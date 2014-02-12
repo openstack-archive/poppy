@@ -22,7 +22,7 @@ installed and running.
     $ cp cdn/etc/logging.conf-sample ~/.cdn/logging.conf
 
 3. Find the ``[drivers:storage:mongodb]`` section in
-   ``~/.marconi/marconi.conf`` and modify the URI to point
+   ``~/.cdn/cdn.conf`` and modify the URI to point
    to your local mongod instance::
 
     uri = mongodb://$MONGODB_HOST:$MONGODB_PORT

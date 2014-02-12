@@ -86,7 +86,7 @@ Template::
   \n
   {{third-party lib imports in human alphabetical order}}
   \n
-  {{marconi imports in human alphabetical order}}
+  {{cdn imports in human alphabetical order}}
   \n
   \n
   {{begin your code}}
@@ -102,9 +102,9 @@ Example::
 
   import eventlet
 
-  import marconi.common
-  from marconi import test
-  import marconi.queues.transport
+  import cdn.common
+  from cdn import test
+  import cdn.queues.transport
 
 
 More Import Examples
@@ -112,11 +112,11 @@ More Import Examples
 
 **INCORRECT** ::
 
-  import marconi.queues.transport.wsgi as wsgi
+  import cdn.queues.transport.wsgi as wsgi
 
 **CORRECT** ::
 
-  from marconi.queues.transport import wsgi
+  from cdn.queues.transport import wsgi
 
 Docstrings
 ----------

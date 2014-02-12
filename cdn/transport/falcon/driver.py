@@ -14,22 +14,39 @@
 # limitations under the License.
 
 import abc
+import cdn.openstack.common.log as logging
 import falcon
 import six
 
 from cdn import transport
-from cdn.transport import DriverBase
+from oslo.config import cfg
 from wsgiref import simple_server
 
 from hosts import HostsResource
 from v1 import V1Resource
+
+_WSGI_OPTIONS = [
+    cfg.StrOpt('bind', default='127.0.0.1',
+               help='Address on which the self-hosting server will listen'),
+
+    cfg.IntOpt('port', default=8888,
+               help='Port on which the self-hosting server will listen'),
+
+]
+
+_WSGI_GROUP = 'drivers:transport:falcon'
+
+LOG = logging.getLogger(__name__)
 
 
 @six.add_metaclass(abc.ABCMeta)
 class Driver(transport.DriverBase):
 
     def __init__(self, conf):
-        super(DriverBase, self).__init__()
+        super(DriverBase, self).__init__(conf)
+
+        self._conf.register_opts(_WSGI_OPTIONS, group=_WSGI_GROUP)
+        self._wsgi_conf = self._conf[_WSGI_GROUP]
 
         self.app = None
         self._init_routes()
@@ -44,13 +61,11 @@ class Driver(transport.DriverBase):
 
     def listen(self):
         """Self-host using 'bind' and 'port' from the WSGI config group."""
-        bind = '127.0.0.1'
-        port = '8080'
         msgtmpl = (u'Serving on host %(bind)s:%(port)s')
+        LOG.info(msgtmpl,
+                 {'bind': self._wsgi_conf.bind, 'port': self._wsgi_conf.port})
 
-        print(msgtmpl)
-
-        httpd = simple_server.make_server(bind=bind,
-                                          port=port,
-                                          app=self.app)
+        httpd = simple_server.make_server(self._wsgi_conf.bind,
+                                          self._wsgi_conf.port,
+                                          self.app)
         httpd.serve_forever()

@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Rackspace Hosting, Inc.
+# Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,7 +10,6 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
-#
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
@@ -21,8 +20,8 @@ import os
 import sys
 import termios
 
-from marconi.openstack.common.gettextutils import _
-from marconi.openstack.common import log as logging
+from cdn.openstack.common.gettextutils import _
+from cdn.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)
@@ -73,7 +72,7 @@ def runnable(func):
         _enable_echo(False)
 
         try:
-            logging.setup('marconi')
+            logging.setup('cdn')
             func()
         except KeyboardInterrupt:
             LOG.info(_(u'Terminating'))
