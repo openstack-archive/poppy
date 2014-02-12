@@ -1,7 +1,6 @@
+"""Falcon Transport Driver"""
 
-"""CDN Transport Drivers"""
-
-from cdn.transport import base
+from cdn.transport.falcon import driver
 
 # Hoist into package namespace
-DriverBase = base.DriverBase
+TransportDriver = driver.TransportDriver

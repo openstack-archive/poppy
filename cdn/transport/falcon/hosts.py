@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import falcon
+import json
 
 
 class HostsResource:
@@ -21,7 +22,7 @@ class HostsResource:
         """Handles GET requests
         """
         resp.status = falcon.HTTP_200  # This is the default status
-        resp.body = [
+        home_doc = [
             {
                 'hostname': 'www.mywebsite.com',
                 'description': 'My Sample Website'
@@ -31,3 +32,5 @@ class HostsResource:
                 'description': 'My Other Website'
             }
         ]
+
+        resp.body = json.dumps(home_doc)

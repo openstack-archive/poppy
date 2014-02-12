@@ -14,16 +14,17 @@
 # limitations under the License.
 
 import abc
-import cdn.openstack.common.log as logging
-import falcon
-import six
-
-from cdn import transport
-from oslo.config import cfg
 from wsgiref import simple_server
 
-from hosts import HostsResource
-from v1 import V1Resource
+import falcon
+from oslo.config import cfg
+import six
+
+import cdn.openstack.common.log as logging
+from cdn import transport
+
+import v1, hosts
+
 
 _WSGI_OPTIONS = [
     cfg.StrOpt('bind', default='127.0.0.1',
@@ -40,10 +41,10 @@ LOG = logging.getLogger(__name__)
 
 
 @six.add_metaclass(abc.ABCMeta)
-class Driver(transport.DriverBase):
+class TransportDriver(transport.DriverBase):
 
     def __init__(self, conf):
-        super(DriverBase, self).__init__(conf)
+        super(TransportDriver, self).__init__(conf)
 
         self._conf.register_opts(_WSGI_OPTIONS, group=_WSGI_GROUP)
         self._wsgi_conf = self._conf[_WSGI_GROUP]
@@ -56,8 +57,8 @@ class Driver(transport.DriverBase):
         self.app = falcon.API()
         version_path = "/v1"
 
-        self.app.add_route(version_path + '/', V1Resource)
-        self.app.add_route(version_path + '/hosts', HostsResource)
+        self.app.add_route(version_path, v1.V1Resource())
+        self.app.add_route(version_path + '/hosts', hosts.HostsResource())
 
     def listen(self):
         """Self-host using 'bind' and 'port' from the WSGI config group."""

@@ -16,12 +16,6 @@
 import abc
 import six
 
-from oslo.config import cfg
-
-_TRANSPORT_OPTIONS = [
-    cfg.StrOpt('auth_strategy', default='')
-]
-
 
 @six.add_metaclass(abc.ABCMeta)
 class DriverBase(object):
@@ -29,17 +23,10 @@ class DriverBase(object):
 
     :param conf: configuration instance
     :type conf: oslo.config.cfg.CONF
-    :param storage: The storage driver
-    :type storage: marconi.queues.storage.base.DataDriverBase
-    :param cache: caching object
-    :type cache: marconi.common.cache.backends.BaseCache
-    :param control: Storage driver to handle the control plane
-    :type control: marconi.queues.storage.base.ControlDriverBase
     """
 
     def __init__(self, conf):
         self._conf = conf
-        self._conf.register_opts(_TRANSPORT_OPTIONS)
 
     @abc.abstractmethod
     def listen():
