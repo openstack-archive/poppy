@@ -23,7 +23,7 @@ class HostController(base.HostBase):
         hostnames = [
             {
                 'hostname': 'www.mywebsite.com',
-                'description': 'My Sample Website using MongoDB'
+                'description': 'My Sample Website using Cassandra'
             },
             {
                 'hostname': 'www.myotherwebsite.com',

@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Rackspace, Inc.
+# Copyright (c) 2013 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,17 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import falcon
-import json
+"""Exports Cassandra storage controllers.
 
+Field Mappings:
+    In order to reduce the disk / memory space used,
+    fields name will be, most of the time, the first
+    letter of their long name. Fields mapping will be
+    updated and documented in each controller class.
+"""
 
-class HostsResource:
-    def __init__(self, host_controller):
-        self.host_controller = host_controller
+from cdn.storage.cassandra import hosts
 
-    def on_get(self, req, resp):
-        """Handles GET requests
-        """
-        hostnames = self.host_controller.list()
-        resp.status = falcon.HTTP_200
-        resp.body = json.dumps(hostnames)
+HostController = hosts.HostController
