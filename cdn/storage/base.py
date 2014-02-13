@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Rackspace, Inc.
+# Copyright (c) 2013 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,64 @@
 
 import abc
 import six
+
+from oslo.config import cfg
+
+_LIMITS_OPTIONS = [
+    cfg.IntOpt('default_hostname_paging', default=10,
+               help='Default hostname pagination size')
+]
+
+_LIMITS_GROUP = 'limits:storage'
+
+
+@six.add_metaclass(abc.ABCMeta)
+class DriverBase(object):
+    """Base class for both data and control plane drivers
+
+    :param conf: Configuration containing options for this driver.
+    :type conf: `oslo.config.ConfigOpts`
+    :param cache: Cache instance to use for reducing latency
+        for certain lookups.
+    :type cache: `cdn.common.cache.backends.BaseCache`
+    """
+    def __init__(self, conf, cache):
+        self.conf = conf
+        self.cache = cache
+
+
+@six.add_metaclass(abc.ABCMeta)
+class StorageDriverBase(DriverBase):
+    """Interface definition for storage drivers.
+
+    Data plane storage drivers are responsible for implementing the
+    core functionality of the system.
+
+    Connection information and driver-specific options are
+    loaded from the config file.
+
+    :param conf: Configuration containing options for this driver.
+    :type conf: `oslo.config.ConfigOpts`
+    :param cache: Cache instance to use for reducing latency
+        for certain lookups.
+    :type cache: `cdn.common.cache.backends.BaseCache`
+    """
+
+    def __init__(self, conf, cache):
+        super(StorageDriverBase, self).__init__(conf, cache)
+
+        self.conf.register_opts(_LIMITS_OPTIONS, group=_LIMITS_GROUP)
+        self.limits_conf = self.conf[_LIMITS_GROUP]
+
+    @abc.abstractmethod
+    def is_alive(self):
+        """Check whether the storage is ready."""
+        raise NotImplementedError
+
+    @abc.abstractproperty
+    def host_controller(self):
+        """Returns the driver's hostname controller."""
+        raise NotImplementedError
 
 
 @six.add_metaclass(abc.ABCMeta)
