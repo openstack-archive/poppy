@@ -63,10 +63,10 @@ def _connection(conf):
     return MongoClient(conf.uri)
 
 
-class StorageDriver(storage.DriverBase):
+class StorageDriver(storage.StorageDriverBase):
 
-    def __init__(self, conf, cache):
-        super(StorageDriver, self).__init__(conf, cache)
+    def __init__(self, conf):
+        super(StorageDriver, self).__init__(conf)
 
         self.conf.register_opts(MONGODB_OPTIONS,
                                 group=MONGODB_GROUP)
@@ -96,4 +96,4 @@ class StorageDriver(storage.DriverBase):
 
     @decorators.lazy_property(write=False)
     def host_controller(self):
-        return controllers.HostController(self)
+        return controllers.HostController()

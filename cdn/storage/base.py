@@ -32,13 +32,9 @@ class DriverBase(object):
 
     :param conf: Configuration containing options for this driver.
     :type conf: `oslo.config.ConfigOpts`
-    :param cache: Cache instance to use for reducing latency
-        for certain lookups.
-    :type cache: `cdn.common.cache.backends.BaseCache`
     """
-    def __init__(self, conf, cache):
+    def __init__(self, conf):
         self.conf = conf
-        self.cache = cache
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -53,13 +49,10 @@ class StorageDriverBase(DriverBase):
 
     :param conf: Configuration containing options for this driver.
     :type conf: `oslo.config.ConfigOpts`
-    :param cache: Cache instance to use for reducing latency
-        for certain lookups.
-    :type cache: `cdn.common.cache.backends.BaseCache`
     """
 
-    def __init__(self, conf, cache):
-        super(StorageDriverBase, self).__init__(conf, cache)
+    def __init__(self, conf):
+        super(StorageDriverBase, self).__init__(conf)
 
         self.conf.register_opts(_LIMITS_OPTIONS, group=_LIMITS_GROUP)
         self.limits_conf = self.conf[_LIMITS_GROUP]
@@ -86,17 +79,17 @@ class HostBase(object):
         pass
 
     @abc.abstractmethod
-    def list(self, project=None, marker=None,
-             limit=None, detailed=False):
-        """Base method for listing hostnames.
+    def list(self,):
+        raise NotImplementedError
 
-        :param project: Project id
-        :param marker: The last host name
-        :param limit: (Default 10, configurable) Max number
-            hostnames to return.
-        :param detailed: Whether metadata is included
+    @abc.abstractmethod
+    def create(self):
+        raise NotImplementedError
 
-        :returns: An iterator giving a sequence of hostnames
-            and the marker of the next page.
-        """
+    @abc.abstractmethod
+    def delete(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get(self):
         raise NotImplementedError

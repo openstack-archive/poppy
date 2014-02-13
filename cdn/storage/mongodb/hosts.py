@@ -14,17 +14,32 @@
 # limitations under the License.
 
 # stevedore/example/simple.py
-from storage import base
+from cdn.storage import base
 
 
 class HostController(base.HostBase):
 
-    def list(self, project=None, marker=None,
-             limit=None, detailed=False):
-        print "list"
+    def list(self):
+        
+        hostnames = [
+            {
+                'hostname': 'www.mywebsite.com',
+                'description': 'My Sample Website'
+            },
+            {
+                'hostname': 'www.myotherwebsite.com',
+                'description': 'My Other Website'
+            }
+        ]
+
+        return hostnames
+
 
     def create(self):
         print "create"
 
     def delete(self):
         print "delete"
+
+    def get(self):
+        print "get hostname"

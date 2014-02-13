@@ -25,8 +25,9 @@ class DriverBase(object):
     :type conf: oslo.config.cfg.CONF
     """
 
-    def __init__(self, conf):
+    def __init__(self, conf, storage):
         self._conf = conf
+        self._storage = storage
 
     @abc.abstractmethod
     def listen():

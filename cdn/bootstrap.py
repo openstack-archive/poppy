@@ -25,6 +25,8 @@ LOG = log.getLogger(__name__)
 _DRIVER_OPTIONS = [
     cfg.StrOpt('transport', default='falcon',
                help='Transport driver to use'),
+    cfg.StrOpt('storage', default='mongodb',
+               help='Storage driver to use'),
 ]
 
 _DRIVER_GROUP = 'drivers'
@@ -43,7 +45,6 @@ class Bootstrap(object):
         self.driver_conf = self.conf[_DRIVER_GROUP]
 
         log.setup('cdn')
-        self._transport_type = 'cdn.transport'
 
         LOG.debug("init bootstrap")
 
@@ -53,9 +54,7 @@ class Bootstrap(object):
 
         # create the driver manager to load the appropriate drivers
         storage_type = 'cdn.storage'
-
-        # TODO(amitgandhinz): load this from config
-        storage_name = 'mongodb'
+        storage_name = self.driver_conf.storage
 
         args = [self.conf]
 
@@ -73,14 +72,15 @@ class Bootstrap(object):
         LOG.debug("loading transport")
 
         # create the driver manager to load the appropriate drivers
+        transport_type = 'cdn.transport'
         transport_name = self.driver_conf.transport
 
-        args = [self.conf]
+        args = [self.conf, self.storage]
 
         LOG.debug((u'Loading transport driver: %s'), transport_name)
 
         try:
-            mgr = driver.DriverManager(namespace=self._transport_type,
+            mgr = driver.DriverManager(namespace=transport_type,
                                        name=transport_name,
                                        invoke_on_load=True,
                                        invoke_args=args)

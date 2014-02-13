@@ -18,19 +18,13 @@ import json
 
 
 class HostsResource:
+    def __init__(self, host_controller):
+        self.host_controller = host_controller
+
     def on_get(self, req, resp):
         """Handles GET requests
         """
-        resp.status = falcon.HTTP_200  # This is the default status
-        home_doc = [
-            {
-                'hostname': 'www.mywebsite.com',
-                'description': 'My Sample Website'
-            },
-            {
-                'hostname': 'www.myotherwebsite.com',
-                'description': 'My Other Website'
-            }
-        ]
-
-        resp.body = json.dumps(home_doc)
+        hostnames = self.host_controller.list()
+        
+        resp.status = falcon.HTTP_200
+        resp.body = json.dumps(hostnames)
