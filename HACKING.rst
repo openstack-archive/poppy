@@ -112,11 +112,11 @@ More Import Examples
 
 **INCORRECT** ::
 
-  import cdn.queues.transport.wsgi as wsgi
+  import cdn.transport.wsgi as wsgi
 
 **CORRECT** ::
 
-  from cdn.queues.transport import wsgi
+  from cdn.transport import wsgi
 
 Docstrings
 ----------

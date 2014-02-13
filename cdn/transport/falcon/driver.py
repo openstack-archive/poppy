@@ -22,8 +22,9 @@ import six
 
 import cdn.openstack.common.log as logging
 from cdn import transport
-
-import v1, hosts
+from cdn.transport.falcon import (
+    v1, hosts
+)
 
 
 _WSGI_OPTIONS = [
@@ -43,8 +44,8 @@ LOG = logging.getLogger(__name__)
 @six.add_metaclass(abc.ABCMeta)
 class TransportDriver(transport.DriverBase):
 
-    def __init__(self, conf):
-        super(TransportDriver, self).__init__(conf)
+    def __init__(self, conf, storage):
+        super(TransportDriver, self).__init__(conf, storage)
 
         self._conf.register_opts(_WSGI_OPTIONS, group=_WSGI_GROUP)
         self._wsgi_conf = self._conf[_WSGI_GROUP]
@@ -57,8 +58,15 @@ class TransportDriver(transport.DriverBase):
         self.app = falcon.API()
         version_path = "/v1"
 
-        self.app.add_route(version_path, v1.V1Resource())
-        self.app.add_route(version_path + '/hosts', hosts.HostsResource())
+        # init the controllers
+        host_controller = self._storage.host_controller
+
+        # setup the routes
+        self.app.add_route(version_path,
+                           v1.V1Resource())
+
+        self.app.add_route(version_path + '/hosts',
+                           hosts.HostsResource(host_controller))
 
     def listen(self):
         """Self-host using 'bind' and 'port' from the WSGI config group."""

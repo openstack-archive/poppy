@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Rackspace, Inc.
+# Copyright (c) 2013 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,23 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import abc
-import six
+"""Exports Mongodb storage controllers.
 
+Field Mappings:
+    In order to reduce the disk / memory space used,
+    fields name will be, most of the time, the first
+    letter of their long name. Fields mapping will be
+    updated and documented in each controller class.
+"""
 
-@six.add_metaclass(abc.ABCMeta)
-class DriverBase(object):
-    """Base class for Transport Drivers to document the expected interface.
+from cdn.storage.mongodb import hosts
 
-    :param conf: configuration instance
-    :type conf: oslo.config.cfg.CONF
-    """
-
-    def __init__(self, conf, storage):
-        self._conf = conf
-        self._storage = storage
-
-    @abc.abstractmethod
-    def listen():
-        """Start listening for client requests (self-hosting mode)."""
-        raise NotImplementedError
+HostController = hosts.HostController
