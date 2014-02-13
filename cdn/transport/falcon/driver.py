@@ -22,8 +22,9 @@ import six
 
 import cdn.openstack.common.log as logging
 from cdn import transport
-
-import v1, hosts
+from cdn.transport.falcon import (
+    v1, hosts
+)
 
 
 _WSGI_OPTIONS = [

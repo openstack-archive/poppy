@@ -18,8 +18,8 @@ installed and running.
 
 2. Copy the CDN config files to the directory ``~/.cdn``::
 
-    $ cp cdn/etc/cdn.conf-sample ~/.cdn/cdn.conf
-    $ cp cdn/etc/logging.conf-sample ~/.cdn/logging.conf
+    $ cp cdn/etc/cdn.conf ~/.cdn/cdn.conf
+    $ cp cdn/etc/logging.conf ~/.cdn/logging.conf
 
 3. Find the ``[drivers:storage:mongodb]`` section in
    ``~/.cdn/cdn.conf`` and modify the URI to point
@@ -47,16 +47,17 @@ installed and running.
 
 8. Test out that CDN is working by requesting the home doc::
 
-    $ curl -i -X GET http://127.0.0.1:8888/v1/
+    $ curl -i -X GET http://0.0.0.0:8888/v1
 
-You should get an **HTTP 201** along with some headers that will look
+You should get an **HTTP 200** along with some headers that will look
 similar to this::
 
-    HTTP/1.0 201 Created
-    Date: Fri, 25 Oct 2013 15:34:37 GMT
+    HTTP/1.0 200 OK
+    Date: Thu, 13 Feb 2014 14:34:21 GMT
     Server: WSGIServer/0.1 Python/2.7.3
-    Content-Length: 0
-    Location: /v1/queues/samplequeue
+    Content-Length: 464
+    Content-Type: application/json-home
+    Cache-Control: max-age=86400
 
 
 .. _`OpenStack` : http://openstack.org/
