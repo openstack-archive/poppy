@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Rackspace, Inc.
+# Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,8 +33,9 @@ class DriverBase(object):
     :param conf: Configuration containing options for this driver.
     :type conf: `oslo.config.ConfigOpts`
     """
-    def __init__(self, conf):
+    def __init__(self, conf, providers):
         self.conf = conf
+        self.providers = providers
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -51,8 +52,8 @@ class StorageDriverBase(DriverBase):
     :type conf: `oslo.config.ConfigOpts`
     """
 
-    def __init__(self, conf):
-        super(StorageDriverBase, self).__init__(conf)
+    def __init__(self, conf, providers):
+        super(StorageDriverBase, self).__init__(conf, providers)
 
         self.conf.register_opts(_LIMITS_OPTIONS, group=_LIMITS_GROUP)
         self.limits_conf = self.conf[_LIMITS_GROUP]
@@ -75,16 +76,16 @@ class HostBase(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self):
-        pass
+    def __init__(self, providers):
+        self.providers = providers
 
     @abc.abstractmethod
-    def list(self,):
+    def list(self):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create(self):
-        raise NotImplementedError
+    def create(self, hostname):
+        self.providers.map(self.create_host, hostname)
 
     @abc.abstractmethod
     def delete(self):
@@ -93,3 +94,6 @@ class HostBase(object):
     @abc.abstractmethod
     def get(self):
         raise NotImplementedError
+
+    def create_host(self, ext, hostname):
+        ext.obj.host_controller.create(hostname)

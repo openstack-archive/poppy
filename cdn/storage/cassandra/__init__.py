@@ -1,4 +1,4 @@
-"""MongoDB Storage Driver for Marconi"""
+"""MongoDB Storage Driver for CDN"""
 
 from cdn.storage.cassandra import driver
 

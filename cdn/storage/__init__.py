@@ -1,4 +1,4 @@
-"""Marconi Storage Drivers"""
+"""CDN Storage Drivers"""
 
 from cdn.storage import base
 

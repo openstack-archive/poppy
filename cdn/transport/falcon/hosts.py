@@ -27,3 +27,10 @@ class HostsResource:
         hostnames = self.host_controller.list()
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(hostnames)
+
+    def on_put(self, req, resp):
+        """Handles GET requests
+        """
+        hostnames = self.host_controller.create("mysite.com", "Test site")
+        resp.status = falcon.HTTP_200
+        resp.body = json.dumps(hostnames)
