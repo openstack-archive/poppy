@@ -13,15 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pecan import make_app
+import fastly
+
+from cdn.provider import base
 
 
-def setup_app(config):
+class HostController(base.HostBase):
 
-    app_conf = dict(config.app)
+    def __init__(self, driver):
+        super(HostController, self).__init__()
 
-    return make_app(
-        app_conf.pop('root'),
-        logging=getattr(config, 'logging', {}),
-        **app_conf
-    )
+        self.client = driver.client
+
+    def list(self):
+        print "get list of hostnames from fastly"
+
+    def create(self, hostname):
+        print self.client.list_services()
+
+    def delete(self):
+        print "delete hostname at fastly"
+
+    def get(self):
+        print "get hostname from fastly"

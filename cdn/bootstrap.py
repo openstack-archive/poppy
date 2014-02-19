@@ -16,7 +16,7 @@
 from cdn.common import decorators
 from cdn.openstack.common import log
 from oslo.config import cfg
-from stevedore import driver
+from stevedore import driver, extension
 
 
 LOG = log.getLogger(__name__)
@@ -49,6 +49,22 @@ class Bootstrap(object):
         LOG.debug("init bootstrap")
 
     @decorators.lazy_property(write=False)
+    def provider(self):
+        LOG.debug((u'Loading provider extension(s)'))
+
+        # create the driver manager to load the appropriate drivers
+        provider_type = 'cdn.provider'
+        args = [self.conf]
+
+        try:
+            mgr = extension.ExtensionManager(namespace=provider_type,
+                                             invoke_on_load=True,
+                                             invoke_args=args)
+            return mgr
+        except RuntimeError as exc:
+            LOG.exception(exc)
+
+    @decorators.lazy_property(write=False)
     def storage(self):
         LOG.debug((u'Loading storage driver'))
 
@@ -56,7 +72,7 @@ class Bootstrap(object):
         storage_type = 'cdn.storage'
         storage_name = self.driver_conf.storage
 
-        args = [self.conf]
+        args = [self.conf, self.provider]
 
         try:
             mgr = driver.DriverManager(namespace=storage_type,

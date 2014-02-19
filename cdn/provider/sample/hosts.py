@@ -13,19 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hosts import HostsController
-from pecan import expose
-from pecan.rest import RestController
+# stevedore/example/simple.py
+from cdn.provider import base
 
 
-class HomeController(RestController):
+class HostController(base.HostBase):
 
-    hosts = HostsController()
+    def list(self):
+        print "get list of hostnames from sample"
 
-    @expose('json')
-    def get_all(self):
-        '''return the HOME document for the API
-        '''
-        return dict(
-            version='1.0'
-        )
+    def create(self, hostname):
+        print "create hostname at sample"
+
+    def delete(self):
+        print "delete hostname at sample"
+
+    def get(self):
+        print "get hostname from sample"

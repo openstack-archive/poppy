@@ -19,6 +19,9 @@ from cdn.storage import base
 
 class HostController(base.HostBase):
 
+    def __init__(self, providers):
+        super(HostController, self).__init__(providers)
+
     def list(self):
         hostnames = [
             {
