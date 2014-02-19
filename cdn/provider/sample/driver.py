@@ -13,16 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pecan import expose
-from v1 import HomeController
+"""CDN Provider implementation."""
+
+from cdn.common import decorators
+from cdn.openstack.common import log as logging
+from cdn import provider
+from cdn.provider.sample import controllers
+
+from oslo.config import cfg
+
+LOG = logging.getLogger(__name__)
 
 
-class RootController(object):
+class CDNProvider(provider.CDNProviderBase):
 
-    v1 = HomeController()
+    def __init__(self, conf):
+        super(CDNProvider, self).__init__(conf)
 
-    @expose('json')
-    def notfound(self):
-        '''return the generic 404 response
-        '''
-        return dict(status=404, message="Not Found")
+    def is_alive(self):
+        return True
+
+    @decorators.lazy_property(write=False)
+    def host_controller(self):
+        return controllers.HostController()
