@@ -68,6 +68,9 @@ class TransportDriver(transport.DriverBase):
         self.app.add_route(version_path + '/hosts',
                            hosts.HostsResource(host_controller))
 
+        self.app.add_route(version_path + '/hosts/{hostname}',
+                           hosts.HostResource(host_controller))
+
     def listen(self):
         """Self-host using 'bind' and 'port' from the WSGI config group."""
         msgtmpl = (u'Serving on host %(bind)s:%(port)s')

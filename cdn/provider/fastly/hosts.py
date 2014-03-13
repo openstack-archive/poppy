@@ -26,10 +26,10 @@ class HostController(base.HostBase):
         self.client = driver.client
 
     def list(self):
-        print "get list of hostnames from fastly"
+        print self.client.list_services()
 
     def create(self, hostname):
-        print self.client.list_services()
+        print "create hostname at fastly"
 
     def delete(self):
         print "delete hostname at fastly"

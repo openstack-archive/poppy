@@ -33,13 +33,12 @@ class HostController(base.HostBase):
 
         return hostnames
 
-    def create(self, host, desc):
+    def create(self, host):
 
         # create the hostname in storage
         hostname = [
             {
-                'hostname': host,
-                'description': desc
+                'hostname': host
             }
         ]
 

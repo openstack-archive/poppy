@@ -82,7 +82,7 @@ class HostBase(object):
     @abc.abstractmethod
     def list(self):
         raise NotImplementedError
-
+        
     @abc.abstractmethod
     def create(self, hostname):
         self.providers.map(self.create_host, hostname)
@@ -97,3 +97,4 @@ class HostBase(object):
 
     def create_host(self, ext, hostname):
         ext.obj.host_controller.create(hostname)
+

@@ -28,9 +28,21 @@ class HostsResource:
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(hostnames)
 
-    def on_put(self, req, resp):
+
+class HostResource:
+    def __init__(self, host_controller):
+        self.host_controller = host_controller
+
+    def on_get(self, req, resp, hostname):
         """Handles GET requests
         """
-        hostnames = self.host_controller.create("mysite.com", "Test site")
+        host = self.host_controller.find(hostname)
         resp.status = falcon.HTTP_200
-        resp.body = json.dumps(hostnames)
+        resp.body = json.dumps(host)
+
+    def on_put(self, req, resp, hostname):
+        """Handles PUT requests
+        """
+        host = self.host_controller.create(hostname)
+        resp.status = falcon.HTTP_200
+        resp.body = json.dumps(host)
