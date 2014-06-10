@@ -13,19 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hosts import HostsController
-from pecan import expose
-from pecan.rest import RestController
+"""CDN Provider implementation."""
+
+from cdn.common import decorators
+from cdn.openstack.common import log as logging
+from cdn import provider
+from cdn.provider.sample import controllers
+
+from oslo.config import cfg
+
+LOG = logging.getLogger(__name__)
 
 
-class HomeController(RestController):
+class CDNProvider(provider.CDNProviderBase):
 
-    hosts = HostsController()
+    def __init__(self, conf):
+        super(CDNProvider, self).__init__(conf)
 
-    @expose('json')
-    def get_all(self):
-        '''return the HOME document for the API
-        '''
-        return dict(
-            version='1.0'
-        )
+    def is_alive(self):
+        return True
+
+    @decorators.lazy_property(write=False)
+    def host_controller(self):
+        return controllers.HostController()

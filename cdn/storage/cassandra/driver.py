@@ -45,8 +45,8 @@ def _connection(conf):
 
 class StorageDriver(storage.StorageDriverBase):
 
-    def __init__(self, conf):
-        super(StorageDriver, self).__init__(conf)
+    def __init__(self, conf, providers):
+        super(StorageDriver, self).__init__(conf, providers)
 
         self.conf.register_opts(CASSANDRA_OPTIONS,
                                 group=CASSANDRA_GROUP)
@@ -57,4 +57,4 @@ class StorageDriver(storage.StorageDriverBase):
 
     @decorators.lazy_property(write=False)
     def host_controller(self):
-        return controllers.HostController()
+        return controllers.HostController(self.providers)

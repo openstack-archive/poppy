@@ -23,7 +23,7 @@ class HostController(base.HostBase):
         hostnames = [
             {
                 'hostname': 'www.mywebsite.com',
-                'description': 'My Sample Website using MongoDB'
+                'description': 'My Sample Website using Mongo'
             },
             {
                 'hostname': 'www.myotherwebsite.com',
@@ -33,11 +33,28 @@ class HostController(base.HostBase):
 
         return hostnames
 
-    def create(self):
-        print "create"
-
-    def delete(self):
-        print "delete"
-
     def get(self):
+        # get the requested hostname from storage
         print "get hostname"
+
+    def create(self, service_name, service_json):
+
+        # create the hostname in storage
+        service = service_json
+
+        # create at providers
+        return super(HostController, self).create(service_name, service)
+
+    def update(self, service_name, service_json):
+        # update configuration in storage
+
+        # update at providers
+        return super(HostController, self).update(service_name, service_json)
+
+    def delete(self, service_name):
+        # delete local configuration from storage
+
+        # delete from providers
+        return super(HostController, self).delete(service_name)
+
+    

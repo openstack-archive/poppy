@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Rackspace, Inc.
+# Copyright (c) 2013 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,15 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pecan import make_app
+"""Exports Sample CDN controllers.
 
+Field Mappings:
+    In order to reduce the disk / memory space used,
+    fields name will be, most of the time, the first
+    letter of their long name. Fields mapping will be
+    updated and documented in each controller class.
+"""
 
-def setup_app(config):
+from cdn.provider.sample import hosts
 
-    app_conf = dict(config.app)
-
-    return make_app(
-        app_conf.pop('root'),
-        logging=getattr(config, 'logging', {}),
-        **app_conf
-    )
+HostController = hosts.HostController

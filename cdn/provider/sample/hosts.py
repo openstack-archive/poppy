@@ -13,16 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pecan import expose
-from v1 import HomeController
+# stevedore/example/simple.py
+from cdn.provider import base
 
 
-class RootController(object):
+class HostController(base.HostBase):
 
-    v1 = HomeController()
+    def __init__(self):
+        super(HostController, self).__init__()
 
-    @expose('json')
-    def notfound(self):
-        '''return the generic 404 response
-        '''
-        return dict(status=404, message="Not Found")
+        self.provider_resp = base.ProviderResponse("sample")
+
+    def update(self):
+        return self.provider_resp.updated(hostname)
+        
+    def create(self, hostname):
+        return self.provider_resp.created(hostname)
+
+    def delete(self, hostname):
+        return self.provider_resp.deleted(hostname)
+   
