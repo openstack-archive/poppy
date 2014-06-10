@@ -32,22 +32,29 @@ class HostController(base.HostBase):
         ]
 
         return hostnames
+    
+    def get(self):
+        # get the requested hostname from storage
+        print "get hostname"
 
-    def create(self, host):
+    def create(self, service_name, service_json):
 
         # create the hostname in storage
-        hostname = [
-            {
-                'hostname': host
-            }
-        ]
+        service = service_json
+        
+        # create at providers
+        return super(HostController, self).create(service_name, service)
 
-        super(HostController, self).create(host)
+    def update(self, service_name, service_json):
+        # update configuration in storage
 
-        return hostname
+        # update at providers
+        return super(HostController, self).update(service_name, service_json)
 
-    def delete(self):
-        print "delete"
+    def delete(self, service_name):
+        # delete local configuration from storage
 
-    def get(self):
-        print "get hostname"
+        # delete from providers
+        return super(HostController, self).delete(service_name)
+
+    

@@ -19,14 +19,17 @@ from cdn.provider import base
 
 class HostController(base.HostBase):
 
-    def list(self):
-        print "get list of hostnames from sample"
+    def __init__(self):
+        super(HostController, self).__init__()
 
+        self.provider_resp = base.ProviderResponse("sample")
+
+    def update(self):
+        return self.provider_resp.updated(hostname)
+        
     def create(self, hostname):
-        print "create hostname at sample"
+        return self.provider_resp.created(hostname)
 
-    def delete(self):
-        print "delete hostname at sample"
-
-    def get(self):
-        print "get hostname from sample"
+    def delete(self, hostname):
+        return self.provider_resp.deleted(hostname)
+   
