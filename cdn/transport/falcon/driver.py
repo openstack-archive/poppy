@@ -56,7 +56,7 @@ class TransportDriver(transport.DriverBase):
     def _init_routes(self):
         """Initialize hooks and URI routes to resources."""
         self.app = falcon.API()
-        version_path = "/v1"
+        version_path = "/v1.0"
 
         # init the controllers
         host_controller = self._storage.host_controller
@@ -67,6 +67,9 @@ class TransportDriver(transport.DriverBase):
 
         self.app.add_route(version_path + '/hosts',
                            hosts.HostsResource(host_controller))
+
+        self.app.add_route(version_path + '/hosts/{service_name}',
+                           hosts.HostResource(host_controller))
 
     def listen(self):
         """Self-host using 'bind' and 'port' from the WSGI config group."""

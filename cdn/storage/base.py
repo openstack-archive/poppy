@@ -78,22 +78,38 @@ class HostBase(object):
 
     def __init__(self, providers):
         self.providers = providers
+        self.wrapper = ProviderWrapper()
 
     @abc.abstractmethod
     def list(self):
         raise NotImplementedError
+        
+    @abc.abstractmethod
+    def create(self, service_name, service_json):
+        return self.providers.map(self.wrapper.create, service_name, service_json)
 
     @abc.abstractmethod
-    def create(self, hostname):
-        self.providers.map(self.create_host, hostname)
+    def update(self, service_name):
+        return self.providers.map(self.wrapper.update, service_name)
 
     @abc.abstractmethod
-    def delete(self):
-        raise NotImplementedError
+    def delete(self, service_name):
+        return self.providers.map(self.wrapper.delete, service_name)
 
     @abc.abstractmethod
     def get(self):
         raise NotImplementedError
 
-    def create_host(self, ext, hostname):
-        ext.obj.host_controller.create(hostname)
+
+class ProviderWrapper(object):
+
+    def create(self, ext, service_name, service_json):
+        return ext.obj.host_controller.create(service_name, service_json)
+
+    def update(self, ext, service_name):
+        return ext.obj.host_controller.update(service_name)
+
+    def delete(self, ext, service_name):
+        return ext.obj.host_controller.delete(service_name)
+
+
