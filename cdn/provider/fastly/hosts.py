@@ -43,19 +43,19 @@ class HostController(base.HostBase):
             service_version = self.client.create_version(service.id)
 
             # Create the domain for this service
-            for (domain in service_json.domains):
+            for domain in service_json["domains"]:
                 domain = self.client.create_domain(service.id, 
                     service_version.number,
-                    domain.domain)
+                    domain["domain"])
 
-            for (origin in service_json.origins):
+            for origin in service_json["origins"]:
                 # Create the origins for this domain
                 backend = self.client.create_backend(service.id,
                     service_version.number,
-                    origin.origin,
-                    origin.origin,
-                    origin.ssl,
-                    origin.port
+                    origin["origin"],
+                    origin["origin"],
+                    origin["ssl"],
+                    origin["port"]
                     )
 
             return self.provider_resp.created(service.name)

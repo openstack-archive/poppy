@@ -25,11 +25,11 @@ class HostController(base.HostBase):
         self.provider_resp = base.ProviderResponse("sample")
 
     def update(self):
-        return self.provider_resp.updated(hostname)
+        return self.provider_resp.updated(service_name)
         
-    def create(self, hostname):
-        return self.provider_resp.created(hostname)
+    def create(self, service_name, service_json):
+        return self.provider_resp.created(service_name)
 
-    def delete(self, hostname):
-        return self.provider_resp.deleted(hostname)
+    def delete(self, service_name):
+        return self.provider_resp.deleted(service_name)
    
