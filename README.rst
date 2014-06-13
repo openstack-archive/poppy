@@ -1,13 +1,48 @@
 CDN
 =======
 
-CDN Service_
+Content Delivery Network Management as a Service
 
-Running a local CDN server with MongoDB
+Note: This is a work in progress and is not currently recommended for production use.
+
+What is CDN
+============
+
+Users have come to expect exceptional speed in their applications, websites, and video experiences.  Because of this, using a CDN has become standard for companies, no matter their size.  
+
+Cloud CDN will take all the guess work out of the CDN market for our users.  CDN will give them a consistently speedy experience from integrated partners, with an easy to use RESTful API.
+
+Vendor lock-in to a particular CDN provider is removed by abstracting away the plethora of vendor API's available.  This means that a customer only has to integrate with one CDN API, and reap the benefits of using multiple providers.
+
+Running performance benchmarks against each integrated CDN provider also then allows you to simply repoint your DNS at the new provider and with that simple change you can ensure your application is running under the best provider at the time.  It will also allow you to handle CDN failures and minimize disruption to your application from CDN outages.
+
+
+Features
+---------
+
+- Wraps third party CDN provider API's
+    - Fastly (http://www.fastly.net)
+    - Your CDN Here!
+- Sends configurations to *n* configured CDN providers
+- Supports multiple backends (CassandraDB recommended)
+    - CassandraDB
+    - Your DB provider here
+- Openstack Compatable
+    - Uses Keystone for authentication
+
+
+What Cloud CDN is not
+----------------------
+
+Cloud CDN does not run its own Edge Cache or POP servers.  This is purely a management API to abstract away the myriad of CDN providers on the market.
+
+
+
+Running a local CDN server with CassandraDB
 -------------------------------------------
 
 **Note:** These instructions are for running a local instance of CDN and
-not all of these steps are required. It is assumed you have `MongoDB`_
+not all of these steps are required. It is assumed you have `CassandraDB`_
 installed and running.
 
 1. From your home folder create the ``~/.cdn`` folder and clone the repo::
@@ -21,11 +56,11 @@ installed and running.
     $ cp cdn/etc/cdn.conf ~/.cdn/cdn.conf
     $ cp cdn/etc/logging.conf ~/.cdn/logging.conf
 
-3. Find the ``[drivers:storage:mongodb]`` section in
+3. Find the ``[drivers:storage:cassandradb]`` section in
    ``~/.cdn/cdn.conf`` and modify the URI to point
-   to your local mongod instance::
+   to your local casssandra instance::
 
-    uri = mongodb://$MONGODB_HOST:$MONGODB_PORT
+    `TODO`
 
 4. For logging, find the ``[DEFAULT]`` section in
    ``~/.cdn/cdn.conf`` and modify as desired::
@@ -60,8 +95,7 @@ similar to this::
     Cache-Control: max-age=86400
 
 
-.. _`OpenStack` : http://openstack.org/
-.. _`MongoDB` : http://docs.mongodb.org/manual/installation/
+.. _`CassandraDB` : http://cassandra.apache.org
 .. _`pyenv` : https://github.com/yyuu/pyenv/
 .. _`virtualenv` : https://pypi.python.org/pypi/virtualenv/
 
