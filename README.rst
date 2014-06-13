@@ -22,19 +22,19 @@ Running performance benchmarks against each configured CDN provider allows you t
 Features
 ---------
 
-- Wraps third party CDN provider API's
++ Wraps third party CDN provider API's
     - Fastly (http://www.fastly.net)
     - Your CDN here
-- Sends configurations to *n* configured CDN providers
-- Supports multiple backends (CassandraDB recommended)
++ Sends configurations to *n* configured CDN providers
++ Supports multiple backends (CassandraDB recommended)
     - CassandraDB
     - Your DB provider here
-- Openstack Compatable
++ Openstack Compatable
     - Uses Keystone for authentication
-- Multiple Origins to pull from (including Rackspace Cloud Files)
-- Supports Multiple Domains
-- Custom Caching and TTL rules
-- Set Restrictions on who can access cached content
++ Multiple Origins to pull from (including Rackspace Cloud Files)
++ Supports Multiple Domains
++ Custom Caching and TTL rules
++ Set Restrictions on who can access cached content
 
 
 What CDN is not
