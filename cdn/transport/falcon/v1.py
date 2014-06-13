@@ -18,25 +18,24 @@ import json
 
 # NOTE(amitgandhinz): http://tools.ietf.org/html/draft-nottingham-json-home-03
 JSON_HOME = {
-    'resources': {
-        #------------------------------------------------------------------
-        # HOSTS
-        #------------------------------------------------------------------
-        'rel/cdn': {
-            'href-template': '/v1/hostnames{?marker,limit,detailed}',
-            'href-vars': {
-                'marker': 'param/marker',
-                'limit': 'param/hostname_limit'
-            },
-            'hints': {
-                'allow': ['GET'],
-                'formats': {
-                    'application/json': {},
-                },
-            },
-        }
-    }
-}
+                "resources": {
+                    "rel/cdn": {
+                        "href-template": "/v1.0/services{?marker,limit}",
+                        "href-vars": {
+                            "marker": "param/marker",
+                            "limit": "param/limit"
+                        },
+                        "hints": {
+                            "allow": [
+                                "GET"
+                            ],
+                            "formats": {
+                                "application/json": {}
+                            }
+                        }
+                    }
+                }
+            }
 
 
 class V1Resource(object):
