@@ -64,9 +64,11 @@ installed and running.
 
 3. Find the ``[drivers:storage:cassandradb]`` section in
    ``~/.cdn/cdn.conf`` and modify the URI to point
-   to your local casssandra instance::
+   to your local casssandra cluster::
 
-    `TODO`
+    [drivers:storage:cassandra]
+    cluster = "localhost"
+    keyspace = cdn
 
 4. For logging, find the ``[DEFAULT]`` section in
    ``~/.cdn/cdn.conf`` and modify as desired::
@@ -113,13 +115,17 @@ Mac OSX
 
 You can check the version currently running with 
     
-    $ java -version
+    $java -version
 
 2. Follow the instructions on the datastax site to install cassandra for Mac OSX 
     
     http://www.datastax.com/2012/01/working-with-apache-cassandra-on-mac-os-x
 
+3. Import the Cassandra Schema to set up the required tables that CDN will need
+    
+    ` TODO `
 
+    
 .. _`CassandraDB` : http://cassandra.apache.org
 .. _`pyenv` : https://github.com/yyuu/pyenv/
 .. _`virtualenv` : https://pypi.python.org/pypi/virtualenv/
