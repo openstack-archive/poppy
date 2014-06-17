@@ -123,7 +123,7 @@ You can check the version currently running with
 
 3. Import the Cassandra Schema to set up the required tables that CDN will need
     
-    ` TODO `
+    Open ./cqlsh and import the /cdn/storage/cassandra/schema.cql file
 
     
 .. _`CassandraDB` : http://cassandra.apache.org
