@@ -23,6 +23,6 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
-from cdn.storage.cassandra import hosts
+from cdn.storage.cassandra import services
 
-HostController = hosts.HostController
+ServicesController = services.ServicesController

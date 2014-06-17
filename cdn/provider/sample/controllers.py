@@ -22,6 +22,6 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
-from cdn.provider.sample import hosts
+from cdn.provider.sample import services
 
-HostController = hosts.HostController
+ServiceController = services.ServiceController

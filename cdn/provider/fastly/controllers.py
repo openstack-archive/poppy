@@ -22,6 +22,6 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
-from cdn.provider.fastly import hosts
+from cdn.provider.fastly import services
 
-HostController = hosts.HostController
+ServiceController = services.ServiceController

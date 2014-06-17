@@ -34,5 +34,5 @@ class CDNProvider(provider.CDNProviderBase):
         return True
 
     @decorators.lazy_property(write=False)
-    def host_controller(self):
-        return controllers.HostController()
+    def service_controller(self):
+        return controllers.ServiceController()

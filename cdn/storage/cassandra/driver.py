@@ -61,9 +61,9 @@ class StorageDriver(storage.StorageDriverBase):
         return _connection(self.cassandra_conf)
 
     @decorators.lazy_property(write=False)
-    def host_controller(self):
-        return controllers.HostController(self)
+    def service_controller(self):
+        return controllers.ServicesController(self)
 
     @decorators.lazy_property(write=False)
-    def host_database(self):
+    def service_database(self):
         return self.connection

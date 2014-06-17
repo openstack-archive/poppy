@@ -80,20 +80,22 @@ class StorageDriver(storage.StorageDriverBase):
             return False
 
     @decorators.lazy_property(write=False)
-    def host_database(self):
-        """Database dedicated to the "host" collection.
-
-        The host collection is separated out into its own database.
-        """
-
-        name = self.mongodb_conf.database + '_host'
-        return self.connection[name]
-
-    @decorators.lazy_property(write=False)
     def connection(self):
         """MongoDB client connection instance."""
         return _connection(self.mongodb_conf)
 
     @decorators.lazy_property(write=False)
-    def host_controller(self):
-        return controllers.HostController(self.providers)
+    def service_controller(self):
+        return controllers.ServicesController(self.providers)
+
+    @decorators.lazy_property(write=False)
+    def service_database(self):
+        """Database dedicated to the "services" collection.
+
+        The services collection is separated out into its own database.
+        """
+
+        name = self.mongodb_conf.database + '_services'
+        return self.connection[name]
+
+   

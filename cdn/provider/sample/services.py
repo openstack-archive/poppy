@@ -17,10 +17,10 @@
 from cdn.provider import base
 
 
-class HostController(base.HostBase):
+class ServiceController(base.ServiceBase):
 
     def __init__(self):
-        super(HostController, self).__init__()
+        super(ServiceController, self).__init__()
 
         self.provider_resp = base.ProviderResponse("sample")
 
