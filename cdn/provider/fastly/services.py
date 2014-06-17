@@ -19,10 +19,10 @@ import json
 from cdn.provider import base
 
 
-class HostController(base.HostBase):
+class ServiceController(base.ServiceBase):
 
     def __init__(self, driver):
-        super(HostController, self).__init__()
+        super(ServiceController, self).__init__()
 
         self.client = driver.client
         self.current_customer = self.client.get_current_customer()

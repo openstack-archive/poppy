@@ -24,4 +24,4 @@ Field Mappings:
 
 from cdn.storage.mongodb import hosts
 
-HostController = hosts.HostController
+ServicesController = servicess.ServicesController

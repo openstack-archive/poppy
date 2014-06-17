@@ -22,8 +22,8 @@ import sys
 from oslo.config import cfg
 
 _LIMITS_OPTIONS = [
-    cfg.IntOpt('default_hostname_paging', default=10,
-               help='Default hostname pagination size')
+    cfg.IntOpt('default_services_paging', default=10,
+               help='Default services pagination size')
 ]
 
 _LIMITS_GROUP = 'limits:storage'
@@ -66,15 +66,14 @@ class CDNProviderBase(ProviderBase):
         raise NotImplementedError
 
     @abc.abstractproperty
-    def host_controller(self):
+    def service_controller(self):
         """Returns the extension's hostname controller."""
         raise NotImplementedError
 
 
 @six.add_metaclass(abc.ABCMeta)
-class HostBase(object):
-    """This class is responsible for managing hostnames.
-    Hostname operations include CRUD, etc.
+class ServiceBase(object):
+    """This class is responsible for managing services.
     """
     __metaclass__ = abc.ABCMeta
 

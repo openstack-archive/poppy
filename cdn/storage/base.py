@@ -19,8 +19,8 @@ import six
 from oslo.config import cfg
 
 _LIMITS_OPTIONS = [
-    cfg.IntOpt('default_hostname_paging', default=10,
-               help='Default hostname pagination size')
+    cfg.IntOpt('default_services_paging', default=10,
+               help='Default services pagination size')
 ]
 
 _LIMITS_GROUP = 'limits:storage'
@@ -36,6 +36,9 @@ class DriverBase(object):
     def __init__(self, conf, providers):
         self.conf = conf
         self.providers = providers
+
+    def providers(self):
+        return self.providers
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -64,20 +67,31 @@ class StorageDriverBase(DriverBase):
         raise NotImplementedError
 
     @abc.abstractproperty
-    def host_controller(self):
+    def service_controller(self):
         """Returns the driver's hostname controller."""
         raise NotImplementedError
 
 
+class ControllerBase(object):
+    """Top-level class for controllers.
+
+    :param driver: Instance of the driver
+        instantiating this controller.
+    """
+
+    def __init__(self, driver):
+        self.driver = driver
+
+
 @six.add_metaclass(abc.ABCMeta)
-class HostBase(object):
-    """This class is responsible for managing hostnames.
-    Hostname operations include CRUD, etc.
+class ServicesBase(ControllerBase):
+    """This class is responsible for managing Services
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, providers):
-        self.providers = providers
+    def __init__(self, driver):
+        super(ServicesBase, self).__init__(driver)
+
         self.wrapper = ProviderWrapper()
 
     @abc.abstractmethod
@@ -86,15 +100,15 @@ class HostBase(object):
         
     @abc.abstractmethod
     def create(self, service_name, service_json):
-        return self.providers.map(self.wrapper.create, service_name, service_json)
+        return self.driver.providers.map(self.wrapper.create, service_name, service_json)
 
     @abc.abstractmethod
     def update(self, service_name):
-        return self.providers.map(self.wrapper.update, service_name)
+        return self.driver.providers.map(self.wrapper.update, service_name)
 
     @abc.abstractmethod
     def delete(self, service_name):
-        return self.providers.map(self.wrapper.delete, service_name)
+        return self.driver.providers.map(self.wrapper.delete, service_name)
 
     @abc.abstractmethod
     def get(self):
@@ -104,12 +118,12 @@ class HostBase(object):
 class ProviderWrapper(object):
 
     def create(self, ext, service_name, service_json):
-        return ext.obj.host_controller.create(service_name, service_json)
+        return ext.obj.service_controller.create(service_name, service_json)
 
     def update(self, ext, service_name):
-        return ext.obj.host_controller.update(service_name)
+        return ext.obj.service_controller.update(service_name)
 
     def delete(self, ext, service_name):
-        return ext.obj.host_controller.delete(service_name)
+        return ext.obj.service_controller.delete(service_name)
 
 
