@@ -13,11 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# stevedore/example/simple.py
+import uuid
+
 from cdn.storage import base
 
+CQL_CREATE_SERVICE = '''
+    INSERT INTO services (servicename, serviceid)
+    VALUES (%s, %s)
+'''
 
 class HostController(base.HostBase):
+
+    def __init__(self, *args, **kwargs):
+        super(HostController, self).__init__(*args, **kwargs)
+
+        self._session = self.driver.host_database
+
 
     def list(self):
         hostnames = [
@@ -41,9 +52,18 @@ class HostController(base.HostBase):
 
         # create the hostname in storage
         service = service_json
+
+        """Creates a new service"""
+        args = (service_name, uuid.uuid1())
+        res = self._session.execute(CQL_CREATE_SERVICE, args)
+
+        print "stored new record in cassandra"
+
         
         # create at providers
-        return super(HostController, self).create(service_name, service)
+        providers = super(HostController, self).create(service_name, service)
+
+        return providers
 
     def update(self, service_name, service_json):
         # update configuration in storage

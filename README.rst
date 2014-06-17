@@ -48,7 +48,7 @@ Getting Started
 -------------------------------------------
 
 **Note:** These instructions are for running a local instance of CDN and
-not all of these steps are required. It is assumed you have `CassandraDB`_
+not all of these steps are required. It is assumed you have `CassandraDB`
 installed and running.
 
 1. From your home folder create the ``~/.cdn`` folder and clone the repo::
@@ -99,6 +99,25 @@ similar to this::
     Content-Length: 464
     Content-Type: application/json-home
     Cache-Control: max-age=86400
+
+
+Installing Cassandra Locally
+-----------------------------
+
+Mac OSX
+-------
+
+1. Update your Java SDK to the latest version (v7+)
+
+    http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+
+You can check the version currently running with 
+    
+    $ java -version
+
+2. Follow the instructions on the datastax site to install cassandra for Mac OSX 
+    
+    http://www.datastax.com/2012/01/working-with-apache-cassandra-on-mac-os-x
 
 
 .. _`CassandraDB` : http://cassandra.apache.org

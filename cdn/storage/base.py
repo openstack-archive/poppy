@@ -37,6 +37,9 @@ class DriverBase(object):
         self.conf = conf
         self.providers = providers
 
+    def providers(self):
+        return self.providers
+
 
 @six.add_metaclass(abc.ABCMeta)
 class StorageDriverBase(DriverBase):
@@ -69,15 +72,27 @@ class StorageDriverBase(DriverBase):
         raise NotImplementedError
 
 
+class ControllerBase(object):
+    """Top-level class for controllers.
+
+    :param driver: Instance of the driver
+        instantiating this controller.
+    """
+
+    def __init__(self, driver):
+        self.driver = driver
+
+
 @six.add_metaclass(abc.ABCMeta)
-class HostBase(object):
+class HostBase(ControllerBase):
     """This class is responsible for managing hostnames.
     Hostname operations include CRUD, etc.
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, providers):
-        self.providers = providers
+    def __init__(self, driver):
+        super(HostBase, self).__init__(driver)
+
         self.wrapper = ProviderWrapper()
 
     @abc.abstractmethod
@@ -86,15 +101,15 @@ class HostBase(object):
         
     @abc.abstractmethod
     def create(self, service_name, service_json):
-        return self.providers.map(self.wrapper.create, service_name, service_json)
+        return self.driver.providers.map(self.wrapper.create, service_name, service_json)
 
     @abc.abstractmethod
     def update(self, service_name):
-        return self.providers.map(self.wrapper.update, service_name)
+        return self.driver.providers.map(self.wrapper.update, service_name)
 
     @abc.abstractmethod
     def delete(self, service_name):
-        return self.providers.map(self.wrapper.delete, service_name)
+        return self.driver.providers.map(self.wrapper.delete, service_name)
 
     @abc.abstractmethod
     def get(self):
