@@ -18,9 +18,15 @@ import uuid
 from cdn.storage import base
 
 CQL_CREATE_SERVICE = '''
-    INSERT INTO services (servicename, serviceid)
+    INSERT INTO services (service_name, service_id)
     VALUES (%s, %s)
 '''
+
+CQL_DELETE_SERVICE = '''
+    DELETE FROM services
+    WHERE service_name = %s
+'''
+
 
 class ServicesController(base.ServicesBase):
 
@@ -116,6 +122,8 @@ class ServicesController(base.ServicesBase):
 
     def delete(self, service_name):
         # delete local configuration from storage
+        args = (service_name, )
+        res = self._session.execute(CQL_DELETE_SERVICE, args)
 
         # delete from providers
         return super(ServicesController, self).delete(service_name)
