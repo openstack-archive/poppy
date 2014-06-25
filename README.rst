@@ -84,6 +84,8 @@ installed and running.
 
     $ pip install -e .
 
+    Installing the fastly client library may have issues.  Copy the `README.md` file to `README` and try again.
+
 7. Start the CDN server::
 
     $ cdn-server
@@ -120,6 +122,9 @@ You can check the version currently running with
 2. Follow the instructions on the datastax site to install cassandra for Mac OSX 
     
     http://www.datastax.com/2012/01/working-with-apache-cassandra-on-mac-os-x
+
+3.  CREATE KEYSPACE cdn
+    WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
 
 3. Import the Cassandra Schema to set up the required tables that CDN will need
     
