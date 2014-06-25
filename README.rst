@@ -71,7 +71,7 @@ installed and running.
     keyspace = cdn
 
 4. By using cassandra storage plugin, you will need to create the default 
-   keyspace "cdn" on your cassandra host/cluster. So log into cqlsh,
+   keyspace "cdn" on your cassandra host/cluster. So log into cqlsh, do::
     
     cqlsh> CREATE KEYSPACE cdn WITH REPLICATION = { 'class' : 'SimpleStrategy' , 'replication_factor' :  1}  ;
 
