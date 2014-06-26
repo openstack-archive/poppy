@@ -89,7 +89,7 @@ installed and running.
 
     $ pip install -r requirements.txt
 
-   Install Requirements for each Provider configured:
+   Install Requirements for each Provider configured::
 
     $ pip install -r cdn/providers/fastly/requirements.txt
   
