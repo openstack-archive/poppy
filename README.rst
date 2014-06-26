@@ -79,12 +79,20 @@ installed and running.
 
     $ cd cdn
 
-6. Run the following so you can see the results of any changes you
-   make to the code without having to reinstall the package each time::
+6. Install general requirements::
 
+    $ pip install -r requirements.txt
+
+   Install Requirements for each Provider configured:
+
+    $ pip install -r cdn/providers/fastly/requirements.txt
+  
+   Run the following so you can see the results of any changes you
+   make to the code without having to reinstall the package each time::
+    
     $ pip install -e .
 
-    Installing the fastly client library may have issues.  Copy the `README.md` file to `README` and try again.
+   Installing the fastly client library may have issues.  Copy the `README.md` file to `README` and try again.
 
 7. Start the CDN server::
 
