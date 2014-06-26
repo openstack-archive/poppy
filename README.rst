@@ -70,14 +70,20 @@ installed and running.
     cluster = "localhost"
     keyspace = cdn
 
-4. For logging, find the ``[DEFAULT]`` section in
+4. By using cassandra storage plugin, you will need to create the default 
+   keyspace "cdn" on your cassandra host/cluster. So log into cqlsh, do::
+    
+    cqlsh> CREATE KEYSPACE cdn WITH REPLICATION = { 'class' : 'SimpleStrategy' , 'replication_factor' :  1}  ;
+
+5. For logging, find the ``[DEFAULT]`` section in
    ``~/.cdn/cdn.conf`` and modify as desired::
 
     log_file = server.log
 
-5. Change directories back to your local copy of the repo::
+6. Change directories back to your local copy of the repo::
 
     $ cd cdn
+
 
 6. Install general requirements::
 
@@ -92,15 +98,17 @@ installed and running.
     
     $ pip install -e .
 
+
    Installing the fastly client library may have issues.  Copy the `README.md` file to `README` and try again.
 
-7. Start the CDN server::
+
+8. Start the CDN server::
 
     $ cdn-server
 
-8. Test out that CDN is working by requesting the home doc::
+9. Test out that CDN is working by requesting the home doc::
 
-    $ curl -i -X GET http://0.0.0.0:8888/v1
+    $ curl -i -X GET http://0.0.0.0:8888/v1.0
 
 You should get an **HTTP 200** along with some headers that will look
 similar to this::
