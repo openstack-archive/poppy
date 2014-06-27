@@ -1,5 +1,10 @@
-# Ensure you have your private key in the folder where this DockerFile is run from
-# and upload your public key to the private Github repo
+##
+##    CDN API
+##
+##
+
+# Ensure you have your private key in the folder (named 'docker_rsa') where this DockerFile is run from
+# and upload your public key 'docker_rsa.pub' to the private Github repo being cloned
 
 FROM ubuntu:14.04
 MAINTAINER Amit Gandhi <amit.gandhi@rackspace.com>
@@ -35,15 +40,8 @@ RUN sudo pip install httplib2>=0.8
 RUN sudo pip install -e /home/cdn/.
 
 # Set up the configuration files
-RUN cp /home/cdn/etc/cdn.conf /etc/cdn.conf
-RUN cp /home/cdn/etc/logging.conf /etc/logging.conf
-
-# Configure Cassandra Storage Driver, and Fastly Provider
-RUN sed -i -e"s/cluster = \"localhost\"/cluster = \"0.0.0.0\"/" /etc/cdn.conf
-RUN sed -i -e"s/apikey = \"MYAPIKEY\"/apikey = \"deadbeef\"/" /etc/cdn.conf
-
-
-RUN more /etc/cdn.conf
+ADD cdn.conf /etc/cdn.conf
+ADD logging.conf /etc/logging.conf
 
 # Start CDN
 EXPOSE 8888
