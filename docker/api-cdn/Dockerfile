@@ -3,8 +3,11 @@
 ##
 ##
 
-# Ensure you have your private key in the folder (named 'docker_rsa') where this DockerFile is run from
-# and upload your public key 'docker_rsa.pub' to the private Github repo being cloned
+# The following files should exist in this folder before running Dockerfile
+# - docker_rsa (private key) -> public key should be published to the private git repo
+# - cdn.conf (desired configuration for cdn api)
+# - logging.conf (desired logging configuration file)
+
 
 FROM ubuntu:14.04
 MAINTAINER Amit Gandhi <amit.gandhi@rackspace.com>
