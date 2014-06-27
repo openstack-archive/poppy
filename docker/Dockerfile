@@ -1,3 +1,6 @@
+# Ensure you have your private key in the folder where this DockerFile is run from
+# and upload your public key to the private Github repo
+
 FROM ubuntu:14.04
 MAINTAINER Amit Gandhi <amit.gandhi@rackspace.com>
 
@@ -43,5 +46,5 @@ RUN sed -i -e"s/apikey = \"MYAPIKEY\"/apikey = \"deadbeef\"/" /etc/cdn.conf
 RUN more /etc/cdn.conf
 
 # Start CDN
+EXPOSE 8888
 ENTRYPOINT ["cdn-server"]
-EXPOSE 8080
