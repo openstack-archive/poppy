@@ -22,6 +22,6 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
-from cdn.provider.sample import services
+from cdn.provider.mock import services
 
 ServiceController = services.ServiceController

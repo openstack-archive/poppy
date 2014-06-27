@@ -25,7 +25,7 @@ LOG = log.getLogger(__name__)
 _DRIVER_OPTIONS = [
     cfg.StrOpt('transport', default='falcon',
                help='Transport driver to use'),
-    cfg.StrOpt('storage', default='mongodb',
+    cfg.StrOpt('storage', default='mockdb',
                help='Storage driver to use'),
 ]
 

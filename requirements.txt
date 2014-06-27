@@ -15,5 +15,3 @@ stevedore>=0.10
 six>=1.4.1
 oslo.config>=1.2.0
 
--e git+https://github.com/zebrafishlabs/fastly-python#egg=fastly-python
-httplib2>=0.8

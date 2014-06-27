@@ -84,10 +84,23 @@ installed and running.
 
     $ cd cdn
 
-7. Run the following so you can see the results of any changes you
-   make to the code without having to reinstall the package each time::
 
+6. Install general requirements::
+
+    $ pip install -r requirements.txt
+
+   Install Requirements for each Provider configured::
+
+    $ pip install -r cdn/providers/fastly/requirements.txt
+  
+   Run the following so you can see the results of any changes you
+   make to the code without having to reinstall the package each time::
+    
     $ pip install -e .
+
+
+   Installing the fastly client library may have issues.  Copy the `README.md` file to `README` and try again.
+
 
 8. Start the CDN server::
 
@@ -125,6 +138,9 @@ You can check the version currently running with
 2. Follow the instructions on the datastax site to install cassandra for Mac OSX 
     
     http://www.datastax.com/2012/01/working-with-apache-cassandra-on-mac-os-x
+
+3.  CREATE KEYSPACE cdn
+    WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
 
 3. Import the Cassandra Schema to set up the required tables that CDN will need
     

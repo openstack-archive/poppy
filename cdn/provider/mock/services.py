@@ -13,26 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""CDN Provider implementation."""
-
-from cdn.common import decorators
-from cdn.openstack.common import log as logging
-from cdn import provider
-from cdn.provider.sample import controllers
-
-from oslo.config import cfg
-
-LOG = logging.getLogger(__name__)
+# stevedore/example/simple.py
+from cdn.provider import base
 
 
-class CDNProvider(provider.CDNProviderBase):
+class ServiceController(base.ServiceBase):
 
-    def __init__(self, conf):
-        super(CDNProvider, self).__init__(conf)
+    def __init__(self):
+        super(ServiceController, self).__init__()
 
-    def is_alive(self):
-        return True
+        self.provider_resp = base.ProviderResponse("mock")
 
-    @decorators.lazy_property(write=False)
-    def service_controller(self):
-        return controllers.ServiceController()
+    def update(self):
+        return self.provider_resp.updated(service_name)
+        
+    def create(self, service_name, service_json):
+        return self.provider_resp.created(service_name)
+
+    def delete(self, service_name):
+        return self.provider_resp.deleted(service_name)
+   
