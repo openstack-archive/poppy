@@ -87,7 +87,7 @@ installed and running.
 
 6. Install general requirements::
 
-    $ pip install -r requirements.txt
+    $ pip install -r requirements/requirements.txt
 
    Install Requirements for each Provider configured::
 
