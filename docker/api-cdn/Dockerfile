@@ -15,8 +15,8 @@ RUN python ez_setup.py
 RUN wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
 RUN python get-pip.py
 
-# uwsgi && virtualenv
-RUN pip install uwsgi virtualenv
+# uwsgi 
+RUN pip install uwsgi 
 
 # Make ssh dir
 RUN mkdir /root/.ssh/
@@ -32,16 +32,10 @@ RUN echo "IdentityFile ~/.ssh/id_rsa" >> /etc/ssh/ssh_config
 RUN touch /root/.ssh/known_hosts
 
 # Pull project
-RUN git clone git@github.com:rackerlab/cdn /home/cdn
-
-# Create a virtual environment
-RUN virtualenv /opt/python27
+RUN git clone git@github.com:tonytan4ever/cdn /home/cdn
 
 # Install Requirements
-RUN sudo /opt/python27/bin/pip install -r /home/cdn/requirements/requirements.txt
-# RUN sudo pip install -r /home/cdn/cdn/provider/fastly/requirements.txt
-RUN sudo /opt/python27/bin/pip install -e git+https://github.com/zebrafishlabs/fastly-python@b98a756b2a03687d76c3cfa0e024a445af85b38d#egg=fastly-python
-RUN sudo /opt/python27/bin/pip install httplib2>=0.8
+RUN sudo pip install -r /home/cdn/requirements/requirements.txt
 
 RUN sudo pip install -e /home/cdn/.
 
@@ -50,8 +44,16 @@ ADD ./cdn.conf /etc/cdn.conf
 ADD ./logging.conf /etc/logging.conf
 ADD ./uwsgi.ini /root/uwsgi.ini
 
-RUN more /etc/cdn.conf
+# create uwsgi log directory
+RUN mkdir -p /var/log/cdn
+RUN chmod -R +w /var/log/cdn
+
+# create uwsgi pid directory
+RUN mkdir -p /var/run/cdn
+RUN chmod -R +w /var/run/cdn
+
+#RUN /usr/local/bin/uwsgi --ini /root/uwsgi.ini
 
 # Start CDN
 EXPOSE 80
-CMD ["/usr/local/bin/uwsgi", "--ini", "/root/uwsgi.ini", "-H", "/opt/python27"]
+CMD ["/usr/local/bin/uwsgi", "--ini", "/root/uwsgi.ini"]
