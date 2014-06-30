@@ -32,7 +32,7 @@ RUN echo "IdentityFile ~/.ssh/id_rsa" >> /etc/ssh/ssh_config
 RUN touch /root/.ssh/known_hosts
 
 # Pull project
-RUN git clone git@github.com:tonytan4ever/cdn /home/cdn
+RUN git clone git@github.com:rackerlab/cdn /home/cdn
 
 # Create a virtual environment
 RUN virtualenv /opt/python27
