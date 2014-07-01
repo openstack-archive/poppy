@@ -41,4 +41,4 @@ RUN chmod 755 /usr/local/bin/cass-stop
 EXPOSE 7199 7000 7001 9160 9042
 USER root
 CMD cass-dock
-RUN 
+
