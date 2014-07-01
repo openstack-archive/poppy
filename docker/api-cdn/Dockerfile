@@ -16,7 +16,18 @@ RUN apt-get -qq update
 RUN apt-get -qq upgrade
 
 # Install Pip, Python, etc
-RUN apt-get -qqy install git-core python-pip curl libpython-dev uwsgi memcached libev4 libev-dev
+RUN apt-get -qqy install git-core wget curl libpython-dev vim memcached libev4 libev-dev python-dev
+
+# setuptools
+RUN wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+RUN python ez_setup.py
+
+# pip
+RUN wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+RUN python get-pip.py
+
+# uwsgi 
+RUN pip install uwsgi 
 
 # Make ssh dir
 RUN mkdir /root/.ssh/
@@ -32,20 +43,28 @@ RUN echo "IdentityFile ~/.ssh/id_rsa" >> /etc/ssh/ssh_config
 RUN touch /root/.ssh/known_hosts
 
 # Pull project
-RUN git clone git@github.com:rackerlabs/cdn.git /home/cdn
+RUN git clone git@github.com:rackerlab/cdn /home/cdn
 
 # Install Requirements
-RUN sudo pip install -r /home/cdn/requirements.txt
-# RUN sudo pip install -r /home/cdn/cdn/provider/fastly/requirements.txt
-RUN sudo pip install -e git+https://github.com/zebrafishlabs/fastly-python@b98a756b2a03687d76c3cfa0e024a445af85b38d#egg=fastly-python
-RUN sudo pip install httplib2>=0.8
+RUN sudo pip install -r /home/cdn/requirements/requirements.txt
 
 RUN sudo pip install -e /home/cdn/.
 
 # Set up the configuration files
-ADD cdn.conf /etc/cdn.conf
-ADD logging.conf /etc/logging.conf
+ADD ./cdn.conf /etc/cdn.conf
+ADD ./logging.conf /etc/logging.conf
+ADD ./uwsgi.ini /root/uwsgi.ini
+
+# create uwsgi log directory
+RUN mkdir -p /var/log/cdn
+RUN chmod -R +w /var/log/cdn
+
+# create uwsgi pid directory
+RUN mkdir -p /var/run/cdn
+RUN chmod -R +w /var/run/cdn
+
+#RUN /usr/local/bin/uwsgi --ini /root/uwsgi.ini
 
 # Start CDN
-EXPOSE 8888
-ENTRYPOINT ["cdn-server"]
+EXPOSE 80
+CMD ["/usr/local/bin/uwsgi", "--ini", "/root/uwsgi.ini"]
