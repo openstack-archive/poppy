@@ -26,7 +26,7 @@ class ServicesController(base.ServicesBase):
         self._session = self.driver.service_database
 
 
-    def list(self):
+    def list(self, project_id):
         services = {
                 "links": [
                     {
@@ -83,26 +83,26 @@ class ServicesController(base.ServicesBase):
 
         return services
     
-    def get(self):
+    def get(self, project_id):
         # get the requested service from storage
         print "get service"
 
-    def create(self, service_name, service_json):
+    def create(self, project_id, service_name, service_json):
 
         # create at providers
-        providers = super(ServicesController, self).create(service_name, service_json)
+        providers = super(ServicesController, self).create(project_id, service_name, service_json)
 
         return providers
 
-    def update(self, service_name, service_json):
+    def update(self, project_id, service_name, service_json):
         # update configuration in storage
 
         # update at providers
-        return super(ServicesController, self).update(service_name, service_json)
+        return super(ServicesController, self).update(project_id, service_name, service_json)
 
-    def delete(self, service_name):
+    def delete(self, project_id, service_name):
 
         # delete from providers
-        return super(ServicesController, self).delete(service_name)
+        return super(ServicesController, self).delete(project_id, service_name)
 
     

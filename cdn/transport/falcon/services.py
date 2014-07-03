@@ -24,7 +24,7 @@ class ServicesResource:
     def on_get(self, req, resp, project_id):
         """Handles GET requests
         """
-        services = self.services_controller.list()
+        services = self.services_controller.list(project_id)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(services)
 
@@ -36,7 +36,7 @@ class ServiceResource:
     def on_get(self, req, resp, project_id, service_name):
         """Handles GET requests
         """
-        service = self.service_controller.find(service_name)
+        service = self.service_controller.find(project_id, service_name)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(service)
 
@@ -52,13 +52,13 @@ class ServiceResource:
     def on_patch(self, req, resp, project_id, service_name):
         """Handles PATCH requests
         """
-        service = self.service_controller.update(service_name)
+        service = self.service_controller.update(project_id, service_name)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(service)
 
     def on_delete(self, req, resp, project_id, service_name):
         """Handles DELETE requests
         """
-        service = self.service_controller.delete(service_name)
+        service = self.service_controller.delete(project_id, service_name)
         resp.status = falcon.HTTP_204
         resp.body = json.dumps(service)
