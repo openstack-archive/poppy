@@ -44,7 +44,7 @@ class V1Resource(object):
         document = json.dumps(JSON_HOME, ensure_ascii=False, indent=4)
         self.document_utf8 = document.encode('utf-8')
 
-    def on_get(self, req, resp):
+    def on_get(self, req, resp, project_id):
         resp.data = self.document_utf8
 
         resp.content_type = 'application/json-home'

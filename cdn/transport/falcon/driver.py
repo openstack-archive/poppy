@@ -57,18 +57,22 @@ class TransportDriver(transport.DriverBase):
         """Initialize hooks and URI routes to resources."""
         self.app = falcon.API()
         version_path = "/v1.0"
+        project_id = "/{project_id}"
+
+        prefix = version_path + project_id
+
 
         # init the controllers
         service_controller = self._storage.service_controller
 
         # setup the routes
-        self.app.add_route(version_path,
+        self.app.add_route(prefix,
                            v1.V1Resource())
 
-        self.app.add_route(version_path + '/services',
+        self.app.add_route(prefix + '/services',
                            services.ServicesResource(service_controller))
 
-        self.app.add_route(version_path + '/services/{service_name}',
+        self.app.add_route(prefix + '/services/{service_name}',
                            services.ServiceResource(service_controller))
 
     def listen(self):
