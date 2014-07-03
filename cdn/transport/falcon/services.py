@@ -33,7 +33,7 @@ class ServiceResource:
     def __init__(self, service_controller):
         self.service_controller = service_controller
 
-    def on_get(self, req, resp, service_name):
+    def on_get(self, req, resp, project_id, service_name):
         """Handles GET requests
         """
         service = self.service_controller.find(service_name)
@@ -49,14 +49,14 @@ class ServiceResource:
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(service)
 
-    def on_patch(self, req, resp, service_name):
+    def on_patch(self, req, resp, project_id, service_name):
         """Handles PATCH requests
         """
         service = self.service_controller.update(service_name)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(service)
 
-    def on_delete(self, req, resp, service_name):
+    def on_delete(self, req, resp, project_id, service_name):
         """Handles DELETE requests
         """
         service = self.service_controller.delete(service_name)

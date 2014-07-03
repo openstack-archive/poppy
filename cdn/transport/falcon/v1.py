@@ -20,7 +20,7 @@ import json
 JSON_HOME = {
                 "resources": {
                     "rel/cdn": {
-                        "href-template": "/v1.0/services{?marker,limit}",
+                        "href-template": "services{?marker,limit}",
                         "href-vars": {
                             "marker": "param/marker",
                             "limit": "param/limit"
