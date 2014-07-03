@@ -17,66 +17,51 @@ import uuid
 
 from cdn.storage import base
 
-CQL_CREATE_SERVICE = '''
-    INSERT INTO services (project_id, service_name) 
-    VALUES (%(project_id), %(service_name))
-''' 
-
-CQL_CREATE_DOMAIN = '''
-    INSERT INTO service_domains (project_id, service_name, domain_name) 
-    VALUES (%(project_id), %(service_name), %(domain_name))
-'''
-
-CQL_CREATE_ORIGIN = '''
-    INSERT INTO service_origins (project_id, service_name, origin_location, port, ssl) 
-    VALUES (%(project_id), %(service_name), %(origin_location), %(port), %(ssl))
-'''
-
-CQL_CREATE_CACHING_RULE = '''
-    INSERT INTO service_caching_rules (project_id, service_name, caching_name, ttl) 
-    VALUES (%(project_id), %(service_name), %(caching_name), %(ttl))
-'''
-
-CQL_CREATE_RESTRICTION = '''
-    INSERT INTO service_restrictions (project_id, service_name, restriction_name) 
-    VALUES (%(project_id), %(service_name), %(restriction_name))
-'''
-
-CQL_CREATE_RULE = '''
-    INSERT INTO service_rules (project_id, service_name, rule_id, rule_name, request_uri, http_host, client_ip, http_method) 
-    VALUES (%(project_id), %(service_name), %(rule_id), %(rule_name), %(request_uri), %(http_host), %(client_ip), %(http_method))
-'''
-
 CQL_GET_ALL_SERVICES = '''
-    BEGIN BATCH
-        SELECT project_id, service_name FROM services WHERE project_id = %(project_id)
-        SELECT domain_name FROM service_domains WHERE project_id = %(project_id)
-        SELECT origin_location, port, ssl FROM service_origins WHERE project_id = %(project_id)
-        SELECT caching_name, ttl FROM service_caching_rules WHERE project_id = %(project_id)
-        SELECT restriction_name FROM service_restrictions WHERE project_id = %(project_id)
-    APPLY BATCH
+    SELECT project_id, service_name 
+    FROM services 
+    WHERE project_id = %(project_id)
 '''
 
 CQL_GET_SERVICE = '''
-    BEGIN BATCH
-        SELECT project_id, service_name FROM services WHERE project_id = %(project_id) AND service_name = %(service_name)
-        SELECT domain_name FROM service_domains WHERE project_id = %(project_id) AND service_name = %(service_name)
-        SELECT origin_location, port, ssl FROM service_origins WHERE project_id = %(project_id) AND service_name = %(service_name)
-        SELECT caching_name, ttl FROM service_caching_rules WHERE project_id = %(project_id) AND service_name = %(service_name)
-        SELECT restriction_name FROM service_restrictions WHERE project_id = %(project_id) AND service_name = %(service_name)
-    APPLY BATCH
+    SELECT project_id, service_name, domains, origins, caching_rules, restrictions 
+    FROM services 
+    WHERE project_id = %(project_id) AND service_name = %(service_name)
 '''
 
 CQL_DELETE_SERVICE = '''
-    BEGIN BATCH
-        DELETE FROM services WHERE project_id = %(project_id) AND service_name = %(service_name)
-        DELETE FROM service_domains WHERE project_id = %(project_id) AND service_name = %(service_name)
-        DELETE FROM service_origins WHERE project_id = %(project_id) AND service_name = %(service_name)
-        DELETE FROM service_caching_rules WHERE project_id = %(project_id) AND service_name = %(service_name)
-        DELETE FROM service_restrictions WHERE project_id = %(project_id) AND service_name = %(service_name)
-    APPLY BATCH
+    DELETE FROM services 
+    WHERE project_id = %(project_id) AND service_name = %(service_name)
 '''
 
+CQL_CREATE_SERVICE = '''
+    INSERT INTO services (project_id, service_name, domains, origins, caching_rules, restrictions)
+    VALUES (%(project_id), %(service_name), %(domains), %(origins), %(caching_rules), %(restrictions))
+'''
+
+CQL_UPDATE_DOMAINS = '''
+    UPDATE services
+    SET domains = %(domains)
+    WHERE project_id = %(project_id) AND service_name = %(service_name)
+'''
+
+CQL_UPDATE_ORIGINS = '''
+    UPDATE services
+    SET origins = %(origins)
+    WHERE project_id = %(project_id) AND service_name = %(service_name)
+'''
+
+CQL_UPDATE_CACHING_RULES = '''
+    UPDATE services
+    SET caching_rules = %(caching_rules)
+    WHERE project_id = %(project_id) AND service_name = %(service_name)
+'''
+
+CQL_UPDATE_RESTRICTIONS = '''
+    UPDATE services
+    SET restrictions = %(restrictions)
+    WHERE project_id = %(project_id) AND service_name = %(service_name)
+'''
 
 
 class ServicesController(base.ServicesBase):
@@ -88,6 +73,12 @@ class ServicesController(base.ServicesBase):
 
 
     def list(self, project_id):
+
+        # get all services
+        args = (project_id, )
+        result = self._session.execute(CQL_GET_ALL_SERVICES, args)
+
+        # build the json structure from this result
         services = {
                 "links": [
                     {
@@ -97,6 +88,7 @@ class ServicesController(base.ServicesBase):
                 ],
                 "services" : [
                     {
+                        "name" : "mywebsite",
                         "domains": [
                             {
                                 "domain": "www.mywebsite.com"
@@ -146,18 +138,28 @@ class ServicesController(base.ServicesBase):
     
     def get(self, project_id):
         # get the requested service from storage
-        print "get service"
+        args = (project_id, service_name, )
+        result = self._session.execute(CQL_GET_SERVICE, args)
+
+        print "get service: " result
 
     def create(self, project_id, service_name, service_json):
 
         # create the service in storage
         service = service_json
 
-        """Creates a new service"""
-        args = (project_id, service_name, uuid.uuid1())
-        res = self._session.execute(CQL_CREATE_SERVICE, args)
+        # creates a new service
+        args = (project_id, 
+            service_name, 
+            service_json["domains"], 
+            service_json["origins"], 
+            service_json["caching"], 
+            service_json["restrictions"],
+            uuid.uuid1())
 
-        print "stored new record in cassandra"
+        result = self._session.execute(CQL_CREATE_SERVICE, args)
+
+        print "stored a new record in cassandra"
 
         
         # create at providers
@@ -168,12 +170,16 @@ class ServicesController(base.ServicesBase):
     def update(self, project_id, service_name, service_json):
         # update configuration in storage
 
+        # determine what changed.
+
+        # update those columns provided only.
+
         # update at providers
         return super(ServicesController, self).update(project_id, service_name, service_json)
 
     def delete(self, project_id, service_name):
         # delete local configuration from storage
-        args = (service_name, )
+        args = (project_id, service_name, )
         res = self._session.execute(CQL_DELETE_SERVICE, args)
 
         # delete from providers
