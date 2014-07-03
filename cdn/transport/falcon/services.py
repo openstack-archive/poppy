@@ -21,7 +21,7 @@ class ServicesResource:
     def __init__(self, services_controller):
         self.services_controller = services_controller
 
-    def on_get(self, req, resp):
+    def on_get(self, req, resp, project_id):
         """Handles GET requests
         """
         services = self.services_controller.list()
