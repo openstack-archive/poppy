@@ -20,8 +20,6 @@ from cdn.openstack.common import log as logging
 from cdn import provider
 from cdn.provider.mock import controllers
 
-from oslo.config import cfg
-
 LOG = logging.getLogger(__name__)
 
 

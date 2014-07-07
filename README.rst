@@ -146,7 +146,20 @@ You can check the version currently running with
     
     Open ./cqlsh and import the /cdn/storage/cassandra/schema.cql file
 
-    
+
+
+Running tests
+-----------------------------
+
+First install the additional requirements:
+
+    $ pip install tox
+
+And then run tests:
+
+    $ tox -e py27
+
+
 .. _`CassandraDB` : http://cassandra.apache.org
 .. _`pyenv` : https://github.com/yyuu/pyenv/
 .. _`virtualenv` : https://pypi.python.org/pypi/virtualenv/

@@ -61,7 +61,6 @@ class TransportDriver(transport.DriverBase):
 
         prefix = version_path + project_id
 
-
         # init the controllers
         service_controller = self._storage.service_controller
 

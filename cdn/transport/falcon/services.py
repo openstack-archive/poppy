@@ -45,7 +45,9 @@ class ServiceResource:
         """
         service_json = json.loads(req.stream.read(req.content_length))
 
-        service = self.service_controller.create(project_id, service_name, service_json)
+        service = self.service_controller.create(project_id,
+                                                 service_name,
+                                                 service_json)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(service)
 

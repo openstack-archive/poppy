@@ -97,10 +97,13 @@ class ServicesBase(ControllerBase):
     @abc.abstractmethod
     def list(self, project_id):
         raise NotImplementedError
-        
+
     @abc.abstractmethod
     def create(self, project_id, service_name, service_json):
-        return self.driver.providers.map(self.wrapper.create, service_name, service_json)
+        return self.driver.providers.map(
+            self.wrapper.create,
+            service_name,
+            service_json)
 
     @abc.abstractmethod
     def update(self, project_id, service_name):
@@ -125,5 +128,3 @@ class ProviderWrapper(object):
 
     def delete(self, ext, service_name):
         return ext.obj.service_controller.delete(service_name)
-
-

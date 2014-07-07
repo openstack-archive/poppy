@@ -97,5 +97,3 @@ class StorageDriver(storage.StorageDriverBase):
 
         name = self.mongodb_conf.database + '_services'
         return self.connection[name]
-
-   
