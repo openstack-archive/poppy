@@ -43,7 +43,7 @@ RUN echo "IdentityFile ~/.ssh/id_rsa" >> /etc/ssh/ssh_config
 RUN touch /root/.ssh/known_hosts
 
 # Pull project
-RUN git clone git@github.com:amitgandhinz/cdn /home/cdn
+RUN git clone git@github.com:rackerlabs/cdn /home/cdn
 
 # Install Requirements
 RUN sudo pip install -r /home/cdn/requirements/requirements.txt
