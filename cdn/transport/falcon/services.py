@@ -21,10 +21,10 @@ class ServicesResource:
     def __init__(self, services_controller):
         self.services_controller = services_controller
 
-    def on_get(self, req, resp):
+    def on_get(self, req, resp, project_id):
         """Handles GET requests
         """
-        services = self.services_controller.list()
+        services = self.services_controller.list(project_id)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(services)
 
@@ -33,32 +33,34 @@ class ServiceResource:
     def __init__(self, service_controller):
         self.service_controller = service_controller
 
-    def on_get(self, req, resp, service_name):
+    def on_get(self, req, resp, project_id, service_name):
         """Handles GET requests
         """
-        service = self.service_controller.find(service_name)
+        service = self.service_controller.get(project_id, service_name)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(service)
 
-    def on_put(self, req, resp, service_name):
+    def on_put(self, req, resp, project_id, service_name):
         """Handles PUT requests
         """
         service_json = json.loads(req.stream.read(req.content_length))
 
-        service = self.service_controller.create(service_name, service_json)
+        service = self.service_controller.create(project_id,
+                                                 service_name,
+                                                 service_json)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(service)
 
-    def on_patch(self, req, resp, service_name):
+    def on_patch(self, req, resp, project_id, service_name):
         """Handles PATCH requests
         """
-        service = self.service_controller.update(service_name)
+        service = self.service_controller.update(project_id, service_name)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(service)
 
-    def on_delete(self, req, resp, service_name):
+    def on_delete(self, req, resp, project_id, service_name):
         """Handles DELETE requests
         """
-        service = self.service_controller.delete(service_name)
+        service = self.service_controller.delete(project_id, service_name)
         resp.status = falcon.HTTP_204
         resp.body = json.dumps(service)

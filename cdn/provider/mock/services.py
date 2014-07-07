@@ -24,12 +24,11 @@ class ServiceController(base.ServiceBase):
 
         self.provider_resp = base.ProviderResponse("mock")
 
-    def update(self):
+    def update(self, service_name, service_json):
         return self.provider_resp.updated(service_name)
-        
+
     def create(self, service_name, service_json):
         return self.provider_resp.created(service_name)
 
     def delete(self, service_name):
         return self.provider_resp.deleted(service_name)
-   

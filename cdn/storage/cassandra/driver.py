@@ -54,7 +54,6 @@ class StorageDriver(storage.StorageDriverBase):
     def is_alive(self):
         return True
 
-
     @decorators.lazy_property(write=False)
     def connection(self):
         """Cassandra connection instance."""

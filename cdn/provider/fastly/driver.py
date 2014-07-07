@@ -44,7 +44,6 @@ class CDNProvider(provider.CDNProviderBase):
 
         self.client = fastly.connect(self.fastly_conf.apikey)
 
-
     def is_alive(self):
         return True
 
