@@ -82,7 +82,6 @@ class ServicesController(base.ServicesBase):
 
         result = self._session.execute(CQL_GET_ALL_SERVICES, args)
 
-        return result
 
         # TODO (amitgandhinz) : build the formatted json structure from the result
         services = {
@@ -140,7 +139,8 @@ class ServicesController(base.ServicesBase):
                 ]
             }
 
-        return services
+        #TODO (amitgandhinz): return services instead once its formatted.
+        return result
     
     def get(self, project_id, service_name):
         # get the requested service from storage
@@ -150,8 +150,6 @@ class ServicesController(base.ServicesBase):
             }
 
         result = self._session.execute(CQL_GET_SERVICE, args)
-
-        print "get service: ", result
 
         # TODO (amitgandhinz): need to format this return result in the correct format.
         return result

@@ -36,7 +36,6 @@ CASSANDRA_GROUP = 'drivers:storage:cassandra'
 
 
 def _connection(conf):
-    print(conf.cluster)
     cluster = Cluster(conf.cluster)
     session = cluster.connect(conf.keyspace)
 
