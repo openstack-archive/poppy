@@ -36,7 +36,7 @@ class ServiceResource:
     def on_get(self, req, resp, project_id, service_name):
         """Handles GET requests
         """
-        service = self.service_controller.find(project_id, service_name)
+        service = self.service_controller.get(project_id, service_name)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(service)
 

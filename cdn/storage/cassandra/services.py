@@ -13,54 +13,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import uuid
 
 from cdn.storage import base
 
 CQL_GET_ALL_SERVICES = '''
-    SELECT project_id, service_name 
+    SELECT project_id, service_name, domains, origins, caching_rules, restrictions 
     FROM services 
-    WHERE project_id = %(project_id)
+    WHERE project_id = %(project_id)s
 '''
 
 CQL_GET_SERVICE = '''
     SELECT project_id, service_name, domains, origins, caching_rules, restrictions 
     FROM services 
-    WHERE project_id = %(project_id) AND service_name = %(service_name)
+    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
 '''
 
 CQL_DELETE_SERVICE = '''
     DELETE FROM services 
-    WHERE project_id = %(project_id) AND service_name = %(service_name)
+    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
 '''
 
 CQL_CREATE_SERVICE = '''
     INSERT INTO services (project_id, service_name, domains, origins, caching_rules, restrictions)
-    VALUES (%(project_id), %(service_name), %(domains), %(origins), %(caching_rules), %(restrictions))
+    VALUES (%(project_id)s, %(service_name)s, %(domains)s, %(origins)s, %(caching_rules)s, %(restrictions)s)
 '''
 
 CQL_UPDATE_DOMAINS = '''
     UPDATE services
-    SET domains = %(domains)
-    WHERE project_id = %(project_id) AND service_name = %(service_name)
+    SET domains = %(domains)s
+    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
 '''
 
 CQL_UPDATE_ORIGINS = '''
     UPDATE services
-    SET origins = %(origins)
-    WHERE project_id = %(project_id) AND service_name = %(service_name)
+    SET origins = %(origins)s
+    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
 '''
 
 CQL_UPDATE_CACHING_RULES = '''
     UPDATE services
-    SET caching_rules = %(caching_rules)
-    WHERE project_id = %(project_id) AND service_name = %(service_name)
+    SET caching_rules = %(caching_rules)s
+    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
 '''
 
 CQL_UPDATE_RESTRICTIONS = '''
     UPDATE services
-    SET restrictions = %(restrictions)
-    WHERE project_id = %(project_id) AND service_name = %(service_name)
+    SET restrictions = %(restrictions)s
+    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
 '''
 
 
@@ -75,10 +76,15 @@ class ServicesController(base.ServicesBase):
     def list(self, project_id):
 
         # get all services
-        args = (project_id, )
+        args = {
+                'project_id' : project_id 
+            }
+
         result = self._session.execute(CQL_GET_ALL_SERVICES, args)
 
-        # build the json structure from this result
+        return result
+
+        # TODO (amitgandhinz) : build the formatted json structure from the result
         services = {
                 "links": [
                     {
@@ -136,32 +142,43 @@ class ServicesController(base.ServicesBase):
 
         return services
     
-    def get(self, project_id):
+    def get(self, project_id, service_name):
         # get the requested service from storage
-        args = (project_id, service_name, )
+        args = {
+                'project_id' : project_id , 
+                'service_name' : service_name
+            }
+
         result = self._session.execute(CQL_GET_SERVICE, args)
 
-        print "get service: " result
+        print "get service: ", result
+
+        # TODO (amitgandhinz): need to format this return result in the correct format.
+        return result
 
     def create(self, project_id, service_name, service_json):
 
         # create the service in storage
         service = service_json
 
+        domains = [json.dumps(domain) for domain in service["domains"]]
+        origins = [json.dumps(origin) for origin in service["origins"]]
+        caching_rules = [json.dumps(caching_rule) for caching_rule in service["caching"]]
+        restrictions = [json.dumps(restriction )for restriction in service["restrictions"]]
+
         # creates a new service
-        args = (project_id, 
-            service_name, 
-            service_json["domains"], 
-            service_json["origins"], 
-            service_json["caching"], 
-            service_json["restrictions"],
-            uuid.uuid1())
-
-        result = self._session.execute(CQL_CREATE_SERVICE, args)
-
-        print "stored a new record in cassandra"
+        args = {
+                'project_id' : project_id, 
+                'service_name' : service_name, 
+                'domains' : domains,
+                'origins' : origins,
+                'caching_rules' : caching_rules,
+                'restrictions' : restrictions
+            }
 
         
+        result = self._session.execute(CQL_CREATE_SERVICE, args)
+
         # create at providers
         providers = super(ServicesController, self).create(project_id, service_name, service)
 
@@ -179,7 +196,10 @@ class ServicesController(base.ServicesBase):
 
     def delete(self, project_id, service_name):
         # delete local configuration from storage
-        args = (project_id, service_name, )
+        args = {
+                'project_id' : project_id , 
+                'service_name' : service_name
+            }
         res = self._session.execute(CQL_DELETE_SERVICE, args)
 
         # delete from providers
