@@ -86,10 +86,9 @@ CQL_UPDATE_RESTRICTIONS = '''
 
 class ServicesController(base.ServicesBase):
 
-    def __init__(self, *args, **kwargs):
-        super(ServicesController, self).__init__(*args, **kwargs)
-
-        self._session = self.driver.service_database
+    @property
+    def session(self):
+        return self.driver.service_database
 
     def list(self, project_id):
 
@@ -98,7 +97,7 @@ class ServicesController(base.ServicesBase):
             'project_id': project_id
         }
 
-        result = self._session.execute(CQL_GET_ALL_SERVICES, args)
+        result = self.session.execute(CQL_GET_ALL_SERVICES, args)
 
         # TODO(amitgandhinz) : build the formatted json structure from the
         # result
@@ -111,8 +110,7 @@ class ServicesController(base.ServicesBase):
             'project_id': project_id,
             'service_name': service_name
         }
-
-        result = self._session.execute(CQL_GET_SERVICE, args)
+        result = self.session.execute(CQL_GET_SERVICE, args)
 
         # TODO(amitgandhinz): need to format this return result in the correct
         # format.
@@ -140,7 +138,7 @@ class ServicesController(base.ServicesBase):
             'restrictions': restrictions
         }
 
-        self._session.execute(CQL_CREATE_SERVICE, args)
+        self.session.execute(CQL_CREATE_SERVICE, args)
 
         # create at providers
         providers = super(ServicesController, self).create(
@@ -166,7 +164,7 @@ class ServicesController(base.ServicesBase):
             'project_id': project_id,
             'service_name': service_name
         }
-        self._session.execute(CQL_DELETE_SERVICE, args)
+        self.session.execute(CQL_DELETE_SERVICE, args)
 
         # delete from providers
         return super(ServicesController, self).delete(project_id, service_name)
