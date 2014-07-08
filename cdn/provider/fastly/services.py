@@ -61,7 +61,7 @@ class ServiceController(base.ServiceBase):
 
         except fastly.FastlyError:
             return self.provider_resp.failed("failed to create service")
-        except:
+        except Exception:
             return self.provider_resp.failed("failed to create service")
 
     def delete(self, service_name):
@@ -73,5 +73,5 @@ class ServiceController(base.ServiceBase):
             self.client.delete_service(service.id)
 
             return self.provider_resp.deleted(service_name)
-        except:
+        except Exception:
             return self.provider_resp.failed("failed to delete service")
