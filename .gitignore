@@ -21,11 +21,13 @@ __pycache__
 
 # Installer logs
 pip-log.txt
+*.log
 
 # Unit test / coverage reports
 .coverage
 .tox
 nosetests.xml
+tests/cover
 
 # Translations
 *.mo
@@ -35,3 +37,4 @@ nosetests.xml
 .project
 .pydevproject
 venv
+docker_rsa*
