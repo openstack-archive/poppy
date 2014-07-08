@@ -14,9 +14,9 @@
 # limitations under the License.
 
 import abc
-import traceback
 import six
 import sys
+import traceback
 
 from oslo.config import cfg
 
