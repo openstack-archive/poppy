@@ -56,6 +56,5 @@ class CassandraStorageServiceTests(TestCase):
         conf = cfg.ConfigOpts()
         cassandra_driver = driver.StorageDriver(conf, None)
 
-        db = cassandra_driver.service_database
+        cassandra_driver.service_database
         mock_cluster.assert_called_with('mock_cdn')
-
