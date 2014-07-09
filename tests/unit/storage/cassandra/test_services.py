@@ -5,7 +5,7 @@ from mock import patch
 from unittest import TestCase
 
 
-class CassandraStorageTests(TestCase):
+class CassandraStorageServiceTests(TestCase):
 
     @patch.object(ServicesController, 'session')
     @patch.object(cassandra.cluster.Session, 'execute')
@@ -33,5 +33,20 @@ class CassandraStorageTests(TestCase):
         sc = ServicesController(None)
         actual_response = json.loads(sc.get(project_id, service_name))
 
+        # assert the response contains the expected values
         self.assertEqual(actual_response[0][0], project_id)
         self.assertEqual(actual_response[0][1], service_name)
+
+        # TODO(amitgandhinz): assert the remaining fields
+
+    def test_create_service(self):
+        pass
+
+    def test_list_services(self):
+        pass
+
+    def test_delete_service(self):
+        pass
+
+    def test_update_service(self):
+        pass
