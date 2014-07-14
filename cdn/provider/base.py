@@ -14,10 +14,9 @@
 # limitations under the License.
 
 import abc
-import json
-import traceback
 import six
 import sys
+import traceback
 
 from oslo.config import cfg
 
@@ -78,16 +77,17 @@ class ServiceBase(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def update(self):
+    def update(self, service_name, service_json):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create(self):
+    def create(self, service_name, service_json):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self):
+    def delete(self, service_name):
         raise NotImplementedError
+
 
 class ProviderResponse(object):
     def __init__(self, provider_type):
@@ -99,34 +99,29 @@ class ProviderResponse(object):
         print "error: ", self.provider, msg, ex_type, ex
         traceback.print_tb(tb)
 
-        return { 
-            self.provider: { 
-                "error" : msg 
-            } 
+        return {
+            self.provider: {
+                "error": msg
+            }
         }
 
     def created(self, domain):
-        return { 
-            self.provider : { 
+        return {
+            self.provider: {
                 "domain": domain
-            } 
+            }
         }
-        
+
     def updated(self, domain):
-        return { 
-            self.provider : { 
+        return {
+            self.provider: {
                 "domain": domain
-            } 
+            }
         }
 
     def deleted(self, domain):
-        return { 
-            self.provider : { 
+        return {
+            self.provider: {
                 "domain": domain
-            } 
+            }
         }
-        
-
-
-
-  

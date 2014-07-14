@@ -28,11 +28,13 @@ _LIMITS_GROUP = 'limits:storage'
 
 @six.add_metaclass(abc.ABCMeta)
 class DriverBase(object):
+
     """Base class for both data and control plane drivers
 
     :param conf: Configuration containing options for this driver.
     :type conf: `oslo.config.ConfigOpts`
     """
+
     def __init__(self, conf, providers):
         self.conf = conf
         self.providers = providers
@@ -43,6 +45,7 @@ class DriverBase(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class StorageDriverBase(DriverBase):
+
     """Interface definition for storage drivers.
 
     Data plane storage drivers are responsible for implementing the
@@ -73,6 +76,7 @@ class StorageDriverBase(DriverBase):
 
 
 class ControllerBase(object):
+
     """Top-level class for controllers.
 
     :param driver: Instance of the driver
@@ -85,6 +89,7 @@ class ControllerBase(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class ServicesBase(ControllerBase):
+
     """This class is responsible for managing Services
     """
     __metaclass__ = abc.ABCMeta
@@ -95,19 +100,22 @@ class ServicesBase(ControllerBase):
         self.wrapper = ProviderWrapper()
 
     @abc.abstractmethod
-    def list(self):
+    def list(self, project_id):
         raise NotImplementedError
-        
-    @abc.abstractmethod
-    def create(self, service_name, service_json):
-        return self.driver.providers.map(self.wrapper.create, service_name, service_json)
 
     @abc.abstractmethod
-    def update(self, service_name):
+    def create(self, project_id, service_name, service_json):
+        return self.driver.providers.map(
+            self.wrapper.create,
+            service_name,
+            service_json)
+
+    @abc.abstractmethod
+    def update(self, project_id, service_name):
         return self.driver.providers.map(self.wrapper.update, service_name)
 
     @abc.abstractmethod
-    def delete(self, service_name):
+    def delete(self, project_id, service_name):
         return self.driver.providers.map(self.wrapper.delete, service_name)
 
     @abc.abstractmethod
@@ -125,5 +133,3 @@ class ProviderWrapper(object):
 
     def delete(self, ext, service_name):
         return ext.obj.service_controller.delete(service_name)
-
-

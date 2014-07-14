@@ -33,8 +33,6 @@ MOCKDB_GROUP = 'drivers:storage:mockdb'
 
 
 def _connection():
-    
-
     return None
 
 
@@ -49,7 +47,6 @@ class StorageDriver(storage.StorageDriverBase):
 
     def is_alive(self):
         return True
-
 
     @decorators.lazy_property(write=False)
     def connection(self):

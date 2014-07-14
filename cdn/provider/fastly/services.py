@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import fastly
-import json
 
 from cdn.provider import base
 
@@ -29,7 +28,7 @@ class ServiceController(base.ServiceBase):
 
         self.provider_resp = base.ProviderResponse("fastly")
 
-    def update(self):
+    def update(self, service_name, service_json):
         print "update services"
 
     def create(self, service_name, service_json):
@@ -37,44 +36,42 @@ class ServiceController(base.ServiceBase):
         try:
             # Create a new service
             service = self.client.create_service(self.current_customer.id,
-                service_name)
+                                                 service_name)
 
             # Create a new version of the service.
             service_version = self.client.create_version(service.id)
 
             # Create the domain for this service
             for domain in service_json["domains"]:
-                domain = self.client.create_domain(service.id, 
-                    service_version.number,
-                    domain["domain"])
+                domain = self.client.create_domain(service.id,
+                                                   service_version.number,
+                                                   domain["domain"])
 
             for origin in service_json["origins"]:
                 # Create the origins for this domain
-                backend = self.client.create_backend(service.id,
-                    service_version.number,
-                    origin["origin"],
-                    origin["origin"],
-                    origin["ssl"],
-                    origin["port"]
-                    )
+                self.client.create_backend(service.id,
+                                           service_version.number,
+                                           origin["origin"],
+                                           origin["origin"],
+                                           origin["ssl"],
+                                           origin["port"]
+                                           )
 
             return self.provider_resp.created(service.name)
 
         except fastly.FastlyError:
             return self.provider_resp.failed("failed to create service")
-        except:
+        except Exception:
             return self.provider_resp.failed("failed to create service")
 
     def delete(self, service_name):
         try:
             # Get the service
             service = self.client.get_service_by_name(service_name)
+
             # Delete the service
-            deleted = self.client.delete_service(service.id)
+            self.client.delete_service(service.id)
 
             return self.provider_resp.deleted(service_name)
-        except:
+        except Exception:
             return self.provider_resp.failed("failed to delete service")
-
-
-   

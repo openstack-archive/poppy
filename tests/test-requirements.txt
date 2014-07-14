@@ -20,3 +20,4 @@ requests>=1.1
 nose
 nose-exclude
 openstack.nose_plugin>=0.7
+coverage

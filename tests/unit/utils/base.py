@@ -13,9 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import testtools
 
-# Server Specific Configurations
-server = {
-    'port': '8080',
-    'host': '0.0.0.0'
-}
+
+class UnitTestBase(testtools.TestCase):
+
+    def setUp(self):
+        super(UnitTestBase, self).setUp()
+
+    def tearDown(self):
+        super(UnitTestBase, self).tearDown()

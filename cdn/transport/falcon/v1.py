@@ -18,24 +18,24 @@ import json
 
 # NOTE(amitgandhinz): http://tools.ietf.org/html/draft-nottingham-json-home-03
 JSON_HOME = {
-                "resources": {
-                    "rel/cdn": {
-                        "href-template": "/v1.0/services{?marker,limit}",
-                        "href-vars": {
-                            "marker": "param/marker",
-                            "limit": "param/limit"
-                        },
-                        "hints": {
-                            "allow": [
-                                "GET"
-                            ],
-                            "formats": {
-                                "application/json": {}
-                            }
-                        }
-                    }
+    "resources": {
+        "rel/cdn": {
+            "href-template": "services{?marker,limit}",
+            "href-vars": {
+                "marker": "param/marker",
+                "limit": "param/limit"
+            },
+            "hints": {
+                "allow": [
+                    "GET"
+                ],
+                "formats": {
+                    "application/json": {}
                 }
             }
+        }
+    }
+}
 
 
 class V1Resource(object):
@@ -44,7 +44,7 @@ class V1Resource(object):
         document = json.dumps(JSON_HOME, ensure_ascii=False, indent=4)
         self.document_utf8 = document.encode('utf-8')
 
-    def on_get(self, req, resp):
+    def on_get(self, req, resp, project_id):
         resp.data = self.document_utf8
 
         resp.content_type = 'application/json-home'
