@@ -1,0 +1,11 @@
+#=============================================================================
+# Configuration file to execute API tests.
+#=============================================================================
+
+[auth]
+username={user name of the cloud account}
+api_key={api key for this user name}
+base_url=https://identity.api.rackspacecloud.com/v2.0/tokens
+
+[cdn]
+base_url=https://private-ea1ca-cloudcdn.apiary.io
