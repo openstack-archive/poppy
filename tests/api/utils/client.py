@@ -16,10 +16,11 @@ class AuthClient(client.HTTPClient):
         self.default_headers['Content-Type'] = 'application/json'
         self.default_headers['Accept'] = 'application/json'
 
-    def get_auth_token(self, url, user_name, api_key):
+    def get_auth_token(self, auth_url, user_name, api_key):
         """
         Get Auth Token using api_key
-        @todo: Support getting token with password (or) api key.
+        TODO (malini-kamalambal): Support getting token with password (or)
+                                  api key.
         """
         request_body = {
             "auth": {
@@ -30,6 +31,7 @@ class AuthClient(client.HTTPClient):
             },
         }
         request_body = json.dumps(request_body)
+        url = auth_url + '/tokens'
 
         response = self.request('POST', url, data=request_body)
         token = response.json()['access']['token']['id']
