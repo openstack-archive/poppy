@@ -85,7 +85,7 @@ installed and running.
     $ cd cdn
 
 
-6. Install general requirements::
+7. Install general requirements::
 
     $ pip install -r requirements/requirements.txt
 
@@ -106,9 +106,9 @@ installed and running.
 
     $ cdn-server
 
-9. Test out that CDN is working by requesting the home doc::
+9. Test out that CDN is working by requesting the home doc (with a sample project ID)::
 
-    $ curl -i -X GET http://0.0.0.0:8888/v1.0
+    $ curl -i -X GET http://0.0.0.0:8888/v1.0/123
 
 You should get an **HTTP 200** along with some headers that will look
 similar to this::
