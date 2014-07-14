@@ -42,14 +42,14 @@ class SchemaBase(object):
         try:
             resource_schemas = cls.schema[resource_name]
         except KeyError:
-            # TODO(Tony): gettext support
+            # TODO(tonytan4ever): gettext support
             msg = _('{0} is not a valid resource name').format(resource_name)
             raise errors.InvalidResourceName(msg)
 
         try:
             return resource_schemas[operation]
         except KeyError:
-            # TODO(Tony): gettext support
+            # TODO(tonytan4ever): gettext support
             msg = _('{0} is not a valid operation for resource: {1}').format(operation, resource_name)
             raise errors.InvalidOperation(msg)
 

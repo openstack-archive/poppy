@@ -25,7 +25,7 @@ import jsonschema
 @validation_function
 def req_accespts_json_pecan(request, desired_content_type):
     # Assume the transport is pecan for now
-    # for falcon the syntax should actaully be:
+    # for falcon the syntax should actually be:
     # request.accept('application/json')
     if request.accept('application/json'):
         raise ValidationFailed('Invalid Accept Header')
@@ -77,7 +77,7 @@ def custom_abort_pecan(errors):
     For pecan, you'd need a handler to internally redirect to a URI path.
 
     """
-    # TODO(Tony): gettext support
+    # TODO(tonytan4ever): gettext support
     details = dict(errors=[{ 'message' : str(error.message) } for error in errors ])
     abort(400, detail=details, headers={'Content-Type':"application/json"})
 

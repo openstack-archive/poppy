@@ -1,8 +1,8 @@
 from cdn.transport.validators.helpers import with_schema_falcon, with_schema_pecan, custom_abort_falcon
 from cdn.transport.validators.schemas import service
 
-from stoplight import Rule, validate, validation_function
-from stoplight.exceptions import ValidationFailed
+from cdn.transport.validators.stoplight import Rule, validate, validation_function
+from cdn.transport.validators.stoplight.exceptions import ValidationFailed
 from pecan import expose
 
 import json
@@ -26,7 +26,7 @@ class DummyRequest(object):
         self.body = json.dumps({
             "domains": [
                 { "domain": "www.mywebsite.com" },
-                {"domain": "blog.mywebsite.com" },
+                { "domain": "blog.mywebsite.com" },
             ],
             "origins": [
                 {
