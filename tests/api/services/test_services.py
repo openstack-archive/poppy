@@ -39,8 +39,6 @@ class TestServices(base.TestBase):
         self.assertEqual(body['origins'], origin_list)
         self.assertEqual(body['caching_list'], caching_list)
 
-    test_create_service.tags = ['smoke', 'positive']
-
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
         super(TestServices, self).tearDown()
