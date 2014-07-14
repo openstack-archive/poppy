@@ -23,7 +23,7 @@ class CassandraStorageServiceTests(TestCase):
         # stubbed cassandra driver
         self.sc = ServicesController(cassandra_driver)
 
-    @file_data('test_data_get_service.json')
+    @file_data('data_get_service.json')
     @patch.object(ServicesController, 'session')
     @patch.object(cassandra.cluster.Session, 'execute')
     def test_get_service(self, value, mock_session, mock_execute):
@@ -38,7 +38,7 @@ class CassandraStorageServiceTests(TestCase):
         self.assertEqual(actual_response[0][0], self.project_id)
         self.assertEqual(actual_response[0][1], self.service_name)
 
-    @file_data('test_data_create_service.json')
+    @file_data('data_create_service.json')
     @patch.object(ServicesController, 'session')
     @patch.object(cassandra.cluster.Session, 'execute')
     def test_create_service(self, value, mock_session, mock_execute):
@@ -50,7 +50,7 @@ class CassandraStorageServiceTests(TestCase):
 
         # TODO(amitgandhinz): need to validate the create to cassandra worked.
 
-    @file_data('test_data_list_services.json')
+    @file_data('data_list_services.json')
     @patch.object(ServicesController, 'session')
     @patch.object(cassandra.cluster.Session, 'execute')
     def test_list_services(self, value, mock_session, mock_execute):
@@ -75,7 +75,7 @@ class CassandraStorageServiceTests(TestCase):
         # into the driver to respond to this call
         self.assertEqual(actual_response, None)
 
-    @file_data('test_data_update_service.json')
+    @file_data('data_update_service.json')
     @patch.object(ServicesController, 'session')
     @patch.object(cassandra.cluster.Session, 'execute')
     def test_update_service(self, value, mock_session, mock_execute):
