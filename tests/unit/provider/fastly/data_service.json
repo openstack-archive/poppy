@@ -1,0 +1,13 @@
+ {
+ 	"service_json" : 
+
+ 		{"domains": 
+ 			
+ 			[{"domain": "parsely.sage.com"},
+ 	         {"domain": "rosemary.thyme.net"}],
+
+         "origins":
+
+         	[{"origin": "scarborough.fair", "ssl": false, "port": 80}]
+        }
+ }

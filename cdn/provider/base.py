@@ -76,6 +76,9 @@ class ServiceBase(object):
     """
     __metaclass__ = abc.ABCMeta
 
+    def __init__(self, driver):
+        self.driver = driver
+
     @abc.abstractmethod
     def update(self, service_name, service_json):
         raise NotImplementedError

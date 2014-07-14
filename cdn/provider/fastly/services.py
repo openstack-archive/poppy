@@ -20,10 +20,14 @@ from cdn.provider import base
 
 class ServiceController(base.ServiceBase):
 
+    @property
+    def client(self):
+        return self.driver.client
+  
     def __init__(self, driver):
-        super(ServiceController, self).__init__()
+        super(ServiceController, self).__init__(driver)
 
-        self.client = driver.client
+        self.driver = driver
         self.current_customer = self.client.get_current_customer()
 
         self.provider_resp = base.ProviderResponse("fastly")

@@ -47,7 +47,7 @@ class CDNProvider(provider.CDNProviderBase):
     def is_alive(self):
         return True
 
-    def client(self):
+    def get_client(self):
         return self.client
 
     @decorators.lazy_property(write=False)
