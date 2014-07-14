@@ -15,8 +15,9 @@
 
 import cassandra
 
-from cdn.storage.cassandra.driver import StorageDriver
-from cdn.storage.cassandra.services import ServicesController
+from cdn.storage.cassandra import driver
+from cdn.storage.cassandra import services
+
 from ddt import ddt, file_data
 from mock import patch
 from oslo.config import cfg
@@ -33,13 +34,13 @@ class CassandraStorageServiceTests(TestCase):
 
         # create mocked config and driver
         conf = cfg.ConfigOpts()
-        cassandra_driver = StorageDriver(conf, None)
+        cassandra_driver = driver.StorageDriver(conf, None)
 
         # stubbed cassandra driver
-        self.sc = ServicesController(cassandra_driver)
+        self.sc = services.ServicesController(cassandra_driver)
 
     @file_data('data_get_service.json')
-    @patch.object(ServicesController, 'session')
+    @patch.object(services.ServicesController, 'session')
     @patch.object(cassandra.cluster.Session, 'execute')
     def test_get_service(self, value, mock_session, mock_execute):
 
@@ -54,7 +55,7 @@ class CassandraStorageServiceTests(TestCase):
         self.assertEqual(actual_response[0][1], self.service_name)
 
     @file_data('data_create_service.json')
-    @patch.object(ServicesController, 'session')
+    @patch.object(services.ServicesController, 'session')
     @patch.object(cassandra.cluster.Session, 'execute')
     def test_create_service(self, value, mock_session, mock_execute):
         responses = self.sc.create(self.project_id, self.service_name, value)
@@ -66,13 +67,13 @@ class CassandraStorageServiceTests(TestCase):
         # TODO(amitgandhinz): need to validate the create to cassandra worked.
 
     @file_data('data_list_services.json')
-    @patch.object(ServicesController, 'session')
+    @patch.object(services.ServicesController, 'session')
     @patch.object(cassandra.cluster.Session, 'execute')
     def test_list_services(self, value, mock_session, mock_execute):
         # mock the response from cassandra
         mock_execute.execute.return_value = value
 
-        sc = ServicesController(None)
+        sc = services.ServicesController(None)
         actual_response = sc.list(self.project_id)
 
         # TODO(amitgandhinz): assert the response
@@ -80,7 +81,7 @@ class CassandraStorageServiceTests(TestCase):
         self.assertEqual(actual_response[0][0], self.project_id)
         self.assertEqual(actual_response[0][1], "mocksite")
 
-    @patch.object(ServicesController, 'session')
+    @patch.object(services.ServicesController, 'session')
     @patch.object(cassandra.cluster.Session, 'execute')
     def test_delete_service(self, mock_session, mock_execute):
         # mock the response from cassandra
@@ -91,7 +92,7 @@ class CassandraStorageServiceTests(TestCase):
         self.assertEqual(actual_response, None)
 
     @file_data('data_update_service.json')
-    @patch.object(ServicesController, 'session')
+    @patch.object(services.ServicesController, 'session')
     @patch.object(cassandra.cluster.Session, 'execute')
     def test_update_service(self, value, mock_session, mock_execute):
         # mock the response from cassandra
