@@ -4,7 +4,7 @@ hacking>=0.5.6,<0.8
 # Packaging
 mock>=1.0
 
-# Unit testing
+# Unit Tests
 ddt>=0.4.0
 discover
 fixtures>=0.3.14
@@ -15,6 +15,10 @@ testtools>=0.9.32
 
 # Functional Tests
 requests>=1.1
+
+# API Tests
+git+https://github.com/stackforge/opencafe.git#egg=opencafe
+jsonschema
 
 # Test runner
 nose
