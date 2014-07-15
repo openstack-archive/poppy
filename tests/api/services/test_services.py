@@ -14,7 +14,7 @@ class TestServices(base.TestBase):
         super(TestServices, self).setUp()
         self.service_name = uuid.uuid1()
 
-    @ddt.file_data('create_service.json')
+    @ddt.file_data('data_create_service.json')
     def test_create_service(self, test_data):
 
         domain_list = test_data['domain_list']

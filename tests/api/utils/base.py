@@ -26,7 +26,6 @@ class TestBase(fixtures.BaseTestFixture):
                                                     cls.auth_config.api_key)
 
         cls.config = config.cdnConfig()
-        version = 'v1.0'
         cls.url = cls.config.base_url
 
         cls.client = client.CDNClient(cls.url, auth_token,
