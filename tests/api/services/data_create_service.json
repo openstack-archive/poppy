@@ -1,0 +1,22 @@
+{
+    "all_fields": {
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origins": "mywebsite.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+    },
+    "caching_empty": {
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origins": "mywebsite.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": []
+    }
+}
