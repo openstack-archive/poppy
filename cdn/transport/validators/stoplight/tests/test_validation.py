@@ -99,7 +99,7 @@ class DummyEndpoint(object):
     # Falcon-style w/ delcared rules
     @validate(request=RequestRule, response=ResponseRule,
         value=UppercaseRule)
-    def get_falcon_style2(self, request, response, value):
+    def get_falcon_with_declared_rules(self, request, response, value):
         return value
 
 
@@ -176,7 +176,7 @@ class TestValidationDecorator(TestCase):
         # The following tests repeat the above
         # tests, but this time they test using the
         # endpoint with the rules being declared
-        # separately. See get_falcon_style2 above
+        # separately. See get_falcon_with_declared_rules above
 
         global error_count
 
@@ -186,26 +186,26 @@ class TestValidationDecorator(TestCase):
         # Try to call with missing params. The validation
         # function should never get called
         oldcount = error_count
-        self.ep.get_falcon_style2(response, 'HELLO')
+        self.ep.get_falcon_with_declared_rules(response, 'HELLO')
         self.assertEqual(oldcount + 1, error_count)
 
         # Try to pass a string to a positional argument
         # where a response is expected
         oldcount = error_count
-        self.ep.get_falcon_style2(request, "bogusinput", 'HELLO')
+        self.ep.get_falcon_with_declared_rules(request, "bogusinput", 'HELLO')
         self.assertEqual(oldcount + 1, error_count)
 
         # Pass in as kwvalues with good input but out of
         # typical order (should succeed)
         oldcount = error_count
-        self.ep.get_falcon_style2(response=response, value='HELLO',
+        self.ep.get_falcon_with_declared_rules(response=response, value='HELLO',
             request=request)
         self.assertEqual(oldcount, error_count)
 
         # Pass in as kwvalues with good input but out of
         # typical order with an invalid value (lower-case 'h')
         oldcount = error_count
-        self.ep.get_falcon_style2(response=response, value='hELLO',
+        self.ep.get_falcon_with_declared_rules(response=response, value='hELLO',
             request=request)
         self.assertEqual(oldcount + 1, error_count)
 
@@ -213,13 +213,13 @@ class TestValidationDecorator(TestCase):
         # and pass an invalid value. Note that here the response is
         # assigned to request, etc.
         oldcount = error_count
-        self.ep.get_falcon_style2(response=request, value='HELLO',
+        self.ep.get_falcon_with_declared_rules(response=request, value='HELLO',
             request=response)
         self.assertEqual(oldcount + 1, error_count)
 
         # Happy path
         oldcount = error_count
-        self.ep.get_falcon_style2(request, response, 'HELLO')
+        self.ep.get_falcon_with_declared_rules(request, response, 'HELLO')
         self.assertEqual(oldcount, error_count)
 
     def test_happy_path_and_validation_failure(self):

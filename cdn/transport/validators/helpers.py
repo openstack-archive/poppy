@@ -23,7 +23,7 @@ import jsonschema
 
 
 @validation_function
-def req_accespts_json_pecan(request, desired_content_type):
+def req_accepts_json_pecan(request, desired_content_type):
     # Assume the transport is pecan for now
     # for falcon the syntax should actually be:
     # request.accept('application/json')

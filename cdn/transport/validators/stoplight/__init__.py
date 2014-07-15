@@ -23,6 +23,6 @@ applications to expose RESTful endpoints as method members of a
 controller class...."""
 
 # Hoist everything up into the stopwatch namespace
-from rule import *
-from exceptions import *
-from decorators import *
+from rule import Rule, ValidationRule
+from exceptions import ValidationFailed, ValidationProgrammingError
+from decorators import validate, validation_function

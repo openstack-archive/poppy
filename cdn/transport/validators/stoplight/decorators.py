@@ -1,8 +1,7 @@
 
 import inspect
 from functools import wraps
-from exceptions import *
-from rule import *
+from exceptions import ValidationFailed, ValidationProgrammingError
 
 
 def validate(**rules):
