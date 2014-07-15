@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from stoplight import *
-from stoplight.exceptions import *
+from stoplight import validation_function, Rule, validate
+from stoplight.exceptions import ValidationFailed, ValidationProgrammingError
 
 import os
 
@@ -96,7 +96,7 @@ class DummyEndpoint(object):
     def get_falcon_style(self, request, response, value):
         return value
 
-    # Falcon-style w/ delcared rules
+    # Falcon-style w/ declared rules
     @validate(request=RequestRule, response=ResponseRule,
         value=UppercaseRule)
     def get_falcon_with_declared_rules(self, request, response, value):
@@ -172,7 +172,7 @@ class TestValidationDecorator(TestCase):
         self.ep.get_falcon_style(request, response, 'HELLO')
         self.assertEqual(oldcount, error_count)
 
-    def test_falcon_style_decld_rules(self):
+    def test_falcon_style_declared_rules(self):
         # The following tests repeat the above
         # tests, but this time they test using the
         # endpoint with the rules being declared

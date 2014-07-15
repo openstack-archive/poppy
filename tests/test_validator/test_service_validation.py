@@ -159,7 +159,7 @@ class TestValidationDecoratorsFalcon(TestCase):
         
 
 
-class PecanEPFunctionalTest(TestCase):
+class PecanEndPointFunctionalTest(TestCase):
      """
      A Simple PecanFunctionalTest base class that sets up a 
      Pecan endpoint (endpoint class: DummyPecanEndpoint)
@@ -176,7 +176,7 @@ class PecanEPFunctionalTest(TestCase):
 
 class TestValidationDecoratorsPecan(PecanEPFunctionalTest):
     
-    def test_pecan_eps_put(self):
+    def test_pecan_endpoint_put(self):
         resp = self.app.put('/', params=fake_request_good.body,
                              headers={"Content-Type":"application/json"})
         self.assertEqual(resp.status_int, 200)
