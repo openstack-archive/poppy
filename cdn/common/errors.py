@@ -15,7 +15,10 @@
 
 
 class InvalidResourceName(Exception):
+
     """Raised when attempted a non existent resource."""
 
+
 class InvalidOperation(Exception):
+
     """Raised when attempted a non existent operation."""

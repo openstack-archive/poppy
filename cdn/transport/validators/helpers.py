@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from stoplight.exceptions import *
-from stoplight import validation_function
+from .stoplight.exceptions import ValidationFailed
+from .stoplight import validation_function
 
-from pecan import request, response, redirect, abort
 import falcon
 import json
 import jsonschema
+from pecan import abort
 
 
 @validation_function
@@ -66,7 +66,8 @@ def custom_abort_falcon(errors):
     """
     ret = DummyResponse()
     ret.code = 400
-    details = dict(errors=[{ 'message' : str(error.message) } for error in errors ])
+    details = dict(errors=[{'message': str(error.message)}
+                           for error in errors])
     ret.message = json.dumps(details)
     return ret
 
@@ -78,8 +79,9 @@ def custom_abort_pecan(errors):
 
     """
     # TODO(tonytan4ever): gettext support
-    details = dict(errors=[{ 'message' : str(error.message) } for error in errors ])
-    abort(400, detail=details, headers={'Content-Type':"application/json"})
+    details = dict(errors=[{'message': str(getattr(error, "message", error))}
+                           for error in errors])
+    abort(400, detail=details, headers={'Content-Type': "application/json"})
 
 
 def with_schema_falcon(request, schema=None):
@@ -91,26 +93,27 @@ def with_schema_falcon(request, schema=None):
     """
     validation_failed = False
     v_error = None
-    if not schema is None:
+    if schema is not None:
         errors_list = []
         try:
             data = json.loads(request.body)
-            errors_list = list(jsonschema.Draft3Validator(schema).iter_errors(data))
-        except ValueError, e:
+            errors_list = list(
+                jsonschema.Draft3Validator(schema).iter_errors(data))
+        except ValueError:
             validation_failed = True
             v_error = ["Invalid JSON body in request"]
 
         if len(errors_list) > 0:
-                validation_failed = True
-                v_error = errors_list
- 
+            validation_failed = True
+            v_error = errors_list
+
     if validation_failed:
         raise ValidationFailed(repr(v_error))
 
 
 def with_schema_pecan(request, schema=None, handler=custom_abort_pecan, **kw):
     """
-    Used to decorate a Pecan/Flask style controller form validation for 
+    Used to decorate a Pecan/Flask style controller form validation for
     anything else (e.g., POST | PUT | PATCH ).
 
     For an HTTP POST or PUT (RFC2616 unsafe methods) request, the schema is
@@ -124,11 +127,14 @@ def with_schema_pecan(request, schema=None, handler=custom_abort_pecan, **kw):
         def wrapped(*args, **kwargs):
             validation_failed = False
             v_error = None
-            if request.method in ('POST', 'PUT', 'PATCH') and not schema is None:
+            errors_list = []
+            if request.method in ('POST', 'PUT', 'PATCH') and \
+                    schema is not None:
                 try:
-                    data = json.loads(request.body)
-                    errors_list = list(jsonschema.Draft3Validator(schema).iter_errors(data))
-                except ValueError, e:
+                    data = json.loads(request.body.decode('utf-8'))
+                    errors_list = list(
+                        jsonschema.Draft3Validator(schema).iter_errors(data))
+                except ValueError:
                     validation_failed = True
                     v_error = ["Invalid JSON body in request"]
 

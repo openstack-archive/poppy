@@ -3,12 +3,11 @@ from unittest import TestCase
 from stoplight import validation_function, Rule, validate
 from stoplight.exceptions import ValidationFailed, ValidationProgrammingError
 
-import os
-
 # TODO: We probably want to move this to a
 # test helpers library
 
 VALIDATED_STR = 'validated'
+
 
 @validation_function
 def is_upper(z):
@@ -30,6 +29,7 @@ get_other_val = other_vals.get
 
 
 class DummyRequest(object):
+
     def __init__(self):
         self.headers = dict(header1='headervalue1')
 
@@ -63,6 +63,7 @@ class DummyEndpoint(object):
 
     # Note: the lambda in this function can never actually be
     # called, so we use no cover here
+
     @validate(value=Rule(is_upper, lambda: abort(404)))  # pragma: no cover
     def get_value_programming_error(self, value):
         # This function body should never be
@@ -81,7 +82,7 @@ class DummyEndpoint(object):
     @validate(
         value1=Rule(is_upper(), lambda: abort(404)),
         value2=Rule(is_upper(empty_ok=True), lambda: abort(404),
-            get_other_val),
+                    get_other_val),
     )  # pragma: no cover
     def get_value_with_getter(self, value1):
         global other_vals
@@ -98,7 +99,7 @@ class DummyEndpoint(object):
 
     # Falcon-style w/ declared rules
     @validate(request=RequestRule, response=ResponseRule,
-        value=UppercaseRule)
+              value=UppercaseRule)
     def get_falcon_with_declared_rules(self, request, response, value):
         return value
 
@@ -149,14 +150,14 @@ class TestValidationDecorator(TestCase):
         # typical order (should succeed)
         oldcount = error_count
         self.ep.get_falcon_style(response=response, value='HELLO',
-            request=request)
+                                 request=request)
         self.assertEqual(oldcount, error_count)
 
         # Pass in as kwvalues with good input but out of
         # typical order with an invalid value (lower-case 'h')
         oldcount = error_count
         self.ep.get_falcon_style(response=response, value='hELLO',
-            request=request)
+                                 request=request)
         self.assertEqual(oldcount + 1, error_count)
 
         # Pass in as kwvalues with good input but out of typical order
@@ -164,7 +165,7 @@ class TestValidationDecorator(TestCase):
         # assigned to request, etc.
         oldcount = error_count
         self.ep.get_falcon_style(response=request, value='HELLO',
-            request=response)
+                                 request=response)
         self.assertEqual(oldcount + 1, error_count)
 
         # Happy path
@@ -198,14 +199,18 @@ class TestValidationDecorator(TestCase):
         # Pass in as kwvalues with good input but out of
         # typical order (should succeed)
         oldcount = error_count
-        self.ep.get_falcon_with_declared_rules(response=response, value='HELLO',
+        self.ep.get_falcon_with_declared_rules(
+            response=response,
+            value='HELLO',
             request=request)
         self.assertEqual(oldcount, error_count)
 
         # Pass in as kwvalues with good input but out of
         # typical order with an invalid value (lower-case 'h')
         oldcount = error_count
-        self.ep.get_falcon_with_declared_rules(response=response, value='hELLO',
+        self.ep.get_falcon_with_declared_rules(
+            response=response,
+            value='hELLO',
             request=request)
         self.assertEqual(oldcount + 1, error_count)
 
@@ -214,7 +219,7 @@ class TestValidationDecorator(TestCase):
         # assigned to request, etc.
         oldcount = error_count
         self.ep.get_falcon_with_declared_rules(response=request, value='HELLO',
-            request=response)
+                                               request=response)
         self.assertEqual(oldcount + 1, error_count)
 
         # Happy path

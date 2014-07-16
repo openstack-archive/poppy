@@ -1,6 +1,7 @@
 
 
 class ValidationFailed(ValueError):
+
     """User input was inconsistent with API restrictions"""
 
     def __init__(self, msg, *args, **kwargs):
@@ -9,6 +10,7 @@ class ValidationFailed(ValueError):
 
 
 class ValidationProgrammingError(ValueError):
+
     """Caller did not map validations correctly"""
 
     def __init__(self, msg, *args, **kwargs):

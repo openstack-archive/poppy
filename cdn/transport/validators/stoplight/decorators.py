@@ -1,7 +1,7 @@
 
-import inspect
 from functools import wraps
-from exceptions import ValidationFailed, ValidationProgrammingError
+import inspect
+from .exceptions import ValidationFailed, ValidationProgrammingError
 
 
 def validate(**rules):
@@ -69,7 +69,7 @@ def validate(**rules):
                     if rule.getter is None:
                         outargs[param] = value
 
-                except ValidationFailed as ex:
+                except ValidationFailed:
                     rule.errfunc()
                     return
 

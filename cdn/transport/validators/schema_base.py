@@ -12,10 +12,9 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import json
 from cdn.common import errors
 from cdn.openstack.common.gettextutils import _
+
 
 class SchemaBase(object):
 
@@ -50,6 +49,7 @@ class SchemaBase(object):
             return resource_schemas[operation]
         except KeyError:
             # TODO(tonytan4ever): gettext support
-            msg = _('{0} is not a valid operation for resource: {1}').format(operation, resource_name)
+            msg = _('{0} is not a valid operation for resource: {1}').format(
+                operation,
+                resource_name)
             raise errors.InvalidOperation(msg)
-

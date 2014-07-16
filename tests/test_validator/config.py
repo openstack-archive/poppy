@@ -8,8 +8,8 @@ server = {
 app = {
     'root': 'test_service_validation.DummyPecanEndpoint',
     'modules': ['pecan_app'],
-    'static_root': '%(confdir)s/../../public',
-    'template_path': '%(confdir)s/../templates',
+    #'static_root': '%(confdir)s/../../public',
+    #'template_path': '%(confdir)s/../templates',
     'debug': True,
     'errors': {
         '404': '/error/404',
