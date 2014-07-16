@@ -59,10 +59,11 @@ class DummyResponse(object):
 
 
 def custom_abort_falcon(errors):
-    """
-    Error_handler for with Schema
-    For pecan, you'd need a handler to internally redirect to a URI path.
+    """Error_handler for with_schema
 
+    Meant to be used with falcon transport.
+
+    param errors: a list of validation exceptions
     """
     ret = DummyResponse()
     ret.code = 400
@@ -73,10 +74,11 @@ def custom_abort_falcon(errors):
 
 
 def custom_abort_pecan(errors):
-    """
-    Error_handler for with Schema
-    For pecan, you'd need a handler to internally redirect to a URI path.
+    """Error_handler for with_schema
 
+    Meant to be used with pecan transport.
+
+    param errors: a list of validation exceptions
     """
     # TODO(tonytan4ever): gettext support
     details = dict(errors=[{'message': str(getattr(error, "message", error))}
@@ -85,8 +87,7 @@ def custom_abort_pecan(errors):
 
 
 def with_schema_falcon(request, schema=None):
-    """
-    Use to decorate a falcon style controller route
+    """Use to decorate a falcon style controller route
 
     :param request: A falcon request
     :param schema: a Json schema to validate against
@@ -112,8 +113,7 @@ def with_schema_falcon(request, schema=None):
 
 
 def with_schema_pecan(request, schema=None, handler=custom_abort_pecan, **kw):
-    """
-    Used to decorate a Pecan/Flask style controller form validation for
+    """Used to decorate a Pecan/Flask style controller form validation for
     anything else (e.g., POST | PUT | PATCH ).
 
     For an HTTP POST or PUT (RFC2616 unsafe methods) request, the schema is
