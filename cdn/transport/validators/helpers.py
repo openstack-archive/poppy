@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from .stoplight.exceptions import ValidationFailed
-from .stoplight import validation_function
 
 import falcon
 import json
@@ -22,16 +21,15 @@ import jsonschema
 from pecan import abort
 
 
-@validation_function
-def req_accepts_json_pecan(request, desired_content_type):
+def req_accepts_json_pecan(request, desired_content_type='application/json'):
     # Assume the transport is pecan for now
     # for falcon the syntax should actually be:
     # request.accept('application/json')
-    if request.accept('application/json'):
+    if not request.accept(desired_content_type):
         raise ValidationFailed('Invalid Accept Header')
 
 
-def require_accepts_json_falcon(req, resp, params):
+def require_accepts_json_falcon(req, resp, params=None):
     """Raises an exception if the request does not accept JSON
 
     Meant to be used as a `before` hook.
@@ -58,7 +56,7 @@ class DummyResponse(object):
     pass
 
 
-def custom_abort_falcon(errors):
+def custom_abort_falcon(errors={"message": "Invalid request body"}):
     """Error_handler for with_schema
 
     Meant to be used with falcon transport.
@@ -67,7 +65,7 @@ def custom_abort_falcon(errors):
     """
     ret = DummyResponse()
     ret.code = 400
-    details = dict(errors=[{'message': str(error.message)}
+    details = dict(errors=[{'message': str(getattr(error, "message", error))}
                            for error in errors])
     ret.message = json.dumps(details)
     return ret

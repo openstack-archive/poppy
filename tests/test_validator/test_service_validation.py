@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cdn.common import errors
 from cdn.transport.validators.helpers import with_schema_falcon,\
-    with_schema_pecan
+    with_schema_pecan, require_accepts_json_falcon,\
+    req_accepts_json_pecan, DummyResponse, custom_abort_falcon
 from cdn.transport.validators.schemas import service
 
 from cdn.transport.validators.stoplight import Rule, validate,\
@@ -27,6 +29,7 @@ from webtest.app import AppError
 import json
 from unittest import TestCase
 
+import falcon
 import functools
 import os
 import re
@@ -80,6 +83,15 @@ class DummyRequest(object):
         })
 
 
+class DummyRequestWithInvalidHeader(DummyRequest):
+
+    def client_accepts(self, header='application/json'):
+        return False
+
+    def accept(self, header='application/json'):
+        return False
+
+
 fake_request_good = DummyRequest()
 fake_request_bad_missing_domain = DummyRequest()
 fake_request_bad_missing_domain.body = json.dumps({
@@ -111,6 +123,7 @@ fake_request_bad_invalid_json_body.body = "{"
 
 
 class _AssertRaisesContext(object):
+
     """A context manager used to implement TestCase.assertRaises* methods."""
 
     def __init__(self, expected, test_case, expected_regexp=None):
@@ -140,7 +153,8 @@ class _AssertRaisesContext(object):
             basestring
         except NameError:
             # Python 3 compatibility
-            basestring = unicode
+            basestring = unicode = str
+            unicode  # For pep8: unicde is defined but not used.
         if isinstance(expected_regexp, basestring):
             expected_regexp = re.compile(expected_regexp)
         if not expected_regexp.search(str(exc_value)):
@@ -151,6 +165,36 @@ class _AssertRaisesContext(object):
 
 
 class BaseTestCase(TestCase):
+
+    def assertRaises(self, excClass, callableObj=None, *args, **kwargs):
+        """Fail unless an exception of class excClass is raised
+           by callableObj when invoked with arguments args and keyword
+           arguments kwargs. If a different type of exception is
+           raised, it will not be caught, and the test case will be
+           deemed to have suffered an error, exactly as for an
+           unexpected exception.
+
+           If called with callableObj omitted or None, will return a
+           context object used like this::
+
+                with self.assertRaises(SomeException):
+                    do_something()
+
+           The context manager keeps a reference to the exception as
+           the 'exception' attribute. This allows you to inspect the
+           exception after the assertion::
+
+               with self.assertRaises(SomeException) as cm:
+                   do_something()
+               the_exception = cm.exception
+               self.assertEqual(the_exception.error_code, 3)
+        """
+        context = _AssertRaisesContext(excClass, self)
+        if callableObj is None:
+            return context
+        with context:
+            callableObj(*args, **kwargs)
+
     def assertRaisesRegexp(self, expected_exception, expected_regexp,
                            callable_obj=None, *args, **kwargs):
         """Asserts that the message in a raised exception matches a regexp."""
@@ -160,6 +204,16 @@ class BaseTestCase(TestCase):
             return context
         with context:
             callable_obj(*args, **kwargs)
+
+    def test_accept_header(self):
+        req = DummyRequestWithInvalidHeader()
+        resp = DummyResponse()
+        with self.assertRaises(falcon.HTTPNotAcceptable):
+            require_accepts_json_falcon(req, resp)
+
+        # print(req_accepts_json_pecan(req))
+        with self.assertRaises(ValidationFailed):
+            req_accepts_json_pecan(req)
 
 
 @validation_function
@@ -182,6 +236,13 @@ class DummyFalconEndpoint(object):
         response=Rule(is_response(), lambda: abort(404))
     )
     def get_falcon_style(self, request, response):
+        return "Hello, World!"
+
+    @validate(
+        request=Rule(request_fit_schema, custom_abort_falcon),
+        response=Rule(is_response(), custom_abort_falcon)
+    )
+    def get_falcon_style_custom_abort(self, request, response):
         return "Hello, World!"
 
 
@@ -219,13 +280,19 @@ class TestFalconStyleValidationFunctions(BaseTestCase):
                                      "Invalid JSON body in request"):
             request_fit_schema(fake_request_bad_invalid_json_body)
 
+    def test_schema_base(self):
+        with self.assertRaises(errors.InvalidResourceName):
+            service.ServiceSchema.get_schema("invalid_resource", "PUT")
+        with self.assertRaises(errors.InvalidOperation):
+            service.ServiceSchema.get_schema("service", "INVALID_HTTP_VERB")
+
 
 class TestValidationDecoratorsFalcon(BaseTestCase):
 
     def setUp(self):
         self.ep = DummyFalconEndpoint()
 
-    def test_falcon_eps(self):
+    def test_falcon_endpoint(self):
         class DummyResponse(object):
             pass
 
@@ -249,6 +316,11 @@ class TestValidationDecoratorsFalcon(BaseTestCase):
             response)
         self.assertEqual(oldcount + 1, error_count)
 
+        # Try to call with bad inputs
+        self.ep.get_falcon_style_custom_abort(
+            fake_request_bad_missing_domain,
+            response)
+
 
 class PecanEndPointFunctionalTest(BaseTestCase):
 
@@ -268,7 +340,6 @@ class PecanEndPointFunctionalTest(BaseTestCase):
 class TestValidationDecoratorsPecan(PecanEndPointFunctionalTest):
 
     def test_pecan_endpoint_put(self):
-        # print(fake_request_good.body)
         resp = self.app.put(
             '/',
             params=fake_request_good.body,
@@ -279,4 +350,6 @@ class TestValidationDecoratorsPecan(PecanEndPointFunctionalTest):
         with self.assertRaisesRegexp(AppError, "400 Bad Request"):
             self.app.put('/', params=fake_request_bad_missing_domain.body,
                          headers={"Content-Type": "application/json"})
-        #assert resp.status_int == 400
+        with self.assertRaisesRegexp(AppError, "400 Bad Request"):
+            self.app.put('/', params=fake_request_bad_invalid_json_body.body,
+                         headers={"Content-Type": "application/json"})
