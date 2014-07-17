@@ -1,40 +1,50 @@
-from mock import patch
-import unittest
-from ddt import ddt, file_data
+# Copyright (c) 2014 Rackspace, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import ddt
 import fastly
+import mock
+import random
+import unittest
 
-from cdn.provider.fastly.services import ServiceController
-from cdn.provider.fastly.driver import CDNProvider
+from cdn.provider.fastly import services
 
 
-@ddt
+@ddt.ddt
 class TestServices(unittest.TestCase):
 
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    @file_data('data_service.json')
-    @patch('fastly.FastlyConnection')
-    @patch('fastly.FastlyService')
-    @patch('fastly.FastlyVersion')
-    @patch('cdn.provider.fastly.services.ServiceController.client')
+    @ddt.file_data('data_service.json')
+    @mock.patch('fastly.FastlyConnection')
+    @mock.patch('fastly.FastlyService')
+    @mock.patch('fastly.FastlyVersion')
+    @mock.patch('cdn.provider.fastly.services.ServiceController.client')
     def test_create(self, service_json, MockConnection,
                     MockService, MockVersion, mock_controllerclient):
         service_name = 'scarborough'
+        mock_service_id = '%020x' % random.randrange(16**20)
         mockCreateVersionResp = {
-            u'service_id': u'296GKB0evsdjqwh2RalZl8', u'number': 5}
+            u'service_id': mock_service_id, u'number': 5}
 
         service = MockService()
-        service.id = '1234'
+        service.id = mock_service_id
         version = MockVersion(MockConnection, mockCreateVersionResp)
         MockConnection.create_service.return_value = service
         MockConnection.create_version.return_value = version
 
         # instantiate
-        controller = ServiceController(None)
+        controller = services.ServiceController(None)
 
         # ASSERTIONS
         # create_service
@@ -86,15 +96,15 @@ class TestServices(unittest.TestCase):
         resp = controller.create(service_name, service_json)
 
         MockConnection.create_service.assert_called_once_with(
-                controller.current_customer.id, service_name)
+            controller.current_customer.id, service_name)
 
         MockConnection.create_version.assert_called_once_with(service.id)
 
-        MockConnection.create_domain.assert_any_call(service.id,
-                version.number, service_json['domains'][0]['domain'])
+        MockConnection.create_domain.assert_any_call(
+            service.id, version.number, service_json['domains'][0]['domain'])
 
-        MockConnection.create_domain.assert_any_call(service.id,
-                version.number, service_json['domains'][1]['domain'])
+        MockConnection.create_domain.assert_any_call(
+            service.id, version.number, service_json['domains'][1]['domain'])
 
         MockConnection.create_backend.assert_has_any_call(
             service.id, 1,
@@ -105,16 +115,16 @@ class TestServices(unittest.TestCase):
 
         self.assertEqual('domain' in resp['fastly'], True)
 
-    @patch('fastly.FastlyConnection')
-    @patch('fastly.FastlyService')
-    @patch('cdn.provider.fastly.services.ServiceController.client')
+    @mock.patch('fastly.FastlyConnection')
+    @mock.patch('fastly.FastlyService')
+    @mock.patch('cdn.provider.fastly.services.ServiceController.client')
     def test_delete(self, mock_connection, mock_service, mock_get_client):
         service_name = 'whatsitnamed'
 
         # instantiate
-        controller = ServiceController(None)
+        controller = services.ServiceController(None)
 
-        # patch return values
+        # mock.patch return values
         service = mock_service()
         service.id = '1234'
         controller.client.get_service_by_name.return_value = service
@@ -135,14 +145,14 @@ class TestServices(unittest.TestCase):
         mock_connection.delete_service.assert_called_once_with(service.id)
         self.assertEqual('domain' in resp['fastly'], True)
 
-    @patch('cdn.provider.fastly.services.ServiceController.client')
+    @mock.patch('cdn.provider.fastly.services.ServiceController.client')
     def test_update(self, mock_get_client):
-        controller = ServiceController(None)
+        controller = services.ServiceController(None)
         resp = controller.update(None, None)
         self.assertEqual(resp, None)
 
-    @patch('cdn.provider.fastly.driver.CDNProvider')
+    @mock.patch('cdn.provider.fastly.driver.CDNProvider')
     def test_client(self, MockDriver):
         driver = MockDriver()
-        controller = ServiceController(driver)
+        controller = services.ServiceController(driver)
         self.assertNotEquals(controller.client(), None)

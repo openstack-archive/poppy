@@ -1,37 +1,60 @@
-from mock import patch
-import unittest
-import fastly
+# Copyright (c) 2014 Rackspace, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
+import fastly
+import mock
+import unittest
+
+from cdn.provider.fastly import driver
 from oslo.config import cfg
-from cdn.provider.fastly.driver import CDNProvider
-from cdn.provider.fastly import controllers
+
+FASTLY_OPTIONS = [
+    cfg.StrOpt('apikey',
+               default='123456',
+               help='Fastly API Key'),
+]
 
 
 class TestDriver(unittest.TestCase):
 
     def setUp(self):
-        self.conf = cfg.CONF
-        self.conf(project='cdn', prog='cdn', args=[])
+        self.conf = cfg.ConfigOpts()
 
-    @patch('fastly.connect')
+    @mock.patch('fastly.connect')
+    @mock.patch.object(driver, 'FASTLY_OPTIONS', new=FASTLY_OPTIONS)
     def test_init(self, mock_connect):
-        provider = CDNProvider(self.conf)
+        provider = driver.CDNProvider(self.conf)
         mock_connect.assert_called_once_with(
             provider.conf['drivers:provider:fastly'].apikey)
 
+    @mock.patch.object(driver, 'FASTLY_OPTIONS', new=FASTLY_OPTIONS)
     def test_is_alive(self):
-        provider = CDNProvider(self.conf)
+        provider = driver.CDNProvider(self.conf)
         self.assertEqual(provider.is_alive(), True)
 
-    @patch.object(fastly, 'FastlyConnection')
-    @patch('fastly.connect')
+    @mock.patch.object(fastly, 'FastlyConnection')
+    @mock.patch('fastly.connect')
+    @mock.patch.object(driver, 'FASTLY_OPTIONS', new=FASTLY_OPTIONS)
     def test_get_client(self, MockConnection, mock_connect):
         mock_connect.return_value = MockConnection(None, None)
-        provider = CDNProvider(self.conf)
-        client = provider.get_client()
+        provider = driver.CDNProvider(self.conf)
+        client = provider.client()
         self.assertNotEquals(client, None)
 
-    @patch('cdn.provider.fastly.controllers.ServiceController')
+    @mock.patch('cdn.provider.fastly.controllers.ServiceController')
+    @mock.patch.object(driver, 'FASTLY_OPTIONS', new=FASTLY_OPTIONS)
     def test_service_controller(self, MockController):
-        provider = CDNProvider(self.conf)
+        provider = driver.CDNProvider(self.conf)
         self.assertNotEquals(provider.service_controller, None)

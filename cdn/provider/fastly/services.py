@@ -23,7 +23,7 @@ class ServiceController(base.ServiceBase):
     @property
     def client(self):
         return self.driver.client
-  
+
     def __init__(self, driver):
         super(ServiceController, self).__init__(driver)
 
@@ -33,7 +33,7 @@ class ServiceController(base.ServiceBase):
         self.provider_resp = base.ProviderResponse("fastly")
 
     def update(self, service_name, service_json):
-        print "update services"
+        print("update services")
 
     def create(self, service_name, service_json):
 
