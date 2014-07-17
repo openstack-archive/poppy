@@ -1,0 +1,40 @@
+{
+    "using_all_fields": [
+        [
+            "123456",
+            "mocksite",
+            [
+                "{\"domain\": \"www.mocksite.com\"}",
+                "{\"domain\": \"blog.mocksite.com\"}"
+            ],
+            [
+                "{\"origin\": \"mocksite.com\", \"ssl\": false, \"port\": 80}"
+            ],
+            [
+                "{\"name\": \"default\", \"ttl\": 3600}"
+            ],
+            [
+                "{\"rules\": [{\"http_host\": \"www.mocksite.com\", \"name\": \"mocksite.com\"}], \"name\": \"website only\"}"
+            ]
+        ]
+    ],
+    "using_only_required_fields": [
+        [
+            "123456",
+            "mocksite",
+            [
+                "{\"domain\": \"www.mocksite.com\"}"
+            ],
+            [
+                "{\"origin\": \"mocksite.com\", \"ssl\": false, \"port\": 80}"
+            ],
+            [
+            ],
+            [
+            ]
+        ]
+    ]
+}
+
+
+
