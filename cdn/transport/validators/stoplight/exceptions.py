@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# THIS FILE IS MANAGED BY THE GLOBAL REQUIREMENTS REPO - DO NOT EDIT
-import setuptools
 
-setuptools.setup(
-    setup_requires=['pbr'],
-    pbr=True)
+class ValidationFailed(ValueError):
+
+    """User input was inconsistent with API restrictions."""
+
+    def __init__(self, msg, *args, **kwargs):
+        msg = msg.format(*args, **kwargs)
+        super(ValidationFailed, self).__init__(msg)
+
+
+class ValidationProgrammingError(ValueError):
+
+    """Caller did not map validations correctly."""
+
+    def __init__(self, msg, *args, **kwargs):
+        msg = msg.format(*args, **kwargs)
+        super(ValidationProgrammingError, self).__init__(msg)
