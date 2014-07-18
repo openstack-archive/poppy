@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from cdn.common import errors
 from cdn.openstack.common.gettextutils import _
 
