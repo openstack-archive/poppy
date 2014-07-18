@@ -74,6 +74,7 @@ class Server(object):
             bootstrap class
         :returns: A callable object
         """
+        raise NotImplementedError
 
     def is_alive(self):
         """Returns True IF the server is running."""
@@ -122,4 +123,3 @@ class CDNServer(Server):
     def get_target(self, conf):
         server = bootstrap.Bootstrap(conf)
         return server.run
-
