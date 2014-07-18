@@ -111,7 +111,8 @@ def with_schema_falcon(request, schema=None):
         raise exceptions.ValidationFailed(repr(v_error))
 
 
-def with_schema_pecan(request, schema=None, handler=custom_abort_pecan, **kw):
+def with_schema_pecan(request, schema=None, handler=custom_abort_pecan,
+                      **kwargs):
     """Used to decorate a Pecan/Flask style controller form validation for
     anything else (e.g., POST | PUT | PATCH ).
 
