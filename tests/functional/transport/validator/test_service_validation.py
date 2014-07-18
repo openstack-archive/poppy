@@ -24,8 +24,7 @@ from pecan import expose, set_config, request
 from webtest.app import AppError
 
 from cdn.common import errors
-from cdn.transport.validators import fake_falcon as falcon
-from cdn.transport.validators.helpers import with_schema_falcon,\
+from cdn.transport.validators.helpers import falcon, with_schema_falcon,\
     with_schema_pecan, require_accepts_json_falcon,\
     req_accepts_json_pecan, DummyResponse, custom_abort_falcon
 from cdn.transport.validators.schemas import service
@@ -263,7 +262,7 @@ class DummyPecanEndpoint(object):
 
 
 def test_fake_falcon():
-    falcon.HTTPNotAcceptable()
+    falcon.HTTPNotAcceptable("nothing")
 
 
 class TestFalconStyleValidationFunctions(BaseTestCase):
