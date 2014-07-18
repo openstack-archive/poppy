@@ -105,18 +105,32 @@ class ServicesBase(ControllerBase):
 
     @abc.abstractmethod
     def create(self, project_id, service_name, service_json):
-        return self.driver.providers.map(
-            self.wrapper.create,
-            service_name,
-            service_json)
+        if (self.driver.providers is not None):
+            return self.driver.providers.map(
+                self.wrapper.create,
+                service_name,
+                service_json)
+        else:
+            return None
 
     @abc.abstractmethod
-    def update(self, project_id, service_name):
-        return self.driver.providers.map(self.wrapper.update, service_name)
+    def update(self, project_id, service_name, service_json):
+        if (self.driver.providers is not None):
+            return self.driver.providers.map(
+                self.wrapper.update,
+                service_name,
+                service_json)
+        else:
+            return None
 
     @abc.abstractmethod
     def delete(self, project_id, service_name):
-        return self.driver.providers.map(self.wrapper.delete, service_name)
+        if (self.driver.providers is not None):
+            return self.driver.providers.map(
+                self.wrapper.delete,
+                service_name)
+        else:
+            return None
 
     @abc.abstractmethod
     def get(self):
