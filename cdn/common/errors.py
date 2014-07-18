@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# THIS FILE IS MANAGED BY THE GLOBAL REQUIREMENTS REPO - DO NOT EDIT
-import setuptools
 
-setuptools.setup(
-    setup_requires=['pbr'],
-    pbr=True)
+class InvalidResourceName(Exception):
+
+    """Raised when attempted a non existent resource."""
+
+
+class InvalidOperation(Exception):
+
+    """Raised when attempted a non existent operation."""

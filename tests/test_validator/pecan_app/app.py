@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# THIS FILE IS MANAGED BY THE GLOBAL REQUIREMENTS REPO - DO NOT EDIT
-import setuptools
+from pecan import make_app
 
-setuptools.setup(
-    setup_requires=['pbr'],
-    pbr=True)
+
+def setup_app(config):
+    app_conf = dict(config.app)
+
+    return make_app(
+        app_conf.pop('root'),
+        logging=getattr(config, 'logging', {}),
+        **app_conf
+    )
