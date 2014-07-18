@@ -63,14 +63,14 @@ def _connection(conf):
     return MongoClient(conf.uri)
 
 
-class StorageDriver(base.Driver):
+class MongoDBStorageDriver(base.Driver):
 
     def __init__(self, conf):
-        super(StorageDriver, self).__init__(conf)
+        super(MongoDBStorageDriver, self).__init__(conf)
 
-        self.conf.register_opts(MONGODB_OPTIONS,
-                                group=MONGODB_GROUP)
-        self.mongodb_conf = self.conf[MONGODB_GROUP]
+        self._conf.register_opts(MONGODB_OPTIONS,
+                                 group=MONGODB_GROUP)
+        self.mongodb_conf = self._conf[MONGODB_GROUP]
 
     def is_alive(self):
         try:

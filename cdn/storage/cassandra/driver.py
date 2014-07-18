@@ -47,9 +47,9 @@ class CassandraStorageDriver(base.Driver):
     def __init__(self, conf):
         super(CassandraStorageDriver, self).__init__(conf)
 
-        self.conf.register_opts(CASSANDRA_OPTIONS,
-                                group=CASSANDRA_GROUP)
-        self.cassandra_conf = self.conf[CASSANDRA_GROUP]
+        self._conf.register_opts(CASSANDRA_OPTIONS,
+                                 group=CASSANDRA_GROUP)
+        self.cassandra_conf = self._conf[CASSANDRA_GROUP]
 
     def is_alive(self):
         return True

@@ -33,7 +33,7 @@ class CassandraStorageServiceTests(TestCase):
     @patch.object(driver, 'CASSANDRA_OPTIONS', new=CASSANDRA_OPTIONS)
     def setUp(self):
         conf = cfg.ConfigOpts()
-        self.cassandra_driver = driver.StorageDriver(conf, None)
+        self.cassandra_driver = driver.CassandraStorageDriver(conf)
 
     def test_storage_driver(self):
         # assert that the configs are set up based on what was passed in
@@ -61,7 +61,3 @@ class CassandraStorageServiceTests(TestCase):
     def test_service_database(self, mock_cluster):
         self.cassandra_driver.service_database
         mock_cluster.assert_called_with('mock_cdn')
-
-    def test_providers(self):
-        providers = self.cassandra_driver.providers
-        self.assertEquals(providers, None)

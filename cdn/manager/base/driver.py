@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Rackspace, Inc.
+# Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,23 @@ import six
 
 
 @six.add_metaclass(abc.ABCMeta)
-class TransportDriverBase(object):
-    """Base class for Transport Drivers to document the expected interface.
+class ManagerDriverBase(object):
+    """Add some docstrings"""
 
-    :param conf: configuration instance
-    :type conf: oslo.config.cfg.CONF
-    """
-
-    def __init__(self, conf, manager):
+    def __init__(self, conf, storage, providers):
         self._conf = conf
-        self._manager = manager
-
-        self._app = None
-
-    @property
-    def app(self):
-        return self._app
+        self._storage = storage
+        self._providers = providers
 
     @property
-    def manager(self):
-        return self._manager
+    def storage(self):
+        return self._storage
 
-    @abc.abstractmethod
-    def listen():
-        """Start listening for client requests (self-hosting mode)."""
+    @property
+    def providers(self):
+        return self._providers
+
+    @abc.abstractproperty
+    def services_controller(self):
+        """Returns the driver's services controller."""
         raise NotImplementedError

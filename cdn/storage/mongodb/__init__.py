@@ -3,4 +3,4 @@
 from cdn.storage.mongodb import driver
 
 # Hoist classes into package namespace
-Driver = driver.StorageDriver
+Driver = driver.MongoDBStorageDriver

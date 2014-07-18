@@ -28,7 +28,7 @@ _DRIVER_OPTIONS = [
     cfg.StrOpt('manager', default='default',
                help='Manager driver to use'),
     cfg.StrOpt('storage', default='mockdb',
-               help='Storage driver to use')
+               help='Storage driver to use'),
 ]
 
 _DRIVER_GROUP = 'drivers'

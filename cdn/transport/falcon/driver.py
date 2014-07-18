@@ -42,7 +42,7 @@ LOG = logging.getLogger(__name__)
 
 
 @six.add_metaclass(abc.ABCMeta)
-class TransportDriver(transport.DriverBase):
+class TransportDriver(transport.Driver):
 
     def __init__(self, conf, manager):
         super(TransportDriver, self).__init__(conf, manager)
@@ -50,29 +50,28 @@ class TransportDriver(transport.DriverBase):
         self._conf.register_opts(_WSGI_OPTIONS, group=_WSGI_GROUP)
         self._wsgi_conf = self._conf[_WSGI_GROUP]
 
-        self.app = None
-        self._init_routes()
+        self._setup_app()
 
-    def _init_routes(self):
+    def _setup_app(self):
         """Initialize hooks and URI routes to resources."""
-        self.app = falcon.API()
+        self._app = falcon.API()
         version_path = "/v1.0"
         project_id = "/{project_id}"
 
         prefix = version_path + project_id
 
         # init the controllers
-        service_controller = self._manager.service_controller
+        service_controller = self.manager.services_controller
 
         # setup the routes
-        self.app.add_route(prefix,
-                           v1.V1Resource())
+        self._app.add_route(prefix,
+                            v1.V1Resource())
 
-        self.app.add_route(prefix + '/services',
-                           services.ServicesResource(service_controller))
+        self._app.add_route(prefix + '/services',
+                            services.ServicesResource(service_controller))
 
-        self.app.add_route(prefix + '/services/{service_name}',
-                           services.ServiceResource(service_controller))
+        self._app.add_route(prefix + '/services/{service_name}',
+                            services.ServiceResource(service_controller))
 
     def listen(self):
         """Self-host using 'bind' and 'port' from the WSGI config group."""

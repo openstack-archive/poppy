@@ -36,14 +36,14 @@ def _connection():
     return None
 
 
-class StorageDriver(base.Driver):
+class MockDBStorageDriver(base.Driver):
 
     def __init__(self, conf):
-        super(StorageDriver, self).__init__(conf)
+        super(MockDBStorageDriver, self).__init__(conf)
 
-        self.conf.register_opts(MOCKDB_OPTIONS,
-                                group=MOCKDB_GROUP)
-        self.mockdb_conf = self.conf[MOCKDB_GROUP]
+        self._conf.register_opts(MOCKDB_OPTIONS,
+                                 group=MOCKDB_GROUP)
+        self.mockdb_conf = self._conf[MOCKDB_GROUP]
 
     def is_alive(self):
         return True

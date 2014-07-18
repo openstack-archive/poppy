@@ -34,7 +34,7 @@ class CassandraStorageServiceTests(TestCase):
 
         # create mocked config and driver
         conf = cfg.ConfigOpts()
-        cassandra_driver = driver.StorageDriver(conf, None)
+        cassandra_driver = driver.CassandraStorageDriver(conf)
 
         # stubbed cassandra driver
         self.sc = services.ServicesController(cassandra_driver)
