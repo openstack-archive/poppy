@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.transport.validators.schema_base import SchemaBase
+from cdn.transport.validators import schema_base
 
 
-class ServiceSchema(SchemaBase):
+class ServiceSchema(schema_base.SchemaBase):
     """JSON Schmema validation for /service
     """
     schema = {
