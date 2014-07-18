@@ -122,3 +122,4 @@ class CDNServer(Server):
     def get_target(self, conf):
         server = bootstrap.Bootstrap(conf)
         return server.run
+
