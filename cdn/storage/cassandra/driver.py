@@ -19,7 +19,7 @@ from cassandra.cluster import Cluster
 
 from cdn.common import decorators
 from cdn.openstack.common import log as logging
-from cdn import storage
+from cdn.storage import base
 from cdn.storage.cassandra import controllers
 
 from oslo.config import cfg
@@ -42,10 +42,10 @@ def _connection(conf):
     return session
 
 
-class StorageDriver(storage.StorageDriverBase):
+class CassandraStorageDriver(base.Driver):
 
-    def __init__(self, conf, providers):
-        super(StorageDriver, self).__init__(conf, providers)
+    def __init__(self, conf):
+        super(CassandraStorageDriver, self).__init__(conf)
 
         self.conf.register_opts(CASSANDRA_OPTIONS,
                                 group=CASSANDRA_GROUP)

@@ -3,4 +3,4 @@
 from cdn.storage.cassandra import driver
 
 # Hoist classes into package namespace
-StorageDriver = driver.StorageDriver
+Driver = driver.StorageDriver

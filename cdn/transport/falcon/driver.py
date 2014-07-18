@@ -44,8 +44,8 @@ LOG = logging.getLogger(__name__)
 @six.add_metaclass(abc.ABCMeta)
 class TransportDriver(transport.DriverBase):
 
-    def __init__(self, conf, storage):
-        super(TransportDriver, self).__init__(conf, storage)
+    def __init__(self, conf, manager):
+        super(TransportDriver, self).__init__(conf, manager)
 
         self._conf.register_opts(_WSGI_OPTIONS, group=_WSGI_GROUP)
         self._wsgi_conf = self._conf[_WSGI_GROUP]
@@ -62,7 +62,7 @@ class TransportDriver(transport.DriverBase):
         prefix = version_path + project_id
 
         # init the controllers
-        service_controller = self._storage.service_controller
+        service_controller = self._manager.service_controller
 
         # setup the routes
         self.app.add_route(prefix,

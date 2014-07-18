@@ -17,7 +17,7 @@
 
 from cdn.common import decorators
 from cdn.openstack.common import log as logging
-from cdn import storage
+from cdn.storage import base
 from cdn.storage.mockdb import controllers
 
 from oslo.config import cfg
@@ -36,10 +36,10 @@ def _connection():
     return None
 
 
-class StorageDriver(storage.StorageDriverBase):
+class StorageDriver(base.Driver):
 
-    def __init__(self, conf, providers):
-        super(StorageDriver, self).__init__(conf, providers)
+    def __init__(self, conf):
+        super(StorageDriver, self).__init__(conf)
 
         self.conf.register_opts(MOCKDB_OPTIONS,
                                 group=MOCKDB_GROUP)

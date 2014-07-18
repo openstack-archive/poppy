@@ -17,8 +17,7 @@ testtools>=0.9.32
 requests>=1.1
 
 # API Tests
-git+https://github.com/stackforge/opencafe.git#egg=opencafe
-jsonschema
+# git+https://github.com/stackforge/opencafe.git#egg=opencafe
 
 # Test runner
 nose

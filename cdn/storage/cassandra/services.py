@@ -84,7 +84,7 @@ CQL_UPDATE_RESTRICTIONS = '''
 '''
 
 
-class ServicesController(base.ServicesBase):
+class ServicesController(base.ServicesController):
 
     @property
     def session(self):
@@ -140,23 +140,13 @@ class ServicesController(base.ServicesBase):
 
         self.session.execute(CQL_CREATE_SERVICE, args)
 
-        # create at providers
-        providers = super(ServicesController, self).create(
-            project_id, service_name, service)
-
-        return providers
-
     def update(self, project_id, service_name, service_json):
         # update configuration in storage
 
         # determine what changed.
 
         # update those columns provided only.
-
-        # update at providers
-        return super(ServicesController, self).update(project_id,
-                                                      service_name,
-                                                      service_json)
+        pass
 
     def delete(self, project_id, service_name):
         # delete local configuration from storage
@@ -165,6 +155,3 @@ class ServicesController(base.ServicesBase):
             'service_name': service_name
         }
         self.session.execute(CQL_DELETE_SERVICE, args)
-
-        # delete from providers
-        return super(ServicesController, self).delete(project_id, service_name)

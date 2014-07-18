@@ -16,7 +16,7 @@
 from cdn.storage import base
 
 
-class ServicesController(base.ServicesBase):
+class ServicesController(base.ServicesController):
 
     def __init__(self, *args, **kwargs):
         super(ServicesController, self).__init__(*args, **kwargs)

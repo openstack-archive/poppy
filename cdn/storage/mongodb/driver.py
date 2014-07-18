@@ -20,7 +20,7 @@ import pymongo.errors
 
 from cdn.common import decorators
 from cdn.openstack.common import log as logging
-from cdn import storage
+from cdn.storage import base
 from cdn.storage.mongodb import controllers
 
 from oslo.config import cfg
@@ -63,10 +63,10 @@ def _connection(conf):
     return MongoClient(conf.uri)
 
 
-class StorageDriver(storage.StorageDriverBase):
+class StorageDriver(base.Driver):
 
-    def __init__(self, conf, providers):
-        super(StorageDriver, self).__init__(conf, providers)
+    def __init__(self, conf):
+        super(StorageDriver, self).__init__(conf)
 
         self.conf.register_opts(MONGODB_OPTIONS,
                                 group=MONGODB_GROUP)
