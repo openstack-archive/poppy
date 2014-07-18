@@ -15,7 +15,7 @@
 
 from functools import wraps
 import inspect
-from .exceptions import ValidationFailed, ValidationProgrammingError
+import exceptions
 
 
 def validate(**rules):
@@ -33,7 +33,7 @@ def validate(**rules):
 
     In this example, bird_id will be passed to val_bird_id
     and validated. If the validation function throws the
-    ValidationFailed exception, the specified code will be returned
+    exceptions.ValidationFailed exception, the specified code will be returned
     in the response and the resultant function will never actually
     be called.
     """
@@ -76,14 +76,14 @@ def validate(**rules):
 
                     if inspect.isfunction(resp):
                         msg = 'Validation function returned a function.'
-                        raise ValidationProgrammingError(msg)
+                        raise exceptions.ValidationProgrammingError(msg)
 
                     # If this is a param rule, add the
                     # param to the list of out args
                     if rule.getter is None:
                         outargs[param] = value
 
-                except ValidationFailed:
+                except exceptions.ValidationFailed:
                     rule.errfunc()
                     return
 
@@ -105,14 +105,14 @@ def validation_function(func):
 
             if not none_ok and value is None:
                 msg = 'None value not permitted'
-                raise ValidationFailed(msg)
+                raise exceptions.ValidationFailed(msg)
 
             if empty_ok and value == '':
                 return
 
             if not empty_ok and value == '':
                 msg = 'Empty value not permitted'
-                raise ValidationFailed(msg)
+                raise exceptions.ValidationFailed(msg)
 
             func(value, **kwargs)
         return wrapper

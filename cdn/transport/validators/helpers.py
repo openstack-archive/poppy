@@ -13,12 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .stoplight.exceptions import ValidationFailed
+import json
 
 import falcon
-import json
 import jsonschema
 from pecan import abort
+
+from .stoplight import exceptions
 
 
 def req_accepts_json_pecan(request, desired_content_type='application/json'):
@@ -26,7 +27,7 @@ def req_accepts_json_pecan(request, desired_content_type='application/json'):
     # for falcon the syntax should actually be:
     # request.accept('application/json')
     if not request.accept(desired_content_type):
-        raise ValidationFailed('Invalid Accept Header')
+        raise exceptions.ValidationFailed('Invalid Accept Header')
 
 
 def require_accepts_json_falcon(req, resp, params=None):
@@ -107,7 +108,7 @@ def with_schema_falcon(request, schema=None):
             v_error = errors_list
 
     if validation_failed:
-        raise ValidationFailed(repr(v_error))
+        raise exceptions.ValidationFailed(repr(v_error))
 
 
 def with_schema_pecan(request, schema=None, handler=custom_abort_pecan, **kw):
