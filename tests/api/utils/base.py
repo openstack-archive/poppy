@@ -1,6 +1,12 @@
+import abc
 import jsonschema
+import multiprocessing
+import six
+
+from oslo.config import cfg
 
 from cafe.drivers.unittest import fixtures
+from cdn import bootstrap
 
 from tests.api.utils import client
 from tests.api.utils import config
@@ -46,3 +52,73 @@ class TestBase(fixtures.BaseTestFixture):
         Deletes the added resources
         """
         super(TestBase, cls).tearDownClass()
+
+
+@six.add_metaclass(abc.ABCMeta)
+class Server(object):
+
+    name = "cdn-api-test-server"
+
+    def __init__(self):
+        self.process = None
+
+    @abc.abstractmethod
+    def get_target(self, conf):
+        """Prepares the target object
+
+        This method is meant to initialize server's
+        bootstrap and return a callable to run the
+        server.
+
+        :param conf: The config instance for the
+            bootstrap class
+        :returns: A callable object
+        """
+
+    def is_alive(self):
+        """Returns True IFF the server is running."""
+
+        if self.process is None:
+            return False
+
+        return self.process.is_alive()
+
+    def start(self, conf):
+        """Starts the server process.
+
+        :param conf: The config instance to use for
+            the new process
+        :returns: A `multiprocessing.Process` instance
+        """
+
+        target = self.get_target(conf)
+
+        if not callable(target):
+            raise RuntimeError("Target not callable")
+
+        self.process = multiprocessing.Process(target=target,
+                                               name=self.name)
+        self.process.daemon = True
+        self.process.start()
+
+        # Give it a second to boot.
+        self.process.join(1)
+        return self.process
+
+    def stop(self):
+        """Terminates a process
+
+        This method kills a process by
+        calling `terminate`. Note that
+        children of this process won't be
+        terminated but become orphaned.
+        """
+        self.process.terminate()
+
+
+class CDNServer(Server):
+    name = "marconi-wsgiref-test-server"
+
+    def get_target(self, conf):
+        server = bootstrap.Bootstrap(conf)
+        return server.run
