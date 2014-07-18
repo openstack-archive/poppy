@@ -13,29 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Server Specific Configurations
 
-server = {
-    'port': '8080',
-    'host': '0.0.0.0'
-}
-
-# Pecan Application Configurations
-app = {
-    'root': 'test_service_validation.DummyPecanEndpoint',
-    'modules': ['pecan_app'],
-    #'static_root': '%(confdir)s/../../public',
-    #'template_path': '%(confdir)s/../templates',
-    'debug': True,
-    'errors': {
-        '404': '/error/404',
-        '__force_dict__': True
-    }
-}
-
-# Custom Configurations must be in Python dictionary format::
-#
-# foo = {'bar':'baz'}
-#
-# All configurations are accessible at::
-# pecan.conf
+class HTTPNotAcceptable(Exception):
+    def __init__(self, msg=None, href=None, href_text=None):
+        Exception.__init__(self)
