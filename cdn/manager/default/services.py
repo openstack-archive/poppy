@@ -16,32 +16,20 @@
 from cdn.manager import base
 
 
-class ProviderController():
-
-    def create(self, ext, service_name, service_json):
-        return ext.obj.service_controller.create(service_name, service_json)
-
-    def update(self, ext, service_name, service_json):
-        return ext.obj.service_controller.update(service_name, service_json)
-
-    def delete(self, ext, service_name):
-        return ext.obj.service_controller.delete(service_name)
-
-
 class DefaultServicesController(base.ServicesController):
 
     def list(self, project_id):
-        services_controller = self._driver.storage.services_controller
+        services_controller = self._driver.storage.service_controller
 
         return services_controller.list(project_id)
 
     def get(self, project_id, service_name):
-        services_controller = self._driver.storage.services_controller
+        services_controller = self._driver.storage.service_controller
 
         return services_controller.get(project_id, service_name)
 
     def create(self, project_id, service_name, service_json):
-        services_controller = self._driver.storage.services_controller
+        services_controller = self._driver.storage.service_controller
 
         services_controller.create(
             project_id,
@@ -50,14 +38,14 @@ class DefaultServicesController(base.ServicesController):
 
         if (self._driver.providers is not None):
             return self._driver.providers.map(
-                ProviderController.create,
+                self.provider_wrapper.create,
                 service_name,
                 service_json)
         else:
             return None
 
     def update(self, project_id, service_name, service_json):
-        services_controller = self._driver.storage.services_controller
+        services_controller = self._driver.storage.service_controller
 
         services_controller.update(
             project_id,
@@ -67,20 +55,20 @@ class DefaultServicesController(base.ServicesController):
 
         if (self._driver.providers is not None):
             return self._driver.providers.map(
-                ProviderController.update,
+                self.provider_wrapper.update,
                 service_name,
                 service_json)
         else:
             return None
 
     def delete(self, project_id, service_name):
-        services_controller = self._driver.storage.services_controller
+        services_controller = self._driver.storage.service_controller
 
         services_controller.delete(project_id, service_name)
 
         if (self._driver.providers is not None):
             return self._driver.providers.map(
-                ProviderController.delete,
+                self.provider_wrapper.delete,
                 service_name)
         else:
             return None

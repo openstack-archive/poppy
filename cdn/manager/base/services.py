@@ -17,6 +17,7 @@ import abc
 import six
 
 from cdn.manager.base import controller
+from cdn.manager.base import providers
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -24,6 +25,8 @@ class ServicesControllerBase(controller.ManagerControllerBase):
 
     def __init__(self, driver):
         super(ServicesControllerBase, self).__init__(driver)
+
+        self.provider_wrapper = providers.ProviderWrapper()
 
     @abc.abstractmethod
     def list(self, project_id):
