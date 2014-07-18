@@ -15,7 +15,8 @@
 
 from functools import wraps
 import inspect
-import exceptions
+
+from . import exceptions
 
 
 def validate(**rules):
