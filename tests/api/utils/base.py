@@ -76,7 +76,7 @@ class Server(object):
         """
 
     def is_alive(self):
-        """Returns True IFF the server is running."""
+        """Returns True IF the server is running."""
 
         if self.process is None:
             return False
@@ -117,7 +117,7 @@ class Server(object):
 
 
 class CDNServer(Server):
-    name = "marconi-wsgiref-test-server"
+    name = "cdn-wsgiref-test-server"
 
     def get_target(self, conf):
         server = bootstrap.Bootstrap(conf)
