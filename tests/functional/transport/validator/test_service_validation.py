@@ -21,7 +21,7 @@ import sys
 from unittest import TestCase
 
 from pecan import expose, set_config, request
-from webtest.app import AppError
+from webtest import app
 
 from cdn.common import errors
 from cdn.transport.validators.helpers import falcon, with_schema_falcon,\
@@ -218,7 +218,6 @@ class BaseTestCase(TestCase):
             e
             pass
 
-        # print(req_accepts_json_pecan(req))
         with self.assertRaises(ValidationFailed):
             req_accepts_json_pecan(req)
 
@@ -358,9 +357,9 @@ class TestValidationDecoratorsPecan(PecanEndPointFunctionalTest):
                 "Content-Type": "application/json;charset=utf-8"})
         self.assertEqual(resp.status_int, 200)
         self.assertEqual(resp.body.decode('utf-8'), "Hello, World!")
-        with self.assertRaisesRegexp(AppError, "400 Bad Request"):
+        with self.assertRaisesRegexp(app.AppError, "400 Bad Request"):
             self.app.put('/', params=fake_request_bad_missing_domain.body,
                          headers={"Content-Type": "application/json"})
-        with self.assertRaisesRegexp(AppError, "400 Bad Request"):
+        with self.assertRaisesRegexp(app.AppError, "400 Bad Request"):
             self.app.put('/', params=fake_request_bad_invalid_json_body.body,
                          headers={"Content-Type": "application/json"})
