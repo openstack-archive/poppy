@@ -72,7 +72,9 @@ class ServiceController(base.ServiceBase):
             service = self.client.get_service_by_name(service_name)
 
             # Delete the service
-            self.client.delete_service(service.id)
+            resp = self.client.delete_service(service.id)
+
+            print 'delete response:', resp
 
             return self.responder.deleted(service_name)
         except Exception:

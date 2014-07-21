@@ -31,100 +31,103 @@ class TestServices(unittest.TestCase):
     @mock.patch('fastly.FastlyVersion')
     @mock.patch('cdn.provider.fastly.services.ServiceController.client')
     @mock.patch('cdn.provider.fastly.driver.CDNProvider')
-    def test_create(self, service_json, MockConnection,
-                    MockService, MockVersion, mock_controllerclient,
-                    MockDriver):
-        driver = MockDriver()
-        service_name = 'scarborough'
-        mock_service_id = '%020x' % random.randrange(16**20)
-        mockCreateVersionResp = {
-            u'service_id': mock_service_id, u'number': 5}
-
-        service = MockService()
-        service.id = mock_service_id
-        version = MockVersion(MockConnection, mockCreateVersionResp)
-        MockConnection.create_service.return_value = service
-        MockConnection.create_version.return_value = version
+    def test_create(self, service_json, mock_connection,
+                    mock_service, mock_version, mock_controllerclient,
+                    mock_driver):
+        driver = mock_driver()
+        driver.provider_name = 'Fastly'
 
         # instantiate
         controller = services.ServiceController(driver)
 
+        service_name = 'scarborough'
+        mock_service_id = '%020x' % random.randrange(16 ** 20)
+        mock_create_version_resp = {
+            u'service_id': mock_service_id, u'number': 5}
+
+        service = mock_service()
+        service.id = mock_service_id
+        version = mock_version(controller.client, mock_create_version_resp)
+        controller.client.create_service.return_value = service
+        controller.client.create_version.return_value = version
+
         # ASSERTIONS
         # create_service
-        MockConnection.create_service.side_effect = fastly.FastlyError(
+        controller.client.create_service.side_effect = fastly.FastlyError(
             Exception('Creating service failed.'))
         resp = controller.create(service_name, service_json)
         self.assertIn('error', resp[driver.provider_name])
 
-        MockConnection.reset_mock()
-        MockConnection.create_service.side_effect = None
+        controller.client.reset_mock()
+        controller.client.create_service.side_effect = None
 
         # create_version
-        MockConnection.create_version.side_effect = fastly.FastlyError(
+        controller.client.create_version.side_effect = fastly.FastlyError(
             Exception('Creating version failed.'))
         resp = controller.create(service_name, service_json)
-        self.assertIn('error', resp['fastly'])
+        self.assertIn('error', resp[driver.provider_name])
 
-        MockConnection.reset_mock()
-        MockConnection.create_version.side_effect = None
+        controller.client.reset_mock()
+        controller.client.create_version.side_effect = None
 
         # create domains
-        MockConnection.create_domain.side_effect = fastly.FastlyError(
+        controller.client.create_domain.side_effect = fastly.FastlyError(
             Exception('Creating domains failed.'))
         resp = controller.create(service_name, service_json)
-        self.assertIn('error', resp['fastly'])
+        self.assertIn('error', resp[driver.provider_name])
 
-        MockConnection.reset_mock()
-        MockConnection.create_domain.side_effect = None
+        controller.client.reset_mock()
+        controller.client.create_domain.side_effect = None
 
         # create backends
-        MockConnection.create_backend.side_effect = fastly.FastlyError(
+        controller.client.create_backend.side_effect = fastly.FastlyError(
             Exception('Creating backend failed.'))
         resp = controller.create(service_name, service_json)
-        self.assertIn('error', resp['fastly'])
+        self.assertIn('error', resp[driver.provider_name])
 
-        MockConnection.reset_mock()
-        MockConnection.create_backend.side_effect = None
+        controller.client.reset_mock()
+        controller.client.create_backend.side_effect = None
 
         # test a general exception
-        MockConnection.create_service.side_effect = Exception(
+        controller.client.create_service.side_effect = Exception(
             'Wild exception occurred.')
         resp = controller.create(service_name, service_json)
-        self.assertIn('error', resp['fastly'])
+        self.assertIn('error', resp[driver.provider_name])
 
         # finally, a clear run
-        MockConnection.reset_mock()
-        MockConnection.create_service.side_effect = None
+        controller.client.reset_mock()
+        controller.client.create_service.side_effect = None
 
         resp = controller.create(service_name, service_json)
 
-        MockConnection.create_service.assert_called_once_with(
+        controller.client.create_service.assert_called_once_with(
             controller.current_customer.id, service_name)
 
-        MockConnection.create_version.assert_called_once_with(service.id)
+        controller.client.create_version.assert_called_once_with(service.id)
 
-        MockConnection.create_domain.assert_any_call(
+        controller.client.create_domain.assert_any_call(
             service.id, version.number, service_json['domains'][0]['domain'])
 
-        MockConnection.create_domain.assert_any_call(
+        controller.client.create_domain.assert_any_call(
             service.id, version.number, service_json['domains'][1]['domain'])
 
-        MockConnection.create_backend.assert_has_any_call(
+        controller.client.create_backend.assert_has_any_call(
             service.id, 1,
             service_json['origins'][0]['origin'],
             service_json['origins'][0]['origin'],
             service_json['origins'][0]['ssl'],
             service_json['origins'][0]['port'])
 
-        self.assertIn('domain', resp['fastly'])
+        self.assertIn('domain', resp[driver.provider_name])
 
     @mock.patch('fastly.FastlyConnection')
     @mock.patch('fastly.FastlyService')
     @mock.patch('cdn.provider.fastly.services.ServiceController.client')
     @mock.patch('cdn.provider.fastly.driver.CDNProvider')
-    def test_delete(self, mock_connection, mock_service, mock_get_client,
-                    MockDriver):
-        driver = MockDriver()
+    def test_delete(self, mock_connection, mock_service, mock_client,
+                    mock_driver):
+        driver = mock_driver()
+        driver.provider_name = 'Fastly'
         service_name = 'whatsitnamed'
 
         # instantiate
@@ -137,30 +140,31 @@ class TestServices(unittest.TestCase):
 
         # test exception
         exception = fastly.FastlyError(Exception('ding'))
-        mock_connection.delete_service.side_effect = exception
+        controller.client.delete_service.side_effect = exception
         resp = controller.delete('wrongname')
+
         self.assertIn('error', resp[driver.provider_name])
 
         # clear run
-        mock_connection.reset_mock()
-        mock_connection.delete_service.side_effect = None
+        controller.client.reset_mock()
+        controller.client.delete_service.side_effect = None
 
         resp = controller.delete(service_name)
-        mock_connection.get_service_by_name.assert_called_once_with(
+        controller.client.get_service_by_name.assert_called_once_with(
             service_name)
-        mock_connection.delete_service.assert_called_once_with(service.id)
+        controller.client.delete_service.assert_called_once_with(service.id)
         self.assertIn('domain', resp[driver.provider_name])
 
     @mock.patch('cdn.provider.fastly.services.ServiceController.client')
     @mock.patch('cdn.provider.fastly.driver.CDNProvider')
-    def test_update(self, mock_get_client, MockDriver):
-        driver = MockDriver()
+    def test_update(self, mock_get_client, mock_driver):
+        driver = mock_driver()
         controller = services.ServiceController(driver)
         resp = controller.update(None, None)
         self.assertEqual(resp, None)
 
     @mock.patch('cdn.provider.fastly.driver.CDNProvider')
-    def test_client(self, MockDriver):
-        driver = MockDriver()
+    def test_client(self, mock_driver):
+        driver = mock_driver()
         controller = services.ServiceController(driver)
         self.assertNotEquals(controller.client(), None)
