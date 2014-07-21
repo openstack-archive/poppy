@@ -1,9 +1,22 @@
+# Copyright (c) 2014 Rackspace, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import abc
 import jsonschema
 import multiprocessing
 import six
-
-from oslo.config import cfg
 
 from cafe.drivers.unittest import fixtures
 from cdn import bootstrap
@@ -39,8 +52,7 @@ class TestBase(fixtures.BaseTestFixture):
                                       deserialize_format='json')
 
     def assertSchema(self, response_json, expected_schema):
-        """Verify response schema aligns with the expected schema
-        """
+        """Verify response schema aligns with the expected schema."""
         try:
             jsonschema.validate(response_json, expected_schema)
         except jsonschema.ValidationError as message:
@@ -48,9 +60,7 @@ class TestBase(fixtures.BaseTestFixture):
 
     @classmethod
     def tearDownClass(cls):
-        """
-        Deletes the added resources
-        """
+        """Deletes the added resources."""
         super(TestBase, cls).tearDownClass()
 
 
@@ -123,4 +133,3 @@ class CDNServer(Server):
     def get_target(self, conf):
         server = bootstrap.Bootstrap(conf)
         return server.run
-
