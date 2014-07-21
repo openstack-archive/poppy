@@ -51,7 +51,7 @@ class TestServices(unittest.TestCase):
         MockConnection.create_service.side_effect = fastly.FastlyError(
             Exception('Creating service failed.'))
         resp = controller.create(service_name, service_json)
-        self.assertEqual('error' in resp['fastly'], True)
+        self.assertIn('error', resp['fastly'])
 
         MockConnection.reset_mock()
         MockConnection.create_service.side_effect = None
@@ -60,7 +60,7 @@ class TestServices(unittest.TestCase):
         MockConnection.create_version.side_effect = fastly.FastlyError(
             Exception('Creating version failed.'))
         resp = controller.create(service_name, service_json)
-        self.assertEqual('error' in resp['fastly'], True)
+        self.assertIn('error', resp['fastly'])
 
         MockConnection.reset_mock()
         MockConnection.create_version.side_effect = None
@@ -69,7 +69,7 @@ class TestServices(unittest.TestCase):
         MockConnection.create_domain.side_effect = fastly.FastlyError(
             Exception('Creating domains failed.'))
         resp = controller.create(service_name, service_json)
-        self.assertEqual('error' in resp['fastly'], True)
+        self.assertIn('error', resp['fastly'])
 
         MockConnection.reset_mock()
         MockConnection.create_domain.side_effect = None
@@ -78,7 +78,7 @@ class TestServices(unittest.TestCase):
         MockConnection.create_backend.side_effect = fastly.FastlyError(
             Exception('Creating backend failed.'))
         resp = controller.create(service_name, service_json)
-        self.assertEqual('error' in resp['fastly'], True)
+        self.assertIn('error', resp['fastly'])
 
         MockConnection.reset_mock()
         MockConnection.create_backend.side_effect = None
@@ -87,7 +87,7 @@ class TestServices(unittest.TestCase):
         MockConnection.create_service.side_effect = Exception(
             'Wild exception occurred.')
         resp = controller.create(service_name, service_json)
-        self.assertEqual('error' in resp['fastly'], True)
+        self.assertIn('error', resp['fastly'])
 
         # finally, a clear run
         MockConnection.reset_mock()
@@ -113,7 +113,7 @@ class TestServices(unittest.TestCase):
             service_json['origins'][0]['ssl'],
             service_json['origins'][0]['port'])
 
-        self.assertEqual('domain' in resp['fastly'], True)
+        self.assertIn('domain', resp['fastly'])
 
     @mock.patch('fastly.FastlyConnection')
     @mock.patch('fastly.FastlyService')
@@ -133,7 +133,7 @@ class TestServices(unittest.TestCase):
         exception = fastly.FastlyError(Exception('ding'))
         mock_connection.delete_service.side_effect = exception
         resp = controller.delete('wrongname')
-        self.assertEqual('error' in resp['fastly'], True)
+        self.assertIn('error', resp['fastly'])
 
         # clear run
         mock_connection.reset_mock()
@@ -143,7 +143,7 @@ class TestServices(unittest.TestCase):
         mock_connection.get_service_by_name.assert_called_once_with(
             service_name)
         mock_connection.delete_service.assert_called_once_with(service.id)
-        self.assertEqual('domain' in resp['fastly'], True)
+        self.assertIn('domain', resp['fastly'])
 
     @mock.patch('cdn.provider.fastly.services.ServiceController.client')
     def test_update(self, mock_get_client):
