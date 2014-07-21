@@ -1,0 +1,3 @@
+
+# API Tests
+git+https://github.com/stackforge/opencafe.git#egg=opencafe

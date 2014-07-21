@@ -20,16 +20,20 @@ from cdn.provider import base
 
 class ServiceController(base.ServiceBase):
 
-    def __init__(self, driver):
-        super(ServiceController, self).__init__()
+    @property
+    def client(self):
+        return self.driver.client
 
-        self.client = driver.client
+    def __init__(self, driver):
+        super(ServiceController, self).__init__(driver)
+
+        self.driver = driver
         self.current_customer = self.client.get_current_customer()
 
         self.provider_resp = base.ProviderResponse("fastly")
 
     def update(self, service_name, service_json):
-        print "update services"
+        print("update services")
 
     def create(self, service_name, service_json):
 

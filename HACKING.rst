@@ -104,7 +104,7 @@ Example::
 
   import cdn.common
   from cdn import test
-  import cdn.queues.transport
+  import cdn.storage.cassandra
 
 
 More Import Examples
