@@ -40,6 +40,10 @@ class ProviderDriverBase(object):
         raise NotImplementedError
 
     @abc.abstractproperty
+    def provider_name(self):
+        raise NotImplementedError
+
+    @abc.abstractproperty
     def service_controller(self):
         """Returns the driver's hostname controller."""
         raise NotImplementedError

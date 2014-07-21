@@ -17,7 +17,7 @@ import abc
 import six
 
 from cdn.provider.base import controller
-from cdn.provider.base import response
+from cdn.provider.base import responder
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -26,7 +26,7 @@ class ServicesControllerBase(controller.ProviderControllerBase):
     def __init__(self, driver):
         super(ServicesControllerBase, self).__init__(driver)
 
-        self.responder = response.Responder(type(self).__name__)
+        self.responder = responder.Responder(driver.provider_name)
 
     @abc.abstractmethod
     def update(self, service_name, service_json):

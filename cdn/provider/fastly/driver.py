@@ -39,7 +39,7 @@ class CDNProvider(base.Driver):
         super(CDNProvider, self).__init__(conf)
 
         self._conf.register_opts(FASTLY_OPTIONS,
-                                group=FASTLY_GROUP)
+                                 group=FASTLY_GROUP)
         self.fastly_conf = self._conf[FASTLY_GROUP]
 
         self.fastly_client = fastly.connect(self.fastly_conf.apikey)
@@ -47,8 +47,13 @@ class CDNProvider(base.Driver):
     def is_alive(self):
         return True
 
+    @decorators.lazy_property(write=False)
     def client(self):
         return self.fastly_client
+
+    @decorators.lazy_property(write=False)
+    def provider_name(self):
+        return "Fastly"
 
     @decorators.lazy_property(write=False)
     def service_controller(self):

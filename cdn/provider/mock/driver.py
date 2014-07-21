@@ -32,5 +32,9 @@ class CDNProvider(base.Driver):
         return True
 
     @decorators.lazy_property(write=False)
+    def provider_name(self):
+        return "Mock"
+
+    @decorators.lazy_property(write=False)
     def service_controller(self):
         return controllers.ServiceController(self)

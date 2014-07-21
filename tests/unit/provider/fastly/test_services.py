@@ -30,8 +30,11 @@ class TestServices(unittest.TestCase):
     @mock.patch('fastly.FastlyService')
     @mock.patch('fastly.FastlyVersion')
     @mock.patch('cdn.provider.fastly.services.ServiceController.client')
+    @mock.patch('cdn.provider.fastly.driver.CDNProvider')
     def test_create(self, service_json, MockConnection,
-                    MockService, MockVersion, mock_controllerclient):
+                    MockService, MockVersion, mock_controllerclient,
+                    MockDriver):
+        driver = MockDriver()
         service_name = 'scarborough'
         mock_service_id = '%020x' % random.randrange(16**20)
         mockCreateVersionResp = {
@@ -44,14 +47,14 @@ class TestServices(unittest.TestCase):
         MockConnection.create_version.return_value = version
 
         # instantiate
-        controller = services.ServiceController(None)
+        controller = services.ServiceController(driver)
 
         # ASSERTIONS
         # create_service
         MockConnection.create_service.side_effect = fastly.FastlyError(
             Exception('Creating service failed.'))
         resp = controller.create(service_name, service_json)
-        self.assertIn('error', resp['fastly'])
+        self.assertIn('error', resp[driver.provider_name])
 
         MockConnection.reset_mock()
         MockConnection.create_service.side_effect = None
@@ -118,11 +121,14 @@ class TestServices(unittest.TestCase):
     @mock.patch('fastly.FastlyConnection')
     @mock.patch('fastly.FastlyService')
     @mock.patch('cdn.provider.fastly.services.ServiceController.client')
-    def test_delete(self, mock_connection, mock_service, mock_get_client):
+    @mock.patch('cdn.provider.fastly.driver.CDNProvider')
+    def test_delete(self, mock_connection, mock_service, mock_get_client,
+                    MockDriver):
+        driver = MockDriver()
         service_name = 'whatsitnamed'
 
         # instantiate
-        controller = services.ServiceController(None)
+        controller = services.ServiceController(driver)
 
         # mock.patch return values
         service = mock_service()
@@ -133,7 +139,7 @@ class TestServices(unittest.TestCase):
         exception = fastly.FastlyError(Exception('ding'))
         mock_connection.delete_service.side_effect = exception
         resp = controller.delete('wrongname')
-        self.assertIn('error', resp['fastly'])
+        self.assertIn('error', resp[driver.provider_name])
 
         # clear run
         mock_connection.reset_mock()
@@ -143,11 +149,13 @@ class TestServices(unittest.TestCase):
         mock_connection.get_service_by_name.assert_called_once_with(
             service_name)
         mock_connection.delete_service.assert_called_once_with(service.id)
-        self.assertIn('domain', resp['fastly'])
+        self.assertIn('domain', resp[driver.provider_name])
 
     @mock.patch('cdn.provider.fastly.services.ServiceController.client')
-    def test_update(self, mock_get_client):
-        controller = services.ServiceController(None)
+    @mock.patch('cdn.provider.fastly.driver.CDNProvider')
+    def test_update(self, mock_get_client, MockDriver):
+        driver = MockDriver()
+        controller = services.ServiceController(driver)
         resp = controller.update(None, None)
         self.assertEqual(resp, None)
 
