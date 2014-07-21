@@ -17,7 +17,7 @@
 
 from cdn.common import decorators
 from cdn.openstack.common import log as logging
-from cdn import provider
+from cdn.provider import base
 from cdn.provider.fastly import controllers
 
 from oslo.config import cfg
@@ -33,14 +33,14 @@ FASTLY_OPTIONS = [
 FASTLY_GROUP = 'drivers:provider:fastly'
 
 
-class CDNProvider(provider.CDNProviderBase):
+class CDNProvider(base.Driver):
 
     def __init__(self, conf):
         super(CDNProvider, self).__init__(conf)
 
-        self.conf.register_opts(FASTLY_OPTIONS,
+        self._conf.register_opts(FASTLY_OPTIONS,
                                 group=FASTLY_GROUP)
-        self.fastly_conf = self.conf[FASTLY_GROUP]
+        self.fastly_conf = self._conf[FASTLY_GROUP]
 
         self.fastly_client = fastly.connect(self.fastly_conf.apikey)
 

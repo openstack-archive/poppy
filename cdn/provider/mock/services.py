@@ -19,16 +19,14 @@ from cdn.provider import base
 
 class ServiceController(base.ServiceBase):
 
-    def __init__(self):
-        super(ServiceController, self).__init__()
-
-        self.provider_resp = base.ProviderResponse("mock")
+    def __init__(self, driver):
+        super(ServiceController, self).__init__(driver)
 
     def update(self, service_name, service_json):
-        return self.provider_resp.updated(service_name)
+        return self.responder.updated(service_name)
 
     def create(self, service_name, service_json):
-        return self.provider_resp.created(service_name)
+        return self.responder.created(service_name)
 
     def delete(self, service_name):
-        return self.provider_resp.deleted(service_name)
+        return self.responder.deleted(service_name)
