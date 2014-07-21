@@ -30,8 +30,6 @@ class ServiceController(base.ServiceBase):
         self.driver = driver
         self.current_customer = self.client.get_current_customer()
 
-        self.provider_resp = base.ProviderResponse("fastly")
-
     def update(self, service_name, service_json):
         print("update services")
 
@@ -61,12 +59,12 @@ class ServiceController(base.ServiceBase):
                                            origin["port"]
                                            )
 
-            return self.provider_resp.created(service.name)
+            return self.responder.created(service.name)
 
         except fastly.FastlyError:
-            return self.provider_resp.failed("failed to create service")
+            return self.responder.failed("failed to create service")
         except Exception:
-            return self.provider_resp.failed("failed to create service")
+            return self.responder.failed("failed to create service")
 
     def delete(self, service_name):
         try:
@@ -76,6 +74,6 @@ class ServiceController(base.ServiceBase):
             # Delete the service
             self.client.delete_service(service.id)
 
-            return self.provider_resp.deleted(service_name)
+            return self.responder.deleted(service_name)
         except Exception:
-            return self.provider_resp.failed("failed to delete service")
+            return self.responder.failed("failed to delete service")

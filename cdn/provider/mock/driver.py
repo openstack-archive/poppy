@@ -17,13 +17,13 @@
 
 from cdn.common import decorators
 from cdn.openstack.common import log as logging
-from cdn import provider
+from cdn.provider import base
 from cdn.provider.mock import controllers
 
 LOG = logging.getLogger(__name__)
 
 
-class CDNProvider(provider.CDNProviderBase):
+class CDNProvider(base.Driver):
 
     def __init__(self, conf):
         super(CDNProvider, self).__init__(conf)
