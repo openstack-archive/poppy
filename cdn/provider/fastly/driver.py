@@ -42,13 +42,13 @@ class CDNProvider(provider.CDNProviderBase):
                                 group=FASTLY_GROUP)
         self.fastly_conf = self.conf[FASTLY_GROUP]
 
-        self.client = fastly.connect(self.fastly_conf.apikey)
+        self.fastly_client = fastly.connect(self.fastly_conf.apikey)
 
     def is_alive(self):
         return True
 
     def client(self):
-        return self.client
+        return self.fastly_client
 
     @decorators.lazy_property(write=False)
     def service_controller(self):

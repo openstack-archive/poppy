@@ -76,6 +76,9 @@ class ServiceBase(object):
     """
     __metaclass__ = abc.ABCMeta
 
+    def __init__(self, driver):
+        self.driver = driver
+
     @abc.abstractmethod
     def update(self, service_name, service_json):
         raise NotImplementedError
@@ -96,7 +99,7 @@ class ProviderResponse(object):
     def failed(self, msg):
         ex_type, ex, tb = sys.exc_info()
 
-        print "error: ", self.provider, msg, ex_type, ex
+        print("error: ", self.provider, msg, ex_type, ex)
         traceback.print_tb(tb)
 
         return {
