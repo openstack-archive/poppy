@@ -31,7 +31,7 @@ class ServiceController(base.ServiceBase):
         self.current_customer = self.client.get_current_customer()
 
     def update(self, service_name, service_json):
-        print("update services")
+        return self.responder.updated(service_name)
 
     def create(self, service_name, service_json):
 
@@ -72,9 +72,7 @@ class ServiceController(base.ServiceBase):
             service = self.client.get_service_by_name(service_name)
 
             # Delete the service
-            resp = self.client.delete_service(service.id)
-
-            print 'delete response:', resp
+            self.client.delete_service(service.id)
 
             return self.responder.deleted(service_name)
         except Exception:

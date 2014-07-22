@@ -88,7 +88,7 @@ class ServicesController(base.ServicesController):
 
     def get(self, project_id):
         # get the requested service from storage
-        print "get service"
+        return ""
 
     def create(self, project_id, service_name, service_json):
 

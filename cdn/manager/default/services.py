@@ -17,21 +17,19 @@ from cdn.manager import base
 
 
 class DefaultServicesController(base.ServicesController):
+    def __init__(self, driver):
+        super(DefaultServicesController, self).__init__(driver)
+
+        self.services_controller = self._driver.storage.service_controller
 
     def list(self, project_id):
-        services_controller = self._driver.storage.service_controller
-
-        return services_controller.list(project_id)
+        return self.services_controller.list(project_id)
 
     def get(self, project_id, service_name):
-        services_controller = self._driver.storage.service_controller
-
-        return services_controller.get(project_id, service_name)
+        return self.services_controller.get(project_id, service_name)
 
     def create(self, project_id, service_name, service_json):
-        services_controller = self._driver.storage.service_controller
-
-        services_controller.create(
+        self.services_controller.create(
             project_id,
             service_name,
             service_json)
@@ -45,9 +43,7 @@ class DefaultServicesController(base.ServicesController):
             return None
 
     def update(self, project_id, service_name, service_json):
-        services_controller = self._driver.storage.service_controller
-
-        services_controller.update(
+        self.services_controller.update(
             project_id,
             service_name,
             service_json
@@ -62,9 +58,7 @@ class DefaultServicesController(base.ServicesController):
             return None
 
     def delete(self, project_id, service_name):
-        services_controller = self._driver.storage.service_controller
-
-        services_controller.delete(project_id, service_name)
+        self.services_controller.delete(project_id, service_name)
 
         if (self._driver.providers is not None):
             return self._driver.providers.map(
