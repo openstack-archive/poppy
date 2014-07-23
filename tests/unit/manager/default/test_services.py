@@ -25,10 +25,13 @@ from unittest import TestCase
 @ddt
 class DefaultManagerServiceTests(TestCase):
     @patch('cdn.storage.base.driver.StorageDriverBase')
-    def setUp(self, mock_driver):
+    @patch('cdn.provider.base.driver.ProviderDriverBase')
+    def setUp(self, mock_driver, mock_provider):
         # create mocked config and driver
         conf = cfg.ConfigOpts()
-        manager_driver = driver.DefaultManagerDriver(conf, mock_driver, None)
+        manager_driver = driver.DefaultManagerDriver(conf,
+                                                     mock_driver,
+                                                     mock_provider)
 
         # stubbed driver
         self.sc = services.DefaultServicesController(manager_driver)
@@ -42,15 +45,43 @@ class DefaultManagerServiceTests(TestCase):
         self.sc.create(project_id, service_name, service_json)
 
         # ensure the manager calls the storage driver with the appropriate data
+        self.sc.storage.create.assert_called_once_with(project_id,
+                                                       service_name,
+                                                       service_json)
         # and that the providers are notified.
-        self.sc.services_controller.assert_called_once(service_json)
+        providers = self.sc._driver.providers
+        providers.map.assert_called_once_with(self.sc.provider_wrapper.create,
+                                              service_name,
+                                              service_json)
 
-    def test_update(self):
-        # ensure that the storage driver is updated appropriately
-        # and the providers are notified
-        pass
+    @file_data('data_list_response.json')
+    def test_update(self, expected_response):
+        project_id = 'mock_id'
+        service_name = 'mock_service'
+        service_json = ''
+
+        self.sc.update(project_id, service_name, service_json)
+
+        # ensure the manager calls the storage driver with the appropriate data
+        self.sc.storage.update.assert_called_once_with(project_id,
+                                                       service_name,
+                                                       service_json)
+        # and that the providers are notified.
+        providers = self.sc._driver.providers
+        providers.map.assert_called_once_with(self.sc.provider_wrapper.update,
+                                              service_name,
+                                              service_json)
 
     def test_delete(self):
-        # ensure that the storage driver record is deleted appropriately
-        # and the providers are notified
-        pass
+        project_id = 'mock_id'
+        service_name = 'mock_service'
+
+        self.sc.delete(project_id, service_name)
+
+        # ensure the manager calls the storage driver with the appropriate data
+        self.sc.storage.delete.assert_called_once_with(project_id,
+                                                       service_name)
+        # and that the providers are notified.
+        providers = self.sc._driver.providers
+        providers.map.assert_called_once_with(self.sc.provider_wrapper.delete,
+                                              service_name)
