@@ -23,8 +23,8 @@ from cdn.manager.base import providers
 @six.add_metaclass(abc.ABCMeta)
 class ServicesControllerBase(controller.ManagerControllerBase):
 
-    def __init__(self, driver):
-        super(ServicesControllerBase, self).__init__(driver)
+    def __init__(self, manager):
+        super(ServicesControllerBase, self).__init__(manager)
 
         self.provider_wrapper = providers.ProviderWrapper()
 

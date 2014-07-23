@@ -17,8 +17,8 @@ from cdn.manager import base
 
 
 class DefaultServicesController(base.ServicesController):
-    def __init__(self, driver):
-        super(DefaultServicesController, self).__init__(driver)
+    def __init__(self, manager):
+        super(DefaultServicesController, self).__init__(manager)
 
         self.services_controller = self._driver.storage.service_controller
 
