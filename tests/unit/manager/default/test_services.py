@@ -72,7 +72,8 @@ class DefaultManagerServiceTests(TestCase):
                                               service_name,
                                               service_json)
 
-    def test_delete(self):
+    @file_data('data_list_response.json')
+    def test_delete(self, expected_response):
         project_id = 'mock_id'
         service_name = 'mock_service'
 

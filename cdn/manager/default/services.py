@@ -34,13 +34,10 @@ class DefaultServicesController(base.ServicesController):
             service_name,
             service_json)
 
-        if (self._driver.providers is not None):
-            return self._driver.providers.map(
-                self.provider_wrapper.create,
-                service_name,
-                service_json)
-        else:
-            return None
+        return self._driver.providers.map(
+            self.provider_wrapper.create,
+            service_name,
+            service_json)
 
     def update(self, project_id, service_name, service_json):
         self.storage.update(
@@ -49,20 +46,14 @@ class DefaultServicesController(base.ServicesController):
             service_json
         )
 
-        if (self._driver.providers is not None):
-            return self._driver.providers.map(
-                self.provider_wrapper.update,
-                service_name,
-                service_json)
-        else:
-            return None
+        return self._driver.providers.map(
+            self.provider_wrapper.update,
+            service_name,
+            service_json)
 
     def delete(self, project_id, service_name):
         self.storage.delete(project_id, service_name)
 
-        if (self._driver.providers is not None):
-            return self._driver.providers.map(
-                self.provider_wrapper.delete,
-                service_name)
-        else:
-            return None
+        return self._driver.providers.map(
+            self.provider_wrapper.delete,
+            service_name)
