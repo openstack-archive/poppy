@@ -26,6 +26,16 @@ class cdnConfig(ConfigSectionInterface):
         return self.get('base_url')
 
 
+class cdnServerConfig(ConfigSectionInterface):
+    """Defines the config values for starting (or not) a cdn server"""
+    SECTION_NAME = 'cdn_server'
+
+    @property
+    def run_server(self):
+        """Boolean value indicating whether to start CDN server."""
+        return self.get_boolean('run_server')
+
+
 class authConfig(ConfigSectionInterface):
     """Defines the auth config values."""
     SECTION_NAME = 'auth'

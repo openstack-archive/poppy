@@ -9,3 +9,6 @@ base_url=https://identity.api.rackspacecloud.com/v2.0
 
 [cdn]
 base_url=https://private-ea1ca-cloudcdn.apiary.io
+
+[cdn_server]
+run_server=True
