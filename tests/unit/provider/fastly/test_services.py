@@ -157,11 +157,14 @@ class TestServices(unittest.TestCase):
 
     @mock.patch('cdn.provider.fastly.services.ServiceController.client')
     @mock.patch('cdn.provider.fastly.driver.CDNProvider')
-    def test_update(self, mock_get_client, mock_driver):
+    @ddt.file_data('data_service.json')
+    def test_update(self, mock_get_client, mock_driver, service_json):
+        service_name = 'whatsitnamed'
+
         driver = mock_driver()
         controller = services.ServiceController(driver)
-        resp = controller.update(None, None)
-        self.assertEqual(resp, None)
+        resp = controller.update(service_name, service_json)
+        self.assertIn('domain', resp[driver.provider_name])
 
     @mock.patch('cdn.provider.fastly.driver.CDNProvider')
     def test_client(self, mock_driver):

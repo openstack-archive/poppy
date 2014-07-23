@@ -15,7 +15,10 @@
 
 import json
 
-import falcon
+try:
+    import falcon
+except ImportError:
+    from . import fake_falcon as falcon
 import jsonschema
 from pecan import abort
 

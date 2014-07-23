@@ -15,7 +15,6 @@
 
 """Fastly CDN Provider implementation."""
 
-from cdn.common import decorators
 from cdn.openstack.common import log as logging
 from cdn.provider import base
 from cdn.provider.fastly import controllers
@@ -47,14 +46,14 @@ class CDNProvider(base.Driver):
     def is_alive(self):
         return True
 
-    @decorators.lazy_property(write=False)
-    def client(self):
-        return self.fastly_client
-
-    @decorators.lazy_property(write=False)
+    @property
     def provider_name(self):
         return "Fastly"
 
-    @decorators.lazy_property(write=False)
+    @property
+    def client(self):
+        return self.fastly_client
+
+    @property
     def service_controller(self):
         return controllers.ServiceController(self)

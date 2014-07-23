@@ -13,27 +13,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""CDN Provider implementation."""
+# Server Specific Configurations
 
-from cdn.openstack.common import log as logging
-from cdn.provider import base
-from cdn.provider.mock import controllers
+server = {
+    'port': '8080',
+    'host': '0.0.0.0'
+}
 
-LOG = logging.getLogger(__name__)
+# Pecan Application Configurations
+app = {
+    'root': 'test_service_validation.DummyPecanEndpoint',
+    'modules': ['pecan_app'],
+    #'static_root': '%(confdir)s/../../public',
+    #'template_path': '%(confdir)s/../templates',
+    'debug': True,
+    'errors': {
+        '404': '/error/404',
+        '__force_dict__': True
+    }
+}
 
-
-class CDNProvider(base.Driver):
-
-    def __init__(self, conf):
-        super(CDNProvider, self).__init__(conf)
-
-    def is_alive(self):
-        return True
-
-    @property
-    def provider_name(self):
-        return "Mock"
-
-    @property
-    def service_controller(self):
-        return controllers.ServiceController(self)
+# Custom Configurations must be in Python dictionary format::
+#
+# foo = {'bar':'baz'}
+#
+# All configurations are accessible at::
+# pecan.conf
