@@ -1,3 +1,18 @@
+# Copyright (c) 2014 Rackspace, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import json
 
 from cafe.engine.http import client
@@ -6,9 +21,7 @@ from models import requests
 
 class AuthClient(client.HTTPClient):
 
-    """
-    Client Objects for Auth call
-    """
+    """Client Objects for Auth call."""
 
     def __init__(self):
         super(AuthClient, self).__init__()
@@ -17,8 +30,8 @@ class AuthClient(client.HTTPClient):
         self.default_headers['Accept'] = 'application/json'
 
     def get_auth_token(self, auth_url, user_name, api_key):
-        """
-        Get Auth Token using api_key
+        """Get Auth Token using api_key
+
         TODO (malini-kamalambal): Support getting token with password (or)
                                   api key.
         """
@@ -40,9 +53,7 @@ class AuthClient(client.HTTPClient):
 
 class CDNClient(client.AutoMarshallingHTTPClient):
 
-    """
-    Client objects for all the CDN api calls
-    """
+    """Client objects for all the CDN api calls."""
 
     def __init__(self, url, auth_token, serialize_format="json",
                  deserialize_format="json"):
@@ -60,11 +71,10 @@ class CDNClient(client.AutoMarshallingHTTPClient):
     def create_service(self, service_name=None,
                        domain_list=None, origin_list=None,
                        caching_list=None, requestslib_kwargs=None):
-        """
-        Creates Service
+        """Creates Service
+
         :return: Response Object containing response code 200 and body with
                 details of service
-
         PUT
         services/{service_name}
         """
@@ -78,8 +88,11 @@ class CDNClient(client.AutoMarshallingHTTPClient):
 
     def get_service(self, service_name):
         """Get Service
+
         :return: Response Object containing response code 200 and body with
         details of service
+        GET
+        services/{service_name}
         """
 
         url = '{0}/services/{1}'.format(self.url, service_name)
@@ -87,7 +100,10 @@ class CDNClient(client.AutoMarshallingHTTPClient):
 
     def delete_service(self, service_name):
         """Delete Service
+
         :return: Response Object containing response code 204
+        DELETE
+        services/{service_name}
         """
 
         url = '{0}/services/{1}'.format(self.url, service_name)
