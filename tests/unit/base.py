@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn import tests
+from tests import base
 
 
-class TestCase(tests.TestCase):
+class TestCase(base.TestCase):
     """Child class of tests.TestCase
 
     Inherit from this and write your test methods. If the child class defines

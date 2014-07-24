@@ -15,7 +15,7 @@
 
 from cdn.manager.default import driver
 from cdn.manager.default import services
-from cdn.tests.unit import base
+from tests.unit import base
 
 from ddt import ddt, file_data
 from mock import patch

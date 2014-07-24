@@ -19,7 +19,9 @@ from cdn.storage.cassandra import driver
 from cdn.storage.cassandra import services
 from mock import patch
 from oslo.config import cfg
-from unittest import TestCase
+
+from tests.unit import base
+
 
 CASSANDRA_OPTIONS = [
     cfg.ListOpt('cluster', default='mock_ip',
@@ -29,9 +31,11 @@ CASSANDRA_OPTIONS = [
 ]
 
 
-class CassandraStorageServiceTests(TestCase):
+class CassandraStorageServiceTests(base.TestCase):
     @patch.object(driver, 'CASSANDRA_OPTIONS', new=CASSANDRA_OPTIONS)
     def setUp(self):
+        super(CassandraStorageServiceTests, self).setUp()
+
         conf = cfg.ConfigOpts()
         self.cassandra_driver = driver.CassandraStorageDriver(conf)
 

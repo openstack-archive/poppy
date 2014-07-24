@@ -17,13 +17,13 @@ import ddt
 import fastly
 import mock
 import random
-import unittest
 
 from cdn.provider.fastly import services
+from tests.unit import base
 
 
 @ddt.ddt
-class TestServices(unittest.TestCase):
+class TestServices(base.TestCase):
 
     @ddt.file_data('data_service.json')
     @mock.patch('fastly.FastlyConnection')

@@ -17,17 +17,19 @@ import cassandra
 
 from cdn.storage.cassandra import driver
 from cdn.storage.cassandra import services
+from tests.unit import base
 
 from ddt import ddt, file_data
 from mock import patch
 from oslo.config import cfg
-from unittest import TestCase
 
 
 @ddt
-class CassandraStorageServiceTests(TestCase):
+class CassandraStorageServiceTests(base.TestCase):
 
     def setUp(self):
+        super(CassandraStorageServiceTests, self).setUp()
+
         # mock arguments to use
         self.project_id = '123456'
         self.service_name = 'mocksite'

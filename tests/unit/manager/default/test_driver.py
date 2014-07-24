@@ -15,7 +15,7 @@
 
 from cdn.manager.default import driver
 from cdn.manager.default import services
-from cdn.tests.unit import base
+from tests.unit import base
 
 from mock import patch
 from oslo.config import cfg
