@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.manager.default import driver
-from cdn.manager.default import services
+import mock
+import unittest
 
 from oslo.config import cfg
 
-import mock
-import unittest
+from cdn.manager.default import driver
+from cdn.manager.default import services
 
 
 class DefaultManagerServiceTests(unittest.TestCase):
