@@ -18,16 +18,26 @@ import six
 
 
 @six.add_metaclass(abc.ABCMeta)
-class DriverBase(object):
+class TransportDriverBase(object):
     """Base class for Transport Drivers to document the expected interface.
 
     :param conf: configuration instance
     :type conf: oslo.config.cfg.CONF
     """
 
-    def __init__(self, conf, storage):
+    def __init__(self, conf, manager):
         self._conf = conf
-        self._storage = storage
+        self._manager = manager
+
+        self._app = None
+
+    @property
+    def app(self):
+        return self._app
+
+    @property
+    def manager(self):
+        return self._manager
 
     @abc.abstractmethod
     def listen():

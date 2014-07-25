@@ -31,7 +31,7 @@ class ServiceController(base.ServiceBase):
         self.current_customer = self.client.get_current_customer()
 
     def update(self, service_name, service_json):
-        print("update services")
+        return self.responder.updated(service_name)
 
     def create(self, service_name, service_json):
 

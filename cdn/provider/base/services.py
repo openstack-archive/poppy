@@ -13,19 +13,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.provider import base
+import abc
+import six
+
+from cdn.provider.base import controller
+from cdn.provider.base import responder
 
 
-class ServiceController(base.ServiceBase):
+@six.add_metaclass(abc.ABCMeta)
+class ServicesControllerBase(controller.ProviderControllerBase):
 
     def __init__(self, driver):
-        super(ServiceController, self).__init__(driver)
+        super(ServicesControllerBase, self).__init__(driver)
 
+        self.responder = responder.Responder(driver.provider_name)
+
+    @abc.abstractmethod
     def update(self, service_name, service_json):
-        return self.responder.updated(service_name)
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def create(self, service_name, service_json):
-        return self.responder.created(service_name)
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def delete(self, service_name):
-        return self.responder.deleted(service_name)
+        raise NotImplementedError

@@ -15,8 +15,26 @@
 # limitations under the License.
 
 # THIS FILE IS MANAGED BY THE GLOBAL REQUIREMENTS REPO - DO NOT EDIT
+import os
 import setuptools
+from pip.req import parse_requirements
+
+requirement_files = []
+# walk the requirements directory and gather requirement files
+for root, dirs, files in os.walk('requirements'):
+    for requirements_file in files:
+        requirements_file_path = os.path.join(root, requirements_file)
+        # parse_requirements() returns generator of pip.req.InstallRequirement objects
+        requirement_files.append(parse_requirements(requirements_file_path))
+
+# parse all requirement files and generate requirements
+requirements = set()
+for requirement_file in requirement_files:
+    requirements.update([str(requirement.req) for requirement in requirement_file])
+# convert requirements in to list
+requirements = list(requirements)
 
 setuptools.setup(
+    install_requires = requirements,
     setup_requires=['pbr'],
     pbr=True)

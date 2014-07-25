@@ -15,7 +15,6 @@
 
 """Fastly CDN Provider implementation."""
 
-from cdn.common import decorators
 from cdn.openstack.common import log as logging
 from cdn.provider import base
 from cdn.provider.fastly import controllers
@@ -38,14 +37,18 @@ class CDNProvider(base.Driver):
     def __init__(self, conf):
         super(CDNProvider, self).__init__(conf)
 
-        self.conf.register_opts(FASTLY_OPTIONS,
-                                group=FASTLY_GROUP)
-        self.fastly_conf = self.conf[FASTLY_GROUP]
+        self._conf.register_opts(FASTLY_OPTIONS,
+                                 group=FASTLY_GROUP)
+        self.fastly_conf = self._conf[FASTLY_GROUP]
 
         self.fastly_client = fastly.connect(self.fastly_conf.apikey)
 
     def is_alive(self):
         return True
+
+    @property
+    def provider_name(self):
+        return "Fastly"
 
     @property
     def client(self):

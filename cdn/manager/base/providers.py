@@ -13,27 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""CDN Provider implementation."""
 
-from cdn.openstack.common import log as logging
-from cdn.provider import base
-from cdn.provider.mock import controllers
+class ProviderWrapper(object):
+    def create(self, ext, service_name, service_json):
+        return ext.obj.service_controller.create(service_name, service_json)
 
-LOG = logging.getLogger(__name__)
+    def update(self, ext, service_name, service_json):
+        return ext.obj.service_controller.update(service_name, service_json)
 
-
-class CDNProvider(base.Driver):
-
-    def __init__(self, conf):
-        super(CDNProvider, self).__init__(conf)
-
-    def is_alive(self):
-        return True
-
-    @property
-    def provider_name(self):
-        return "Mock"
-
-    @property
-    def service_controller(self):
-        return controllers.ServiceController(self)
+    def delete(self, ext, service_name):
+        return ext.obj.service_controller.delete(service_name)
