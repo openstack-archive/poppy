@@ -18,10 +18,9 @@ from cdn.storage import base
 
 class ServicesController(base.ServicesController):
 
-    def __init__(self, *args, **kwargs):
-        super(ServicesController, self).__init__(*args, **kwargs)
-
-        self._session = self.driver.service_database
+    @property
+    def session(self):
+        return self._driver.service_database
 
     def list(self, project_id):
         services = {
@@ -92,21 +91,13 @@ class ServicesController(base.ServicesController):
 
     def create(self, project_id, service_name, service_json):
 
-        # create at providers
-        providers = super(ServicesController, self).create(
-            project_id, service_name, service_json)
-
-        return providers
+        return ""
 
     def update(self, project_id, service_name, service_json):
         # update configuration in storage
-
-        # update at providers
-        return super(ServicesController, self).update(project_id,
-                                                      service_name,
-                                                      service_json)
+        return ""
 
     def delete(self, project_id, service_name):
 
         # delete from providers
-        return super(ServicesController, self).delete(project_id, service_name)
+        return ""

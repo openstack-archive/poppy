@@ -18,6 +18,9 @@ from cdn.storage import base
 
 
 class ServicesController(base.ServicesController):
+    @property
+    def session(self):
+        return self._driver.service_database
 
     def list(self, project_id):
         services = {}
