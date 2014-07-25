@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+
 import sys
 import traceback
 
@@ -24,7 +26,7 @@ class Responder(object):
     def failed(self, msg):
         ex_type, ex, tb = sys.exc_info()
 
-        print "error: ", self.provider, msg, ex_type, ex
+        print("error: {0} {1} {2} {3}".format(self.provider, msg, ex_type, ex))
         traceback.print_tb(tb)
 
         return {

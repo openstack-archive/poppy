@@ -13,15 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cassandra
+import mock
+
+from oslo.config import cfg
 
 from cdn.storage.cassandra import driver
 from cdn.storage.cassandra import services
-
-from oslo.config import cfg
 from tests.unit import base
 
-import cassandra
-import mock
 
 CASSANDRA_OPTIONS = [
     cfg.ListOpt('cluster', default='mock_ip',

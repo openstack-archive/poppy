@@ -13,16 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cassandra
+import ddt
+import mock
+
+from oslo.config import cfg
 
 from cdn.storage.cassandra import driver
 from cdn.storage.cassandra import services
 from tests.unit import base
-
-from oslo.config import cfg
-
-import cassandra
-import ddt
-import mock
 
 
 @ddt.ddt
