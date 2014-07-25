@@ -90,7 +90,7 @@ class ServicesController(base.ServicesController):
     def session(self):
         return self._driver.service_database
 
-    def list(self, project_id):
+    def list(self, project_id, marker=None, limit=None):
 
         # get all services
         args = {

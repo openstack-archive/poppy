@@ -18,8 +18,11 @@ from cdn.storage import base
 
 
 class ServicesController(base.ServicesController):
+    @property
+    def session(self):
+        return self._driver.service_database
 
-    def list(self, project_id):
+    def list(self, project_id, marker=None, limit=None):
         services = {}
         return services
 

@@ -27,7 +27,7 @@ class ServicesControllerBase(controller.StorageControllerBase):
         super(ServicesControllerBase, self).__init__(driver)
 
     @abc.abstractmethod
-    def list(self, project_id):
+    def list(self, project_id, marker=None, limit=None):
         raise NotImplementedError
 
     @abc.abstractmethod

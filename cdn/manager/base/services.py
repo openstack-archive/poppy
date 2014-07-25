@@ -29,7 +29,7 @@ class ServicesControllerBase(controller.ManagerControllerBase):
         self.provider_wrapper = providers.ProviderWrapper()
 
     @abc.abstractmethod
-    def list(self, project_id):
+    def list(self, project_id, marker=None, limit=None):
         raise NotImplementedError
 
     @abc.abstractmethod

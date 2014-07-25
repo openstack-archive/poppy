@@ -22,8 +22,8 @@ class DefaultServicesController(base.ServicesController):
 
         self.storage = self._driver.storage.service_controller
 
-    def list(self, project_id):
-        return self.storage.list(project_id)
+    def list(self, project_id, marker=None, limit=None):
+        return self.storage.list(project_id, marker, limit)
 
     def get(self, project_id, service_name):
         return self.storage.get(project_id, service_name)

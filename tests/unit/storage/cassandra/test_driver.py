@@ -13,15 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import cassandra
 
 from cdn.storage.cassandra import driver
 from cdn.storage.cassandra import services
-from mock import patch
-from oslo.config import cfg
 
+from oslo.config import cfg
 from tests.unit import base
 
+import cassandra
+import mock
 
 CASSANDRA_OPTIONS = [
     cfg.ListOpt('cluster', default='mock_ip',
@@ -32,7 +32,7 @@ CASSANDRA_OPTIONS = [
 
 
 class CassandraStorageServiceTests(base.TestCase):
-    @patch.object(driver, 'CASSANDRA_OPTIONS', new=CASSANDRA_OPTIONS)
+    @mock.patch.object(driver, 'CASSANDRA_OPTIONS', new=CASSANDRA_OPTIONS)
     def setUp(self):
         super(CassandraStorageServiceTests, self).setUp()
 
@@ -49,7 +49,7 @@ class CassandraStorageServiceTests(base.TestCase):
     def test_is_alive(self):
         self.assertEquals(self.cassandra_driver.is_alive(), True)
 
-    @patch.object(cassandra.cluster.Cluster, 'connect')
+    @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_connection(self, mock_cluster):
         self.cassandra_driver.connection()
         mock_cluster.assert_called_with('mock_cdn')
@@ -61,7 +61,7 @@ class CassandraStorageServiceTests(base.TestCase):
             isinstance(sc, services.ServicesController),
             True)
 
-    @patch.object(cassandra.cluster.Cluster, 'connect')
+    @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_service_database(self, mock_cluster):
         self.cassandra_driver.service_database
         mock_cluster.assert_called_with('mock_cdn')

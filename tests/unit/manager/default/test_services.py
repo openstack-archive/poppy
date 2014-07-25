@@ -17,15 +17,14 @@ from cdn.manager.default import driver
 from cdn.manager.default import services
 from tests.unit import base
 
-from ddt import ddt, file_data
-from mock import patch
 from oslo.config import cfg
 
+import mock
 
-@ddt
+
 class DefaultManagerServiceTests(base.TestCase):
-    @patch('cdn.storage.base.driver.StorageDriverBase')
-    @patch('cdn.provider.base.driver.ProviderDriverBase')
+    @mock.patch('cdn.storage.base.driver.StorageDriverBase')
+    @mock.patch('cdn.provider.base.driver.ProviderDriverBase')
     def setUp(self, mock_driver, mock_provider):
         super(DefaultManagerServiceTests, self).setUp()
 
@@ -38,8 +37,7 @@ class DefaultManagerServiceTests(base.TestCase):
         # stubbed driver
         self.sc = services.DefaultServicesController(manager_driver)
 
-    @file_data('data_list_response.json')
-    def test_create(self, expected_response):
+    def test_create(self):
         project_id = 'mock_id'
         service_name = 'mock_service'
         service_json = ''
@@ -56,8 +54,7 @@ class DefaultManagerServiceTests(base.TestCase):
                                               service_name,
                                               service_json)
 
-    @file_data('data_list_response.json')
-    def test_update(self, expected_response):
+    def test_update(self):
         project_id = 'mock_id'
         service_name = 'mock_service'
         service_json = ''
@@ -74,8 +71,7 @@ class DefaultManagerServiceTests(base.TestCase):
                                               service_name,
                                               service_json)
 
-    @file_data('data_list_response.json')
-    def test_delete(self, expected_response):
+    def test_delete(self):
         project_id = 'mock_id'
         service_name = 'mock_service'
 

@@ -13,20 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import cassandra
 
 from cdn.storage.cassandra import driver
 from cdn.storage.cassandra import services
 from tests.unit import base
 
-from ddt import ddt, file_data
-from mock import patch
 from oslo.config import cfg
 
+import cassandra
+import ddt
+import mock
 
-@ddt
+
+@ddt.ddt
 class CassandraStorageServiceTests(base.TestCase):
-
     def setUp(self):
         super(CassandraStorageServiceTests, self).setUp()
 
@@ -41,9 +41,9 @@ class CassandraStorageServiceTests(base.TestCase):
         # stubbed cassandra driver
         self.sc = services.ServicesController(cassandra_driver)
 
-    @file_data('data_get_service.json')
-    @patch.object(services.ServicesController, 'session')
-    @patch.object(cassandra.cluster.Session, 'execute')
+    @ddt.file_data('data_get_service.json')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_get_service(self, value, mock_session, mock_execute):
 
         # mock the response from cassandra
@@ -56,9 +56,9 @@ class CassandraStorageServiceTests(base.TestCase):
         self.assertEqual(actual_response[0][0], self.project_id)
         self.assertEqual(actual_response[0][1], self.service_name)
 
-    @file_data('data_create_service.json')
-    @patch.object(services.ServicesController, 'session')
-    @patch.object(cassandra.cluster.Session, 'execute')
+    @ddt.file_data('data_create_service.json')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_create_service(self, value, mock_session, mock_execute):
         responses = self.sc.create(self.project_id, self.service_name, value)
 
@@ -68,9 +68,9 @@ class CassandraStorageServiceTests(base.TestCase):
 
         # TODO(amitgandhinz): need to validate the create to cassandra worked.
 
-    @file_data('data_list_services.json')
-    @patch.object(services.ServicesController, 'session')
-    @patch.object(cassandra.cluster.Session, 'execute')
+    @ddt.file_data('data_list_services.json')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_list_services(self, value, mock_session, mock_execute):
         # mock the response from cassandra
         mock_execute.execute.return_value = value
@@ -83,8 +83,8 @@ class CassandraStorageServiceTests(base.TestCase):
         self.assertEqual(actual_response[0][0], self.project_id)
         self.assertEqual(actual_response[0][1], "mocksite")
 
-    @patch.object(services.ServicesController, 'session')
-    @patch.object(cassandra.cluster.Session, 'execute')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_delete_service(self, mock_session, mock_execute):
         # mock the response from cassandra
         actual_response = self.sc.delete(self.project_id, self.service_name)
@@ -93,9 +93,9 @@ class CassandraStorageServiceTests(base.TestCase):
         # into the driver to respond to this call
         self.assertEqual(actual_response, None)
 
-    @file_data('data_update_service.json')
-    @patch.object(services.ServicesController, 'session')
-    @patch.object(cassandra.cluster.Session, 'execute')
+    @ddt.file_data('data_update_service.json')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_update_service(self, value, mock_session, mock_execute):
         # mock the response from cassandra
         actual_response = self.sc.update(self.project_id,
@@ -106,7 +106,7 @@ class CassandraStorageServiceTests(base.TestCase):
         # into the driver to respond to this call
         self.assertEqual(actual_response, None)
 
-    @patch.object(cassandra.cluster.Cluster, 'connect')
+    @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_session(self, mock_service_database):
         session = self.sc.session
         self.assertNotEquals(session, None)

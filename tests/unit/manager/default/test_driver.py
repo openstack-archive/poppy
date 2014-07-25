@@ -17,13 +17,14 @@ from cdn.manager.default import driver
 from cdn.manager.default import services
 from tests.unit import base
 
-from mock import patch
 from oslo.config import cfg
+
+import mock
 
 
 class DefaultManagerDriverTests(base.TestCase):
-    @patch('cdn.storage.base.driver.StorageDriverBase')
-    @patch('cdn.provider.base.driver.ProviderDriverBase')
+    @mock.patch('cdn.storage.base.driver.StorageDriverBase')
+    @mock.patch('cdn.provider.base.driver.ProviderDriverBase')
     def setUp(self, mock_storage, mock_provider):
         super(DefaultManagerDriverTests, self).setUp()
 
