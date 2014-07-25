@@ -36,6 +36,4 @@ class DefaultManagerDriverTests(base.TestCase):
     def test_services_controller(self):
         sc = self.driver.services_controller
 
-        self.assertEquals(
-            isinstance(sc, services.DefaultServicesController),
-            True)
+        self.assertIsInstance(sc, services.DefaultServicesController)
