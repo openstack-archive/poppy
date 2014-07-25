@@ -13,32 +13,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# stevedore/example/simple.py
-from cdn.storage import base
+import abc
+import six
+
+from cdn.storage.base import controller
 
 
-class ServicesController(base.ServicesController):
-    @property
-    def session(self):
-        return self._driver.service_database
+@six.add_metaclass(abc.ABCMeta)
+class ServicesControllerBase(controller.StorageControllerBase):
 
+    def __init__(self, driver):
+        super(ServicesControllerBase, self).__init__(driver)
+
+    @abc.abstractmethod
     def list(self, project_id, marker=None, limit=None):
-        services = {}
-        return services
+        raise NotImplementedError
 
-    def get(self, project_id, service_name):
-        # get the requested service from storage
-        pass
-
+    @abc.abstractmethod
     def create(self, project_id, service_name, service_json):
+        raise NotImplementedError
 
-        # create the service in storage
-        pass
-
+    @abc.abstractmethod
     def update(self, project_id, service_name, service_json):
-        # update configuration in storage
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def delete(self, project_id, service_name):
-        # delete local configuration from storage
-        pass
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get(self):
+        raise NotImplementedError

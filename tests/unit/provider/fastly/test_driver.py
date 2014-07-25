@@ -37,7 +37,7 @@ class TestDriver(unittest.TestCase):
     def test_init(self, mock_connect):
         provider = driver.CDNProvider(self.conf)
         mock_connect.assert_called_once_with(
-            provider.conf['drivers:provider:fastly'].apikey)
+            provider._conf['drivers:provider:fastly'].apikey)
 
     @mock.patch.object(driver, 'FASTLY_OPTIONS', new=FASTLY_OPTIONS)
     def test_is_alive(self):

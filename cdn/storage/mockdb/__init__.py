@@ -3,4 +3,4 @@
 from cdn.storage.mockdb import driver
 
 # Hoist classes into package namespace
-StorageDriver = driver.StorageDriver
+Driver = driver.MockDBStorageDriver

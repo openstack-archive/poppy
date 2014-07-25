@@ -13,27 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""CDN Provider implementation."""
+"""Default manager driver implementation."""
 
-from cdn.openstack.common import log as logging
-from cdn.provider import base
-from cdn.provider.mock import controllers
-
-LOG = logging.getLogger(__name__)
+from cdn.common import decorators
+from cdn.manager import base
+from cdn.manager.default import controllers
 
 
-class CDNProvider(base.Driver):
+class DefaultManagerDriver(base.Driver):
 
-    def __init__(self, conf):
-        super(CDNProvider, self).__init__(conf)
+    def __init__(self, conf, storage, providers):
+        super(DefaultManagerDriver, self).__init__(conf, storage, providers)
 
-    def is_alive(self):
-        return True
-
-    @property
-    def provider_name(self):
-        return "Mock"
-
-    @property
-    def service_controller(self):
-        return controllers.ServiceController(self)
+    @decorators.lazy_property(write=False)
+    def services_controller(self):
+        return controllers.Services(self)

@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Rackspace, Inc.
+# Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,30 +16,26 @@
 import abc
 import six
 
+from cdn.provider.base import controller
+from cdn.provider.base import responder
+
 
 @six.add_metaclass(abc.ABCMeta)
-class TransportDriverBase(object):
-    """Base class for Transport Drivers to document the expected interface.
+class ServicesControllerBase(controller.ProviderControllerBase):
 
-    :param conf: configuration instance
-    :type conf: oslo.config.cfg.CONF
-    """
+    def __init__(self, driver):
+        super(ServicesControllerBase, self).__init__(driver)
 
-    def __init__(self, conf, manager):
-        self._conf = conf
-        self._manager = manager
-
-        self._app = None
-
-    @property
-    def app(self):
-        return self._app
-
-    @property
-    def manager(self):
-        return self._manager
+        self.responder = responder.Responder(driver.provider_name)
 
     @abc.abstractmethod
-    def listen():
-        """Start listening for client requests (self-hosting mode)."""
+    def update(self, service_name, service_json):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def create(self, service_name, service_json):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def delete(self, service_name):
         raise NotImplementedError

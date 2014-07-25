@@ -13,27 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""CDN Provider implementation."""
-
-from cdn.openstack.common import log as logging
-from cdn.provider import base
-from cdn.provider.mock import controllers
-
-LOG = logging.getLogger(__name__)
+import abc
+import six
 
 
-class CDNProvider(base.Driver):
+@six.add_metaclass(abc.ABCMeta)
+class StorageControllerBase(object):
 
-    def __init__(self, conf):
-        super(CDNProvider, self).__init__(conf)
+    """Top-level class for controllers.
 
-    def is_alive(self):
-        return True
+    :param driver: Instance of the driver
+        instantiating this controller.
+    """
 
-    @property
-    def provider_name(self):
-        return "Mock"
-
-    @property
-    def service_controller(self):
-        return controllers.ServiceController(self)
+    def __init__(self, driver):
+        self._driver = driver

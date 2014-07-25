@@ -25,6 +25,8 @@ LOG = log.getLogger(__name__)
 _DRIVER_OPTIONS = [
     cfg.StrOpt('transport', default='falcon',
                help='Transport driver to use'),
+    cfg.StrOpt('manager', default='default',
+               help='Manager driver to use'),
     cfg.StrOpt('storage', default='mockdb',
                help='Storage driver to use'),
 ]
@@ -72,11 +74,30 @@ class Bootstrap(object):
         storage_type = 'cdn.storage'
         storage_name = self.driver_conf.storage
 
-        args = [self.conf, self.provider]
+        args = [self.conf]
 
         try:
             mgr = driver.DriverManager(namespace=storage_type,
                                        name=storage_name,
+                                       invoke_on_load=True,
+                                       invoke_args=args)
+            return mgr.driver
+        except RuntimeError as exc:
+            LOG.exception(exc)
+
+    @decorators.lazy_property(write=False)
+    def manager(self):
+        LOG.debug((u'Loading manager driver'))
+
+        # create the driver manager to load the appropriate drivers
+        manager_type = 'cdn.manager'
+        manager_name = self.driver_conf.manager
+
+        args = [self.conf, self.storage, self.provider]
+
+        try:
+            mgr = driver.DriverManager(namespace=manager_type,
+                                       name=manager_name,
                                        invoke_on_load=True,
                                        invoke_args=args)
             return mgr.driver
@@ -91,7 +112,7 @@ class Bootstrap(object):
         transport_type = 'cdn.transport'
         transport_name = self.driver_conf.transport
 
-        args = [self.conf, self.storage]
+        args = [self.conf, self.manager]
 
         LOG.debug((u'Loading transport driver: %s'), transport_name)
 
