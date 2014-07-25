@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import abc
-
 import six
 
 from cdn.storage.base import controller
