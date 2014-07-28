@@ -16,7 +16,7 @@
 from cafe.engine.models.data_interfaces import ConfigSectionInterface
 
 
-class cdnConfig(ConfigSectionInterface):
+class CDNConfig(ConfigSectionInterface):
     """Defines the config values for cdn."""
     SECTION_NAME = 'cdn'
 
@@ -26,7 +26,7 @@ class cdnConfig(ConfigSectionInterface):
         return self.get('base_url')
 
 
-class cdnServerConfig(ConfigSectionInterface):
+class CDNServerConfig(ConfigSectionInterface):
     """Defines the config values for starting (or not) a cdn server"""
     SECTION_NAME = 'cdn_server'
 
@@ -36,7 +36,7 @@ class cdnServerConfig(ConfigSectionInterface):
         return self.get_boolean('run_server')
 
 
-class authConfig(ConfigSectionInterface):
+class AuthConfig(ConfigSectionInterface):
     """Defines the auth config values."""
     SECTION_NAME = 'auth'
 

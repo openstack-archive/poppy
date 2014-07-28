@@ -8,7 +8,7 @@ api_key={api key for this user name}
 base_url=https://identity.api.rackspacecloud.com/v2.0
 
 [cdn]
-base_url=https://private-ea1ca-cloudcdn.apiary.io
+base_url=https//0.0.0.0:8888
 
 [cdn_server]
 run_server=True

@@ -1,9 +1,8 @@
 API Tests
 =========
 
-These test an actual API against a running environment.
 The API tests
-
++ test an actual API against a running environment.
 + are black box tests
 + can be used to test any running instance of cdn server (dev, test, prod, local
   instance, containerized instance)

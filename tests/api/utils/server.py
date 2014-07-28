@@ -68,8 +68,12 @@ class Server(object):
         self.process.daemon = True
         self.process.start()
 
-        # Give it a second to boot.
-        self.process.join(1)
+        # Set the timeout. The calling thread will be blocked until the process
+        # whose join() method is called terminates or until the timeout occurs.
+        # The timeout is set, so that the calling (API tests)
+        # & called processes (CDN Server) can execute in parallel.
+        self.process.join(.001)
+
         return self.process
 
     def stop(self):
