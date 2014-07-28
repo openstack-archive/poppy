@@ -73,5 +73,3 @@ class TestPecanDriver(unittest.TestCase):
         #assertR
         t.stop()
         terminate_thread(t)
-         
-    
