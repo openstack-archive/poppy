@@ -43,9 +43,3 @@ class RootController(base.Controller):
             args.pop(1)
 
         return super(RootController, self)._route(args, request)
-
-    @pecan.expose('json')
-    def get_all(self):
-        return {
-            'status': 'up',
-        }

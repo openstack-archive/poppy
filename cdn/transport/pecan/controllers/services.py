@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import uuid
+import json
 
 import pecan
 
+from cdn.openstack.common import local
 from cdn.transport.pecan.controllers import base
 
 
@@ -24,12 +25,41 @@ class ServicesController(base.Controller):
 
     @pecan.expose('json')
     def get_all(self):
-        tenant_id = pecan.request.context.to_dict()['tenant']
+        context = local.store.context
+        tenant_id = context.tenant
+        marker = pecan.request.GET.get('marker')
+        limit = pecan.request.GET.get('limit')
         services_controller = self._driver.manager.services_controller
-        return services_controller.list(tenant_id)
+        return services_controller.list(tenant_id, marker, limit)
 
     @pecan.expose('json')
-    def get_one(self):
-        tenant_id = pecan.request.context.to_dict()['tenant']
+    def get_one(self, service_name):
+        context = local.store.context
+        tenant_id = context.tenant
         services_controller = self._driver.manager.services_controller
-        return services_controller.list(tenant_id)
+        return services_controller.get(tenant_id, service_name)
+
+    @pecan.expose('json')
+    def put(self, service_name):
+        context = local.store.context
+        tenant_id = context.tenant
+        services_controller = self._driver.manager.services_controller
+        service_json = json.loads(pecan.request.body.decode('utf-8'))
+        return services_controller.create(tenant_id, service_name,
+                                                        service_json)
+
+    @pecan.expose('json')
+    def delete(self, service_name):
+        context = local.store.context
+        tenant_id = context.tenant
+        services_controller = self._driver.manager.services_controller
+        return services_controller.delete(tenant_id, service_name)
+
+    @pecan.expose('json')
+    def patch_one(self, service_name):
+        context = local.store.context
+        tenant_id = context.tenant
+        services_controller = self._driver.manager.services_controller
+        service_json = json.loads(pecan.request.body.decode('utf-8'))
+        return services_controller.update(tenant_id, service_name,
+                                                        service_json)

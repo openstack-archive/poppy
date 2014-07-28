@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
+
+import pecan
 from pecan import rest
 
 
@@ -23,3 +26,25 @@ class Controller(rest.RestController):
 
     def add_controller(self, path, controller):
         setattr(self, path, controller)
+
+    def _handle_patch(self, method, remainder):
+        '''
+        Routes ``PATCH`` actions to the appropriate controller.
+        '''
+        # route to a patch_all or get if no additional parts are available
+        if not remainder or remainder == ['']:
+            controller = self._find_controller('patch_all', 'patch')
+            if controller:
+                return controller, []
+            pecan.abort(404)
+
+        controller = getattr(self, remainder[0], None)
+        if controller and not inspect.ismethod(controller):
+            return pecan.routing.lookup_controller(controller, remainder[1:])
+
+        # finally, check for the regular patch_one/patch requests
+        controller = self._find_controller('patch_one', 'patch')
+        if controller:
+            return controller, remainder
+
+        pecan.abort(404)
