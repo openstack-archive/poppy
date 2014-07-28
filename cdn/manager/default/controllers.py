@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.manager.default import services
+from cdn.manager.default import services, v1
 
 
 Services = services.DefaultServicesController
+V1 = v1.DefaultV1Controller

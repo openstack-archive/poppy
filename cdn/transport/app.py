@@ -28,7 +28,7 @@ to the WSGI app when it is called from other apps.
 
 from oslo.config import cfg
 
-from dory import bootstrap
+from cdn import bootstrap
 
 
 conf = cfg.CONF
