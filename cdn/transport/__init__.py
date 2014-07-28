@@ -3,5 +3,6 @@
 
 from cdn.transport import base
 
+
 # Hoist into package namespace
-DriverBase = base.DriverBase
+Driver = base.TransportDriverBase

@@ -15,15 +15,14 @@
 
 """CDN Provider implementation."""
 
-from cdn.common import decorators
 from cdn.openstack.common import log as logging
-from cdn import provider
+from cdn.provider import base
 from cdn.provider.mock import controllers
 
 LOG = logging.getLogger(__name__)
 
 
-class CDNProvider(provider.CDNProviderBase):
+class CDNProvider(base.Driver):
 
     def __init__(self, conf):
         super(CDNProvider, self).__init__(conf)
@@ -31,6 +30,10 @@ class CDNProvider(provider.CDNProviderBase):
     def is_alive(self):
         return True
 
-    @decorators.lazy_property(write=False)
+    @property
+    def provider_name(self):
+        return "Mock"
+
+    @property
     def service_controller(self):
-        return controllers.ServiceController()
+        return controllers.ServiceController(self)
