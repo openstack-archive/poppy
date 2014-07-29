@@ -38,7 +38,7 @@ origin = {
 cache = {'type': 'object',
          'properties': {
              'name': {'type': 'string', 'pattern': '^[a-zA-Z0-9_-]{1,64}$'},
-             'ttl': {'type': 'number', 'minimum': 1, 'maximum': 36000},
+             'ttl': {'type': 'number', 'minimum': 1, 'maximum': 3600},
              'rules': {'type': 'array'}},
          'required': ['name', 'ttl'],
          'additionalProperties': False}
