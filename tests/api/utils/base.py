@@ -13,16 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import abc
 import jsonschema
-import multiprocessing
-import six
+
+from oslo.config import cfg
 
 from cafe.drivers.unittest import fixtures
-from cdn import bootstrap
 
 from tests.api.utils import client
 from tests.api.utils import config
+from tests.api.utils import server
 
 
 class TestBase(fixtures.BaseTestFixture):
@@ -38,18 +37,25 @@ class TestBase(fixtures.BaseTestFixture):
 
         super(TestBase, cls).setUpClass()
 
-        cls.auth_config = config.authConfig()
+        cls.auth_config = config.AuthConfig()
         cls.auth_client = client.AuthClient()
         auth_token = cls.auth_client.get_auth_token(cls.auth_config.base_url,
                                                     cls.auth_config.user_name,
                                                     cls.auth_config.api_key)
 
-        cls.config = config.cdnConfig()
+        cls.config = config.CDNConfig()
         cls.url = cls.config.base_url
 
         cls.client = client.CDNClient(cls.url, auth_token,
                                       serialize_format='json',
                                       deserialize_format='json')
+
+        cls.server_config = config.CDNServerConfig()
+        if cls.server_config.run_server:
+            conf = cfg.CONF
+            conf(project='cdn', prog='cdn')
+            cdn_server = server.CDNServer()
+            cdn_server.start(conf)
 
     def assertSchema(self, response_json, expected_schema):
         """Verify response schema aligns with the expected schema."""
@@ -62,74 +68,3 @@ class TestBase(fixtures.BaseTestFixture):
     def tearDownClass(cls):
         """Deletes the added resources."""
         super(TestBase, cls).tearDownClass()
-
-
-@six.add_metaclass(abc.ABCMeta)
-class Server(object):
-
-    name = "cdn-api-test-server"
-
-    def __init__(self):
-        self.process = None
-
-    @abc.abstractmethod
-    def get_target(self, conf):
-        """Prepares the target object
-
-        This method is meant to initialize server's
-        bootstrap and return a callable to run the
-        server.
-
-        :param conf: The config instance for the
-            bootstrap class
-        :returns: A callable object
-        """
-        raise NotImplementedError
-
-    def is_alive(self):
-        """Returns True IF the server is running."""
-
-        if self.process is None:
-            return False
-
-        return self.process.is_alive()
-
-    def start(self, conf):
-        """Starts the server process.
-
-        :param conf: The config instance to use for
-            the new process
-        :returns: A `multiprocessing.Process` instance
-        """
-
-        target = self.get_target(conf)
-
-        if not callable(target):
-            raise RuntimeError("Target not callable")
-
-        self.process = multiprocessing.Process(target=target,
-                                               name=self.name)
-        self.process.daemon = True
-        self.process.start()
-
-        # Give it a second to boot.
-        self.process.join(1)
-        return self.process
-
-    def stop(self):
-        """Terminates a process
-
-        This method kills a process by
-        calling `terminate`. Note that
-        children of this process won't be
-        terminated but become orphaned.
-        """
-        self.process.terminate()
-
-
-class CDNServer(Server):
-    name = "cdn-wsgiref-test-server"
-
-    def get_target(self, conf):
-        server = bootstrap.Bootstrap(conf)
-        return server.run
