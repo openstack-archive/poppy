@@ -65,6 +65,3 @@ class TestCase(testtools.TestCase):
         conf = cfg.ConfigOpts()
         conf(args=[], default_config_files=[cls.conf_path(filename)])
         return conf
-
-    def _my_dir(self):
-        return os.path.abspath(os.path.dirname(__file__))
