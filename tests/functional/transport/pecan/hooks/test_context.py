@@ -31,7 +31,7 @@ class ContextHookTest(base.FunctionalTest):
         response = self.app.get('/v1.0', headers=self.headers)
 
         self.assertEqual(200, response.status_code)
-        
+
         # Temporary until actual implementation
         self.assertEqual(v1.JSON_HOME, response.json)
 

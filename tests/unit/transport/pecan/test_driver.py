@@ -17,7 +17,6 @@ import os
 
 import mock
 from oslo.config import cfg
-import testtools
 
 from cdn.transport import pecan
 from tests.unit.utils.base import UnitTestBase
@@ -27,9 +26,9 @@ class PecanTransportDriverTest(UnitTestBase):
 
     def test_listen(self):
         tests_path = os.path.abspath(os.path.dirname(
-                                    os.path.dirname(
+            os.path.dirname(
                                      os.path.dirname(os.path.dirname(__file__)
-                                    ))))
+                                                     ))))
         conf_path = os.path.join(tests_path, 'etc', 'default_functional.conf')
         cfg.CONF(args=[], default_config_files=[conf_path])
 

@@ -28,9 +28,9 @@ class BaseFunctionalTest(testtools.TestCase):
         super(BaseFunctionalTest, self).setUp()
 
         tests_path = os.path.abspath(os.path.dirname(
-                                    os.path.dirname(
-                                     os.path.dirname(os.path.dirname(__file__)
-                                    ))))
+            os.path.dirname(
+                os.path.dirname(os.path.dirname(__file__)
+                                ))))
         conf_path = os.path.join(tests_path, 'etc', 'default_functional.conf')
         cfg.CONF(args=[], default_config_files=[conf_path])
         cdn_wsgi = bootstrap.Bootstrap(cfg.CONF).transport.app

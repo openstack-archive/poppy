@@ -33,7 +33,8 @@ class ContextHook(hooks.PecanHook):
             context_kwargs['tenant'] = state.request.path.split('/')[2]
 
         if 'X-Auth-Token' in state.request.headers:
-            context_kwargs['auth_token'] = state.request.headers['X-Auth-Token']
+            context_kwargs['auth_token'] = \
+                state.request.headers['X-Auth-Token']
 
         request_context = context.RequestContext(**context_kwargs)
         state.request.context = request_context

@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import requests
 from oslo.config import cfg
 
 from cdn.transport.pecan import driver
@@ -22,16 +21,15 @@ from tests.unit.utils import thread_helper
 
 
 class TestPecanDriver(base.UnitTestBase):
+
     def setUp(self):
         # Let manager = None for now
         self.pecan_driver = driver.PecanTransportDriver(cfg.CONF, None)
         super(TestPecanDriver, self).setUp()
-        
-    
-    
+
     def test_app_created(self):
         self.assertEquals(self.pecan_driver.app is not None, True)
-        t = thread_helper.StoppableThread(target = self.pecan_driver.listen)
+        t = thread_helper.StoppableThread(target=self.pecan_driver.listen)
         t.start()
         self.assertTrue(t.isAlive())
         t.stop()
