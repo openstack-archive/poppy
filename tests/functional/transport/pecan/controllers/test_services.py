@@ -15,6 +15,10 @@
 
 import json
 
+import pecan
+from webtest import app
+
+from cdn.transport.pecan.controllers import base as c_base
 from tests.functional.transport.pecan import base
 
 
@@ -52,6 +56,28 @@ class ServiceControllerTest(base.FunctionalTest):
                                   })
 
         self.assertEqual(200, response.status_code)
+    
+    def test_patch_non_exist(self):
+        # This is for coverage 100%
+        self.assertRaises(app.AppError, self.app.patch, "/v1.0/0001", 
+                            headers = {
+                                  "Content-Type" : "application/json"
+                                  })
+        
+        self.assertRaises(app.AppError, self.app.patch, 
+                            "/v1.0/01234/123", 
+                            headers = {
+                                "Content-Type" : "application/json"
+                            })
+        
+        class FakeController(c_base.Controller):
+            @pecan.expose("json")
+            def patch_all(self):
+                return "Hello World!"
+        
+        self.test_fake_controller = FakeController(None)
+        patch_ret_val = self.test_fake_controller._handle_patch('patch', '')
+        self.assertTrue(len(patch_ret_val) == 2)
         
     def test_delete(self):
         response = self.app.delete('/v1.0/0001/services/fake_service_name_4')

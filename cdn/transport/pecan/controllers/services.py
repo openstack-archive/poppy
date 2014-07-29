@@ -46,7 +46,7 @@ class ServicesController(base.Controller):
         services_controller = self._driver.manager.services_controller
         service_json = json.loads(pecan.request.body.decode('utf-8'))
         return services_controller.create(tenant_id, service_name,
-                                                        service_json)
+                                          service_json)
 
     @pecan.expose('json')
     def delete(self, service_name):
@@ -62,4 +62,4 @@ class ServicesController(base.Controller):
         services_controller = self._driver.manager.services_controller
         service_json = json.loads(pecan.request.body.decode('utf-8'))
         return services_controller.update(tenant_id, service_name,
-                                                        service_json)
+                                          service_json)

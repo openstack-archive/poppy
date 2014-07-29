@@ -34,7 +34,7 @@ class RootController(base.Controller):
     def _route(self, args, request=None):
         # Optionally allow OpenStack project ID in the URL
         # Remove it from the URL if it's present
-        # ['v1', 'todos'] or ['v1', '123', 'todos']
+        # ['v1.0', 'services'] or ['v1', '123', 'services']
         if (
             len(args) >= 2
             and args[0] in self.paths

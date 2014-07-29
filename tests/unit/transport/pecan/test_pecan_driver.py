@@ -13,63 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-import threading
-import ctypes
-
 import requests
 from oslo.config import cfg
 
 from cdn.transport.pecan import driver
+from tests.unit.utils import base
+from tests.unit.utils import thread_helper
 
 
-def terminate_thread(thread):
-    """Terminates a python thread from another thread.
-
-    :param thread: a threading.Thread instance
-    """
-    if not thread.isAlive():
-        return
-
-    exc = ctypes.py_object(SystemExit)
-    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
-        ctypes.c_long(thread.ident), exc)
-    if res == 0:
-        raise ValueError("nonexistent thread id")
-    elif res > 1:
-        # """if it returns a number greater than one, you're in trouble,
-        # and you should call it again with exc=NULL to revert the effect"""
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(thread.ident, None)
-        raise SystemError("PyThreadState_SetAsyncExc failed")
-
-
-class StoppableThread(threading.Thread):
-    """Thread class with a stop() method. The thread itself has to check
-    regularly for the stopped() condition."""
-
-    def __init__(self, **kwargs):
-        super(StoppableThread, self).__init__(**kwargs)
-        self._stop = threading.Event()
-
-    def stop(self):
-        self._stop.set()
-
-    def stopped(self):
-        return self._stop.isSet()
-
-
-class TestPecanDriver(unittest.TestCase):
+class TestPecanDriver(base.UnitTestBase):
     def setUp(self):
         # Let manager = None for now
         self.pecan_driver = driver.PecanTransportDriver(cfg.CONF, None)
+        super(TestPecanDriver, self).setUp()
+        
     
     
     def test_app_created(self):
         self.assertEquals(self.pecan_driver.app is not None, True)
-        t = StoppableThread(target = self.pecan_driver.listen)
+        t = thread_helper.StoppableThread(target = self.pecan_driver.listen)
         t.start()
-        #r = requests.get('http://127.0.0.1:8888')
-        #print r
-        #assertR
+        self.assertTrue(t.isAlive())
         t.stop()
-        terminate_thread(t)
+        thread_helper.terminate_thread(t)
