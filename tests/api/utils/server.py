@@ -72,7 +72,7 @@ class Server(object):
         # whose join() method is called terminates or until the timeout occurs.
         # The timeout is set, so that the calling (API tests)
         # & called processes (CDN Server) can execute in parallel.
-        self.process.join(.001)
+        self.process.join(.1)
 
         return self.process
 

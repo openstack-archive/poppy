@@ -51,7 +51,6 @@ class TestBase(fixtures.BaseTestFixture):
                                       deserialize_format='json')
 
         cls.server_config = config.CDNServerConfig()
-
         if cls.server_config.run_server:
             conf = cfg.CONF
             conf(project='cdn', prog='cdn')
