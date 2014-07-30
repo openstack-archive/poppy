@@ -16,13 +16,13 @@
 import os
 
 from oslo.config import cfg
-import testtools
 import webtest
 
 from cdn import bootstrap
+from tests.functional import base
 
 
-class BaseFunctionalTest(testtools.TestCase):
+class BaseFunctionalTest(base.TestCase):
 
     def setUp(self):
         super(BaseFunctionalTest, self).setUp()
