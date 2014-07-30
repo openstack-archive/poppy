@@ -15,10 +15,10 @@
 
 import fastly
 import mock
-import unittest
 
 from cdn.provider.fastly import driver
 from oslo.config import cfg
+from tests.unit import base
 
 FASTLY_OPTIONS = [
     cfg.StrOpt('apikey',
@@ -27,9 +27,11 @@ FASTLY_OPTIONS = [
 ]
 
 
-class TestDriver(unittest.TestCase):
+class TestDriver(base.TestCase):
 
     def setUp(self):
+        super(TestDriver, self).setUp()
+
         self.conf = cfg.ConfigOpts()
 
     @mock.patch('fastly.connect')
