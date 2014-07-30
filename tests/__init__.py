@@ -15,8 +15,6 @@
 import os
 
 
-tests_dir = os.path.abspath(os.path.dirname(__file__))
-os.environ.setdefault("CDN_TESTS_DIR", tests_dir)
-
 if "CDN_TESTS_CONFIGS_DIR" not in os.environ:
+    tests_dir = os.path.abspath(os.path.dirname(__file__))
     os.environ["CDN_TESTS_CONFIGS_DIR"] = os.path.join(tests_dir, "etc")
