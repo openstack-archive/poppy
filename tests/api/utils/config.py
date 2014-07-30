@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cafe.engine.models.data_interfaces import ConfigSectionInterface
+from cafe.engine.models import data_interfaces
 
 
-class cdnConfig(ConfigSectionInterface):
+class CDNConfig(data_interfaces.ConfigSectionInterface):
     """Defines the config values for cdn."""
     SECTION_NAME = 'cdn'
 
@@ -26,7 +26,17 @@ class cdnConfig(ConfigSectionInterface):
         return self.get('base_url')
 
 
-class authConfig(ConfigSectionInterface):
+class CDNServerConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the config values for starting (or not) a cdn server"""
+    SECTION_NAME = 'cdn_server'
+
+    @property
+    def run_server(self):
+        """Boolean value indicating whether to start CDN server."""
+        return self.get_boolean('run_server')
+
+
+class AuthConfig(data_interfaces.ConfigSectionInterface):
     """Defines the auth config values."""
     SECTION_NAME = 'auth'
 
