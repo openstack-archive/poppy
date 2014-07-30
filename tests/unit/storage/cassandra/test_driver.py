@@ -15,12 +15,12 @@
 
 import cassandra
 import mock
-import unittest
 
 from oslo.config import cfg
 
 from cdn.storage.cassandra import driver
 from cdn.storage.cassandra import services
+from tests.unit import base
 
 
 CASSANDRA_OPTIONS = [
@@ -31,9 +31,11 @@ CASSANDRA_OPTIONS = [
 ]
 
 
-class CassandraStorageServiceTests(unittest.TestCase):
+class CassandraStorageServiceTests(base.TestCase):
     @mock.patch.object(driver, 'CASSANDRA_OPTIONS', new=CASSANDRA_OPTIONS)
     def setUp(self):
+        super(CassandraStorageServiceTests, self).setUp()
+
         conf = cfg.ConfigOpts()
         self.cassandra_driver = driver.CassandraStorageDriver(conf)
 

@@ -14,18 +14,20 @@
 # limitations under the License.
 
 import mock
-import unittest
 
 from oslo.config import cfg
 
 from cdn.manager.default import driver
 from cdn.manager.default import services
+from tests.unit import base
 
 
-class DefaultManagerServiceTests(unittest.TestCase):
+class DefaultManagerServiceTests(base.TestCase):
     @mock.patch('cdn.storage.base.driver.StorageDriverBase')
     @mock.patch('cdn.provider.base.driver.ProviderDriverBase')
     def setUp(self, mock_driver, mock_provider):
+        super(DefaultManagerServiceTests, self).setUp()
+
         # create mocked config and driver
         conf = cfg.ConfigOpts()
         manager_driver = driver.DefaultManagerDriver(conf,
