@@ -18,7 +18,7 @@ import pecan
 from cdn.transport.pecan.controllers import base
 
 
-class V1Controller(base.Controller):
+class ControllerV1(base.Controller):
 
     @pecan.expose('json')
     def get(self):

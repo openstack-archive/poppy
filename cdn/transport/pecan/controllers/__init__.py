@@ -23,4 +23,4 @@ from cdn.transport.pecan.controllers import v1
 # Hoist into package namespace
 Root = root.RootController
 Services = services.ServicesController
-V1 = v1.V1Controller
+V1 = v1.ControllerV1
