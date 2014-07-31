@@ -13,8 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.manager.default import services, v1
+"""WSGI callable for WSGI containers
+
+This app should be used by external WSGI
+containers. For example:
+
+    $ gunicorn cdn.transport.app:app
+
+NOTE: As for external containers, it is necessary
+to put config files in the standard paths. There's
+no common way to specify / pass configuration files
+to the WSGI app when it is called from other apps.
+"""
+
+from oslo.config import cfg
+
+from cdn import bootstrap
 
 
-Services = services.DefaultServicesController
-V1 = v1.DefaultV1Controller
+conf = cfg.CONF
+conf(project='cdn', prog='cdn', args=[])
+
+app = bootstrap.Bootstrap(conf).transport.app

@@ -15,8 +15,10 @@
 
 from cdn.manager.base import driver
 from cdn.manager.base import services
+from cdn.manager.base import v1
 
 
 Driver = driver.ManagerDriverBase
 
 ServicesController = services.ServicesControllerBase
+V1Controller = v1.V1ControllerBase

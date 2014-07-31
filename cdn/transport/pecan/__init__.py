@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.manager.default import services, v1
+"""Pecan Transport Driver"""
+
+from cdn.transport.pecan import driver
 
 
-Services = services.DefaultServicesController
-V1 = v1.DefaultV1Controller
+# Hoist into package namespace
+Driver = driver.PecanTransportDriver
