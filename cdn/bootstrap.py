@@ -23,7 +23,7 @@ LOG = log.getLogger(__name__)
 
 
 _DRIVER_OPTIONS = [
-    cfg.StrOpt('transport', default='falcon',
+    cfg.StrOpt('transport', default='pecan',
                help='Transport driver to use'),
     cfg.StrOpt('manager', default='default',
                help='Manager driver to use'),
