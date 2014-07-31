@@ -15,7 +15,6 @@
 
 import fixtures
 import os
-import six
 import testtools
 
 from oslo.config import cfg
@@ -66,21 +65,3 @@ class TestCase(testtools.TestCase):
         conf = cfg.ConfigOpts()
         conf(args=[], default_config_files=[cls.conf_path(filename)])
         return conf
-
-    def config(self, group=None, **kw):
-        """Override some configuration values.
-
-        The keyword arguments are the names of configuration options to
-        override and their values.
-
-        If a group argument is supplied, the overrides are applied to
-        the specified configuration option group.
-
-        All overrides are automatically cleared at the end of the current
-        test by the tearDown() method.
-        """
-        for k, v in six.iteritems(kw):
-            self.conf.set_override(k, v, group)
-
-    def _my_dir(self):
-        return os.path.abspath(os.path.dirname(__file__))
