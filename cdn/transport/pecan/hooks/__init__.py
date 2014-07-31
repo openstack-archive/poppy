@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.manager.default import services, v1
+"""Pecan Hooks"""
+
+from cdn.transport.pecan.hooks import context
 
 
-Services = services.DefaultServicesController
-V1 = v1.DefaultV1Controller
+# Hoist into package namespace
+Context = context.ContextHook

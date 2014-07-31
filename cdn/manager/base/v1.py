@@ -14,33 +14,16 @@
 # limitations under the License.
 
 import abc
-
 import six
+
+from cdn.manager.base import controller
 
 
 @six.add_metaclass(abc.ABCMeta)
-class TransportDriverBase(object):
-    """Base class for Transport Drivers to document the expected interface.
-
-    :param conf: configuration instance
-    :type conf: oslo.config.cfg.CONF
-    """
-
-    def __init__(self, conf, manager):
-        self._conf = conf
-        self._manager = manager
-
-        self._app = None
-
-    @property
-    def app(self):
-        return self._app
-
-    @property
-    def manager(self):
-        return self._manager
+class V1ControllerBase(controller.ManagerControllerBase):
+    def __init__(self, manager):
+        super(V1ControllerBase, self).__init__(manager)
 
     @abc.abstractmethod
-    def listen():
-        """Start listening for client requests (self-hosting mode)."""
+    def get(self):
         raise NotImplementedError

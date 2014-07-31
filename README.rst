@@ -24,7 +24,9 @@ Features
 
 + Wraps third party CDN provider API's
     - Fastly (http://www.fastly.net)
-    - Your CDN here
+    - Amazon CloudFront
+    - MaxCDN
+    - Your CDN Here...
 + Sends configurations to *n* configured CDN providers
 + Supports multiple backends (CassandraDB recommended)
     - CassandraDB

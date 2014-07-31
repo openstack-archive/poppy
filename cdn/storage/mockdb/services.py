@@ -85,7 +85,7 @@ class ServicesController(base.ServicesController):
 
         return services
 
-    def get(self, project_id):
+    def get(self, project_id, service_name):
         # get the requested service from storage
         return ""
 
