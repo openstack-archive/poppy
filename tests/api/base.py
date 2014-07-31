@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import jsonschema
+import os
 
 from oslo.config import cfg
 
@@ -35,6 +36,8 @@ class TestBase(fixtures.BaseTestFixture):
     @classmethod
     def setUpClass(cls):
 
+        cls.conf_file = 'cdn_mockdb.conf'
+
         super(TestBase, cls).setUpClass()
 
         cls.auth_config = config.AuthConfig()
@@ -51,9 +54,14 @@ class TestBase(fixtures.BaseTestFixture):
                                       deserialize_format='json')
 
         cls.server_config = config.CDNServerConfig()
+
         if cls.server_config.run_server:
-            conf = cfg.CONF
-            conf(project='cdn', prog='cdn')
+            conf_path = os.environ["CDN_TESTS_CONFIGS_DIR"]
+            config_file = os.path.join(conf_path, cls.conf_file)
+
+            conf = cfg.ConfigOpts()
+            conf(project='cdn', prog='cdn', args=[],
+                 default_config_files=[config_file])
             cdn_server = server.CDNServer()
             cdn_server.start(conf)
 
