@@ -19,10 +19,10 @@ import mock
 from oslo.config import cfg
 
 from cdn.transport import pecan
-from tests.unit.utils.base import UnitTestBase
+from tests.unit import base
 
 
-class PecanTransportDriverTest(UnitTestBase):
+class PecanTransportDriverTest(base.TestCase):
 
     def test_listen(self):
         tests_path = os.path.abspath(os.path.dirname(
