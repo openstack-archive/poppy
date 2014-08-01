@@ -35,6 +35,7 @@ _DRIVER_GROUP = 'drivers'
 
 
 class Bootstrap(object):
+
     """Defines the CDN bootstrapper.
 
     The bootstrap loads up drivers per a given configuration, and
@@ -58,13 +59,10 @@ class Bootstrap(object):
         provider_type = 'cdn.provider'
         args = [self.conf]
 
-        try:
-            mgr = extension.ExtensionManager(namespace=provider_type,
-                                             invoke_on_load=True,
-                                             invoke_args=args)
-            return mgr
-        except RuntimeError as exc:
-            LOG.exception(exc)
+        mgr = extension.ExtensionManager(namespace=provider_type,
+                                         invoke_on_load=True,
+                                         invoke_args=args)
+        return mgr
 
     @decorators.lazy_property(write=False)
     def storage(self):
