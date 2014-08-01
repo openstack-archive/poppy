@@ -21,9 +21,9 @@ To run the tests
     export CAFE_ROOT_LOG_PATH=~/.cdn/logs
     export CAFE_TEST_LOG_PATH=~/.cdn/logs
 
-3. Copy the tests.conf file to the path set by CAFE_CONFIG_FILE_PATH::
+3. Copy the api.conf file to the path set by CAFE_CONFIG_FILE_PATH::
 
-    cp tests/api/etc/tests.conf ~/.cdn/tests.conf
+    cp tests/etc/api.conf ~/.cdn/tests.conf
 
 4. Once you are ready to run the tests::
 

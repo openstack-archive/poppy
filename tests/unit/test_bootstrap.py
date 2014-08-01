@@ -18,24 +18,35 @@ import os
 import mock
 from oslo.config import cfg
 
-from cdn.transport import pecan
+from cdn import bootstrap
 from tests.unit import base
 
 
-class PecanTransportDriverTest(base.TestCase):
+class TestBootStrap(base.TestCase):
 
-    def test_listen(self):
+    def test_boot_strap_successful(self):
         tests_path = os.path.abspath(os.path.dirname(
-            os.path.dirname(
-                                     os.path.dirname(os.path.dirname(__file__)
-                                                     ))))
+            os.path.dirname(__file__)))
         conf_path = os.path.join(tests_path, 'etc', 'default_functional.conf')
         cfg.CONF(args=[], default_config_files=[conf_path])
+
+        bootstrap_obj = bootstrap.Bootstrap(cfg.CONF)
 
         mock_path = 'cdn.transport.pecan.driver.simple_server'
         with mock.patch(mock_path) as mocked_module:
             mock_server = mock.Mock()
             mocked_module.make_server = mock.Mock(return_value=mock_server)
-            driver = pecan.Driver(cfg.CONF, None)
-            driver.listen()
+            bootstrap_obj.run()
             self.assertTrue(mock_server.serve_forever.called)
+
+    def test_boot_strap_when_exception(self):
+        tests_path = os.path.abspath(os.path.dirname(
+            os.path.dirname(__file__)))
+        conf_path = os.path.join(tests_path, 'etc', 'bootstrap_unit.conf')
+        cfg.CONF(args=[], default_config_files=[conf_path])
+
+        bootstrap_obj = bootstrap.Bootstrap(cfg.CONF)
+
+        self.assertTrue(bootstrap_obj.transport is None)
+        self.assertTrue(bootstrap_obj.manager is None)
+        self.assertTrue(bootstrap_obj.storage is None)
