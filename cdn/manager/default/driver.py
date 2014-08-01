@@ -28,3 +28,7 @@ class DefaultManagerDriver(base.Driver):
     @decorators.lazy_property(write=False)
     def services_controller(self):
         return controllers.Services(self)
+
+    @decorators.lazy_property(write=False)
+    def v1_controller(self):
+        return controllers.V1(self)

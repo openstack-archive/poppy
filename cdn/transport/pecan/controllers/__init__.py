@@ -13,8 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.manager.default import services, v1
+"""Pecan Controllers"""
+
+from cdn.transport.pecan.controllers import root
+from cdn.transport.pecan.controllers import services
+from cdn.transport.pecan.controllers import v1
 
 
-Services = services.DefaultServicesController
-V1 = v1.DefaultV1Controller
+# Hoist into package namespace
+Root = root.RootController
+Services = services.ServicesController
+V1 = v1.ControllerV1
