@@ -16,7 +16,7 @@
 import ddt
 import uuid
 
-from tests.api.utils import base
+from tests.api import base
 from tests.api.utils.schema import response
 
 
