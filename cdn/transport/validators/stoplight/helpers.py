@@ -13,19 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-class ValidationFailed(ValueError):
-
-    """User input was inconsistent with API restrictions."""
-
-    def __init__(self, msg, *args, **kwargs):
-        super(ValidationFailed, self).__init__(msg)
+"""
+Some useful getters for thread local request style validation
+"""
 
 
-class ValidationProgrammingError(ValueError):
+def pecan_getter(parm):
+    """pecan getter"""
+    pecan_module = __import__('pecan', globals(), locals(), ['request'])
+    return getattr(pecan_module, 'request')
 
-    """Caller did not map validations correctly."""
 
-    def __init__(self, msg, *args, **kwargs):
-        msg = msg.format(*args, **kwargs)
-        super(ValidationProgrammingError, self).__init__(msg)
+# def flask_getter(parm):
+#     pecan_module = __import__('flask', globals(), locals(), ['request'])
+#     return getattr(pecan_module, 'request')

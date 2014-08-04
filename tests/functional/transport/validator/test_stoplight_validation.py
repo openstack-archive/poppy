@@ -13,25 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.transport.validators.stoplight import validation_function, Rule,\
-    validate
-from cdn.transport.validators.stoplight.exceptions import ValidationFailed,\
-    ValidationProgrammingError
+from cdn.transport.validators.stoplight import decorators
+from cdn.transport.validators.stoplight import exceptions
+from cdn.transport.validators.stoplight import rule
 
 from test_service_validation import BaseTestCase
 # TODO(tonytan4ever): We probably want to move this to a
 # test helpers library
 
-VALIDATED_STR = 'validated'
 
-
-@validation_function
+@decorators.validation_function
 def is_upper(z):
     """Simple validation function for testing purposes
     that ensures that input is all caps
     """
     if z.upper() != z:
-        raise ValidationFailed('{0} no uppercase'.format(z))
+        raise exceptions.ValidationFailed('{0} no uppercase'.format(z))
 
 error_count = 0
 
@@ -54,21 +51,21 @@ class DummyResponse(object):
     pass
 
 
-@validation_function
+@decorators.validation_function
 def is_request(candidate):
     if not isinstance(candidate, DummyRequest):
-        raise ValidationFailed('Input must be a request')
+        raise exceptions.ValidationFailed('Input must be a request')
 
 
-@validation_function
+@decorators.validation_function
 def is_response(candidate):
     if not isinstance(candidate, DummyResponse):
-        raise ValidationFailed('Input must be a response')
+        raise exceptions.ValidationFailed('Input must be a response')
 
 
-RequestRule = Rule(is_request(), lambda: abort(404))
-ResponseRule = Rule(is_response(), lambda: abort(404))
-UppercaseRule = Rule(is_upper(), lambda: abort(404))
+RequestRule = rule.Rule(is_request(), lambda error_info: abort(404))
+ResponseRule = rule.Rule(is_response(), lambda error_info: abort(404))
+UppercaseRule = rule.Rule(is_upper(), lambda error_info: abort(404))
 
 
 class DummyEndpoint(object):
@@ -80,43 +77,47 @@ class DummyEndpoint(object):
     # Note: the lambda in this function can never actually be
     # called, so we use no cover here
 
-    @validate(value=Rule(is_upper, lambda: abort(404)))  # pragma: no cover
+    @decorators.validate(
+        value=rule.Rule(
+            is_upper,
+            lambda error_info: abort(404)))  # pragma: no cover
     def get_value_programming_error(self, value):
         # This function body should never be
         # callable since the validation error
         # should not allow it to be called
         assert False  # pragma: no cover
 
-    @validate(
-        value1=Rule(is_upper(), lambda: abort(404)),
-        value2=Rule(is_upper(), lambda: abort(404)),
-        value3=Rule(is_upper(), lambda: abort(404))
+    @decorators.validate(
+        value1=rule.Rule(is_upper(), lambda error_info: abort(404)),
+        value2=rule.Rule(is_upper(), lambda error_info: abort(404)),
+        value3=rule.Rule(is_upper(), lambda error_info: abort(404))
     )  # pragma: no cover
     def get_value_happy_path(self, value1, value2, value3):
         return value1 + value2 + value3
 
-    @validate(
-        value1=Rule(is_upper(), lambda: abort(404)),
-        value2=Rule(is_upper(empty_ok=True), lambda: abort(404),
-                    get_other_val),
+    @decorators.validate(
+        value1=rule.Rule(is_upper(), lambda: abort(404)),
+        value2=rule.Rule(is_upper(empty_ok=True),
+                         lambda error_info: abort(404),
+                         get_other_val),
     )  # pragma: no cover
     def get_value_with_getter(self, value1):
         global other_vals
         return value1 + other_vals.get('value2')
 
     # Falcon-style endpoint
-    @validate(
-        request=Rule(is_request(), lambda: abort(404)),
-        response=Rule(is_response(), lambda: abort(404)),
-        value=Rule(is_upper(), lambda: abort(404))
+    @decorators.validate(
+        request=rule.Rule(is_request(), lambda error_info: abort(404)),
+        response=rule.Rule(is_response(), lambda error_info: abort(404)),
+        value=rule.Rule(is_upper(), lambda error_info: abort(404))
     )
     def get_falcon_style(self, request, response, value):
         return value
 
-    # Falcon-style w/ declared rules
-    @validate(request=RequestRule, response=ResponseRule,
-              value=UppercaseRule)
-    def get_falcon_with_declared_rules(self, request, response, value):
+    # Falcon-style w/ delcared rules
+    @decorators.validate(request=RequestRule, response=ResponseRule,
+                         value=UppercaseRule)
+    def get_falcon_style2(self, request, response, value):
         return value
 
 
@@ -125,12 +126,12 @@ class TestValidationFunction(BaseTestCase):
     def test_empty_ok(self):
         is_upper(empty_ok=True)('')
 
-        with self.assertRaises(ValidationFailed):
+        with self.assertRaises(exceptions.ValidationFailed):
             is_upper()('')
 
         is_upper(none_ok=True)(None)
 
-        with self.assertRaises(ValidationFailed):
+        with self.assertRaises(exceptions.ValidationFailed):
             is_upper()(None)
 
 
@@ -138,9 +139,10 @@ class TestValidationDecorator(BaseTestCase):
 
     def setUp(self):
         self.ep = DummyEndpoint()
+        super(TestValidationDecorator, self).setUp()
 
     def test_programming_error(self):
-        with self.assertRaises(ValidationProgrammingError):
+        with self.assertRaises(exceptions.ValidationProgrammingError):
             self.ep.get_value_programming_error('AT_ME')
 
     def test_falcon_style(self):
@@ -189,11 +191,11 @@ class TestValidationDecorator(BaseTestCase):
         self.ep.get_falcon_style(request, response, 'HELLO')
         self.assertEqual(oldcount, error_count)
 
-    def test_falcon_style_declared_rules(self):
+    def test_falcon_style_decld_rules(self):
         # The following tests repeat the above
         # tests, but this time they test using the
         # endpoint with the rules being declared
-        # separately. See get_falcon_with_declared_rules above
+        # separately. See get_falcon_style2 above
 
         global error_count
 
@@ -203,44 +205,40 @@ class TestValidationDecorator(BaseTestCase):
         # Try to call with missing params. The validation
         # function should never get called
         oldcount = error_count
-        self.ep.get_falcon_with_declared_rules(response, 'HELLO')
+        self.ep.get_falcon_style2(response, 'HELLO')
         self.assertEqual(oldcount + 1, error_count)
 
         # Try to pass a string to a positional argument
         # where a response is expected
         oldcount = error_count
-        self.ep.get_falcon_with_declared_rules(request, "bogusinput", 'HELLO')
+        self.ep.get_falcon_style2(request, "bogusinput", 'HELLO')
         self.assertEqual(oldcount + 1, error_count)
 
         # Pass in as kwvalues with good input but out of
         # typical order (should succeed)
         oldcount = error_count
-        self.ep.get_falcon_with_declared_rules(
-            response=response,
-            value='HELLO',
-            request=request)
+        self.ep.get_falcon_style2(response=response, value='HELLO',
+                                  request=request)
         self.assertEqual(oldcount, error_count)
 
         # Pass in as kwvalues with good input but out of
         # typical order with an invalid value (lower-case 'h')
         oldcount = error_count
-        self.ep.get_falcon_with_declared_rules(
-            response=response,
-            value='hELLO',
-            request=request)
+        self.ep.get_falcon_style2(response=response, value='hELLO',
+                                  request=request)
         self.assertEqual(oldcount + 1, error_count)
 
         # Pass in as kwvalues with good input but out of typical order
         # and pass an invalid value. Note that here the response is
         # assigned to request, etc.
         oldcount = error_count
-        self.ep.get_falcon_with_declared_rules(response=request, value='HELLO',
-                                               request=response)
+        self.ep.get_falcon_style2(response=request, value='HELLO',
+                                  request=response)
         self.assertEqual(oldcount + 1, error_count)
 
         # Happy path
         oldcount = error_count
-        self.ep.get_falcon_with_declared_rules(request, response, 'HELLO')
+        self.ep.get_falcon_style2(request, response, 'HELLO')
         self.assertEqual(oldcount, error_count)
 
     def test_happy_path_and_validation_failure(self):
