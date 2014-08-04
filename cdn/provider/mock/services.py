@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# stevedore/example/simple.py
 from cdn.provider import base
 
 
