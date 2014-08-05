@@ -34,7 +34,7 @@ def validate(**rules):
 
     In this example, bird_id will be passed to val_bird_id
     and validated. If the validation function throws the
-    exceptions.ValidationFailed exception, the specified code will be returned
+    ValidationFailed exception, the specified code will be returned
     in the response and the resultant function will never actually
     be called.
     """
@@ -56,7 +56,6 @@ def validate(**rules):
             param_values.update(kwargs)
 
             for param, rule in rules.items():
-
                 # Where can we get the value? It's either
                 # the getter on the rule or we default
                 # to verifying parameters.
@@ -84,8 +83,8 @@ def validate(**rules):
                     if rule.getter is None:
                         outargs[param] = value
 
-                except exceptions.ValidationFailed:
-                    rule.errfunc()
+                except exceptions.ValidationFailed as ex:
+                    rule.errfunc(error_info=ex)
                     return
 
             assert funcparams.args[0] == 'self'
@@ -97,7 +96,8 @@ def validate(**rules):
 
 
 def validation_function(func):
-    """Decorator for creating a validation function."""
+    """Decorator for creating a validation function.
+    """
     @wraps(func)
     def inner(none_ok=False, empty_ok=False):
         def wrapper(value, **kwargs):
@@ -115,6 +115,6 @@ def validation_function(func):
                 msg = 'Empty value not permitted'
                 raise exceptions.ValidationFailed(msg)
 
-            func(value, **kwargs)
+            func(value)
         return wrapper
     return inner

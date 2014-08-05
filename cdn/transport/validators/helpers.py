@@ -13,16 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
+import functools
 import json
 
 try:
     import falcon
 except ImportError:
-    from . import fake_falcon as falcon
+    import fake_falcon as falcon
 import jsonschema
-from pecan import abort
+import pecan
 
-from .stoplight import exceptions
+from cdn.transport.validators.stoplight import decorators
+from cdn.transport.validators.stoplight import exceptions
 
 
 def req_accepts_json_pecan(request, desired_content_type='application/json'):
@@ -60,7 +63,7 @@ class DummyResponse(object):
     pass
 
 
-def custom_abort_falcon(errors={"message": "Invalid request body"}):
+def custom_abort_falcon(error_info=None):
     """Error_handler for with_schema
 
     Meant to be used with falcon transport.
@@ -69,13 +72,15 @@ def custom_abort_falcon(errors={"message": "Invalid request body"}):
     """
     ret = DummyResponse()
     ret.code = 400
+    if not isinstance(error_info, collections.Iterable):
+        error_info = [error_info]
     details = dict(errors=[{'message': str(getattr(error, "message", error))}
-                           for error in errors])
+                           for error in error_info])
     ret.message = json.dumps(details)
     return ret
 
 
-def custom_abort_pecan(errors):
+def custom_abort_pecan(errors_info):
     """Error_handler for with_schema
 
     Meant to be used with pecan transport.
@@ -84,8 +89,12 @@ def custom_abort_pecan(errors):
     """
     # TODO(tonytan4ever): gettext support
     details = dict(errors=[{'message': str(getattr(error, "message", error))}
-                           for error in errors])
-    abort(400, detail=details, headers={'Content-Type': "application/json"})
+                           for error in errors_info])
+    pecan.abort(
+        400,
+        detail=details,
+        headers={
+            'Content-Type': "application/json"})
 
 
 def with_schema_falcon(request, schema=None):
@@ -153,3 +162,40 @@ def with_schema_pecan(request, schema=None, handler=custom_abort_pecan,
         return wrapped
 
     return decorator
+
+
+def json_matches_schema_inner(request, schema=None):
+    errors_list = []
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except ValueError:
+        raise exceptions.ValidationFailed('Invalid JSON string')
+
+    if schema is not None:
+        errors_list = list(
+            jsonschema.Draft3Validator(schema).iter_errors(data))
+
+    if len(errors_list) > 0:
+        details = dict(errors=[{
+            'message': str(getattr(error, "message", error))}
+            for error in errors_list])
+        raise exceptions.ValidationFailed(json.dumps(details))
+    else:
+        return
+
+
+def json_matches_schema(input_schema):
+    return functools.partial(
+        json_matches_schema_inner,
+        schema=input_schema)
+
+
+@decorators.validation_function
+def is_valid_service_name(service_name):
+    pass
+
+
+def abort_with_message(error_info):
+    pecan.abort(400, detail=getattr(error_info, "message", ""),
+                headers={'Content-Type': "application/json"})

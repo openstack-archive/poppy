@@ -18,16 +18,18 @@ import json
 import os
 import re
 import sys
-from unittest import TestCase
 
-from pecan import expose, set_config, request
+import pecan
 from webtest import app
 
 from cdn.common import errors
 from cdn.transport.validators import helpers
 from cdn.transport.validators.schemas import service
-from cdn.transport.validators import stoplight
+from cdn.transport.validators.stoplight import decorators
 from cdn.transport.validators.stoplight import exceptions
+from cdn.transport.validators.stoplight import helpers as stoplight_helpers
+from cdn.transport.validators.stoplight import rule
+from tests.functional import base
 
 # for pecan testing app
 os.environ['PECAN_CONFIG'] = os.path.join(os.path.dirname(__file__),
@@ -44,6 +46,23 @@ error_count = 0
 def abort(code):
     global error_count
     error_count = error_count + 1
+
+
+@decorators.validation_function
+def is_valid_json(r):
+    """Simple validation function for testing purposes
+    that ensures that input is a valid json string
+    """
+    if len(r.body) == 0:
+        return
+    else:
+        try:
+            json.loads(r.body.decode('utf-8'))
+        except Exception as e:
+            e
+            raise exceptions.ValidationFailed('Invalid JSON string')
+        else:
+            return
 
 
 class DummyRequest(object):
@@ -70,7 +89,7 @@ class DummyRequest(object):
                 {"name": "default", "ttl": 3600},
                 {"name": "home",
                  "ttl": 17200,
-                 "stoplight.Rules": [
+                 "rules": [
                      {"name": "index", "request_url": "/index.htm"}
                  ]
                  },
@@ -104,13 +123,13 @@ fake_request_bad_missing_domain.body = json.dumps({
         {"name": "default", "ttl": 3600},
         {"name": "home",
          "ttl": 17200,
-                 "stoplight.Rules": [
+                 "rules": [
                      {"name": "index", "request_url": "/index.htm"}
                  ]
          },
         {"name": "images",
                  "ttl": 12800,
-                 "stoplight.Rules": [
+                 "rules": [
                      {"name": "images", "request_url": "*.png"}
                  ]
          }
@@ -162,7 +181,7 @@ class _AssertRaisesContext(object):
         return True
 
 
-class BaseTestCase(TestCase):
+class BaseTestCase(base.TestCase):
 
     def assertRaises(self, excClass, callableObj=None, *args, **kwargs):
         """Fail unless an exception of class excClass is raised
@@ -217,7 +236,7 @@ class BaseTestCase(TestCase):
             helpers.req_accepts_json_pecan(req)
 
 
-@stoplight.validation_function
+@decorators.validation_function
 def is_response(candidate):
     pass
 
@@ -232,17 +251,18 @@ request_fit_schema = functools.partial(
 class DummyFalconEndpoint(object):
     # falcon style endpoint
 
-    @stoplight.validate(
-        request=stoplight.Rule(request_fit_schema, lambda: abort(404)),
-        response=stoplight.Rule(is_response(), lambda: abort(404))
+    @decorators.validate(
+        request=rule.Rule(request_fit_schema, lambda error_info: abort(404)),
+        response=rule.Rule(is_response(), lambda error_info: abort(404))
     )
     def get_falcon_style(self, request, response):
         return "Hello, World!"
 
-    @stoplight.validate(
-        request=stoplight.Rule(request_fit_schema,
-                               helpers.custom_abort_falcon),
-        response=stoplight.Rule(is_response(), helpers.custom_abort_falcon)
+    @decorators.validate(
+        request=rule.Rule(request_fit_schema,
+                          helpers.custom_abort_falcon),
+        response=rule.Rule(is_response(),
+                           helpers.custom_abort_falcon)
     )
     def get_falcon_style_custom_abort(self, request, response):
         return "Hello, World!"
@@ -250,9 +270,18 @@ class DummyFalconEndpoint(object):
 
 class DummyPecanEndpoint(object):
 
-    @expose()
-    @helpers.with_schema_pecan(request, schema=testing_schema)
+    @pecan.expose(generic=True)
+    @helpers.with_schema_pecan(pecan.request, schema=testing_schema)
     def index(self):
+        return "Hello, World!"
+
+    @index.when(method='PUT')
+    @decorators.validate(
+        request=rule.Rule(is_valid_json(),
+                          lambda error_info: pecan.abort(400),
+                          stoplight_helpers.pecan_getter)
+    )
+    def index_put(self):
         return "Hello, World!"
 
 
@@ -297,6 +326,7 @@ class TestValidationDecoratorsFalcon(BaseTestCase):
 
     def setUp(self):
         self.ep = DummyFalconEndpoint()
+        super(TestValidationDecoratorsFalcon, self).setUp()
 
     def test_falcon_endpoint(self):
         class DummyResponse(object):
@@ -338,15 +368,17 @@ class PecanEndPointFunctionalTest(BaseTestCase):
         self.app = load_test_app(os.path.join(os.path.dirname(__file__),
                                               'config.py'
                                               ))
+        super(PecanEndPointFunctionalTest, self).setUp()
 
     def tearDown(self):
-        set_config({}, overwrite=True)
+        pecan.set_config({}, overwrite=True)
+        super(PecanEndPointFunctionalTest, self).tearDown()
 
 
 class TestValidationDecoratorsPecan(PecanEndPointFunctionalTest):
 
-    def test_pecan_endpoint_put(self):
-        resp = self.app.put(
+    def test_pecan_endpoint_post(self):
+        resp = self.app.post(
             '/',
             params=fake_request_good.body,
             headers={
@@ -354,8 +386,8 @@ class TestValidationDecoratorsPecan(PecanEndPointFunctionalTest):
         self.assertEqual(resp.status_int, 200)
         self.assertEqual(resp.body.decode('utf-8'), "Hello, World!")
         with self.assertRaisesRegexp(app.AppError, "400 Bad Request"):
-            self.app.put('/', params=fake_request_bad_missing_domain.body,
-                         headers={"Content-Type": "application/json"})
+            self.app.post('/', params=fake_request_bad_missing_domain.body,
+                          headers={"Content-Type": "application/json"})
         with self.assertRaisesRegexp(app.AppError, "400 Bad Request"):
-            self.app.put('/', params=fake_request_bad_invalid_json_body.body,
-                         headers={"Content-Type": "application/json"})
+            self.app.post('/', params=fake_request_bad_invalid_json_body.body,
+                          headers={"Content-Type": "application/json"})
