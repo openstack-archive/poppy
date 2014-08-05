@@ -133,7 +133,7 @@ Mac OSX
 
     http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 
-You can check the version currently running with::
+   You can check the version currently running with::
     
     $java -version
 
