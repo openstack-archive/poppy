@@ -129,22 +129,23 @@ Installing Cassandra Locally
 Mac OSX
 -------
 
-1. Update your Java SDK to the latest version (v7+)
+1. Update your Java SDK to the latest version (v7+)::
 
     http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 
-You can check the version currently running with 
+   You can check the version currently running with::
     
     $java -version
 
-2. Follow the instructions on the datastax site to install cassandra for Mac OSX 
+2. Follow the instructions on the datastax site to install cassandra for Mac OSX::
     
     http://www.datastax.com/2012/01/working-with-apache-cassandra-on-mac-os-x
 
-3.  CREATE KEYSPACE cdn
-    WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
+3. Create a Keyspace with Replication::
 
-3. Import the Cassandra Schema to set up the required tables that CDN will need
+    CREATE KEYSPACE cdn WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
+
+4. Import the Cassandra Schema to set up the required tables that CDN will need::
     
     Open ./cqlsh and import the /cdn/storage/cassandra/schema.cql file
 
@@ -153,11 +154,11 @@ You can check the version currently running with
 Running tests
 -----------------------------
 
-First install the additional requirements:
+First install the additional requirements::
 
     $ pip install tox
 
-And then run tests:
+And then run tests::
 
     $ tox -e py27
 
