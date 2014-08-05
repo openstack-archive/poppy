@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import collections
+import functools
 import json
 
 try:
@@ -163,7 +164,7 @@ def with_schema_pecan(request, schema=None, handler=custom_abort_pecan,
     return decorator
 
 
-def json_matches_schema(request, schema=None):
+def json_matches_schema_inner(request, schema=None):
     errors_list = []
 
     try:
@@ -182,6 +183,12 @@ def json_matches_schema(request, schema=None):
         raise exceptions.ValidationFailed(json.dumps(details))
     else:
         return
+
+
+def json_matches_schema(input_schema):
+    return functools.partial(
+        json_matches_schema_inner,
+        schema=input_schema)
 
 
 @decorators.validation_function

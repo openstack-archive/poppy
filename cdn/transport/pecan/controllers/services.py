@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import functools
 import json
 
 import pecan
@@ -51,11 +50,8 @@ class ServicesController(base.Controller):
             helpers.is_valid_service_name(),
             helpers.abort_with_message),
         request=rule.Rule(
-            functools.partial(
-                helpers.json_matches_schema,
-                schema=service.ServiceSchema.get_schema(
-                    "service",
-                    "PUT")),
+            helpers.json_matches_schema(
+                service.ServiceSchema.get_schema("service", "PUT")),
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
     def put(self, service_name):
@@ -79,11 +75,8 @@ class ServicesController(base.Controller):
             helpers.is_valid_service_name(),
             helpers.abort_with_message),
         request=rule.Rule(
-            functools.partial(
-                helpers.json_matches_schema,
-                schema=service.ServiceSchema.get_schema(
-                    "service",
-                    "PATCH")),
+            helpers.json_matches_schema(
+                service.ServiceSchema.get_schema("service", "PATCH")),
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
     def patch_one(self, service_name):
