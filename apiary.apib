@@ -1,0 +1,616 @@
+FORMAT: 1A
+HOST: https://www.poppycdn.io/
+
+# Poppy CDN
+OpenStack operators have many choices when incorporating a Content Delivery Network (CDN) into their infrastructure -- the CDN marketplace has both tried-and-true vendors and up-and-coming upstarts with innovative new features.
+
+But these vendors often have highly-customized and proprietary provisioning APIs. This can be problematic when an operator wishes to support multiple providers -- or swap out one vendor for another. And these challenges spill over to developers who become forced into codifying the CDN instructions for multiple vendors into their applications.
+
+Poppy aims to solve these challenges. Written as a modular, vendor-neutral API, Poppy incorporates a driver-based model that wraps provisioning instructions for all CDN vendors that support it. Application developers can write their code once, and Poppy will handle all the requisite translations behind-the-scenes.
+
+
+## Primary Mission ##
+
+Provide a generic and modular vendor-neutral API that wraps provisioning instructions for CDN vendors that support it.
+
+
+## Requests and Authentication
+Every REST request for CDN requires the inclusion of the `X-Auth-Token` HTTP header. 
+The regions you have access to are available in your service catalog.
+
++ `X-Auth-Token` : Obtain this token and your service catalog via the [Authentication service](http://docs.rackspace.com/auth/api/v2.0/auth-client-devguide/content/QuickStart-000.html).
+
+
+Every REST request requires a `project_id` in the url *or* as a header.
+
++ `project_id` : The unique identifier for the user. This is used as the first parameter before the request path.  e.g GET https://www.poppycdn.io/{project_id}/v1.0/
++ `X_PROJECT_ID` : The unique identifier for the user
+
+
+Every REST request contains the `version` in the URI (e.g /v1.0/ ). 
+
++ The version and project_id can be retrieved by following the link in your service catalog.
+
+
+
+## Role Based Access
+Every REST request for CDN will check the `X-Auth-Token` account provided in the HTTP header against the roles allowed for that user. If a method is rejected based on an insufficient role, the user will receive an HTTP 403 `Forbidden` response code.
+
+
+## Media Types
+Requests with a message-body are using `application/json` to set or update resource states.
+
+## Allowed HTTP Requests
++ `PUT` - To create a resource
++ `GET` - Get a resource or list of resources
++ `DELETE` - To delete resource
++ `PATCH` - To update a resource
+
+## Description Of Usual Server Responses
++ 200 `OK` - the request was successful (some API calls may return 201 instead).
++ 201 `Created` - the request was successful and a resource was created.
++ 202 `Accepted` - the request was accepted for processing.
++ 204 `No Content` - the request was successful but there is no representation to return (i.e. the response is empty).
++ 400 `Bad Request` - the request could not be understood or was missing required parameters.
++ 401 `Unauthorized` - authentication failed or user doesn't have permissions for requested operation.
++ 403 `Forbidden` - access denied.
++ 404 `Not Found` - resource was not found.
++ 405 `Method Not Allowed` - requested method is not supported for resource.
++ 429 `Too Many Requests` - exceeded GoodData API limits. Pause requests, wait up to one minute, and try again.
++ 503 `Service Unavailable` - service is temporary unavailable (e.g. scheduled Platform Maintenance). Try again later.
+
+Error Response codes will be accompanied by a `application/json` response body containing the error messages.
+
+Successful Response codes are only returned if all configured providers were successful in processing the request.
+    
+
+## Error Resources
+A single Error object. The Error resource is returned whenever there is an HTTP 400 or HTTP 500 level Response Code, or if there is an error with one or more providers.
+
+```     
+{
+    "errors" : [
+        { "message" : "The server is currently down for maintenance" },
+        { "message" : "The TTL field needs to be an integer between 3600 and 9999" },
+        ...
+        { "provider_a" : "The domain already exists" },
+        { "provider_b" : "The provider is currently unavailable" }
+    ]
+}
+```
+
+# Group Base
+
+## Error [/error]
+A single Error object. The Error resource is returned whenever there is an HTTP 400 or HTTP 500 level Response Code.
+
++ Model (application/json)
+    
+    + Body
+          
+            {
+                "errors" : [
+                    { "message" : "The server is currently down for maintenance" },
+                    { "message" : "The TTL field needs to be an integer between 3600 and 9999" },
+                    ...
+                    { "provider_a" : "The domain already exists" },
+                    { "provider_b" : "The provider is currently unavailable" }
+                ]
+            }
+
+
+## Home Document [/]
+This resource does not have any attributes. It offers a **Home document** to allow navigating the remainder of the API.
+
+
+
+
+## Retrieve the Entry Point [GET]
+
++ Response 200 (application/json)
+
+        {
+            "resources": {
+                "rel/cdn": {
+                    "href-template": "services{?marker,limit}",
+                    "href-vars": {
+                        "marker": "param/marker",
+                        "limit": "param/limit"
+                    },
+                    "hints": {
+                        "allow": [
+                            "GET"
+                        ],
+                        "formats": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        }
+
+## Health Check [/health]
+
+
+
+
+## Health Check [GET]
++ Response 204
+
++ Response 503 (application/json)
+        
+    [Error][]
+
+# Group Services
+Services related resources of the **Services API**
+
+## Services Collection [/services{?marker,limit}]
+Collection of all Services.
+
+It **embeds** *Service Resources* in the API.
+
+
++ Model (application/json)
+    
+    + Body
+
+            {
+                "links": [
+                    {
+                        "rel": "next",
+                        "href": "/v1.0/services?marker=www.myothersite.com&limit=20"
+                    }
+                ],
+                "services": [
+                    {
+                        "domains": [
+                            {
+                                "domain": "www.mywebsite.com"
+                            }
+                        ],
+                        "origins": [
+                            {
+                                "origin": "mywebsite.com",
+                                "port": 80,
+                                "ssl": false
+                            }
+                        ],
+                        "caching": [
+                            {
+                                "name": "default",
+                                "ttl": 3600
+                            },
+                            {
+                                "name": "home",
+                                "ttl": 17200,
+                                "rules": [
+                                    {
+                                        "name": "index",
+                                        "request_url": "/index.htm"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "images",
+                                "ttl": 12800,
+                                "rules": [
+                                    {
+                                        "name": "images",
+                                        "request_url": "*.png"
+                                    }
+                                ]
+                            }
+                        ],
+                        "restrictions": [
+                            {
+                                "name": "website only",
+                                "rules": [
+                                    {
+                                        "name": "mywebsite.com",
+                                        "http_host": "www.mywebsite.com"
+                                    }
+                                ]
+                            }
+                        ],
+                        "flavorRef": "asia",
+                        "status": "deployed",
+                        "links": [
+                            {
+                                "href": "/v1.0/services/mywebsite.com",
+                                "rel": "self"
+                            },
+                            {
+                                "href": "mywebsite.com.poppycdn.net",
+                                "rel": "access_url"
+                            }
+                        ]
+                    },
+                    {
+                        "domains": [
+                            {
+                                "domain": "www.myothersite.com"
+                            }
+                        ],
+                        "origins": [
+                            {
+                                "origin": "44.33.22.11",
+                                "port": 80,
+                                "ssl": false
+                            },
+                            {
+                                "origin": "77.66.55.44",
+                                "port": 80,
+                                "ssl": false,
+                                "rules": [
+                                    {
+                                        "name": "videos",
+                                        "request_url": "^/videos/*.m3u"
+                                    }
+                                ]
+                            }
+                        ],
+                        "caching": [
+                            {
+                                "name": "default",
+                                "ttl": 3600
+                            }
+                        ],
+                        "restrictions": [
+                            {}
+                        ],
+                        "flavorRef": "europe",
+                        "status": "deployed",
+                        "links": [
+                            {
+                                "href": "/v1.0/services/myothersite.com",
+                                "rel": "self"
+                            },
+                            {
+                                "href": "myothersite.com.poppycdn.net",
+                                "rel": "access_url"
+                            }
+                        ]
+                    }
+                ]
+            }
+
+### List All Services [GET]
++ Parameters
+    + marker (optional, string) ... marker representing the last service listed
+    + limit (optional, integer) ... number of resources to list
+    
++ Response 200 (application/json)
+
+    [Services Collection][]
+    
+## Service [/services/{service_name}]
+A single Service object. The Service resource is the central resource in the REST API. 
+It represents your application whose assets are to be distributed.
+
+#### Service Resource ####
+The Service resource has the following attributes: 
+
+- `domains[]` - mandatory: a list of domains used by users to access the distributed assets
+    - `domain` - mandatory: the domain used to access the assets on the edge cache server
+
+- `origins[]` - mandatory: a list of origin domains or IP addresses where the original assets are stored
+    - `origin` : mandatory: the url or ip address to pull origin content from
+    - `port` : optional: the port used to access the origin (defaults to port 80)
+    - `ssl` : optional: use https to access the origin (defaults to false)
+    - `rules[]` : optional: a collection of rules defining the conditions when this origin should be accessed
+        - `name` - mandatory: the name of this rule
+        - `request_url` - mandatory: the request url this rule should match for this origin to be used (regex is supported)
+                
+- `caching[]` - optional: `ttl` rules for the assets under this service. Supports wildcard for fine grained control.
+    - `name` - required: the name of this caching rule (Note: 'default' is a reserved name used for the default ttl setting).
+    - `ttl` - required: the ttl to apply
+    - `rules[]` - optional: a collection of rules that determine if this ttl should be applied to an asset.
+        - `name` - mandatory: the name of this rule
+        - `request_url` - mandatory: the request url this rule should match for this ttl to be used (regex is supported)  
+
+- `restrictions[]` - optional: restrictions defining who can access assets. 
+    - `name` - mandatory: the name of this restriction
+    - `rules[]` - mandatory: a collection of rules that define the restrictions to impose.  Rules can be combined together.
+        - `name` - mandatory: the name of this rule
+        - `request_url` - optional: the request url this rule should match for this restriction to be used (regex is supported)
+        
+        - `http_host` - optional: the http host that requests must come from
+        - `client_ip` - optional: the client ip that requests can be accepted from
+        - `http_method` - optional: the HTTP Method (GET, PUT, POST, DELETE, PATCH, ...) that can be accepted
+        
+- `flavorRef` - mandatory: the cdn provider flavor id to use. For a list of flavors, see "[Flavors](http://docs.cloudcdn.apiary.io/#flavors)".
+- `status` - generated: the current status of the service. See "Status Values".
+- `links[]` - generated: self navigating json document paths
+    - `href` - generated: the location to access this resource
+    - `rel` - generated: how the href link provided is related to this resource
+
+#### Status Values ####
+- `in progress` - the service is currently being deployed.
+- `deployed` - the service has been deployed and is ready to use.
+
+
+
++ Parameters
+    + service_name (required, string, `mywebsite.com`) ... The name of the service representing their distributed content
+
++ Model (application/json)
+
+    
+    + Body
+
+            {
+                "domains": [
+                    {
+                        "domain": "blog.mywebsite.com"
+                    }
+                ],
+                "origins": [
+                    {
+                        "origin": "mywebsite.com",
+                        "port": 80,
+                        "ssl": false
+                    },
+                    {
+                        "origin": "77.66.55.44",
+                        "port": 80,
+                        "ssl": false,
+                        "rules": [
+                            {
+                                "name": "videos",
+                                "request_url": "^/videos/*.m3u"
+                            }
+                        ]
+                    }
+                ],
+                "caching": [
+                    {
+                        "name": "default",
+                        "ttl": 3600
+                    },
+                    {
+                        "name": "home",
+                        "ttl": 17200,
+                        "rules": [
+                            {
+                                "name": "index",
+                                "request_url": "/index.htm"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "images",
+                        "ttl": 12800,
+                        "rules": [
+                            {
+                                "name": "images",
+                                "request_url": "*.png"
+                            }
+                        ]
+                    }
+                ],
+                "restrictions": [
+                    {
+                        "name": "website only",
+                        "rules": [
+                            {
+                                "name": "mywebsite.com",
+                                "http_host": "www.mywebsite.com"
+                            }
+                        ]
+                    }
+                ],
+                "flavorRef" : "europe",
+                "status" : "deployed",
+                "links": [
+                    {
+                        "href": "/v1.0/services/mywebsite.com",
+                        "rel": "self"
+                    },
+                    {
+                        "href": "mywebsite.com.poppycdn.net",
+                        "rel": "access_url"
+                    }
+                ]
+            }
+
+### Retrieve a Service [GET]
++ Response 200 (application/json)
+    
+    [Service][]
+
+
+### Create a Service [PUT]
+To create a new Service, simply provide a JSON body of the new Service with the required attributes. 
+
++ Request (application/json)
+
+        {
+            "domains": [
+                {"domain": "www.mywebsite.com"},
+                {"domain": "blog.mywebsite.com"}
+            ],
+            "origins": [
+                {
+                    "origin": "mywebsite.com",
+                    "port": 80,
+                    "ssl": false
+                }
+            ],
+            "caching": [
+                { "name" : "default", "ttl" : 3600 },
+                { "name" : "home", 
+                  "ttl" : 17200, 
+                  "rules" : [
+                        { "name" : "index", "request_url" : "/index.htm" }
+                    ] 
+                },
+                { "name" : "images",
+                  "ttl" : 12800, 
+                  "rules" : [
+                        { "name" : "images", "request_url" : "*.png" }
+                    ] 
+                }
+            ]
+        }
+
+
++ Response 202 (application/json)
+
+            {
+                "links": [
+                    {
+                        "href": "/v1.0/services/mywebsite",
+                        "rel": "self"
+                    }
+                ]
+            }
+    
+### Edit a Service [PATCH]
+To update a Service, send a JSON body with an updated value for one or more of the top level Service resource attributes. All attributes values (states) from the previous version of this Service are carried over by default if not included in the body.
+
++ Request (application/json)
+
+        {
+            "origins": [
+                    {
+                        "origin": "44.33.22.11",
+                        "port": 80,
+                        "ssl": false
+                    }
+                ]
+        }
+
++ Response 202 (application/json)
+    
+            {
+                "links": [
+                    {
+                        "href": "/v1.0/services/mywebsite",
+                        "rel": "self"
+                    }
+                ]
+            }
+
+### Delete a Service [DELETE]
++ Response 204
+
+## Service Assets [/services/{service_name}/assets{?url}]
+A Service will distribute assets across the network.  Service Assets will let you interrogate properties about these assets and perform certain actions on them.
+
++ Parameters
+    + service_name (required, string, `mywebsite`) ... The name of the service representing their distributed content
+    + url (optional, string) ... The url of an asset to purge.  If left blank, purge will occur against all assets for the service.
+
+### Check a Cached Asset [GET]
+Check the version of the asset that has been cached at the edge, along with any custom rules for this asset.
+
++ Parameters
+    + service_name (required, string, `mywebsite`) ... The name of the service representing their distributed content
+    + url (required, string) ... The url of an asset to check. 
+    
++ Response 200
+
+        TODO - and consider the asset version across multiple providers and multiple cache nodes!
+
+### Purge a Cached Asset [DELETE]
+Remove (Purge) the current version of the asset that has been cached at the edge
++ Response 200
+
+## Todo - Service Analytics [/services/{service_name}/analytics{?url}]
+Service Analytics will report usage data (hits, misses, etc) about the service.
+
++ Parameters
+    + service_name (required, string, `mywebsite`) ... The name of the service representing their distributed content
+    + url (optional, string) ... The url of an asset to get analytics on.  If left blank, analytics will report against all assets for the service.
+
+### Asset Analytics [GET]
+
++ Response 200
+
+        TODO
+        
+
+# Group Flavors
+A flavor is a mapping configuration to a CDN provider. Each flavor is a unique one-to-one mapping to a provider.  The operator can decide the flavor names offered, and the mapping to each provider offered.
+
+## Flavors [/flavors]
+### Get a List of Flavors [GET]
+
++ Response 200 (application/json)
+        
+        [
+            {
+                "id" : "europe",
+                "provider" : "Fastly",
+                "links": [
+                    {
+                        "href": "/v1.0/flavors/europe",
+                        "rel": "self"
+                    }
+                ]
+            },
+            {
+                "id" : "asia",
+                "provider" : "ChinaCache",
+                "links": [
+                    {
+                        "href": "/v1.0/flavors/europe",
+                        "rel": "self"
+                    }
+                ]
+            },
+            {
+                "id" : "americas",
+                "provider" : "CloudFront",
+                "links": [
+                    {
+                        "href": "/v1.0/flavors/europe",
+                        "rel": "self"
+                    }
+                ]
+            },
+            {
+                "id" : "global",
+                "provider" : "Akamai",
+                "links": [
+                    {
+                        "href": "/v1.0/flavors/europe",
+                        "rel": "self"
+                    }
+                ]
+            }
+        ]
+
+## Flavor Details [/flavors/{flavor_id}]
++ Parameters
+    + flavor_id (required, string, `asia`) ... The flavor id to get details about
+
+### Get Flavor Details [GET]
+    
++ Response 200 (application/json)
+
+        {
+            "id" : "asia",
+            "provider" : "ChinaCache",
+            "description" : "ChinaCache ensures that your China users experience optimal performance for your website, file download, video, live streaming and eCommerce transactions in China.",
+            "provider_link" : "http://www.chinacache.com",
+            "links": [
+                {
+                    "href": "/v1.0/flavors/asia",
+                    "rel": "self"
+                }
+            ]
+        }
+
+
+
+# Group Streaming
+Poppy will need to support video streaming, with Adaptive Bit Rate, HLS/HDS, and some sort of transcoding of a video 
+
+## Todo - Streaming [/stream]
+
+### Stream [GET]
+
++ Response 200
+
+        TODO
