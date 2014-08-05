@@ -377,7 +377,7 @@ class PecanEndPointFunctionalTest(BaseTestCase):
 
 class TestValidationDecoratorsPecan(PecanEndPointFunctionalTest):
 
-    def test_pecan_endpoint_put(self):
+    def test_pecan_endpoint_post(self):
         resp = self.app.post(
             '/',
             params=fake_request_good.body,
