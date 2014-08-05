@@ -27,7 +27,7 @@ from cdn.transport.validators import helpers
 from cdn.transport.validators.schemas import service
 from cdn.transport.validators.stoplight import decorators
 from cdn.transport.validators.stoplight import exceptions
-from cdn.transport.validators.stoplight import helpers as s_helpers
+from cdn.transport.validators.stoplight import helpers as stoplight_helpers
 from cdn.transport.validators.stoplight import rule
 from tests.functional import base
 
@@ -279,7 +279,7 @@ class DummyPecanEndpoint(object):
     @decorators.validate(
         request=rule.Rule(is_valid_json(),
                           lambda error_info: pecan.abort(400),
-                          s_helpers.pecan_getter)
+                          stoplight_helpers.pecan_getter)
     )
     def index_put(self):
         return "Hello, World!"

@@ -23,7 +23,7 @@ from cdn.transport.pecan.controllers import base
 from cdn.transport.validators import helpers
 from cdn.transport.validators.schemas import service
 from cdn.transport.validators.stoplight import decorators
-from cdn.transport.validators.stoplight import helpers as s_helpers
+from cdn.transport.validators.stoplight import helpers as stoplight_helpers
 from cdn.transport.validators.stoplight import rule
 
 
@@ -57,7 +57,7 @@ class ServicesController(base.Controller):
                     "service",
                     "PUT")),
             helpers.abort_with_message,
-            s_helpers.pecan_getter))
+            stoplight_helpers.pecan_getter))
     def put(self, service_name):
         context = local.store.context
         tenant_id = context.tenant
@@ -85,7 +85,7 @@ class ServicesController(base.Controller):
                     "service",
                     "PATCH")),
             helpers.abort_with_message,
-            s_helpers.pecan_getter))
+            stoplight_helpers.pecan_getter))
     def patch_one(self, service_name):
         context = local.store.context
         tenant_id = context.tenant

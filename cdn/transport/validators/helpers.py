@@ -19,12 +19,12 @@ import json
 try:
     import falcon
 except ImportError:
-    from . import fake_falcon as falcon
+    import fake_falcon as falcon
 import jsonschema
 import pecan
 
-from .stoplight import decorators
-from .stoplight import exceptions
+from cdn.transport.validators.stoplight import decorators
+from cdn.transport.validators.stoplight import exceptions
 
 
 def req_accepts_json_pecan(request, desired_content_type='application/json'):
