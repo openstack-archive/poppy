@@ -22,6 +22,6 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
-from cdn.provider.fastly import services
+from poppy.provider.fastly import services
 
 ServiceController = services.ServiceController

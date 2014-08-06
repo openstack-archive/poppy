@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.storage import base
+from poppy.storage import base
 
 
 class ServicesController(base.ServicesController):

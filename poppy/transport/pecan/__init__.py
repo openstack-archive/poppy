@@ -15,7 +15,7 @@
 
 """Pecan Transport Driver"""
 
-from cdn.transport.pecan import driver
+from poppy.transport.pecan import driver
 
 
 # Hoist into package namespace

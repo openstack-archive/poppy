@@ -15,9 +15,9 @@
 
 """Pecan Controllers"""
 
-from cdn.transport.pecan.controllers import root
-from cdn.transport.pecan.controllers import services
-from cdn.transport.pecan.controllers import v1
+from poppy.transport.pecan.controllers import root
+from poppy.transport.pecan.controllers import services
+from poppy.transport.pecan.controllers import v1
 
 
 # Hoist into package namespace

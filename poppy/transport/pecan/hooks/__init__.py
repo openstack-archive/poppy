@@ -15,7 +15,7 @@
 
 """Pecan Hooks"""
 
-from cdn.transport.pecan.hooks import context
+from poppy.transport.pecan.hooks import context
 
 
 # Hoist into package namespace

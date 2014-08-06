@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.transport.validators import schema_base
+from poppy.transport.validators import schema_base
 
 
 class ServiceSchema(schema_base.SchemaBase):

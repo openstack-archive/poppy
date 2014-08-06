@@ -22,6 +22,6 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
-from cdn.storage.mongodb import services
+from poppy.storage.mongodb import services
 
 ServicesController = services.ServicesController

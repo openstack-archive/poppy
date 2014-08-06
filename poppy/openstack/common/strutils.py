@@ -24,7 +24,7 @@ import unicodedata
 
 import six
 
-from cdn.openstack.common.gettextutils import _
+from poppy.openstack.common.gettextutils import _
 
 
 UNIT_PREFIX_EXPONENT = {

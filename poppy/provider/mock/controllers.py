@@ -22,6 +22,6 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
-from cdn.provider.mock import services
+from poppy.provider.mock import services
 
 ServiceController = services.ServiceController

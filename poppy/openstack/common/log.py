@@ -40,13 +40,13 @@ from oslo.config import cfg
 import six
 from six import moves
 
-from cdn.openstack.common.gettextutils import _
-from cdn.openstack.common import importutils
-from cdn.openstack.common import jsonutils
-from cdn.openstack.common import local
+from poppy.openstack.common.gettextutils import _
+from poppy.openstack.common import importutils
+from poppy.openstack.common import jsonutils
+from poppy.openstack.common import local
 # NOTE(flaper87): Pls, remove when graduating this module
 # from the incubator.
-from cdn.openstack.common.strutils import mask_password  # noqa
+from poppy.openstack.common.strutils import mask_password  # noqa
 
 
 _DEFAULT_LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"

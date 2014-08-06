@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from cdn import bootstrap
-from cdn.common import cli
+from poppy.common import cli
 from oslo.config import cfg
 
 

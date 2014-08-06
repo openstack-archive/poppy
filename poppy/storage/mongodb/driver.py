@@ -18,10 +18,10 @@
 import pymongo
 import pymongo.errors
 
-from cdn.common import decorators
-from cdn.openstack.common import log as logging
-from cdn.storage import base
-from cdn.storage.mongodb import controllers
+from poppy.common import decorators
+from poppy.openstack.common import log as logging
+from poppy.storage import base
+from poppy.storage.mongodb import controllers
 
 from oslo.config import cfg
 

@@ -15,8 +15,8 @@
 
 from pecan import hooks
 
-from cdn.openstack.common import context
-from cdn.openstack.common import local
+from poppy.openstack.common import context
+from poppy.openstack.common import local
 
 
 class ContextHook(hooks.PecanHook):

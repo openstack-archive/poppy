@@ -16,8 +16,8 @@
 import abc
 import six
 
-from cdn.provider.base import controller
-from cdn.provider.base import responder
+from poppy.provider.base import controller
+from poppy.provider.base import responder
 
 
 @six.add_metaclass(abc.ABCMeta)

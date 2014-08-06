@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.manager.base import driver
-from cdn.manager.base import services
-from cdn.manager.base import v1
+from poppy.manager.base import driver
+from poppy.manager.base import services
+from poppy.manager.base import v1
 
 
 Driver = driver.ManagerDriverBase

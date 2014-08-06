@@ -15,9 +15,9 @@
 
 """Fastly CDN Provider implementation."""
 
-from cdn.openstack.common import log as logging
-from cdn.provider import base
-from cdn.provider.fastly import controllers
+from poppy.openstack.common import log as logging
+from poppy.provider import base
+from poppy.provider.fastly import controllers
 
 from oslo.config import cfg
 

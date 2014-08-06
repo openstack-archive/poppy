@@ -15,9 +15,9 @@
 
 """Default manager driver implementation."""
 
-from cdn.common import decorators
-from cdn.manager import base
-from cdn.manager.default import controllers
+from poppy.common import decorators
+from poppy.manager import base
+from poppy.manager.default import controllers
 
 
 class DefaultManagerDriver(base.Driver):

@@ -18,10 +18,10 @@ from wsgiref import simple_server
 from oslo.config import cfg
 import pecan
 
-from cdn.openstack.common import log
+from poppy.openstack.common import log
 from cdn import transport
-from cdn.transport.pecan import controllers
-from cdn.transport.pecan import hooks
+from poppy.transport.pecan import controllers
+from poppy.transport.pecan import hooks
 
 
 _PECAN_OPTIONS = [

@@ -17,7 +17,7 @@ import re
 
 import pecan
 
-from cdn.transport.pecan.controllers import base
+from poppy.transport.pecan.controllers import base
 
 
 class RootController(base.Controller):

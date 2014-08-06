@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.provider.base import driver
-from cdn.provider.base import services
+from poppy.provider.base import driver
+from poppy.provider.base import services
 
 
 Driver = driver.ProviderDriverBase

@@ -19,7 +19,7 @@ gettext for openstack-common modules.
 
 Usual usage in an openstack.common module:
 
-    from cdn.openstack.common.gettextutils import _
+    from poppy.openstack.common.gettextutils import _
 """
 
 import copy

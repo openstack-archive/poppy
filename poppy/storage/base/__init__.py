@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.storage.base import driver
-from cdn.storage.base import services
+from poppy.storage.base import driver
+from poppy.storage.base import services
 
 
 Driver = driver.StorageDriverBase

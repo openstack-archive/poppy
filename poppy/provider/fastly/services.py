@@ -15,7 +15,7 @@
 
 import fastly
 
-from cdn.provider import base
+from poppy.provider import base
 
 
 class ServiceController(base.ServiceBase):

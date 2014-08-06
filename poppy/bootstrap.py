@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.common import decorators
-from cdn.openstack.common import log
+from poppy.common import decorators
+from poppy.openstack.common import log
 from oslo.config import cfg
 from stevedore import driver, extension
 

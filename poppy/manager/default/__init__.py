@@ -15,7 +15,7 @@
 
 """Default Manager Driver"""
 
-from cdn.manager.default import driver
+from poppy.manager.default import driver
 
 
 # Hoist classes into package namespace

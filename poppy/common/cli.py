@@ -20,8 +20,8 @@ import os
 import sys
 import termios
 
-from cdn.openstack.common.gettextutils import _
-from cdn.openstack.common import log as logging
+from poppy.openstack.common.gettextutils import _
+from poppy.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)

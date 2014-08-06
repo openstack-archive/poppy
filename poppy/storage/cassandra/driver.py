@@ -17,10 +17,10 @@
 
 from cassandra.cluster import Cluster
 
-from cdn.common import decorators
-from cdn.openstack.common import log as logging
-from cdn.storage import base
-from cdn.storage.cassandra import controllers
+from poppy.common import decorators
+from poppy.openstack.common import log as logging
+from poppy.storage import base
+from poppy.storage.cassandra import controllers
 
 from oslo.config import cfg
 

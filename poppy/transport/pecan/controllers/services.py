@@ -17,13 +17,13 @@ import json
 
 import pecan
 
-from cdn.openstack.common import local
-from cdn.transport.pecan.controllers import base
-from cdn.transport.validators import helpers
-from cdn.transport.validators.schemas import service
-from cdn.transport.validators.stoplight import decorators
-from cdn.transport.validators.stoplight import helpers as stoplight_helpers
-from cdn.transport.validators.stoplight import rule
+from poppy.openstack.common import local
+from poppy.transport.pecan.controllers import base
+from poppy.transport.validators import helpers
+from poppy.transport.validators.schemas import service
+from poppy.transport.validators.stoplight import decorators
+from poppy.transport.validators.stoplight import helpers as stoplight_helpers
+from poppy.transport.validators.stoplight import rule
 
 
 class ServicesController(base.Controller):

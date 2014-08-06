@@ -15,7 +15,7 @@
 
 """CDN Transport Drivers"""
 
-from cdn.transport import base
+from poppy.transport import base
 
 
 # Hoist into package namespace

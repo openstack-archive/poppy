@@ -16,7 +16,7 @@
 import abc
 import six
 
-from cdn.storage.base import controller
+from poppy.storage.base import controller
 
 
 @six.add_metaclass(abc.ABCMeta)

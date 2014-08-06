@@ -20,9 +20,9 @@ import falcon
 from oslo.config import cfg
 import six
 
-import cdn.openstack.common.log as logging
+import poppy.openstack.common.log as logging
 from cdn import transport
-from cdn.transport.falcon import (
+from poppy.transport.falcon import (
     v1, services
 )
 

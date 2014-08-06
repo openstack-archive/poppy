@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # stevedore/example/simple.py
-from cdn.storage import base
+from poppy.storage import base
 
 
 class ServicesController(base.ServicesController):

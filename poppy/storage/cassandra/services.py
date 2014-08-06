@@ -15,7 +15,7 @@
 
 import json
 
-from cdn.storage import base
+from poppy.storage import base
 
 CQL_GET_ALL_SERVICES = '''
     SELECT project_id,

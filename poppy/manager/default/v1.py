@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.manager import base
+from poppy.manager import base
 
 JSON_HOME = {
     "resources": {

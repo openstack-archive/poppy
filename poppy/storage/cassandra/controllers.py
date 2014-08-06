@@ -23,6 +23,6 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
-from cdn.storage.cassandra import services
+from poppy.storage.cassandra import services
 
 ServicesController = services.ServicesController

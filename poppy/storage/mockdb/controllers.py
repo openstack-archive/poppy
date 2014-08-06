@@ -23,6 +23,6 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
-from cdn.storage.mockdb import services
+from poppy.storage.mockdb import services
 
 ServicesController = services.ServicesController
