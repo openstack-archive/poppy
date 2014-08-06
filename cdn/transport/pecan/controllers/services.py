@@ -19,6 +19,11 @@ import pecan
 
 from cdn.openstack.common import local
 from cdn.transport.pecan.controllers import base
+from cdn.transport.validators import helpers
+from cdn.transport.validators.schemas import service
+from cdn.transport.validators.stoplight import decorators
+from cdn.transport.validators.stoplight import helpers as stoplight_helpers
+from cdn.transport.validators.stoplight import rule
 
 
 class ServicesController(base.Controller):
@@ -40,6 +45,15 @@ class ServicesController(base.Controller):
         return services_controller.get(tenant_id, service_name)
 
     @pecan.expose('json')
+    @decorators.validate(
+        service_name=rule.Rule(
+            helpers.is_valid_service_name(),
+            helpers.abort_with_message),
+        request=rule.Rule(
+            helpers.json_matches_schema(
+                service.ServiceSchema.get_schema("service", "PUT")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter))
     def put(self, service_name):
         context = local.store.context
         tenant_id = context.tenant
@@ -56,6 +70,15 @@ class ServicesController(base.Controller):
         return services_controller.delete(tenant_id, service_name)
 
     @pecan.expose('json')
+    @decorators.validate(
+        service_name=rule.Rule(
+            helpers.is_valid_service_name(),
+            helpers.abort_with_message),
+        request=rule.Rule(
+            helpers.json_matches_schema(
+                service.ServiceSchema.get_schema("service", "PATCH")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter))
     def patch_one(self, service_name):
         context = local.store.context
         tenant_id = context.tenant
