@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.manager.default import v1
+from poppy.manager.default import v1
 
 from tests.functional.transport.pecan import base
 

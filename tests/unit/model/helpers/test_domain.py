@@ -16,7 +16,7 @@
 
 import ddt
 
-from cdn.model.helpers import domain
+from poppy.model.helpers import domain
 from tests.unit import base
 
 

@@ -22,13 +22,13 @@ import sys
 import pecan
 from webtest import app
 
-from cdn.common import errors
-from cdn.transport.validators import helpers
-from cdn.transport.validators.schemas import service
-from cdn.transport.validators.stoplight import decorators
-from cdn.transport.validators.stoplight import exceptions
-from cdn.transport.validators.stoplight import helpers as stoplight_helpers
-from cdn.transport.validators.stoplight import rule
+from poppy.common import errors
+from poppy.transport.validators import helpers
+from poppy.transport.validators.schemas import service
+from poppy.transport.validators.stoplight import decorators
+from poppy.transport.validators.stoplight import exceptions
+from poppy.transport.validators.stoplight import helpers as stoplight_helpers
+from poppy.transport.validators.stoplight import rule
 from tests.functional import base
 
 # for pecan testing app

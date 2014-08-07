@@ -17,13 +17,13 @@ import abc
 import multiprocessing
 import six
 
-from cdn import bootstrap
+from poppy import bootstrap
 
 
 @six.add_metaclass(abc.ABCMeta)
 class Server(object):
 
-    name = "cdn-server"
+    name = "poppy-server"
 
     def __init__(self):
         self.process = None
@@ -88,7 +88,7 @@ class Server(object):
 
 
 class CDNServer(Server):
-    name = "cdn-server"
+    name = "poppy-server"
 
     def get_target(self, conf):
         server = bootstrap.Bootstrap(conf)

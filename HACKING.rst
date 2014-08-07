@@ -86,7 +86,7 @@ Template::
   \n
   {{third-party lib imports in human alphabetical order}}
   \n
-  {{cdn imports in human alphabetical order}}
+  {{poppy imports in human alphabetical order}}
   \n
   \n
   {{begin your code}}
@@ -102,9 +102,9 @@ Example::
 
   import eventlet
 
-  import cdn.common
-  from cdn import test
-  import cdn.storage.cassandra
+  import poppy.common
+  from poppy import test
+  import poppy.storage.cassandra
 
 
 More Import Examples
@@ -112,11 +112,11 @@ More Import Examples
 
 **INCORRECT** ::
 
-  import cdn.transport.wsgi as wsgi
+  import poppy.transport.wsgi as wsgi
 
 **CORRECT** ::
 
-  from cdn.transport import wsgi
+  from poppy.transport import wsgi
 
 Docstrings
 ----------

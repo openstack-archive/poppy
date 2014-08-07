@@ -16,7 +16,7 @@
 import fastly
 import mock
 
-from cdn.provider.fastly import driver
+from poppy.provider.fastly import driver
 from oslo.config import cfg
 from tests.unit import base
 
@@ -55,7 +55,7 @@ class TestDriver(base.TestCase):
         client = provider.client()
         self.assertNotEquals(client, None)
 
-    @mock.patch('cdn.provider.fastly.controllers.ServiceController')
+    @mock.patch('poppy.provider.fastly.controllers.ServiceController')
     @mock.patch.object(driver, 'FASTLY_OPTIONS', new=FASTLY_OPTIONS)
     def test_service_controller(self, MockController):
         provider = driver.CDNProvider(self.conf)

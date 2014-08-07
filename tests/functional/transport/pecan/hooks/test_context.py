@@ -15,7 +15,7 @@
 
 import uuid
 
-from cdn.manager.default import v1
+from poppy.manager.default import v1
 from tests.functional.transport.pecan import base
 
 

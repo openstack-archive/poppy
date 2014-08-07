@@ -18,7 +18,7 @@ import os
 from oslo.config import cfg
 import webtest
 
-from cdn import bootstrap
+from poppy import bootstrap
 from tests.functional import base
 
 
@@ -33,9 +33,9 @@ class BaseFunctionalTest(base.TestCase):
                                 ))))
         conf_path = os.path.join(tests_path, 'etc', 'default_functional.conf')
         cfg.CONF(args=[], default_config_files=[conf_path])
-        cdn_wsgi = bootstrap.Bootstrap(cfg.CONF).transport.app
+        poppy_wsgi = bootstrap.Bootstrap(cfg.CONF).transport.app
 
-        self.app = webtest.TestApp(cdn_wsgi)
+        self.app = webtest.TestApp(poppy_wsgi)
 
 
 FunctionalTest = BaseFunctionalTest

@@ -36,7 +36,7 @@ class TestBase(fixtures.BaseTestFixture):
     @classmethod
     def setUpClass(cls):
 
-        cls.conf_file = 'cdn_mockdb.conf'
+        cls.conf_file = 'poppy_mockdb.conf'
 
         super(TestBase, cls).setUpClass()
 
@@ -56,14 +56,14 @@ class TestBase(fixtures.BaseTestFixture):
         cls.server_config = config.CDNServerConfig()
 
         if cls.server_config.run_server:
-            conf_path = os.environ["CDN_TESTS_CONFIGS_DIR"]
+            conf_path = os.environ["POPPY_TESTS_CONFIGS_DIR"]
             config_file = os.path.join(conf_path, cls.conf_file)
 
             conf = cfg.ConfigOpts()
-            conf(project='cdn', prog='cdn', args=[],
+            conf(project='poppy', prog='poppy', args=[],
                  default_config_files=[config_file])
-            cdn_server = server.CDNServer()
-            cdn_server.start(conf)
+            poppy_server = server.CDNServer()
+            poppy_server.start(conf)
 
     def assertSchema(self, response_json, expected_schema):
         """Verify response schema aligns with the expected schema."""

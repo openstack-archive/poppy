@@ -1,11 +1,11 @@
 ##
-##    CDN API
+##    Poppy
 ##
 ##
 
 # The following files should exist in this folder before running Dockerfile
 # - docker_rsa (private key) -> public key should be published to the private git repo
-# - cdn.conf (desired configuration for cdn api)
+# - poppy.conf (desired configuration for poppy api)
 # - logging.conf (desired logging configuration file)
 
 
@@ -43,28 +43,28 @@ RUN echo "IdentityFile ~/.ssh/id_rsa" >> /etc/ssh/ssh_config
 RUN touch /root/.ssh/known_hosts
 
 # Pull project
-RUN git clone git@github.com:rackerlabs/cdn /home/cdn
+RUN git clone git@github.com:rackerlabs/cdn /home/poppy
 
 # Install Requirements
-RUN sudo pip install -r /home/cdn/requirements/requirements.txt
+RUN sudo pip install -r /home/poppy/requirements/requirements.txt
 
-RUN sudo pip install -e /home/cdn/.
+RUN sudo pip install -e /home/poppy/.
 
 # Set up the configuration files
-ADD ./cdn.conf /etc/cdn.conf
+ADD ./poppy.conf /etc/poppy.conf
 ADD ./logging.conf /etc/logging.conf
 ADD ./uwsgi.ini /root/uwsgi.ini
 
 # create uwsgi log directory
-RUN mkdir -p /var/log/cdn
-RUN chmod -R +w /var/log/cdn
+RUN mkdir -p /var/log/poppy
+RUN chmod -R +w /var/log/poppy
 
 # create uwsgi pid directory
-RUN mkdir -p /var/run/cdn
-RUN chmod -R +w /var/run/cdn
+RUN mkdir -p /var/run/poppy
+RUN chmod -R +w /var/run/poppy
 
 #RUN /usr/local/bin/uwsgi --ini /root/uwsgi.ini
 
-# Start CDN
+# Start Poppy
 EXPOSE 80
 CMD ["/usr/local/bin/uwsgi", "--ini", "/root/uwsgi.ini"]

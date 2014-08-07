@@ -18,7 +18,7 @@ import os
 import mock
 from oslo.config import cfg
 
-from cdn.transport import pecan
+from poppy.transport import pecan
 from tests.unit import base
 
 
@@ -32,7 +32,7 @@ class PecanTransportDriverTest(base.TestCase):
         conf_path = os.path.join(tests_path, 'etc', 'default_functional.conf')
         cfg.CONF(args=[], default_config_files=[conf_path])
 
-        mock_path = 'cdn.transport.pecan.driver.simple_server'
+        mock_path = 'poppy.transport.pecan.driver.simple_server'
         with mock.patch(mock_path) as mocked_module:
             mock_server = mock.Mock()
             mocked_module.make_server = mock.Mock(return_value=mock_server)
