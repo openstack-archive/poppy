@@ -121,7 +121,7 @@ class TranslatorFactory(object):
 # module within each application.
 
 # Create the global translation functions.
-_translators = TranslatorFactory('cdn')
+_translators = TranslatorFactory('poppy')
 
 # The primary translation function using the well-known name "_"
 _ = _translators.primary
@@ -182,7 +182,7 @@ class Message(six.text_type):
     """
 
     def __new__(cls, msgid, msgtext=None, params=None,
-                domain='cdn', *args):
+                domain='poppy', *args):
         """Create a new Message object.
 
         In order for translation to work gettext requires a message ID, this

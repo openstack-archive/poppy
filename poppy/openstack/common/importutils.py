@@ -59,7 +59,7 @@ def import_module(import_str):
 
 
 def import_versioned_module(version, submodule=None):
-    module = 'cdn.v%s' % version
+    module = 'poppy.v%s' % version
     if submodule:
         module = '.'.join((module, submodule))
     return import_module(module)

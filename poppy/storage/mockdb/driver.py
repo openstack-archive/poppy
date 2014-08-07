@@ -25,7 +25,7 @@ from oslo.config import cfg
 LOG = logging.getLogger(__name__)
 
 MOCKDB_OPTIONS = [
-    cfg.StrOpt('database', default='cdn',
+    cfg.StrOpt('database', default='poppy',
                help='Database for all queries made in session')
 ]
 

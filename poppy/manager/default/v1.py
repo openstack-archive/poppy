@@ -17,7 +17,7 @@ from poppy.manager import base
 
 JSON_HOME = {
     "resources": {
-        "rel/cdn": {
+        "rel/poppy": {
             "href-template": "services{?marker,limit}",
             "href-vars": {
                 "marker": "param/marker",

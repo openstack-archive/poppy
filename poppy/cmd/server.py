@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn import bootstrap
+from poppy import bootstrap
 from poppy.common import cli
 from oslo.config import cfg
 
@@ -24,7 +24,7 @@ def run():
     # to pick up common options from openstack.common.log, since
     # that module uses the global CONF instance exclusively.
     conf = cfg.CONF
-    conf(project='cdn', prog='cdn')
+    conf(project='poppy', prog='poppy')
 
     server = bootstrap.Bootstrap(conf)
     server.run()

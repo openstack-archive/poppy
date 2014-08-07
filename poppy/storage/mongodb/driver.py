@@ -33,7 +33,7 @@ MONGODB_OPTIONS = [
     # Database name
     # TODO(kgriffs): Consider local sharding across DBs to mitigate
     # per-DB locking latency.
-    cfg.StrOpt('database', default='cdn', help='Database name'),
+    cfg.StrOpt('database', default='poppy', help='Database name'),
 
     cfg.IntOpt('max_attempts', default=1000,
                help=('Maximum number of times to retry a failed operation.'

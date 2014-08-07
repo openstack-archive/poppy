@@ -19,7 +19,7 @@ import json
 # NOTE(amitgandhinz): http://tools.ietf.org/html/draft-nottingham-json-home-03
 JSON_HOME = {
     "resources": {
-        "rel/cdn": {
+        "rel/poppy": {
             "href-template": "services{?marker,limit}",
             "href-vars": {
                 "marker": "param/marker",

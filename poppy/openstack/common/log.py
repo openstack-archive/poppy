@@ -40,6 +40,8 @@ from oslo.config import cfg
 import six
 from six import moves
 
+_PY26 = sys.version_info[0:2] == (2, 6)
+
 from poppy.openstack.common.gettextutils import _
 from poppy.openstack.common import importutils
 from poppy.openstack.common import jsonutils
@@ -226,6 +228,15 @@ class BaseLoggerAdapter(logging.LoggerAdapter):
 
     def audit(self, msg, *args, **kwargs):
         self.log(logging.AUDIT, msg, *args, **kwargs)
+
+    def isEnabledFor(self, level):
+        if _PY26:
+            # This method was added in python 2.7 (and it does the exact
+            # same logic, so we need to do the exact same logic so that
+            # python 2.6 has this capability as well).
+            return self.logger.isEnabledFor(level)
+        else:
+            return super(BaseLoggerAdapter, self).isEnabledFor(level)
 
 
 class LazyAdapter(BaseLoggerAdapter):
@@ -502,7 +513,7 @@ def _setup_logging_from_conf(project, version):
     if CONF.publish_errors:
         try:
             handler = importutils.import_object(
-                "cdn.openstack.common.log_handler.PublishErrorsHandler",
+                "poppy.openstack.common.log_handler.PublishErrorsHandler",
                 logging.ERROR)
         except ImportError:
             handler = importutils.import_object(

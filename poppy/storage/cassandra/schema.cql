@@ -1,5 +1,5 @@
-CREATE KEYSPACE cdn WITH REPLICATION = { 'class' : 'SimpleStrategy' , 'replication_factor' :  1}  ;
-USE cdn;
+CREATE KEYSPACE poppy WITH REPLICATION = { 'class' : 'SimpleStrategy' , 'replication_factor' :  1}  ;
+USE poppy;
 
 CREATE TABLE services (
     project_id VARCHAR,

@@ -47,7 +47,7 @@ class Bootstrap(object):
         self.conf.register_opts(_DRIVER_OPTIONS, group=_DRIVER_GROUP)
         self.driver_conf = self.conf[_DRIVER_GROUP]
 
-        log.setup('cdn')
+        log.setup('poppy')
 
         LOG.debug("init bootstrap")
 
@@ -56,7 +56,7 @@ class Bootstrap(object):
         LOG.debug((u'Loading provider extension(s)'))
 
         # create the driver manager to load the appropriate drivers
-        provider_type = 'cdn.provider'
+        provider_type = 'poppy.provider'
         args = [self.conf]
 
         mgr = extension.ExtensionManager(namespace=provider_type,
@@ -69,7 +69,7 @@ class Bootstrap(object):
         LOG.debug((u'Loading storage driver'))
 
         # create the driver manager to load the appropriate drivers
-        storage_type = 'cdn.storage'
+        storage_type = 'poppy.storage'
         storage_name = self.driver_conf.storage
 
         args = [self.conf]
@@ -88,7 +88,7 @@ class Bootstrap(object):
         LOG.debug((u'Loading manager driver'))
 
         # create the driver manager to load the appropriate drivers
-        manager_type = 'cdn.manager'
+        manager_type = 'poppy.manager'
         manager_name = self.driver_conf.manager
 
         args = [self.conf, self.storage, self.provider]
@@ -107,7 +107,7 @@ class Bootstrap(object):
         LOG.debug("loading transport")
 
         # create the driver manager to load the appropriate drivers
-        transport_type = 'cdn.transport'
+        transport_type = 'poppy.transport'
         transport_name = self.driver_conf.transport
 
         args = [self.conf, self.manager]

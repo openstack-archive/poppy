@@ -19,7 +19,7 @@ from oslo.config import cfg
 import pecan
 
 from poppy.openstack.common import log
-from cdn import transport
+from poppy import transport
 from poppy.transport.pecan import controllers
 from poppy.transport.pecan import hooks
 

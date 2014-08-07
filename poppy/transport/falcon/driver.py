@@ -21,7 +21,7 @@ from oslo.config import cfg
 import six
 
 import poppy.openstack.common.log as logging
-from cdn import transport
+from poppy import transport
 from poppy.transport.falcon import (
     v1, services
 )

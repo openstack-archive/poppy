@@ -28,7 +28,7 @@ LOG = logging.getLogger(__name__)
 
 CASSANDRA_OPTIONS = [
     cfg.ListOpt('cluster', help='Cassandra Cluster contact points'),
-    cfg.StrOpt('keyspace', default='cdn',
+    cfg.StrOpt('keyspace', default='poppy',
                help='Keyspace for all queries made in session'),
 ]
 

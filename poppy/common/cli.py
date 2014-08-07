@@ -72,7 +72,7 @@ def runnable(func):
         _enable_echo(False)
 
         try:
-            logging.setup('cdn')
+            logging.setup('poppy')
             func()
         except KeyboardInterrupt:
             LOG.info(_(u'Terminating'))

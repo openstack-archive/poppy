@@ -17,4 +17,4 @@ import pbr.packaging
 import pbr.version
 
 
-version_info = pbr.version.VersionInfo('cdn')
+version_info = pbr.version.VersionInfo('poppy')

@@ -18,7 +18,7 @@
 This app should be used by external WSGI
 containers. For example:
 
-    $ gunicorn cdn.transport.app:app
+    $ gunicorn poppy.transport.app:app
 
 NOTE: As for external containers, it is necessary
 to put config files in the standard paths. There's
@@ -28,10 +28,10 @@ to the WSGI app when it is called from other apps.
 
 from oslo.config import cfg
 
-from cdn import bootstrap
+from poppy import bootstrap
 
 
 conf = cfg.CONF
-conf(project='cdn', prog='cdn', args=[])
+conf(project='poppy', prog='poppy', args=[])
 
 app = bootstrap.Bootstrap(conf).transport.app
