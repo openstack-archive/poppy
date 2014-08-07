@@ -16,7 +16,7 @@
 
 import ddt
 
-from cdn.model.helpers import cachingrule
+from poppy.model.helpers import cachingrule
 from tests.unit import base
 
 

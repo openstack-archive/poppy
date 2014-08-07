@@ -18,7 +18,7 @@ import os
 import mock
 from oslo.config import cfg
 
-from cdn import bootstrap
+from poppy import bootstrap
 from tests.unit import base
 
 
@@ -32,7 +32,7 @@ class TestBootStrap(base.TestCase):
 
         bootstrap_obj = bootstrap.Bootstrap(cfg.CONF)
 
-        mock_path = 'cdn.transport.pecan.driver.simple_server'
+        mock_path = 'poppy.transport.pecan.driver.simple_server'
         with mock.patch(mock_path) as mocked_module:
             mock_server = mock.Mock()
             mocked_module.make_server = mock.Mock(return_value=mock_server)

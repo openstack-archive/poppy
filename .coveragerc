@@ -1,5 +1,5 @@
 [run]
-omit = *cdn/openstack*
+omit = *poppy/openstack*
 
 [report]
 exclude_lines =

@@ -15,7 +15,7 @@
 
 from oslo.config import cfg
 
-from cdn.provider.mock import driver
+from poppy.provider.mock import driver
 from tests.unit import base
 
 

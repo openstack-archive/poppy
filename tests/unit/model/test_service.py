@@ -16,9 +16,9 @@
 
 import ddt
 
-from cdn.model.helpers import domain
-from cdn.model.helpers import origin
-from cdn.model import service
+from poppy.model.helpers import domain
+from poppy.model.helpers import origin
+from poppy.model import service
 
 from tests.unit import base
 

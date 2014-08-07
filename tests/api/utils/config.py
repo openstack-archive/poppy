@@ -16,23 +16,23 @@
 from cafe.engine.models import data_interfaces
 
 
-class CDNConfig(data_interfaces.ConfigSectionInterface):
-    """Defines the config values for cdn."""
-    SECTION_NAME = 'cdn'
+class PoppyConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the config values for poppy."""
+    SECTION_NAME = 'poppy'
 
     @property
     def base_url(self):
-        """CDN endpoint."""
+        """poppy endpoint."""
         return self.get('base_url')
 
 
-class CDNServerConfig(data_interfaces.ConfigSectionInterface):
-    """Defines the config values for starting (or not) a cdn server"""
-    SECTION_NAME = 'cdn_server'
+class PoppyServerConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the config values for starting (or not) a Poppy server"""
+    SECTION_NAME = 'poppy_server'
 
     @property
     def run_server(self):
-        """Boolean value indicating whether to start CDN server."""
+        """Boolean value indicating whether to start a Poppy server."""
         return self.get_boolean('run_server')
 
 

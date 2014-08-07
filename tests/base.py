@@ -33,7 +33,7 @@ class TestCase(testtools.TestCase):
     def setUp(self):
         super(TestCase, self).setUp()
 
-        self.useFixture(fixtures.FakeLogger('cdn'))
+        self.useFixture(fixtures.FakeLogger('poppy'))
 
         if self.config_file:
             self.conf = self.load_conf(self.config_file)

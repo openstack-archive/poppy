@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.transport.validators.stoplight import decorators
-from cdn.transport.validators.stoplight import exceptions
-from cdn.transport.validators.stoplight import rule
+from poppy.transport.validators.stoplight import decorators
+from poppy.transport.validators.stoplight import exceptions
+from poppy.transport.validators.stoplight import rule
 
 from test_service_validation import BaseTestCase
 # TODO(tonytan4ever): We probably want to move this to a

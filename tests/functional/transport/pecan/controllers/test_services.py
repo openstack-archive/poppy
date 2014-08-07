@@ -18,7 +18,7 @@ import json
 import pecan
 from webtest import app
 
-from cdn.transport.pecan.controllers import base as c_base
+from poppy.transport.pecan.controllers import base as c_base
 from tests.functional.transport.pecan import base
 
 

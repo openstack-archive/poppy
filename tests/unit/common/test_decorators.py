@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cdn.common import decorators
+from poppy.common import decorators
 from tests.unit import base
 
 

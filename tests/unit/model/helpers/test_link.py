@@ -16,7 +16,7 @@
 
 import ddt
 
-from cdn.model.helpers import link
+from poppy.model.helpers import link
 from tests.unit import base
 
 

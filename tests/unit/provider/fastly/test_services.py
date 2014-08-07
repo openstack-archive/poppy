@@ -18,7 +18,7 @@ import fastly
 import mock
 import random
 
-from cdn.provider.fastly import services
+from poppy.provider.fastly import services
 from tests.unit import base
 
 
@@ -29,8 +29,8 @@ class TestServices(base.TestCase):
     @mock.patch('fastly.FastlyConnection')
     @mock.patch('fastly.FastlyService')
     @mock.patch('fastly.FastlyVersion')
-    @mock.patch('cdn.provider.fastly.services.ServiceController.client')
-    @mock.patch('cdn.provider.fastly.driver.CDNProvider')
+    @mock.patch('poppy.provider.fastly.services.ServiceController.client')
+    @mock.patch('poppy.provider.fastly.driver.CDNProvider')
     def test_create(self, service_json, mock_connection,
                     mock_service, mock_version, mock_controllerclient,
                     mock_driver):
@@ -122,8 +122,8 @@ class TestServices(base.TestCase):
 
     @mock.patch('fastly.FastlyConnection')
     @mock.patch('fastly.FastlyService')
-    @mock.patch('cdn.provider.fastly.services.ServiceController.client')
-    @mock.patch('cdn.provider.fastly.driver.CDNProvider')
+    @mock.patch('poppy.provider.fastly.services.ServiceController.client')
+    @mock.patch('poppy.provider.fastly.driver.CDNProvider')
     def test_delete(self, mock_connection, mock_service, mock_client,
                     mock_driver):
         driver = mock_driver()
@@ -155,8 +155,8 @@ class TestServices(base.TestCase):
         controller.client.delete_service.assert_called_once_with(service.id)
         self.assertIn('domain', resp[driver.provider_name])
 
-    @mock.patch('cdn.provider.fastly.services.ServiceController.client')
-    @mock.patch('cdn.provider.fastly.driver.CDNProvider')
+    @mock.patch('poppy.provider.fastly.services.ServiceController.client')
+    @mock.patch('poppy.provider.fastly.driver.CDNProvider')
     @ddt.file_data('data_service.json')
     def test_update(self, mock_get_client, mock_driver, service_json):
         service_name = 'whatsitnamed'
@@ -166,7 +166,7 @@ class TestServices(base.TestCase):
         resp = controller.update(service_name, service_json)
         self.assertIn('domain', resp[driver.provider_name])
 
-    @mock.patch('cdn.provider.fastly.driver.CDNProvider')
+    @mock.patch('poppy.provider.fastly.driver.CDNProvider')
     def test_client(self, mock_driver):
         driver = mock_driver()
         controller = services.ServiceController(driver)

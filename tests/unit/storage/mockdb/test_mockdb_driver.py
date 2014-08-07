@@ -15,7 +15,7 @@
 
 from oslo.config import cfg
 
-from cdn.storage.mockdb import driver
+from poppy.storage.mockdb import driver
 from tests.unit import base
 
 
