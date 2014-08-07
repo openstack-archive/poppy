@@ -13,12 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import fastly
 import mock
 
-from poppy.provider.fastly import driver
+import fastly
 from oslo.config import cfg
+
+from poppy.provider.fastly import driver
 from tests.unit import base
+
 
 FASTLY_OPTIONS = [
     cfg.StrOpt('apikey',

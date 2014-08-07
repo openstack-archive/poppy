@@ -61,7 +61,7 @@ installed and running.
 
 2. Copy the Poppy config files to the directory ``~/.poppy``::
 
-    $ cp poppy/etc/cdn.conf ~/.poppy/poppy.conf
+    $ cp poppy/etc/poppy.conf ~/.poppy/poppy.conf
     $ cp poppy/etc/logging.conf ~/.poppy/logging.conf
 
 3. Find the ``[drivers:storage:cassandradb]`` section in
@@ -73,7 +73,7 @@ installed and running.
     keyspace = poppy
 
 4. By using cassandra storage plugin, you will need to create the default 
-   keyspace "cdn" on your cassandra host/cluster. So log into cqlsh, do::
+   keyspace "poppy" on your cassandra host/cluster. So log into cqlsh, do::
     
     cqlsh> CREATE KEYSPACE poppy WITH REPLICATION = { 'class' : 'SimpleStrategy' , 'replication_factor' :  1}  ;
 
@@ -144,7 +144,7 @@ Mac OSX
 
 4. Import the Cassandra Schema to set up the required tables that CDN will need::
     
-    Open ./cqlsh and import the /cdn/storage/cassandra/schema.cql file
+    Open ./cqlsh and import the /poppy/storage/cassandra/schema.cql file
 
 
 

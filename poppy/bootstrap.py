@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.common import decorators
-from poppy.openstack.common import log
 from oslo.config import cfg
 from stevedore import driver, extension
+
+from poppy.common import decorators
+from poppy.openstack.common import log
 
 
 LOG = log.getLogger(__name__)

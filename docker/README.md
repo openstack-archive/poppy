@@ -1,7 +1,7 @@
 Building the Cassandra Docker Image
 --------------------------------------
 
-From the docker/cassandra-cdn folder:
+From the docker/cassandra folder:
 
     $ docker build -t db .
 
@@ -30,5 +30,5 @@ Where local ip is the ip address of your running docker container
 Import Schema
 ---------------
 
-Import the schema file from the cdn/storage/cassandra/schema.cql file.
+Import the schema file from the poppy/storage/cassandra/schema.cql file.
 
