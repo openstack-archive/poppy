@@ -27,12 +27,12 @@ class PoppyConfig(data_interfaces.ConfigSectionInterface):
 
 
 class PoppyServerConfig(data_interfaces.ConfigSectionInterface):
-    """Defines the config values for starting (or not) a poppy server"""
+    """Defines the config values for starting (or not) a Poppy server"""
     SECTION_NAME = 'poppy_server'
 
     @property
     def run_server(self):
-        """Boolean value indicating whether to start poppy server."""
+        """Boolean value indicating whether to start a Poppy server."""
         return self.get_boolean('run_server')
 
 
