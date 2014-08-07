@@ -18,7 +18,7 @@ import json
 import pecan
 from webtest import app
 
-from cdn.transport.pecan.controllers import base as c_base
+from poppy.transport.pecan.controllers import base as c_base
 from tests.functional.transport.pecan import base
 
 
@@ -38,23 +38,80 @@ class ServiceControllerTest(base.FunctionalTest):
         self.assertEqual(200, response.status_code)
 
     def test_create(self):
+         # create with errorenous data: invalid json data
+        self.assertRaises(app.AppError, self.app.put,
+                          '/v1.0/0001/services/fake_service_name_2',
+                          params="{", headers={
+                              "Content-Type": "application/json"
+                          })
+
+        # create with errorenous data
+        self.assertRaises(app.AppError, self.app.put,
+                          '/v1.0/0001/services/fake_service_name_2',
+                          params=json.dumps({
+                              "domain": "www.mytest.com"
+                          }), headers={
+                              "Content-Type": "application/json"
+                          })
+
+        # create with good data
         response = self.app.put('/v1.0/0001/services/fake_service_name_2',
                                 params=json.dumps({
-                                    "domain": "www.mytest.com"
-                                }), headers={
-                                    "Content-Type": "application/json"
-                                })
-
+                                    "domains": [
+                                        {"domain": "www.mywebsite.com"},
+                                        {"domain": "blog.mywebsite.com"},
+                                    ],
+                                    "origins": [{"origin": "mywebsite.com",
+                                                 "port": 80,
+                                                 "ssl": False},
+                                                {"origin": "mywebsite.com",
+                                                 }],
+                                    "caching": [{"name": "default",
+                                                 "ttl": 3600},
+                                                {"name": "home",
+                                                 "ttl": 17200,
+                                                 "rules": [
+                                                     {"name": "index",
+                                                      "request_url":
+                                                      "/index.htm"}]},
+                                                {"name": "images",
+                                                 "ttl": 12800,
+                                                 "rules": [
+                                                     {"name": "images",
+                                                      "request_url": "*.png"}]}
+                                                ]}),
+                                headers={"Content-Type": "application/json"})
         self.assertEqual(200, response.status_code)
 
     def test_update(self):
+        # update with erroneous data
+        self.assertRaises(app.AppError, self.app.patch,
+                          '/v1.0/0001/services/fake_service_name_3',
+                          params=json.dumps({
+                              "origins": [
+                                  {
+                                      # missing "origin" here
+                                      "port": 80,
+                                      "ssl": False
+                                  }
+                              ]
+                          }), headers={
+                              "Content-Type": "application/json"
+                          })
+
+        # update with good data
         response = self.app.patch('/v1.0/0001/services/fake_service_name_3',
                                   params=json.dumps({
-                                      "domain": "www.mytest.com"
+                                      "origins": [
+                                          {
+                                                    "origin": "44.33.22.11",
+                                                    "port": 80,
+                                                    "ssl": False
+                                                    }
+                                      ]
                                   }), headers={
                                       "Content-Type": "application/json"
                                   })
-
         self.assertEqual(200, response.status_code)
 
     def test_patch_non_exist(self):

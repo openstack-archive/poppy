@@ -19,8 +19,8 @@ import mock
 
 from oslo.config import cfg
 
-from cdn.storage.cassandra import driver
-from cdn.storage.cassandra import services
+from poppy.storage.cassandra import driver
+from poppy.storage.cassandra import services
 from tests.unit import base
 
 

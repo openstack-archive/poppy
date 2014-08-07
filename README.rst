@@ -1,16 +1,16 @@
-CDN
+Poppy
 =======
 
-Content Delivery Network Management as a Service
+CDN Provider Management as a Service
 
 Note: This is a work in progress and is not currently recommended for production use.
 
-What is CDN
+What is Poppy
 ============
 
 Users have come to expect exceptional speed in their applications, websites, and video experiences.  Because of this, using a CDN has become standard for companies, no matter their size.  
 
-CDN will take all the guess work out of the CDN market for our users.  CDN will give them a consistently speedy experience from integrated partners, with an easy to use RESTful API.
+Poppy will take all the guess work out of the CDN market for our users.  Poppy will give them a consistently speedy experience from integrated partners, with an easy to use RESTful API.
 
 Vendor lock-in to a particular CDN provider is removed by abstracting away the plethora of vendor API's available.  This means that a customer only has to integrate with one CDN API, and reap the benefits of using multiple providers.
 
@@ -39,10 +39,10 @@ Features
 + Set Restrictions on who can access cached content
 
 
-What CDN is not
+What Poppy is not
 ----------------------
 
-CDN does not run its own Edge Cache or POP servers.  This is purely a management API to abstract away the myriad of CDN providers on the market.
+Poppy does not run its own Edge Cache or POP servers.  This is purely a management API to abstract away the myriad of CDN providers on the market.
 
 
 
@@ -53,38 +53,38 @@ Getting Started
 not all of these steps are required. It is assumed you have `CassandraDB`
 installed and running.
 
-1. From your home folder create the ``~/.cdn`` folder and clone the repo::
+1. From your home folder create the ``~/.poppy`` folder and clone the repo::
 
     $ cd
-    $ mkdir .cdn
+    $ mkdir .poppy
     $ git clone https://github.com/rackerlabs/cdn.git
 
-2. Copy the CDN config files to the directory ``~/.cdn``::
+2. Copy the Poppy config files to the directory ``~/.poppy``::
 
-    $ cp cdn/etc/cdn.conf ~/.cdn/cdn.conf
-    $ cp cdn/etc/logging.conf ~/.cdn/logging.conf
+    $ cp poppy/etc/poppy.conf ~/.poppy/poppy.conf
+    $ cp poppy/etc/logging.conf ~/.poppy/logging.conf
 
 3. Find the ``[drivers:storage:cassandradb]`` section in
-   ``~/.cdn/cdn.conf`` and modify the URI to point
+   ``~/.poppy/poppy.conf`` and modify the URI to point
    to your local casssandra cluster::
 
     [drivers:storage:cassandra]
     cluster = "localhost"
-    keyspace = cdn
+    keyspace = poppy
 
 4. By using cassandra storage plugin, you will need to create the default 
-   keyspace "cdn" on your cassandra host/cluster. So log into cqlsh, do::
+   keyspace "poppy" on your cassandra host/cluster. So log into cqlsh, do::
     
-    cqlsh> CREATE KEYSPACE cdn WITH REPLICATION = { 'class' : 'SimpleStrategy' , 'replication_factor' :  1}  ;
+    cqlsh> CREATE KEYSPACE poppy WITH REPLICATION = { 'class' : 'SimpleStrategy' , 'replication_factor' :  1}  ;
 
 5. For logging, find the ``[DEFAULT]`` section in
-   ``~/.cdn/cdn.conf`` and modify as desired::
+   ``~/.poppy/poppy.conf`` and modify as desired::
 
     log_file = server.log
 
 6. Change directories back to your local copy of the repo::
 
-    $ cd cdn
+    $ cd poppy
 
 
 7. Install general requirements::
@@ -93,7 +93,7 @@ installed and running.
 
    Install Requirements for each Provider configured::
 
-    $ pip install -r cdn/providers/fastly/requirements.txt
+    $ pip install -r poppy/providers/fastly/requirements.txt
   
    Run the following so you can see the results of any changes you
    make to the code without having to reinstall the package each time::
@@ -101,14 +101,11 @@ installed and running.
     $ pip install -e .
 
 
-   Installing the fastly client library may have issues.  Copy the `README.md` file to `README` and try again.
+8. Start the Poppy server::
 
+    $ poppy-server
 
-8. Start the CDN server::
-
-    $ cdn-server
-
-9. Test out that CDN is working by requesting the home doc (with a sample project ID)::
+9. Test out that Poppy is working by requesting the home doc (with a sample project ID)::
 
     $ curl -i -X GET http://0.0.0.0:8888/v1.0/123
 
@@ -129,37 +126,38 @@ Installing Cassandra Locally
 Mac OSX
 -------
 
-1. Update your Java SDK to the latest version (v7+)
+1. Update your Java SDK to the latest version (v7+)::
 
     http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 
-You can check the version currently running with 
+   You can check the version currently running with::
     
     $java -version
 
-2. Follow the instructions on the datastax site to install cassandra for Mac OSX 
+2. Follow the instructions on the datastax site to install cassandra for Mac OSX::
     
     http://www.datastax.com/2012/01/working-with-apache-cassandra-on-mac-os-x
 
-3.  CREATE KEYSPACE cdn
-    WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
+3. Create a Keyspace with Replication::
 
-3. Import the Cassandra Schema to set up the required tables that CDN will need
+    CREATE KEYSPACE poppy WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
+
+4. Import the Cassandra Schema to set up the required tables that CDN will need::
     
-    Open ./cqlsh and import the /cdn/storage/cassandra/schema.cql file
+    Open ./cqlsh and import the /poppy/storage/cassandra/schema.cql file
 
 
 
 Running tests
 -----------------------------
 
-First install the additional requirements:
+First install the additional requirements::
 
     $ pip install tox
 
-And then run tests:
+And then run tests::
 
-    $ tox -e py27
+    $ tox
 
 
 .. _`CassandraDB` : http://cassandra.apache.org

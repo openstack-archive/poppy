@@ -17,14 +17,14 @@ import mock
 
 from oslo.config import cfg
 
-from cdn.manager.default import driver
-from cdn.manager.default import services
+from poppy.manager.default import driver
+from poppy.manager.default import services
 from tests.unit import base
 
 
 class DefaultManagerDriverTests(base.TestCase):
-    @mock.patch('cdn.storage.base.driver.StorageDriverBase')
-    @mock.patch('cdn.provider.base.driver.ProviderDriverBase')
+    @mock.patch('poppy.storage.base.driver.StorageDriverBase')
+    @mock.patch('poppy.provider.base.driver.ProviderDriverBase')
     def setUp(self, mock_storage, mock_provider):
         super(DefaultManagerDriverTests, self).setUp()
 
