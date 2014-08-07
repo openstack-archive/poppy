@@ -8,7 +8,5 @@ openstack.nose_plugin
 oslosphinx
 oslotest
 sphinx
-sphinxcontrib-pecanwsme
-sphinxcontrib-httpdomain
 requests
 testtools
