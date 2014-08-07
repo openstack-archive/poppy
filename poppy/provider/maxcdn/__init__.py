@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Rackspace, Inc.
+# Copyright (c) 2013 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,16 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Pecan Controllers"""
+"""MaxCDN Provider Extension for CDN"""
 
-from poppy.transport.pecan.controllers import ping
-from poppy.transport.pecan.controllers import root
-from poppy.transport.pecan.controllers import services
-from poppy.transport.pecan.controllers import v1
+from poppy.provider.maxcdn import driver
 
-
-# Hoist into package namespace
-Root = root.RootController
-Ping = ping.PingController
-Services = services.ServicesController
-V1 = v1.ControllerV1
+# Hoist classes into package namespace
+Driver = driver.CDNProvider

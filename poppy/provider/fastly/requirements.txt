@@ -1,2 +1,0 @@
--e git+https://github.com/zebrafishlabs/fastly-python#egg=fastly-python
-httplib2>=0.8

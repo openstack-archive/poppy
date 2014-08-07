@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Rackspace, Inc.
+# Copyright (c) 2013 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,16 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Pecan Controllers"""
+"""Exports MaxCDN poppy controllers.
 
-from poppy.transport.pecan.controllers import ping
-from poppy.transport.pecan.controllers import root
-from poppy.transport.pecan.controllers import services
-from poppy.transport.pecan.controllers import v1
+Field Mappings:
+    In order to reduce the disk / memory space used,
+    fields name will be, most of the time, the first
+    letter of their long name. Fields mapping will be
+    updated and documented in each controller class.
+"""
 
+from poppy.provider.maxcdn import services
 
-# Hoist into package namespace
-Root = root.RootController
-Ping = ping.PingController
-Services = services.ServicesController
-V1 = v1.ControllerV1
+ServiceController = services.ServiceController
