@@ -11,10 +11,10 @@
     License for the specific language governing permissions and limitations
     under the License.
 
-Welcome to Poppy's documentation!
-=================================
+Welcome to Poppy's developer documentation!
+===========================================
 
-Poppy is an OpenStack related project to provide a generic and modular vendor-neutral API that wraps provisioning instructions for CDN vendors that support it.
+Poppy is an OpenStack related project to provide a generic and modular vendor-neutral API which wraps provisioning instructions for CDN vendors that support it.
 
 Poppy, as with all OpenStack projects, is written with the following design
 guidelines in mind:
@@ -40,13 +40,16 @@ Concepts
 
    glossary
 
-Installing/Configuring Poppy
-============================
+Getting Started
+===============
 
 .. toctree::
    :maxdepth: 1
 
-   installing
+   gettingstarted_installing
+   gettingstarted_testing
+   gettingstarted_contributing
+
 
 Operating Poppy
 ===============
@@ -54,10 +57,20 @@ Operating Poppy
 .. toctree::
    :maxdepth: 1
 
-   ha
+   ops
 
-Using Poppy
-===========
+
+Developer Docs
+==============
+
+.. toctree::
+   :maxdepth: 3
+
+   poppy
+
+
+Using Poppy's API
+=================
 
 .. toctree::
    :maxdepth: 1
