@@ -52,3 +52,8 @@ class TestService(base.TestCase):
         # origins
         self.assertEqual(myservice.origins, myorigins)
         self.assertRaises(AttributeError, setattr, myservice, 'origins', [])
+
+        # caching, restrictions, and links, empty for now
+        self.assertEqual(myservice.caching, [])
+        self.assertEqual(myservice.restrictions, [])
+        self.assertEqual(myservice.links, [])

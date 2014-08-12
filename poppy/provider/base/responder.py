@@ -35,23 +35,24 @@ class Responder(object):
             }
         }
 
-    def created(self, domain):
+    def created(self, provider_service_id, links):
         return {
             self.provider: {
-                "domain": domain
+                "id": provider_service_id,
+                "links": links
             }
         }
 
-    def updated(self, domain):
+    def updated(self, provider_service_id):
         return {
             self.provider: {
-                "domain": domain
+                "id": provider_service_id
             }
         }
 
-    def deleted(self, domain):
+    def deleted(self, provider_service_id):
         return {
             self.provider: {
-                "domain": domain
+                "id": provider_service_id
             }
         }

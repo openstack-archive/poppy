@@ -22,7 +22,7 @@ server = {
 
 # Pecan Application Configurations
 app = {
-    'root': 'test_service_validation.DummyPecanEndpoint',
+    'root': 'test_pecan_style_validation.DummyPecanEndpoint',
     'modules': ['pecan_app'],
     #'static_root': '%(confdir)s/../../public',
     #'template_path': '%(confdir)s/../templates',

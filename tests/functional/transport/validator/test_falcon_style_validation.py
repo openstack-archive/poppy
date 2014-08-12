@@ -48,23 +48,6 @@ def abort(code):
     error_count = error_count + 1
 
 
-@decorators.validation_function
-def is_valid_json(r):
-    """Simple validation function for testing purposes
-    that ensures that input is a valid json string
-    """
-    if len(r.body) == 0:
-        return
-    else:
-        try:
-            json.loads(r.body.decode('utf-8'))
-        except Exception as e:
-            e
-            raise exceptions.ValidationFailed('Invalid JSON string')
-        else:
-            return
-
-
 class DummyRequest(object):
 
     def __init__(self):
@@ -98,6 +81,12 @@ class DummyRequest(object):
                  }
             ]
         })
+    
+    def client_accepts(self, header='application/json'):
+        return True
+
+    def accept(self, header='application/json'):
+        return True
 
 
 class DummyRequestWithInvalidHeader(DummyRequest):
@@ -231,9 +220,15 @@ class BaseTestCase(base.TestCase):
         except Exception as e:
             e
             pass
-
+        
         with self.assertRaises(exceptions.ValidationFailed):
             helpers.req_accepts_json_pecan(req)
+            
+        good_req = DummyRequest()
+        self.assertEquals(helpers.require_accepts_json_falcon(good_req, resp),
+                          None)
+        
+        self.assertEquals(helpers.req_accepts_json_pecan(good_req, resp), None)
 
 
 @decorators.validation_function
@@ -246,6 +241,10 @@ testing_schema = service.ServiceSchema.get_schema("service", "PUT")
 request_fit_schema = functools.partial(
     helpers.with_schema_falcon,
     schema=testing_schema)
+
+request_passthrough_schema = functools.partial(
+    helpers.with_schema_falcon,
+    schema=None)
 
 
 class DummyFalconEndpoint(object):
@@ -266,27 +265,24 @@ class DummyFalconEndpoint(object):
     )
     def get_falcon_style_custom_abort(self, request, response):
         return "Hello, World!"
-
-
-class DummyPecanEndpoint(object):
-
-    @pecan.expose(generic=True)
-    @helpers.with_schema_pecan(pecan.request, schema=testing_schema)
-    def index(self):
-        return "Hello, World!"
-
-    @index.when(method='PUT')
+    
     @decorators.validate(
-        request=rule.Rule(is_valid_json(),
-                          lambda error_info: pecan.abort(400),
-                          stoplight_helpers.pecan_getter)
+        request=rule.Rule(request_passthrough_schema,
+                          helpers.custom_abort_falcon),
+        response=rule.Rule(is_response(),
+                           helpers.custom_abort_falcon)
     )
-    def index_put(self):
+    def get_falcon_style_passthrough_schema(self, request, response):
         return "Hello, World!"
 
 
 def test_fake_falcon():
     helpers.falcon.HTTPNotAcceptable("nothing")
+
+
+def test_no_error_custom_abort_falcon():
+    assert helpers.custom_abort_falcon(None) is not None
+    assert helpers.custom_abort_falcon([1,2]) is not None
 
 
 class TestFalconStyleValidationFunctions(BaseTestCase):
@@ -356,38 +352,14 @@ class TestValidationDecoratorsFalcon(BaseTestCase):
         self.ep.get_falcon_style_custom_abort(
             fake_request_bad_missing_domain,
             response)
-
-
-class PecanEndPointFunctionalTest(BaseTestCase):
-
-    """A Simple PecanFunctionalTest base class that sets up a
-    Pecan endpoint (endpoint class: DummyPecanEndpoint)
-    """
-
-    def setUp(self):
-        self.app = load_test_app(os.path.join(os.path.dirname(__file__),
-                                              'config.py'
-                                              ))
-        super(PecanEndPointFunctionalTest, self).setUp()
-
-    def tearDown(self):
-        pecan.set_config({}, overwrite=True)
-        super(PecanEndPointFunctionalTest, self).tearDown()
-
-
-class TestValidationDecoratorsPecan(PecanEndPointFunctionalTest):
-
-    def test_pecan_endpoint_post(self):
-        resp = self.app.post(
-            '/',
-            params=fake_request_good.body,
-            headers={
-                "Content-Type": "application/json;charset=utf-8"})
-        self.assertEqual(resp.status_int, 200)
-        self.assertEqual(resp.body.decode('utf-8'), "Hello, World!")
-        with self.assertRaisesRegexp(app.AppError, "400 Bad Request"):
-            self.app.post('/', params=fake_request_bad_missing_domain.body,
-                          headers={"Content-Type": "application/json"})
-        with self.assertRaisesRegexp(app.AppError, "400 Bad Request"):
-            self.app.post('/', params=fake_request_bad_invalid_json_body.body,
-                          headers={"Content-Type": "application/json"})
+        
+        # Try with
+        # Try to call with good inputs
+        oldcount = error_count
+        ret = self.ep.get_falcon_style_passthrough_schema(\
+                    fake_request_bad_missing_domain, response)
+        self.assertEqual(oldcount, error_count)
+        self.assertEqual(
+            ret,
+            "Hello, World!",
+            "testing not passed on endpoint: get_falcon_style with valid data")
