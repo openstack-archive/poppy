@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import jsonschema
 import os
 
+from cafe.drivers.unittest import fixtures
+import jsonschema
 from oslo.config import cfg
 
-from cafe.drivers.unittest import fixtures
 
 from tests.api.utils import client
 from tests.api.utils import config

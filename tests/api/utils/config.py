@@ -27,7 +27,7 @@ class PoppyConfig(data_interfaces.ConfigSectionInterface):
 
 
 class PoppyServerConfig(data_interfaces.ConfigSectionInterface):
-    """Defines the config values for starting (or not) a Poppy server"""
+    """Defines the config values for starting (or not) a Poppy server."""
     SECTION_NAME = 'poppy_server'
 
     @property

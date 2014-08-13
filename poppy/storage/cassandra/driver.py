@@ -15,7 +15,7 @@
 
 """Cassandra storage driver implementation."""
 
-from cassandra.cluster import Cluster
+from cassandra import cluster
 
 from poppy.common import decorators
 from poppy.openstack.common import log as logging
@@ -36,8 +36,8 @@ CASSANDRA_GROUP = 'drivers:storage:cassandra'
 
 
 def _connection(conf):
-    cluster = Cluster(conf.cluster)
-    session = cluster.connect(conf.keyspace)
+    cassandra_cluster = cluster.Cluster(conf.cluster)
+    session = cassandra_cluster.connect(conf.keyspace)
 
     return session
 

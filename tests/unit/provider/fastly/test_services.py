@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import random
+
 import ddt
 import fastly
 import mock
-import random
 
 from poppy.provider.fastly import services
 from tests.unit import base
@@ -170,4 +171,4 @@ class TestServices(base.TestCase):
     def test_client(self, mock_driver):
         driver = mock_driver()
         controller = services.ServiceController(driver)
-        self.assertNotEquals(controller.client(), None)
+        self.assertNotEqual(controller.client(), None)

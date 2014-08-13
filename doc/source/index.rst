@@ -32,34 +32,3 @@ be found on the `OpenStack wiki`_. Cloud administrators, refer to `docs.openstac
 .. _`OpenStack wiki`: http://wiki.openstack.org
 .. _`docs.openstack.org`: http://docs.openstack.org
 
-Concepts
-========
-
-.. toctree::
-   :maxdepth: 1
-
-   glossary
-
-Installing/Configuring Poppy
-============================
-
-.. toctree::
-   :maxdepth: 1
-
-   installing
-
-Operating Poppy
-===============
-
-.. toctree::
-   :maxdepth: 1
-
-   ha
-
-Using Poppy
-===========
-
-.. toctree::
-   :maxdepth: 1
-
-   api

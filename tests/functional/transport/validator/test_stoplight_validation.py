@@ -16,26 +16,15 @@
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import exceptions
 from poppy.transport.validators.stoplight import rule
-
-from test_service_validation import BaseTestCase
-# TODO(tonytan4ever): We probably want to move this to a
-# test helpers library
+from tests.functional.transport.validator import base
 
 
 @decorators.validation_function
 def is_upper(z):
-    """Simple validation function for testing purposes
-    that ensures that input is all caps
-    """
+    """Ensures Uppercase."""
     if z.upper() != z:
         raise exceptions.ValidationFailed('{0} no uppercase'.format(z))
 
-error_count = 0
-
-
-def abort(code):
-    global error_count
-    error_count = error_count + 1
 
 other_vals = dict()
 get_other_val = other_vals.get
@@ -63,9 +52,9 @@ def is_response(candidate):
         raise exceptions.ValidationFailed('Input must be a response')
 
 
-RequestRule = rule.Rule(is_request(), lambda error_info: abort(404))
-ResponseRule = rule.Rule(is_response(), lambda error_info: abort(404))
-UppercaseRule = rule.Rule(is_upper(), lambda error_info: abort(404))
+RequestRule = rule.Rule(is_request(), lambda error_info: base.abort(404))
+ResponseRule = rule.Rule(is_response(), lambda error_info: base.abort(404))
+UppercaseRule = rule.Rule(is_upper(), lambda error_info: base.abort(404))
 
 
 class DummyEndpoint(object):
@@ -80,7 +69,7 @@ class DummyEndpoint(object):
     @decorators.validate(
         value=rule.Rule(
             is_upper,
-            lambda error_info: abort(404)))  # pragma: no cover
+            lambda error_info: base.abort(404)))  # pragma: no cover
     def get_value_programming_error(self, value):
         # This function body should never be
         # callable since the validation error
@@ -88,17 +77,17 @@ class DummyEndpoint(object):
         assert False  # pragma: no cover
 
     @decorators.validate(
-        value1=rule.Rule(is_upper(), lambda error_info: abort(404)),
-        value2=rule.Rule(is_upper(), lambda error_info: abort(404)),
-        value3=rule.Rule(is_upper(), lambda error_info: abort(404))
+        value1=rule.Rule(is_upper(), lambda error_info: base.abort(404)),
+        value2=rule.Rule(is_upper(), lambda error_info: base.abort(404)),
+        value3=rule.Rule(is_upper(), lambda error_info: base.abort(404))
     )  # pragma: no cover
     def get_value_happy_path(self, value1, value2, value3):
         return value1 + value2 + value3
 
     @decorators.validate(
-        value1=rule.Rule(is_upper(), lambda: abort(404)),
+        value1=rule.Rule(is_upper(), lambda: base.abort(404)),
         value2=rule.Rule(is_upper(empty_ok=True),
-                         lambda error_info: abort(404),
+                         lambda error_info: base.abort(404),
                          get_other_val),
     )  # pragma: no cover
     def get_value_with_getter(self, value1):
@@ -107,9 +96,9 @@ class DummyEndpoint(object):
 
     # Falcon-style endpoint
     @decorators.validate(
-        request=rule.Rule(is_request(), lambda error_info: abort(404)),
-        response=rule.Rule(is_response(), lambda error_info: abort(404)),
-        value=rule.Rule(is_upper(), lambda error_info: abort(404))
+        request=rule.Rule(is_request(), lambda error_info: base.abort(404)),
+        response=rule.Rule(is_response(), lambda error_info: base.abort(404)),
+        value=rule.Rule(is_upper(), lambda error_info: base.abort(404))
     )
     def get_falcon_style(self, request, response, value):
         return value
@@ -121,7 +110,7 @@ class DummyEndpoint(object):
         return value
 
 
-class TestValidationFunction(BaseTestCase):
+class TestValidationFunction(base.BaseTestCase):
 
     def test_empty_ok(self):
         is_upper(empty_ok=True)('')
@@ -135,7 +124,7 @@ class TestValidationFunction(BaseTestCase):
             is_upper()(None)
 
 
-class TestValidationDecorator(BaseTestCase):
+class TestValidationDecorator(base.BaseTestCase):
 
     def setUp(self):
         self.ep = DummyEndpoint()
@@ -154,42 +143,42 @@ class TestValidationDecorator(BaseTestCase):
 
         # Try to call with missing params. The validation
         # function should never get called
-        oldcount = error_count
+        oldcount = base.error_count
         self.ep.get_falcon_style(response, 'HELLO')
-        self.assertEqual(oldcount + 1, error_count)
+        self.assertEqual(oldcount + 1, base.error_count)
 
         # Try to pass a string to a positional argument
         # where a response is expected
-        oldcount = error_count
+        oldcount = base.error_count
         self.ep.get_falcon_style(request, "bogusinput", 'HELLO')
-        self.assertEqual(oldcount + 1, error_count)
+        self.assertEqual(oldcount + 1, base.error_count)
 
         # Pass in as kwvalues with good input but out of
         # typical order (should succeed)
-        oldcount = error_count
+        oldcount = base.error_count
         self.ep.get_falcon_style(response=response, value='HELLO',
                                  request=request)
-        self.assertEqual(oldcount, error_count)
+        self.assertEqual(oldcount, base.error_count)
 
         # Pass in as kwvalues with good input but out of
         # typical order with an invalid value (lower-case 'h')
-        oldcount = error_count
+        oldcount = base.error_count
         self.ep.get_falcon_style(response=response, value='hELLO',
                                  request=request)
-        self.assertEqual(oldcount + 1, error_count)
+        self.assertEqual(oldcount + 1, base.error_count)
 
         # Pass in as kwvalues with good input but out of typical order
         # and pass an invalid value. Note that here the response is
         # assigned to request, etc.
-        oldcount = error_count
+        oldcount = base.error_count
         self.ep.get_falcon_style(response=request, value='HELLO',
                                  request=response)
-        self.assertEqual(oldcount + 1, error_count)
+        self.assertEqual(oldcount + 1, base.error_count)
 
         # Happy path
-        oldcount = error_count
+        oldcount = base.error_count
         self.ep.get_falcon_style(request, response, 'HELLO')
-        self.assertEqual(oldcount, error_count)
+        self.assertEqual(oldcount, base.error_count)
 
     def test_falcon_style_declared_rules(self):
         # The following tests repeat the above
@@ -197,71 +186,70 @@ class TestValidationDecorator(BaseTestCase):
         # endpoint with the rules being declared
         # separately. See get_falcon_with_declared_rules above
 
-        global error_count
-
         request = DummyRequest()
         response = DummyResponse()
 
         # Try to call with missing params. The validation
         # function should never get called
-        oldcount = error_count
+        oldcount = base.error_count
         self.ep.get_falcon_with_declared_rules(response, 'HELLO')
-        self.assertEqual(oldcount + 1, error_count)
+        self.assertEqual(oldcount + 1, base.error_count)
 
         # Try to pass a string to a positional argument
         # where a response is expected
-        oldcount = error_count
+        oldcount = base.error_count
         self.ep.get_falcon_with_declared_rules(request, "bogusinput", 'HELLO')
-        self.assertEqual(oldcount + 1, error_count)
+        self.assertEqual(oldcount + 1, base.error_count)
 
         # Pass in as kwvalues with good input but out of
         # typical order (should succeed)
-        oldcount = error_count
+        oldcount = base.error_count
         self.ep.get_falcon_with_declared_rules(
             response=response,
             value='HELLO',
             request=request)
-        self.assertEqual(oldcount, error_count)
+        self.assertEqual(oldcount, base.error_count)
 
         # Pass in as kwvalues with good input but out of
         # typical order with an invalid value (lower-case 'h')
-        oldcount = error_count
+        oldcount = base.error_count
         self.ep.get_falcon_with_declared_rules(
             response=response,
             value='hELLO',
             request=request)
-        self.assertEqual(oldcount + 1, error_count)
+        self.assertEqual(oldcount + 1, base.error_count)
 
         # Pass in as kwvalues with good input but out of typical order
         # and pass an invalid value. Note that here the response is
         # assigned to request, etc.
-        oldcount = error_count
+        oldcount = base.error_count
         self.ep.get_falcon_with_declared_rules(response=request, value='HELLO',
                                                request=response)
-        self.assertEqual(oldcount + 1, error_count)
+        self.assertEqual(oldcount + 1, base.error_count)
 
         # Happy path
-        oldcount = error_count
+        oldcount = base.error_count
         self.ep.get_falcon_with_declared_rules(request, response, 'HELLO')
-        self.assertEqual(oldcount, error_count)
+        self.assertEqual(oldcount, base.error_count)
 
-    def test_happy_path_and_validation_failure(self):
-        global error_count
+    def test_validation_passed(self):
         # Should not throw
         res = self.ep.get_value_happy_path('WHATEVER', 'HELLO', 'YES')
         self.assertEqual('WHATEVERHELLOYES', res)
 
+    def test_validation_failed(self):
         # Validation should have failed, and
         # we should have seen a tick in the error count
-        oldcount = error_count
-        res = self.ep.get_value_happy_path('WHAtEVER', 'HELLO', 'YES')
-        self.assertEqual(oldcount + 1, error_count)
+        oldcount = base.error_count
+        self.ep.get_value_happy_path('WHAtEVER', 'HELLO', 'YES')
+        self.assertEqual(oldcount + 1, base.error_count)
 
+    def test_validating_none_value(self):
         # Check passing a None value. This decorator does
         # not permit none values.
-        oldcount = error_count
-        res = self.ep.get_value_happy_path(None, 'HELLO', 'YES')
-        self.assertEqual(oldcount + 1, error_count)
+        oldcount = base.error_count
+        self.ep.get_value_happy_path(None, 'HELLO', 'YES')
+        self.assertEqual(oldcount + 1, base.error_count)
 
     def test_getter(self):
         global other_vals
