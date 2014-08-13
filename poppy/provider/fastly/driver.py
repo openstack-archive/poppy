@@ -19,9 +19,9 @@ from poppy.openstack.common import log as logging
 from poppy.provider import base
 from poppy.provider.fastly import controllers
 
+import fastly
 from oslo.config import cfg
 
-import fastly
 
 LOG = logging.getLogger(__name__)
 

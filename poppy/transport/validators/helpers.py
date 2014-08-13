@@ -125,8 +125,7 @@ def with_schema_falcon(request, schema=None):
 
 def with_schema_pecan(request, schema=None, handler=custom_abort_pecan,
                       **kwargs):
-    """Used to decorate a Pecan/Flask style controller form validation for
-    anything else (e.g., POST | PUT | PATCH ).
+    """Decorate a Pecan/Flask style controller form validation.
 
     For an HTTP POST or PUT (RFC2616 unsafe methods) request, the schema is
     used to validate the request body.
@@ -140,8 +139,9 @@ def with_schema_pecan(request, schema=None, handler=custom_abort_pecan,
             validation_failed = False
             v_error = None
             errors_list = []
-            if request.method in ('POST', 'PUT', 'PATCH') and \
-                    schema is not None:
+            if request.method in ('POST', 'PUT', 'PATCH') and (
+                schema is not None
+            ):
                 try:
                     data = json.loads(request.body.decode('utf-8'))
                     errors_list = list(

@@ -14,7 +14,8 @@
 # limitations under the License.
 
 from oslo.config import cfg
-from stevedore import driver, extension
+from stevedore import driver
+from stevedore import extension
 
 from poppy.common import decorators
 from poppy.openstack.common import log

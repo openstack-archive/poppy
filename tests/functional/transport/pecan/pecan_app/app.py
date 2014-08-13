@@ -13,29 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Server Specific Configurations
+import pecan
 
-server = {
-    'port': '8080',
-    'host': '0.0.0.0'
-}
 
-# Pecan Application Configurations
-app = {
-    'root': 'test_service_validation.DummyPecanEndpoint',
-    'modules': ['pecan_app'],
-    #'static_root': '%(confdir)s/../../public',
-    #'template_path': '%(confdir)s/../templates',
-    'debug': True,
-    'errors': {
-        '404': '/error/404',
-        '__force_dict__': True
-    }
-}
+def setup_app(config):
+    app_conf = dict(config.app)
 
-# Custom Configurations must be in Python dictionary format::
-#
-# foo = {'bar':'baz'}
-#
-# All configurations are accessible at::
-# pecan.conf
+    return pecan.make_app(
+        app_conf.pop('root'),
+        logging=getattr(config, 'logging', {}),
+        **app_conf
+    )

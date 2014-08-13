@@ -12,3 +12,18 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+server = {
+    'port': '8080',
+    'host': '0.0.0.0'
+}
+
+app = {
+    'root': 'tests.functional.transport.pecan.mock.MockPecanEndpoint',
+    'modules': ['tests.functional.transport.pecan.pecan_app'],
+    'debug': True,
+    'errors': {
+        '404': '/error/404',
+        '__force_dict__': True
+    }
+}

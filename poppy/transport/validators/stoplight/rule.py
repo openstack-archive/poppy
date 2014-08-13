@@ -13,14 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import namedtuple
+import collections
 
-ValidationRule = namedtuple('ValidationRule', 'vfunc errfunc getter')
+ValidationRule = collections.namedtuple('ValidationRule',
+                                        'vfunc errfunc getter'
+                                        )
 
 
 def Rule(vfunc, on_error, getter=None):
-    """Constructs a single validation rule. A rule effectively
-    is saying "I want to validation this input using
+    """Constructs a single validation rule.
+
+    A rule effectively is saying "I want to validation this input using
     this function and if validation fails I want this (on_error)
     to happen.
 

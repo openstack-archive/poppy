@@ -28,8 +28,8 @@ class Controller(rest.RestController):
         setattr(self, path, controller)
 
     def _handle_patch(self, method, remainder):
-        '''Routes ``PATCH`` actions to the appropriate controller.
-        '''
+        """Routes ``PATCH`` actions to the appropriate controller."""
+
         # route to a patch_all or get if no additional parts are available
         if not remainder or remainder == ['']:
             controller = self._find_controller('patch_all', 'patch')

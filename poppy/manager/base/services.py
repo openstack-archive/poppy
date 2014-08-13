@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import abc
+
 import six
 
 from poppy.manager.base import controller

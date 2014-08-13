@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import mock
-
 from oslo.config import cfg
 
 from poppy.manager.default import driver

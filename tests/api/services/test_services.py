@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import ddt
 import uuid
+
+import ddt
 
 from tests.api import base
 from tests.api.utils.schema import response
@@ -45,7 +46,7 @@ class TestServices(base.TestBase):
         response_body = resp.json()
         self.assertSchema(response_body, response.create_service)
 
-        #Get on Created Service
+        # Get on Created Service
         resp = self.client.get_service(service_name=self.service_name)
         self.assertEqual(resp.status_code, 200)
 

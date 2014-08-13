@@ -52,7 +52,7 @@ links = {'type': 'object',
 
 restrictions = {'type': 'array'}
 
-#Response Schema Definition for Create Service API
+# Response Schema Definition for Create Service API
 create_service = {
     'type': 'object',
     'properties': {

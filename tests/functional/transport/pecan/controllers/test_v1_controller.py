@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from poppy.manager.default import v1
-
 from tests.functional.transport.pecan import base
 
 

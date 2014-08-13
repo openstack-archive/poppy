@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from functools import wraps
+import functools
 import inspect
 
-from . import exceptions
+from poppy.transport.validators.stoplight import exceptions
 
 
 def validate(**rules):
@@ -39,7 +39,7 @@ def validate(**rules):
     be called.
     """
     def _validate(f):
-        @wraps(f)
+        @functools.wraps(f)
         def wrapper(*args, **kwargs):
 
             funcparams = inspect.getargspec(f)
@@ -96,9 +96,8 @@ def validate(**rules):
 
 
 def validation_function(func):
-    """Decorator for creating a validation function.
-    """
-    @wraps(func)
+    """Decorator for creating a validation function."""
+    @functools.wraps(func)
     def inner(none_ok=False, empty_ok=False):
         def wrapper(value, **kwargs):
             if none_ok and value is None:

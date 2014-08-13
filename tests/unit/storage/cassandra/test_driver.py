@@ -15,7 +15,6 @@
 
 import cassandra
 import mock
-
 from oslo.config import cfg
 
 from poppy.storage.cassandra import driver
@@ -32,6 +31,7 @@ CASSANDRA_OPTIONS = [
 
 
 class CassandraStorageServiceTests(base.TestCase):
+
     @mock.patch.object(driver, 'CASSANDRA_OPTIONS', new=CASSANDRA_OPTIONS)
     def setUp(self):
         super(CassandraStorageServiceTests, self).setUp()
@@ -41,13 +41,13 @@ class CassandraStorageServiceTests(base.TestCase):
 
     def test_storage_driver(self):
         # assert that the configs are set up based on what was passed in
-        self.assertEquals(self.cassandra_driver.cassandra_conf['cluster'],
-                          ['mock_ip'])
-        self.assertEquals(self.cassandra_driver.cassandra_conf.keyspace,
-                          'mock_poppy')
+        self.assertEqual(self.cassandra_driver.cassandra_conf['cluster'],
+                         ['mock_ip'])
+        self.assertEqual(self.cassandra_driver.cassandra_conf.keyspace,
+                         'mock_poppy')
 
     def test_is_alive(self):
-        self.assertEquals(self.cassandra_driver.is_alive(), True)
+        self.assertEqual(self.cassandra_driver.is_alive(), True)
 
     @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_connection(self, mock_cluster):
@@ -57,7 +57,7 @@ class CassandraStorageServiceTests(base.TestCase):
     def test_service_controller(self):
         sc = self.cassandra_driver.service_controller
 
-        self.assertEquals(
+        self.assertEqual(
             isinstance(sc, services.ServicesController),
             True)
 

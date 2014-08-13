@@ -24,6 +24,7 @@ class SchemaBase(object):
     @classmethod
     def get_schema(cls, resource_name, operation):
         """Returns the schema for an operation
+
         :param resource_name: Operation for which resource need
         to be validated.
         :type operation: `six.text_type`
