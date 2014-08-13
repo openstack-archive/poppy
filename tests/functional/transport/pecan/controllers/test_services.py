@@ -38,7 +38,7 @@ class ServiceControllerTest(base.FunctionalTest):
         self.assertEqual(200, response.status_code)
 
     def test_create(self):
-         # create with errorenous data: invalid json data
+        # create with errorenous data: invalid json data
         self.assertRaises(app.AppError, self.app.put,
                           '/v1.0/0001/services/fake_service_name_2',
                           params="{", headers={

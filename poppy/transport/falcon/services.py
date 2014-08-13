@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import falcon
 import json
+
+import falcon
 
 
 class ServicesResource:
@@ -22,8 +23,8 @@ class ServicesResource:
         self.services_controller = services_controller
 
     def on_get(self, req, resp, project_id):
-        """Handles GET requests
-        """
+        """Handles GET requests."""
+
         services = self.services_controller.list(project_id)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(services)
@@ -34,15 +35,15 @@ class ServiceResource:
         self.service_controller = service_controller
 
     def on_get(self, req, resp, project_id, service_name):
-        """Handles GET requests
-        """
+        """Handles GET requests."""
+
         service = self.service_controller.get(project_id, service_name)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(service)
 
     def on_put(self, req, resp, project_id, service_name):
-        """Handles PUT requests
-        """
+        """Handles PUT requests."""
+
         service_json = json.loads(req.stream.read(req.content_length))
 
         service = self.service_controller.create(project_id,
@@ -52,15 +53,15 @@ class ServiceResource:
         resp.body = json.dumps(service)
 
     def on_patch(self, req, resp, project_id, service_name):
-        """Handles PATCH requests
-        """
+        """Handles PATCH requests."""
+
         service = self.service_controller.update(project_id, service_name)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(service)
 
     def on_delete(self, req, resp, project_id, service_name):
-        """Handles DELETE requests
-        """
+        """Handles DELETE requests."""
+
         service = self.service_controller.delete(project_id, service_name)
         resp.status = falcon.HTTP_204
         resp.body = json.dumps(service)

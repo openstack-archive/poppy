@@ -17,27 +17,28 @@ import os
 import sys
 
 import pecan
-from pecan.testing import load_test_app
+import pecan.testing
+import test_service_validation
 from webtest import app
+
 
 os.environ['PECAN_CONFIG'] = os.path.join(os.path.dirname(__file__),
                                           'config.py')
 # For noese fix
 sys.path = [os.path.abspath(os.path.dirname(__file__))] + sys.path
 
-import test_service_validation
-
 
 class PecanEndPointFunctionalTest(test_service_validation.BaseTestCase):
 
-    """A Simple PecanFunctionalTest base class that sets up a
-    Pecan endpoint (endpoint class: DummyPecanEndpoint)
-    """
+    """Sets up a Test Pecan endpoint."""
 
     def setUp(self):
-        self.app = load_test_app(os.path.join(os.path.dirname(__file__),
-                                              'config.py'
-                                              ))
+        self.app = pecan.testing.load_test_app(
+            os.path.join(
+                os.path.dirname(__file__), 'config.py'
+            )
+        )
+
         super(PecanEndPointFunctionalTest, self).setUp()
 
     def tearDown(self):

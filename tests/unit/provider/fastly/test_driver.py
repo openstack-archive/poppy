@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import mock
-
 import fastly
+import mock
 from oslo.config import cfg
 
 from poppy.provider.fastly import driver
@@ -55,10 +54,10 @@ class TestDriver(base.TestCase):
         mock_connect.return_value = MockConnection(None, None)
         provider = driver.CDNProvider(self.conf)
         client = provider.client()
-        self.assertNotEquals(client, None)
+        self.assertNotEqual(client, None)
 
     @mock.patch('poppy.provider.fastly.controllers.ServiceController')
     @mock.patch.object(driver, 'FASTLY_OPTIONS', new=FASTLY_OPTIONS)
     def test_service_controller(self, MockController):
         provider = driver.CDNProvider(self.conf)
-        self.assertNotEquals(provider.service_controller, None)
+        self.assertNotEqual(provider.service_controller, None)

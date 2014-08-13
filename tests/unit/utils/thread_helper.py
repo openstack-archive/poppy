@@ -38,9 +38,9 @@ def terminate_thread(thread):
 
 
 class StoppableThread(threading.Thread):
-    """Thread class with a stop() method. The thread itself has to check
-    regularly for the stopped() condition.
-    """
+
+    """This thread checks regularly for the stopped() condition."""
+
     def __init__(self, **kwargs):
         super(StoppableThread, self).__init__(**kwargs)
         self._stop = threading.Event()

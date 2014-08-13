@@ -15,6 +15,7 @@
 
 import abc
 import multiprocessing
+
 import six
 
 from poppy import bootstrap

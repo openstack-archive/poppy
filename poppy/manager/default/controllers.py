@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager.default import services, v1
+from poppy.manager.default import services
+from poppy.manager.default import v1
 
 
 Services = services.DefaultServicesController

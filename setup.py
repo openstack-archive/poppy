@@ -16,6 +16,7 @@
 
 # THIS FILE IS MANAGED BY THE GLOBAL REQUIREMENTS REPO - DO NOT EDIT
 import os
+
 import pip
 import setuptools
 

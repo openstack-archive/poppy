@@ -16,7 +16,6 @@
 import cassandra
 import ddt
 import mock
-
 from oslo.config import cfg
 
 from poppy.storage.cassandra import driver
@@ -108,4 +107,4 @@ class CassandraStorageServiceTests(base.TestCase):
     @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_session(self, mock_service_database):
         session = self.sc.session
-        self.assertNotEquals(session, None)
+        self.assertNotEqual(session, None)

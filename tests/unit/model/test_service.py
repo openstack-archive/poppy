@@ -19,7 +19,6 @@ import ddt
 from poppy.model.helpers import domain
 from poppy.model.helpers import origin
 from poppy.model import service
-
 from tests.unit import base
 
 

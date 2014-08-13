@@ -22,9 +22,8 @@ import six
 
 import poppy.openstack.common.log as logging
 from poppy import transport
-from poppy.transport.falcon import (
-    v1, services
-)
+from poppy.transport.falcon import services
+from poppy.transport.falcon import v1
 
 
 _WSGI_OPTIONS = [

@@ -24,9 +24,7 @@ from test_service_validation import BaseTestCase
 
 @decorators.validation_function
 def is_upper(z):
-    """Simple validation function for testing purposes
-    that ensures that input is all caps
-    """
+    """Ensures Uppercase."""
     if z.upper() != z:
         raise exceptions.ValidationFailed('{0} no uppercase'.format(z))
 

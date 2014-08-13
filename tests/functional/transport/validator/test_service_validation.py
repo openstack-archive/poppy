@@ -20,6 +20,7 @@ import re
 import sys
 
 import pecan
+import pecan.testing
 from webtest import app
 
 from poppy.common import errors
@@ -37,9 +38,6 @@ os.environ['PECAN_CONFIG'] = os.path.join(os.path.dirname(__file__),
 # For noese fix
 sys.path = [os.path.abspath(os.path.dirname(__file__))] + sys.path
 
-from pecan.testing import load_test_app
-
-
 error_count = 0
 
 
@@ -50,9 +48,8 @@ def abort(code):
 
 @decorators.validation_function
 def is_valid_json(r):
-    """Simple validation function for testing purposes
-    that ensures that input is a valid json string
-    """
+    """Ensures that input is a valid json string."""
+
     if len(r.body) == 0:
         return
     else:
@@ -184,7 +181,9 @@ class _AssertRaisesContext(object):
 class BaseTestCase(base.TestCase):
 
     def assertRaises(self, excClass, callableObj=None, *args, **kwargs):
-        """Fail unless an exception of class excClass is raised
+        """Assert a particular Exception has occurred.
+
+        Fail unless an exception of class excClass is raised
            by callableObj when invoked with arguments args and keyword
            arguments kwargs. If a different type of exception is
            raised, it will not be caught, and the test case will be
@@ -206,6 +205,7 @@ class BaseTestCase(base.TestCase):
                the_exception = cm.exception
                self.assertEqual(the_exception.error_code, 3)
         """
+
         context = _AssertRaisesContext(excClass, self)
         if callableObj is None:
             return context
@@ -292,7 +292,7 @@ def test_fake_falcon():
 class TestFalconStyleValidationFunctions(BaseTestCase):
 
     def test_with_schema_falcon(self):
-        self.assertEquals(
+        self.assertEqual(
             helpers.with_schema_falcon(
                 fake_request_good,
                 schema=testing_schema),
@@ -308,7 +308,7 @@ class TestFalconStyleValidationFunctions(BaseTestCase):
                 schema=testing_schema)
 
     def test_partial_with_schema(self):
-        self.assertEquals(request_fit_schema(fake_request_good), None)
+        self.assertEqual(request_fit_schema(fake_request_good), None)
         with self.assertRaisesRegexp(exceptions.ValidationFailed, "domain"):
             request_fit_schema(fake_request_bad_missing_domain)
         with self.assertRaisesRegexp(exceptions.ValidationFailed,
@@ -360,14 +360,13 @@ class TestValidationDecoratorsFalcon(BaseTestCase):
 
 class PecanEndPointFunctionalTest(BaseTestCase):
 
-    """A Simple PecanFunctionalTest base class that sets up a
-    Pecan endpoint (endpoint class: DummyPecanEndpoint)
-    """
+    """Sets up a Test Pecan endpoint."""
 
     def setUp(self):
-        self.app = load_test_app(os.path.join(os.path.dirname(__file__),
-                                              'config.py'
-                                              ))
+        self.app = pecan.testing.load_test_app(
+            os.path.join(os.path.dirname(__file__),
+                         'config.py'
+                         ))
         super(PecanEndPointFunctionalTest, self).setUp()
 
     def tearDown(self):
