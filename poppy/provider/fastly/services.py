@@ -49,6 +49,17 @@ class ServiceController(base.ServiceBase):
                                                    service_version.number,
                                                    domain["domain"])
 
+            # TODO(tonytan4ever): what if check_domains fail ?
+            # For right now we fail the who create process.
+            # But do we want to fail the whole service create ? probably not.
+            # we need to carefully divise our try_catch here.
+            links = [{"href": '.'.join([domain_dict['name'], suffix]),
+                      "rel": 'access_url'}
+                     for domain_dict, suffix, enabled in
+                     self.client.check_domains(service.id,
+                                               service_version.number)
+                     if enabled]
+
             for origin in service_json["origins"]:
                 # Create the origins for this domain
                 self.client.create_backend(service.id,
@@ -58,8 +69,7 @@ class ServiceController(base.ServiceBase):
                                            origin["ssl"],
                                            origin["port"]
                                            )
-
-            return self.responder.created(service.name)
+            return self.responder.created(service.id, links)
 
         except fastly.FastlyError:
             return self.responder.failed("failed to create service")
