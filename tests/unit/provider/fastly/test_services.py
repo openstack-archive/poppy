@@ -12,8 +12,8 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import random
+import uuid
 
 import ddt
 import fastly
@@ -172,3 +172,83 @@ class TestServices(base.TestCase):
         driver = mock_driver()
         controller = services.ServiceController(driver)
         self.assertNotEqual(controller.client(), None)
+
+
+class TestProviderValidation(base.TestCase):
+    """Tests for provider side validation methods.
+
+    This class tests the validation methods to verify the data accuracy
+    at the provider side.
+    """
+
+    @mock.patch('poppy.provider.fastly.services.ServiceController.client')
+    @mock.patch('poppy.provider.fastly.driver.CDNProvider')
+    def setUp(self, mock_client, mock_driver):
+        super(TestProviderValidation, self).setUp()
+
+        self.driver = mock_driver()
+        self.controller = services.ServiceController(self.driver)
+        self.client = mock_client
+        self.service_name = uuid.uuid1()
+        service_json = {"domains": [{"domain": "parsely.sage.com"}],
+                        "origins": [{"origin": "mockdomain.com",
+                                     "ssl": False, "port": 80}]}
+        self.controller.create(self.service_name, service_json)
+
+    @mock.patch('fastly.FastlyService')
+    def test_get_service_details(self, mock_service):
+
+        service = mock_service()
+        service.id = '1234'
+        service.version = [{'number': 1}]
+
+        self.controller.client.get_service_by_name.return_value = service
+
+        self.controller.client.list_domains.return_value = \
+            [{u'comment': u'A new domain.',
+              u'service_id': u'75hthkv6jrGW4aVjSReT0w', u'version': 1,
+              u'name': u'www.testr.com'}]
+
+        self.controller.client.list_cache_settings.return_value = \
+            [{u'stale_ttl': u'0', u'name': u'test-cache', u'ttl': u'3600',
+              u'version': u'1', u'cache_condition': '', u'action': '',
+              u'service_id': u'75hthkv6jrGW4aVjSReT0w'}]
+
+        self.controller.client.list_backends.return_value = \
+            [{u'comment': '', u'shield': None, u'weight': 100,
+              u'between_bytes_timeout': 10000, u'ssl_client_key': None,
+              u'first_byte_timeout': 15000, u'auto_loadbalance': False,
+              u'use_ssl': False, u'port': 80, u'ssl_hostname': None,
+              u'hostname': u'www.testr.com', u'error_threshold': 0,
+              u'max_conn': 20, u'version': 1, u'ipv4': None, u'ipv6': None,
+              u'connect_timeout': 1000, u'ssl_ca_cert': None,
+              u'request_condition': '', u'healthcheck': None,
+              u'address': u'www.testr.com', u'ssl_client_cert': None,
+              u'name': u'bbb', u'client_cert': None,
+              u'service_id': u'75hthkv6jrGW4aVjSReT0w'}]
+
+        resp = self.controller.get(self.service_name)
+
+        self.assertEqual(resp[self.driver.provider_name]['domains'],
+                         ['www.testr.com'])
+
+        self.assertEqual(resp[self.driver.provider_name]['caching'],
+                         [{'name': 'test-cache', 'ttl': 3600, 'rules': ''}])
+
+        self.assertEqual(resp[self.driver.provider_name]['origins'],
+                         [{'origin': u'www.testr.com', 'port': 80,
+                           'ssl': False}])
+
+    def test_get_service_details_error(self):
+        error = fastly.FastlyError('DIMMM')
+        self.controller.client.get_service_by_name.side_effect = error
+        resp = self.controller.get('rror-service')
+
+        self.assertIn('error', resp[self.driver.provider_name])
+
+    def test_get_service_details_exception(self):
+        exception = Exception('DOOM')
+        self.controller.client.get_service_by_name.side_effect = exception
+        resp = self.controller.get('magic-service')
+
+        self.assertIn('error', resp[self.driver.provider_name])
