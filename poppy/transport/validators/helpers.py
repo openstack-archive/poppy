@@ -20,7 +20,7 @@ import json
 try:
     import falcon
 except ImportError:
-    import fake_falcon as falcon
+    from poppy.transport.validators import fake_falcon as falcon
 import jsonschema
 import pecan
 
