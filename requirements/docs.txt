@@ -1,0 +1,4 @@
+oslosphinx
+sphinx
+sphinxcontrib-pecanwsme
+sphinxcontrib-httpdomain
