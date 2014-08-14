@@ -55,3 +55,12 @@ class Responder(object):
                 "domain": domain
             }
         }
+
+    def get(self, domain_list, origin_list, cache_list):
+        return {
+            self.provider: {
+                "domains": domain_list,
+                "origins": origin_list,
+                "caching": cache_list
+            }
+        }

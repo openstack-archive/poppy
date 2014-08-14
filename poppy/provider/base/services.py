@@ -40,3 +40,8 @@ class ServicesControllerBase(controller.ProviderControllerBase):
     @abc.abstractmethod
     def delete(self, service_name):
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def get(self, service_name):
+        """Get details of the service, as stored by the provider. """
+        raise NotImplementedError
