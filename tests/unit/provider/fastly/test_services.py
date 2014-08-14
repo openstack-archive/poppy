@@ -88,6 +88,14 @@ class TestServices(base.TestCase):
 
         controller.client.reset_mock()
         controller.client.create_backend.side_effect = None
+        
+        controller.client.check_domains.side_effect =  fastly.FastlyError(
+            Exception('Check_domains failed.'))
+        resp = controller.create(service_name, service_json)
+        self.assertIn('error', resp[driver.provider_name])
+        
+        controller.client.reset_mock()
+        controller.client.check_domains.side_effect = None
 
         # test a general exception
         controller.client.create_service.side_effect = Exception(
@@ -98,6 +106,19 @@ class TestServices(base.TestCase):
         # finally, a clear run
         controller.client.reset_mock()
         controller.client.create_service.side_effect = None
+        
+        controller.client.check_domains.return_value = [
+         [{
+            "name" : "www.example.com",
+            "comment" : "",
+            "service_id" : "<fake_id>",
+            "version" : "1",
+            "locked" : True
+          },
+          "global.prod.fastly.net.",
+           True
+          ]
+        ]
 
         resp = controller.create(service_name, service_json)
 
@@ -111,6 +132,9 @@ class TestServices(base.TestCase):
 
         controller.client.create_domain.assert_any_call(
             service.id, version.number, service_json['domains'][1]['domain'])
+        
+        controller.client.check_domains.assert_called_once_with(
+            service.id, version.number)
 
         controller.client.create_backend.assert_has_any_call(
             service.id, 1,
@@ -119,7 +143,7 @@ class TestServices(base.TestCase):
             service_json['origins'][0]['ssl'],
             service_json['origins'][0]['port'])
 
-        self.assertIn('domain', resp[driver.provider_name])
+        self.assertIn('links', resp[driver.provider_name])
 
     @mock.patch('fastly.FastlyConnection')
     @mock.patch('fastly.FastlyService')
@@ -154,7 +178,7 @@ class TestServices(base.TestCase):
         controller.client.get_service_by_name.assert_called_once_with(
             service_name)
         controller.client.delete_service.assert_called_once_with(service.id)
-        self.assertIn('domain', resp[driver.provider_name])
+        self.assertIn('id', resp[driver.provider_name])
 
     @mock.patch('poppy.provider.fastly.services.ServiceController.client')
     @mock.patch('poppy.provider.fastly.driver.CDNProvider')
@@ -165,7 +189,7 @@ class TestServices(base.TestCase):
         driver = mock_driver()
         controller = services.ServiceController(driver)
         resp = controller.update(service_name, service_json)
-        self.assertIn('domain', resp[driver.provider_name])
+        self.assertIn('id', resp[driver.provider_name])
 
     @mock.patch('poppy.provider.fastly.driver.CDNProvider')
     def test_client(self, mock_driver):
