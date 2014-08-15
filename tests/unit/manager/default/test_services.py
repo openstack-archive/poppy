@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import ddt
 import mock
 from oslo.config import cfg
 
@@ -21,7 +22,9 @@ from poppy.manager.default import services
 from tests.unit import base
 
 
+@ddt.ddt
 class DefaultManagerServiceTests(base.TestCase):
+
     @mock.patch('poppy.storage.base.driver.StorageDriverBase')
     @mock.patch('poppy.provider.base.driver.ProviderDriverBase')
     def setUp(self, mock_driver, mock_provider):
@@ -53,10 +56,18 @@ class DefaultManagerServiceTests(base.TestCase):
                                               service_name,
                                               service_json)
 
-    def test_update(self):
+    @ddt.file_data('data_provider_details.json')
+    def test_update(self, provider_details_json):
+        self.provider_details = provider_details_json
         project_id = 'mock_id'
         service_name = 'mock_service'
         service_json = ''
+
+        providers = self.sc._driver.providers
+
+        self.sc.storage.get_provider_details.return_value = (
+            self.provider_details
+        )
 
         self.sc.update(project_id, service_name, service_json)
 
@@ -65,14 +76,19 @@ class DefaultManagerServiceTests(base.TestCase):
                                                        service_name,
                                                        service_json)
         # and that the providers are notified.
-        providers = self.sc._driver.providers
         providers.map.assert_called_once_with(self.sc.provider_wrapper.update,
-                                              service_name,
+                                              self.provider_details,
                                               service_json)
 
-    def test_delete(self):
+    @ddt.file_data('data_provider_details.json')
+    def test_delete(self, provider_details_json):
+        self.provider_details = provider_details_json
         project_id = 'mock_id'
         service_name = 'mock_service'
+
+        self.sc.storage.get_provider_details.return_value = (
+            self.provider_details
+        )
 
         self.sc.delete(project_id, service_name)
 
@@ -82,4 +98,4 @@ class DefaultManagerServiceTests(base.TestCase):
         # and that the providers are notified.
         providers = self.sc._driver.providers
         providers.map.assert_called_once_with(self.sc.provider_wrapper.delete,
-                                              service_name)
+                                              self.provider_details)

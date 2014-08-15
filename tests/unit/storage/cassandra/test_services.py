@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 import cassandra
 import ddt
 import mock
@@ -25,6 +27,7 @@ from tests.unit import base
 
 @ddt.ddt
 class CassandraStorageServiceTests(base.TestCase):
+
     def setUp(self):
         super(CassandraStorageServiceTests, self).setUp()
 
@@ -103,6 +106,29 @@ class CassandraStorageServiceTests(base.TestCase):
         # Expect the response to be None as there are no providers passed
         # into the driver to respond to this call
         self.assertEqual(actual_response, None)
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_provider_details(self, mock_session, mock_execute):
+        # mock the response from cassandra
+        mock_execute.execute.return_value = {
+            "MaxCDN": json.dumps({'id': 11942,
+                                  'name': "my_service_name",
+                                  'access_url': 'my_service_name'
+                                  '.mycompanyalias.netdna-cdn.com'}),
+            "Fastly": json.dumps({'id': 3488,
+                                  "name": "my_service_name",
+                                  'access_url': 'my_service_name'
+                                  '.global.prod.fastly.net'}),
+            "CloudFront": json.dumps({'id': 5892,
+                                      'access_url': 'my_service_name'
+                                      '.gibberish.amzcf.com'}),
+            "Mock": json.dumps({'id': "73242",
+                                'access_url': 'my_service_name.mock.com'}),
+        }
+        actual_response = self.sc.get_provider_details(self.project_id,
+                                                       self.service_name)
+        self.assertTrue(isinstance(actual_response, dict))
 
     @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_session(self, mock_service_database):
