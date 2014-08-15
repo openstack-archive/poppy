@@ -13,11 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager.default import flavors
-from poppy.manager.default import home
-from poppy.manager.default import services
+from poppy.storage import base
 
 
-Home = home.DefaultHomeController
-Flavors = flavors.DefaultFlavorsController
-Services = services.DefaultServicesController
+class FlavorsController(base.FlavorsController):
+    @property
+    def session(self):
+        return self._driver.flavor_database
+
+    def list(self):
+        return ""
+
+    def get(self, flavor_id):
+        return ""
+
+    def add(self, flavor):
+        return ""
+
+    def delete(self, flavor_id, provider_id):
+        return ""

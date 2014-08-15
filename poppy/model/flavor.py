@@ -13,32 +13,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import abc
 
-import six
+class Flavor(object):
 
+    def __init__(self,
+                 flavor_id, providers=[]):
 
-@six.add_metaclass(abc.ABCMeta)
-class ManagerDriverBase(object):
-    def __init__(self, conf, storage, providers):
-        self._conf = conf
-        self._storage = storage
+        self._flavor_id = flavor_id
         self._providers = providers
 
     @property
-    def storage(self):
-        return self._storage
+    def flavor_id(self):
+        return self._flavor_id
 
     @property
     def providers(self):
         return self._providers
 
-    @abc.abstractproperty
-    def services_controller(self):
-        """Returns the driver's services controller."""
-        raise NotImplementedError
 
-    @abc.abstractproperty
-    def flavors_controller(self):
-        """Returns the driver's flavors controller."""
-        raise NotImplementedError
+class Provider(object):
+
+    def __init__(self,
+                 provider_id,
+                 provider_url):
+        self._provider_id = provider_id
+        self._provider_url = provider_url
+
+    @property
+    def provider_id(self):
+        return self._provider_id
+
+    @property
+    def provider_url(self):
+        return self._provider_url
