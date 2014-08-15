@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 import mock
 from oslo.config import cfg
 
@@ -22,10 +24,23 @@ from tests.unit import base
 
 
 class DefaultManagerServiceTests(base.TestCase):
+
     @mock.patch('poppy.storage.base.driver.StorageDriverBase')
     @mock.patch('poppy.provider.base.driver.ProviderDriverBase')
     def setUp(self, mock_driver, mock_provider):
         super(DefaultManagerServiceTests, self).setUp()
+
+        self.provider_details = {
+            "MaxCDN": json.dumps({'id': "11942", 'name': "my_service_name"}),
+            "Fastly": json.dumps({'id': "3488",
+                                  "service_name": "my_service_name"}),
+            "CloudFront": json.dumps({'distribution_id': "5892"}),
+            "Mock": json.dumps({'id': "73242"}),
+        }
+
+        mock_driver.service_controller.get_provider_details.return_value = (
+            self.provider_details
+        )
 
         # create mocked config and driver
         conf = cfg.ConfigOpts()
@@ -58,6 +73,8 @@ class DefaultManagerServiceTests(base.TestCase):
         service_name = 'mock_service'
         service_json = ''
 
+        providers = self.sc._driver.providers
+
         self.sc.update(project_id, service_name, service_json)
 
         # ensure the manager calls the storage driver with the appropriate data
@@ -65,9 +82,8 @@ class DefaultManagerServiceTests(base.TestCase):
                                                        service_name,
                                                        service_json)
         # and that the providers are notified.
-        providers = self.sc._driver.providers
         providers.map.assert_called_once_with(self.sc.provider_wrapper.update,
-                                              service_name,
+                                              self.provider_details,
                                               service_json)
 
     def test_delete(self):
@@ -82,4 +98,4 @@ class DefaultManagerServiceTests(base.TestCase):
         # and that the providers are notified.
         providers = self.sc._driver.providers
         providers.map.assert_called_once_with(self.sc.provider_wrapper.delete,
-                                              service_name)
+                                              self.provider_details)
