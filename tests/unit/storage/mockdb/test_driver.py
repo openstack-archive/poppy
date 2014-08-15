@@ -19,11 +19,24 @@ from poppy.storage.mockdb import driver
 from tests.unit import base
 
 
-class MockDBDriverTest(base.TestCase):
+class MockDBStorageDriverTests(base.TestCase):
 
-    def test_mockdb_driver_working(self):
+    def setUp(self):
+        super(MockDBStorageDriverTests, self).setUp()
+
         self.mockdb_driver = driver.MockDBStorageDriver(cfg.CONF)
+
+    def test_is_alive(self):
         self.assertTrue(self.mockdb_driver.is_alive())
-        self.assertTrue(self.mockdb_driver.service_database is None)
+
+    def test_database(self):
+        self.assertTrue(self.mockdb_driver.database is None)
+
+    def test_connection(self):
         self.assertTrue(self.mockdb_driver.connection is None)
-        self.assertTrue(self.mockdb_driver.service_controller.session is None)
+
+    def test_services_controller(self):
+        self.assertTrue(self.mockdb_driver.services_controller.session is None)
+
+    def test_flavors_controller(self):
+        self.assertTrue(self.mockdb_driver.flavors_controller.session is None)

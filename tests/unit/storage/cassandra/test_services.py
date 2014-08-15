@@ -54,7 +54,7 @@ class CassandraStorageServiceTests(base.TestCase):
         self.assertEqual(actual_response[0][0], self.project_id)
         self.assertEqual(actual_response[0][1], self.service_name)
 
-    @ddt.file_data('data_create_service.json')
+    @ddt.file_data('../data/data_create_service.json')
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_create_service(self, value, mock_session, mock_execute):
@@ -91,7 +91,7 @@ class CassandraStorageServiceTests(base.TestCase):
         # into the driver to respond to this call
         self.assertEqual(actual_response, None)
 
-    @ddt.file_data('data_update_service.json')
+    @ddt.file_data('../data/data_update_service.json')
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_update_service(self, value, mock_session, mock_execute):

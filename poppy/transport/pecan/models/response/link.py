@@ -14,26 +14,16 @@
 # limitations under the License.
 
 
-import ddt
+try:
+    import ordereddict as collections
+except ImportError:
+    import collections
 
-from poppy.model.helpers import link
-from tests.unit import base
 
+class Model(collections.OrderedDict):
 
-@ddt.ddt
-class TestLink(base.TestCase):
+    def __init__(self, href, rel):
+        super(Model, self).__init__()
 
-    def test_link(self):
-
-        href = 'http://www.mywebsite.com/'
-        rel = 'nofollow'
-        mylink = link.Link(href, rel)
-
-        # test all properties
-        # href
-        self.assertEqual(mylink.href, href)
-        self.assertRaises(AttributeError, setattr, mylink, 'href', href)
-
-        # rel
-        self.assertEqual(mylink.rel, rel)
-        self.assertRaises(AttributeError, setattr, mylink, 'href', rel)
+        self['href'] = href
+        self['rel'] = rel

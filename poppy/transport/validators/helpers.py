@@ -196,6 +196,11 @@ def is_valid_service_name(service_name):
     pass
 
 
+@decorators.validation_function
+def is_valid_flavor_id(flavor_id):
+    pass
+
+
 def abort_with_message(error_info):
     pecan.abort(400, detail=getattr(error_info, "message", ""),
                 headers={'Content-Type': "application/json"})

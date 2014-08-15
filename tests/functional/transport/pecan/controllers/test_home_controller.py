@@ -13,18 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import abc
-
-import six
-
-from poppy.manager.base import controller
+from poppy.manager.default import home
+from tests.functional.transport.pecan import base
 
 
-@six.add_metaclass(abc.ABCMeta)
-class V1ControllerBase(controller.ManagerControllerBase):
-    def __init__(self, manager):
-        super(V1ControllerBase, self).__init__(manager)
+class HomeControllerTest(base.FunctionalTest):
 
-    @abc.abstractmethod
-    def get(self):
-        raise NotImplementedError
+    def test_get_all(self):
+        response = self.app.get('/v1.0/00001')
+
+        self.assertEqual(200, response.status_code)
+        # Temporary until actual implementation
+        self.assertEqual(home.JSON_HOME, response.json)

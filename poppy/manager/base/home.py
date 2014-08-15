@@ -13,11 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager.default import flavors
-from poppy.manager.default import home
-from poppy.manager.default import services
+import abc
+
+import six
+
+from poppy.manager.base import controller
 
 
-Home = home.DefaultHomeController
-Flavors = flavors.DefaultFlavorsController
-Services = services.DefaultServicesController
+@six.add_metaclass(abc.ABCMeta)
+class HomeControllerBase(controller.ManagerControllerBase):
+    def __init__(self, manager):
+        super(HomeControllerBase, self).__init__(manager)
+
+    @abc.abstractmethod
+    def get(self):
+        raise NotImplementedError
