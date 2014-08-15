@@ -1,4 +1,5 @@
 -r common.txt
+-r docs.txt
 -r storage/cassandra.txt
 -r transport/pecan.txt
 -r provider/fastly.txt
