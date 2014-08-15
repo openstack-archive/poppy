@@ -155,3 +155,21 @@ class ServicesController(base.ServicesController):
             'service_name': service_name
         }
         self.session.execute(CQL_DELETE_SERVICE, args)
+
+    def get_provider_details(self, project_id, service_name):
+        # TODO(tonytan4ever): Use real CQL read provider details info
+        return {
+            "MaxCDN": json.dumps({'id': 11942,
+                                  'name': "my_service_name",
+                                  'access_url': 'my_service_name'
+                                  '.mycompanyalias.netdna-cdn.com'}),
+            "Fastly": json.dumps({'id': 3488,
+                                  "name": "my_service_name",
+                                  'access_url': 'my_service_name'
+                                  '.global.prod.fastly.net'}),
+            "CloudFront": json.dumps({'id': 5892,
+                                      'access_url': 'my_service_name'
+                                      '.gibberish.amzcf.com'}),
+            "Mock": json.dumps({'id': "73242",
+                                'access_url': 'my_service_name.mock.com'}),
+        }

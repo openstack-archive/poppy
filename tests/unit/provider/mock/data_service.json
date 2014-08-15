@@ -1,0 +1,11 @@
+{
+    "service_json": {
+        "domains": [
+            {"domain": "parsely.sage.com"},
+            {"domain": "rosemary.thyme.net"}
+        ],
+        "origins": [
+            {"origin": "mockdomain.com", "ssl": false, "port": 80}
+        ]
+    }
+}

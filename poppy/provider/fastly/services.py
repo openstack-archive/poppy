@@ -30,8 +30,8 @@ class ServiceController(base.ServiceBase):
         self.driver = driver
         self.current_customer = self.client.get_current_customer()
 
-    def update(self, service_name, service_json):
-        return self.responder.updated(service_name)
+    def update(self, provider_service_id, service_json):
+        return self.responder.updated(provider_service_id)
 
     def create(self, service_name, service_json):
 
@@ -76,14 +76,11 @@ class ServiceController(base.ServiceBase):
         except Exception:
             return self.responder.failed("failed to create service")
 
-    def delete(self, service_name):
+    def delete(self, provider_service_id):
         try:
-            # Get the service
-            service = self.client.get_service_by_name(service_name)
-
             # Delete the service
-            self.client.delete_service(service.id)
+            self.client.delete_service(provider_service_id)
 
-            return self.responder.deleted(service_name)
+            return self.responder.deleted(provider_service_id)
         except Exception:
             return self.responder.failed("failed to delete service")
