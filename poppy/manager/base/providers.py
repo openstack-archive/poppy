@@ -13,13 +13,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
+from poppy.common import errors
+
 
 class ProviderWrapper(object):
+
     def create(self, ext, service_name, service_json):
         return ext.obj.service_controller.create(service_name, service_json)
 
-    def update(self, ext, service_name, service_json):
-        return ext.obj.service_controller.update(service_name, service_json)
+    def update(self, ext, provider_details, service_json):
+        try:
+            provider_detail_string = provider_details[ext.provider_name]
+            provider_detail = json.loads(provider_detail_string)
+        except KeyError:
+            raise errors.BadProviderDetail(
+                "No provider detail information."
+                "Perhaps service has not been created")
+        except Exception:
+            # json decode error goes here...
+            raise errors.BadProviderDetail("Bad provider detail information."
+                                           "Perhaps some error happened"
+                                           "during service creation")
+        provider_service_id = provider_detail['id']
+        return ext.obj.service_controller.update(
+            provider_service_id,
+            service_json)
 
-    def delete(self, ext, service_name):
-        return ext.obj.service_controller.delete(service_name)
+    def delete(self, ext, provider_details):
+        try:
+            provider_detail_string = provider_details[ext.provider_name]
+            provider_detail = json.loads(provider_detail_string)
+        except KeyError:
+            raise errors.BadProviderDetail(
+                "No provider detail information."
+                "Perhaps service has not been created")
+        except Exception:
+            # json decode error goes here...
+            raise errors.BadProviderDetail("Bad provider detail information."
+                                           "Perhaps some error happened"
+                                           "during service creation")
+        provider_service_id = provider_detail['id']
+        return ext.obj.service_controller.delete(provider_service_id)

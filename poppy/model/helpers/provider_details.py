@@ -14,16 +14,6 @@
 # limitations under the License.
 
 
-class InvalidResourceName(Exception):
-
-    """Raised when attempted a non existent resource."""
-
-
-class InvalidOperation(Exception):
-
-    """Raised when attempted a non existent operation."""
-
-
-class BadProviderDetail(Exception):
-
-    """Raised when attempted a non existent operation."""
+class ProviderDetails(dict):
+    # TODO(tonytan4ever): Utilize this model class with manager
+    pass

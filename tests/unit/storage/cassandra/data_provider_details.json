@@ -1,0 +1,9 @@
+{
+	"provider_details": 
+			{  
+			   "MaxCDN": "{\"id\": 11942, \"name\": \"my_service_name\"}", 
+			   "Mock": "{\"id\": 73242}", 
+			   "CloudFront": "{\"distribution_id\": 5ABC892}", 
+			   "Fastly": "{\"service_name\": \"my_service_name\", \"id\": 3488}"
+			}
+}
