@@ -13,15 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager.default import v1
+from poppy.manager.default import home
 from tests.functional.transport.pecan import base
 
 
-class V1ControllerTest(base.FunctionalTest):
+class HomeControllerTest(base.FunctionalTest):
 
     def test_get_all(self):
         response = self.app.get('/v1.0/00001')
 
         self.assertEqual(200, response.status_code)
         # Temporary until actual implementation
-        self.assertEqual(v1.JSON_HOME, response.json)
+        self.assertEqual(home.JSON_HOME, response.json)

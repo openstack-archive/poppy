@@ -13,17 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.storage import base
 
-class Link(object):
 
-    def __init__(self, href, rel):
-        self._href = href
-        self._rel = rel
+class FlavorsController(base.FlavorsController):
 
     @property
-    def href(self):
-        return self._href
+    def session(self):
+        return self._driver.flavor_database
 
-    @property
-    def rel(self):
-        return self._rel
+    def list(self):
+        return ""
+
+    def get(self, flavor_id):
+        return ""
+
+    def add(self, flavor):
+        pass
+
+    def delete(self, flavor_id):
+        pass
