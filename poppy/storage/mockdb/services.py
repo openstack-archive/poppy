@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 from poppy.storage import base
 
 
@@ -101,3 +103,12 @@ class ServicesController(base.ServicesController):
 
         # delete from providers
         return ""
+
+    def get_provider_details(self, project_id, service_name):
+        return {
+            "MaxCDN": json.dumps({'id': "11942", 'name': "my_service_name"}),
+            "Fastly": json.dumps({'id': "3488",
+                                  "service_name": "my_service_name"}),
+            "CloudFront": json.dumps({'distribution_id': "5892"}),
+            "Mock": json.dumps({'id': "73242"}),
+        }

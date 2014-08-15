@@ -8,5 +8,6 @@ CREATE TABLE services (
     origins LIST<TEXT>,
     caching_rules LIST<TEXT>,
     restrictions LIST<TEXT>,
+    provider_details MAP<TEXT, TEXT>,
     PRIMARY KEY (project_id, service_name)
 ); 

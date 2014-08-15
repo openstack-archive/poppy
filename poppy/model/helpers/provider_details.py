@@ -14,14 +14,5 @@
 # limitations under the License.
 
 
-class ProviderWrapper(object):
-    def create(self, ext, service_name, service_json):
-        return ext.obj.service_controller.create(service_name, service_json)
-
-    def update(self, ext, provider_details, service_json):
-        provider_detail = provider_details[ext.provider_name]
-        return ext.obj.service_controller.update(provider_detail, service_json)
-
-    def delete(self, ext, provider_details):
-        provider_detail = provider_details[ext.provider_name]
-        return ext.obj.service_controller.delete(provider_detail)
+class ProviderDetails(dict):
+    pass

@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 import fastly
 
 from poppy.provider import base
@@ -30,8 +32,10 @@ class ServiceController(base.ServiceBase):
         self.driver = driver
         self.current_customer = self.client.get_current_customer()
 
-    def update(self, service_name, service_json):
-        return self.responder.updated(service_name)
+    def update(self, provider_detail, service_json):
+        provider_details_dict = json.loads(provider_detail)
+        service_id = provider_details_dict['id']
+        return self.responder.updated(service_id)
 
     def create(self, service_name, service_json):
 
@@ -66,14 +70,14 @@ class ServiceController(base.ServiceBase):
         except Exception:
             return self.responder.failed("failed to create service")
 
-    def delete(self, service_name):
+    def delete(self, provider_details):
         try:
-            # Get the service
-            service = self.client.get_service_by_name(service_name)
+            provider_details_dict = json.loads(provider_details)
+            service_id = provider_details_dict['id']
 
             # Delete the service
-            self.client.delete_service(service.id)
+            self.client.delete_service(service_id)
 
-            return self.responder.deleted(service_name)
+            return self.responder.deleted(service_id)
         except Exception:
             return self.responder.failed("failed to delete service")

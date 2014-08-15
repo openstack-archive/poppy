@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import random
 
 import ddt
@@ -129,20 +130,21 @@ class TestServices(base.TestCase):
                     mock_driver):
         driver = mock_driver()
         driver.provider_name = 'Fastly'
-        service_name = 'whatsitnamed'
+        provider_detail = json.dumps({'id': 3488,
+                                      "service_name": "my_service_name"})
 
         # instantiate
         controller = services.ServiceController(driver)
 
         # mock.patch return values
         service = mock_service()
-        service.id = '1234'
+        service.id = 3488
         controller.client.get_service_by_name.return_value = service
 
         # test exception
         exception = fastly.FastlyError(Exception('ding'))
         controller.client.delete_service.side_effect = exception
-        resp = controller.delete('wrongname')
+        resp = controller.delete(provider_detail)
 
         self.assertIn('error', resp[driver.provider_name])
 
@@ -150,9 +152,9 @@ class TestServices(base.TestCase):
         controller.client.reset_mock()
         controller.client.delete_service.side_effect = None
 
-        resp = controller.delete(service_name)
-        controller.client.get_service_by_name.assert_called_once_with(
-            service_name)
+        resp = controller.delete(provider_detail)
+        # controller.client.get_service_by_name.assert_called_once_with(
+        #    service_name)
         controller.client.delete_service.assert_called_once_with(service.id)
         self.assertIn('domain', resp[driver.provider_name])
 
@@ -160,11 +162,12 @@ class TestServices(base.TestCase):
     @mock.patch('poppy.provider.fastly.driver.CDNProvider')
     @ddt.file_data('data_service.json')
     def test_update(self, mock_get_client, mock_driver, service_json):
-        service_name = 'whatsitnamed'
+        provider_detail = json.dumps({'id': "3488",
+                                      "service_name": "my_service_name"})
 
         driver = mock_driver()
         controller = services.ServiceController(driver)
-        resp = controller.update(service_name, service_json)
+        resp = controller.update(provider_detail, service_json)
         self.assertIn('domain', resp[driver.provider_name])
 
     @mock.patch('poppy.provider.fastly.driver.CDNProvider')
