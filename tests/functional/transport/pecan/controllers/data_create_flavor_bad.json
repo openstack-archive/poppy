@@ -1,0 +1,21 @@
+{
+    "no_body": {
+    },
+    "no_flavor_id": {
+        "x_id" : "asia"
+    },
+    "invalid_fields": {
+        "id" : "asia",
+        "providers" : [
+            {
+                "invalid_field" : "ChinaCache",
+                "links": [
+                    {
+                        "href": "http://www.chinacache.com",
+                        "rel": "invalid_url"
+                    }
+                ]
+            }
+        ]
+    }
+}
