@@ -13,14 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pecan
+from poppy.manager.default import home
+from tests.functional.transport.pecan import base
 
-from poppy.transport.pecan.controllers import base
 
+class HomeControllerTest(base.FunctionalTest):
 
-class ControllerV1(base.Controller):
+    def test_get_all(self):
+        response = self.app.get('/v1.0/00001')
 
-    @pecan.expose('json')
-    def get(self):
-        v1_controller = self._driver.manager.v1_controller
-        return v1_controller.get()
+        self.assertEqual(200, response.status_code)
+        # Temporary until actual implementation
+        self.assertEqual(home.JSON_HOME, response.json)

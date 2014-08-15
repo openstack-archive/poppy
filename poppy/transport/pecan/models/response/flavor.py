@@ -18,10 +18,29 @@ try:
 except ImportError:
     import collections
 
+from poppy.transport.pecan.models.response import link
+
 
 class Model(collections.OrderedDict):
-    'response class for Domain.'
-    def __init__(self, href, rel):
+
+    def __init__(self, flavor, request):
         super(Model, self).__init__()
-        self['href'] = href
-        self['rel'] = rel
+
+        self['id'] = flavor.flavor_id
+        self['providers'] = []
+
+        for x in flavor.providers:
+            provider = collections.OrderedDict()
+            provider['provider'] = x.provider_id
+            provider['links'] = []
+            provider['links'].append(
+                link.Model(x.provider_url, 'provider_url'))
+
+            self['providers'].append(provider)
+
+        self['links'] = []
+        self['links'].append(
+            link.Model(
+                u'{0}/v1.0/flavors/{1}'.format(request.host_url,
+                                               flavor.flavor_id),
+                'self'))

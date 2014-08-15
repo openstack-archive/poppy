@@ -13,27 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pecan
 
-import ddt
-
-from poppy.model.helpers import link
-from tests.unit import base
+from poppy.transport.pecan.controllers import base
 
 
-@ddt.ddt
-class TestLink(base.TestCase):
+class HomeController(base.Controller):
 
-    def test_link(self):
-
-        href = 'http://www.mywebsite.com/'
-        rel = 'nofollow'
-        mylink = link.Link(href, rel)
-
-        # test all properties
-        # href
-        self.assertEqual(mylink.href, href)
-        self.assertRaises(AttributeError, setattr, mylink, 'href', href)
-
-        # rel
-        self.assertEqual(mylink.rel, rel)
-        self.assertRaises(AttributeError, setattr, mylink, 'href', rel)
+    @pecan.expose('json')
+    def get(self):
+        home_controller = self._driver.manager.home_controller
+        return home_controller.get()

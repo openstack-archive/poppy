@@ -35,6 +35,6 @@ class BaseFunctionalTest(base.TestCase):
         cfg.CONF(args=[], default_config_files=[conf_path])
         poppy_wsgi = bootstrap.Bootstrap(cfg.CONF).transport.app
 
-        self.app = webtest.TestApp(poppy_wsgi)
+        self.app = webtest.app.TestApp(poppy_wsgi)
 
 FunctionalTest = BaseFunctionalTest

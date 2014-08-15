@@ -21,8 +21,15 @@ VALID_STATUSES = [u'unknown', u'in_progress', u'deployed', u'failed']
 
 class Service(common.DictSerializableModel):
 
-    def __init__(self, name, domains, origins, caching=[], restrictions=[]):
+    def __init__(self,
+                 name,
+                 flavorRef,
+                 domains,
+                 origins,
+                 caching=[],
+                 restrictions=[]):
         self._name = name
+        self._flavorRef = flavorRef
         self._domains = domains
         self._origins = origins
         self._caching = caching
@@ -85,6 +92,10 @@ class Service(common.DictSerializableModel):
                     value,
                     VALID_STATUSES)
             )
+
+    @property
+    def flavorRef(self):
+        return self._flavorRef
 
     @classmethod
     def init_from_dict(cls, dict):
