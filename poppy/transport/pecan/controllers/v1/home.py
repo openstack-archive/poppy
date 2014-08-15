@@ -18,9 +18,9 @@ import pecan
 from poppy.transport.pecan.controllers import base
 
 
-class ControllerV1(base.Controller):
+class HomeController(base.Controller):
 
     @pecan.expose('json')
     def get(self):
-        v1_controller = self._driver.manager.v1_controller
-        return v1_controller.get()
+        home_controller = self._driver.manager.home_controller
+        return home_controller.get()

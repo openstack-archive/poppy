@@ -13,17 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo.config import cfg
 
-from poppy.storage.mockdb import driver
-from tests.unit import base
+class FlavorResponseModel(object):
 
-
-class MockDBDriverTest(base.TestCase):
-
-    def test_mockdb_driver_working(self):
-        self.mockdb_driver = driver.MockDBStorageDriver(cfg.CONF)
-        self.assertTrue(self.mockdb_driver.is_alive())
-        self.assertTrue(self.mockdb_driver.service_database is None)
-        self.assertTrue(self.mockdb_driver.connection is None)
-        self.assertTrue(self.mockdb_driver.services_controller.session is None)
+    def init(self, data_model):
+        pass

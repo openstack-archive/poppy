@@ -22,6 +22,8 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
+from poppy.storage.mongodb import flavors
 from poppy.storage.mongodb import services
 
 ServicesController = services.ServicesController
+FlavorsController = flavors.FlavorsController
