@@ -44,6 +44,7 @@ class Responder(object):
         }
 
     def updated(self, provider_service_id):
+        # TODO(tonytan4ever): May beed to add link information as return
         return {
             self.provider: {
                 "id": provider_service_id
