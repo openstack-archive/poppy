@@ -23,6 +23,8 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
+from poppy.storage.cassandra import flavors
 from poppy.storage.cassandra import services
 
 ServicesController = services.ServicesController
+FlavorsController = flavors.FlavorsController

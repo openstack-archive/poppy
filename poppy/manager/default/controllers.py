@@ -13,9 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.manager.default import flavors
+from poppy.manager.default import home
 from poppy.manager.default import services
-from poppy.manager.default import v1
 
 
+Home = home.DefaultHomeController
+Flavors = flavors.DefaultFlavorsController
 Services = services.DefaultServicesController
-V1 = v1.DefaultV1Controller

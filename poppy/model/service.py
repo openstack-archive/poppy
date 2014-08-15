@@ -13,16 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.model.helpers import link
+
+
+VALID_STATUSES = [u'unknown', u'in_progress', u'deployed', u'failed']
+
 
 class Service(object):
 
-    def __init__(self, name, domains, origins):
+    def __init__(self,
+                 name,
+                 flavorRef,
+                 domains,
+                 origins,
+                 caching=[],
+                 restrictions=[]):
         self._name = name
         self._domains = domains
         self._origins = origins
-        self._caching = []
-        self._restrictions = []
-        self._links = []
+        self._caching = caching
+        self._restrictions = restrictions
+        self._flavorRef = flavorRef
+        self._links = [
+            link.Link(u'/v1.0/services/{0}'.format(self.name), 'self')]
+        self._status = 'unknown'
 
     @property
     def name(self):
@@ -43,6 +57,25 @@ class Service(object):
     @property
     def restrictions(self):
         return self._restrictions
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, value):
+        if (value in VALID_STATUSES):
+            self._status = value
+        else:
+            raise ValueError(
+                u'Status {0} not in valid options: {1}'.format(
+                    value,
+                    VALID_STATUSES)
+            )
+
+    @property
+    def flavorRef(self):
+        return self._flavorRef
 
     @property
     def links(self):

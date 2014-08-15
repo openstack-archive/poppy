@@ -52,6 +52,11 @@ class StorageDriverBase(object):
         raise NotImplementedError
 
     @abc.abstractproperty
-    def service_controller(self):
+    def services_controller(self):
+        """Returns the driver's hostname controller."""
+        raise NotImplementedError
+
+    @abc.abstractproperty
+    def flavors_controller(self):
         """Returns the driver's hostname controller."""
         raise NotImplementedError

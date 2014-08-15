@@ -14,9 +14,11 @@
 # limitations under the License.
 
 from poppy.storage.base import driver
+from poppy.storage.base import flavors
 from poppy.storage.base import services
 
 
 Driver = driver.StorageDriverBase
 
+FlavorsController = flavors.FlavorsControllerBase
 ServicesController = services.ServicesControllerBase
