@@ -31,4 +31,3 @@ be found on the `OpenStack wiki`_. Cloud administrators, refer to `docs.openstac
 
 .. _`OpenStack wiki`: http://wiki.openstack.org
 .. _`docs.openstack.org`: http://docs.openstack.org
-
