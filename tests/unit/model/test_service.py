@@ -16,38 +16,96 @@
 
 import ddt
 
+from poppy.model.helpers import cachingrule
 from poppy.model.helpers import domain
 from poppy.model.helpers import origin
+from poppy.model.helpers import restriction
 from poppy.model import service
 from tests.unit import base
 
 
 @ddt.ddt
-class TestService(base.TestCase):
+class TestServiceModel(base.TestCase):
 
-    def test_create_service(self):
-        service_name = 'NewService'
-        myorigins = []
-        mydomains = []
+    def setUp(self):
+        super(TestServiceModel, self).setUp()
 
-        myorigins.append(origin.Origin('mysite.com'))
-        myorigins.append(origin.Origin('yoursite.io', port=80, ssl=True))
+        self.service_name = 'NewService'
+        self.flavorRef = "strawberry"
 
-        mydomains.append(domain.Domain('oursite.org'))
-        mydomains.append(domain.Domain('wiki.cc'))
+        self.myorigins = []
+        self.mydomains = []
+        self.myrestrictions = []
+        self.mycaching = []
 
-        myservice = service.Service(service_name, mydomains, myorigins)
+        self.myorigins.append(origin.Origin('mysite.com'))
+        self.myorigins.append(origin.Origin('yoursite.io', port=80, ssl=True))
+
+        self.mydomains.append(domain.Domain('oursite.org'))
+        self.mydomains.append(domain.Domain('wiki.cc'))
+
+        self.myrestrictions.append(restriction.Restriction('referrer_site'))
+        self.myrestrictions.append(restriction.Restriction('client_ip'))
+
+        self.mycaching.append(cachingrule.CachingRule('images', 3600))
+        self.mycaching.append(cachingrule.CachingRule('js', 7200))
+
+    def test_create(self):
+        myservice = service.Service(
+            self.service_name, self.flavorRef, self.mydomains, self.myorigins,
+            self.mycaching, self.myrestrictions)
 
         # test all properties
         # name
-        self.assertEqual(myservice.name, service_name)
+        self.assertEqual(myservice.name, self.service_name)
         self.assertRaises(
-            AttributeError, setattr, myservice, 'name', service_name)
+            AttributeError, setattr, myservice, 'name', self.service_name)
+
+        # flavorRef
+        self.assertEqual(myservice.flavorRef, self.flavorRef)
 
         # domains
-        self.assertEqual(myservice.domains, mydomains)
+        self.assertEqual(myservice.domains, self.mydomains)
         self.assertRaises(AttributeError, setattr, myservice, 'domains', [])
 
         # origins
-        self.assertEqual(myservice.origins, myorigins)
+        self.assertEqual(myservice.origins, self.myorigins)
         self.assertRaises(AttributeError, setattr, myservice, 'origins', [])
+
+        # restrictions
+        self.assertEqual(myservice.restrictions, self.myrestrictions)
+        self.assertRaises(
+            AttributeError, setattr, myservice, 'restrictions', [])
+
+        # caching rules
+        self.assertEqual(myservice.caching, self.mycaching)
+        self.assertRaises(
+            AttributeError, setattr, myservice, 'caching', [])
+
+        # status
+        self.assertEqual(myservice.status, "unknown")
+
+        # links
+        self.assertEqual(myservice.links, [])
+
+    @ddt.data('', 'apple')
+    def test_set_invalid_status(self, status):
+        myservice = service.Service(
+            self.service_name,
+            self.flavorRef,
+            self.mydomains,
+            self.myorigins)
+
+        self.assertRaises(ValueError, setattr, myservice, 'status', status)
+
+    @ddt.data('unknown', 'in_progress', 'deployed', 'failed')
+    def test_set_valid_status(self, status):
+        myservice = service.Service(
+            self.service_name,
+            self.flavorRef,
+            self.mydomains,
+            self.myorigins)
+
+        myservice.status = status
+
+        self.assertEqual(myservice.status, status)
