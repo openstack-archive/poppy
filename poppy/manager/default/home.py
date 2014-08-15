@@ -36,9 +36,9 @@ JSON_HOME = {
 }
 
 
-class DefaultV1Controller(base.V1Controller):
+class DefaultHomeController(base.HomeController):
     def __init__(self, manager):
-        super(DefaultV1Controller, self).__init__(manager)
+        super(DefaultHomeController, self).__init__(manager)
 
         self.JSON_HOME = JSON_HOME
 
