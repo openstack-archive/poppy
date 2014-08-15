@@ -13,14 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pecan
+# stevedore/example/simple.py
+from poppy.storage import base
 
-from poppy.transport.pecan.controllers import base
 
+class FlavorsController(base.FlavorsController):
+    @property
+    def session(self):
+        return self._driver.flavor_database
 
-class ControllerV1(base.Controller):
+    def list(self):
+        return ""
 
-    @pecan.expose('json')
-    def get(self):
-        v1_controller = self._driver.manager.v1_controller
-        return v1_controller.get()
+    def get(self, flavor_id):
+        return ""
+
+    def add(self, flavor):
+        return ""
+
+    def delete(self, flavor_id, provider_id):
+        return ""

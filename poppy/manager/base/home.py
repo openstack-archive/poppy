@@ -13,17 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import abc
 
-class Link(object):
+import six
 
-    def __init__(self, href, rel):
-        self._href = href
-        self._rel = rel
+from poppy.manager.base import controller
 
-    @property
-    def href(self):
-        return self._href
 
-    @property
-    def rel(self):
-        return self._rel
+@six.add_metaclass(abc.ABCMeta)
+class HomeControllerBase(controller.ManagerControllerBase):
+    def __init__(self, manager):
+        super(HomeControllerBase, self).__init__(manager)
+
+    @abc.abstractmethod
+    def get(self):
+        raise NotImplementedError

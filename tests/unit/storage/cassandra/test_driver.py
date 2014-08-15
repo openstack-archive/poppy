@@ -55,7 +55,7 @@ class CassandraStorageServiceTests(base.TestCase):
         mock_cluster.assert_called_with('mock_poppy')
 
     def test_service_controller(self):
-        sc = self.cassandra_driver.service_controller
+        sc = self.cassandra_driver.services_controller
 
         self.assertEqual(
             isinstance(sc, services.ServicesController),
