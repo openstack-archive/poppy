@@ -85,8 +85,12 @@ class MongoDBStorageDriver(base.Driver):
         return _connection(self.mongodb_conf)
 
     @decorators.lazy_property(write=False)
-    def service_controller(self):
-        return controllers.ServicesController(self.providers)
+    def services_controller(self):
+        return controllers.ServicesController(self)
+
+    @decorators.lazy_property(write=False)
+    def flavors_controller(self):
+        return controllers.FlavorsController(self)
 
     @decorators.lazy_property(write=False)
     def service_database(self):
@@ -96,4 +100,14 @@ class MongoDBStorageDriver(base.Driver):
         """
 
         name = self.mongodb_conf.database + '_services'
+        return self.connection[name]
+
+    @decorators.lazy_property(write=False)
+    def flavor_database(self):
+        """Database dedicated to the "services" collection.
+
+        The services collection is separated out into its own database.
+        """
+
+        name = self.mongodb_conf.database + '_flavors'
         return self.connection[name]

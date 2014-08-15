@@ -32,6 +32,7 @@ class TestServiceModel(base.TestCase):
         super(TestServiceModel, self).setUp()
 
         self.service_name = uuid.uuid1()
+        self.flavorRef = "strawberry"
 
         self.myorigins = []
         self.mydomains = []
@@ -52,7 +53,7 @@ class TestServiceModel(base.TestCase):
 
     def test_create(self):
         myservice = service.Service(
-            self.service_name, self.mydomains, self.myorigins,
+            self.service_name, self.flavorRef, self.mydomains, self.myorigins,
             self.mycaching, self.myrestrictions)
 
         # test all properties
@@ -60,6 +61,9 @@ class TestServiceModel(base.TestCase):
         self.assertEqual(myservice.name, self.service_name)
         self.assertRaises(
             AttributeError, setattr, myservice, 'name', self.service_name)
+
+        # flavorRef
+        self.assertEqual(myservice.flavorRef, self.flavorRef)
 
         # domains
         self.assertEqual(myservice.domains, self.mydomains)
@@ -82,13 +86,11 @@ class TestServiceModel(base.TestCase):
         # status
         self.assertEqual(myservice.status, u'unknown')
 
-        # links
-        self.assertEqual(myservice.links, [])
-
-    @ddt.data(u'', u'apple')
+    @ddt.data('', 'apple')
     def test_set_invalid_status(self, status):
         myservice = service.Service(
             self.service_name,
+            self.flavorRef,
             self.mydomains,
             self.myorigins)
 
@@ -98,6 +100,7 @@ class TestServiceModel(base.TestCase):
     def test_set_valid_status(self, status):
         myservice = service.Service(
             self.service_name,
+            self.flavorRef,
             self.mydomains,
             self.myorigins)
 

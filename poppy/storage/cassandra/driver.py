@@ -16,6 +16,7 @@
 """Cassandra storage driver implementation."""
 
 from cassandra import cluster
+from cassandra import query
 
 from poppy.common import decorators
 from poppy.openstack.common import log as logging
@@ -38,6 +39,7 @@ CASSANDRA_GROUP = 'drivers:storage:cassandra'
 def _connection(conf):
     cassandra_cluster = cluster.Cluster(conf.cluster)
     session = cassandra_cluster.connect(conf.keyspace)
+    session.row_factory = query.dict_factory
 
     return session
 
@@ -60,9 +62,17 @@ class CassandraStorageDriver(base.Driver):
         return _connection(self.cassandra_conf)
 
     @decorators.lazy_property(write=False)
-    def service_controller(self):
+    def services_controller(self):
         return controllers.ServicesController(self)
 
     @decorators.lazy_property(write=False)
+    def flavors_controller(self):
+        return controllers.FlavorsController(self)
+
+    @decorators.lazy_property(write=False)
     def service_database(self):
+        return self.connection
+
+    @decorators.lazy_property(write=False)
+    def flavor_database(self):
         return self.connection
