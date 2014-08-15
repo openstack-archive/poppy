@@ -21,7 +21,7 @@ class DefaultServicesController(base.ServicesController):
     def __init__(self, manager):
         super(DefaultServicesController, self).__init__(manager)
 
-        self.storage = self._driver.storage.service_controller
+        self.storage = self._driver.storage.services_controller
 
     def list(self, project_id, marker=None, limit=None):
         return self.storage.list(project_id, marker, limit)

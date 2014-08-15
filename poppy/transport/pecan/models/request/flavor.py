@@ -13,15 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager.default import v1
-from tests.functional.transport.pecan import base
+from poppy.model import flavor
 
 
-class V1ControllerTest(base.FunctionalTest):
+def load_from_json(json_data):
 
-    def test_get_all(self):
-        response = self.app.get('/v1.0/00001')
+    flavor_id = json_data['id']
+    providers = []
 
-        self.assertEqual(200, response.status_code)
-        # Temporary until actual implementation
-        self.assertEqual(v1.JSON_HOME, response.json)
+    for p in json_data['providers']:
+        provider_id = p['provider']
+        provider_url = [item['href']
+                        for item in p['links']
+                        if item['rel'] == 'provider_url'][0]
+
+        provider = flavor.Provider(provider_id, provider_url)
+        providers.append(provider)
+
+    new_flavor = flavor.Flavor(flavor_id, providers)
+
+    return new_flavor

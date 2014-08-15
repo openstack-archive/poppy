@@ -1,6 +1,7 @@
 -r common.txt
 -r docs.txt
--r storage/cassandra.txt
 -r transport/pecan.txt
+-r storage/cassandra.txt
+-r provider/cloudfront.txt
 -r provider/fastly.txt
 -r provider/maxcdn.txt

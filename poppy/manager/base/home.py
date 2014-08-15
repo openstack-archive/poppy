@@ -13,19 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.model import common
+import abc
+
+import six
+
+from poppy.manager.base import controller
 
 
-class Link(common.DictSerializableModel):
+@six.add_metaclass(abc.ABCMeta)
+class HomeControllerBase(controller.ManagerControllerBase):
+    def __init__(self, manager):
+        super(HomeControllerBase, self).__init__(manager)
 
-    def __init__(self, href, rel):
-        self._href = href
-        self._rel = rel
-
-    @property
-    def href(self):
-        return self._href
-
-    @property
-    def rel(self):
-        return self._rel
+    @abc.abstractmethod
+    def get(self):
+        raise NotImplementedError

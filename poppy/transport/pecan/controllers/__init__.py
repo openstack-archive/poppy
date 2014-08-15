@@ -15,14 +15,8 @@
 
 """Pecan Controllers"""
 
-from poppy.transport.pecan.controllers import ping
 from poppy.transport.pecan.controllers import root
-from poppy.transport.pecan.controllers import services
-from poppy.transport.pecan.controllers import v1
 
 
 # Hoist into package namespace
 Root = root.RootController
-Ping = ping.PingController
-Services = services.ServicesController
-V1 = v1.ControllerV1

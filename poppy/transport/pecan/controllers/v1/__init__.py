@@ -13,18 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import abc
+"""Pecan v1.0 Controllers"""
 
-import six
+from poppy.transport.pecan.controllers.v1 import flavors
+from poppy.transport.pecan.controllers.v1 import home
+from poppy.transport.pecan.controllers.v1 import ping
+from poppy.transport.pecan.controllers.v1 import services
 
-from poppy.manager.base import controller
 
-
-@six.add_metaclass(abc.ABCMeta)
-class V1ControllerBase(controller.ManagerControllerBase):
-    def __init__(self, manager):
-        super(V1ControllerBase, self).__init__(manager)
-
-    @abc.abstractmethod
-    def get(self):
-        raise NotImplementedError
+# Hoist into package namespace
+Home = home.HomeController
+Services = services.ServicesController
+Flavors = flavors.FlavorsController
+Ping = ping.PingController

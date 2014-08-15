@@ -21,7 +21,12 @@ VALID_STATUSES = [u'unknown', u'in_progress', u'deployed', u'failed']
 
 class Service(common.DictSerializableModel):
 
-    def __init__(self, name, domains, origins, caching=[], restrictions=[]):
+    def __init__(self,
+                 name,
+                 domains,
+                 origins,
+                 caching=[],
+                 restrictions=[]):
         self._name = name
         self._domains = domains
         self._origins = origins

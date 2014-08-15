@@ -99,7 +99,7 @@ class ServicesController(base.ServicesController):
 
     @property
     def session(self):
-        return self._driver.service_database
+        return self._driver.database
 
     def list(self, project_id, marker=None, limit=None):
 
