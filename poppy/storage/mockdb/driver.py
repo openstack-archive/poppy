@@ -15,7 +15,6 @@
 
 """Storage driver implementation."""
 
-from poppy.common import decorators
 from poppy.openstack.common import log as logging
 from poppy.storage import base
 from poppy.storage.mockdb import controllers
@@ -48,15 +47,19 @@ class MockDBStorageDriver(base.Driver):
     def is_alive(self):
         return True
 
-    @decorators.lazy_property(write=False)
+    @property
     def connection(self):
         """Connection instance."""
         return _connection()
 
-    @decorators.lazy_property(write=False)
-    def service_controller(self):
+    @property
+    def services_controller(self):
         return controllers.ServicesController(self)
 
-    @decorators.lazy_property(write=False)
-    def service_database(self):
+    @property
+    def flavors_controller(self):
+        return controllers.FlavorsController(self)
+
+    @property
+    def database(self):
         return self.connection

@@ -1,0 +1,22 @@
+{
+    "one_provider": [{
+            "flavor_id" : "europe",
+            "providers" : {
+                "fastly" : "www.fastly.net"
+            }
+    }],
+    "multiple_providers": [{
+            "flavor_id" : "europe",
+            "providers" : {
+                "fastly" : "www.fastly.net",
+                "maxcdn" : "www.maxcdn.net"
+            }
+    }],
+    "no_providers": [{
+            "flavor_id" : "europe",
+            "providers" : {}
+    }]
+}
+
+
+
