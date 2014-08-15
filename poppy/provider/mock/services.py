@@ -13,7 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import random
+import uuid
+
+from poppy.openstack.common import log
 from poppy.provider import base
+
+LOG = log.getLogger(__name__)
 
 
 class ServiceController(base.ServiceBase):
@@ -21,11 +27,18 @@ class ServiceController(base.ServiceBase):
     def __init__(self, driver):
         super(ServiceController, self).__init__(driver)
 
-    def update(self, service_name, service_json):
-        return self.responder.updated(service_name)
+    def update(self, provider_service_id, service_json):
+        return self.responder.updated(provider_service_id)
 
     def create(self, service_name, service_json):
-        return self.responder.created(service_name)
+        LOG.debug("Mock creating service: %s" % service_name)
+        # We generate a fake id here
+        service_id = random.randint(1, 10000)
+        return self.responder.created(service_id, {})
 
-    def delete(self, service_name):
-        return self.responder.deleted(service_name)
+    def delete(self, provider_service_id):
+        return self.responder.deleted(provider_service_id)
+    
+    def get(self, service_name):
+        return self.responder.get([], [], [])
+

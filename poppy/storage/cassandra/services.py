@@ -83,6 +83,12 @@ CQL_UPDATE_RESTRICTIONS = '''
     WHERE project_id = %(project_id)s AND service_name = %(service_name)s
 '''
 
+CQL_GET_PROVIDER_DETAILS = '''
+    SELECT provider_details
+    FROM services
+    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
+'''
+
 
 class ServicesController(base.ServicesController):
 
@@ -155,3 +161,15 @@ class ServicesController(base.ServicesController):
             'service_name': service_name
         }
         self.session.execute(CQL_DELETE_SERVICE, args)
+
+    def get_provider_details(self, project_id, service_name):
+        # TODO(tonytan4ever): Use real CQL read provider details info        
+        args = {
+            'project_id': project_id,
+            'service_name': service_name
+        }
+        # TODO(tonytan4ever): Not sure this returns a list or a single dictionary
+        # Needs to verify after cassandra unittest framework has been added in
+        # if a list, the return the first item of a list. if it is a dictionary 
+        # returns the dictionary
+        return self.session.execute(CQL_GET_PROVIDER_DETAILS, args)
