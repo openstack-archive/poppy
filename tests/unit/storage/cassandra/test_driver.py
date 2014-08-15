@@ -18,6 +18,7 @@ import mock
 from oslo.config import cfg
 
 from poppy.storage.cassandra import driver
+from poppy.storage.cassandra import flavors
 from poppy.storage.cassandra import services
 from tests.unit import base
 
@@ -30,11 +31,11 @@ CASSANDRA_OPTIONS = [
 ]
 
 
-class CassandraStorageServiceTests(base.TestCase):
+class CassandraStorageDriverTests(base.TestCase):
 
     @mock.patch.object(driver, 'CASSANDRA_OPTIONS', new=CASSANDRA_OPTIONS)
     def setUp(self):
-        super(CassandraStorageServiceTests, self).setUp()
+        super(CassandraStorageDriverTests, self).setUp()
 
         conf = cfg.ConfigOpts()
         self.cassandra_driver = driver.CassandraStorageDriver(conf)
@@ -55,13 +56,25 @@ class CassandraStorageServiceTests(base.TestCase):
         mock_cluster.assert_called_with('mock_poppy')
 
     def test_service_controller(self):
-        sc = self.cassandra_driver.service_controller
+        sc = self.cassandra_driver.services_controller
 
         self.assertEqual(
             isinstance(sc, services.ServicesController),
             True)
 
+    def test_flavor_controller(self):
+        sc = self.cassandra_driver.flavors_controller
+
+        self.assertEqual(
+            isinstance(sc, flavors.FlavorsController),
+            True)
+
     @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_service_database(self, mock_cluster):
         self.cassandra_driver.service_database
+        mock_cluster.assert_called_with('mock_poppy')
+
+    @mock.patch.object(cassandra.cluster.Cluster, 'connect')
+    def test_flavor_database(self, mock_cluster):
+        self.cassandra_driver.flavor_database
         mock_cluster.assert_called_with('mock_poppy')

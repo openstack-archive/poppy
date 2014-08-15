@@ -14,11 +14,13 @@
 # limitations under the License.
 
 from poppy.manager.base import driver
+from poppy.manager.base import flavors
+from poppy.manager.base import home
 from poppy.manager.base import services
-from poppy.manager.base import v1
 
 
 Driver = driver.ManagerDriverBase
 
+FlavorsController = flavors.FlavorsControllerBase
 ServicesController = services.ServicesControllerBase
-V1Controller = v1.V1ControllerBase
+HomeController = home.HomeControllerBase

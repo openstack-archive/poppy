@@ -15,7 +15,7 @@
 
 import uuid
 
-from poppy.manager.default import v1
+from poppy.manager.default import home
 from tests.functional.transport.pecan import base
 
 
@@ -33,11 +33,11 @@ class ContextHookTest(base.FunctionalTest):
         self.assertEqual(200, response.status_code)
 
         # Temporary until actual implementation
-        self.assertEqual(v1.JSON_HOME, response.json)
+        self.assertEqual(home.JSON_HOME, response.json)
 
     def test_project_id_in_url(self):
         response = self.app.get('/v1.0/000001', headers=self.headers)
 
         self.assertEqual(200, response.status_code)
         # Temporary until actual implementation
-        self.assertEqual(v1.JSON_HOME, response.json)
+        self.assertEqual(home.JSON_HOME, response.json)
