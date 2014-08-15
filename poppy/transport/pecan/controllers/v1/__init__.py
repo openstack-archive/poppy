@@ -13,11 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager.default import flavors
-from poppy.manager.default import home
-from poppy.manager.default import services
+"""Pecan v1.0 Controllers"""
+
+from poppy.transport.pecan.controllers.v1 import flavors
+from poppy.transport.pecan.controllers.v1 import home
+from poppy.transport.pecan.controllers.v1 import ping
+from poppy.transport.pecan.controllers.v1 import services
 
 
-Home = home.DefaultHomeController
-Flavors = flavors.DefaultFlavorsController
-Services = services.DefaultServicesController
+# Hoist into package namespace
+Home = home.HomeController
+Services = services.ServicesController
+Flavors = flavors.FlavorsController
+Ping = ping.PingController

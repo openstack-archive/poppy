@@ -24,6 +24,10 @@ class Controller(rest.RestController):
     def __init__(self, driver):
         self._driver = driver
 
+    @property
+    def driver(self):
+        return self._driver
+
     def add_controller(self, path, controller):
         setattr(self, path, controller)
 

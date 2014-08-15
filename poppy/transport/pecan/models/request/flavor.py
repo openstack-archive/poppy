@@ -13,17 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.model import flavor
 
-class Link(object):
 
-    def __init__(self, href, rel):
-        self._href = href
-        self._rel = rel
+class Model(flavor.Flavor):
 
-    @property
-    def href(self):
-        return self._href
+    def __init__(self, json_data):
 
-    @property
-    def rel(self):
-        return self._rel
+        flavor_id = json_data['id']
+        providers = []
+
+        for p in json_data['providers']:
+            provider_id = p['provider']
+            provider_url = [item['href']
+                            for item in p['links']
+                            if item['rel'] == 'provider_url'][0]
+
+            provider = flavor.Provider(provider_id, provider_url)
+            providers.append(provider)
+
+        super(Model, self).__init__(flavor_id, providers)
