@@ -17,6 +17,7 @@ import mock
 from oslo.config import cfg
 
 from poppy.manager.default import driver
+from poppy.manager.default import flavors
 from poppy.manager.default import services
 from tests.unit import base
 
@@ -36,3 +37,8 @@ class DefaultManagerDriverTests(base.TestCase):
         sc = self.driver.services_controller
 
         self.assertIsInstance(sc, services.DefaultServicesController)
+
+    def test_flavors_controller(self):
+        sc = self.driver.flavors_controller
+
+        self.assertIsInstance(sc, flavors.DefaultFlavorsController)

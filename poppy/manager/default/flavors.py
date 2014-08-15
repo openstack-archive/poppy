@@ -15,32 +15,21 @@
 
 from poppy.manager import base
 
-JSON_HOME = {
-    "resources": {
-        "rel/poppy": {
-            "href-template": "services{?marker,limit}",
-            "href-vars": {
-                "marker": "param/marker",
-                "limit": "param/limit"
-            },
-            "hints": {
-                "allow": [
-                    "GET"
-                ],
-                "formats": {
-                    "application/json": {}
-                }
-            }
-        }
-    }
-}
 
-
-class DefaultV1Controller(base.V1Controller):
+class DefaultFlavorsController(base.FlavorsController):
     def __init__(self, manager):
-        super(DefaultV1Controller, self).__init__(manager)
+        super(DefaultFlavorsController, self).__init__(manager)
 
-        self.JSON_HOME = JSON_HOME
+        self.storage = self._driver.storage.flavors_controller
 
-    def get(self):
-        return self.JSON_HOME
+    def list(self):
+        return self.storage.list()
+
+    def get(self, flavor_id):
+        return self.storage.get(flavor_id)
+
+    def add(self, new_flavor):
+        return self.storage.add(new_flavor)
+
+    def delete(self, flavor_id):
+        return self.storage.delete(flavor_id)

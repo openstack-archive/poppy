@@ -21,6 +21,7 @@ import pecan
 from poppy.openstack.common import log
 from poppy import transport
 from poppy.transport.pecan import controllers
+from poppy.transport.pecan.controllers import v1
 from poppy.transport.pecan import hooks
 
 
@@ -49,14 +50,15 @@ class PecanTransportDriver(transport.Driver):
     def _setup_app(self):
         root_controller = controllers.Root(self)
 
+        home_controller = v1.Home(self)
+
+        root_controller.add_controller('v1.0', home_controller)
+
+        home_controller.add_controller('services', v1.Services(self))
+        home_controller.add_controller('flavors', v1.Flavors(self))
+
         pecan_hooks = [hooks.Context()]
-
         self._app = pecan.make_app(root_controller, hooks=pecan_hooks)
-
-        controller_v1 = controllers.V1(self)
-        root_controller.add_controller('v1.0', controller_v1)
-
-        controller_v1.add_controller('services', controllers.Services(self))
 
     def listen(self):
         LOG.info(

@@ -13,17 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Pecan v1.0 Controllers"""
 
-class Link(object):
+from poppy.transport.pecan.controllers.v1 import flavors
+from poppy.transport.pecan.controllers.v1 import home
+from poppy.transport.pecan.controllers.v1 import services
 
-    def __init__(self, href, rel):
-        self._href = href
-        self._rel = rel
 
-    @property
-    def href(self):
-        return self._href
-
-    @property
-    def rel(self):
-        return self._rel
+# Hoist into package namespace
+Home = home.HomeController
+Services = services.ServicesController
+Flavors = flavors.FlavorsController

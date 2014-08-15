@@ -13,17 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo.config import cfg
-
-from poppy.storage.mockdb import driver
-from tests.unit import base
+from poppy.model import flavor
 
 
-class MockDBDriverTest(base.TestCase):
+class Model(flavor.Flavor):
 
-    def test_mockdb_driver_working(self):
-        self.mockdb_driver = driver.MockDBStorageDriver(cfg.CONF)
-        self.assertTrue(self.mockdb_driver.is_alive())
-        self.assertTrue(self.mockdb_driver.service_database is None)
-        self.assertTrue(self.mockdb_driver.connection is None)
-        self.assertTrue(self.mockdb_driver.services_controller.session is None)
+    def __init__(self, json_data):
+
+        flavor_id = json_data['id']
+        providers = []
+
+        for p in json_data['providers']:
+            provider_id = p['provider']
+            provider_url = [item['href']
+                            for item in p['links']
+                            if item['rel'] == 'provider_url'][0]
+
+            provider = flavor.Provider(provider_id, provider_url)
+            providers.append(provider)
+
+        super(Model, self).__init__(flavor_id, providers)
