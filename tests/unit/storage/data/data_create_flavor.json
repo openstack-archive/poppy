@@ -1,0 +1,43 @@
+{
+    "one_provider": {
+        "id" : "asia",
+        "providers" : [
+            {
+                "provider" : "ChinaCache",
+                "links": [
+                    {
+                        "href": "http://www.chinacache.com",
+                        "rel": "provider_url"
+                    }
+                ]
+            }
+        ]
+    },
+    "many_providers": {
+        "id" : "asia",
+        "providers" : [
+            {
+                "provider" : "ChinaCache",
+                "links": [
+                    {
+                        "href": "http://www.chinacache.com",
+                        "rel": "provider_url"
+                    }
+                ]
+            },
+            {
+                "provider" : "KiwiCache",
+                "links": [
+                    {
+                        "href": "http://www.cdn.co.nz",
+                        "rel": "provider_url"
+                    }
+                ]
+            }
+        ]
+    },
+    "no_providers": {
+        "id" : "asia",
+        "providers" : []
+    }
+}
