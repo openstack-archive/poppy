@@ -22,3 +22,8 @@ class InvalidResourceName(Exception):
 class InvalidOperation(Exception):
 
     """Raised when attempted a non existent operation."""
+
+
+class BadProviderDetail(Exception):
+
+    """Raised when attempted a non existent operation."""

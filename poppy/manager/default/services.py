@@ -17,6 +17,7 @@ from poppy.manager import base
 
 
 class DefaultServicesController(base.ServicesController):
+
     def __init__(self, manager):
         super(DefaultServicesController, self).__init__(manager)
 
@@ -34,6 +35,7 @@ class DefaultServicesController(base.ServicesController):
             service_name,
             service_json)
 
+        # TODO(tonytan4ever): need to update provider_detail info in storage
         return self._driver.providers.map(
             self.provider_wrapper.create,
             service_name,
@@ -46,14 +48,18 @@ class DefaultServicesController(base.ServicesController):
             service_json
         )
 
+        provider_details = self.storage.get_provider_details(project_id,
+                                                             service_name)
         return self._driver.providers.map(
             self.provider_wrapper.update,
-            service_name,
+            provider_details,
             service_json)
 
     def delete(self, project_id, service_name):
         self.storage.delete(project_id, service_name)
 
+        provider_details = self.storage.get_provider_details(project_id,
+                                                             service_name)
         return self._driver.providers.map(
             self.provider_wrapper.delete,
-            service_name)
+            provider_details)

@@ -25,6 +25,7 @@ from tests.unit import base
 
 @ddt.ddt
 class CassandraStorageServiceTests(base.TestCase):
+
     def setUp(self):
         super(CassandraStorageServiceTests, self).setUp()
 
@@ -103,6 +104,20 @@ class CassandraStorageServiceTests(base.TestCase):
         # Expect the response to be None as there are no providers passed
         # into the driver to respond to this call
         self.assertEqual(actual_response, None)
+
+    @ddt.file_data('data_provider_details.json')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_provider_details(self, provider_details_json,
+                                  mock_session, mock_execute):
+        # mock the response from cassandra
+        mock_execute.execute.return_value = [provider_details_json]
+        actual_response = self.sc.get_provider_details(self.project_id,
+                                                       self.service_name)
+        self.assertTrue("MaxCDN" in actual_response)
+        self.assertTrue("Mock" in actual_response)
+        self.assertTrue("CloudFront" in actual_response)
+        self.assertTrue("Fastly" in actual_response)
 
     @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_session(self, mock_service_database):
