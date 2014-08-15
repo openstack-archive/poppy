@@ -13,18 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import abc
-
-import six
-
-from poppy.manager.base import controller
+# stevedore/example/simple.py
+from poppy.storage import base
 
 
-@six.add_metaclass(abc.ABCMeta)
-class V1ControllerBase(controller.ManagerControllerBase):
-    def __init__(self, manager):
-        super(V1ControllerBase, self).__init__(manager)
+class FlavorsController(base.FlavorsController):
+    @property
+    def session(self):
+        return self._driver.flavor_database
 
-    @abc.abstractmethod
-    def get(self):
-        raise NotImplementedError
+    def list(self):
+        return ""
+
+    def get(self, flavor_id):
+        return ""
+
+    def add(self, flavor):
+        return ""
+
+    def delete(self, flavor_id, provider_id):
+        return ""
