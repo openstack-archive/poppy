@@ -33,6 +33,8 @@ class TestServices(base.TestBase):
     @ddt.file_data('data_create_service.json')
     def test_create_service(self, test_data):
 
+        self.skipTest('Endpoint Not Implemented')
+
         domain_list = test_data['domain_list']
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']

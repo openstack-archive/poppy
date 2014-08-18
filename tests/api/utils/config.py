@@ -41,6 +41,11 @@ class AuthConfig(data_interfaces.ConfigSectionInterface):
     SECTION_NAME = 'auth'
 
     @property
+    def auth_enabled(self):
+        """Auth On/Off."""
+        return self.get_boolean('auth_enabled')
+
+    @property
     def base_url(self):
         """Auth endpoint."""
         return self.get('base_url')
