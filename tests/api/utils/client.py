@@ -51,14 +51,14 @@ class AuthClient(client.HTTPClient):
         return token
 
 
-class CDNClient(client.AutoMarshallingHTTPClient):
+class PoppyClient(client.AutoMarshallingHTTPClient):
 
-    """Client objects for all the CDN api calls."""
+    """Client objects for all the Poppy api calls."""
 
     def __init__(self, url, auth_token, serialize_format="json",
                  deserialize_format="json"):
-        super(CDNClient, self).__init__(serialize_format,
-                                        deserialize_format)
+        super(PoppyClient, self).__init__(serialize_format,
+                                          deserialize_format)
         self.url = url
         self.auth_token = auth_token
         self.default_headers['X-Auth-Token'] = auth_token
