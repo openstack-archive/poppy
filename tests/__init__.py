@@ -14,7 +14,17 @@
 # limitations under the License.
 import os
 
+tests_dir = os.path.abspath(os.path.dirname(__file__))
 
-if "CDN_TESTS_CONFIGS_DIR" not in os.environ:
-    tests_dir = os.path.abspath(os.path.dirname(__file__))
-    os.environ["CDN_TESTS_CONFIGS_DIR"] = os.path.join(tests_dir, "etc")
+if "POPPY_TESTS_CONFIGS_DIR" not in os.environ:
+    os.environ["POPPY_TESTS_CONFIGS_DIR"] = os.path.join(tests_dir, "etc")
+
+if "CAFE_CONFIG_FILE_PATH" not in os.environ:
+    os.environ["CAFE_CONFIG_FILE_PATH"] = os.path.join(tests_dir,
+                                                       "etc/api.conf")
+
+if "CAFE_ROOT_LOG_PATH" not in os.environ:
+    os.environ["CAFE_ROOT_LOG_PATH"] = os.path.join(tests_dir, '/logs')
+
+if "CAFE_TEST_LOG_PATH" not in os.environ:
+    os.environ["CAFE_TEST_LOG_PATH"] = os.path.join(tests_dir, '/logs')
