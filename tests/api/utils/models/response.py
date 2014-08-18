@@ -29,7 +29,7 @@ class CreateService(base.AutoMarshallingModel):
         self.caching_list = caching_list or []
 
     def _obj_to_json(self):
-        create_service_request = {"domains": self.domain_list,
-                                  "origins": self.origin_list,
-                                  "caching": self.caching_list}
+        create_service_request = {'domains': self.domain_list,
+                                  'origins': self.origin_list,
+                                  'caching': self.caching_list}
         return json.dumps(create_service_request)

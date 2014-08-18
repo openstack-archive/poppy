@@ -51,7 +51,7 @@ class TestCase(testtools.TestCase):
         if os.path.exists(filename):
             return filename
 
-        return os.path.join(os.environ["CDN_TESTS_CONFIGS_DIR"], filename)
+        return os.path.join(os.environ['CDN_TESTS_CONFIGS_DIR'], filename)
 
     @classmethod
     def load_conf(cls, filename):

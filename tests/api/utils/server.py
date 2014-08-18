@@ -24,7 +24,7 @@ from poppy import bootstrap
 @six.add_metaclass(abc.ABCMeta)
 class Server(object):
 
-    name = "poppy-server"
+    name = 'poppy-server'
 
     def __init__(self):
         self.process = None
@@ -62,7 +62,7 @@ class Server(object):
         target = self.get_target(conf)
 
         if not callable(target):
-            raise RuntimeError("Target not callable")
+            raise RuntimeError('Target not callable')
 
         self.process = multiprocessing.Process(target=target,
                                                name=self.name)
@@ -73,7 +73,7 @@ class Server(object):
         # whose join() method is called terminates or until the timeout occurs.
         # The timeout is set, so that the calling (API tests)
         # & called processes (CDN Server) can execute in parallel.
-        self.process.join(.1)
+        self.process.join(1)
 
         return self.process
 
@@ -89,7 +89,7 @@ class Server(object):
 
 
 class CDNServer(Server):
-    name = "poppy-server"
+    name = 'poppy-server'
 
     def get_target(self, conf):
         server = bootstrap.Bootstrap(conf)

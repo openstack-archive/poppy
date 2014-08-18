@@ -41,6 +41,11 @@ class AuthConfig(data_interfaces.ConfigSectionInterface):
     SECTION_NAME = 'auth'
 
     @property
+    def auth_enabled(self):
+        """Auth On/Off."""
+        return self.get_boolean('auth_enabled')
+
+    @property
     def base_url(self):
         """Auth endpoint."""
         return self.get('base_url')
@@ -48,14 +53,14 @@ class AuthConfig(data_interfaces.ConfigSectionInterface):
     @property
     def user_name(self):
         """The name of the user, if applicable."""
-        return self.get("user_name")
+        return self.get('user_name')
 
     @property
     def api_key(self):
         """The user's api key, if applicable."""
-        return self.get_raw("api_key")
+        return self.get_raw('api_key')
 
     @property
     def tenant_id(self):
         """The user's tenant_id, if applicable."""
-        return self.get("tenant_id")
+        return self.get('tenant_id')

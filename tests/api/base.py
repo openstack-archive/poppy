@@ -36,24 +36,30 @@ class TestBase(fixtures.BaseTestFixture):
     @classmethod
     def setUpClass(cls):
 
+        # NOTE(malini): The below conf file is used to start a local instance
+        # of the CDN Server, if run_server=True in the api tests config file.
         cls.conf_file = 'poppy_mockdb.conf'
 
         super(TestBase, cls).setUpClass()
 
         cls.auth_config = config.AuthConfig()
-        cls.auth_client = client.AuthClient()
-        auth_token = cls.auth_client.get_auth_token(cls.auth_config.base_url,
-                                                    cls.auth_config.user_name,
-                                                    cls.auth_config.api_key)
+        if cls.auth_config.auth_enabled:
+            cls.auth_client = client.AuthClient()
+            auth_token = cls.auth_client.get_auth_token(
+                cls.auth_config.base_url,
+                cls.auth_config.user_name,
+                cls.auth_config.api_key)
+        else:
+            auth_token = 'dummy'
 
-        cls.config = config.CDNConfig()
+        cls.config = config.PoppyConfig()
         cls.url = cls.config.base_url
 
-        cls.client = client.CDNClient(cls.url, auth_token,
-                                      serialize_format='json',
-                                      deserialize_format='json')
+        cls.client = client.PoppyClient(cls.url, auth_token,
+                                        serialize_format='json',
+                                        deserialize_format='json')
 
-        cls.server_config = config.CDNServerConfig()
+        cls.server_config = config.PoppyServerConfig()
 
         if cls.server_config.run_server:
             conf_path = os.environ["POPPY_TESTS_CONFIGS_DIR"]
