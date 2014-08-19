@@ -13,16 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Pecan Controllers"""
+from poppy.manager.default import v1
+from webtest import app
 
-from poppy.transport.pecan.controllers import ping
-from poppy.transport.pecan.controllers import root
-from poppy.transport.pecan.controllers import services
-from poppy.transport.pecan.controllers import v1
+from tests.functional.transport.pecan import base
 
 
-# Hoist into package namespace
-Root = root.RootController
-Ping = ping.PingController
-Services = services.ServicesController
-V1 = v1.ControllerV1
+class TestPing(base.FunctionalTest):
+
+    def test_ping(self):
+        response = self.app.get('/v1.0/0001/ping')
+
+        self.assertEqual(204, response.status_code)
+        self.assertEqual('{}', response.body)
