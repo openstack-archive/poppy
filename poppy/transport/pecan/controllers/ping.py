@@ -13,16 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Pecan Controllers"""
+import pecan
 
-from poppy.transport.pecan.controllers import ping
-from poppy.transport.pecan.controllers import root
-from poppy.transport.pecan.controllers import services
-from poppy.transport.pecan.controllers import v1
+from poppy.transport.pecan.controllers import base
 
 
-# Hoist into package namespace
-Root = root.RootController
-Ping = ping.PingController
-Services = services.ServicesController
-V1 = v1.ControllerV1
+class PingController(base.Controller):
+
+    @pecan.expose()
+    def get(self):
+        pecan.response.status = 204
