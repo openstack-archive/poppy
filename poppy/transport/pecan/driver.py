@@ -56,6 +56,7 @@ class PecanTransportDriver(transport.Driver):
         controller_v1 = controllers.V1(self)
         root_controller.add_controller('v1.0', controller_v1)
 
+        controller_v1.add_controller('ping', controllers.Ping(self))
         controller_v1.add_controller('services', controllers.Services(self))
 
     def listen(self):
