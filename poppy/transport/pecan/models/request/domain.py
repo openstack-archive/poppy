@@ -13,24 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-import ddt
-
 from poppy.model.helpers import domain
-from tests.unit import base
+from poppy.transport.pecan.models import common
 
 
-@ddt.ddt
-class TestDomain(base.TestCase):
-
-    def test_domain(self):
-
-        domain_name = 'www.mydomain.com'
-        changed_domain_name = 'www.changed-domain.com'
-        mydomain = domain.Domain(domain_name)
-
-        # test all properties
-        # domain
-        self.assertEqual(mydomain.domain, domain_name)
-        mydomain.domain = changed_domain_name
-        self.assertEqual(mydomain.domain, changed_domain_name)
+class Model(domain.Domain, common.SerializableModel):
+    'request class for Doamin'
+    def __init__(self, input_json, **kwargs):
+        self.from_dict(input_json)
+         

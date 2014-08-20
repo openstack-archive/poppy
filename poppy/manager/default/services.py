@@ -28,28 +28,28 @@ class DefaultServicesController(base.ServicesController):
     def get(self, project_id, service_name):
         return self.storage.get(project_id, service_name)
 
-    def create(self, project_id, service_name, service_json):
+    def create(self, project_id, service_name, request_service):
         self.storage.create(
             project_id,
             service_name,
-            service_json)
+            request_service)
 
         return self._driver.providers.map(
             self.provider_wrapper.create,
             service_name,
-            service_json)
+            request_service)
 
-    def update(self, project_id, service_name, service_json):
+    def update(self, project_id, service_name, request_service):
         self.storage.update(
             project_id,
             service_name,
-            service_json
+            request_service
         )
 
         return self._driver.providers.map(
             self.provider_wrapper.update,
             service_name,
-            service_json)
+            request_service)
 
     def delete(self, project_id, service_name):
         self.storage.delete(project_id, service_name)

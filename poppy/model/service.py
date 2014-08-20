@@ -25,28 +25,47 @@ class Service(object):
         self._origins = origins
         self._caching = caching
         self._restrictions = restrictions
-        self._links = []
         self._status = u'unknown'
 
     @property
     def name(self):
         return self._name
 
+    @name.setter
+    def name(self, value):
+        self._name = value
+
     @property
     def domains(self):
         return self._domains
+
+    @domains.setter
+    def domains(self, value):
+        self._domains = value
 
     @property
     def origins(self):
         return self._origins
 
+    @origins.setter
+    def origins(self, value):
+        self._origins = value
+
     @property
     def caching(self):
         return self._caching
 
+    @caching.setter
+    def caching(self, value):
+        self._caching = value
+
     @property
     def restrictions(self):
         return self._restrictions
+
+    @restrictions.setter
+    def restrictions(self, value):
+        self._restrictions = value
 
     @property
     def status(self):
@@ -62,7 +81,3 @@ class Service(object):
                     value,
                     VALID_STATUSES)
             )
-
-    @property
-    def links(self):
-        return self._links

@@ -22,3 +22,7 @@ class Domain(object):
     @property
     def domain(self):
         return self._domain
+
+    @domain.setter
+    def domain(self, value):
+        self._domain = value

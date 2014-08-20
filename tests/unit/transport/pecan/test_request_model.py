@@ -13,24 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 
 import ddt
 
-from poppy.model.helpers import domain
+from poppy.transport.pecan.models.request import service
 from tests.unit import base
 
 
 @ddt.ddt
-class TestDomain(base.TestCase):
+class TestRequestsModel(base.TestCase):
 
-    def test_domain(self):
+    @ddt.file_data('data_service_model.json')
+    def test_service_model(self, input_json):
+        input_json = json.dumps(input_json)
+        c = service.Model("test_service_name", input_json)
 
-        domain_name = 'www.mydomain.com'
-        changed_domain_name = 'www.changed-domain.com'
-        mydomain = domain.Domain(domain_name)
-
-        # test all properties
-        # domain
-        self.assertEqual(mydomain.domain, domain_name)
-        mydomain.domain = changed_domain_name
-        self.assertEqual(mydomain.domain, changed_domain_name)
+        self.assertTrue(isinstance(c.origins, list))
+        self.assertTrue(isinstance(c.domains, list))

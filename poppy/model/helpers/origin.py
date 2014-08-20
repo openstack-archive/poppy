@@ -26,6 +26,10 @@ class Origin(object):
     def origin(self):
         return self._origin
 
+    @origin.setter
+    def origin(self, value):
+        self._origin = value
+
     @property
     def port(self):
         return self._port
@@ -45,3 +49,7 @@ class Origin(object):
     @property
     def rules(self):
         return self._rules
+
+    @rules.setter
+    def rules(self, value):
+        self._rules = value

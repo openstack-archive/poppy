@@ -19,6 +19,9 @@ import pecan
 
 from poppy.openstack.common import local
 from poppy.transport.pecan.controllers import base
+from poppy.transport.pecan.models.request import service as req_service_model
+from poppy.transport.pecan.models.response import link
+from poppy.transport.pecan.models.response import service as resp_service_model
 from poppy.transport.validators import helpers
 from poppy.transport.validators.schemas import service
 from poppy.transport.validators.stoplight import decorators
@@ -35,14 +38,27 @@ class ServicesController(base.Controller):
         marker = pecan.request.GET.get('marker')
         limit = pecan.request.GET.get('limit')
         services_controller = self._driver.manager.services_controller
-        return services_controller.list(tenant_id, marker, limit)
+        service_resultset = services_controller.list(tenant_id, marker, limit)
+        # serialize the service result set into a list of service response
+        # object
+        result = [resp_service_model.Model(s) for s in service_resultset]
+        # TODO(tonytan4ever): edge case, what should be the result when there
+        # is no service ? What should be the links field of return like ?
+        return {
+            'links': link.Model('/v1.0/services?maker={0}&limit={1}'.format(
+                result[-1].name if len(result) > 0 else None,
+                limit),
+                'next'),
+            'services': result
+        }
 
     @pecan.expose('json')
     def get_one(self, service_name):
         context = local.store.context
         tenant_id = context.tenant
         services_controller = self._driver.manager.services_controller
-        return services_controller.get(tenant_id, service_name)
+        s_dict = services_controller.get(tenant_id, service_name)
+        return resp_service_model.Model(s_dict)
 
     @pecan.expose('json')
     @decorators.validate(
@@ -58,9 +74,14 @@ class ServicesController(base.Controller):
         context = local.store.context
         tenant_id = context.tenant
         services_controller = self._driver.manager.services_controller
-        service_json = json.loads(pecan.request.body.decode('utf-8'))
+        service_json_string = pecan.request.body.decode('utf-8')
+        request_service = req_service_model.Model(service_name,
+                                                  service_json_string)
+        # convert service_json into a service model
+        # under poppy.models.helpers.service.py
+        # and pass service_json to create
         return services_controller.create(tenant_id, service_name,
-                                          service_json)
+                                          request_service)
 
     @pecan.expose('json')
     def delete(self, service_name):
@@ -84,5 +105,8 @@ class ServicesController(base.Controller):
         tenant_id = context.tenant
         services_controller = self._driver.manager.services_controller
         service_json = json.loads(pecan.request.body.decode('utf-8'))
+        # convert service_json into a service model
+        # under poppy.models.helpers.service.py
+        # and pass service_json to update
         return services_controller.update(tenant_id, service_name,
                                           service_json)

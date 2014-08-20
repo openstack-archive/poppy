@@ -37,5 +37,4 @@ class BaseFunctionalTest(base.TestCase):
 
         self.app = webtest.TestApp(poppy_wsgi)
 
-
 FunctionalTest = BaseFunctionalTest

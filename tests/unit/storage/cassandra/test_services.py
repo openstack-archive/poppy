@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 import cassandra
 import ddt
 import mock
@@ -20,11 +22,13 @@ from oslo.config import cfg
 
 from poppy.storage.cassandra import driver
 from poppy.storage.cassandra import services
+from poppy.transport.pecan.models.request import service
 from tests.unit import base
 
 
 @ddt.ddt
 class CassandraStorageServiceTests(base.TestCase):
+
     def setUp(self):
         super(CassandraStorageServiceTests, self).setUp()
 
@@ -58,7 +62,9 @@ class CassandraStorageServiceTests(base.TestCase):
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_create_service(self, value, mock_session, mock_execute):
-        responses = self.sc.create(self.project_id, self.service_name, value)
+        request_service = service.Model(self.service_name, json.dumps(value))
+        responses = self.sc.create(self.project_id, self.service_name,
+                                   request_service)
 
         # Expect the response to be None as there are no providers passed
         # into the driver to respond to this call

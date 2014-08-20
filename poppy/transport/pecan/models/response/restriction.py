@@ -13,24 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from pecan import jsonify
 
-import ddt
-
-from poppy.model.helpers import domain
-from tests.unit import base
+from poppy.model.helpers import restriction
+from poppy.transport.pecan.models import common
 
 
-@ddt.ddt
-class TestDomain(base.TestCase):
+class Model(restriction.Restriction, common.SerializableModel):
+    'response class for Domain'
+    def __init__(self, data_model):
+        self.from_dict(data_model.to_dict())
 
-    def test_domain(self):
+    def encode(self):
+        return self.to_dict()
 
-        domain_name = 'www.mydomain.com'
-        changed_domain_name = 'www.changed-domain.com'
-        mydomain = domain.Domain(domain_name)
 
-        # test all properties
-        # domain
-        self.assertEqual(mydomain.domain, domain_name)
-        mydomain.domain = changed_domain_name
-        self.assertEqual(mydomain.domain, changed_domain_name)
+@jsonify.jsonify.register(Model)
+def jsonify_model(obj):
+    return obj.encode()
