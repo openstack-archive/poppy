@@ -13,7 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.model.helpers import domain
+from poppy.model.helpers import origin
 from poppy.model.helpers import provider_details
+from poppy.model import service
 from poppy.storage import base
 
 
@@ -24,71 +27,118 @@ class ServicesController(base.ServicesController):
         return self._driver.service_database
 
     def list(self, project_id, marker=None, limit=None):
-        services = {
-            "links": [
-                {
-                    "rel": "next",
-                    "href": "/v1.0/services?marker=www.test.com&limit=20"
-                }
-            ],
-            "services": [
-                {
-                    "domains": [
+        services = [
+            {
+                "name": "mockdb1_service_name",
+                "domains": [
                         {
                             "domain": "www.mywebsite.com"
                         }
-                    ],
-                    "origins": [
-                        {
-                            "origin": "mywebsite.com",
-                            "port": 80,
-                            "ssl": False
-                        }
-                    ],
-                    "caching": [
-                        {"name": "default", "ttl": 3600},
-                        {
-                            "name": "home",
+                ],
+                "origins": [
+                    {
+                        "origin": "mywebsite.com",
+                        "port": 80,
+                        "ssl": False
+                    }
+                ],
+                "caching": [
+                    {"name": "default", "ttl": 3600},
+                    {
+                        "name": "home",
+                        "ttl": 17200,
+                        "rules": [
+                                {"name": "index",
+                                 "request_url": "/index.htm"}
+                        ]
+                    },
+                    {
+                        "name": "images",
+                        "ttl": 12800,
+                        "rules": [
+                                {"name": "images", "request_url": "*.png"}
+                        ]
+                    }
+                ],
+                "restrictions": [
+                    {
+                        "name": "website only",
+                        "rules": [
+                                {
+                                    "name": "mywebsite.com",
+                                    "http_host": "www.mywebsite.com"
+                                }
+                        ]
+                    }
+                ],
+            }
+        ]
+
+        services_result = []
+        for r in services:
+            name = r.get("name", "unnamed")
+            origins = r.get("origins", [])
+            domains = r.get("domains", [])
+            origins = [origin.Origin(d) for d in origins]
+            domains = [domain.Domain(d) for d in domains]
+            services_result.append(service.Service(name, domains, origins))
+
+        return services_result
+
+    def get(self, project_id, service_name):
+        # get the requested service from storage
+        service_dict = {
+            "name": service_name,
+            "domains": [
+                {
+                    "domain": "www.mywebsite.com"
+                }
+            ],
+            "origins": [
+                {
+                    "origin": "mywebsite.com",
+                    "port": 80,
+                    "ssl": False
+                }
+            ],
+            "caching": [
+                {"name": "default", "ttl": 3600},
+                {
+                    "name": "home",
                             "ttl": 17200,
                             "rules": [
-                                    {"name": "index",
-                                        "request_url": "/index.htm"}
+                                {"name": "index",
+                                 "request_url": "/index.htm"}
                             ]
-                        },
-                        {
-                            "name": "images",
+                },
+                {
+                    "name": "images",
                             "ttl": 12800,
                             "rules": [
-                                    {"name": "images", "request_url": "*.png"}
+                                {"name": "images", "request_url": "*.png"}
                             ]
-                        }
-                    ],
-                    "restrictions": [
-                        {
-                            "name": "website only",
+                }
+            ],
+            "restrictions": [
+                {
+                    "name": "website only",
                             "rules": [
                                 {
                                     "name": "mywebsite.com",
                                     "http_host": "www.mywebsite.com"
                                 }
                             ]
-                        }
-                    ],
-                    "links": [
-                        {
-                            "href": "/v1.0/services/mywebsite",
-                            "rel": "self"
-                        }
-                    ]
                 }
-            ]
+            ],
         }
 
-        return services
-
-    def get(self, project_id, service_name):
-        # get the requested service from storage
-        return ""
+        name = service_dict.get("name", "unnamed")
+        origins = service_dict.get("origins", [])
+        domains = service_dict.get("domains", [])
+        origins = [origin.Origin(d) for d in origins]
+        domains = [domain.Domain(d) for d in domains]
+        services_result = [service.Service(name, domains, origins)]
+        return services_result
 
     def create(self, project_id, service_name, service_json):
 

@@ -17,8 +17,10 @@ import json
 
 import pecan
 
-from poppy.openstack.common import local
 from poppy.transport.pecan.controllers import base
+from poppy.transport.pecan.models.request import service as req_service_model
+from poppy.transport.pecan.models.response import link
+from poppy.transport.pecan.models.response import service as resp_service_model
 from poppy.transport.validators import helpers
 from poppy.transport.validators.schemas import service
 from poppy.transport.validators.stoplight import decorators
@@ -30,19 +32,29 @@ class ServicesController(base.Controller):
 
     @pecan.expose('json')
     def get_all(self):
-        context = local.store.context
-        tenant_id = context.tenant
         marker = pecan.request.GET.get('marker')
         limit = pecan.request.GET.get('limit')
         services_controller = self._driver.manager.services_controller
-        return services_controller.list(tenant_id, marker, limit)
+        service_resultset = services_controller.list(
+            self.project_id, marker, limit)
+        result = [
+            resp_service_model.Model(s) for s in service_resultset]
+        # TODO(tonytan4ever): edge case: what should be the result when there
+        # is no service ? What should be the links field of return like ?
+        return {
+            'links': link.Model('/v1.0/services?marker={0}&limit={1}'.format(
+                result[-1]["name"] if len(result) > 0 else None,
+                limit),
+                'next'),
+            'services': result
+        }
 
     @pecan.expose('json')
     def get_one(self, service_name):
-        context = local.store.context
-        tenant_id = context.tenant
         services_controller = self._driver.manager.services_controller
-        return services_controller.get(tenant_id, service_name)
+        service_obj = services_controller.get(self.project_id, service_name)[0]
+        # convert a service model into a response service model
+        return resp_service_model.Model(service_obj)
 
     @pecan.expose('json')
     @decorators.validate(
@@ -55,19 +67,16 @@ class ServicesController(base.Controller):
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
     def put(self, service_name):
-        context = local.store.context
-        tenant_id = context.tenant
         services_controller = self._driver.manager.services_controller
-        service_json = json.loads(pecan.request.body.decode('utf-8'))
-        return services_controller.create(tenant_id, service_name,
-                                          service_json)
+        service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
+        service_obj = req_service_model.load_from_json(service_json_dict)
+        return services_controller.create(self.project_id, service_name,
+                                          service_obj)
 
     @pecan.expose('json')
     def delete(self, service_name):
-        context = local.store.context
-        tenant_id = context.tenant
         services_controller = self._driver.manager.services_controller
-        return services_controller.delete(tenant_id, service_name)
+        return services_controller.delete(self.project_id, service_name)
 
     @pecan.expose('json')
     @decorators.validate(
@@ -80,9 +89,10 @@ class ServicesController(base.Controller):
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
     def patch_one(self, service_name):
-        context = local.store.context
-        tenant_id = context.tenant
         services_controller = self._driver.manager.services_controller
         service_json = json.loads(pecan.request.body.decode('utf-8'))
-        return services_controller.update(tenant_id, service_name,
+        # TODO(tonytan4ever): convert service_json into a partial service model
+        # under poppy.models.helpers.service.py
+        # and pass service_json to update
+        return services_controller.update(self.project_id, service_name,
                                           service_json)

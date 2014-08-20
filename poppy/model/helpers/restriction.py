@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.model import common
 
-class Restriction(object):
+
+class Restriction(common.DictSerializableModel):
 
     def __init__(self, name):
         self._name = name

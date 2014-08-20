@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,9 +24,14 @@ from tests.unit import base
 @ddt.ddt
 class TestOrigin(base.TestCase):
 
-    def test_origin(self):
+    @ddt.unpack
+    @ddt.data({'origin_url': 'www.mydomain.com',
+               'changed_origin_url': 'www.changed-domain.com'},
+              {'origin_url': u'www.düsseldorf-Lörick.com',
+               'changed_origin_url': u'www.düsseldorf.com'
+               })
+    def test_origin(self, origin_url, changed_origin_url):
 
-        origin_url = 'www.mywebsite.com'
         port = 443
         ssl = True
         myorigin = origin.Origin(origin_url, port, ssl)
@@ -33,8 +39,8 @@ class TestOrigin(base.TestCase):
         # test all properties
         # origin
         self.assertEqual(myorigin.origin, origin_url)
-        self.assertRaises(
-            AttributeError, setattr, myorigin, 'origin', origin_url)
+        myorigin.origin = changed_origin_url
+        self.assertEqual(myorigin.origin, changed_origin_url)
 
         # port
         self.assertEqual(myorigin.port, port)
@@ -48,4 +54,9 @@ class TestOrigin(base.TestCase):
 
         # rules
         self.assertEqual(myorigin.rules, [])
-        self.assertRaises(AttributeError, setattr, myorigin, 'rules', [])
+        myorigin.rules = []
+        self.assertEqual(myorigin.rules, [])
+
+        # my other origin
+        my_other_origin = origin.Origin.init_from_dict({"origin": origin_url})
+        self.assertEqual(my_other_origin.origin, origin_url)
