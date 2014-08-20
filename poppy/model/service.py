@@ -13,11 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.model import common
+from poppy.model.helpers import domain
+from poppy.model.helpers import origin
+
 
 VALID_STATUSES = [u'unknown', u'in_progress', u'deployed', u'failed']
 
 
-class Service(object):
+class Service(common.DictSerializableModel):
 
     def __init__(self, name, domains, origins, caching=[], restrictions=[]):
         self._name = name
@@ -25,28 +29,55 @@ class Service(object):
         self._origins = origins
         self._caching = caching
         self._restrictions = restrictions
-        self._links = []
         self._status = u'unknown'
 
     @property
     def name(self):
         return self._name
 
+    @name.setter
+    def name(self, value):
+        self._name = value
+
     @property
     def domains(self):
-        return self._domains
+        return [domain.to_dict() for domain in self._domains]
+
+    @domains.setter
+    def domains(self, value):
+        # explict requirement: value should be a list of dictionary
+        # due to weakly typed Python
+        self._domains = [domain.Domain.from_dict_init(d) for d in value]
 
     @property
     def origins(self):
-        return self._origins
+        return [origin.to_dict() for origin in self._origins]
+
+    @origins.setter
+    def origins(self, value):
+        # explicit requirement: value should be a list of dictionary
+        # due to weakly typed Python
+        self._origins = [origin.Origin.from_dict_init(d) for d in value]
 
     @property
     def caching(self):
         return self._caching
 
+    @caching.setter
+    def caching(self, value):
+        # TODO(tonytan4ever): convert a list of dictionaries into a list of
+        # caching rules
+        self._caching = value
+
     @property
     def restrictions(self):
         return self._restrictions
+
+    @restrictions.setter
+    def restrictions(self, value):
+        # TODO(tonytan4ever): convert a list of dictionaries into a list of
+        # restriction
+        self._restrictions = value
 
     @property
     def status(self):
@@ -63,6 +94,15 @@ class Service(object):
                     VALID_STATUSES)
             )
 
-    @property
-    def links(self):
-        return self._links
+    @classmethod
+    def from_dict_init(cls, dict):
+        """Construct a model instance from a dictionary.
+
+        This is only meant to be used for converting a
+        response model into a model.
+        When converting a model into a request model,
+        use to_dict.
+        """
+        o = cls("unamed", [], [])
+        o.from_dict(dict)
+        return o

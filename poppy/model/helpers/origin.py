@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.model import common
 
-class Origin(object):
+
+class Origin(common.DictSerializableModel):
 
     def __init__(self, origin, port=80, ssl=False):
         self._origin = origin
@@ -25,6 +27,10 @@ class Origin(object):
     @property
     def origin(self):
         return self._origin
+
+    @origin.setter
+    def origin(self, value):
+        self._origin = value
 
     @property
     def port(self):
@@ -45,3 +51,18 @@ class Origin(object):
     @property
     def rules(self):
         return self._rules
+
+    @rules.setter
+    def rules(self, value):
+        # TODO(tonytan4ever) this field should by typed too
+        self._rules = value
+
+    @classmethod
+    def from_dict_init(cls, dict):
+        """Construct a model instance from a dictionary.
+
+        This serves as a 2nd constructor
+        """
+        o = cls("unamed")
+        o.from_dict(dict)
+        return o

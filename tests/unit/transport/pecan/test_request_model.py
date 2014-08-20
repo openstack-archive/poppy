@@ -13,19 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.model import common
+import json
+
+import ddt
+
+from poppy.transport.pecan.models.request import service
+from tests.unit import base
 
 
-class Restriction(common.DictSerializableModel):
+@ddt.ddt
+class TestRequestsModel(base.TestCase):
 
-    def __init__(self, name):
-        self._name = name
-        self._rules = []
+    @ddt.file_data('data_service_model.json')
+    def test_service_model(self, input_json):
+        input_json = json.dumps(input_json)
+        c = service.Model(input_json)
 
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def rules(self):
-        return self._rules
+        self.assertTrue(isinstance(c.origins, list))
+        self.assertTrue(isinstance(c.domains, list))

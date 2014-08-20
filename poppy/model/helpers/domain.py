@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.model import common
 
-class Domain(object):
+
+class Domain(common.DictSerializableModel):
 
     def __init__(self, domain):
         self._domain = domain
@@ -22,3 +24,17 @@ class Domain(object):
     @property
     def domain(self):
         return self._domain
+
+    @domain.setter
+    def domain(self, value):
+        self._domain = value
+
+    @classmethod
+    def from_dict_init(cls, dict):
+        """Construct a model instance from a dictionary.
+
+        This serves as a 2nd constructor
+        """
+        o = cls("unamed")
+        o.from_dict(dict)
+        return o

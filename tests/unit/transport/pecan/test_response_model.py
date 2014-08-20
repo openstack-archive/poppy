@@ -13,24 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import ddt
 
-from poppy.model.helpers import domain
+from poppy.transport.pecan.models.response import service as resp_service
 from tests.unit import base
 
 
 @ddt.ddt
-class TestDomain(base.TestCase):
+class TestRequestsModel(base.TestCase):
 
-    def test_domain(self):
+    @ddt.file_data('data_service_model.json')
+    def test_service_model(self, input_json):
+        # Typical use case would be converting a request model into
+        # a response mode. Could also be converting a normal model
+        # into a response model as well
+        resp_model = resp_service.Model(input_json)
 
-        domain_name = 'www.mydomain.com'
-        changed_domain_name = 'www.changed-domain.com'
-        mydomain = domain.Domain(domain_name)
-
-        # test all properties
-        # domain
-        self.assertEqual(mydomain.domain, domain_name)
-        mydomain.domain = changed_domain_name
-        self.assertEqual(mydomain.domain, changed_domain_name)
+        self.assertTrue(isinstance(resp_model.origins, list))
+        self.assertTrue(isinstance(resp_model.domains, list))

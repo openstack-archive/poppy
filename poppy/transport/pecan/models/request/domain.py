@@ -13,19 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.model import common
+from poppy.model.helpers import domain
 
 
-class Restriction(common.DictSerializableModel):
+class Model(domain.Domain):
 
-    def __init__(self, name):
-        self._name = name
-        self._rules = []
+    'request class for Doamin'
 
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def rules(self):
-        return self._rules
+    def __init__(self, input_json, **kwargs):
+        self.from_dict(input_json)
