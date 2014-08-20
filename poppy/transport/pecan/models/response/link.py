@@ -13,19 +13,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+try:
+    import ordereddict as collections
+except ImportError:
+    import collections
+
+from pecan import jsonify
+
 from poppy.model import common
 
 
-class Restriction(common.DictSerializableModel):
+class Model(common.DictSerializableModel):
 
-    def __init__(self, name):
-        self._name = name
-        self._rules = []
+    'response class for Domain'
 
-    @property
-    def name(self):
-        return self._name
+    def __init__(self, href, rel):
+        self._href = href
+        self._rel = rel
 
     @property
-    def rules(self):
-        return self._rules
+    def href(self):
+        return self._href
+
+    @property
+    def rel(self):
+        return self._rel
+
+    def encode(self):
+        return collections.OrderedDict({
+            "href": self.href,
+            "rel": self.rel
+        })
+
+
+@jsonify.jsonify.register(Model)
+def jsonify_model(obj):
+    return obj.encode()

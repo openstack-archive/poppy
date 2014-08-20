@@ -58,32 +58,33 @@ class TestServiceModel(base.TestCase):
         # test all properties
         # name
         self.assertEqual(myservice.name, self.service_name)
-        self.assertRaises(
-            AttributeError, setattr, myservice, 'name', self.service_name)
+        changed_service_name = 'ChangedServiceName'
+        myservice.name = changed_service_name
+        self.assertEqual(myservice.name, changed_service_name)
 
         # domains
-        self.assertEqual(myservice.domains, self.mydomains)
-        self.assertRaises(AttributeError, setattr, myservice, 'domains', [])
+        self.assertEqual(myservice.domains, [domain.to_dict() for domain
+                                             in self.mydomains])
+        myservice.domains = []
+        self.assertEqual(myservice.domains, [])
 
         # origins
-        self.assertEqual(myservice.origins, self.myorigins)
-        self.assertRaises(AttributeError, setattr, myservice, 'origins', [])
+        self.assertEqual(myservice.origins, [origin.to_dict() for origin
+                                             in self.myorigins])
+        myservice.origins = []
+        self.assertEqual(myservice.origins, [])
 
-        # restrictions
         self.assertEqual(myservice.restrictions, self.myrestrictions)
-        self.assertRaises(
-            AttributeError, setattr, myservice, 'restrictions', [])
+        myservice.restrictions = []
+        self.assertEqual(myservice.restrictions, [])
 
         # caching rules
         self.assertEqual(myservice.caching, self.mycaching)
-        self.assertRaises(
-            AttributeError, setattr, myservice, 'caching', [])
+        myservice.caching = []
+        self.assertEqual(myservice.caching, [])
 
         # status
         self.assertEqual(myservice.status, u'unknown')
-
-        # links
-        self.assertEqual(myservice.links, [])
 
     @ddt.data(u'', u'apple')
     def test_set_invalid_status(self, status):

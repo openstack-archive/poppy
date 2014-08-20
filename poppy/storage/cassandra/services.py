@@ -116,17 +116,15 @@ class ServicesController(base.ServicesController):
         # format.
         return result
 
-    def create(self, project_id, service_name, service_json):
+    def create(self, project_id, service_name, service_obj):
 
         # create the service in storage
-        service = service_json
-
-        domains = [json.dumps(domain) for domain in service["domains"]]
-        origins = [json.dumps(origin) for origin in service["origins"]]
+        domains = [json.dumps(domain) for domain in service_obj.domains]
+        origins = [json.dumps(origin) for origin in service_obj.origins]
         caching_rules = [json.dumps(caching_rule)
-                         for caching_rule in service["caching"]]
+                         for caching_rule in service_obj.caching]
         restrictions = [json.dumps(restriction)
-                        for restriction in service["restrictions"]]
+                        for restriction in service_obj.restrictions]
 
         # creates a new service
         args = {
@@ -140,7 +138,7 @@ class ServicesController(base.ServicesController):
 
         self.session.execute(CQL_CREATE_SERVICE, args)
 
-    def update(self, project_id, service_name, service_json):
+    def update(self, project_id, service_name, service_obj):
         # update configuration in storage
 
         # determine what changed.

@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.model import common
 
-class CachingRule(object):
+
+class CachingRule(common.DictSerializableModel):
 
     def __init__(self, name, ttl):
         self._name = name

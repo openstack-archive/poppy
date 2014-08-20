@@ -13,19 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from pecan import jsonify
+
 from poppy.model import common
 
 
-class Restriction(common.DictSerializableModel):
+class Model(common.DictSerializableModel):
 
-    def __init__(self, name):
-        self._name = name
-        self._rules = []
+    'response class for Domain'
 
-    @property
-    def name(self):
-        return self._name
+    def __init__(self, data_model):
+        self.from_dict(data_model.to_dict())
 
-    @property
-    def rules(self):
-        return self._rules
+    def encode(self):
+        return {
+            "domain": self.domain
+        }
+
+
+@jsonify.jsonify.register(Model)
+def jsonify_model(obj):
+    return obj.encode()

@@ -29,12 +29,13 @@ class TestOrigin(base.TestCase):
         port = 443
         ssl = True
         myorigin = origin.Origin(origin_url, port, ssl)
+        changed_origin_url = 'www.mywebsite.com'
 
         # test all properties
         # origin
         self.assertEqual(myorigin.origin, origin_url)
-        self.assertRaises(
-            AttributeError, setattr, myorigin, 'origin', origin_url)
+        myorigin.origin = changed_origin_url
+        self.assertEqual(myorigin.origin, changed_origin_url)
 
         # port
         self.assertEqual(myorigin.port, port)
@@ -48,4 +49,5 @@ class TestOrigin(base.TestCase):
 
         # rules
         self.assertEqual(myorigin.rules, [])
-        self.assertRaises(AttributeError, setattr, myorigin, 'rules', [])
+        myorigin.rules = []
+        self.assertEqual(myorigin.rules, [])
