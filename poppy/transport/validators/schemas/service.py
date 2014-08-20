@@ -23,6 +23,7 @@ class ServiceSchema(schema_base.SchemaBase):
     schema = {
         'service': {
             'PUT': {
+                'name': 'service',
                 'type': 'object',
                 'properties': {
                     "domains": {

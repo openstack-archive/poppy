@@ -13,28 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.model import common
+from poppy.model import service
+from poppy.transport.pecan.models.request import domain
+from poppy.transport.pecan.models.request import origin
 
 
-class Domain(common.DictSerializableModel):
-
-    def __init__(self, domain):
-        self._domain = domain
-
-    @property
-    def domain(self):
-        return self._domain
-
-    @domain.setter
-    def domain(self, value):
-        self._domain = value
-
-    @classmethod
-    def init_from_dict(cls, dict_obj):
-        """Construct a model instance from a dictionary.
-
-        This serves as a 2nd constructor
-        """
-        o = cls("unnamed")
-        o.domain = dict_obj.get("domain", "unnamed")
-        return o
+def load_from_json(json_data):
+    name = json_data.get("name", "unnamed")
+    origins = json_data.get("origins", [])
+    domains = json_data.get("domains", [])
+    origins = [origin.load_from_json(d) for d in origins]
+    domains = [domain.load_from_json(d) for d in domains]
+    return service.Service(name, origins, domains)

@@ -40,3 +40,8 @@ class ContextHook(hooks.PecanHook):
         request_context = context.RequestContext(**context_kwargs)
         state.request.context = request_context
         local.store.context = request_context
+
+    def before(self, state):
+        '''Attach tenant_id as a member variable project_id to controller.'''
+        state.controller.__self__.project_id = getattr(local.store.context,
+                                                       "tenant", None)

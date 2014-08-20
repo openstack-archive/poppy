@@ -1,39 +1,37 @@
 {
     "using_all_fields": [
-        [
-            "123456",
-            "mocksite",
-            [
+        {
+            "name": "mocksite",
+            "domain": [
                 "{\"domain\": \"www.mocksite.com\"}",
                 "{\"domain\": \"blog.mocksite.com\"}"
             ],
-            [
+            "origin": [
                 "{\"origin\": \"mocksite.com\", \"ssl\": false, \"port\": 80}"
             ],
-            [
+            "caching": [
                 "{\"name\": \"default\", \"ttl\": 3600}"
             ],
-            [
+            "restrictions": [
                 "{\"rules\": [{\"http_host\": \"www.mocksite.com\", \"name\": \"mocksite.com\"}], \"name\": \"website only\"}"
             ]
-        ],
-        [
-            "123456",
-            "another_mocksite",
-            [
+        },
+        {
+            "name": "another_mocksite",
+            "domain": [
                 "{\"domain\": \"www.mocksite.co.uk\"}",
                 "{\"domain\": \"blog.mocksite.co.uk\"}"
             ],
-            [
+            "origin": [
                 "{\"origin\": \"mocksite.co.uk\", \"ssl\": false, \"port\": 80}"
             ],
-            [
+            "caching":[
                 "{\"name\": \"default\", \"ttl\": 3600}"
             ],
-            [
+            "restrictions":[
                 "{\"rules\": [{\"http_host\": \"www.mocksite.co.uk\", \"name\": \"mocksite.co.uk\"}], \"name\": \"website only\"}"
             ]
-        ]
+        }
     ]
 }
 

@@ -18,8 +18,10 @@ import ddt
 import mock
 from oslo.config import cfg
 
+from poppy.model import service
 from poppy.storage.cassandra import driver
 from poppy.storage.cassandra import services
+from poppy.transport.pecan.models.request import service as req_service
 from tests.unit import base
 
 
@@ -52,14 +54,27 @@ class CassandraStorageServiceTests(base.TestCase):
 
         # TODO(amitgandhinz): assert the response
         # matches the expectation (using jsonschema)
-        self.assertEqual(actual_response[0][0], self.project_id)
-        self.assertEqual(actual_response[0][1], self.service_name)
+        self.assertEqual(actual_response.name, self.service_name)
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_service_with_exception(self, mock_session, mock_execute):
+
+        # mock the response from cassandra
+        mock_execute.execute.return_value = []
+
+        self.assertRaises(ValueError, self.sc.get,
+                          self.project_id, self.service_name)
 
     @ddt.file_data('data_create_service.json')
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_create_service(self, value, mock_session, mock_execute):
-        responses = self.sc.create(self.project_id, self.service_name, value)
+        value.update({'name': self.service_name})
+        request_service = req_service.load_from_json(value)
+        service_obj = service.Service.init_from_dict(request_service.to_dict())
+        responses = self.sc.create(self.project_id, self.service_name,
+                                   service_obj)
 
         # Expect the response to be None as there are no providers passed
         # into the driver to respond to this call
@@ -79,8 +94,7 @@ class CassandraStorageServiceTests(base.TestCase):
 
         # TODO(amitgandhinz): assert the response
         # matches the expectation (using jsonschema)
-        self.assertEqual(actual_response[0][0], self.project_id)
-        self.assertEqual(actual_response[0][1], "mocksite")
+        self.assertEqual(actual_response[0].name, "mocksite")
 
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')

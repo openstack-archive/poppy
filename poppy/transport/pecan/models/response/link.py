@@ -13,28 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.model import common
+try:
+    import ordereddict as collections
+except ImportError:
+    import collections
 
 
-class Domain(common.DictSerializableModel):
-
-    def __init__(self, domain):
-        self._domain = domain
-
-    @property
-    def domain(self):
-        return self._domain
-
-    @domain.setter
-    def domain(self, value):
-        self._domain = value
-
-    @classmethod
-    def init_from_dict(cls, dict_obj):
-        """Construct a model instance from a dictionary.
-
-        This serves as a 2nd constructor
-        """
-        o = cls("unnamed")
-        o.domain = dict_obj.get("domain", "unnamed")
-        return o
+class Model(collections.OrderedDict):
+    'response class for Domain.'
+    def __init__(self, href, rel):
+        super(Model, self).__init__()
+        self['href'] = href
+        self['rel'] = rel

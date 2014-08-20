@@ -1,0 +1,33 @@
+{
+    "using_all_fields": {
+        "name": "mocksite.com",
+        "domains": [
+            {"domain": "test.mocksite.com" },
+            {"domain": "blog.mocksite.com"}
+        ],
+        "origins": [
+            {
+                "origin": "mocksite.com",
+                "port": 80,
+                "ssl": false
+            }
+        ],
+        "caching": [
+            {
+                "name": "default",
+                "ttl": 3600
+            }
+        ],
+        "restrictions": [
+             {
+                "name": "website only",
+                "rules": [
+                    {
+                        "name": "mocksite.com",
+                        "http_host": "www.mocksite.com"
+                    }
+                ]
+            }
+        ]
+    }
+}
