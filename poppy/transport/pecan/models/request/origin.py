@@ -13,28 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.model import common
+from poppy.model.helpers import origin
 
 
-class Domain(common.DictSerializableModel):
-
-    def __init__(self, domain):
-        self._domain = domain
-
-    @property
-    def domain(self):
-        return self._domain
-
-    @domain.setter
-    def domain(self, value):
-        self._domain = value
-
-    @classmethod
-    def init_from_dict(cls, dict_obj):
-        """Construct a model instance from a dictionary.
-
-        This serves as a 2nd constructor
-        """
-        o = cls("unnamed")
-        o.domain = dict_obj.get("domain", "unnamed")
-        return o
+def load_from_json(json_data):
+    origin_name = json_data.get("origin", "unnamed")
+    port = json_data.get("port", 80)
+    ssl = json_data.get("ssl", False)
+    return origin.Origin(origin_name, port, ssl)

@@ -15,8 +15,12 @@
 
 import json
 
+from poppy.model.helpers import domain
+from poppy.model.helpers import origin
 from poppy.model.helpers import provider_details
+from poppy.model import service
 from poppy.storage import base
+
 
 CQL_GET_ALL_SERVICES = '''
     SELECT project_id,
@@ -104,12 +108,20 @@ class ServicesController(base.ServicesController):
             'project_id': project_id
         }
 
-        result = self.session.execute(CQL_GET_ALL_SERVICES, args)
+        results = self.session.execute(CQL_GET_ALL_SERVICES, args)
 
         # TODO(amitgandhinz) : build the formatted json structure from the
         # result
         # TODO(amitgandhinz): return services instead once its formatted.
-        return result
+        services = []
+        for r in results:
+            name = r.get("name", "unnamed")
+            origins = r.get("origins", [])
+            domains = r.get("domains", [])
+            origins = [origin.Origin(d) for d in origins]
+            domains = [domain.Domain(d) for d in domains]
+            services.append(service.Service(name, domains, origins))
+        return services
 
     def get(self, project_id, service_name):
         # get the requested service from storage
@@ -117,23 +129,31 @@ class ServicesController(base.ServicesController):
             'project_id': project_id,
             'service_name': service_name
         }
-        result = self.session.execute(CQL_GET_SERVICE, args)
+        results = self.session.execute(CQL_GET_SERVICE, args)
 
         # TODO(amitgandhinz): need to format this return result in the correct
         # format.
-        return result
+        services = []
+        for r in results:
+            name = r.get("name", "unnamed")
+            origins = r.get("origins", [])
+            domains = r.get("domains", [])
+            origins = [origin.Origin(d) for d in origins]
+            domains = [domain.Domain(d) for d in domains]
+            services.append(service.Service(name, domains, origins))
+        return services
 
-    def create(self, project_id, service_name, service_json):
+    def create(self, project_id, service_name, service_obj):
 
         # create the service in storage
-        service = service_json
-
-        domains = [json.dumps(domain) for domain in service["domains"]]
-        origins = [json.dumps(origin) for origin in service["origins"]]
-        caching_rules = [json.dumps(caching_rule)
-                         for caching_rule in service["caching"]]
+        domains = [json.dumps(domain.to_dict())
+                   for domain in service_obj.domains]
+        origins = [json.dumps(origin.to_dict())
+                   for origin in service_obj.origins]
+        caching_rules = [json.dumps(caching_rule.to_dict())
+                         for caching_rule in service_obj.caching]
         restrictions = [json.dumps(restriction)
-                        for restriction in service["restrictions"]]
+                        for restriction in service_obj.restrictions]
 
         # creates a new service
         args = {
@@ -147,7 +167,7 @@ class ServicesController(base.ServicesController):
 
         self.session.execute(CQL_CREATE_SERVICE, args)
 
-    def update(self, project_id, service_name, service_json):
+    def update(self, project_id, service_name, service_obj):
         # update configuration in storage
 
         # determine what changed.

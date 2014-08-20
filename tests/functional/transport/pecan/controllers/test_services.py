@@ -32,10 +32,18 @@ class ServiceControllerTest(base.FunctionalTest):
 
         self.assertEqual(200, response.status_code)
 
+        response_dict = json.loads(response.body.decode("utf-8"))
+        self.assertTrue("links" in response_dict)
+        self.assertTrue("services" in response_dict)
+
     def test_get_one(self):
         response = self.app.get('/v1.0/0001/services/fake_service_name')
 
         self.assertEqual(200, response.status_code)
+
+        response_dict = json.loads(response.body.decode("utf-8"))
+        self.assertTrue("domains" in response_dict)
+        self.assertTrue("origins" in response_dict)
 
     def test_create(self):
         # create with errorenous data: invalid json data

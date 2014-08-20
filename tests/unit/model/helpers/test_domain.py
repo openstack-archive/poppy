@@ -26,10 +26,14 @@ class TestDomain(base.TestCase):
     def test_domain(self):
 
         domain_name = 'www.mydomain.com'
+        changed_domain_name = 'www.changed-domain.com'
         mydomain = domain.Domain(domain_name)
 
         # test all properties
         # domain
         self.assertEqual(mydomain.domain, domain_name)
-        self.assertRaises(
-            AttributeError, setattr, mydomain, 'domain', domain_name)
+        mydomain.domain = changed_domain_name
+        self.assertEqual(mydomain.domain, changed_domain_name)
+
+        my_other_domain = domain.Domain.init_from_dict({"domain": domain_name})
+        self.assertEqual(my_other_domain.domain, domain_name)
