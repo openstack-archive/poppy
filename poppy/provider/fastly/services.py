@@ -87,3 +87,41 @@ class ServiceController(base.ServiceBase):
             return self.responder.deleted(service_name)
         except Exception:
             return self.responder.failed("failed to delete service")
+
+    def get(self, service_name):
+        try:
+            # Get the service
+            service = self.client.get_service_by_name(service_name)
+            service_version = self.client.list_versions(service.id)
+
+            # TODO(malini): Use the active version, instead of the first
+            # available. This will need to wait until the create service is
+            # implemented completely.
+            version = service_version[0]['number']
+
+            # Get the Domain List
+            domains = self.client.list_domains(service.id, version)
+            domain_list = [domain['name'] for domain in domains]
+
+            # Get the Cache List
+            cache_setting_list = self.client.list_cache_settings(
+                service.id, version)
+
+            cache_list = [{'name': item['name'], 'ttl': int(item['ttl']),
+                           'rules': item['cache_condition']}
+                          for item in cache_setting_list]
+
+            # Get the Origin List
+            backends = self.client.list_backends(service.id, version)
+            origin = backends[0]['address']
+            port = backends[0]['port']
+            ssl = backends[0]['use_ssl']
+
+            origin_list = [{'origin': origin, 'port': port, 'ssl': ssl}]
+
+            return self.responder.get(domain_list, origin_list, cache_list)
+
+        except fastly.FastlyError:
+            return self.responder.failed("failed to GET service")
+        except Exception:
+            return self.responder.failed("failed to GET service")
