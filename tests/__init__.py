@@ -24,7 +24,7 @@ if "CAFE_CONFIG_FILE_PATH" not in os.environ:
                                                        "etc/api.conf")
 
 if "CAFE_ROOT_LOG_PATH" not in os.environ:
-    os.environ["CAFE_ROOT_LOG_PATH"] = os.path.join(tests_dir, '/logs')
+    os.environ["CAFE_ROOT_LOG_PATH"] = os.path.join(tests_dir)
 
 if "CAFE_TEST_LOG_PATH" not in os.environ:
-    os.environ["CAFE_TEST_LOG_PATH"] = os.path.join(tests_dir, '/logs')
+    os.environ["CAFE_TEST_LOG_PATH"] = os.path.join(tests_dir)
