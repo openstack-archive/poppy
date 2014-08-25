@@ -64,7 +64,6 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         self.auth_token = auth_token
         self.default_headers['X-Auth-Token'] = auth_token
         self.default_headers['Content-Type'] = 'application/json'
-        self.default_headers['Accept'] = 'application/json'
 
         self.serialize = serialize_format
         self.deserialize_format = deserialize_format
@@ -79,7 +78,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         PUT
         services/{service_name}
         """
-        url = '{0}/services/{1}'.format(self.url, service_name)
+        url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
         request_object = requests.CreateService(domain_list=domain_list,
                                                 origin_list=origin_list,
                                                 caching_list=caching_list)
@@ -96,7 +95,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         services/{service_name}
         """
 
-        url = '{0}/services/{1}'.format(self.url, service_name)
+        url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
         return self.request('GET', url)
 
     def delete_service(self, service_name):
@@ -107,5 +106,27 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         services/{service_name}
         """
 
-        url = '{0}/services/{1}'.format(self.url, service_name)
+        url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
         return self.request('DELETE', url)
+
+    def check_health(self):
+        """Check Health of the application
+
+        :return: Response Object containing response code 204
+        GET
+        health
+        """
+
+        url = '{0}/v1.0/health'.format(self.url)
+        return self.request('GET', url)
+
+    def ping(self):
+        """Ping the server
+
+        :return: Response Object containing response code 204
+        GET
+        ping
+        """
+
+        url = '{0}/v1.0/ping'.format(self.url)
+        return self.request('GET', url)
