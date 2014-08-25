@@ -66,8 +66,8 @@ class TestBase(fixtures.BaseTestFixture):
             conf = cfg.ConfigOpts()
             conf(project='poppy', prog='poppy', args=[],
                  default_config_files=[config_file])
-            poppy_server = server.CDNServer()
-            poppy_server.start(conf)
+            cls.poppy_server = server.CDNServer()
+            cls.poppy_server.start(conf)
 
     def assertSchema(self, response_json, expected_schema):
         """Verify response schema aligns with the expected schema."""
@@ -79,4 +79,6 @@ class TestBase(fixtures.BaseTestFixture):
     @classmethod
     def tearDownClass(cls):
         """Deletes the added resources."""
+        if cls.server_config.run_server:
+            cls.poppy_server.stop()
         super(TestBase, cls).tearDownClass()

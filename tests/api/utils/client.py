@@ -109,3 +109,25 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
         url = '{0}/services/{1}'.format(self.url, service_name)
         return self.request('DELETE', url)
+
+    def check_health(self):
+        """Check Health of the application
+
+        :return: Response Object containing response code 204
+        GET
+        health
+        """
+
+        url = '{0}/health'.format(self.url)
+        return self.request('GET', url)
+
+    def ping(self):
+        """Ping the server
+
+        :return: Response Object containing response code 204
+        GET
+        ping
+        """
+
+        url = '{0}/ping'.format(self.url)
+        return self.request('GET', url)
