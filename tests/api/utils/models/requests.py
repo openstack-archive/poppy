@@ -38,3 +38,20 @@ class CreateService(base.AutoMarshallingModel):
                                   "caching": self.caching_list,
                                   "flavorRef": self.flavorRef}
         return json.dumps(create_service_request)
+
+
+class CreateFlavor(base.AutoMarshallingModel):
+    """Marshalling for Create Flavor requests."""
+
+    def __init__(self, flavor_id=None, provider_list=None, limits=None):
+        super(CreateFlavor, self).__init__()
+
+        self.flavor_id = flavor_id
+        self.provider_list = provider_list
+        self.limits = limits
+
+    def _obj_to_json(self):
+        create_flavor_request = {"id": self.flavor_id,
+                                 "providers": self.provider_list,
+                                 "limits": self.limits}
+        return json.dumps(create_flavor_request)

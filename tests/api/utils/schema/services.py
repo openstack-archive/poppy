@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Definition for components of Create Service API Schema
 domain = {
     'type': 'object',
     'properties': {
@@ -104,4 +105,5 @@ list_services = {
             'type': 'array',
             'items': get_service}},
     'required': ['links', 'services'],
-    'additionalProperties': False}
+    'additionalProperties': False
+}
