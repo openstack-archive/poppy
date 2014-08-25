@@ -79,4 +79,6 @@ class TestBase(fixtures.BaseTestFixture):
     @classmethod
     def tearDownClass(cls):
         """Deletes the added resources."""
+        if cls.server_config.run_server:
+            cls.poppy_server.stop()
         super(TestBase, cls).tearDownClass()

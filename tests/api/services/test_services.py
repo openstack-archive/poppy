@@ -18,7 +18,7 @@ import uuid
 import ddt
 
 from tests.api import base
-from tests.api.utils.schema import response
+from tests.api.utils.schema import services
 
 
 @ddt.ddt
@@ -46,7 +46,7 @@ class TestServices(base.TestBase):
         self.assertEqual(resp.status_code, 201)
 
         response_body = resp.json()
-        self.assertSchema(response_body, response.create_service)
+        self.assertSchema(response_body, services.create_service)
 
         # Get on Created Service
         resp = self.client.get_service(service_name=self.service_name)

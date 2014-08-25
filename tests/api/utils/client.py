@@ -17,7 +17,7 @@ import json
 
 from cafe.engine.http import client
 
-from tests.api.utils.models import requests
+from tests.api.utils.models import requests as requests_model
 
 
 class AuthClient(client.HTTPClient):
@@ -80,9 +80,10 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         services/{service_name}
         """
         url = '{0}/services/{1}'.format(self.url, service_name)
-        request_object = requests.CreateService(domain_list=domain_list,
-                                                origin_list=origin_list,
-                                                caching_list=caching_list)
+        request_object = requests_model.CreateService(
+            domain_list=domain_list,
+            origin_list=origin_list,
+            caching_list=caching_list)
         return self.request('PUT', url,
                             request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
@@ -108,4 +109,50 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         """
 
         url = '{0}/services/{1}'.format(self.url, service_name)
+        return self.request('DELETE', url)
+
+    def create_flavor(self, flavor_id=None, provider_list=None,
+                      requestslib_kwargs=None):
+        """Create flavor
+
+        :return: Response Object containing response code 204 and header with
+                 Location
+        PUT
+        flavors/{flavor_id}
+        """
+        url = '{0}/flavors/{1}'.format(self.url, flavor_id)
+        request_object = requests_model.CreateFlavor(
+            flavor_id=flavor_id,
+            provider_list=provider_list)
+        return self.request('POST', url,
+                            request_entity=request_object,
+                            requestslib_kwargs=requestslib_kwargs)
+
+    def get_flavor(self, flavor_location=None, flavor_id=None):
+        """Get Flavor
+
+        :return: Response Object containing response code 200 and body with
+        details of flavor
+        GET
+        flavors/{flavor_id}
+        """
+        if flavor_location:
+            url = '{0}{1}'.format(self.url, flavor_location)
+        else:
+            url = '{0}/flavors/{1}'.format(self.url, flavor_id)
+
+        return self.request('GET', url)
+
+    def delete_flavor(self, flavor_location=None, flavor_id=None):
+        """Delete Flavor
+
+        :return: Response Object containing response code 204
+        DELETE
+        flavors/{flavor_id}
+        """
+        if flavor_location:
+            url = '{0}{1}'.format(self.url, flavor_location)
+        else:
+            url = '{0}/flavors/{1}'.format(self.url, flavor_id)
+
         return self.request('DELETE', url)

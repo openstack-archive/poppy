@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Definition for components of Create Service API Schema
 domain = {
     'type': 'object',
     'properties': {
@@ -53,6 +54,7 @@ links = {'type': 'object',
 restrictions = {'type': 'array'}
 
 # Response Schema Definition for Create Service API
+
 create_service = {
     'type': 'object',
     'properties': {
@@ -78,4 +80,5 @@ create_service = {
         'restrictions': restrictions,
     },
     'required': ['domains', 'origins', 'caching', 'links', 'restrictions'],
-    'additionalProperties': False}
+    'additionalProperties': False
+}
