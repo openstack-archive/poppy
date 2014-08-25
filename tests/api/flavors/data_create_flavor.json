@@ -1,0 +1,15 @@
+{"all_fields":
+    {"provider_list": [
+        {"provider": "ChinaCache",
+         "links": [{"href": "http://www.chinacache.com",
+                    "rel": "provider_url"}]}]},
+ "multiple_providers":
+    {"provider_list": [
+        {"provider": "ChinaCache",
+         "links": [{"href": "http://www.chinacache.com",
+                    "rel": "provider_url"}]},
+        {"provider": "OUIIICache",
+         "links": [{"href": "http://111.222.333.444",
+                    "rel": "provider_url"}]}
+    ]}
+ }

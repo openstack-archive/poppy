@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Definition for components of Create Service API Schema
 domain = {
     'type': 'object',
     'properties': {
@@ -53,6 +54,7 @@ links = {'type': 'object',
 restrictions = {'type': 'array'}
 
 # Response Schema Definition for Create Service API
+
 create_service = {
     'type': 'object',
     'properties': {
@@ -78,4 +80,50 @@ create_service = {
         'restrictions': restrictions,
     },
     'required': ['domains', 'origins', 'caching', 'links', 'restrictions'],
-    'additionalProperties': False}
+    'additionalProperties': False
+}
+
+# Definition for components of Get Flavor API Schema
+
+provider_link = {'type': 'object',
+                 'properties': {'href': {'type': 'uri'},
+                                'rel': {'type': 'string',
+                                        'pattern': '^provider_url$'}},
+                 'additionalProperties': False}
+
+provider = {'type': 'object',
+            'properties': {'provider': {'type': 'string'},
+                           'links': {'type': 'array',
+                                     'items': provider_link,
+                                     'minItems': 1,
+                                     'maxItems': 1}},
+            'required': ['provider', 'links'],
+            'additionalProperties': False}
+
+link = {'type': 'object',
+        'properties': {
+            'href': {'type': 'string',
+                     'pattern': '^/v1.0/flavors/[a-zA-Z0-9_-]{1,64}$'},
+            'rel': {'type': 'string',
+                    'pattern': '^self$'}},
+        'required': ['href', 'rel'],
+        'additionalProperties': False}
+
+# Response Schema definition for Get Flavor API
+
+get_flavor = {
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'string'},
+        'providers': {'type': 'array',
+                      'items': provider,
+                      'minItems': 1
+                      },
+        'links': {'type': 'array',
+                  'items': link,
+                  'minItems': 1,
+                  'maxItems': 1},
+    },
+    'required': ['id', 'providers', 'links'],
+    'additionalProperties': False
+}
