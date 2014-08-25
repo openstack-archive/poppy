@@ -31,7 +31,7 @@ class AuthClient(client.HTTPClient):
         self.default_headers['Accept'] = 'application/json'
 
     def authenticate_user(self, auth_url, user_name, api_key):
-        """Get Auth Token using api_key
+        """Get Auth Token & Project ID using api_key
 
         TODO (malini-kamalambal): Support getting token with password (or)
                                   api key.
@@ -87,8 +87,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
                                                 origin_list=origin_list,
                                                 caching_list=caching_list,
                                                 flavorRef=flavorRef)
-        return self.request('POST', url,
-                            request_entity=request_object,
+        return self.request('POST', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
     def get_service(self, service_name):
@@ -147,3 +146,50 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
         url = '{0}/v1.0/ping'.format(self.url)
         return self.request('GET', url)
+
+    def create_flavor(self, flavor_id=None, provider_list=None, limits=None,
+                      requestslib_kwargs=None):
+        """Create flavor
+
+        :return: Response Object containing response code 204 and header with
+                 Location
+        PUT
+        flavors/{flavor_id}
+        """
+        url = '{0}/v1.0/flavors'.format(self.url)
+        request_object = requests.CreateFlavor(
+            flavor_id=flavor_id,
+            provider_list=provider_list,
+            limits=limits)
+        return self.request('POST', url,
+                            request_entity=request_object,
+                            requestslib_kwargs=requestslib_kwargs)
+
+    def get_flavor(self, flavor_location=None, flavor_id=None):
+        """Get Flavor
+
+        :return: Response Object containing response code 200 and body with
+        details of flavor
+        GET
+        flavors/{flavor_id}
+        """
+        if flavor_location:
+            url = flavor_location
+        else:
+            url = '{0}/v1.0/flavors/{1}'.format(self.url, flavor_id)
+
+        return self.request('GET', url)
+
+    def delete_flavor(self, flavor_location=None, flavor_id=None):
+        """Delete Flavor
+
+        :return: Response Object containing response code 204
+        DELETE
+        flavors/{flavor_id}
+        """
+        if flavor_location:
+            url = flavor_location
+        else:
+            url = '{0}/v1.0/flavors/{1}'.format(self.url, flavor_id)
+
+        return self.request('DELETE', url)

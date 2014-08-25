@@ -1,0 +1,33 @@
+{
+"empty_provider_list":
+    {"provider_list": []},
+"no_provider_url":
+    {"provider_list": [
+        {"provider": "fastly",
+         "links": [
+            {"href": "http://fastly.com", "rel": "no_provider_url"}]}]
+    },
+"no_rel_field":
+    {"provider_list": [
+        {"provider": "ChinaCache",
+         "links": [{"href": "http://www.chinacache.com"}]},
+        {"provider": "maxCDN",
+         "links": [{"href": "http://www.maxcdn.com/", "rel": "provider_url"}]}]
+    },
+"empty_string_rel_field":
+    {"provider_list": [
+        {"provider": "ChinaCache",
+         "links": [{"href": "http://www.chinacache.com", "rel": ""}]},
+        {"provider": "maxCDN",
+         "links": [{"href": "http://www.maxcdn.com/", "rel": "provider_url"}]}]
+    },
+"empty_href":
+    {"provider_list": [
+        {"provider": "ChinaCache",
+         "links": [{"href": "", "rel": "provider_url"}]}]},
+"invalid_href":
+    {"provider_list": [
+        {"provider": "ChinaCache",
+         "links": [{"href": "watermelon", "rel": "provider_url"}]}]}
+
+}
