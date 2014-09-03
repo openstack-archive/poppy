@@ -13,25 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import mock
+import os
+
 from oslo.config import cfg
 
-from poppy.manager.default import driver
+from poppy import bootstrap
 from poppy.manager.default import flavors
+from poppy.manager.default import health
 from poppy.manager.default import services
 from tests.unit import base
 
 
 class DefaultManagerDriverTests(base.TestCase):
-    @mock.patch('poppy.storage.base.driver.StorageDriverBase')
-    @mock.patch('poppy.provider.base.driver.ProviderDriverBase')
-    def setUp(self, mock_storage, mock_provider):
+
+    def setUp(self):
         super(DefaultManagerDriverTests, self).setUp()
 
-        conf = cfg.ConfigOpts()
-        self.driver = driver.DefaultManagerDriver(conf,
-                                                  mock_storage,
-                                                  mock_provider)
+        tests_path = os.path.abspath(os.path.dirname(
+            os.path.dirname(
+                os.path.dirname(os.path.dirname(__file__)))))
+        conf_path = os.path.join(tests_path, 'etc', 'default_functional.conf')
+        cfg.CONF(args=[], default_config_files=[conf_path])
+
+        self.bootstrapper = bootstrap.Bootstrap(cfg.CONF)
+        self.driver = self.bootstrapper.manager
+        self.mock_provider = self.bootstrapper.provider['mock']
+        self.mock_storage = self.bootstrapper.storage
 
     def test_services_controller(self):
         sc = self.driver.services_controller
@@ -39,6 +46,11 @@ class DefaultManagerDriverTests(base.TestCase):
         self.assertIsInstance(sc, services.DefaultServicesController)
 
     def test_flavors_controller(self):
-        sc = self.driver.flavors_controller
+        fc = self.driver.flavors_controller
 
-        self.assertIsInstance(sc, flavors.DefaultFlavorsController)
+        self.assertIsInstance(fc, flavors.DefaultFlavorsController)
+
+    def test_health_controller(self):
+        hc = self.driver.health_controller
+
+        self.assertIsInstance(hc, health.DefaultHealthController)

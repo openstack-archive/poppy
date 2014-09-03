@@ -36,3 +36,7 @@ class DefaultManagerDriver(base.Driver):
     @decorators.lazy_property(write=False)
     def flavors_controller(self):
         return controllers.Flavors(self)
+
+    @decorators.lazy_property(write=False)
+    def health_controller(self):
+        return controllers.Health(self)

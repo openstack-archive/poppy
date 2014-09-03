@@ -40,6 +40,7 @@ LOG = log.getLogger(__name__)
 class PecanTransportDriver(transport.Driver):
 
     def __init__(self, conf, manager):
+
         super(PecanTransportDriver, self).__init__(conf, manager)
 
         self._conf.register_opts(_PECAN_OPTIONS, group=_PECAN_GROUP)
@@ -55,6 +56,10 @@ class PecanTransportDriver(transport.Driver):
         root_controller.add_controller('v1.0', home_controller)
 
         home_controller.add_controller('ping', v1.Ping(self))
+        health_controller = v1.Health(self)
+        home_controller.add_controller('health', health_controller)
+        health_controller.add_controller('storage', v1.StorageHealth(self))
+        health_controller.add_controller('provider', v1.ProviderHealth(self))
         home_controller.add_controller('services', v1.Services(self))
         home_controller.add_controller('flavors', v1.Flavors(self))
 

@@ -48,6 +48,11 @@ class MockDBStorageDriver(base.Driver):
         return True
 
     @property
+    def storage_name(self):
+        """For name."""
+        return 'MockDB'
+
+    @property
     def connection(self):
         """Connection instance."""
         return _connection()

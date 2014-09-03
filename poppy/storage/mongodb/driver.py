@@ -79,6 +79,11 @@ class MongoDBStorageDriver(base.Driver):
         except pymongo.errors.PyMongoError:
             return False
 
+    @property
+    def storage_name(self):
+        """For name."""
+        return 'MongoDB'
+
     @decorators.lazy_property(write=False)
     def connection(self):
         """MongoDB client connection instance."""
