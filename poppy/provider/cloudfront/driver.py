@@ -17,6 +17,7 @@
 
 import boto
 from oslo.config import cfg
+import requests
 
 from poppy.openstack.common import log as logging
 from poppy.provider import base
@@ -45,7 +46,10 @@ class CDNProvider(base.Driver):
             aws_secret_access_key=self.cloudfront_conf.aws_secret_access_key)
 
     def is_alive(self):
-        return True
+        response = requests.get('http://aws.amazon.com/cloudfront/')
+        if response.status_code == 200:
+            return True
+        return False
 
     @property
     def provider_name(self):
