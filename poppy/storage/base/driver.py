@@ -60,3 +60,7 @@ class StorageDriverBase(object):
     def flavors_controller(self):
         """Returns the driver's hostname controller."""
         raise NotImplementedError
+
+    def storage_name(self):
+        """For name."""
+        raise NotImplementedError

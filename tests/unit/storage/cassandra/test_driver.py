@@ -47,8 +47,11 @@ class CassandraStorageDriverTests(base.TestCase):
         self.assertEqual(self.cassandra_driver.cassandra_conf.keyspace,
                          'mock_poppy')
 
+    def test_storage_name(self):
+        self.assertEqual("Cassandra", self.cassandra_driver.storage_name)
+
     def test_is_alive(self):
-        self.assertEqual(self.cassandra_driver.is_alive(), True)
+        self.assertTrue(self.cassandra_driver.is_alive())
 
     @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_connection(self, mock_cluster):

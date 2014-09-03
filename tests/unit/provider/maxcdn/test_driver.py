@@ -18,6 +18,7 @@ import os
 import mock
 from oslo.config import cfg
 
+from poppy.common import util
 from poppy.provider.maxcdn import driver
 from tests.unit import base
 
@@ -36,8 +37,7 @@ class TestDriver(base.TestCase):
 
         tests_path = os.path.abspath(os.path.dirname(
             os.path.dirname(
-                os.path.dirname(os.path.dirname(__file__)
-                                ))))
+                os.path.dirname(os.path.dirname(__file__)))))
         conf_path = os.path.join(tests_path, 'etc', 'default_functional.conf')
         cfg.CONF(args=[], default_config_files=[conf_path])
 
@@ -56,6 +56,14 @@ class TestDriver(base.TestCase):
     def test_is_alive(self):
         provider = driver.CDNProvider(self.conf)
         self.assertEqual(provider.is_alive(), True)
+
+    @mock.patch('requests.get')
+    def test_not_available(self, mock_get):
+        response_object = util.dict2obj(
+            {'content': 'Not available', 'status_code': 404})
+        mock_get.return_value = response_object
+        provider = driver.CDNProvider(self.conf)
+        self.assertEqual(provider.is_alive(), False)
 
     @mock.patch.object(driver, 'MAXCDN_OPTIONS', new=MAXCDN_OPTIONS)
     def test_get_client(self):

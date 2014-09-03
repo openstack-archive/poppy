@@ -17,6 +17,7 @@
 
 import maxcdn
 from oslo.config import cfg
+import requests
 
 from poppy.openstack.common import log as logging
 from poppy.provider import base
@@ -49,8 +50,10 @@ class CDNProvider(base.Driver):
                                            self.maxcdn_conf.consumer_secret)
 
     def is_alive(self):
-        """For health state."""
-        return True
+        response = requests.get('https://rws.maxcdn.com/')
+        if response.status_code == 200:
+            return True
+        return False
 
     @property
     def provider_name(self):
