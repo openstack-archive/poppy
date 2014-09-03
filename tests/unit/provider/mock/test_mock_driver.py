@@ -25,4 +25,4 @@ class MockProviderDriverTest(base.TestCase):
         self.driver = driver.CDNProvider(cfg.CONF)
 
     def test_mock_provider_driver_working(self):
-        self.assertTrue(self.driver.is_alive())
+        self.assertTrue(self.driver.health())

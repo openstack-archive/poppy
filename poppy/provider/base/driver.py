@@ -36,7 +36,7 @@ class ProviderDriverBase(object):
         self._conf = conf
 
     @abc.abstractmethod
-    def is_alive(self):
+    def health(self):
         """Check whether the storage is ready."""
         raise NotImplementedError
 

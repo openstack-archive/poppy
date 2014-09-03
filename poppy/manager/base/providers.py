@@ -17,6 +17,8 @@ from poppy.common import errors
 
 
 class ProviderWrapper(object):
+    def health(self, ext):
+        return {'provider_name': ext.obj.provider_name, 'health': ext.obj.health()}
 
     def create(self, ext, service_name, service_json):
         return ext.obj.service_controller.create(service_name, service_json)

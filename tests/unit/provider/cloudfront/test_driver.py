@@ -55,7 +55,15 @@ class TestDriver(base.TestCase):
 
     def test_is_alive(self):
         provider = driver.CDNProvider(self.conf)
-        self.assertEqual(provider.is_alive(), True)
+        self.assertEqual(provider.health(), True)
+
+    @mock.patch('httplib2.Http')
+    def test_not_available(self, MockHttp):
+        mock_http = MockHttp()
+        mock_http.request.return_value = ({'status':'404'}, 'Not Available')
+        provider = driver.CDNProvider(self.conf)
+        self.assertEqual(provider.health(), False)
+
 
     @mock.patch.object(boto.cloudfront, 'CloudFrontConnection')
     @mock.patch('boto.connect_cloudfront')

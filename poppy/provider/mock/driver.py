@@ -27,7 +27,7 @@ class CDNProvider(base.Driver):
     def __init__(self, conf):
         super(CDNProvider, self).__init__(conf)
 
-    def is_alive(self):
+    def health(self):
         return True
 
     @property

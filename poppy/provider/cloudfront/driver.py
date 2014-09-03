@@ -16,6 +16,7 @@
 """CloudFront CDN Provider implementation."""
 
 import boto
+import httplib2
 from oslo.config import cfg
 
 from poppy.openstack.common import log as logging
@@ -44,8 +45,15 @@ class CDNProvider(base.Driver):
             aws_access_key_id=self.cloudfront_conf.aws_access_key_id,
             aws_secret_access_key=self.cloudfront_conf.aws_secret_access_key)
 
-    def is_alive(self):
-        return True
+    def health(self):
+        #http = httplib2.Http(".cache")
+        http = httplib2.Http()
+        resp, content = http.request('http://aws.amazon.com/cloudfront/', 'GET')
+        #resp = http.request("http://aws.amazon.com/cloudfront/")
+        #import pdb; pdb.set_trace()
+        if resp['status'] == '200':
+            return True
+        return False
 
     @property
     def provider_name(self):
