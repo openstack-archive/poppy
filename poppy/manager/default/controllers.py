@@ -14,10 +14,12 @@
 # limitations under the License.
 
 from poppy.manager.default import flavors
+from poppy.manager.default import health
 from poppy.manager.default import home
 from poppy.manager.default import services
 
 
 Home = home.DefaultHomeController
 Flavors = flavors.DefaultFlavorsController
+Health = health.DefaultHealthController
 Services = services.DefaultServicesController
