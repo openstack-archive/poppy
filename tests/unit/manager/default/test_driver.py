@@ -13,25 +13,57 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 import mock
 from oslo.config import cfg
 
-from poppy.manager.default import driver
+from poppy import bootstrap
 from poppy.manager.default import flavors
 from poppy.manager.default import services
 from tests.unit import base
 
 
 class DefaultManagerDriverTests(base.TestCase):
-    @mock.patch('poppy.storage.base.driver.StorageDriverBase')
-    @mock.patch('poppy.provider.base.driver.ProviderDriverBase')
-    def setUp(self, mock_storage, mock_provider):
+
+    def setUp(self):
         super(DefaultManagerDriverTests, self).setUp()
 
-        conf = cfg.ConfigOpts()
-        self.driver = driver.DefaultManagerDriver(conf,
-                                                  mock_storage,
-                                                  mock_provider)
+        tests_path = os.path.abspath(os.path.dirname(
+            os.path.dirname(
+                os.path.dirname(os.path.dirname(__file__)))))
+        conf_path = os.path.join(tests_path, 'etc', 'default_functional.conf')
+        cfg.CONF(args=[], default_config_files=[conf_path])
+
+        self.bootstrapper = bootstrap.Bootstrap(cfg.CONF)
+        self.driver = self.bootstrapper.manager
+        self.mock_provider = self.bootstrapper.provider['mock']
+        self.mock_storage = self.bootstrapper.storage
+
+    def test_is_storage_alive(self):
+        with mock.patch.object(self.mock_storage, 'is_alive',
+                               return_value=False):
+            is_alive = self.driver.is_storage_alive('mockdb')
+            self.assertFalse(is_alive)
+
+    def test_is_provider_alive(self):
+        with mock.patch.object(self.mock_provider.obj, 'is_alive',
+                               return_value=False):
+            provider_name = self.mock_provider.obj.provider_name.lower()
+            is_alive = self.driver.is_provider_alive(provider_name)
+            self.assertFalse(is_alive)
+
+    def test_health_storage_not_available(self):
+        with mock.patch.object(self.mock_storage, 'is_alive',
+                               return_value=False):
+            is_alive, health_map = self.driver.health()
+            self.assertFalse(is_alive)
+
+    def test_health_provider_not_available(self):
+        with mock.patch.object(self.mock_provider.obj, 'is_alive',
+                               return_value=False):
+            is_alive, health_map = self.driver.health()
+            self.assertFalse(is_alive)
 
     def test_services_controller(self):
         sc = self.driver.services_controller

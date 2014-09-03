@@ -36,3 +36,41 @@ class DefaultManagerDriver(base.Driver):
     @decorators.lazy_property(write=False)
     def flavors_controller(self):
         return controllers.Flavors(self)
+
+    def health(self):
+        health_map = {}
+
+        is_alive = True
+        storage_name = self.storage.storage_name.lower()
+        storage_alive = self.storage.is_alive()
+        health_storage = {'storage_name': storage_name,
+                          'is_alive': storage_alive}
+        health_map['storage'] = health_storage
+        if not storage_alive:
+            is_alive = False
+
+        health_map['providers'] = []
+        for provider_ext in self.providers:
+            provider = provider_ext.obj
+            provider_name = provider.provider_name.lower()
+            provider_alive = provider.is_alive()
+            health_provider = {'provider_name': provider_name,
+                               'is_alive': provider_alive}
+            health_map['providers'].append(health_provider)
+            if not provider_alive:
+                is_alive = False
+
+        return is_alive, health_map
+
+    def is_provider_alive(self, provider_name):
+        """Returns the health of provider."""
+
+        return self.providers[provider_name].obj.is_alive()
+
+    def is_storage_alive(self, storage_name):
+        """Returns the health of storage."""
+
+        if storage_name == self.storage.storage_name.lower():
+            return self.storage.is_alive()
+        else:
+            raise KeyError
