@@ -13,18 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Pecan Controllers"""
-
-from poppy.transport.pecan.controllers import health
-from poppy.transport.pecan.controllers import ping
-from poppy.transport.pecan.controllers import root
-from poppy.transport.pecan.controllers import services
-from poppy.transport.pecan.controllers import v1
+from tests.functional.transport.pecan import base
 
 
-# Hoist into package namespace
-Root = root.RootController
-Health = health.HealthController
-Ping = ping.PingController
-Services = services.ServicesController
-V1 = v1.ControllerV1
+class TestHealth(base.FunctionalTest):
+
+    def test_health(self):
+        response = self.app.get('/v1.0/health')
+        self.assertEqual(200, response.status_code)
+
+    def test_health_storage(self):
+        response = self.app.get('/v1.0/health/storage')
+        self.assertEqual(200, response.status_code)
+
+    def test_health_fastly(self):
+        response = self.app.get('/v1.0/health/fastly')
+        self.assertEqual(200, response.status_code)
