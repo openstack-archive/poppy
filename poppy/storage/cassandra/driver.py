@@ -56,6 +56,11 @@ class CassandraStorageDriver(base.Driver):
         return True
 
     @property
+    def storage_name(self):
+        """For name."""
+        return "Cassandra"
+
+    @property
     def connection(self):
         """Cassandra connection instance."""
         return _connection(self.cassandra_conf)

@@ -36,3 +36,20 @@ class DefaultManagerDriver(base.Driver):
     @decorators.lazy_property(write=False)
     def flavors_controller(self):
         return controllers.Flavors(self)
+
+    def health_provider(self, provider):
+        """Returns the health of provider."""
+
+        return (provider, self.providers[provider].obj.is_alive())
+
+    def health_storage(self):
+        """Returns the health of storage."""
+
+        return (self.storage.storage_name, self.storage.is_alive())
+
+    def health_providers(self):
+        """Returns the health of storage and providers."""
+
+        health_providers = self.providers.map(self.provider_wrapper.health)
+
+        return health_providers
