@@ -20,7 +20,6 @@ from oslo.config import cfg
 from poppy.provider.fastly import driver
 from tests.unit import base
 
-
 FASTLY_OPTIONS = [
     cfg.StrOpt('apikey',
                default='123456',
@@ -46,6 +45,13 @@ class TestDriver(base.TestCase):
     def test_is_alive(self):
         provider = driver.CDNProvider(self.conf)
         self.assertEqual(provider.is_alive(), True)
+
+    @mock.patch('httplib2.Http')
+    def test_not_available(self, MockHttp):
+        mock_http = MockHttp()
+        mock_http.request.return_value = ({'status': '404'}, 'Not Available')
+        provider = driver.CDNProvider(self.conf)
+        self.assertEqual(provider.is_alive(), False)
 
     @mock.patch.object(fastly, 'FastlyConnection')
     @mock.patch('fastly.connect')
