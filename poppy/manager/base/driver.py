@@ -17,6 +17,8 @@ import abc
 
 import six
 
+from poppy.manager.base import providers as mproviders
+
 
 @six.add_metaclass(abc.ABCMeta)
 class ManagerDriverBase(object):
@@ -24,6 +26,7 @@ class ManagerDriverBase(object):
         self._conf = conf
         self._storage = storage
         self._providers = providers
+        self.provider_wrapper = mproviders.ProviderWrapper()
 
     @property
     def storage(self):
@@ -36,4 +39,9 @@ class ManagerDriverBase(object):
     @abc.abstractproperty
     def services_controller(self):
         """Returns the driver's services controller."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def health(self):
+        """Returns the health of storage and providers."""
         raise NotImplementedError
