@@ -20,6 +20,8 @@ from poppy.provider import base
 from poppy.provider.fastly import controllers
 
 import fastly
+import httplib2
+
 from oslo.config import cfg
 
 
@@ -44,7 +46,11 @@ class CDNProvider(base.Driver):
         self.fastly_client = fastly.connect(self.fastly_conf.apikey)
 
     def is_alive(self):
-        return True
+        http = httplib2.Http()
+        resp, content = http.request("https://api.fastly.com/")
+        if resp['status'] == '200':
+            return True
+        return False
 
     @property
     def provider_name(self):

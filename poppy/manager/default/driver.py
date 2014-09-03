@@ -32,3 +32,46 @@ class DefaultManagerDriver(base.Driver):
     @decorators.lazy_property(write=False)
     def v1_controller(self):
         return controllers.V1(self)
+
+    def health_provider(self, provider):
+        """Returns the health of provider."""
+        status = '200'
+        body = {}
+
+        if self.providers[provider].obj.is_alive():
+            body[provider] = 'OK'
+        else:
+            status = '503'
+            body[provider] = 'Provider {0} not available'.format(provider)
+
+        return (status, body)
+
+    def health_storage(self):
+        """Returns the health of storage."""
+
+        status = '200'
+        body = {}
+        if self.storage.is_alive():
+            body['storage'] = 'OK'
+        else:
+            status = '503'
+            body['storage'] = 'Storage not available'
+
+        return (status, body)
+
+    def health(self):
+        """Returns the health of storage and providers."""
+
+        status, body = self.health_storage()
+
+        providers = self.providers.map(self.provider_wrapper.health)
+        for provider in providers:
+            if provider['health']:
+                body[provider['provider_name']] = 'OK'
+            else:
+                status = '503'
+                verbose = 'Provider {0} not available'.format(
+                    provider['provider_name'])
+                body[provider['provider_name']] = verbose
+
+        return (status, body)

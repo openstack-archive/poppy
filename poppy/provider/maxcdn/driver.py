@@ -15,6 +15,8 @@
 
 """Max CDN Provider implementation."""
 
+import httplib2
+
 import maxcdn
 from oslo.config import cfg
 
@@ -49,8 +51,11 @@ class CDNProvider(base.Driver):
                                            self.maxcdn_conf.consumer_secret)
 
     def is_alive(self):
-        """For health state."""
-        return True
+        http = httplib2.Http()
+        resp, content = http.request("https://rws.maxcdn.com/")
+        if resp['status'] == '200':
+            return True
+        return False
 
     @property
     def provider_name(self):
