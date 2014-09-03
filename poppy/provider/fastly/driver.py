@@ -15,13 +15,13 @@
 
 """Fastly CDN Provider implementation."""
 
+import fastly
+from oslo.config import cfg
+import requests
+
 from poppy.openstack.common import log as logging
 from poppy.provider import base
 from poppy.provider.fastly import controllers
-
-import fastly
-from oslo.config import cfg
-
 
 LOG = logging.getLogger(__name__)
 
@@ -44,7 +44,10 @@ class CDNProvider(base.Driver):
         self.fastly_client = fastly.connect(self.fastly_conf.apikey)
 
     def is_alive(self):
-        return True
+        response = requests.get('https://api.fastly.com/')
+        if response.status_code == 200:
+            return True
+        return False
 
     @property
     def provider_name(self):

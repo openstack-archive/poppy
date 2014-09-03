@@ -17,33 +17,29 @@ import abc
 
 import six
 
+from poppy.manager.base import controller
+
 
 @six.add_metaclass(abc.ABCMeta)
-class ManagerDriverBase(object):
-    def __init__(self, conf, storage, providers):
-        self._conf = conf
-        self._storage = storage
-        self._providers = providers
+class HealthControllerBase(controller.ManagerControllerBase):
 
-    @property
-    def storage(self):
-        return self._storage
+    def __init__(self, manager):
+        super(HealthControllerBase, self).__init__(manager)
 
-    @property
-    def providers(self):
-        return self._providers
+        self._storage = self.driver.storage
+        self._providers = self.driver.providers
 
-    @abc.abstractproperty
-    def services_controller(self):
-        """Returns the driver's services controller."""
+    @abc.abstractmethod
+    def health(self):
+        """Returns the health of storage and providers."""
         raise NotImplementedError
 
-    @abc.abstractproperty
-    def flavors_controller(self):
-        """Returns the driver's flavors controller."""
+    @abc.abstractmethod
+    def is_provider_alive(self, provider_name):
+        """Returns the health of provider."""
         raise NotImplementedError
 
-    @abc.abstractproperty
-    def health_controller(self):
-        """Returns the driver's flavors controller."""
+    @abc.abstractmethod
+    def is_storage_alive(self, storage_name):
+        """Returns the health of storage."""
         raise NotImplementedError
