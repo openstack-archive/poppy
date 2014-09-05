@@ -1,5 +1,5 @@
-{
-    "using_all_fields": {
+{         
+      "using_all_fields": {
         "name": "mocksite.com",
         "domains": [
             {"domain": "test.mocksite.com" },
@@ -12,7 +12,7 @@
                 "ssl": false
             }
         ],
-        "flavorRef": "standard",
+        "flavorRef": "https://www.poppycdn.io/v1.0/flavors/standard",
         "caching": [
             {
                 "name": "default",
@@ -32,3 +32,6 @@
         ]
     }
 }
+
+
+

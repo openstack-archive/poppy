@@ -45,7 +45,7 @@ class MockDBStorageFlavorsTests(base.TestCase):
 
         actual_response = self.fc.get(self.flavor_id)
 
-        self.assertEqual(actual_response, None)
+        self.assertEqual(actual_response.flavor_id, "standard")
 
     @mock.patch.object(flavors.FlavorsController, 'session')
     @ddt.file_data('../data/data_create_flavor.json')
@@ -61,7 +61,8 @@ class MockDBStorageFlavorsTests(base.TestCase):
         actual_response = self.fc.list()
 
         # confirm the correct number of results are returned
-        self.assertEqual(actual_response, [])
+        self.assertEqual(len(actual_response), 1)
+        self.assertEqual(actual_response[0].flavor_id, "standard")
 
     @mock.patch.object(flavors.FlavorsController, 'session')
     def test_delete_flavor(self, mock_session):

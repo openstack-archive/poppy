@@ -178,7 +178,10 @@ def json_matches_schema_inner(request, schema=None):
 
     if len(errors_list) > 0:
         details = dict(errors=[{
-            'message': str(getattr(error, "message", error))}
+            'message': '-'.join([
+                "[%s]" % "][".join(repr(p) for p in error.path),
+                str(getattr(error, "message", error))
+            ])}
             for error in errors_list])
         raise exceptions.ValidationFailed(json.dumps(details))
     else:

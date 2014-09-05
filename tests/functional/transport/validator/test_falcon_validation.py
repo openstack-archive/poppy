@@ -24,7 +24,7 @@ from poppy.transport.validators.stoplight import rule
 from tests.functional.transport.validator import base
 
 
-testing_schema = service.ServiceSchema.get_schema("service", "PUT")
+testing_schema = service.ServiceSchema.get_schema("service", "POST")
 request_fit_schema = functools.partial(
     helpers.with_schema_falcon,
     schema=testing_schema)
