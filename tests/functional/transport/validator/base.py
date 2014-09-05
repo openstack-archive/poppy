@@ -50,6 +50,7 @@ class DummyRequest(object):
         self.headers = dict(header1='headervalue1')
         self.method = "PUT"
         self.body = json.dumps({
+            "name": "fake_service_name",
             "domains": [
                 {"domain": "www.mywebsite.com"},
                 {"domain": "blog.mywebsite.com"},
@@ -75,7 +76,8 @@ class DummyRequest(object):
                 {"name": "images",
                  "ttl": 12800,
                  }
-            ]
+            ],
+            "flavorRef": "https://www.poppycdn.io/v1.0/flavors/standard"
         })
 
 
@@ -91,6 +93,7 @@ class DummyRequestWithInvalidHeader(DummyRequest):
 fake_request_good = DummyRequest()
 fake_request_bad_missing_domain = DummyRequest()
 fake_request_bad_missing_domain.body = json.dumps({
+    "name": "fake_service_name",
     "origins": [
         {
             "origin": "mywebsite.com",
@@ -112,7 +115,8 @@ fake_request_bad_missing_domain.body = json.dumps({
                      {"name": "images", "request_url": "*.png"}
                  ]
          }
-    ]
+    ],
+    "flavorRef": "https://www.poppycdn.io/v1.0/flavors/standard"
 })
 fake_request_bad_invalid_json_body = DummyRequest()
 fake_request_bad_invalid_json_body.body = "{"

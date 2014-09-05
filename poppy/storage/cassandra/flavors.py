@@ -83,10 +83,18 @@ class FlavorsController(base.FlavorsController):
         if (len(flavors) == 1):
             return flavors[0]
         else:
-            raise LookupError("More than one flavor was retrieved.")
+            raise LookupError("More than one flavor/no record was retrieved.")
 
     def add(self, flavor):
         """Add a new flavor."""
+
+        try:
+            self.get(flavor.flavor_id)
+        except LookupError:
+            pass
+        else:
+            raise ValueError("Flavor %s already exists..."
+                             % flavor.flavor_id)
 
         providers = dict((p.provider_id, p.provider_url)
                          for p in flavor.providers)

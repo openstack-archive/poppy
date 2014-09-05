@@ -1,5 +1,6 @@
 {
     "using_all_fields": {
+        "name": "mocksite.com",
         "domains": [
             {"domain": "test.mocksite.com" },
             {"domain": "blog.mocksite.com"}
@@ -11,6 +12,7 @@
                 "ssl": false
             }
         ],
+        "flavorRef": "standard",
         "caching": [
             {
                 "name": "default",
