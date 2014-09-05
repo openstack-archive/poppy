@@ -1,5 +1,6 @@
 {
     "service_json": {
+        "name" : "mysite.com",
         "domains": [
             {"domain": "parsely.sage.com"},
             {"domain": "rosemary.thyme.net"}
@@ -7,6 +8,7 @@
         "origins": [
             {"origin": "mydomain.com", "ssl": false, "port": 80},
             {"origin": "youdomain.com", "ssl": true, "port": 443}
-        ]
+        ],
+        "flavorRef" : "standard"
     }
 }

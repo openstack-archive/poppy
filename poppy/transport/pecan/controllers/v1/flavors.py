@@ -43,14 +43,12 @@ class FlavorsController(base.Controller):
     @pecan.expose('json')
     def get_one(self, flavor_id):
         flavors_controller = self.driver.manager.flavors_controller
-        result = flavors_controller.get(flavor_id)
-
-        if result is not None:
-            print (result)
-            print('done')
-            return flavor_response.Model(result, pecan.request)
+        try:
+            result = flavors_controller.get(flavor_id)
+        except LookupError as e:
+            pecan.abort(404, detail=str(e))
         else:
-            pecan.response.status = 404
+            return flavor_response.Model(result, pecan.request)
 
     @pecan.expose('json')
     @decorators.validate(

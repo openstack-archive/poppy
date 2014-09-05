@@ -1,5 +1,5 @@
-{
-    "using_all_fields": {
+{         
+      "using_all_fields": {
         "name": "mocksite.com",
         "domains": [
             {"domain": "test.mocksite.com" },
@@ -32,3 +32,6 @@
         ]
     }
 }
+
+
+
