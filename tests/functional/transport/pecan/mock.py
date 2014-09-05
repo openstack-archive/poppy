@@ -27,7 +27,7 @@ from poppy.transport.validators.stoplight import rule
 
 class MockPecanEndpoint(object):
 
-    testing_schema = service.ServiceSchema.get_schema("service", "PUT")
+    testing_schema = service.ServiceSchema.get_schema("service", "POST")
 
     @decorators.validation_function
     def is_valid_json(r):

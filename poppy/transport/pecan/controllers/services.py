@@ -58,18 +58,16 @@ class ServicesController(base.Controller):
 
     @pecan.expose('json')
     @decorators.validate(
-        service_name=rule.Rule(
-            helpers.is_valid_service_name(),
-            helpers.abort_with_message),
         request=rule.Rule(
             helpers.json_matches_schema(
-                service.ServiceSchema.get_schema("service", "PUT")),
+                service.ServiceSchema.get_schema("service", "POST")),
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
-    def put(self, service_name):
+    def post(self):
         services_controller = self._driver.manager.services_controller
         service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
         service_obj = req_service_model.load_from_json(service_json_dict)
+        service_name = service_json_dict.get("name", None)
         return services_controller.create(self.project_id, service_name,
                                           service_obj)
 

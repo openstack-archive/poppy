@@ -46,7 +46,17 @@ class DefaultManagerServiceTests(base.TestCase):
         self.service_name = 'mock_service'
         self.service_json = ''
 
-    def test_create(self):
+    @ddt.data([  # mock a response from map call
+        {'Mock': {'id': '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                  'links': [{'href': 'www.mysite.com',
+                             'rel': 'access_url'}]
+                  }},
+        {'Fastly': {'error': "fail to create servcice"}}
+    ])
+    def test_create(self, mock_map_response):
+        providers = self.sc._driver.providers
+        # Mock a response from map call to cover up
+        providers.map.return_value = mock_map_response
 
         self.sc.create(self.project_id, self.service_name, self.service_json)
 
@@ -54,8 +64,6 @@ class DefaultManagerServiceTests(base.TestCase):
         self.sc.storage.create.assert_called_once_with(self.project_id,
                                                        self.service_name,
                                                        self.service_json)
-        # and that the providers are notified.
-        providers = self.sc._driver.providers
         providers.map.assert_called_once_with(self.sc.provider_wrapper.create,
                                               self.service_name,
                                               self.service_json)
@@ -67,12 +75,13 @@ class DefaultManagerServiceTests(base.TestCase):
             provider_detail_dict = json.loads(
                 provider_details_json[provider_name]
             )
-            id = provider_detail_dict.get("id", None)
-            access_url = provider_detail_dict.get("access_url", None)
+            provider_service_id = provider_detail_dict.get(
+                "provider_service_id", None)
+            access_urls = provider_detail_dict.get("access_url", None)
             status = provider_detail_dict.get("status", u'unknown')
             provider_detail_obj = provider_details.ProviderDetail(
-                id=id,
-                access_url=access_url,
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
                 status=status)
             self.provider_details[provider_name] = provider_detail_obj
 
@@ -100,12 +109,13 @@ class DefaultManagerServiceTests(base.TestCase):
             provider_detail_dict = json.loads(
                 provider_details_json[provider_name]
             )
-            id = provider_detail_dict.get("id", None)
-            access_url = provider_detail_dict.get("access_url", None)
+            provider_service_id = provider_detail_dict.get(
+                "provider_service_id", None)
+            access_urls = provider_detail_dict.get("access_urls", None)
             status = provider_detail_dict.get("status", u'unknown')
             provider_detail_obj = provider_details.ProviderDetail(
-                id=id,
-                access_url=access_url,
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
                 status=status)
             self.provider_details[provider_name] = provider_detail_obj
 

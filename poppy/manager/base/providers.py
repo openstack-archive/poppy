@@ -28,7 +28,7 @@ class ProviderWrapper(object):
             raise errors.BadProviderDetail(
                 "No provider detail information."
                 "Perhaps service has not been created")
-        provider_service_id = provider_detail.id
+        provider_service_id = provider_detail.provider_service_id
         return ext.obj.service_controller.update(
             provider_service_id,
             service_json)
@@ -40,5 +40,5 @@ class ProviderWrapper(object):
             raise errors.BadProviderDetail(
                 "No provider detail information."
                 "Perhaps service has not been created")
-        provider_service_id = provider_detail.id
+        provider_service_id = provider_detail.provider_service_id
         return ext.obj.service_controller.delete(provider_service_id)

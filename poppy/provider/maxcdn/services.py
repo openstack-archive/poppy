@@ -78,11 +78,11 @@ class ServiceController(base.ServiceBase):
             # Add custom domains to this service
             links = []
             for domain in service_json['domains']:
-                custom_domain_response = self.client.post(
+                self.client.post(
                     '/zones/pull/%s/customdomains.json'
                     % created_zone_info['id'],
                     {'custom_domain': domain['domain']})
-                links.append(custom_domain_response)
+                links.append({'href': domain['domain'], "rel": "access_url"})
             # TODO(tonytan4ever): What if it fails during add domains ?
             return self.responder.created(created_zone_info['id'], links)
         except Exception:

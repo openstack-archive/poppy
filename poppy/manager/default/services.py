@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from poppy.manager import base
+from poppy.model.helpers import provider_details
 
 
 class DefaultServicesController(base.ServicesController):
@@ -35,11 +36,28 @@ class DefaultServicesController(base.ServicesController):
             service_name,
             service_obj)
 
-        # TODO(tonytan4ever): need to update provider_detail info in storage
-        return self._driver.providers.map(
+        # TODO(tonytan4ever): incorporate flavor change,
+        # only create on providers in this flavor
+        responders = self._driver.providers.map(
             self.provider_wrapper.create,
             service_name,
             service_obj)
+
+        provider_details_dict = {}
+        for responder in responders:
+            for provider_name in responder:
+                if "error" not in responder[provider_name]:
+                    provider_details_dict[provider_name] = (
+                        provider_details.ProviderDetail(
+                            provider_service_id=responder[provider_name]["id"],
+                            access_urls=[link['href'] for link in
+                                         responder[provider_name]["links"]])
+                    )
+
+        self.storage.update_provider_details(project_id, service_name,
+                                             provider_details_dict)
+
+        return responders
 
     def update(self, project_id, service_name, service_obj):
         self.storage.update(

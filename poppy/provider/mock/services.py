@@ -33,7 +33,9 @@ class ServiceController(base.ServiceBase):
         LOG.debug("Mock creating service: %s" % service_name)
         # We generate a fake id here
         service_id = uuid.uuid1()
-        return self.responder.created(str(service_id), {})
+        return self.responder.created(str(service_id), [{
+            "href": "www.mysite.com",
+            'rel': "access_url"}])
 
     def delete(self, provider_service_id):
         return self.responder.deleted(provider_service_id)

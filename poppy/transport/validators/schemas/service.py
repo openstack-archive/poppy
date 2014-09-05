@@ -22,10 +22,13 @@ class ServiceSchema(schema_base.SchemaBase):
 
     schema = {
         'service': {
-            'PUT': {
-                'name': 'service',
+            'POST': {
                 'type': 'object',
                 'properties': {
+                    "name": {
+                        'type': 'string',
+                        'required': True,
+                    },
                     "domains": {
                         'type': 'array',
                         'items': {
