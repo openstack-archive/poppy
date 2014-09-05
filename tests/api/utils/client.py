@@ -78,8 +78,9 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         PUT
         services/{service_name}
         """
-        url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
-        request_object = requests.CreateService(domain_list=domain_list,
+        url = '{0}/v1.0/services'.format(self.url)
+        request_object = requests.CreateService(service_name=service_name,
+                                                domain_list=domain_list,
                                                 origin_list=origin_list,
                                                 caching_list=caching_list)
         return self.request('PUT', url,

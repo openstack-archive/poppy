@@ -46,8 +46,6 @@ class FlavorsController(base.Controller):
         result = flavors_controller.get(flavor_id)
 
         if result is not None:
-            print (result)
-            print('done')
             return flavor_response.Model(result, pecan.request)
         else:
             pecan.response.status = 404
