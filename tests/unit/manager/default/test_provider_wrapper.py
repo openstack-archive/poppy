@@ -31,8 +31,8 @@ class TestProviderWrapper(base.TestCase):
         # fake a provider details to work with unittest
         self.fake_provider_details = {
             "Fastly": provider_details.ProviderDetail(
-                id=uuid.uuid1(),
-                access_url='mydummywebsite.prod.fastly.com')}
+                provider_service_id=uuid.uuid1(),
+                access_urls='mydummywebsite.prod.fastly.com')}
 
     def test_update_with_keyerror(self):
         mock_ext = mock.Mock(provider_name="no_existent_provider")
@@ -47,7 +47,7 @@ class TestProviderWrapper(base.TestCase):
         self.provider_wrapper_obj.update(mock_ext,
                                          self.fake_provider_details, {})
         mock_ext.obj.service_controller.update.assert_called_once_with(
-            fastly_provider_detail.id,
+            fastly_provider_detail.provider_service_id,
             {})
 
     def test_delete_with_keyerror(self):
@@ -62,4 +62,4 @@ class TestProviderWrapper(base.TestCase):
         fastly_provider_detail = self.fake_provider_details["Fastly"]
         self.provider_wrapper_obj.delete(mock_ext, self.fake_provider_details)
         mock_ext.obj.service_controller.delete.assert_called_once_with(
-            fastly_provider_detail.id)
+            fastly_provider_detail.provider_service_id)

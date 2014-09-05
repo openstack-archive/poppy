@@ -48,7 +48,7 @@ class FlavorControllerTest(base.FunctionalTest):
         self.assertEqual(200, response.status_code)
 
     def test_get_not_found(self):
-        response = self.app.get('/v1.0/flavors/{0}'.format(uuid.uuid1()),
+        response = self.app.get('/v1.0/flavors/{0}'.format("non_exist"),
                                 status=404,
                                 expect_errors=True)
 

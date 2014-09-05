@@ -15,6 +15,7 @@
 
 import json
 
+import ddt
 import pecan
 from webtest import app
 
@@ -22,6 +23,7 @@ from poppy.transport.pecan.controllers import base as c_base
 from tests.functional.transport.pecan import base
 
 
+@ddt.ddt
 class ServiceControllerTest(base.FunctionalTest):
 
     def test_get_all(self):
@@ -45,51 +47,30 @@ class ServiceControllerTest(base.FunctionalTest):
         self.assertTrue("domains" in response_dict)
         self.assertTrue("origins" in response_dict)
 
-    def test_create(self):
+    @ddt.file_data("data_create_service.json")
+    def test_create(self, service_json):
         # create with errorenous data: invalid json data
-        self.assertRaises(app.AppError, self.app.put,
-                          '/v1.0/0001/services/fake_service_name_2',
+        self.assertRaises(app.AppError, self.app.post,
+                          '/v1.0/0001/services',
                           params="{", headers={
                               "Content-Type": "application/json"
                           })
 
         # create with errorenous data
-        self.assertRaises(app.AppError, self.app.put,
-                          '/v1.0/0001/services/fake_service_name_2',
+        self.assertRaises(app.AppError, self.app.post,
+                          '/v1.0/0001/services',
                           params=json.dumps({
+                              "name": "fake_service_name_2",
                               "domain": "www.mytest.com"
                           }), headers={
                               "Content-Type": "application/json"
                           })
 
         # create with good data
-        response = self.app.put('/v1.0/0001/services/fake_service_name_2',
-                                params=json.dumps({
-                                    "domains": [
-                                        {"domain": "www.mywebsite.com"},
-                                        {"domain": "blog.mywebsite.com"},
-                                    ],
-                                    "origins": [{"origin": "mywebsite.com",
-                                                 "port": 80,
-                                                 "ssl": False},
-                                                {"origin": "mywebsite.com",
-                                                 }],
-                                    "caching": [{"name": "default",
-                                                 "ttl": 3600},
-                                                {"name": "home",
-                                                 "ttl": 17200,
-                                                 "rules": [
-                                                     {"name": "index",
-                                                      "request_url":
-                                                      "/index.htm"}]},
-                                                {"name": "images",
-                                                 "ttl": 12800,
-                                                 "rules": [
-                                                     {"name": "images",
-                                                      "request_url": "*.png"}]}
-                                                ]}),
-                                headers={"Content-Type": "application/json"})
-        self.assertEqual(200, response.status_code)
+        response = self.app.post('/v1.0/0001/services',
+                                 params=json.dumps(service_json),
+                                 headers={"Content-Type": "application/json"})
+        self.assertEqual(202, response.status_code)
 
     def test_update(self):
         # update with erroneous data

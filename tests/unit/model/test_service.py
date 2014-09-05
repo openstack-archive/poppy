@@ -53,7 +53,7 @@ class TestServiceModel(base.TestCase):
 
     def test_create(self):
         myservice = service.Service(
-            self.service_name, self.mydomains, self.myorigins,
+            self.service_name, self.mydomains, self.myorigins, self.flavorRef,
             self.mycaching, self.myrestrictions)
 
         # test all properties
@@ -76,6 +76,11 @@ class TestServiceModel(base.TestCase):
         myservice.origins = []
         self.assertEqual(myservice.origins, [])
 
+        # flavorRef
+        self.assertEqual(myservice.flavorRef, self.flavorRef)
+        myservice.flavorRef = "standard"
+        self.assertEqual(myservice.flavorRef, "standard")
+
         self.assertEqual(myservice.restrictions, self.myrestrictions)
         myservice.restrictions = []
         self.assertEqual(myservice.restrictions, [])
@@ -88,12 +93,24 @@ class TestServiceModel(base.TestCase):
         # status
         self.assertEqual(myservice.status, u'unknown')
 
+    def test_init_from_dict_method(self):
+        # this should generate a service copy from my service
+        myservice = service.Service(
+            self.service_name, self.mydomains, self.myorigins, self.flavorRef,
+            self.mycaching, self.myrestrictions)
+        cloned_service = service.Service.init_from_dict(myservice.to_dict())
+
+        self.assertEqual(cloned_service.domains, myservice.domains)
+        self.assertEqual(cloned_service.origins, myservice.origins)
+        self.assertEqual(cloned_service.flavorRef, myservice.flavorRef)
+
     @ddt.data(u'', u'apple')
     def test_set_invalid_status(self, status):
         myservice = service.Service(
             self.service_name,
             self.mydomains,
-            self.myorigins)
+            self.myorigins,
+            self.flavorRef)
 
         self.assertRaises(ValueError, setattr, myservice, 'status', status)
 
@@ -102,7 +119,8 @@ class TestServiceModel(base.TestCase):
         myservice = service.Service(
             self.service_name,
             self.mydomains,
-            self.myorigins)
+            self.myorigins,
+            self.flavorRef)
 
         myservice.status = status
 

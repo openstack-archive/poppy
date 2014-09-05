@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,66 +19,77 @@ from poppy.transport.validators import schema_base
 
 class ServiceSchema(schema_base.SchemaBase):
 
-    """JSON Schmema validation for /service."""
+    '''JSON Schmema validation for /service.'''
 
     schema = {
         'service': {
-            'PUT': {
-                'name': 'service',
+            'POST': {
                 'type': 'object',
                 'properties': {
-                    "domains": {
+                    'name': {
+                        'type': 'string',
+                        'required': True,
+                    },
+                    'domains': {
                         'type': 'array',
                         'items': {
-                            'type': "object",
-                            "properties": {
-                                "domain": {
-                                    "type": "string",
-                                    'pattern': "^(([a-zA-Z]{1})|"
-                                    "([a-zA-Z]{1}[a-zA-Z]{1})|"
-                                    "([a-zA-Z]{1}[0-9]{1})"
-                                    "|([0-9]{1}[a-zA-Z]{1})|"
-                                    "([a-zA-Z0-9][a-zA-Z0-9-_]{1,61}"
-                                    "[a-zA-Z0-9]))\."
-                                    "([a-zA-Z]{2,6}|"
-                                    "[a-zA-Z0-9-]{2,30}\.[a-zA-Z]{2,3})$"
+                            'type': 'object',
+                            'properties': {
+                                'domain': {
+                                    'type': 'string',
+                                    'pattern': '^(([a-zA-Z]{1})|'
+                                    '([a-zA-Z]{1}[a-zA-Z]{1})|'
+                                    '([a-zA-Z]{1}[0-9]{1})'
+                                    '|([0-9]{1}[a-zA-Z]{1})|'
+                                    '([a-zA-Z0-9][a-zA-Z0-9-_]{1,61}'
+                                    '[a-zA-Z0-9]))\.'
+                                    '([a-zA-Z]{2,6}|'
+                                    '[a-zA-Z0-9-]{2,30}\.[a-zA-Z]{2,3})$'
                                 }}},
                         'required': True,
-                        "minItems": 1},
-                    "origins": {
+                        'minItems': 1},
+                    'origins': {
                         'type': 'array',
                         'items': {
-                            'type': "object",
-                            "properties": {
-                                "origin": {
-                                    "type": "string",
-                                    "required": True},
-                                "port": {
-                                    "type": "integer",
-                                    "enum": [
+                            'type': 'object',
+                            'properties': {
+                                'origin': {
+                                    'type': 'string',
+                                    'pattern': '^(([a-zA-Z]{1})|'
+                                    '([a-zA-Z]{1}[a-zA-Z]{1})|'
+                                    '([a-zA-Z]{1}[0-9]{1})'
+                                    '|([0-9]{1}[a-zA-Z]{1})|'
+                                    '([a-zA-Z0-9][a-zA-Z0-9-_]{1,61}'
+                                    '[a-zA-Z0-9]))\.'
+                                    '([a-zA-Z]{2,6}|'
+                                    '[a-zA-Z0-9-]{2,30}\.[a-zA-Z]{2,3})$',
+                                    'required': True},
+                                'port': {
+                                    'type': 'integer',
+                                    'enum': [
                                         80,
                                         443]},
-                                "ssl": {
-                                    "type": "boolean"}},
+                                'ssl': {
+                                    'type': 'boolean'}},
                         },
                         'required': True,
-                        "minItems": 1},
-                    "caching": {
+                        'minItems': 1},
+                    'caching': {
                         'type': 'array',
                         'items': {
-                            'type': "object",
-                            "properties": {
-                                "name": {
-                                    "type": "string",
-                                    "required": True},
-                                "ttl": {
-                                    "type": "integer",
-                                    "required": True},
-                                "rules": {
-                                    "type": "array",
+                            'type': 'object',
+                            'properties': {
+                                'name': {
+                                    'type': 'string',
+                                    'required': True},
+                                'ttl': {
+                                    'type': 'integer',
+                                    'required': True},
+                                'rules': {
+                                    'type': 'array',
                                     'items': {
-                                        'type': "object",
-                                        "properties": {
+                                        'type': 'object',
+                                        'properties': {
                                             'name': {
                                                 'type': 'string'},
                                             'request_url': {
@@ -85,60 +97,95 @@ class ServiceSchema(schema_base.SchemaBase):
                                 }},
                         },
                     },
+                    'restrictions': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'name': {
+                                    'type': 'string',
+                                    'required': True},
+                                'rules': {
+                                    'type': 'array',
+                                    'items': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'name': {
+                                                'type': 'string'},
+                                            'request_url': {
+                                                'type': 'string'},
+                                            'http_host': {
+                                                'type': 'string'},
+                                            'client_ip': {
+                                                'type': 'string'},
+                                            'http_method': {
+                                                'type': 'string',
+                                                'enum': [
+                                                    'GET',
+                                                    'PUT',
+                                                    'POST',
+                                                    'PATCH']}}},
+                                }},
+                        },
+                    },
+                    'flavorRef': {
+                        'type': 'string',
+                        'required': True,
+                    }
                 }},
             'PATCH': {
                 'type': 'object',
                 'properties': {
-                    "domains": {
+                    'domains': {
                         'type': 'array',
                         'items': {
-                            'type': "object",
-                            "properties": {
-                                "domain": {
-                                    "type": "string",
-                                    'pattern': "^(([a-zA-Z]{1})|"
-                                    "([a-zA-Z]{1}[a-zA-Z]{1})|"
-                                    "([a-zA-Z]{1}[0-9]{1})"
-                                    "|([0-9]{1}[a-zA-Z]{1})|"
-                                    "([a-zA-Z0-9][a-zA-Z0-9-_]{1,61}"
-                                    "[a-zA-Z0-9]))\."
-                                    "([a-zA-Z]{2,6}|"
-                                    "[a-zA-Z0-9-]{2,30}\.[a-zA-Z]{2,3})$"
+                            'type': 'object',
+                            'properties': {
+                                'domain': {
+                                    'type': 'string',
+                                    'pattern': '^(([a-zA-Z]{1})|'
+                                    '([a-zA-Z]{1}[a-zA-Z]{1})|'
+                                    '([a-zA-Z]{1}[0-9]{1})'
+                                    '|([0-9]{1}[a-zA-Z]{1})|'
+                                    '([a-zA-Z0-9][a-zA-Z0-9-_]{1,61}'
+                                    '[a-zA-Z0-9]))\.'
+                                    '([a-zA-Z]{2,6}|'
+                                    '[a-zA-Z0-9-]{2,30}\.[a-zA-Z]{2,3})$'
                                 }}},
                     },
-                    "origins": {
+                    'origins': {
                         'type': 'array',
                         'items': {
-                            'type': "object",
-                            "properties": {
-                                "origin": {
-                                    "type": "string",
-                                    "required": True},
-                                "port": {
-                                    "type": "integer",
-                                    "enum": [
+                            'type': 'object',
+                            'properties': {
+                                'origin': {
+                                    'type': 'string',
+                                    'required': True},
+                                'port': {
+                                    'type': 'integer',
+                                    'enum': [
                                         80,
                                         443]},
-                                "ssl": {
-                                    "type": "boolean"}},
+                                'ssl': {
+                                    'type': 'boolean'}},
                         },
                     },
-                    "caching": {
+                    'caching': {
                         'type': 'array',
                         'items': {
-                            'type': "object",
-                            "properties": {
-                                "name": {
-                                    "type": "string",
-                                    "required": True},
-                                "ttl": {
-                                    "type": "integer",
-                                    "required": True},
-                                "rules": {
-                                    "type": "array",
+                            'type': 'object',
+                            'properties': {
+                                'name': {
+                                    'type': 'string',
+                                    'required': True},
+                                'ttl': {
+                                    'type': 'integer',
+                                    'required': True},
+                                'rules': {
+                                    'type': 'array',
                                     'items': {
-                                        'type': "object",
-                                        "properties": {
+                                        'type': 'object',
+                                        'properties': {
                                             'name': {
                                                 'type': 'string'},
                                             'request_url': {
@@ -146,6 +193,40 @@ class ServiceSchema(schema_base.SchemaBase):
                                 }},
                         },
                     },
+                    'restrictions': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'name': {
+                                    'type': 'string',
+                                    'required': True},
+                                'rules': {
+                                    'type': 'array',
+                                    'items': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'name': {
+                                                'type': 'string'},
+                                            'request_url': {
+                                                'type': 'string'},
+                                            'http_host': {
+                                                'type': 'string'},
+                                            'client_ip': {
+                                                'type': 'string'},
+                                            'http_method': {
+                                                'type': 'string',
+                                                'enum': [
+                                                    'GET',
+                                                    'PUT',
+                                                    'POST',
+                                                    'PATCH']}}},
+                                }},
+                        },
+                    },
+                    'flavorRef': {
+                        'type': 'string',
+                    }
                 }},
         },
     }
