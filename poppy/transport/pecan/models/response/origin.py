@@ -15,8 +15,8 @@
 
 try:
     import ordereddict as collections
-except ImportError:
-    import collections
+except ImportError:        # pragma: no cover
+    import collections     # pragma: no cover
 
 
 class Model(collections.OrderedDict):

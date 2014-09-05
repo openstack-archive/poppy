@@ -35,12 +35,14 @@ class Responder(object):
             }
         }
 
-    def created(self, provider_service_id, links):
+    def created(self, provider_service_id, links, **extras):
+        provider_response = {
+            "id": provider_service_id,
+            "links": links
+        }
+        provider_response.update(extras)
         return {
-            self.provider: {
-                "id": provider_service_id,
-                "links": links
-            }
+            self.provider: provider_response
         }
 
     def updated(self, provider_service_id):

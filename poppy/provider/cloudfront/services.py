@@ -15,6 +15,7 @@
 
 from boto import cloudfront
 
+from poppy.common import decorators
 from poppy.provider import base
 
 
@@ -28,36 +29,43 @@ class ServiceController(base.ServiceBase):
         super(ServiceController, self).__init__(driver)
 
         self.driver = driver
-        self.current_customer = self.client.get_current_customer()
 
     # TODO(obulpathi): get service
     def get(self, service_name):
         return {'domains': [], 'origins': [], 'caching': []}
 
     # TODo(obulpathi): update service
-    def update(self, service_name, service_json):
+    def update(self, service_name, service_obj):
         return self.responder.updated(service_name)
 
-    def create(self, service_name, service_json):
+    def create(self, service_obj):
         # TODO(obulpathi): create a single distribution for multiple origins
-        origin = service_json['origins'][0]
+        origin = service_obj.origins[0]
         try:
             # Create the origin for this domain:
             aws_origin = cloudfront.origin.CustomOrigin(
-                dns_name=origin['origin'],
-                http_port=origin['port'],
-                https_port=origin['ssl'],
+                dns_name=origin.origin,
+                http_port=origin.port,
+                # cannot specify ssl like this yet, CF takes a port #
+                # https_port=origin.ssl,
                 origin_protocol_policy='match-viewer')
             distribution = self.client.create_distribution(
                 origin=aws_origin,
                 enabled=True)
+            if distribution.status == 'InProgress':
+                status = 'in_progress'
+            elif distribution.status == 'Deployed':
+                status = 'deployed'
+            else:
+                status = 'unknown'
         except cloudfront.exception.CloudFrontServerError as e:
             return self.responder.failed(str(e))
         except Exception as e:
             return self.responder.failed(str(e))
 
         links = [{'href': distribution.domain_name, 'rel': 'access_url'}]
-        return self.responder.created(distribution.id, links)
+        # extra information should be passed in here.
+        return self.responder.created(distribution.id, links, status=status)
 
     def delete(self, service_name):
         # NOTE(obulpathi): distribution_id is the equivalent of service_name
@@ -68,3 +76,8 @@ class ServiceController(base.ServiceBase):
             return self.responder.deleted(distribution_id)
         except Exception as e:
             return self.responder.failed(str(e))
+
+    @decorators.lazy_property(write=False)
+    def current_customer(self):
+        # TODO(tonytan4ever/obulpathi): Implement cloudfront's current_customer
+        pass

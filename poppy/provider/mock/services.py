@@ -15,6 +15,7 @@
 
 import uuid
 
+from poppy.common import decorators
 from poppy.openstack.common import log
 from poppy.provider import base
 
@@ -26,17 +27,23 @@ class ServiceController(base.ServiceBase):
     def __init__(self, driver):
         super(ServiceController, self).__init__(driver)
 
-    def update(self, provider_service_id, service_json):
+    def update(self, provider_service_id, service_obj):
         return self.responder.updated(provider_service_id)
 
-    def create(self, service_name, service_json):
-        LOG.debug("Mock creating service: %s" % service_name)
+    def create(self, service_obj):
         # We generate a fake id here
         service_id = uuid.uuid1()
-        return self.responder.created(str(service_id), {})
+        return self.responder.created(str(service_id), [{
+            "href": "www.mysite.com",
+            'rel': "access_url"}])
 
     def delete(self, provider_service_id):
         return self.responder.deleted(provider_service_id)
 
     def get(self, service_name):
         return self.responder.get([], [], [])
+
+    @decorators.lazy_property(write=False)
+    def current_customer(self):
+        '''return current_customer for Mock. We can return a None.'''
+        return None

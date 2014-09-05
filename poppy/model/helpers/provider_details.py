@@ -21,27 +21,32 @@ class ProviderDetail(object):
 
     '''ProviderDetail object for each provider.'''
 
-    def __init__(self, id=None, access_url=None, status=u"unknown", name=None):
-        self._id = id
-        self._access_url = access_url
+    def __init__(self, provider_service_id=None, access_urls=None,
+                 status=u"unknown", name=None):
+        self._provider_service_id = provider_service_id
+        self._access_urls = access_urls
         self._status = status
         self._name = name
 
     @property
-    def id(self):
-        return self._id
+    def provider_service_id(self):
+        return self._provider_service_id
 
-    @id.setter
-    def id(self, value):
-        self._id = value
+    @provider_service_id.setter
+    def provider_service_id(self, value):
+        self._provider_service_id = value
 
     @property
-    def access_url(self):
-        return self._access_url
+    def access_urls(self):
+        return self._access_urls
 
-    @access_url.setter
-    def access_url(self, value):
-        self._access_url = value
+    @property
+    def name(self):
+        return self._name
+
+    @access_urls.setter
+    def access_urls(self, value):
+        self._access_urls = value
 
     @property
     def status(self):
