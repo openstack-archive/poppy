@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +46,7 @@ fake_maxcdn_client_get_return_value = {u'code': 200,
 
 fake_maxcdn_client_400_return_value = {
     u'code': 400,
-    u'message': "operation PUT/GET/POST failed due to technical difficulties.."
+    u'message': 'operation PUT/GET/POST failed due to technical difficulties..'
 }
 
 
@@ -63,8 +64,8 @@ class fake_maxcdn_api_client:
     def post(self, url=None, data=None):
         return {u'code': 201,
                 u'data': {
-                    u"pullzone": {
-                        u"cdn_url": u"newpullzone1.alias.netdna-cdn.com",
+                    u'pullzone': {
+                        u'cdn_url': u'newpullzone1.alias.netdna-cdn.com',
                         u'name': u'newpullzone1',
                         u'id': u'97312'
                     }}}
@@ -72,8 +73,8 @@ class fake_maxcdn_api_client:
     def put(self, url=None, params=None):
         return {u'code': 200,
                 u'data': {
-                    u"pullzone": {
-                        u"cdn_url": u"newpullzone1.alias.netdna-cdn.com",
+                    u'pullzone': {
+                        u'cdn_url': u'newpullzone1.alias.netdna-cdn.com',
                         u'name': u'newpullzone1',
                         u'id': u'97312'
                     }}}
@@ -103,7 +104,7 @@ class TestServices(base.TestCase):
         new_driver = driver.CDNProvider(self.conf)
         # instantiate
         controller = services.ServiceController(new_driver)
-        service_name = "test_service_name"
+        service_name = 'test_service_name'
         self.assertTrue(controller.get(service_name) is not None)
 
     @ddt.file_data('data_service.json')
@@ -114,7 +115,7 @@ class TestServices(base.TestCase):
         # instantiate
         controller = services.ServiceController(new_driver)
         # test create, everything goes through successfully
-        service_name = "test_service_name"
+        service_name = 'test_service_name'
         resp = controller.create(service_name, service_json)
         self.assertIn('id', resp[new_driver.provider_name])
         self.assertIn('links', resp[new_driver.provider_name])
@@ -131,11 +132,11 @@ class TestServices(base.TestCase):
                                         fake_maxcdn_client_get_return_value
                                         })
 
-        service_name = "test_service_name"
+        service_name = 'test_service_name'
 
         controller_with_create_exception = services.ServiceController(driver)
         controller_with_create_exception.client.configure_mock(**{
-            "post.side_effect":
+            'post.side_effect':
             RuntimeError('Creating service mysteriously failed.')})
         resp = controller_with_create_exception.create(
             service_name,
@@ -145,7 +146,7 @@ class TestServices(base.TestCase):
         controller_with_create_exception.client.reset_mock()
         controller_with_create_exception.client.configure_mock(**{
             'post.side_effect': None,
-            "post.return_value": fake_maxcdn_client_400_return_value
+            'post.return_value': fake_maxcdn_client_400_return_value
         })
         resp = controller_with_create_exception.create(
             service_name,
@@ -160,7 +161,7 @@ class TestServices(base.TestCase):
         # instantiate
         controller = services.ServiceController(new_driver)
         # test create, everything goes through successfully
-        service_name = "test_service_name"
+        service_name = 'test_service_name'
         resp = controller.update(service_name, service_json)
         self.assertIn('id', resp[new_driver.provider_name])
 
@@ -176,11 +177,11 @@ class TestServices(base.TestCase):
                                         fake_maxcdn_client_get_return_value
                                         })
 
-        service_name = "test_service_name"
+        service_name = 'test_service_name'
 
         controller_with_update_exception = services.ServiceController(driver)
         controller_with_update_exception.client.configure_mock(**{
-            "put.side_effect":
+            'put.side_effect':
             RuntimeError('Updating service mysteriously failed.')})
         resp = controller_with_update_exception.update(
             service_name,
@@ -189,8 +190,8 @@ class TestServices(base.TestCase):
 
         controller_with_update_exception.client.reset_mock()
         controller_with_update_exception.client.configure_mock(**{
-            "put.side_effect": None,
-            "put.return_value": fake_maxcdn_client_400_return_value
+            'put.side_effect': None,
+            'put.return_value': fake_maxcdn_client_400_return_value
         })
         resp = controller_with_update_exception.update(
             service_name,
@@ -204,7 +205,7 @@ class TestServices(base.TestCase):
         # instantiate
         controller = services.ServiceController(new_driver)
         # test create, everything goes through successfully
-        service_name = "test_service_name"
+        service_name = 'test_service_name'
         resp = controller.delete(service_name)
         self.assertIn('id', resp[new_driver.provider_name])
 
@@ -219,11 +220,11 @@ class TestServices(base.TestCase):
                                         fake_maxcdn_client_get_return_value
                                         })
 
-        service_name = "test_service_name"
+        service_name = 'test_service_name'
 
         controller_with_delete_exception = services.ServiceController(driver)
         controller_with_delete_exception.client.configure_mock(**{
-            "delete.side_effect":
+            'delete.side_effect':
             RuntimeError('Deleting service mysteriously failed.')})
         resp = controller_with_delete_exception.delete(service_name)
         self.assertEqual(resp[driver.provider_name]['error'],
@@ -231,9 +232,31 @@ class TestServices(base.TestCase):
 
         controller_with_delete_exception.client.reset_mock()
         controller_with_delete_exception.client.configure_mock(**{
-            "delete.side_effect": None,
-            "delete.return_value": fake_maxcdn_client_400_return_value
+            'delete.side_effect': None,
+            'delete.return_value': fake_maxcdn_client_400_return_value
         })
         resp = controller_with_delete_exception.delete(service_name)
         self.assertEqual(resp[driver.provider_name]['error'],
                          'failed to delete service')
+
+    @ddt.data('good-service-name', 'yahooservice')
+    @mock.patch.object(driver.CDNProvider, 'client',
+                       new=fake_maxcdn_api_client())
+    def test_map_service_name_no_hash(self, service_name):
+        maxcdn_driver = driver.CDNProvider(self.conf)
+        controller = services.ServiceController(maxcdn_driver)
+        self.assertEqual(controller._map_service_name(service_name),
+                         service_name)
+
+    @ddt.data(u'www.düsseldorf-Lörick.com', 'yahoo%_notvalid')
+    @mock.patch.object(driver.CDNProvider, 'client',
+                       new=fake_maxcdn_api_client())
+    def test_map_service_name_with_hash(self, service_name):
+        maxcdn_driver = driver.CDNProvider(self.conf)
+        controller = services.ServiceController(maxcdn_driver)
+        # test hashed
+        self.assertNotEqual(controller._map_service_name(service_name),
+                            service_name)
+        # test deterministic-ity
+        self.assertEqual(controller._map_service_name(service_name),
+                         controller._map_service_name(service_name))

@@ -52,16 +52,21 @@ CQL_DELETE_SERVICE = '''
 CQL_CREATE_SERVICE = '''
     INSERT INTO services (project_id,
         service_name,
+        flavor_id,
         domains,
         origins,
         caching_rules,
-        restrictions)
+        restrictions,
+        provider_details
+        )
     VALUES (%(project_id)s,
         %(service_name)s,
+        %(flavor_id)s,
         %(domains)s,
         %(origins)s,
         %(caching_rules)s,
-        %(restrictions)s)
+        %(restrictions)s,
+        %(provider_details)s)
 '''
 
 CQL_UPDATE_DOMAINS = '''
@@ -94,6 +99,12 @@ CQL_GET_PROVIDER_DETAILS = '''
     WHERE project_id = %(project_id)s AND service_name = %(service_name)s
 '''
 
+CQL_UPDATE_PROVIDER_DETAILS = '''
+    UPDATE services
+    set provider_details = %(provider_details)s
+    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
+'''
+
 
 class ServicesController(base.ServicesController):
 
@@ -123,7 +134,8 @@ class ServicesController(base.ServicesController):
                                      json.loads(o).get("ssl", False))
                        for o in origins]
             domains = [domain.Domain(json.loads(d)['domain']) for d in domains]
-            services.append(service.Service(name, domains, origins))
+            flavorRef = r.get("flavor_id", "unnamed")
+            services.append(service.Service(name, domains, origins, flavorRef))
         return services
 
     def get(self, project_id, service_name):
@@ -148,7 +160,8 @@ class ServicesController(base.ServicesController):
                                      json.loads(o).get("ssl", False))
                        for o in origins]
             domains = [domain.Domain(json.loads(d)['domain']) for d in domains]
-            services.append(service.Service(name, domains, origins))
+            flavorRef = r.get("flavor_id", "unnamed")
+            services.append(service.Service(name, domains, origins, flavorRef))
         return services[0]
 
     def create(self, project_id, service_name, service_obj):
@@ -167,10 +180,13 @@ class ServicesController(base.ServicesController):
         args = {
             'project_id': project_id,
             'service_name': service_name,
+            'flavor_id': service_obj.flavorRef,
             'domains': domains,
             'origins': origins,
             'caching_rules': caching_rules,
-            'restrictions': restrictions
+            'restrictions': restrictions,
+            # TODO(tonytan4ever): Incorporate flavor change.
+            'provider_details': {}
         }
 
         self.session.execute(CQL_CREATE_SERVICE, args)
@@ -206,12 +222,34 @@ class ServicesController(base.ServicesController):
         results = {}
         for provider_name in exec_results[0]:
             provider_detail_dict = json.loads(exec_results[0][provider_name])
-            id = provider_detail_dict.get("id", None)
-            access_url = provider_detail_dict.get("access_url", None)
+            pr_id = provider_detail_dict.get("provider_service_id", None)
+            access_urls = provider_detail_dict.get("access_urls", None)
             status = provider_detail_dict.get("status", u'unknown')
             provider_detail_obj = provider_details.ProviderDetail(
-                id=id,
-                access_url=access_url,
+                provider_service_id=pr_id,
+                access_urls=access_urls,
                 status=status)
             results[provider_name] = provider_detail_obj
         return results
+
+    def update_provider_details(self, project_id, service_name,
+                                provider_details):
+        provider_detail_dict = {}
+        for provider_name in provider_details:
+            provider_detail_dict[provider_name] = json.dumps({
+                "id": provider_details[provider_name].provider_service_id,
+                "access_urls": provider_details[provider_name].access_urls,
+                "status": provider_details[provider_name].status,
+                "name": provider_details[provider_name].name,
+            })
+        args = {
+            'project_id': project_id,
+            'service_name': service_name,
+            'provider_details': provider_detail_dict
+        }
+        # TODO(tonytan4ever): Not sure this returns a list or a single
+        # dictionary.
+        # Needs to verify after cassandra unittest framework has been added in
+        # if a list, the return the first item of a list. if it is a dictionary
+        # returns the dictionary
+        self.session.execute(CQL_UPDATE_PROVIDER_DETAILS, args)

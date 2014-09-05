@@ -47,49 +47,54 @@ class ServiceControllerTest(base.FunctionalTest):
 
     def test_create(self):
         # create with errorenous data: invalid json data
-        self.assertRaises(app.AppError, self.app.put,
-                          '/v1.0/0001/services/fake_service_name_2',
+        self.assertRaises(app.AppError, self.app.post,
+                          '/v1.0/0001/services',
                           params="{", headers={
                               "Content-Type": "application/json"
                           })
 
         # create with errorenous data
-        self.assertRaises(app.AppError, self.app.put,
-                          '/v1.0/0001/services/fake_service_name_2',
+        self.assertRaises(app.AppError, self.app.post,
+                          '/v1.0/0001/services',
                           params=json.dumps({
+                              "name": "fake_service_name_2",
                               "domain": "www.mytest.com"
                           }), headers={
                               "Content-Type": "application/json"
                           })
 
         # create with good data
-        response = self.app.put('/v1.0/0001/services/fake_service_name_2',
-                                params=json.dumps({
-                                    "domains": [
-                                        {"domain": "www.mywebsite.com"},
-                                        {"domain": "blog.mywebsite.com"},
-                                    ],
-                                    "origins": [{"origin": "mywebsite.com",
-                                                 "port": 80,
-                                                 "ssl": False},
-                                                {"origin": "mywebsite.com",
-                                                 }],
-                                    "caching": [{"name": "default",
-                                                 "ttl": 3600},
-                                                {"name": "home",
-                                                 "ttl": 17200,
-                                                 "rules": [
-                                                     {"name": "index",
-                                                      "request_url":
-                                                      "/index.htm"}]},
-                                                {"name": "images",
-                                                 "ttl": 12800,
-                                                 "rules": [
-                                                     {"name": "images",
-                                                      "request_url": "*.png"}]}
-                                                ]}),
-                                headers={"Content-Type": "application/json"})
-        self.assertEqual(200, response.status_code)
+        response = self.app.post('/v1.0/0001/services',
+                                 params=json.dumps({
+                                     "name": "fake_service_name_2",
+                                     "domains": [
+                                         {"domain": "www.mywebsite.com"},
+                                         {"domain": "blog.mywebsite.com"},
+                                     ],
+                                     "origins": [{"origin": "mywebsite.com",
+                                                  "port": 80,
+                                                  "ssl": False},
+                                                 {"origin": "mywebsite.com",
+                                                  }],
+                                     "caching": [{"name": "default",
+                                                  "ttl": 3600},
+                                                 {"name": "home",
+                                                  "ttl": 17200,
+                                                  "rules": [
+                                                      {"name": "index",
+                                                       "request_url":
+                                                       "/index.htm"}]},
+                                                 {"name": "images",
+                                                  "ttl": 12800,
+                                                  "rules": [
+                                                      {"name": "images",
+                                                       "request_url":
+                                                       "*.png"}]}
+                                                 ],
+                                     "flavorRef": "https://www.poppycdn.io/"
+                                                  "v1.0/flavors/standard"}),
+                                 headers={"Content-Type": "application/json"})
+        self.assertEqual(202, response.status_code)
 
     def test_update(self):
         # update with erroneous data

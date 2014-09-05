@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.model import flavor
 from poppy.storage import base
 
 
@@ -23,10 +24,23 @@ class FlavorsController(base.FlavorsController):
         return self._driver.database
 
     def list(self):
-        return []
+        f = flavor.Flavor(
+            "standard",
+            [flavor.Provider("maxcdn", "www.maxcdn.com"),
+             flavor.Provider("fastly", "www.fastly.com")]
+        )
+        return [f]
 
     def get(self, flavor_id):
-        return None
+        f = flavor.Flavor(
+            "standard",
+            [flavor.Provider("maxcdn", "www.maxcdn.com"),
+             flavor.Provider("fastly", "www.fastly.com"),
+             flavor.Provider("mock", "www.mock_provider.com")]
+        )
+        if flavor_id == "non_exist":
+            return None
+        return f
 
     def add(self, flavor):
         pass

@@ -42,6 +42,7 @@ class ServicesController(base.ServicesController):
                         "ssl": False
                     }
                 ],
+                "flavorRef": "https://www.poppycdn.io/v1.0/flavors/standard",
                 "caching": [
                     {"name": "default", "ttl": 3600},
                     {
@@ -81,7 +82,9 @@ class ServicesController(base.ServicesController):
             domains = r.get("domains", [])
             origins = [origin.Origin(d) for d in origins]
             domains = [domain.Domain(d) for d in domains]
-            services_result.append(service.Service(name, domains, origins))
+            flavorRef = r.get("name", "standard").split("/")[-1]
+            services_result.append(service.Service(name, domains, origins,
+                                                   flavorRef))
 
         return services_result
 
@@ -101,6 +104,7 @@ class ServicesController(base.ServicesController):
                     "ssl": False
                 }
             ],
+            "flavorRef": "https://www.poppycdn.io/v1.0/flavors/standard",
             "caching": [
                 {"name": "default", "ttl": 3600},
                 {
@@ -137,7 +141,8 @@ class ServicesController(base.ServicesController):
         domains = service_dict.get("domains", [])
         origins = [origin.Origin(d) for d in origins]
         domains = [domain.Domain(d) for d in domains]
-        services_result = service.Service(name, domains, origins)
+        flavorRef = service_dict.get("name", "standard").split("/")[-1]
+        services_result = service.Service(name, domains, origins, flavorRef)
         return services_result
 
     def create(self, project_id, service_name, service_json):
@@ -156,19 +161,23 @@ class ServicesController(base.ServicesController):
     def get_provider_details(self, project_id, service_name):
         return {
             "MaxCDN": provider_details.ProviderDetail(
-                id=11942,
+                provider_service_id=11942,
                 name='my_service_name',
-                access_url='my_service_name'
-                '.mycompanyalias.netdna-cdn.com'),
+                access_urls=['my_service_name'
+                             '.mycompanyalias.netdna-cdn.com']),
             "Fastly": provider_details.ProviderDetail(
-                id=3488,
+                provider_service_id=3488,
                 name="my_service_name",
-                access_url='my_service_name'
-                '.global.prod.fastly.net'),
+                access_urls=['my_service_name'
+                             '.global.prod.fastly.net']),
             "CloudFront": provider_details.ProviderDetail(
-                id=5892,
-                access_url='my_service_name'
-                '.gibberish.amzcf.com'),
+                provider_service_id=5892,
+                access_urls=['my_service_name'
+                             '.gibberish.amzcf.com']),
             "Mock": provider_details.ProviderDetail(
-                id="73242",
-                access_url='my_service_name.mock.com')}
+                provider_service_id="73242",
+                access_urls=['my_service_name.mock.com'])}
+
+    def update_provider_details(self, project_id, service_name,
+                                provider_details):
+        pass

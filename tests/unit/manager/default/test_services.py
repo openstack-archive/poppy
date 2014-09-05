@@ -22,6 +22,7 @@ from oslo.config import cfg
 from poppy.manager.default import driver
 from poppy.manager.default import services
 from poppy.model.helpers import provider_details
+from poppy.transport.pecan.models.request import service
 from tests.unit import base
 
 
@@ -44,21 +45,59 @@ class DefaultManagerServiceTests(base.TestCase):
 
         self.project_id = 'mock_id'
         self.service_name = 'mock_service'
-        self.service_json = ''
+        self.service_json = {
+            "name": "fake_service_name",
+            "domains": [
+                {"domain": "www.mywebsite.com"},
+                {"domain": "blog.mywebsite.com"},
+            ],
+            "origins": [
+                {
+                    "origin": "mywebsite.com",
+                    "port": 80,
+                    "ssl": False
+                },
+                {
+                    "origin": "mywebsite.com",
+                }
+            ],
+            "caching": [
+                {"name": "default", "ttl": 3600},
+                {"name": "home",
+                 "ttl": 17200,
+                 "rules": [
+                     {"name": "index", "request_url": "/index.htm"}
+                 ]
+                 },
+                {"name": "images",
+                 "ttl": 12800,
+                 }
+            ],
+            "flavorRef": "https://www.poppycdn.io/v1.0/flavors/standard"
+        }
 
-    def test_create(self):
+    @ddt.data([  # mock a response from map call
+        {'Mock': {'id': '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                  'links': [{'href': 'www.mysite.com',
+                             'rel': 'access_url'}]
+                  }},
+        {'Fastly': {'error': "fail to create servcice"}}
+    ])
+    def test_create(self, mock_map_response):
+        providers = self.sc._driver.providers
+        # Mock a response from map call to cover up
+        providers.map.return_value = mock_map_response
+        service_obj = service.load_from_json(self.service_json)
 
-        self.sc.create(self.project_id, self.service_name, self.service_json)
+        self.sc.create(self.project_id, self.service_name, service_obj)
 
         # ensure the manager calls the storage driver with the appropriate data
         self.sc.storage.create.assert_called_once_with(self.project_id,
                                                        self.service_name,
-                                                       self.service_json)
-        # and that the providers are notified.
-        providers = self.sc._driver.providers
-        providers.map.assert_called_once_with(self.sc.provider_wrapper.create,
-                                              self.service_name,
-                                              self.service_json)
+                                                       service_obj)
+        # providers.map.assert_called_once_with(self.sc.provider_wrapper.create,
+        #                                      self.service_name,
+        #                                      service_obj)
 
     @ddt.file_data('data_provider_details.json')
     def test_update(self, provider_details_json):
@@ -67,12 +106,13 @@ class DefaultManagerServiceTests(base.TestCase):
             provider_detail_dict = json.loads(
                 provider_details_json[provider_name]
             )
-            id = provider_detail_dict.get("id", None)
-            access_url = provider_detail_dict.get("access_url", None)
+            provider_service_id = provider_detail_dict.get(
+                "provider_service_id", None)
+            access_urls = provider_detail_dict.get("access_url", None)
             status = provider_detail_dict.get("status", u'unknown')
             provider_detail_obj = provider_details.ProviderDetail(
-                id=id,
-                access_url=access_url,
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
                 status=status)
             self.provider_details[provider_name] = provider_detail_obj
 
@@ -100,12 +140,13 @@ class DefaultManagerServiceTests(base.TestCase):
             provider_detail_dict = json.loads(
                 provider_details_json[provider_name]
             )
-            id = provider_detail_dict.get("id", None)
-            access_url = provider_detail_dict.get("access_url", None)
+            provider_service_id = provider_detail_dict.get(
+                "provider_service_id", None)
+            access_urls = provider_detail_dict.get("access_urls", None)
             status = provider_detail_dict.get("status", u'unknown')
             provider_detail_obj = provider_details.ProviderDetail(
-                id=id,
-                access_url=access_url,
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
                 status=status)
             self.provider_details[provider_name] = provider_detail_obj
 

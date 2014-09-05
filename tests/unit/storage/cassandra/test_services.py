@@ -13,11 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 import cassandra
 import ddt
 import mock
 from oslo.config import cfg
 
+from poppy.model.helpers import provider_details
 from poppy.model import service
 from poppy.storage.cassandra import driver
 from poppy.storage.cassandra import services
@@ -132,6 +135,46 @@ class CassandraStorageServiceTests(base.TestCase):
         self.assertTrue("Mock" in actual_response)
         self.assertTrue("CloudFront" in actual_response)
         self.assertTrue("Fastly" in actual_response)
+
+    @ddt.file_data('data_provider_details.json')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_update_provider_details(self, provider_details_json,
+                                     mock_session, mock_execute):
+        provider_details_dict = {}
+        for k, v in provider_details_json.items():
+            provider_detail_dict = json.loads(v)
+            provider_details_dict[k] = provider_details.ProviderDetail(
+                provider_service_id=(
+                    provider_detail_dict["provider_service_id"]),
+                access_urls=provider_detail_dict["access_urls"])
+
+        # mock the response from cassandra
+        mock_execute.execute.return_value = None
+
+        self.sc.update_provider_details(
+            self.project_id,
+            self.service_name,
+            provider_details_dict)
+
+        # this is for update_provider_details unittest code coverage
+        arg_provider_details_dict = {}
+        for provider_name in provider_details_dict:
+            arg_provider_details_dict[provider_name] = json.dumps({
+                "id": provider_details_dict[provider_name].provider_service_id,
+                "access_urls": (
+                    provider_details_dict[provider_name].access_urls),
+                "status": provider_details_dict[provider_name].status,
+                "name": provider_details_dict[provider_name].name,
+            })
+        args = {
+            'project_id': self.project_id,
+            'service_name': self.service_name,
+            'provider_details': arg_provider_details_dict
+        }
+
+        mock_execute.execute.assert_called_once_with(
+            services.CQL_UPDATE_PROVIDER_DETAILS, args)
 
     @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_session(self, mock_service_database):
