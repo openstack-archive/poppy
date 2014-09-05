@@ -16,8 +16,8 @@
 import inspect
 try:
     import ordereddict as collections
-except ImportError:
-    import collections
+except ImportError:        # pragma: no cover
+    import collections     # pragma: no cover
 
 
 class DictSerializableModel(object):
@@ -48,7 +48,7 @@ class DictSerializableModel(object):
         return self
 
     @classmethod
-    def init_from_dict(cls, dict):
+    def init_from_dict(cls, input_dict):
         """Construct a model instance from a dictionary.
 
         This is only meant to be used for converting a

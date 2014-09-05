@@ -13,7 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import hashlib
+import re
+
+from poppy.common import decorators
 from poppy.provider import base
+
+MAXCDN_NAMING_RULE = "^[a-zA-Z0-9-]{3,32}$"
 
 
 class ServiceController(base.ServiceBase):
@@ -32,21 +38,17 @@ class ServiceController(base.ServiceBase):
 
         self.driver = driver
 
-        # This returns the current customer account info
-        account_info_return = self.client.get('/account.json')
-        if account_info_return['code'] != 200:
-            raise RuntimeError(account_info_return['error'])
-        self.current_customer = account_info_return['data']['account']
-
-    def update(self, pullzone_id, service_json):
+    def update(self, pullzone_id, service_obj):
         '''MaxCDN update.
 
          manager needs to pass in pullzone id to delete.
         '''
         try:
+            # TODO(tonytan4ever): correctly convert and update service_obj
+            # to a dictionary passed into maxcdn call.
             update_response = self.client.put('/zones/pull.json/%s'
                                               % pullzone_id,
-                                              params=service_json)
+                                              params=service_obj.to_dict())
             if update_response['code'] != 200:
                 return self.responder.failed('failed to update service')
             return self.responder.updated(
@@ -55,19 +57,19 @@ class ServiceController(base.ServiceBase):
             # this exception branch will most likely for a network failure
             return self.responder.failed('failed to update service')
 
-    def create(self, service_name, service_json):
+    def create(self, service_obj):
         '''MaxCDN create.
 
          manager needs to pass in a service name to create.
         '''
         try:
             # Create a new pull zone: maxcdn only supports 1 origin
-            origin = service_json['origins'][0]
+            origin = service_obj.origins[0]
             create_response = self.client.post('/zones/pull.json', data={
-                'name': service_name,
-                'url': origin['origin'],
-                'port': origin.get('port', 80),
-                'sslshared': 1 if origin['ssl'] else 0,
+                'name': self._map_service_name(service_obj.name),
+                'url': origin.origin,
+                'port': getattr(origin, 'port', 80),
+                'sslshared': 1 if origin.ssl else 0
             })
 
             if create_response['code'] != 201:
@@ -77,12 +79,12 @@ class ServiceController(base.ServiceBase):
 
             # Add custom domains to this service
             links = []
-            for domain in service_json['domains']:
-                custom_domain_response = self.client.post(
+            for domain in service_obj.domains:
+                self.client.post(
                     '/zones/pull/%s/customdomains.json'
                     % created_zone_info['id'],
-                    {'custom_domain': domain['domain']})
-                links.append(custom_domain_response)
+                    {'custom_domain': domain.domain})
+                links.append({'href': domain.domain, "rel": "access_url"})
             # TODO(tonytan4ever): What if it fails during add domains ?
             return self.responder.created(created_zone_info['id'], links)
         except Exception:
@@ -108,3 +110,24 @@ class ServiceController(base.ServiceBase):
     def get(self, service_name):
         '''Get details of the service, as stored by the provider.'''
         return {'domains': [], 'origins': [], 'caching': []}
+
+    def _map_service_name(self, service_name):
+        """Map poppy service name to provider's specific service name.
+
+        Map a poppy service name to a provider's service name so it
+        can comply provider's naming convention.
+        """
+        max_cdn_naming_regex = re.compile(MAXCDN_NAMING_RULE)
+        if max_cdn_naming_regex.match(service_name):
+            return service_name
+        else:
+            return hashlib.md5(service_name.encode("utf-8")).hexdigest()
+
+    @decorators.lazy_property(write=False)
+    def current_customer(self):
+        # This returns the current customer account info
+        account_info_return = self.client.get('/account.json')
+        if account_info_return['code'] == 200:
+            return account_info_return['data']['account']
+        else:
+            raise RuntimeError("Get maxcdn current customer failed...")

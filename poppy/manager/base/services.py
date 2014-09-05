@@ -38,11 +38,11 @@ class ServicesControllerBase(controller.ManagerControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create(self, project_id, service_name, service_json):
+    def create(self, project_id, service_obj):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, project_id, service_name, service_json):
+    def update(self, project_id, service_name, service_obj):
         raise NotImplementedError
 
     @abc.abstractmethod

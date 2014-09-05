@@ -83,7 +83,7 @@ class FlavorsController(base.FlavorsController):
         if (len(flavors) == 1):
             return flavors[0]
         else:
-            raise LookupError("More than one flavor was retrieved.")
+            raise LookupError("More than one flavor/no record was retrieved.")
 
     def add(self, flavor):
         """Add a new flavor."""

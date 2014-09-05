@@ -1,10 +1,12 @@
 {
     "all_fields": {
+        "name": "my_servicde_name",
         "domain_list": [{"domain": "mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origins": "mywebsite.com",
                          "port": 443,
                          "ssl": false}],
+        "flavorRef": "standard",
         "caching_list": [{"name": "default", "ttl": 3600},
                          {"name": "home",
                           "ttl": 1200,
@@ -12,11 +14,13 @@
                                      "request_url" : "/index.htm"}]}]
     },
     "caching_empty": {
+    	"name": "my_servicde_name_2",
         "domain_list": [{"domain": "mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origins": "mywebsite.com",
                          "port": 443,
                          "ssl": false}],
+        "flavorRef": "standard",
         "caching_list": []
     }
 }

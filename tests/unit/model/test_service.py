@@ -53,7 +53,7 @@ class TestServiceModel(base.TestCase):
 
     def test_create(self):
         myservice = service.Service(
-            self.service_name, self.mydomains, self.myorigins,
+            self.service_name, self.mydomains, self.myorigins, self.flavorRef,
             self.mycaching, self.myrestrictions)
 
         # test all properties
@@ -93,7 +93,8 @@ class TestServiceModel(base.TestCase):
         myservice = service.Service(
             self.service_name,
             self.mydomains,
-            self.myorigins)
+            self.myorigins,
+            self.flavorRef)
 
         self.assertRaises(ValueError, setattr, myservice, 'status', status)
 
@@ -102,7 +103,8 @@ class TestServiceModel(base.TestCase):
         myservice = service.Service(
             self.service_name,
             self.mydomains,
-            self.myorigins)
+            self.myorigins,
+            self.flavorRef)
 
         myservice.status = status
 
