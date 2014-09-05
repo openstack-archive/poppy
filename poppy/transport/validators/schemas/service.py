@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,10 +23,13 @@ class ServiceSchema(schema_base.SchemaBase):
 
     schema = {
         'service': {
-            'PUT': {
-                'name': 'service',
+            'POST': {
                 'type': 'object',
                 'properties': {
+                    "name": {
+                        'type': 'string',
+                        'required': True,
+                    },
                     "domains": {
                         'type': 'array',
                         'items': {
@@ -85,6 +89,41 @@ class ServiceSchema(schema_base.SchemaBase):
                                 }},
                         },
                     },
+                    "restrictions": {
+                        'type': 'array',
+                        'items': {
+                            'type': "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "required": True},
+                                "rules": {
+                                    "type": "array",
+                                    'items': {
+                                        'type': "object",
+                                        "properties": {
+                                            'name': {
+                                                'type': 'string'},
+                                            'request_url': {
+                                                'type': 'string'},
+                                            'http_host': {
+                                                'type': 'string'},
+                                            'client_ip': {
+                                                'type': 'string'},
+                                            'http_method': {
+                                                'type': 'string',
+                                                "enum": [
+                                                    "GET",
+                                                    "PUT",
+                                                    "POST",
+                                                    "PATCH"]}}},
+                                }},
+                        },
+                    },
+                    "flavorRef": {
+                        'type': 'string',
+                        'required': True,
+                    }
                 }},
             'PATCH': {
                 'type': 'object',
@@ -146,6 +185,40 @@ class ServiceSchema(schema_base.SchemaBase):
                                 }},
                         },
                     },
+                    "restrictions": {
+                        'type': 'array',
+                        'items': {
+                            'type': "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "required": True},
+                                "rules": {
+                                    "type": "array",
+                                    'items': {
+                                        'type': "object",
+                                        "properties": {
+                                            'name': {
+                                                'type': 'string'},
+                                            'request_url': {
+                                                'type': 'string'},
+                                            'http_host': {
+                                                'type': 'string'},
+                                            'client_ip': {
+                                                'type': 'string'},
+                                            'http_method': {
+                                                'type': 'string',
+                                                "enum": [
+                                                    "GET",
+                                                    "PUT",
+                                                    "POST",
+                                                    "PATCH"]}}},
+                                }},
+                        },
+                    },
+                    "flavorRef": {
+                        'type': 'string',
+                    }
                 }},
         },
     }
