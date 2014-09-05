@@ -17,7 +17,7 @@ from poppy.model.helpers import origin
 
 
 def load_from_json(json_data):
-    origin_name = json_data.get("origin", "unnamed")
+    origin_name = json_data.get("origin")
     port = json_data.get("port", 80)
     ssl = json_data.get("ssl", False)
     return origin.Origin(origin_name, port, ssl)

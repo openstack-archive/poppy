@@ -21,6 +21,7 @@ import fastly
 import mock
 
 from poppy.provider.fastly import services
+from poppy.transport.pecan.models.request import service
 from tests.unit import base
 
 
@@ -59,91 +60,118 @@ class TestServices(base.TestCase):
     def test_create_with_create_service_exception(self, service_json):
         # ASSERTIONS
         # create_service
+        service_obj = service.load_from_json(service_json)
+
         self.controller.client.create_service.side_effect = fastly.FastlyError(
             Exception('Creating service failed.'))
-        resp = self.controller.create(self.service_name, service_json)
+        resp = self.controller.create(service_obj)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_service.json')
     def test_create_with_create_version_exception(self, service_json):
         self.controller.client.reset_mock()
         self.controller.client.create_service.side_effect = None
+        service_obj = service.load_from_json(service_json)
 
         # create_version
         self.controller.client.create_version.side_effect = fastly.FastlyError(
             Exception('Creating version failed.'))
-        resp = self.controller.create(self.service_name, service_json)
+        resp = self.controller.create(service_obj)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_service.json')
     def test_create_with_create_domain_exception(self, service_json):
         self.controller.client.reset_mock()
         self.controller.client.create_version.side_effect = None
+        service_obj = service.load_from_json(service_json)
 
         # create domains
         self.controller.client.create_domain.side_effect = fastly.FastlyError(
             Exception('Creating domains failed.'))
-        resp = self.controller.create(self.service_name, service_json)
+        resp = self.controller.create(service_obj)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_service.json')
     def test_create_with_create_backend_exception(self, service_json):
         self.controller.client.reset_mock()
         self.controller.client.create_domain.side_effect = None
+        service_obj = service.load_from_json(service_json)
 
         # create backends
         self.controller.client.create_backend.side_effect = fastly.FastlyError(
             Exception('Creating backend failed.'))
-        resp = self.controller.create(self.service_name, service_json)
+        resp = self.controller.create(service_obj)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_service.json')
     def test_create_with_check_domains_exception(self, service_json):
         self.controller.client.reset_mock()
         self.controller.client.create_backend.side_effect = None
+        service_obj = service.load_from_json(service_json)
 
         self.controller.client.check_domains.side_effect = fastly.FastlyError(
             Exception('Check_domains failed.'))
-        resp = self.controller.create(self.service_name, service_json)
+        resp = self.controller.create(service_obj)
+        self.assertIn('error', resp[self.driver.provider_name])
+
+    @ddt.file_data('data_service.json')
+    def test_create_with_list_versions_exception(self, service_json):
+        self.controller.client.reset_mock()
+        self.controller.client.create_backend.side_effect = None
+        service_obj = service.load_from_json(service_json)
+
+        self.controller.client.list_versions.side_effect = fastly.FastlyError(
+            Exception('List_versions failed.'))
+        resp = self.controller.create(service_obj)
+        self.assertIn('error', resp[self.driver.provider_name])
+
+    @ddt.file_data('data_service.json')
+    def test_create_with_activate_version_exception(self, service_json):
+        self.controller.client.reset_mock()
+        self.controller.client.create_backend.side_effect = None
+        service_obj = service.load_from_json(service_json)
+
+        self.controller.client.active_version.side_effect = fastly.FastlyError(
+            Exception('Active_version failed.'))
+        resp = self.controller.create(service_obj)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_service.json')
     def test_create_with_general_exception(self, service_json):
         self.controller.client.reset_mock()
         self.controller.client.check_domains.side_effect = None
+        service_obj = service.load_from_json(service_json)
 
         # test a general exception
         self.controller.client.create_service.side_effect = Exception(
             'Wild exception occurred.')
-        resp = self.controller.create(self.service_name, service_json)
+        resp = self.controller.create(service_obj)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_service.json')
     def test_create(self, service_json):
         # instantiate
         # this case needs to set all return value for each call
+        service_obj = service.load_from_json(service_json)
+
         controller = services.ServiceController(self.driver)
 
         controller.client.create_service.return_value = self.service_instance
         controller.client.create_version.return_value = self.version
+        controller.client.list_versions.return_value = [self.version]
+        controller.client.active_version.return_value = self.version
 
+        fastly_fake_domain_check = type(
+            'FastlyDomain', (object,), {
+                'name': 'fake_domain.global.prod.fastly.net'})
         controller.client.check_domains.return_value = [
-            [{
-             "name": "www.example.com",
-             "comment": "",
-             "service_id": "<fake_id>",
-             "version": "1",
-             "locked": True
-             },
-             "global.prod.fastly.net.",
-             True
-             ]
+            mock.Mock(domain=fastly_fake_domain_check)
         ]
 
-        resp = controller.create(self.service_name, service_json)
+        resp = controller.create(service_obj)
 
         controller.client.create_service.assert_called_once_with(
-            controller.current_customer.id, self.service_name)
+            controller.current_customer.id, service_obj.name)
 
         controller.client.create_version.assert_called_once_with(
             self.service_instance.id)
@@ -151,22 +179,22 @@ class TestServices(base.TestCase):
         controller.client.create_domain.assert_any_call(
             self.service_instance.id,
             self.version.number,
-            service_json['domains'][0]['domain'])
+            service_obj.domains[0].domain)
 
         controller.client.create_domain.assert_any_call(
             self.service_instance.id,
             self.version.number,
-            service_json['domains'][1]['domain'])
+            service_obj.domains[1].domain)
 
         controller.client.check_domains.assert_called_once_with(
             self.service_instance.id, self.version.number)
 
         controller.client.create_backend.assert_has_any_call(
             self.service_instance.id, 1,
-            service_json['origins'][0]['origin'],
-            service_json['origins'][0]['origin'],
-            service_json['origins'][0]['ssl'],
-            service_json['origins'][0]['port'])
+            service_obj.origins[0].origin.replace(":", "-"),
+            service_obj.origins[0].origin,
+            service_obj.origins[0].ssl,
+            service_obj.origins[0].port)
 
         self.assertIn('links', resp[self.driver.provider_name])
 
@@ -231,10 +259,13 @@ class TestProviderValidation(base.TestCase):
         self.controller = services.ServiceController(self.driver)
         self.client = mock_client
         self.service_name = uuid.uuid1()
-        service_json = {"domains": [{"domain": "parsely.sage.com"}],
+        service_json = {"name": "mocksite.com",
+                        "domains": [{"domain": "parsely.sage.com"}],
                         "origins": [{"origin": "mockdomain.com",
-                                     "ssl": False, "port": 80}]}
-        self.controller.create(self.service_name, service_json)
+                                     "ssl": False, "port": 80}],
+                        "flavorRef": "standard"}
+        service_obj = service.load_from_json(service_json)
+        self.controller.create(service_obj)
 
     @mock.patch('fastly.FastlyService')
     def test_get_service_details(self, mock_service):

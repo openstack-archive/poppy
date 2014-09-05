@@ -1,5 +1,5 @@
-{
-    "using_all_fields": {
+{         
+      "non_existing_flavor_input": {
         "name": "mocksite.com",
         "domains": [
             {"domain": "test.mocksite.com" },
@@ -12,7 +12,7 @@
                 "ssl": false
             }
         ],
-        "flavorRef": "standard",
+        "flavorRef": "non_exist",
         "caching": [
             {
                 "name": "default",

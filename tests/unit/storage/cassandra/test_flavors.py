@@ -20,6 +20,7 @@ import ddt
 import mock
 from oslo.config import cfg
 
+from poppy.model import flavor as model_flavor
 from poppy.storage.cassandra import driver
 from poppy.storage.cassandra import flavors
 from poppy.transport.pecan.models.request import flavor
@@ -70,6 +71,10 @@ class CassandraStorageFlavorsTests(base.TestCase):
     @mock.patch.object(flavors.FlavorsController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_add_flavor(self, value, mock_session, mock_execute):
+        self.fc.get = mock.Mock(side_effect=LookupError(
+            "More than one flavor/no record was retrieved."
+        ))
+
         # mock the response from cassandra
         mock_execute.execute.return_value = value
 
@@ -78,6 +83,20 @@ class CassandraStorageFlavorsTests(base.TestCase):
         actual_response = self.fc.add(new_flavor)
 
         self.assertEqual(actual_response, None)
+
+    @ddt.file_data('../data/data_create_flavor.json')
+    @mock.patch.object(flavors.FlavorsController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_add_flavor_exist(self, value, mock_session, mock_execute):
+        self.fc.get = mock.Mock(return_value=model_flavor.Flavor(
+            flavor_id=value['id']
+        ))
+
+        # mock the response from cassandra
+        mock_execute.execute.return_value = value
+        new_flavor = flavor.load_from_json(value)
+
+        self.assertRaises(ValueError, self.fc.add, new_flavor)
 
     @ddt.file_data('data_list_flavors.json')
     @mock.patch.object(flavors.FlavorsController, 'session')

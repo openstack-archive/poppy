@@ -21,7 +21,9 @@ from oslo.config import cfg
 
 from poppy.manager.default import driver
 from poppy.manager.default import services
+from poppy.model import flavor
 from poppy.model.helpers import provider_details
+from poppy.transport.pecan.models.request import service
 from tests.unit import base
 
 
@@ -44,21 +46,98 @@ class DefaultManagerServiceTests(base.TestCase):
 
         self.project_id = 'mock_id'
         self.service_name = 'mock_service'
-        self.service_json = ''
+        self.service_json = {
+            "name": "fake_service_name",
+            "domains": [
+                {"domain": "www.mywebsite.com"},
+                {"domain": "blog.mywebsite.com"},
+            ],
+            "origins": [
+                {
+                    "origin": "mywebsite.com",
+                    "port": 80,
+                    "ssl": False
+                },
+                {
+                    "origin": "mywebsite.com",
+                }
+            ],
+            "caching": [
+                {"name": "default", "ttl": 3600},
+                {"name": "home",
+                 "ttl": 17200,
+                 "rules": [
+                     {"name": "index", "request_url": "/index.htm"}
+                 ]
+                 },
+                {"name": "images",
+                 "ttl": 12800,
+                 }
+            ],
+            "flavorRef": "https://www.poppycdn.io/v1.0/flavors/standard"
+        }
 
     def test_create(self):
+        service_obj = service.load_from_json(self.service_json)
+        # fake one return value
+        self.sc.flavor_controller.get.return_value = flavor.Flavor(
+            "standard",
+            [flavor.Provider("cloudfront", "www.cloudfront.com"),
+             flavor.Provider("fastly", "www.fastly.com"),
+             flavor.Provider("mock", "www.mock_provider.com")]
+        )
 
-        self.sc.create(self.project_id, self.service_name, self.service_json)
+        providers = self.sc._driver.providers
+
+        # mock responses from provider_wrapper.create call
+        # to get code coverage
+        def get_provider_extension_by_name(name):
+            if name == "cloudfront":
+                return mock.Mock(
+                    obj=mock.Mock(
+                        service_controller=mock.Mock(
+                            create=mock.Mock(
+                                return_value={
+                                    'Cloudfront': {
+                                        'id':
+                                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                                        'links': [
+                                            {
+                                                'href': 'www.mysite.com',
+                                                'rel': 'access_url'}],
+                                        'status': "in_progress"}}),
+                        )))
+            elif name == "fastly":
+                return mock.Mock(obj=mock.Mock(service_controller=mock.Mock(
+                    create=mock.Mock(return_value={
+                        'Fastly': {'error': "fail to create servcice",
+                                   'error_detail': 'Fastly Create failed'
+                                   ' because of XYZ'}})
+                    )
+                ))
+            else:
+                return mock.Mock(
+                    obj=mock.Mock(
+                        service_controller=mock.Mock(
+                            create=mock.Mock(
+                                return_value={
+                                    name.title(): {
+                                        'id':
+                                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                                        'links': [
+                                            {
+                                                'href': 'www.mysite.com',
+                                                'rel': 'access_url'}]}}),
+                        )))
+
+        providers.__getitem__.side_effect = get_provider_extension_by_name
+
+        self.sc.create(self.project_id, service_obj)
 
         # ensure the manager calls the storage driver with the appropriate data
-        self.sc.storage.create.assert_called_once_with(self.project_id,
-                                                       self.service_name,
-                                                       self.service_json)
-        # and that the providers are notified.
-        providers = self.sc._driver.providers
-        providers.map.assert_called_once_with(self.sc.provider_wrapper.create,
-                                              self.service_name,
-                                              self.service_json)
+        self.sc.storage_controller.create.assert_called_once_with(
+            self.project_id,
+            service_obj)
 
     @ddt.file_data('data_provider_details.json')
     def test_update(self, provider_details_json):
@@ -67,27 +146,29 @@ class DefaultManagerServiceTests(base.TestCase):
             provider_detail_dict = json.loads(
                 provider_details_json[provider_name]
             )
-            id = provider_detail_dict.get("id", None)
-            access_url = provider_detail_dict.get("access_url", None)
+            provider_service_id = provider_detail_dict.get(
+                "provider_service_id", None)
+            access_urls = provider_detail_dict.get("access_url", None)
             status = provider_detail_dict.get("status", u'unknown')
             provider_detail_obj = provider_details.ProviderDetail(
-                id=id,
-                access_url=access_url,
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
                 status=status)
             self.provider_details[provider_name] = provider_detail_obj
 
         providers = self.sc._driver.providers
 
-        self.sc.storage.get_provider_details.return_value = (
+        self.sc.storage_controller.get_provider_details.return_value = (
             self.provider_details
         )
 
         self.sc.update(self.project_id, self.service_name, self.service_json)
 
         # ensure the manager calls the storage driver with the appropriate data
-        self.sc.storage.update.assert_called_once_with(self.project_id,
-                                                       self.service_name,
-                                                       self.service_json)
+        self.sc.storage_controller.update.assert_called_once_with(
+            self.project_id,
+            self.service_name,
+            self.service_json)
         # and that the providers are notified.
         providers.map.assert_called_once_with(self.sc.provider_wrapper.update,
                                               self.provider_details,
@@ -100,24 +181,27 @@ class DefaultManagerServiceTests(base.TestCase):
             provider_detail_dict = json.loads(
                 provider_details_json[provider_name]
             )
-            id = provider_detail_dict.get("id", None)
-            access_url = provider_detail_dict.get("access_url", None)
+            provider_service_id = provider_detail_dict.get(
+                "provider_service_id", None)
+            access_urls = provider_detail_dict.get("access_urls", None)
             status = provider_detail_dict.get("status", u'unknown')
             provider_detail_obj = provider_details.ProviderDetail(
-                id=id,
-                access_url=access_url,
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
                 status=status)
             self.provider_details[provider_name] = provider_detail_obj
 
-        self.sc.storage.get_provider_details.return_value = (
+        self.sc.storage_controller.get_provider_details.return_value = (
             self.provider_details
         )
 
         self.sc.delete(self.project_id, self.service_name)
 
         # ensure the manager calls the storage driver with the appropriate data
-        self.sc.storage.delete.assert_called_once_with(self.project_id,
-                                                       self.service_name)
+        self.sc.storage_controller.delete.assert_called_once_with(
+            self.project_id,
+            self.service_name
+        )
         # and that the providers are notified.
         providers = self.sc._driver.providers
         providers.map.assert_called_once_with(self.sc.provider_wrapper.delete,
