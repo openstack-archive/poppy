@@ -45,3 +45,11 @@ class ServicesControllerBase(controller.ProviderControllerBase):
     def get(self, service_name):
         """Get details of the service, as stored by the provider."""
         raise NotImplementedError
+
+    def _map_service_name(self, service_name):
+        """Map poppy service name to provider's specific service name.
+
+        Map a poppy service name to a provider's service name so it
+        can comply provider's naming convention.
+        """
+        return service_name

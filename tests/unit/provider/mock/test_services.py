@@ -19,6 +19,7 @@ import ddt
 import mock
 
 from poppy.provider.mock import services
+from poppy.transport.pecan.models.request import service
 from tests.unit import base
 
 
@@ -34,7 +35,8 @@ class MockProviderServicesTest(base.TestCase):
 
     @ddt.file_data('data_service.json')
     def test_update(self, service_json):
-        response = self.sc.update(self.test_provider_service_id, service_json)
+        service_obj = service.load_from_json(service_json)
+        response = self.sc.update(self.test_provider_service_id, service_obj)
         self.assertTrue(response is not None)
 
     def test_delete(self):
@@ -47,5 +49,6 @@ class MockProviderServicesTest(base.TestCase):
 
     @ddt.file_data('data_service.json')
     def test_create(self, service_json):
-        response = self.sc.create("mock_name", service_json)
+        service_obj = service.load_from_json(service_json)
+        response = self.sc.create(service_obj)
         self.assertTrue(response is not None)

@@ -1,7 +1,7 @@
 {
     "using_all_fields": [
         {
-            "name" : "mocksite",
+            "service_name" : "mocksite",
             "domains": [
                 "{\"domain\": \"www.mocksite.com\"}",
                 "{\"domain\": \"blog.mocksite.com\"}"
@@ -12,6 +12,7 @@
             "caching": [
                 "{\"name\": \"default\", \"ttl\": 3600}"
             ],
+            "flavor_id" : "standard",
             "restrictions": [
                 "{\"rules\": [{\"http_host\": \"www.mocksite.com\", \"name\": \"mocksite.com\"}], \"name\": \"website only\"}"
             ]

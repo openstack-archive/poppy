@@ -25,11 +25,13 @@ class Service(common.DictSerializableModel):
                  name,
                  domains,
                  origins,
+                 flavorRef,
                  caching=[],
                  restrictions=[]):
         self._name = name
         self._domains = domains
         self._origins = origins
+        self._flavorRef = flavorRef
         self._caching = caching
         self._restrictions = restrictions
         self._status = u'unknown'
@@ -57,6 +59,14 @@ class Service(common.DictSerializableModel):
     @origins.setter
     def origins(self, value):
         self._origins = value
+
+    @property
+    def flavorRef(self):
+        return self._flavorRef
+
+    @flavorRef.setter
+    def flavorRef(self, value):
+        self._flavorRef = value
 
     @property
     def caching(self):
@@ -92,7 +102,7 @@ class Service(common.DictSerializableModel):
             )
 
     @classmethod
-    def init_from_dict(cls, dict):
+    def init_from_dict(cls, input_dict):
         """Construct a model instance from a dictionary.
 
         This is only meant to be used for converting a
@@ -100,6 +110,6 @@ class Service(common.DictSerializableModel):
         When converting a model into a request model,
         use to_dict.
         """
-        o = cls("unnamed", [], [])
-        o.from_dict(dict)
+        o = cls("unnamed", [], [], "unnamed")
+        o.from_dict(input_dict)
         return o

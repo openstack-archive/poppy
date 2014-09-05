@@ -28,46 +28,49 @@ class ServiceController(base.ServiceBase):
         super(ServiceController, self).__init__(driver)
 
         self.driver = driver
-        self.current_customer = self.client.get_current_customer()
+        try:
+            self.current_customer = self.client.get_current_customer()
+        except Exception:
+            self.current_customer = None
 
-    def update(self, provider_service_id, service_json):
+    def update(self, provider_service_id, service_obj):
         return self.responder.updated(provider_service_id)
 
-    def create(self, service_name, service_json):
+    def create(self, service_obj):
 
         try:
             # Create a new service
             service = self.client.create_service(self.current_customer.id,
-                                                 service_name)
+                                                 service_obj.name)
 
             # Create a new version of the service.
             service_version = self.client.create_version(service.id)
 
             # Create the domain for this service
-            for domain in service_json["domains"]:
+            for domain in service_obj.domains:
                 domain = self.client.create_domain(service.id,
                                                    service_version.number,
-                                                   domain["domain"])
+                                                   domain.domain)
 
             # TODO(tonytan4ever): what if check_domains fail ?
             # For right now we fail the who create process.
             # But do we want to fail the whole service create ? probably not.
             # we need to carefully divise our try_catch here.
-            links = [{"href": '.'.join([domain_dict['name'], suffix]),
+            domain_checks = self.client.check_domains(service.id,
+                                                      service_version.number)
+            links = [{"href": '.'.join([domain_check.domain.name,
+                                        "global.prod.fastly.net"]),
                       "rel": 'access_url'}
-                     for domain_dict, suffix, enabled in
-                     self.client.check_domains(service.id,
-                                               service_version.number)
-                     if enabled]
+                     for domain_check in domain_checks]
 
-            for origin in service_json["origins"]:
+            for origin in service_obj.origins:
                 # Create the origins for this domain
                 self.client.create_backend(service.id,
                                            service_version.number,
-                                           origin["origin"],
-                                           origin["origin"],
-                                           origin["ssl"],
-                                           origin["port"]
+                                           origin.origin.replace(":", "-"),
+                                           origin.origin,
+                                           origin.ssl,
+                                           origin.port
                                            )
             return self.responder.created(service.id, links)
 

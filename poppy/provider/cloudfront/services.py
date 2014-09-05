@@ -28,25 +28,26 @@ class ServiceController(base.ServiceBase):
         super(ServiceController, self).__init__(driver)
 
         self.driver = driver
-        self.current_customer = self.client.get_current_customer()
+        # This does not work, in cloudfront
+        # self.current_customer = self.client.get_current_customer()
 
     # TODO(obulpathi): get service
     def get(self, service_name):
         return {'domains': [], 'origins': [], 'caching': []}
 
     # TODo(obulpathi): update service
-    def update(self, service_name, service_json):
+    def update(self, service_name, service_obj):
         return self.responder.updated(service_name)
 
-    def create(self, service_name, service_json):
+    def create(self, service_obj):
         # TODO(obulpathi): create a single distribution for multiple origins
-        origin = service_json['origins'][0]
+        origin = service_obj.origins[0]
         try:
             # Create the origin for this domain:
             aws_origin = cloudfront.origin.CustomOrigin(
-                dns_name=origin['origin'],
-                http_port=origin['port'],
-                https_port=origin['ssl'],
+                dns_name=origin.origin,
+                http_port=origin.port,
+                https_port=origin.ssl,
                 origin_protocol_policy='match-viewer')
             distribution = self.client.create_distribution(
                 origin=aws_origin,

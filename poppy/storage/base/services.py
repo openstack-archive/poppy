@@ -49,3 +49,7 @@ class ServicesControllerBase(controller.StorageControllerBase):
     @abc.abstractmethod
     def get_provider_details(self, project_id, service_name):
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def update_provider_details(self, provider_details):
+        raise NotImplementedError

@@ -19,8 +19,8 @@ from boto import cloudfront
 import ddt
 import mock
 
-
 from poppy.provider.cloudfront import services
+from poppy.transport.pecan.models.request import service
 from tests.unit import base
 
 
@@ -46,30 +46,34 @@ class TestServices(base.TestCase):
     @ddt.file_data('data_service.json')
     def test_create_server_error(self, service_json):
         # create_distribution: CloudFrontServerError
+        service_obj = service.load_from_json(service_json)
         side_effect = cloudfront.exception.CloudFrontServerError(
             503, 'Service Unavailable')
         self.controller.client.create_distribution.side_effect = side_effect
 
-        resp = self.controller.create(self.service_name, service_json)
+        resp = self.controller.create(service_obj)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_service.json')
     def test_create_exception(self, service_json):
         # generic exception: Exception
+        service_obj = service.load_from_json(service_json)
         self.controller.client.create_distribution.side_effect = Exception(
             'Creating service failed.')
-        resp = self.controller.create(self.service_name, service_json)
+        resp = self.controller.create(service_obj)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_service.json')
     def test_create(self, service_json):
         # clear run
-        resp = self.controller.create(self.service_name, service_json)
+        service_obj = service.load_from_json(service_json)
+        resp = self.controller.create(service_obj)
         self.assertIn('links', resp[self.driver.provider_name])
 
     @ddt.file_data('data_service.json')
     def test_update(self, service_json):
-        resp = self.controller.update(self.service_name, service_json)
+        service_obj = service.load_from_json(service_json)
+        resp = self.controller.update(self.service_name, service_obj)
         self.assertIn('id', resp[self.driver.provider_name])
 
     def test_delete_exceptions(self):
