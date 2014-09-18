@@ -39,3 +39,10 @@ class Model(collections.OrderedDict):
         self["links"] = [link.Model(
             '/v1.0/services/{0}'.format(self["name"]),
             'self')]
+
+        for provider_name in service_obj.provider_details:
+            for access_url in (
+                    service_obj.provider_details[provider_name].access_urls):
+                self["links"].append(link.Model(
+                    access_url,
+                    'access_url'))

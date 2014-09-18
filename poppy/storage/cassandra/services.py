@@ -140,7 +140,7 @@ class ServicesController(base.ServicesController):
 
         services = []
         for r in results:
-            name = r.get("name", "unnamed")
+            name = r.get("name")
             origins = r.get("origins", [])
             domains = r.get("domains", [])
             origins = [origin.Origin(json.loads(o)['origin'],
@@ -148,6 +148,21 @@ class ServicesController(base.ServicesController):
                                      json.loads(o).get("ssl", False))
                        for o in origins]
             domains = [domain.Domain(json.loads(d)['domain']) for d in domains]
+            s = service.Service(name, domains, origins)
+            provider_detail_results = r.get("provider_details")
+            provider_details_dict = {}
+            for provider_name in provider_detail_results:
+                provider_detail_dict = json.loads(
+                    provider_detail_results[provider_name])
+                provider_service_id = provider_detail_dict.get("id", None)
+                access_urls = provider_detail_dict.get("access_urls", [])
+                status = provider_detail_dict.get("status", u'unknown')
+                provider_detail_obj = provider_details.ProviderDetail(
+                    provider_service_id=provider_service_id,
+                    access_urls=access_urls,
+                    status=status)
+                provider_details_dict[provider_name] = provider_detail_obj
+            s.provider_details = provider_details_dict
             services.append(service.Service(name, domains, origins))
         return services[0]
 
@@ -206,12 +221,12 @@ class ServicesController(base.ServicesController):
         results = {}
         for provider_name in exec_results[0]:
             provider_detail_dict = json.loads(exec_results[0][provider_name])
-            id = provider_detail_dict.get("id", None)
-            access_url = provider_detail_dict.get("access_url", None)
+            provider_service_id = provider_detail_dict.get("id", None)
+            access_urls = provider_detail_dict.get("access_urls", [])
             status = provider_detail_dict.get("status", u'unknown')
             provider_detail_obj = provider_details.ProviderDetail(
-                id=id,
-                access_url=access_url,
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
                 status=status)
             results[provider_name] = provider_detail_obj
         return results

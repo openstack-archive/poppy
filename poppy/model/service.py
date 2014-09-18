@@ -33,6 +33,7 @@ class Service(common.DictSerializableModel):
         self._caching = caching
         self._restrictions = restrictions
         self._status = u'unknown'
+        self._provider_details = {}
 
     @property
     def name(self):
@@ -91,8 +92,16 @@ class Service(common.DictSerializableModel):
                     VALID_STATUSES)
             )
 
+    @property
+    def provider_details(self):
+        return self._provider_details
+
+    @provider_details.setter
+    def provider_details(self, value):
+        self._provider_details = value
+
     @classmethod
-    def init_from_dict(cls, dict):
+    def init_from_dict(cls, input_dict):
         """Construct a model instance from a dictionary.
 
         This is only meant to be used for converting a
@@ -101,5 +110,5 @@ class Service(common.DictSerializableModel):
         use to_dict.
         """
         o = cls("unnamed", [], [])
-        o.from_dict(dict)
+        o.from_dict(input_dict)
         return o

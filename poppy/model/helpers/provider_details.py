@@ -21,9 +21,11 @@ class ProviderDetail(object):
 
     '''ProviderDetail object for each provider.'''
 
-    def __init__(self, id=None, access_url=None, status=u"unknown", name=None):
-        self._id = id
-        self._access_url = access_url
+    def __init__(self, provider_service_id=None, access_urls=None,
+                 status=u"unknown",
+                 name=None):
+        self._id = provider_service_id
+        self._access_urls = access_urls
         self._status = status
         self._name = name
 
@@ -36,12 +38,12 @@ class ProviderDetail(object):
         self._id = value
 
     @property
-    def access_url(self):
-        return self._access_url
+    def access_urls(self):
+        return self._access_urls
 
-    @access_url.setter
-    def access_url(self, value):
-        self._access_url = value
+    @access_urls.setter
+    def access_urls(self, value):
+        self._access_urls = value
 
     @property
     def status(self):
