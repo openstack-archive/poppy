@@ -31,8 +31,8 @@ class TestProviderWrapper(base.TestCase):
         # fake a provider details to work with unittest
         self.fake_provider_details = {
             "Fastly": provider_details.ProviderDetail(
-                id=uuid.uuid1(),
-                access_url='mydummywebsite.prod.fastly.com')}
+                provider_service_id=uuid.uuid1(),
+                access_urls=['mydummywebsite.prod.fastly.com'])}
 
     def test_update_with_keyerror(self):
         mock_ext = mock.Mock(provider_name="no_existent_provider")

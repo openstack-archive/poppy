@@ -45,6 +45,10 @@ class ServiceControllerTest(base.FunctionalTest):
         self.assertTrue("domains" in response_dict)
         self.assertTrue("origins" in response_dict)
 
+    def test_get_one_not_exist(self):
+        self.assertRaises(app.AppError, self.app.get,
+                          '/v1.0/0001/services/non_exist_service_name')
+
     def test_create(self):
         # create with errorenous data: invalid json data
         self.assertRaises(app.AppError, self.app.put,

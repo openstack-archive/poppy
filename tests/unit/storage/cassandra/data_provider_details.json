@@ -1,9 +1,9 @@
 {
 	"provider_details":
 			{
-			   "MaxCDN": "{\"id\": 11942, \"access_url\": \"mypullzone.netdata.com\"}",
-			   "Mock": "{\"id\": 73242, \"access_url\": \"mycdn.mock.com\"}",
-			   "CloudFront": "{\"id\": \"5ABC892\", \"access_url\": \"cf123.cloudcf.com\"}",
-			   "Fastly": "{\"id\": 3488, \"access_url\": \"mockcf123.fastly.prod.com\"}"
+			   "MaxCDN": "{\"id\": 11942, \"access_urls\": [\"mypullzone.netdata.com\"]}",
+			   "Mock": "{\"id\": 73242, \"access_urls\": [\"mycdn.mock.com\"]}",
+			   "CloudFront": "{\"id\": \"5ABC892\", \"access_urls\": [\"cf123.cloudcf.com\"]}",
+			   "Fastly": "{\"id\": 3488, \"access_urls\": [\"mockcf123.fastly.prod.com\"]}"
 			}
 }
