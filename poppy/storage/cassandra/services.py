@@ -39,7 +39,8 @@ CQL_GET_SERVICE = '''
         domains,
         origins,
         caching_rules,
-        restrictions
+        restrictions,
+        provider_details
     FROM services
     WHERE project_id = %(project_id)s AND service_name = %(service_name)s
 '''
@@ -130,8 +131,8 @@ class ServicesController(base.ServicesController):
             origins = r.get("origins", [])
             domains = r.get("domains", [])
             origins = [origin.Origin(json.loads(o)['origin'],
-                                     json.loads(o).get("port", 80),
-                                     json.loads(o).get("ssl", False))
+                                     json.loads(o).get('port', 80),
+                                     json.loads(o).get('ssl', False))
                        for o in origins]
             domains = [domain.Domain(json.loads(d)['domain']) for d in domains]
             flavorRef = r.get("flavor_id")
@@ -147,22 +148,37 @@ class ServicesController(base.ServicesController):
         results = self.session.execute(CQL_GET_SERVICE, args)
 
         if len(results) != 1:
-            raise LookupError("No service or multiple service found: %s"
-                              % service_name)
+            raise ValueError('No service or multiple service found: %s'
+                             % service_name)
 
-        services = []
-        for r in results:
-            name = r.get("service_name")
-            origins = r.get("origins", [])
-            domains = r.get("domains", [])
-            origins = [origin.Origin(json.loads(o)['origin'],
-                                     json.loads(o).get("port", 80),
-                                     json.loads(o).get("ssl", False))
-                       for o in origins]
-            domains = [domain.Domain(json.loads(d)['domain']) for d in domains]
-            flavorRef = r.get("flavor_id")
-            services.append(service.Service(name, domains, origins, flavorRef))
-        return services[0]
+        # at this point, it is certain that there's exactly 1 result in
+        # results.
+        result = results[0]
+        name = result.get('service_name')
+        origins = result.get('origins', [])
+        domains = result.get('domains', [])
+        origins = [origin.Origin(json.loads(o)['origin'],
+                                 json.loads(o).get('port', 80),
+                                 json.loads(o).get('ssl', False))
+                   for o in origins]
+        domains = [domain.Domain(json.loads(d)['domain']) for d in domains]
+        flavorRef = result.get("flavor_id")
+        s = service.Service(name, domains, origins, flavorRef)
+        provider_detail_results = result.get('provider_details')
+        provider_details_dict = {}
+        for provider_name in provider_detail_results:
+            provider_detail_dict = json.loads(
+                provider_detail_results[provider_name])
+            provider_service_id = provider_detail_dict.get('id', None)
+            access_urls = provider_detail_dict.get('access_urls', [])
+            status = provider_detail_dict.get('status', u'unknown')
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
+                status=status)
+            provider_details_dict[provider_name] = provider_detail_obj
+        s.provider_details = provider_details_dict
+        return s
 
     def create(self, project_id, service_obj):
         # create the service in storage
@@ -172,7 +188,7 @@ class ServicesController(base.ServicesController):
         # Note: If it does, no LookupError will be raised
         try:
             self.get(project_id, service_name)
-        except LookupError:
+        except ValueError:  # this value error means this service doesn't exist
             pass
         else:
             raise ValueError("Service %s already exists..." % service_name)
@@ -232,12 +248,13 @@ class ServicesController(base.ServicesController):
         results = {}
         for provider_name in exec_results[0]:
             provider_detail_dict = json.loads(exec_results[0][provider_name])
-            pr_id = provider_detail_dict.get("provider_service_id", None)
+
+            provider_service_id = provider_detail_dict.get('id', None)
             access_urls = provider_detail_dict.get("access_urls", None)
             status = provider_detail_dict.get("status", u'unknown')
             error_info = provider_detail_dict.get("error_info", None)
             provider_detail_obj = provider_details.ProviderDetail(
-                provider_service_id=pr_id,
+                provider_service_id=provider_service_id,
                 access_urls=access_urls,
                 status=status,
                 error_info=error_info)

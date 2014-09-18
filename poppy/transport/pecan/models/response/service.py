@@ -18,6 +18,9 @@ try:
 except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
 
+import pecan
+
+from poppy.common import uri
 from poppy.transport.pecan.models.response import domain
 from poppy.transport.pecan.models.response import link
 from poppy.transport.pecan.models.response import origin
@@ -29,7 +32,7 @@ class Model(collections.OrderedDict):
 
     def __init__(self, service_obj):
         super(Model, self).__init__()
-        self["name"] = service_obj.name,
+        self["name"] = service_obj.name
         self["domains"] = [domain.Model(d) for d in service_obj.domains]
         self["origins"] = [origin.Model(o) for o in service_obj.origins]
         self["status"] = service_obj.status
@@ -37,5 +40,15 @@ class Model(collections.OrderedDict):
         # TODO(tonytan4ever) : add access_url links.
         # This has things to do with provider_detail change. (CDN-172)
         self["links"] = [link.Model(
-            '/v1.0/services/{0}'.format(self["name"]),
+            str(
+                uri.encode(u'{0}/v1.0/services/{1}'.format(
+                    pecan.request.host_url,
+                    self['name']))),
             'self')]
+
+        for provider_name in service_obj.provider_details:
+            for access_url in (
+                    service_obj.provider_details[provider_name].access_urls):
+                self["links"].append(link.Model(
+                    access_url,
+                    'access_url'))

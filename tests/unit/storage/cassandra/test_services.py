@@ -65,14 +65,13 @@ class CassandraStorageServiceTests(base.TestCase):
         # mock the response from cassandra
         mock_execute.execute.return_value = []
 
-        self.assertRaises(LookupError, self.sc.get,
+        self.assertRaises(ValueError, self.sc.get,
                           self.project_id, self.service_name)
 
     @ddt.file_data('../data/data_create_service.json')
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_create_service(self, value, mock_session, mock_execute):
-        value.update({'name': self.service_name})
         service_obj = req_service.load_from_json(value)
         responses = self.sc.create(self.project_id, service_obj)
 
@@ -155,7 +154,7 @@ class CassandraStorageServiceTests(base.TestCase):
             provider_detail_dict = json.loads(v)
             provider_details_dict[k] = provider_details.ProviderDetail(
                 provider_service_id=(
-                    provider_detail_dict["provider_service_id"]),
+                    provider_detail_dict["id"]),
                 access_urls=provider_detail_dict["access_urls"])
 
         # mock the response from cassandra

@@ -53,7 +53,12 @@ class ServicesController(base.Controller):
     @pecan.expose('json')
     def get_one(self, service_name):
         services_controller = self._driver.manager.services_controller
-        service_obj = services_controller.get(self.project_id, service_name)
+        try:
+            service_obj = services_controller.get(
+                self.project_id, service_name)
+        except ValueError:
+            pecan.abort(404, detail='service %s is not found' %
+                        service_name)
         # convert a service model into a response service model
         return resp_service_model.Model(service_obj)
 

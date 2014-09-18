@@ -24,6 +24,7 @@ class ProviderDetail(object):
     def __init__(self, provider_service_id=None, access_urls=[],
                  status=u"unknown", name=None, error_info=None):
         self._provider_service_id = provider_service_id
+        self._id = provider_service_id
         self._access_urls = access_urls
         self._status = status
         self._name = name

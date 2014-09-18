@@ -146,13 +146,12 @@ class DefaultManagerServiceTests(base.TestCase):
             provider_detail_dict = json.loads(
                 provider_details_json[provider_name]
             )
-            provider_service_id = provider_detail_dict.get(
-                "provider_service_id", None)
-            access_urls = provider_detail_dict.get("access_url", None)
-            status = provider_detail_dict.get("status", u'unknown')
+            provider_service_id = provider_detail_dict.get('id', None)
+            access_url = provider_detail_dict.get('access_url', None)
+            status = provider_detail_dict.get('status', u'unknown')
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
-                access_urls=access_urls,
+                access_urls=access_url,
                 status=status)
             self.provider_details[provider_name] = provider_detail_obj
 
@@ -181,10 +180,9 @@ class DefaultManagerServiceTests(base.TestCase):
             provider_detail_dict = json.loads(
                 provider_details_json[provider_name]
             )
-            provider_service_id = provider_detail_dict.get(
-                "provider_service_id", None)
-            access_urls = provider_detail_dict.get("access_urls", None)
-            status = provider_detail_dict.get("status", u'unknown')
+            provider_service_id = provider_detail_dict.get('id', None)
+            access_urls = provider_detail_dict.get('access_urls', [])
+            status = provider_detail_dict.get('status', u'unknown')
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
                 access_urls=access_urls,

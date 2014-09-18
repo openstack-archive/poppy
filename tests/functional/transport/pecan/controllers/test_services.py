@@ -47,15 +47,12 @@ class ServiceControllerTest(base.FunctionalTest):
         self.assertTrue("domains" in response_dict)
         self.assertTrue("origins" in response_dict)
 
+    def test_get_one_not_exist(self):
+        self.assertRaises(app.AppError, self.app.get,
+                          '/v1.0/0001/services/non_exist_service_name')
+
     @ddt.file_data("data_create_service.json")
     def test_create(self, service_json):
-        # create with errorenous data: invalid json data
-        self.assertRaises(app.AppError, self.app.post,
-                          '/v1.0/0001/services',
-                          params="{", headers={
-                              "Content-Type": "application/json"
-                          })
-
         # create with good data
         response = self.app.post('/v1.0/0001/services',
                                  params=json.dumps(service_json),
@@ -64,6 +61,13 @@ class ServiceControllerTest(base.FunctionalTest):
 
     @ddt.file_data("data_create_service_bad_input_json.json")
     def test_create_with_bad_input_json(self, service_json):
+        # create with errorenous data: invalid json data
+        self.assertRaises(app.AppError, self.app.post,
+                          '/v1.0/0001/services',
+                          params="{", headers={
+                              "Content-Type": "application/json"
+                          })
+
         # create with errorenous data
         self.assertRaises(app.AppError, self.app.post,
                           '/v1.0/0001/services',
