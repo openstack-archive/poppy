@@ -11,7 +11,7 @@ CREATE TABLE services (
     restrictions LIST<TEXT>,
     provider_details MAP<TEXT, TEXT>,
     PRIMARY KEY (project_id, service_name)
-); 
+);
 
 CREATE TABLE flavors (
     flavor_id VARCHAR,

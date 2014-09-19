@@ -1,5 +1,5 @@
-#
 # Copyright (c) 2014 Rackspace, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,9 +14,18 @@
 # limitations under the License.
 
 
-"""Cassandra Storage Driver for CDN"""
+from tests.unit.storage.cassandra import parser
 
-from poppy.storage.cassandra import driver
+class Session(object):
+    def __init__(self, cassandra):
+        self.keyspace = None
+        self.cassandra = cassandra
 
-# Hoist classes into package namespace
-Driver = driver.CassandraStorageDriver
+    def set_keyspace(self, keyspace):
+        self.keyspace = keyspace
+
+    def execute(self, cmd, args = None):
+        # parse the command
+        method, args = parser.parse(cmd, args)
+        # execute the command
+        getattr(self.cassandra, method)(args)

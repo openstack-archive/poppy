@@ -1,5 +1,5 @@
-#
 # Copyright (c) 2014 Rackspace, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,9 +14,19 @@
 # limitations under the License.
 
 
-"""Cassandra Storage Driver for CDN"""
+from tests.unit.storage.cassandra import mockcassandra
+from tests.unit.storage.cassandra import session
 
-from poppy.storage.cassandra import driver
+class Cluster(object):
 
-# Hoist classes into package namespace
-Driver = driver.CassandraStorageDriver
+    def __init__(self, hosts = None):
+        self.cassandra = mockcassandra.Cassandra()
+
+    def connect(self, keyspace=None):
+        connection = session.Session(self.cassandra)
+        if keyspace:
+            connection.set_keyspace(keyspace)
+        return connection
+
+    def shutdown(self):
+        pass

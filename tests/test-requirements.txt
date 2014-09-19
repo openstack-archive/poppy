@@ -6,5 +6,6 @@ mock
 nose
 openstack.nose_plugin
 oslotest
+pyparsing
 requests
 testtools
