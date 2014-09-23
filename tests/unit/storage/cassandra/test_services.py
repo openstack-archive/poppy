@@ -136,9 +136,10 @@ class CassandraStorageServiceTests(base.TestCase):
     def test_get_provider_details(self, provider_details_json,
                                   mock_session, mock_execute):
         # mock the response from cassandra
-        mock_execute.execute.return_value = [provider_details_json]
-        actual_response = self.sc.get_provider_details(self.project_id,
-                                                       self.service_name)
+        mock_execute.execute.return_value = [{'provider_details':
+                                              provider_details_json}]
+        actual_response = self.sc._get_provider_details(self.project_id,
+                                                        self.service_name)
         self.assertTrue("MaxCDN" in actual_response)
         self.assertTrue("Mock" in actual_response)
         self.assertTrue("CloudFront" in actual_response)
@@ -160,7 +161,7 @@ class CassandraStorageServiceTests(base.TestCase):
         # mock the response from cassandra
         mock_execute.execute.return_value = None
 
-        self.sc.update_provider_details(
+        self.sc._update_provider_details(
             self.project_id,
             self.service_name,
             provider_details_dict)

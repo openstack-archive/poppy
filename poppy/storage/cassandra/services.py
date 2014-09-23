@@ -171,7 +171,7 @@ class ServicesController(base.ServicesController):
                 provider_detail_results[provider_name])
             provider_service_id = provider_detail_dict.get('id', None)
             access_urls = provider_detail_dict.get('access_urls', [])
-            status = provider_detail_dict.get('status', u'unknown')
+            status = provider_detail_dict.get('status', u'creating')
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
                 access_urls=access_urls,
@@ -233,7 +233,7 @@ class ServicesController(base.ServicesController):
         }
         self.session.execute(CQL_DELETE_SERVICE, args)
 
-    def get_provider_details(self, project_id, service_name):
+    def _get_provider_details(self, project_id, service_name):
         # TODO(tonytan4ever): Use real CQL read provider details info
         args = {
             'project_id': project_id,
@@ -245,13 +245,13 @@ class ServicesController(base.ServicesController):
         # if a list, the return the first item of a list. if it is a dictionary
         # returns the dictionary
         exec_results = self.session.execute(CQL_GET_PROVIDER_DETAILS, args)
+        result = exec_results[0]['provider_details']
         results = {}
-        for provider_name in exec_results[0]:
-            provider_detail_dict = json.loads(exec_results[0][provider_name])
-
+        for provider_name in result:
+            provider_detail_dict = json.loads(result[provider_name])
             provider_service_id = provider_detail_dict.get('id', None)
             access_urls = provider_detail_dict.get("access_urls", None)
-            status = provider_detail_dict.get("status", u'unknown')
+            status = provider_detail_dict.get("status", u'creating')
             error_info = provider_detail_dict.get("error_info", None)
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
@@ -261,8 +261,8 @@ class ServicesController(base.ServicesController):
             results[provider_name] = provider_detail_obj
         return results
 
-    def update_provider_details(self, project_id, service_name,
-                                provider_details):
+    def _update_provider_details(self, project_id, service_name,
+                                 provider_details):
         provider_detail_dict = {}
         for provider_name in provider_details:
             provider_detail_dict[provider_name] = json.dumps({
