@@ -13,8 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import multiprocessing
+
 from poppy.manager import base
 from poppy.model.helpers import provider_details
+
+
+def service_delete_worker(provider_details, service_controller,
+                          project_id, service_name):
+    responders = []
+    # delete all service from each provider
+    for provider in provider_details:
+        responder = service_controller.provider_wrapper.delete(
+            service_controller._driver.providers[provider.lower()],
+            provider_details)
+        responders.append(responder)
+
+    for responder in responders:
+        # this is the item of responder, if there's "error"
+        # key in it, it means the deletion for this provider failed.
+        # in that case we cannot delete service from poppy storage.
+        if "error" in responder.items()[0][1]:
+            break
+    else:
+        # Only if all provider successfully deleted we can delete
+        # the poppy service.
+        service_controller.storage_controller.delete(project_id, service_name)
 
 
 class DefaultServicesController(base.ServicesController):
@@ -80,9 +104,9 @@ class DefaultServicesController(base.ServicesController):
                     )
                     provider_details_dict[provider_name].status = 'failed'
 
-        self.storage_controller.update_provider_details(project_id,
-                                                        service_name,
-                                                        provider_details_dict)
+        self.storage_controller._update_provider_details(project_id,
+                                                         service_name,
+                                                         provider_details_dict)
 
         return responders
 
@@ -93,7 +117,7 @@ class DefaultServicesController(base.ServicesController):
             service_obj
         )
 
-        provider_details = self.storage_controller.get_provider_details(
+        provider_details = self.storage_controller._get_provider_details(
             project_id,
             service_name)
         return self._driver.providers.map(
@@ -102,11 +126,23 @@ class DefaultServicesController(base.ServicesController):
             service_obj)
 
     def delete(self, project_id, service_name):
-        self.storage_controller.delete(project_id, service_name)
-
-        provider_details = self.storage_controller.get_provider_details(
+        provider_details = self.storage_controller._get_provider_details(
             project_id,
             service_name)
-        return self._driver.providers.map(
-            self.provider_wrapper.delete,
+
+        # change each provider detail's status to delete_in_progress
+        # TODO(tonytan4ever): what if this provider is in 'falied status'?
+        # Maybe raising a 400 error here ?
+        for provider in provider_details:
+            provider_details[provider].status = "delete_in_progress"
+
+        provider_details = self.storage_controller._update_provider_details(
+            project_id,
+            service_name,
             provider_details)
+
+        p = multiprocessing.Process(target=service_delete_worker,
+                                    args=(provider_details, self, project_id,
+                                          service_name))
+        p.start()
+        return
