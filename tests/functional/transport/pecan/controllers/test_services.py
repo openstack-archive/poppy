@@ -132,4 +132,4 @@ class ServiceControllerTest(base.FunctionalTest):
     def test_delete(self):
         response = self.app.delete('/v1.0/0001/services/fake_service_name_4')
 
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(202, response.status_code)

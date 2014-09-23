@@ -26,20 +26,20 @@ class Responder(object):
     def failed(self, msg):
         ex_type, ex, tb = sys.exc_info()
 
-        print("error: {0} {1} {2} {3}".format(self.provider, msg, ex_type, ex))
+        print('error: {0} {1} {2} {3}'.format(self.provider, msg, ex_type, ex))
         traceback.print_tb(tb)
 
         return {
             self.provider: {
-                "error": msg,
-                "error_detail": traceback.format_exc()
+                'error': msg,
+                'error_detail': traceback.format_exc(),
             }
         }
 
     def created(self, provider_service_id, links, **extras):
         provider_response = {
-            "id": provider_service_id,
-            "links": links
+            'id': provider_service_id,
+            'links': links
         }
         provider_response.update(extras)
         return {
@@ -50,22 +50,22 @@ class Responder(object):
         # TODO(tonytan4ever): May need to add link information as return
         return {
             self.provider: {
-                "id": provider_service_id
+                'id': provider_service_id
             }
         }
 
     def deleted(self, provider_service_id):
         return {
             self.provider: {
-                "id": provider_service_id
+                'id': provider_service_id
             }
         }
 
     def get(self, domain_list, origin_list, cache_list):
         return {
             self.provider: {
-                "domains": domain_list,
-                "origins": origin_list,
-                "caching": cache_list
+                'domains': domain_list,
+                'origins': origin_list,
+                'caching': cache_list
             }
         }
