@@ -32,8 +32,14 @@ class MockDBStorageDriverTests(base.TestCase):
     def test_database(self):
         self.assertTrue(self.mockdb_driver.database is None)
 
+    def test_connect(self):
+        self.assertTrue(self.mockdb_driver.connect() == "")
+
     def test_connection(self):
         self.assertTrue(self.mockdb_driver.connection is None)
+
+    def test_close_connection(self):
+        self.assertTrue(self.mockdb_driver.close_connection() == "")
 
     def test_services_controller(self):
         self.assertTrue(self.mockdb_driver.services_controller.session is None)
