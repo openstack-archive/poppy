@@ -125,7 +125,11 @@ class ServicesController(base.Controller):
     @pecan.expose('json')
     def delete(self, service_name):
         services_controller = self._driver.manager.services_controller
-        return services_controller.delete(self.project_id, service_name)
+        try:
+            services_controller.delete(self.project_id, service_name)
+        except LookupError as e:
+            pecan.abort(404, detail=str(e))
+        pecan.response.status = 202
 
     @pecan.expose('json')
     @decorators.validate(
