@@ -51,6 +51,7 @@ class CassandraStorageDriver(base.Driver):
         self._conf.register_opts(CASSANDRA_OPTIONS,
                                  group=CASSANDRA_GROUP)
         self.cassandra_conf = self._conf[CASSANDRA_GROUP]
+        self.session = None
 
     def is_alive(self):
         return True
@@ -59,11 +60,6 @@ class CassandraStorageDriver(base.Driver):
     def storage_name(self):
         """For name."""
         return 'Cassandra'
-
-    @property
-    def connection(self):
-        """Cassandra connection instance."""
-        return _connection(self.cassandra_conf)
 
     @property
     def services_controller(self):
@@ -75,4 +71,14 @@ class CassandraStorageDriver(base.Driver):
 
     @property
     def database(self):
-        return self.connection
+        # if the session has been shutdown, reopen a session
+        if self.session is None or self.session.is_shutdown:
+            self.connect()
+        return self.session
+
+    def connect(self):
+        self.session = _connection(self.cassandra_conf)
+
+    def close_connection(self):
+        self.session.cluster.shutdown()
+        self.session.shutdown()

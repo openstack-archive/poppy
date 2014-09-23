@@ -86,7 +86,7 @@ class ServicesController(base.ServicesController):
                     provider_detail_dicts[provider_name])
                 provider_service_id = provider_detail_dict.get('id', None)
                 access_urls = provider_detail_dict.get('access_urls', [])
-                status = provider_detail_dict.get('status', u'unknown')
+                status = provider_detail_dict.get('status', u'creating')
                 provider_detail_obj = provider_details.ProviderDetail(
                     provider_service_id=provider_service_id,
                     access_urls=access_urls,
@@ -161,7 +161,7 @@ class ServicesController(base.ServicesController):
                 provider_detail_dicts[provider_name])
             provider_service_id = provider_detail_dict.get('id', None)
             access_urls = provider_detail_dict.get('access_urls', [])
-            status = provider_detail_dict.get('status', u'unknown')
+            status = provider_detail_dict.get('status', u'creating')
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
                 access_urls=access_urls,
@@ -180,27 +180,28 @@ class ServicesController(base.ServicesController):
         return ''
 
     def delete(self, project_id, service_name):
-
         # delete from providers
         return ''
 
     def get_provider_details(self, project_id, service_name):
+        if service_name == 'non_exist_service_name':
+            raise LookupError('Service non_exist_service_name does not exist')
         return {
-            "MaxCDN": provider_details.ProviderDetail(
+            'MaxCDN': provider_details.ProviderDetail(
                 provider_service_id=11942,
                 name='my_service_name',
                 access_urls=['my_service_name'
                              '.mycompanyalias.netdna-cdn.com']),
-            "Fastly": provider_details.ProviderDetail(
+            'Fastly': provider_details.ProviderDetail(
                 provider_service_id=3488,
                 name="my_service_name",
                 access_urls=['my_service_name'
                              '.global.prod.fastly.net']),
-            "CloudFront": provider_details.ProviderDetail(
+            'CloudFront': provider_details.ProviderDetail(
                 provider_service_id=5892,
                 access_urls=['my_service_name'
                              '.gibberish.amzcf.com']),
-            "Mock": provider_details.ProviderDetail(
+            'Mock': provider_details.ProviderDetail(
                 provider_service_id="73242",
                 access_urls=['my_service_name.mock.com'])}
 
