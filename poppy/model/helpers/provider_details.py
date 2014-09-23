@@ -14,7 +14,11 @@
 # limitations under the License.
 
 
-VALID_STATUSES = [u'unknown', u'in_progress', u'deployed', u'failed']
+VALID_STATUSES = [
+    u'deploy_in_progress',
+    u'deployed',
+    u'delete_in_progress',
+    u'failed']
 
 
 class ProviderDetail(object):
@@ -22,7 +26,7 @@ class ProviderDetail(object):
     '''ProviderDetail object for each provider.'''
 
     def __init__(self, provider_service_id=None, access_urls=[],
-                 status=u"unknown", name=None, error_info=None):
+                 status=u"deploy_in_progress", name=None, error_info=None):
         self._provider_service_id = provider_service_id
         self._id = provider_service_id
         self._access_urls = access_urls
