@@ -102,11 +102,15 @@ class DefaultServicesController(base.ServicesController):
             service_obj)
 
     def delete(self, project_id, service_name):
-        self.storage_controller.delete(project_id, service_name)
-
         provider_details = self.storage_controller.get_provider_details(
             project_id,
             service_name)
-        return self._driver.providers.map(
-            self.provider_wrapper.delete,
-            provider_details)
+        responders = []
+        for provider in provider_details:
+            responder = self.provider_wrapper.delete(
+                self._driver.providers[provider.lower()],
+                provider_details)
+            responders.append(responder)
+
+        self.storage_controller.delete(project_id, service_name)
+        return responders

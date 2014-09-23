@@ -16,7 +16,7 @@
 from poppy.model import common
 
 
-VALID_STATUSES = [u'unknown', u'in_progress', u'deployed', u'failed']
+VALID_STATUSES = [u'created', u'enabled', u'disabled', u'delete_in_progress']
 
 
 class Service(common.DictSerializableModel):
@@ -34,7 +34,7 @@ class Service(common.DictSerializableModel):
         self._flavorRef = flavorRef
         self._caching = caching
         self._restrictions = restrictions
-        self._status = u'unknown'
+        self._status = u'created'
         self._provider_details = {}
 
     @property
