@@ -53,10 +53,24 @@ class CassandraStorageDriverTests(base.TestCase):
     def test_is_alive(self):
         self.assertTrue(self.cassandra_driver.is_alive())
 
-    @mock.patch.object(cassandra.cluster.Cluster, 'connect')
-    def test_connection(self, mock_cluster):
-        self.cassandra_driver.connection()
-        mock_cluster.assert_called_with('mock_poppy')
+    def test_connect(self):
+        self.cassandra_driver.session = None
+        self.cassandra_driver.connect = mock.Mock()
+        self.cassandra_driver.database
+        self.cassandra_driver.connect.assert_called_once_with()
+        # reset session to not None value
+        self.cassandra_driver.session = mock.Mock(is_shutdown=False)
+        # 2nd time should get a not-none session
+        self.assertTrue(self.cassandra_driver.database is not None)
+
+    def test_close_connection(self):
+        self.cassandra_driver.session = mock.Mock()
+        self.cassandra_driver.close_connection()
+
+        self.cassandra_driver.session.cluster.shutdown.assert_called_once_with(
+        )
+        self.cassandra_driver.session.shutdown.assert_called_once_with(
+        )
 
     def test_service_controller(self):
         sc = self.cassandra_driver.services_controller
