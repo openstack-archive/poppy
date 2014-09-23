@@ -68,3 +68,9 @@ class MockDBStorageDriver(base.Driver):
     @property
     def database(self):
         return self.connection
+
+    def connect(self):
+        return ""
+
+    def close_connection(self):
+        return ""
