@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 from cafe.engine.models import data_interfaces
 
 
@@ -25,16 +27,25 @@ class PoppyConfig(data_interfaces.ConfigSectionInterface):
         """poppy endpoint."""
         return self.get('base_url')
 
+    @property
+    def flavor(self):
+        """poppy flavor definitions."""
+        return json.loads(self.get('flavor'))
 
-class PoppyServerConfig(data_interfaces.ConfigSectionInterface):
-    """Defines the config values for starting (or not) a Poppy server."""
-    SECTION_NAME = 'poppy_server'
+
+class TestConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the config values specific to test execution."""
+    SECTION_NAME = 'test_configuration'
 
     @property
     def run_server(self):
         """Boolean value indicating whether to start a Poppy server."""
         return self.get_boolean('run_server')
 
+    @property
+    def provider_validation(self):
+        """Boolean value indicating if tests verify provider side details."""
+        return self.get_boolean('provider_validation')
 
 class AuthConfig(data_interfaces.ConfigSectionInterface):
     """Defines the auth config values."""
@@ -53,14 +64,34 @@ class AuthConfig(data_interfaces.ConfigSectionInterface):
     @property
     def user_name(self):
         """The name of the user, if applicable."""
-        return self.get("user_name")
+        return self.get('user_name')
 
     @property
     def api_key(self):
         """The user's api key, if applicable."""
-        return self.get_raw("api_key")
+        return self.get_raw('api_key')
 
     @property
     def tenant_id(self):
         """The user's tenant_id, if applicable."""
-        return self.get("tenant_id")
+        return self.get('tenant_id')
+
+
+class FastlyConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the fastly config values."""
+    SECTION_NAME = 'fastly'
+
+    @property
+    def api_key(self):
+        """Fastly API Key."""
+        return self.get('api_key')
+
+    @property
+    def email(self):
+        """Email id associated with Fastly account."""
+        return self.get('email')
+
+    @property
+    def password(self):
+        """Fastly password."""
+        return self.get('password')

@@ -1,9 +1,9 @@
 {
     "all_fields": {
-        "name": "my_servicde_name",
+        "name": "my_service_name",
         "domain_list": [{"domain": "mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
-        "origin_list": [{"origins": "mywebsite.com",
+        "origin_list": [{"origin": "mywebsite1.com",
                          "port": 443,
                          "ssl": false}],
         "flavorRef": "standard",
@@ -14,10 +14,10 @@
                                      "request_url" : "/index.htm"}]}]
     },
     "caching_empty": {
-    	"name": "my_servicde_name_2",
+        "name": "my_service_name_2",
         "domain_list": [{"domain": "mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
-        "origin_list": [{"origins": "mywebsite.com",
+        "origin_list": [{"origin": "mywebsite1.com",
                          "port": 443,
                          "ssl": false}],
         "flavorRef": "standard",
