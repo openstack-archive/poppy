@@ -19,7 +19,6 @@ from cafe.drivers.unittest import fixtures
 import jsonschema
 from oslo.config import cfg
 
-
 from tests.api.utils import client
 from tests.api.utils import config
 from tests.api.utils import server
@@ -35,8 +34,6 @@ class TestBase(fixtures.BaseTestFixture):
 
     @classmethod
     def setUpClass(cls):
-
-        cls.conf_file = 'poppy_mockdb.conf'
 
         super(TestBase, cls).setUpClass()
 
@@ -57,11 +54,11 @@ class TestBase(fixtures.BaseTestFixture):
                                         serialize_format='json',
                                         deserialize_format='json')
 
-        cls.server_config = config.PoppyServerConfig()
-
-        if cls.server_config.run_server:
+        cls.test_config = config.TestConfig()
+        if cls.test_config.run_server:
+            conf_file = 'poppy_mockdb.conf'
             conf_path = os.environ["POPPY_TESTS_CONFIGS_DIR"]
-            config_file = os.path.join(conf_path, cls.conf_file)
+            config_file = os.path.join(conf_path, conf_file)
 
             conf = cfg.ConfigOpts()
             conf(project='poppy', prog='poppy', args=[],
@@ -79,6 +76,6 @@ class TestBase(fixtures.BaseTestFixture):
     @classmethod
     def tearDownClass(cls):
         """Deletes the added resources."""
-        if cls.server_config.run_server:
+        if cls.test_config.run_server:
             cls.poppy_server.stop()
         super(TestBase, cls).tearDownClass()
