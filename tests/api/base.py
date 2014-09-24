@@ -22,6 +22,7 @@ from oslo.config import cfg
 
 from tests.api.utils import client
 from tests.api.utils import config
+from tests.api.utils import fastlyclient as fastly
 from tests.api.utils import server
 
 
@@ -35,8 +36,6 @@ class TestBase(fixtures.BaseTestFixture):
 
     @classmethod
     def setUpClass(cls):
-
-        cls.conf_file = 'poppy_mockdb.conf'
 
         super(TestBase, cls).setUpClass()
 
@@ -57,11 +56,11 @@ class TestBase(fixtures.BaseTestFixture):
                                         serialize_format='json',
                                         deserialize_format='json')
 
-        cls.server_config = config.PoppyServerConfig()
-
-        if cls.server_config.run_server:
+        cls.test_config = config.TestConfig()
+        if cls.test_config.run_server:
+            conf_file = 'poppy_mockdb.conf'
             conf_path = os.environ["POPPY_TESTS_CONFIGS_DIR"]
-            config_file = os.path.join(conf_path, cls.conf_file)
+            config_file = os.path.join(conf_path, conf_file)
 
             conf = cfg.ConfigOpts()
             conf(project='poppy', prog='poppy', args=[],
@@ -76,9 +75,37 @@ class TestBase(fixtures.BaseTestFixture):
         except jsonschema.ValidationError as message:
             assert False, message
 
+    def getServiceFromProvider(self, provider, service_name):
+        if provider == 'fastly':
+            fastly_config = config.FastlyConfig()
+            fastly_client = fastly.FastlyClient(
+                api_key=fastly_config.api_key,
+                email=fastly_config.email,
+                password=fastly_config.password)
+            service_details = fastly_client.get_service(service_name)
+        return service_details
+        '''elif provider == 'maxcdn':
+            maxcdn.verifyUpdate(service_name)
+        elif provider == 'cloudfront':
+            cloudfront.verifyUpdate(service_name)
+        elif provider == 'akamai':
+            akamai.verifyUpdate(service_name)
+        '''
+
+    def getServiceFromFlavor(self, flavor, service_name):
+        """Verify response schema aligns with the expected schema."""
+        provider_list = self.config.flavor[flavor]
+        #service_details = {
+        #    provider: self.getServiceFromProvider(provider, service_name)
+        #    for provider in provider_list}
+        service_details = dict(
+            (provider, self.getServiceFromProvider(provider, service_name))
+            for provider in provider_list)
+        return service_details
+
     @classmethod
     def tearDownClass(cls):
         """Deletes the added resources."""
-        if cls.server_config.run_server:
+        if cls.test_config.run_server:
             cls.poppy_server.stop()
         super(TestBase, cls).tearDownClass()
