@@ -13,8 +13,8 @@
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}]
     },
-    "caching_empty": {
-        "name": "my_service_name_2",
+   "caching_empty": {
+        "name": "caching_empty",
         "domain_list": [{"domain": "mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": "mywebsite1.com",
@@ -22,5 +22,19 @@
                          "ssl": false}],
         "flavorRef": "standard",
         "caching_list": []
+    },
+    "non_ASCII": {
+        "name": "איבערזעצן",
+        "domain_list": [{"domain": "сайт.com"},
+                        {"domain": "ਦੀ ਵੈੱਬਸਾਈਟ.com"}],
+        "origin_list": [{"origin": "www.இணையதளத்தில்.com",
+                         "port": 443,
+                         "ssl": false}],
+        "flavorRef": "standard",
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
     }
 }
