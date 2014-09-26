@@ -66,6 +66,7 @@ class TestCreateService(providers.TestProviderBase):
             service_details = (
                 self.getServiceFromFlavor(flavor, self.service_name))
             provider_list = self.config.flavor[flavor]
+
             # Verify that the service stored in each provider (that is part of
             # the flavor) is what Poppy sent them.
             for provider in provider_list:
@@ -84,6 +85,22 @@ class TestCreateService(providers.TestProviderBase):
                     sorted(caching_list),
                     msg='Caching List Not Correct for {0} service name {1}'.
                         format(provider, self.service_name))
+
+    @ddt.file_data('data_create_service_negative.json')
+    def test_create_service_negative(self, test_data):
+
+        service_name = test_data['service_name']
+        domain_list = test_data['domain_list']
+        origin_list = test_data['origin_list']
+        caching_list = test_data['caching_list']
+        flavor = test_data['flavorRef']
+
+        resp = self.client.create_service(service_name=service_name,
+                                          domain_list=domain_list,
+                                          origin_list=origin_list,
+                                          caching_list=caching_list,
+                                          flavorRef=flavor)
+        self.assertEqual(resp.status_code, 400)
 
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
