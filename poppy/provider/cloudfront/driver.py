@@ -55,6 +55,7 @@ class CDNProvider(base.Driver):
     def provider_name(self):
         return 'CloudFront'
 
+    @property
     def client(self):
         return self.cloudfront_client
 

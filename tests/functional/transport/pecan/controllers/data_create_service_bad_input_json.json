@@ -1,0 +1,70 @@
+{         
+	"missing_origin": {
+        "name": "mocksite.com",
+        "domain": "my_domain.com"
+    },
+    "non_existing_flavor_input": {
+        "name": "mocksite.com",
+        "domains": [
+            {"domain": "test.mocksite.com" },
+            {"domain": "blog.mocksite.com"}
+        ],
+        "origins": [
+            {
+                "origin": "mocksite.com",
+                "port": 80,
+                "ssl": false
+            }
+        ],
+        "flavorRef": "non_exist",
+        "caching": [
+            {
+                "name": "default",
+                "ttl": 3600
+            }
+        ],
+        "restrictions": [
+             {
+                "name": "website only",
+                "rules": [
+                    {
+                        "name": "mocksite.com",
+                        "http_host": "www.mocksite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "existing_name_service_json": {
+        "name": "mockdb1_service_name",
+        "domains": [
+            {"domain": "test.mocksite.com" },
+            {"domain": "blog.mocksite.com"}
+        ],
+        "origins": [
+            {
+                "origin": "mocksite.com",
+                "port": 80,
+                "ssl": false
+            }
+        ],
+        "flavorRef": "standard",
+        "caching": [
+            {
+                "name": "default",
+                "ttl": 3600
+            }
+        ],
+        "restrictions": [
+             {
+                "name": "website only",
+                "rules": [
+                    {
+                        "name": "mocksite.com",
+                        "http_host": "www.mocksite.com"
+                    }
+                ]
+            }
+        ]
+    }
+}

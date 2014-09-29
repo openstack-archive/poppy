@@ -1,7 +1,7 @@
 {
     "using_all_fields": [
         {
-            "name": "mocksite",
+            "service_name": "mocksite",
             "domain": [
                 "{\"domain\": \"www.mocksite.com\"}",
                 "{\"domain\": \"blog.mocksite.com\"}"
@@ -9,6 +9,7 @@
             "origin": [
                 "{\"origin\": \"mocksite.com\", \"ssl\": false, \"port\": 80}"
             ],
+            "flavor_id" : "standard",
             "caching": [
                 "{\"name\": \"default\", \"ttl\": 3600}"
             ],
@@ -17,7 +18,7 @@
             ]
         },
         {
-            "name": "another_mocksite",
+            "service_name": "another_mocksite",
             "domain": [
                 "{\"domain\": \"www.mocksite.co.uk\"}",
                 "{\"domain\": \"blog.mocksite.co.uk\"}"
@@ -25,6 +26,7 @@
             "origin": [
                 "{\"origin\": \"mocksite.co.uk\", \"ssl\": false, \"port\": 80}"
             ],
+            "flavor_id" : "premium",
             "caching":[
                 "{\"name\": \"default\", \"ttl\": 3600}"
             ],

@@ -42,6 +42,7 @@ class ServicesController(base.ServicesController):
                         "ssl": False
                     }
                 ],
+                "flavorRef": "standard",
                 "caching": [
                     {"name": "default", "ttl": 3600},
                     {
@@ -76,12 +77,14 @@ class ServicesController(base.ServicesController):
 
         services_result = []
         for r in services:
-            name = r.get("name", "unnamed")
+            name = r.get("name")
             origins = r.get("origins", [])
             domains = r.get("domains", [])
             origins = [origin.Origin(d) for d in origins]
             domains = [domain.Domain(d) for d in domains]
-            services_result.append(service.Service(name, domains, origins))
+            flavorRef = r.get("name").split("/")[-1]
+            services_result.append(service.Service(name, domains, origins,
+                                                   flavorRef))
 
         return services_result
 
@@ -101,6 +104,7 @@ class ServicesController(base.ServicesController):
                     "ssl": False
                 }
             ],
+            "flavorRef": "standard",
             "caching": [
                 {"name": "default", "ttl": 3600},
                 {
@@ -132,16 +136,18 @@ class ServicesController(base.ServicesController):
             ],
         }
 
-        name = service_dict.get("name", "unnamed")
+        name = service_dict.get("name")
         origins = service_dict.get("origins", [])
         domains = service_dict.get("domains", [])
         origins = [origin.Origin(d) for d in origins]
         domains = [domain.Domain(d) for d in domains]
-        services_result = service.Service(name, domains, origins)
+        flavorRef = service_dict.get("name").split("/")[-1]
+        services_result = service.Service(name, domains, origins, flavorRef)
         return services_result
 
-    def create(self, project_id, service_name, service_json):
-
+    def create(self, project_id, service_obj):
+        if service_obj.name == "mockdb1_service_name":
+            raise ValueError("Service %s already exists..." % service_obj.name)
         return ""
 
     def update(self, project_id, service_name, service_json):
@@ -156,19 +162,23 @@ class ServicesController(base.ServicesController):
     def get_provider_details(self, project_id, service_name):
         return {
             "MaxCDN": provider_details.ProviderDetail(
-                id=11942,
+                provider_service_id=11942,
                 name='my_service_name',
-                access_url='my_service_name'
-                '.mycompanyalias.netdna-cdn.com'),
+                access_urls=['my_service_name'
+                             '.mycompanyalias.netdna-cdn.com']),
             "Fastly": provider_details.ProviderDetail(
-                id=3488,
+                provider_service_id=3488,
                 name="my_service_name",
-                access_url='my_service_name'
-                '.global.prod.fastly.net'),
+                access_urls=['my_service_name'
+                             '.global.prod.fastly.net']),
             "CloudFront": provider_details.ProviderDetail(
-                id=5892,
-                access_url='my_service_name'
-                '.gibberish.amzcf.com'),
+                provider_service_id=5892,
+                access_urls=['my_service_name'
+                             '.gibberish.amzcf.com']),
             "Mock": provider_details.ProviderDetail(
-                id="73242",
-                access_url='my_service_name.mock.com')}
+                provider_service_id="73242",
+                access_urls=['my_service_name.mock.com'])}
+
+    def update_provider_details(self, project_id, service_name,
+                                provider_details):
+        pass
