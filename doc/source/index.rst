@@ -66,6 +66,7 @@ Developer Docs
    :maxdepth: 3
 
    poppy
+   provider_details
 
 
 Using Poppy's API
