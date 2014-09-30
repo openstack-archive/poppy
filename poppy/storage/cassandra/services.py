@@ -33,6 +33,20 @@ CQL_GET_ALL_SERVICES = '''
     WHERE project_id = %(project_id)s
 '''
 
+CQL_LIST_SERVICES = '''
+    SELECT project_id,
+        service_name,
+        domains,
+        origins,
+        caching_rules,
+        restrictions
+    FROM services
+    WHERE project_id = %(project_id)s
+        AND token(service_name) > token(%(service_name)s)
+    ORDER BY service_name
+    LIMIT %(limit)s
+'''
+
 CQL_GET_SERVICE = '''
     SELECT project_id,
         service_name,
@@ -113,29 +127,41 @@ class ServicesController(base.ServicesController):
     def session(self):
         return self._driver.database
 
-    def list(self, project_id, marker=None, limit=None):
+    def list(self, project_id, marker='', limit=10):
 
-        # get all services
+        # list services
         args = {
-            'project_id': project_id
+            'project_id': project_id,
+            'limit': limit
         }
+        results = self.session.execute(CQL_LIST_SERVICES, args)
 
-        results = self.session.execute(CQL_GET_ALL_SERVICES, args)
-
-        # TODO(amitgandhinz) : build the formatted json structure from the
-        # result
-        # TODO(amitgandhinz): return services instead once its formatted.
         services = []
-        for r in results:
-            name = r.get("service_name")
-            origins = r.get("origins", [])
-            domains = r.get("domains", [])
+        for result in results:
+            name = result.get('service_name')
+            origins = result.get('origins', [])
+            domains = result.get('domains', [])
+            flavorRef = result.get("flavor_id")
             origins = [origin.Origin(json.loads(o)['origin'],
                                      json.loads(o).get('port', 80),
                                      json.loads(o).get('ssl', False))
                        for o in origins]
             domains = [domain.Domain(json.loads(d)['domain']) for d in domains]
-            flavorRef = r.get("flavor_id")
+            s = service.Service(name, domains, origins, flavorRef)
+            provider_detail_results = result.get('provider_details')
+            provider_details_dict = {}
+            for provider_name in provider_detail_results:
+                provider_detail_dict = json.loads(
+                    provider_detail_results[provider_name])
+                provider_service_id = provider_detail_dict.get('id', None)
+                access_urls = provider_detail_dict.get('access_urls', [])
+                status = provider_detail_dict.get('status', u'unknown')
+                provider_detail_obj = provider_details.ProviderDetail(
+                    provider_service_id=provider_service_id,
+                    access_urls=access_urls,
+                    status=status)
+                provider_details_dict[provider_name] = provider_detail_obj
+            s.provider_details = provider_details_dict
             services.append(service.Service(name, domains, origins, flavorRef))
         return services
 

@@ -40,11 +40,12 @@ class ServicesController(base.Controller):
             self.project_id, marker, limit)
         result = [
             resp_service_model.Model(s) for s in service_resultset]
-        # TODO(tonytan4ever): edge case: what should be the result when there
-        # is no service ? What should be the links field of return like ?
+        # TODO(tonytan4ever): What should be the links field of return like ?
+        # if len(result) < min(limit, MAX_LIMIT): link = None
+        # else: link = '/v1.0/services?marker={0}&limit={1}'
         return {
             'links': link.Model('/v1.0/services?marker={0}&limit={1}'.format(
-                result[-1]["name"] if len(result) > 0 else None,
+                result[-1]['name'] if len(result) > 0 else None,
                 limit),
                 'next'),
             'services': result
