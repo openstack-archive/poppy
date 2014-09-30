@@ -19,6 +19,13 @@ from poppy.openstack.common import context
 from poppy.openstack.common import local
 
 
+class PoppyRequestContext(context.RequestContext):
+
+    def __init__(self, **kwargs):
+        self.base_url = kwargs.pop('base_url')
+        super(PoppyRequestContext, self).__init__(**kwargs)
+
+
 class ContextHook(hooks.PecanHook):
 
     def on_route(self, state):
@@ -26,18 +33,24 @@ class ContextHook(hooks.PecanHook):
 
         if 'X-Project-ID' in state.request.headers:
             context_kwargs['tenant'] = state.request.headers['X-Project-ID']
+            context_kwargs['base_url'] = (
+                state.request.host_url +
+                '/'.join(state.request.path.split('/')[0:2]))
 
         if 'tenant' not in context_kwargs:
             # Didn't find the X-Project-Id header, pull from URL instead
             # Expects form /v1/{project_id}/path
             context_kwargs['tenant'] = state.request.path.split('/')[2]
+            context_kwargs['base_url'] = (
+                state.request.host_url +
+                '/'.join(state.request.path.split('/')[0:3]))
 
         if 'X-Auth-Token' in state.request.headers:
             context_kwargs['auth_token'] = (
                 state.request.headers['X-Auth-Token']
             )
 
-        request_context = context.RequestContext(**context_kwargs)
+        request_context = PoppyRequestContext(**context_kwargs)
         state.request.context = request_context
         local.store.context = request_context
 
@@ -45,3 +58,5 @@ class ContextHook(hooks.PecanHook):
         '''Attach tenant_id as a member variable project_id to controller.'''
         state.controller.__self__.project_id = getattr(local.store.context,
                                                        "tenant", None)
+        state.controller.__self__.base_url = getattr(local.store.context,
+                                                     "base_url", None)

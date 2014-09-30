@@ -14,9 +14,14 @@
 # limitations under the License.
 
 import abc
+import json
 
 import six
 
+from poppy.model.helpers import domain
+from poppy.model.helpers import origin
+from poppy.model.helpers import provider_details
+from poppy.model import service
 from poppy.storage.base import controller
 
 
@@ -53,3 +58,31 @@ class ServicesControllerBase(controller.StorageControllerBase):
     @abc.abstractmethod
     def update_provider_details(self, provider_details):
         raise NotImplementedError
+
+    @staticmethod
+    def format_result(result):
+        name = result.get('service_name')
+        origins = [json.loads(o) for o in result.get('origins', [])]
+        domains = [json.loads(d) for d in result.get('domains', [])]
+        origins = [origin.Origin(o['origin'],
+                                 o.get('port', 80),
+                                 o.get('ssl', False))
+                   for o in origins]
+        domains = [domain.Domain(d['domain']) for d in domains]
+        flavorRef = result.get('flavorRef')
+        s = service.Service(name, domains, origins, flavorRef)
+        provider_detail_results = result.get('provider_details')
+        provider_details_dict = {}
+        for provider_name in provider_detail_results:
+            provider_detail_dict = json.loads(
+                provider_detail_results[provider_name])
+            provider_service_id = provider_detail_dict.get('id', None)
+            access_urls = provider_detail_dict.get('access_urls', [])
+            status = provider_detail_dict.get('status', u'unknown')
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
+                status=status)
+            provider_details_dict[provider_name] = provider_detail_obj
+        s.provider_details = provider_details_dict
+        return s
