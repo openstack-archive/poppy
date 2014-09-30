@@ -16,11 +16,19 @@
 import json
 
 import ddt
+from oslo.config import cfg
 import pecan
 from webtest import app
 
 from poppy.transport.pecan.controllers import base as c_base
 from tests.functional.transport.pecan import base
+
+LIMITS_OPTIONS = [
+    cfg.IntOpt('max_services_per_page', default=20,
+               help='Max number of services per page for list services'),
+]
+
+LIMITS_GROUP = 'drivers:transport:limits'
 
 
 @ddt.ddt
@@ -37,6 +45,18 @@ class ServiceControllerTest(base.FunctionalTest):
         response_dict = json.loads(response.body.decode("utf-8"))
         self.assertTrue("links" in response_dict)
         self.assertTrue("services" in response_dict)
+
+    def test_get_more_than_max_services_per_page(self):
+        self.conf.register_opts(LIMITS_OPTIONS, group=LIMITS_GROUP)
+        self.limits_conf = self.conf[LIMITS_GROUP]
+        self.max_services_per_page = self.limits_conf.max_services_per_page
+
+        response = self.app.get('/v1.0/0001/services', params={
+            "marker": 'service_name',
+            "limit": self.max_services_per_page + 1
+        }, expect_errors=True)
+
+        self.assertEqual(400, response.status_code)
 
     def test_get_one(self):
         response = self.app.get('/v1.0/0001/services/fake_service_name')

@@ -15,10 +15,7 @@
 
 import json
 
-from poppy.model.helpers import domain
-from poppy.model.helpers import origin
 from poppy.model.helpers import provider_details
-from poppy.model import service
 from poppy.storage import base
 
 
@@ -29,11 +26,25 @@ class ServicesController(base.ServicesController):
         return self._driver.database
 
     def list(self, project_id, marker=None, limit=None):
+        provider_details = {
+            'MaxCDN': json.dumps(
+                {'id': 11942,
+                 'access_urls': ['mypullzone.netdata.com']}),
+            'Mock': json.dumps(
+                {'id': 73242,
+                 'access_urls': ['mycdn.mock.com']}),
+            'CloudFront': json.dumps(
+                {'id': '5ABC892',
+                 'access_urls': ['cf123.cloudcf.com']}),
+            'Fastly': json.dumps(
+                {'id': 3488,
+                 'access_urls': ['mockcf123.fastly.prod.com']})}
+
         services = [{'name': 'mockdb1_service_name',
-                     'domains': [{'domain': 'www.mywebsite.com'}],
-                     'origins': [{'origin': 'mywebsite.com',
-                                  'port': 80,
-                                  'ssl': False}],
+                     'domains': [json.dumps({'domain': 'www.mywebsite.com'})],
+                     'origins': [json.dumps({'origin': 'mywebsite.com',
+                                             'port': 80,
+                                             'ssl': False})],
                      'flavorRef': 'standard',
                      'caching': [{'name': 'default',
                                   'ttl': 3600},
@@ -49,51 +60,11 @@ class ServicesController(base.ServicesController):
                                        'rules': [{'name': 'mywebsite.com',
                                                   'http_host':
                                                   'www.mywebsite.com'}]}],
-                     'provider_details':
-                     {
-                         'MaxCDN':
-                             '{\"id\": 11942,'
-                             ' \"access_urls\": '
-                             '[\"mypullzone.netdata.com\"]}',
-                         'Mock':
-                             '{\"id\": 73242,'
-                             ' \"access_urls\": [\"mycdn.mock.com\"]}',
-                         'CloudFront':
-                             '{\"id\": \"5ABC892\",'
-                             ' \"access_urls\": '
-                             '[\"cf123.cloudcf.com\"]}',
-                         'Fastly':
-                             '{\"id\": 3488,'
-                             ' \"access_urls\": '
-                             '[\"mockcf123.fastly.prod.com\"]}'
-                     }}
-                    ]
+                     'provider_details': provider_details}]
 
         services_result = []
         for r in services:
-            name = r.get('name', 'unnamed')
-            origins = r.get('origins', [])
-            domains = r.get('domains', [])
-            flavorRef = r.get('flavorRef')
-            provider_detail_dicts = r.get('provider_details')
-            origins = [origin.Origin(o['origin'],
-                                     o.get('port', 80),
-                                     o.get('ssl', False)) for o in origins]
-            domains = [domain.Domain(d['domain']) for d in domains]
-            provider_details_dict = {}
-            for provider_name in provider_detail_dicts:
-                provider_detail_dict = json.loads(
-                    provider_detail_dicts[provider_name])
-                provider_service_id = provider_detail_dict.get('id', None)
-                access_urls = provider_detail_dict.get('access_urls', [])
-                status = provider_detail_dict.get('status', u'unknown')
-                provider_detail_obj = provider_details.ProviderDetail(
-                    provider_service_id=provider_service_id,
-                    access_urls=access_urls,
-                    status=status)
-                provider_details_dict[provider_name] = provider_detail_obj
-            service_result = service.Service(name, domains, origins, flavorRef)
-            service_result.provider_details = provider_details_dict
+            service_result = self.format_result(r)
             services_result.append(service_result)
 
         return services_result
@@ -102,11 +73,27 @@ class ServicesController(base.ServicesController):
         # get the requested service from storage
         if service_name == "non_exist_service_name":
             raise ValueError("service: % does not exist")
+        origin_json = json.dumps({'origin': 'mywebsite.com',
+                                  'port': 80,
+                                  'ssl': False})
+        domain_json = json.dumps({'domain': 'www.mywebsite.com'})
+        provider_details = {
+            'MaxCDN': json.dumps(
+                {'id': 11942,
+                 'access_urls': ['mypullzone.netdata.com']}),
+            'Mock': json.dumps(
+                {'id': 73242,
+                 'access_urls': ['mycdn.mock.com']}),
+            'CloudFront': json.dumps(
+                {'id': '5ABC892',
+                 'access_urls': ['cf123.cloudcf.com']}),
+            'Fastly': json.dumps(
+                {'id': 3488,
+                 'access_urls': ['mockcf123.fastly.prod.com']})}
+
         service_dict = {'name': service_name,
-                        'domains': [{'domain': 'www.mywebsite.com'}],
-                        'origins': [{'origin': 'mywebsite.com',
-                                     'port': 80,
-                                     'ssl': False}],
+                        'domains': [domain_json],
+                        'origins': [origin_json],
                         'flavorRef': 'standard',
                         'caching': [{'name': 'default',
                                      'ttl': 3600},
@@ -122,53 +109,10 @@ class ServicesController(base.ServicesController):
                                           'rules': [{'name': 'mywebsite.com',
                                                      'http_host':
                                                      'www.mywebsite.com'}]}],
-                        'provider_details':
-                        {
-                            'MaxCDN':
-                                '{\"id\": 11942,'
-                                ' \"access_urls\": '
-                                '[\"mypullzone.netdata.com\"]}',
-                            'Mock':
-                                '{\"id\": 73242,'
-                                ' \"access_urls\": '
-                                '[\"mycdn.mock.com\"]}',
-                            'CloudFront':
-                                '{\"id\": \"5ABC892\",'
-                                ' \"access_urls\": '
-                                '[\"cf123.cloudcf.com\"]}',
-                            'Fastly':
-                                '{\"id\": 3488,'
-                                ' \"access_urls\": '
-                                '[\"mockcf123.fastly.prod.com\"'
-                                ']}'
-                        }}
+                        'provider_details': provider_details}
 
-        name = service_dict.get('name', 'unnamed')
-        origins = service_dict.get('origins', [])
-        domains = service_dict.get('domains', [])
-        origins = [origin.Origin(
-            o['origin'],
-            o.get('port', 80),
-            o.get('ssl', False))
-            for o in origins]
-        domains = [domain.Domain(d['domain']) for d in domains]
-        flavorRef = service_dict.get('flavorRef')
-        provider_detail_dicts = service_dict.get('provider_details')
-        services_result = service.Service(name, domains, origins, flavorRef)
-        provider_details_dict = {}
-        for provider_name in provider_detail_dicts:
-            provider_detail_dict = json.loads(
-                provider_detail_dicts[provider_name])
-            provider_service_id = provider_detail_dict.get('id', None)
-            access_urls = provider_detail_dict.get('access_urls', [])
-            status = provider_detail_dict.get('status', u'unknown')
-            provider_detail_obj = provider_details.ProviderDetail(
-                provider_service_id=provider_service_id,
-                access_urls=access_urls,
-                status=status)
-            provider_details_dict[provider_name] = provider_detail_obj
-        services_result.provider_details = provider_details_dict
-        return services_result
+        service_result = self.format_result(service_dict)
+        return service_result
 
     def create(self, project_id, service_obj):
         if service_obj.name == "mockdb1_service_name":
