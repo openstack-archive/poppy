@@ -33,6 +33,21 @@ CQL_GET_ALL_SERVICES = '''
     WHERE project_id = %(project_id)s
 '''
 
+CQL_LIST_SERVICES = '''
+    SELECT project_id,
+        service_name,
+        domains,
+        origins,
+        caching_rules,
+        restrictions,
+        provider_details
+    FROM services
+    WHERE project_id = %(project_id)s
+        AND token(service_name) > token(%(service_name)s)
+    ORDER BY service_name
+    LIMIT %(limit)s
+'''
+
 CQL_GET_SERVICE = '''
     SELECT project_id,
         service_name,
@@ -113,47 +128,8 @@ class ServicesController(base.ServicesController):
     def session(self):
         return self._driver.database
 
-    def list(self, project_id, marker=None, limit=None):
-
-        # get all services
-        args = {
-            'project_id': project_id
-        }
-
-        results = self.session.execute(CQL_GET_ALL_SERVICES, args)
-
-        # TODO(amitgandhinz) : build the formatted json structure from the
-        # result
-        # TODO(amitgandhinz): return services instead once its formatted.
-        services = []
-        for r in results:
-            name = r.get("service_name")
-            origins = r.get("origins", [])
-            domains = r.get("domains", [])
-            origins = [origin.Origin(json.loads(o)['origin'],
-                                     json.loads(o).get('port', 80),
-                                     json.loads(o).get('ssl', False))
-                       for o in origins]
-            domains = [domain.Domain(json.loads(d)['domain']) for d in domains]
-            flavorRef = r.get("flavor_id")
-            services.append(service.Service(name, domains, origins, flavorRef))
-        return services
-
-    def get(self, project_id, service_name):
-        # get the requested service from storage
-        args = {
-            'project_id': project_id,
-            'service_name': service_name
-        }
-        results = self.session.execute(CQL_GET_SERVICE, args)
-
-        if len(results) != 1:
-            raise ValueError('No service or multiple service found: %s'
-                             % service_name)
-
-        # at this point, it is certain that there's exactly 1 result in
-        # results.
-        result = results[0]
+    @staticmethod
+    def format_result(result):
         name = result.get('service_name')
         origins = result.get('origins', [])
         domains = result.get('domains', [])
@@ -179,6 +155,37 @@ class ServicesController(base.ServicesController):
             provider_details_dict[provider_name] = provider_detail_obj
         s.provider_details = provider_details_dict
         return s
+
+    def list(self, project_id, marker='', limit=10):
+
+        # list services
+        args = {
+            'project_id': project_id,
+            'service_name': marker,
+            'limit': limit
+        }
+        results = self.session.execute(CQL_LIST_SERVICES, args)
+
+        services = [ServicesController.format_result(r) for r in results]
+
+        return services
+
+    def get(self, project_id, service_name):
+        # get the requested service from storage
+        args = {
+            'project_id': project_id,
+            'service_name': service_name
+        }
+        results = self.session.execute(CQL_GET_SERVICE, args)
+
+        if len(results) != 1:
+            raise ValueError('No service or multiple service found: %s'
+                             % service_name)
+
+        # at this point, it is certain that there's exactly 1 result in
+        # results.
+        result = results[0]
+        return ServicesController.format_result(result)
 
     def create(self, project_id, service_obj):
         # create the service in storage
