@@ -45,7 +45,7 @@ class ServicesController(base.Controller):
         # is no service ? What should be the links field of return like ?
         return {
             'links': link.Model('/v1.0/services?marker={0}&limit={1}'.format(
-                result[-1]["name"] if len(result) > 0 else None,
+                result[-1]['name'] if len(result) > 0 else None,
                 limit),
                 'next'),
             'services': result

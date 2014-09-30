@@ -2,11 +2,11 @@
     "using_all_fields": [
         {
             "service_name": "mocksite",
-            "domain": [
+            "domains": [
                 "{\"domain\": \"www.mocksite.com\"}",
                 "{\"domain\": \"blog.mocksite.com\"}"
             ],
-            "origin": [
+            "origins": [
                 "{\"origin\": \"mocksite.com\", \"ssl\": false, \"port\": 80}"
             ],
             "flavor_id" : "standard",
@@ -50,6 +50,3 @@
         }
     ]
 }
-
-
-

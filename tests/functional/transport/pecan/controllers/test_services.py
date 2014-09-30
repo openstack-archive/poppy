@@ -32,6 +32,7 @@ class ServiceControllerTest(base.FunctionalTest):
             "limit": 3
         })
 
+        import pdb; pdb.set_trace()
         self.assertEqual(200, response.status_code)
 
         response_dict = json.loads(response.body.decode("utf-8"))
@@ -133,3 +134,22 @@ class ServiceControllerTest(base.FunctionalTest):
         response = self.app.delete('/v1.0/0001/services/fake_service_name_4')
 
         self.assertEqual(200, response.status_code)
+
+    @ddt.file_data("data_list_service.json")
+    @unpack
+    def test_list(self, service_json1, service_json2):
+        # create with good data
+        response = self.app.post('/v1.0/0001/services',
+                                 params=json.dumps(service_json1),
+                                 headers={"Content-Type": "application/json"})
+        self.assertEqual(202, response.status_code)
+        response = self.app.post('/v1.0/0001/services',
+                                 params=json.dumps(service_json2),
+                                 headers={"Content-Type": "application/json"})
+        self.assertEqual(202, response.status_code)
+
+        response = self.app.get('/v1.0/0001/services',
+                                 params=json.dumps(service_json2),
+                                 headers={"Content-Type": "application/json"})
+        import pdb; pdb.set_trace()
+        self.assertEqual(202, response.status_code)
