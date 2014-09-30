@@ -41,11 +41,11 @@ class ServicesController(base.Controller):
         result = [
             resp_service_model.Model(s, pecan.request)
             for s in service_resultset]
-        # TODO(tonytan4ever): edge case: what should be the result when there
-        # is no service ? What should be the links field of return like ?
+        # TODO(obulpathi): edge case: when the total number of services is a
+        # multiple of limit, the last batch has a non-null marker.
         return {
             'links': link.Model('/v1.0/services?marker={0}&limit={1}'.format(
-                result[-1]["name"] if len(result) > 0 else None,
+                result[-1]['name'] if len(result) > 0 else None,
                 limit),
                 'next'),
             'services': result
