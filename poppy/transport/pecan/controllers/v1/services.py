@@ -15,6 +15,7 @@
 
 import json
 
+from oslo.config import cfg
 import pecan
 
 from poppy.common import uri
@@ -28,27 +29,56 @@ from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import helpers as stoplight_helpers
 from poppy.transport.validators.stoplight import rule
 
+LIMITS_OPTIONS = [
+    cfg.IntOpt('max_services_per_page', default=20,
+               help='Max number of services per page for list services'),
+]
+
+LIMITS_GROUP = 'drivers:transport:limits'
+
 
 class ServicesController(base.Controller):
 
+    def __init__(self, driver, conf):
+        super(ServicesController, self).__init__(driver)
+        self._conf = conf
+        self._conf.register_opts(LIMITS_OPTIONS, group=LIMITS_GROUP)
+        self.limits_conf = self._conf[LIMITS_GROUP]
+        self.max_services_per_page = self.limits_conf.max_services_per_page
+
     @pecan.expose('json')
     def get_all(self):
-        marker = pecan.request.GET.get('marker')
-        limit = pecan.request.GET.get('limit')
+        marker = pecan.request.GET.get('marker', '')
+        limit = pecan.request.GET.get('limit', 10)
+        try:
+            limit = int(limit)
+            if limit <= 0:
+                pecan.abort(400, detail='Limit should be greater than 0')
+            if limit > self.max_services_per_page:
+                error_msg = 'Limit should be less than or equal to {0}'.format(
+                    self.max_services_per_page)
+                pecan.abort(400, detail=error_msg)
+        except ValueError:
+            pecan.abort(400, detail='Invalid limit: {0}'.format(limit))
+
         services_controller = self._driver.manager.services_controller
         service_resultset = services_controller.list(
             self.project_id, marker, limit)
-        result = [
+        results = [
             resp_service_model.Model(s, pecan.request)
             for s in service_resultset]
-        # TODO(tonytan4ever): edge case: what should be the result when there
-        # is no service ? What should be the links field of return like ?
+        # TODO(obulpathi): edge case: when the total number of services is a
+        # multiple of limit, the last batch has a non-null marker.
+        links = []
+        if len(results) > 0:
+            links.append(
+                link.Model('/v1.0/services?marker={0}&limit={1}'.format(
+                    results[-1]['name'], limit),
+                    'next'))
+
         return {
-            'links': link.Model('/v1.0/services?marker={0}&limit={1}'.format(
-                result[-1]["name"] if len(result) > 0 else None,
-                limit),
-                'next'),
-            'services': result
+            'links': links,
+            'services': results
         }
 
     @pecan.expose('json')
