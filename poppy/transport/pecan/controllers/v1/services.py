@@ -33,22 +33,28 @@ class ServicesController(base.Controller):
 
     @pecan.expose('json')
     def get_all(self):
-        marker = pecan.request.GET.get('marker')
-        limit = pecan.request.GET.get('limit')
+        # TODO(obulpathi): input validation and hard limit for limit
+        marker = pecan.request.GET.get('marker', '')
+        limit = int(pecan.request.GET.get('limit', 10))
+
         services_controller = self._driver.manager.services_controller
         service_resultset = services_controller.list(
             self.project_id, marker, limit)
-        result = [
+        results = [
             resp_service_model.Model(s, pecan.request)
             for s in service_resultset]
-        # TODO(tonytan4ever): edge case: what should be the result when there
-        # is no service ? What should be the links field of return like ?
+        # TODO(obulpathi): edge case: when the total number of services is a
+        # multiple of limit, the last batch has a non-null marker.
+        links = []
+        if len(results) > 0:
+            links.append(
+                link.Model('/v1.0/services?marker={0}&limit={1}'.format(
+                    results[-1]['name'], limit),
+                    'next'))
+
         return {
-            'links': link.Model('/v1.0/services?marker={0}&limit={1}'.format(
-                result[-1]["name"] if len(result) > 0 else None,
-                limit),
-                'next'),
-            'services': result
+            'links': links,
+            'services': results
         }
 
     @pecan.expose('json')
