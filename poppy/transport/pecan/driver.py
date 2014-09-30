@@ -60,7 +60,8 @@ class PecanTransportDriver(transport.Driver):
         home_controller.add_controller('health', health_controller)
         health_controller.add_controller('storage', v1.StorageHealth(self))
         health_controller.add_controller('provider', v1.ProviderHealth(self))
-        home_controller.add_controller('services', v1.Services(self))
+        home_controller.add_controller('services',
+                                       v1.Services(self, self._conf))
         home_controller.add_controller('flavors', v1.Flavors(self))
 
         pecan_hooks = [hooks.Context()]
