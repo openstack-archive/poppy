@@ -23,7 +23,7 @@ class ProviderWrapper(object):
 
     def update(self, ext, provider_details, service_json):
         try:
-            provider_detail = provider_details[ext.provider_name]
+            provider_detail = provider_details[ext.obj.provider_name]
         except KeyError:
             raise errors.BadProviderDetail(
                 "No provider detail information."
@@ -35,7 +35,7 @@ class ProviderWrapper(object):
 
     def delete(self, ext, provider_details):
         try:
-            provider_detail = provider_details[ext.provider_name]
+            provider_detail = provider_details[ext.obj.provider_name]
         except KeyError:
             raise errors.BadProviderDetail(
                 "No provider detail information."

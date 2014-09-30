@@ -101,7 +101,7 @@ class CassandraStorageServiceTests(base.TestCase):
         mock_execute.execute.return_value = value
 
         sc = services.ServicesController(None)
-        actual_response = sc.list(self.project_id)
+        actual_response = sc.list(self.project_id, None, None)
 
         # TODO(amitgandhinz): assert the response
         # matches the expectation (using jsonschema)
