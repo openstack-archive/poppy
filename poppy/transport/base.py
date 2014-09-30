@@ -37,6 +37,10 @@ class TransportDriverBase(object):
         return self._app
 
     @property
+    def conf(self):
+        return self._conf
+
+    @property
     def manager(self):
         return self._manager
 
