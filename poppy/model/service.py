@@ -35,6 +35,7 @@ class Service(common.DictSerializableModel):
         self._caching = caching
         self._restrictions = restrictions
         self._status = u'unknown'
+        self._provider_details = {}
 
     @property
     def name(self):
@@ -100,6 +101,14 @@ class Service(common.DictSerializableModel):
                     value,
                     VALID_STATUSES)
             )
+
+    @property
+    def provider_details(self):
+        return self._provider_details
+
+    @provider_details.setter
+    def provider_details(self, value):
+        self._provider_details = value
 
     @classmethod
     def init_from_dict(cls, input_dict):

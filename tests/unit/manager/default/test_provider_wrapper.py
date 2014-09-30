@@ -32,7 +32,7 @@ class TestProviderWrapper(base.TestCase):
         self.fake_provider_details = {
             "Fastly": provider_details.ProviderDetail(
                 provider_service_id=uuid.uuid1(),
-                access_urls='mydummywebsite.prod.fastly.com')}
+                access_urls=['mydummywebsite.prod.fastly.com'])}
 
     def test_update_with_keyerror(self):
         mock_ext = mock.Mock(provider_name="no_existent_provider")
