@@ -22,6 +22,12 @@ from poppy.manager.base import controller
 
 @six.add_metaclass(abc.ABCMeta)
 class FlavorsControllerBase(controller.ManagerControllerBase):
+    """
+    Flavor controller base class
+
+    Attributes:
+      storage:
+    """
 
     def __init__(self, manager):
         super(FlavorsControllerBase, self).__init__(manager)

@@ -20,7 +20,20 @@ import six
 
 @six.add_metaclass(abc.ABCMeta)
 class ManagerDriverBase(object):
+    """ Base class for driver manager
+
+    Attributes:
+      storage:
+      providers:
+    """
+
     def __init__(self, conf, storage, providers):
+        """
+          Args:
+            conf:
+            storage:
+            providers:
+        """
         self._conf = conf
         self._storage = storage
         self._providers = providers

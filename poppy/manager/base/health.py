@@ -22,6 +22,10 @@ from poppy.manager.base import controller
 
 @six.add_metaclass(abc.ABCMeta)
 class HealthControllerBase(controller.ManagerControllerBase):
+    """
+    Health controller base class
+
+    """
 
     def __init__(self, manager):
         super(HealthControllerBase, self).__init__(manager)
