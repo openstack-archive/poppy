@@ -39,7 +39,8 @@ class ServicesController(base.Controller):
         service_resultset = services_controller.list(
             self.project_id, marker, limit)
         result = [
-            resp_service_model.Model(s) for s in service_resultset]
+            resp_service_model.Model(s, pecan.request)
+            for s in service_resultset]
         # TODO(tonytan4ever): edge case: what should be the result when there
         # is no service ? What should be the links field of return like ?
         return {
@@ -59,8 +60,12 @@ class ServicesController(base.Controller):
         except ValueError:
             pecan.abort(404, detail='service %s is not found' %
                         service_name)
+        # TODO(tonytan4ever): hardcode for deployed right now,
+        # late needs to pull in provider tail to check each provider's
+        # real status
+        service_obj.status = u"deployed"
         # convert a service model into a response service model
-        return resp_service_model.Model(service_obj)
+        return resp_service_model.Model(service_obj, pecan.request)
 
     @pecan.expose('json')
     @decorators.validate(

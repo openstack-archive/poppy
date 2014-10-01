@@ -76,8 +76,10 @@ class ServicesController(base.ServicesController):
             domains = r.get('domains', [])
             flavorRef = r.get('flavorRef')
             provider_detail_dicts = r.get('provider_details')
-            origins = [origin.Origin(d) for d in origins]
-            domains = [domain.Domain(d) for d in domains]
+            origins = [origin.Origin(o['origin'],
+                                     o.get('port', 80),
+                                     o.get('ssl', False)) for o in origins]
+            domains = [domain.Domain(d['domain']) for d in domains]
             provider_details_dict = {}
             for provider_name in provider_detail_dicts:
                 provider_detail_dict = json.loads(
@@ -144,8 +146,12 @@ class ServicesController(base.ServicesController):
         name = service_dict.get('name', 'unnamed')
         origins = service_dict.get('origins', [])
         domains = service_dict.get('domains', [])
-        origins = [origin.Origin(d) for d in origins]
-        domains = [domain.Domain(d) for d in domains]
+        origins = [origin.Origin(
+            o['origin'],
+            o.get('port', 80),
+            o.get('ssl', False))
+            for o in origins]
+        domains = [domain.Domain(d['domain']) for d in domains]
         flavorRef = service_dict.get('flavorRef')
         provider_detail_dicts = service_dict.get('provider_details')
         services_result = service.Service(name, domains, origins, flavorRef)

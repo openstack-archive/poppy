@@ -18,8 +18,6 @@ try:
 except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
 
-import pecan
-
 from poppy.common import uri
 from poppy.transport.pecan.models.response import domain
 from poppy.transport.pecan.models.response import link
@@ -30,7 +28,7 @@ class Model(collections.OrderedDict):
 
     'Service Response Model.'
 
-    def __init__(self, service_obj):
+    def __init__(self, service_obj, request):
         super(Model, self).__init__()
         self["name"] = service_obj.name
         self["domains"] = [domain.Model(d) for d in service_obj.domains]
@@ -42,7 +40,7 @@ class Model(collections.OrderedDict):
         self["links"] = [link.Model(
             str(
                 uri.encode(u'{0}/v1.0/services/{1}'.format(
-                    pecan.request.host_url,
+                    request.host_url,
                     self['name']))),
             'self')]
 
