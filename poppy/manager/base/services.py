@@ -23,6 +23,7 @@ from poppy.manager.base import providers
 
 @six.add_metaclass(abc.ABCMeta)
 class ServicesControllerBase(controller.ManagerControllerBase):
+    """Services controller base class."""
 
     def __init__(self, manager):
         super(ServicesControllerBase, self).__init__(manager)
@@ -31,20 +32,57 @@ class ServicesControllerBase(controller.ManagerControllerBase):
 
     @abc.abstractmethod
     def list(self, project_id, marker=None, limit=None):
+        """list
+
+        :param self
+        :param project_id
+        :param marker
+        :limit
+        :raises: NotImplentedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get(self, project_id, service_name):
+        """get
+
+        :param self
+        :param project_id
+        :param service_name
+        :raises: NotImplentedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def create(self, project_id, service_obj):
+        """create
+
+        :param self
+        :param project_id
+        :param service_obj
+        :raises: NotImplentedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def update(self, project_id, service_name, service_obj):
+        """upate
+
+        :param self
+        :param project_id
+        :param service_name
+        :param service_obj
+        :raises: NotImplentedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def delete(self, project_id, service_name):
+        """get
+
+       :param self
+       :param project_id
+       :param service_name
+       :raises: NotImplentedError
+       """
         raise NotImplementedError

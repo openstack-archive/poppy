@@ -20,6 +20,8 @@ import six
 
 @six.add_metaclass(abc.ABCMeta)
 class ManagerDriverBase(object):
+    """Base class for driver manager."""
+
     def __init__(self, conf, storage, providers):
         self._conf = conf
         self._storage = storage
@@ -27,23 +29,45 @@ class ManagerDriverBase(object):
 
     @property
     def storage(self):
+        """storage
+
+        :param self
+        :returns storage
+        """
         return self._storage
 
     @property
     def providers(self):
+        """storage
+
+        :param self
+        :returns providers
+        """
         return self._providers
 
     @abc.abstractproperty
     def services_controller(self):
-        """Returns the driver's services controller."""
+        """Returns the driver's services controller
+
+        :param self
+        :raises NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractproperty
     def flavors_controller(self):
-        """Returns the driver's flavors controller."""
+        """Returns the driver's flavors controller
+
+        :param self
+        :raises NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractproperty
     def health_controller(self):
-        """Returns the driver's flavors controller."""
+        """Returns the driver's health controller
+
+        :param self
+        :raises NotImplementedError
+        """
         raise NotImplementedError

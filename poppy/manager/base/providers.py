@@ -17,11 +17,27 @@ from poppy.common import errors
 
 
 class ProviderWrapper(object):
+    """"ProviderWrapper class."""
 
     def create(self, ext, service_obj):
+        """Create a provider
+
+        :param self
+        :param ext
+        :param service_obj
+        :returns: ext.obj.service_controller.create(service_obj)
+        """
+
         return ext.obj.service_controller.create(service_obj)
 
     def update(self, ext, provider_details, service_json):
+        """Update a provider
+
+        :param self
+        :param ext
+        :param provider_details
+        :param service_json
+        """
         try:
             provider_detail = provider_details[ext.provider_name]
         except KeyError:
