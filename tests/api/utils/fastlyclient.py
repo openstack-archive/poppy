@@ -33,7 +33,11 @@ class FastlyClient(client.AutoMarshallingHTTPClient):
 
     def get_service(self, service_name):
         # Get the service
-        service = self.client.get_service_by_name(service_name)
+        try:
+            service = self.client.get_service_by_name(service_name)
+        except fastly.FastlyError as e:
+            assert False, e
+
         service_version = self.client.list_versions(service.id)
 
         # The create service api_call updates the domain, origin & cache
@@ -55,21 +59,17 @@ class FastlyClient(client.AutoMarshallingHTTPClient):
                       for item in cache_setting_list]
 
         # Get the Origin List
-        backends = self.client.list_backends(service.id, version)
-        origin = backends[0].address
-        port = backends[0].port
-        ssl = backends[0].use_ssl
-
-        origin_list = [{'origin': origin, 'port': port, 'ssl': ssl}]
+        try:
+            backends = self.client.list_backends(service.id, version)
+            origin = backends[0].address
+            port = backends[0].port
+            ssl = backends[0].use_ssl
+            origin_list = [{'origin': origin, 'port': port, 'ssl': ssl}]
+        except IndexError:
+            assert False, 'Empty Backend in Fastly'
+        except fastly.FastlyError as e:
+            assert False, e
 
         return {'domain_list': domain_list,
                 'origin_list': origin_list,
                 'caching_list': cache_list}
-
-    '''except fastly.FastlyError:
-        print('1', fastly.FastlyError)
-        return ("failed to GET service")
-    except Exception:
-        print('2', Exception)
-        return ("failed to GET service")
-    '''

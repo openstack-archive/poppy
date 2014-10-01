@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from tests.api import base
+from tests.api.utils import config
 from tests.api.utils import fastlyclient as fastly
 
 
@@ -32,7 +33,7 @@ class TestProviderBase(base.TestBase):
 
     def getServiceFromProvider(self, provider, service_name):
         if provider == 'fastly':
-            fastly_config = self.config.FastlyConfig()
+            fastly_config = config.FastlyConfig()
             fastly_client = fastly.FastlyClient(
                 api_key=fastly_config.api_key,
                 email=fastly_config.email,
