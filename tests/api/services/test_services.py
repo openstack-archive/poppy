@@ -17,8 +17,9 @@ import uuid
 
 import ddt
 
+from tests.api import base
 from tests.api import providers
-# from tests.api.utils.schema import response - Uncomment after get_service API
+from tests.api.utils.schema import response
 
 
 @ddt.ddt
@@ -45,19 +46,17 @@ class TestServices(providers.TestProviderBase):
                                           flavorRef=flavor)
         self.assertEqual(resp.status_code, 202)
 
-        # TODO(malini): uncomment after get_service endpoint is complete.
-        '''
-        # Get on Created Service
         resp = self.client.get_service(service_name=self.service_name)
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
-        self.assertSchema(body, response.create_service)
+        self.assertSchema(body, response.get_service)
 
         self.assertEqual(body['domains'], domain_list)
         self.assertEqual(body['origins'], origin_list)
-        self.assertEqual(body['caching_list'], caching_list)
-        '''
+
+        # TODO(malini): uncomment below after caching list is implemented.
+        # self.assertEqual(body['caching_list'], caching_list)
 
         # Verify the service is updated at all Providers for the flavor
         if self.test_config.provider_validation:
@@ -86,3 +85,50 @@ class TestServices(providers.TestProviderBase):
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
         super(TestServices, self).tearDown()
+
+
+@ddt.ddt
+class TestServiceActions(base.TestBase):
+
+    """Tests for PATCH, GET & DELETE Services."""
+
+    def setUp(self):
+        super(TestServiceActions, self).setUp()
+        self.service_name = str(uuid.uuid1())
+        self.domain_list = [{"domain": "mywebsite.com"},
+                            {"domain": "blog.mywebsite.com"}]
+
+        self.origin_list = [{"origin": "mywebsite.com",
+                             "port": 443, "ssl": False}]
+
+        self.caching_list = [{"name": "default", "ttl": 3600},
+                             {"name": "home", "ttl": 1200,
+                              "rules": [{"name": "index",
+                                         "request_url": "/index.htm"}]}]
+
+        self.client.create_service(service_name=self.service_name,
+                                   domain_list=self.domain_list,
+                                   origin_list=self.origin_list,
+                                   caching_list=self.caching_list,
+                                   flavorRef='standard')
+
+    def test_get_service(self):
+
+        resp = self.client.get_service(service_name=self.service_name)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertSchema(body, response.get_service)
+        self.assertEqual(body['domains'], self.domain_list)
+        self.assertEqual(body['origins'], self.origin_list)
+        # TODO(malini): uncomment below after caching list is implemented.
+        # self.assertEqual(body['caching_list'], self.caching_list)
+
+    def test_get_non_existing_service(self):
+
+        resp = self.client.get_service(service_name='this_cant_be_true')
+        self.assertEqual(resp.status_code, 404)
+
+    def tearDown(self):
+        self.client.delete_service(service_name=self.service_name)
+        super(TestServiceActions, self).tearDown()
