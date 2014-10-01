@@ -16,16 +16,15 @@
 domain = {
     'type': 'object',
     'properties': {
-        'domain': {'type': 'string',
-                   'pattern': '^([a-zA-Z0-9-.]+(.com))$'}},
-        'required': ['domain']
+        'domain': {'type': 'string', 'format': 'uri'}},
+    'required': ['domain']
 }
 
 origin = {
     'type': 'object',
     'properties': {
         'origin': {'type': 'string',
-                   'pattern': '^([a-zA-Z0-9-.]{5,1000})$'},
+                   'format': 'uri'},
         'port': {'type': 'number',
                  'minumum': 0,
                  'maximum': 100000},
@@ -46,36 +45,38 @@ cache = {'type': 'object',
 links = {'type': 'object',
          'properties': {
              'href': {'type': 'string',
-                      'pattern': '^/v1.0/services/[a-zA-Z0-9_-]{1,64}$'},
-             'rel': {'type': 'string'}}
+                      'anyOf':
+                      [{'format': 'uri'},
+                       {'pattern':
+                        '^(https?)(:/{1,3})[a-z0-9.\-:]{1,400}'
+                        '(/v1.0/services/)[a-zA-Z0-9_-]{1,256}$'}]},
+             'rel': {'type': 'string', 'enum': ['self', 'access_url']}}
          }
 
 restrictions = {'type': 'array'}
 
 # Response Schema Definition for Create Service API
-create_service = {
+get_service = {
     'type': 'object',
     'properties': {
+        'name': {'type': 'string'},
         'domains': {'type': 'array',
                     'items': domain,
-                    'minItems': 1,
-                    'maxItems': 10
+                    'minItems': 1
                     },
         'origins': {'type': 'array',
                     'items': origin,
-                    'minItems': 1,
-                    'maxItems': 10
+                    'minItems': 1
                     },
         'caching': {'type': 'array',
                     'items': cache,
-                    'minItems': 1,
-                    'maxItems': 10
                     },
         'links': {'type': 'array',
                   'items': links,
-                  'minItems': 1,
-                  'maxItems': 1},
+                  'minItems': 1},
+        'status': {'type': 'string',
+                   'enum': ['in_progress', 'deployed', 'unknown', 'failed']},
         'restrictions': restrictions,
     },
-    'required': ['domains', 'origins', 'caching', 'links', 'restrictions'],
+    'required': ['domains', 'origins', 'links'],
     'additionalProperties': False}
