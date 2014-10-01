@@ -22,9 +22,16 @@ from poppy.manager.base import controller
 
 @six.add_metaclass(abc.ABCMeta)
 class HomeControllerBase(controller.ManagerControllerBase):
+    """Home controller base class."""
+
     def __init__(self, manager):
         super(HomeControllerBase, self).__init__(manager)
 
     @abc.abstractmethod
     def get(self):
+        """get
+
+        :param self
+        :raises: NotImplentedError
+        """
         raise NotImplementedError

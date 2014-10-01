@@ -22,6 +22,7 @@ from poppy.manager.base import controller
 
 @six.add_metaclass(abc.ABCMeta)
 class HealthControllerBase(controller.ManagerControllerBase):
+    """Health controller base class."""
 
     def __init__(self, manager):
         super(HealthControllerBase, self).__init__(manager)
@@ -31,15 +32,26 @@ class HealthControllerBase(controller.ManagerControllerBase):
 
     @abc.abstractmethod
     def health(self):
-        """Returns the health of storage and providers."""
+        """Returns the health of storage and providers
+
+        :raises: NotImplentedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def is_provider_alive(self, provider_name):
-        """Returns the health of provider."""
+        """Returns the health of provider
+
+        :param provider_name
+        :raises: NotImplentedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def is_storage_alive(self, storage_name):
-        """Returns the health of storage."""
+        """Returns the health of storage
+
+        :param storage_name
+        :raises: NotImplentedError
+        """
         raise NotImplementedError
