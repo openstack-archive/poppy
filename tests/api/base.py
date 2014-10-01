@@ -56,7 +56,7 @@ class TestBase(fixtures.BaseTestFixture):
 
         cls.test_config = config.TestConfig()
         if cls.test_config.run_server:
-            conf_file = 'poppy_mockdb.conf'
+            conf_file = 'poppy_cassandra.conf'
             conf_path = os.environ["POPPY_TESTS_CONFIGS_DIR"]
             config_file = os.path.join(conf_path, conf_file)
 
