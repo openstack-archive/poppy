@@ -22,6 +22,7 @@ from poppy.manager.base import controller
 
 @six.add_metaclass(abc.ABCMeta)
 class FlavorsControllerBase(controller.ManagerControllerBase):
+    """Flavor controller base class."""
 
     def __init__(self, manager):
         super(FlavorsControllerBase, self).__init__(manager)
@@ -30,20 +31,44 @@ class FlavorsControllerBase(controller.ManagerControllerBase):
 
     @property
     def storage(self):
+        """storage
+
+        :returns: the storage object
+        """
         return self._storage
 
     @abc.abstractmethod
     def list(self):
+        """list
+
+        :raises: NotImplentedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get(self, flavor_id):
+        """GET
+
+        :param flavor_id
+        :raises: NotImplentedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def add(self, flavor):
+        """POST
+
+        :param flavor
+        :raises: NotImplentedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def delete(self, flavor_id, provider_id):
+        """DELETE
+
+        :param flavor_id
+        :param provider_id
+        :raises: NotImplentedError
+        """
         raise NotImplementedError
