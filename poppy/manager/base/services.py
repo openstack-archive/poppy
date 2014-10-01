@@ -23,6 +23,7 @@ from poppy.manager.base import providers
 
 @six.add_metaclass(abc.ABCMeta)
 class ServicesControllerBase(controller.ManagerControllerBase):
+    """ Services controller base class """
 
     def __init__(self, manager):
         super(ServicesControllerBase, self).__init__(manager)
