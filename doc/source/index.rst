@@ -37,6 +37,7 @@ Concepts
    :maxdepth: 1
 
    glossary
+   provider_details
 
 Getting Started
 ===============
@@ -66,7 +67,6 @@ Developer Docs
    :maxdepth: 3
 
    poppy
-   provider_details
 
 
 Using Poppy's API
