@@ -233,6 +233,50 @@ class TestServices(base.TestCase):
         self.assertEqual(resp[driver.provider_name]['error'],
                          'failed to delete service')
 
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider.client')
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider')
+    def test_purge_with_error(self, mock_controllerclient, mock_driver):
+        # test create with exceptions
+        driver = mock_driver()
+        driver.attach_mock(mock_controllerclient, 'client')
+        driver.client.configure_mock(**{'purge.return_value':
+                                        fake_maxcdn_client_400_return_value
+                                        })
+        controller_purge_with_error = services.ServiceController(driver)
+        pullzone_id = 'test_random_pullzone_id'
+        resp = controller_purge_with_error.purge(pullzone_id)
+        self.assertEqual(resp[driver.provider_name]['error'],
+                         'failed to PURGE service')
+
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider.client')
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider')
+    def test_purge_with_exception(self, mock_controllerclient, mock_driver):
+        # test create with exceptions
+        driver = mock_driver()
+        driver.attach_mock(mock_controllerclient, 'client')
+        driver.client.configure_mock(**{'purge.side_effect':
+                                        RuntimeError("ding")
+                                        })
+        controller_purge_with_error = services.ServiceController(driver)
+        pullzone_id = 'test_random_pullzone_id'
+        resp = controller_purge_with_error.purge(pullzone_id)
+        self.assertEqual(resp[driver.provider_name]['error'],
+                         'failed to PURGE service')
+
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider.client')
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider')
+    def test_purge(self, mock_controllerclient, mock_driver):
+        # test create with exceptions
+        driver = mock_driver()
+        driver.attach_mock(mock_controllerclient, 'client')
+        driver.client.configure_mock(**{'purge.return_value':
+                                        {u'code': 200}
+                                        })
+        controller_purge_with_error = services.ServiceController(driver)
+        pullzone_id = 'test_random_pullzone_id'
+        resp = controller_purge_with_error.purge(pullzone_id)
+        self.assertIn('id', resp[driver.provider_name])
+
     @ddt.data('good-service-name', 'yahooservice')
     @mock.patch.object(driver.CDNProvider, 'client',
                        new=fake_maxcdn_api_client())
