@@ -40,6 +40,10 @@ class ServiceController(base.ServiceBase):
     def delete(self, provider_service_id):
         return self.responder.deleted(provider_service_id)
 
+    def purge(self, provider_service_id, purge_urls=None):
+        return self.responder.purged(provider_service_id,
+                                     purge_urls=purge_urls)
+
     def get(self, service_name):
         return self.responder.get([], [], [])
 

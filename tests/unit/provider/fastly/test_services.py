@@ -237,6 +237,35 @@ class TestServices(base.TestCase):
         resp = controller.update(provider_service_id, service_json)
         self.assertIn('id', resp[self.driver.provider_name])
 
+    def test_purge_with_exception(self):
+        provider_service_id = uuid.uuid1()
+        controller = services.ServiceController(self.driver)
+        exception = fastly.FastlyError(Exception('ding'))
+        controller.client.purge_service.side_effect = exception
+        resp = controller.purge(provider_service_id, None)
+        self.assertIn('error', resp[self.driver.provider_name])
+
+    def test_purge_all(self):
+        provider_service_id = uuid.uuid1()
+        controller = services.ServiceController(self.driver)
+        controller.client.purge_service.return_value = 'some_value'
+        resp = controller.purge(provider_service_id, None)
+        controller.client.purge_service.assert_called_once_with(
+            provider_service_id
+        )
+        self.assertIn('id', resp[self.driver.provider_name])
+
+    def test_purge_partial(self):
+        provider_service_id = uuid.uuid1()
+        controller = services.ServiceController(self.driver)
+        controller.client.purge_service.return_value = 'some_value'
+        controller.client.list_domains.return_value = [
+            mock.Mock(name='domain_1'),
+            mock.Mock(name='domain_2')]
+        controller.client.purge_url.return_value = 'purge_url_return'
+        resp = controller.purge(provider_service_id, ['/url_1', '/url_2'])
+        self.assertIn('id', resp[self.driver.provider_name])
+
     def test_client(self):
         controller = services.ServiceController(self.driver)
         self.assertNotEqual(controller.client(), None)
