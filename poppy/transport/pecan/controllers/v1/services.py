@@ -29,7 +29,14 @@ from poppy.transport.validators.stoplight import helpers as stoplight_helpers
 from poppy.transport.validators.stoplight import rule
 
 
+class ServiceAssetsController(base.Controller):
+    pass
+
+
 class ServicesController(base.Controller):
+
+    # TODO(tonytan4ever): Add asserts controller for purge, etc
+    # assets = ServiceAssetsController()
 
     @pecan.expose('json')
     def get_all(self):

@@ -48,6 +48,10 @@ class MockProviderServicesTest(base.TestCase):
         response = self.sc.get("mock_name")
         self.assertTrue(response is not None)
 
+    def test_purge(self):
+        response = self.sc.purge("mock_name")
+        self.assertTrue(response is not None)
+
     @ddt.file_data('data_service.json')
     def test_create(self, service_json):
         service_obj = service.load_from_json(service_json)

@@ -61,6 +61,15 @@ class Responder(object):
             }
         }
 
+    def purged(self, provider_service_id, **extras):
+        provider_response = {
+            'id': provider_service_id
+        }
+        provider_response.update(extras)
+        return {
+            self.provider: provider_response
+        }
+
     def get(self, domain_list, origin_list, cache_list):
         return {
             self.provider: {

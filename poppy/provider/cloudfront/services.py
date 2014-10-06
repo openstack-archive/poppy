@@ -83,6 +83,16 @@ class ServiceController(base.ServiceBase):
         except Exception as e:
             return self.responder.failed(str(e))
 
+    def purge(self, distribution_id, purge_urls=None):
+        try:
+            purge_urls = [] if purge_urls is None else purge_urls
+            self.client.create_invalidation_request(distribution_id,
+                                                    purge_urls)
+            return self.responder.purged(distribution_id,
+                                         purge_urls=purge_urls)
+        except Exception:
+            return self.responder.failed("failed to PURGE service")
+
     @decorators.lazy_property(write=False)
     def current_customer(self):
         # TODO(tonytan4ever/obulpathi): Implement cloudfront's current_customer
