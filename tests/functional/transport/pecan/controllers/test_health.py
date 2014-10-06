@@ -23,7 +23,7 @@ class TestHealth(base.FunctionalTest):
         self.assertEqual(200, response.status_code)
 
     def test_health_storage(self):
-        response = self.app.get('/v1.0/health/storage/mockdb')
+        response = self.app.get('/v1.0/health/storage/cassandra')
         self.assertEqual(200, response.status_code)
         self.assertIn('true', str(response.body))
 
