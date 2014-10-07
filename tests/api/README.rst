@@ -34,4 +34,8 @@ To run the tests
 Tox Support
 -----------
 
-Coming Soon to a Repo Near You!
+The API tests require cassandra running in your local machine, in order to
+run via tox. It is assumed you already have the Cassandra instance up &
+running locally. You can make the API tests part of tox, by overriding the
+default positional argument in tox.ini::
+    example : tox -- --exclude=None
