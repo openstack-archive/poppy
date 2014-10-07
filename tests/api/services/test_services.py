@@ -1,3 +1,5 @@
+# coding= utf-8
+
 # Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,12 +25,12 @@ from tests.api.utils.schema import response
 
 
 @ddt.ddt
-class TestServices(providers.TestProviderBase):
+class TestCreateService(providers.TestProviderBase):
 
-    """Tests for Services."""
+    """Tests for Create Service."""
 
     def setUp(self):
-        super(TestServices, self).setUp()
+        super(TestCreateService, self).setUp()
         self.service_name = str(uuid.uuid1())
 
     @ddt.file_data('data_create_service.json')
@@ -84,7 +86,98 @@ class TestServices(providers.TestProviderBase):
 
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
-        super(TestServices, self).tearDown()
+        super(TestCreateService, self).tearDown()
+
+
+@ddt.ddt
+class TestListServices(base.TestBase):
+    """Tests for List Services."""
+
+    def _create_test_service(self):
+        service_name = str(uuid.uuid1())
+
+        self.domain_list = [{"domain": "mywebsite.com"},
+                            {"domain": "blog.mywebsite.com"}]
+
+        self.origin_list = [{"origin": "mywebsite.com",
+                             "port": 443, "ssl": False}]
+
+        self.caching_list = [{"name": "default", "ttl": 3600},
+                             {"name": "home", "ttl": 1200,
+                              "rules": [{"name": "index",
+                                         "request_url": "/index.htm"}]}]
+
+        self.client.create_service(service_name=service_name,
+                                   domain_list=self.domain_list,
+                                   origin_list=self.origin_list,
+                                   caching_list=self.caching_list,
+                                   flavorRef='standard')
+        return service_name
+
+    def setUp(self):
+        super(TestListServices, self).setUp()
+        self.service_list = []
+
+    def test_list_single_service(self):
+        self.service_list.append(self._create_test_service())
+        resp = self.client.list_services()
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertSchema(body, response.list_services)
+
+    def test_list_services_no_service(self):
+        resp = self.client.list_services()
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertEqual(body['services'], [])
+        self.assertEqual(body['links'], [])
+
+    @ddt.data(1, 5, 10)
+    def test_list_services_valid_limit(self, limit):
+        self.skipTest('Crashes Cassandra?')
+        self.service_list = [self._create_test_service() for _ in range(limit)]
+        url_param = {'limit': limit}
+        resp = self.client.list_services(param=url_param)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertEqual(len(body['services']), limit)
+        self.assertSchema(body, response.list_services)
+
+    def test_list_services_multiple_page(self):
+        self.skipTest('Exceeds max number of services allowed by Fastly')
+        self.service_list = [self._create_test_service() for _ in range(25)]
+        resp = self.client.list_services()
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        # TODO(malini): remove hard coded value with configurable value
+        self.assertEqual(len(body['services']), 10)
+        self.assertSchema(body, response.list_services)
+
+    @ddt.data(-1, -10000000000, 0, 10000000, 'invalid', '学校', '')
+    def test_list_services_invalid_limits(self, limit):
+        url_param = {'limit': limit}
+        resp = self.client.list_services(param=url_param)
+        self.assertEqual(resp.status_code, 400)
+
+    @ddt.data(-1, -10000000000, 0, 10000000, 'invalid', '学校', '')
+    def test_list_services_various_markers(self, marker):
+        url_param = {'marker': marker}
+        resp = self.client.list_services(param=url_param)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_list_services_invalid_param(self):
+        url_param = {'yummy': 123}
+        resp = self.client.list_services(param=url_param)
+        self.assertEqual(resp.status_code, 200)
+
+    def tearDown(self):
+        for service in self.service_list:
+            self.client.delete_service(service_name=service)
+        super(TestListServices, self).tearDown()
 
 
 @ddt.ddt
