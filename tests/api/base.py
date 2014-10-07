@@ -40,17 +40,18 @@ class TestBase(fixtures.BaseTestFixture):
         cls.auth_config = config.AuthConfig()
         if cls.auth_config.auth_enabled:
             cls.auth_client = client.AuthClient()
-            auth_token = cls.auth_client.get_auth_token(
+            auth_token, project_id = cls.auth_client.authenticate_user(
                 cls.auth_config.base_url,
                 cls.auth_config.user_name,
                 cls.auth_config.api_key)
         else:
             auth_token = 'dummy'
+            project_id = 'dummy'
 
         cls.config = config.PoppyConfig()
         cls.url = cls.config.base_url
 
-        cls.client = client.PoppyClient(cls.url, auth_token,
+        cls.client = client.PoppyClient(cls.url, auth_token, project_id,
                                         serialize_format='json',
                                         deserialize_format='json')
 
