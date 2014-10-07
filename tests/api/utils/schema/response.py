@@ -44,22 +44,19 @@ cache = {'type': 'object',
 
 links = {'type': 'object',
          'properties': {
-             'href': {'type': 'string',
-                      'anyOf':
-                      [{'format': 'uri'},
-                       {'pattern':
-                        '^(https?)(:/{1,3})[a-z0-9.\-:]{1,400}'
-                        '(/v1.0/services/)[a-zA-Z0-9_-]{1,256}$'}]},
+             'href': {'type': 'string', 'format': 'uri'},
              'rel': {'type': 'string', 'enum': ['self', 'access_url']}}
          }
 
 restrictions = {'type': 'array'}
+flavor_id = {'type': 'string', 'pattern': '([a-zA-Z0-9_\-]{1,256})'}
+service_name = {'type': 'string', 'pattern': '([a-zA-Z0-9_\-\.]{1,256})'}
 
-# Response Schema Definition for Create Service API
+# Response Schema Definition for Get Service API
 get_service = {
     'type': 'object',
     'properties': {
-        'name': {'type': 'string'},
+        'name': service_name,
         'domains': {'type': 'array',
                     'items': domain,
                     'minItems': 1
@@ -77,6 +74,34 @@ get_service = {
         'status': {'type': 'string',
                    'enum': ['in_progress', 'deployed', 'unknown', 'failed']},
         'restrictions': restrictions,
+        'flavorRef': flavor_id
     },
-    'required': ['domains', 'origins', 'links'],
+    'required': ['domains', 'origins', 'links', 'flavorRef', 'status'],
+    'additionalProperties': False}
+
+list_services_link = {
+    'type': 'object',
+    'properties': {
+        'rel': {'type': 'string', 'enum': ['next']},
+        'href': {'type': 'string',
+                 'pattern':
+                 '(https?)(:/{1,3})([a-z0-9\.\-:]{1,400})'
+                 '(/v1\.0/services\?marker=)([a-zA-Z0-9_\-\.]{1,256})'
+                 '(&limit=)([1-9]|1[0-9])'}},
+        'required': ['rel', 'href'],
+        'additionalProperties': False}
+
+# Response Schema Definition for List Services API
+list_services = {
+    'type': 'object',
+    'properties': {
+        'links': {
+            'type': 'array',
+            'items': list_services_link,
+            'minItems': 1,
+            'maxItems': 1},
+        'services': {
+            'type': 'array',
+            'items': get_service}},
+    'required': ['links', 'services'],
     'additionalProperties': False}

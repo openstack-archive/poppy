@@ -101,6 +101,18 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
         return self.request('GET', url)
 
+    def list_services(self, param=None):
+        """Get a list of Services
+
+        :return: Response Object containing response code 200 and body with
+        list of services & details
+        GET
+        services
+        """
+
+        url = '{0}/v1.0/services'.format(self.url)
+        return self.request('GET', url, params=param)
+
     def delete_service(self, service_name):
         """Delete Service
 
