@@ -20,6 +20,7 @@ import mock
 from oslo.config import cfg
 
 from poppy.manager.default import driver
+from poppy.manager.default.service_async_workers import create_service_worker
 from poppy.manager.default import services
 from poppy.model import flavor
 from poppy.model.helpers import provider_details
@@ -140,6 +141,85 @@ class DefaultManagerServiceTests(base.TestCase):
         self.sc.storage_controller.create.assert_called_once_with(
             self.project_id,
             service_obj)
+
+    @ddt.file_data('data_provider_details.json')
+    def test_create_service_worker(self, provider_details_json):
+        service_obj = service.load_from_json(self.service_json)
+
+        self.provider_details = {}
+        for provider_name in provider_details_json:
+            provider_detail_dict = json.loads(
+                provider_details_json[provider_name]
+            )
+            provider_service_id = provider_detail_dict.get('id', None)
+            access_urls = provider_detail_dict.get('access_urls', None)
+            status = provider_detail_dict.get('status', u'deployed')
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
+                status=status)
+            self.provider_details[provider_name] = provider_detail_obj
+
+            providers = self.sc._driver.providers
+
+            def get_provider_extension_by_name(name):
+                if name == 'cloudfront':
+                    return_mock = {
+                        'CloudFront': {
+                            'id':
+                            '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                            'links': [{'href': 'www.mysite.com',
+                                       'rel': 'access_url'}],
+                            'status': 'in_progress'
+                        }
+                    }
+                    service_controller = mock.Mock(
+                        create=mock.Mock(return_value=return_mock)
+                    )
+                    return mock.Mock(obj=mock.Mock(
+                        provider_name='CloudFront',
+                        service_controller=service_controller)
+                    )
+                elif name == 'fastly':
+                    return_mock = {
+                        'Fastly': {'error': "fail to create servcice",
+                                   'error_detail': 'Fastly Create failed'
+                                   '     because of XYZ'}
+                    }
+                    service_controller = mock.Mock(
+                        create=mock.Mock(return_value=return_mock)
+                    )
+                    return mock.Mock(obj=mock.Mock(
+                        provider_name='MaxCDN',
+                        service_controller=service_controller)
+                    )
+                else:
+                    return_mock = {
+                        name.title(): {
+                            'id':
+                            '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                            'links': [
+                                {'href': 'www.mysite.com',
+                                 'rel': 'access_url'}]
+                        }
+                    }
+                    service_controller = mock.Mock(
+                        create=mock.Mock(return_value=return_mock)
+                    )
+                    return mock.Mock(obj=mock.Mock(
+                        provider_name=name.title(),
+                        service_controller=service_controller)
+                    )
+
+        providers.__getitem__.side_effect = get_provider_extension_by_name
+        providers_list = ['mock', 'cloudfront', 'fastly']
+        # worker process returns None
+        res = create_service_worker.service_create_worker(providers_list,
+                                                          self.sc,
+                                                          self.project_id,
+                                                          self.service_name,
+                                                          service_obj)
+        self.assertTrue(res is None)
 
     @ddt.file_data('data_provider_details.json')
     def test_update(self, provider_details_json):
