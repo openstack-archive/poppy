@@ -52,8 +52,13 @@ class TestDriver(base.TestCase):
             provider._conf['drivers:provider:maxcdn'].consumer_key,
             provider._conf['drivers:provider:maxcdn'].consumer_secret)
 
+    @mock.patch('requests.get')
     @mock.patch.object(driver, 'MAXCDN_OPTIONS', new=MAXCDN_OPTIONS)
-    def test_is_alive(self):
+    def test_is_alive(self, mock_get):
+        response_object = util.dict2obj(
+            {'content': '', 'status_code': 200})
+        mock_get.return_value = response_object
+
         provider = driver.CDNProvider(self.conf)
         self.assertEqual(provider.is_alive(), True)
 
