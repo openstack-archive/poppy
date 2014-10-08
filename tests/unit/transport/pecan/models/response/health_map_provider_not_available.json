@@ -1,6 +1,6 @@
-[
-    {
+{
+    "provider_not_available":{
         "storage": {"storage_name": "cassandra", "is_alive": "True"},
         "providers": [{"provider_name": "fastly", "is_alive": ""}]
     }
-]
+}
