@@ -16,8 +16,8 @@
 import multiprocessing
 
 from poppy.manager import base
+from poppy.manager.default.service_async_workers import create_service_worker
 from poppy.manager.default.service_async_workers import delete_service_worker
-from poppy.model.helpers import provider_details
 
 
 class DefaultServicesController(base.ServicesController):
@@ -52,42 +52,20 @@ class DefaultServicesController(base.ServicesController):
         except ValueError as e:
             raise e
 
-        responders = []
-        for provider in providers:
-            responder = self.provider_wrapper.create(
-                self._driver.providers[provider],
-                service_obj)
-            responders.append(responder)
-
-        provider_details_dict = {}
-        for responder in responders:
-            for provider_name in responder:
-                if 'error' not in responder[provider_name]:
-                    provider_details_dict[provider_name] = (
-                        provider_details.ProviderDetail(
-                            provider_service_id=responder[provider_name]['id'],
-                            access_urls=[link['href'] for link in
-                                         responder[provider_name]['links']])
-                    )
-                    if 'status' in responder[provider_name]:
-                        provider_details_dict[provider_name].status = (
-                            responder[provider_name]['status'])
-                    else:
-                        provider_details_dict[provider_name].status = (
-                            'deployed')
-                else:
-                    provider_details_dict[provider_name] = (
-                        provider_details.ProviderDetail(
-                            error_info=responder[provider_name]['error_detail']
-                        )
-                    )
-                    provider_details_dict[provider_name].status = 'failed'
-
-        self.storage_controller.update_provider_details(project_id,
-                                                        service_name,
-                                                        provider_details_dict)
-
-        return responders
+        self.storage_controller._driver.close_connection()
+        p = multiprocessing.Process(
+            name='Process: create poppy service %s for'
+            ' project id: %s' %
+            (service_name,
+             project_id),
+            target=create_service_worker.service_create_worker,
+            args=(
+                providers,
+                self,
+                project_id,
+                service_name, service_obj))
+        p.start()
+        return
 
     def update(self, project_id, service_name, service_obj):
         self.storage_controller.update(

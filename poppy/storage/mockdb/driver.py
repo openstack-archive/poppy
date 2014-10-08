@@ -73,4 +73,4 @@ class MockDBStorageDriver(base.Driver):
         return ""
 
     def close_connection(self):
-        return ""
+        return None
