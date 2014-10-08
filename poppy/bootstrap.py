@@ -29,7 +29,7 @@ _DRIVER_OPTIONS = [
                help='Transport driver to use'),
     cfg.StrOpt('manager', default='default',
                help='Manager driver to use'),
-    cfg.StrOpt('storage', default='mockdb',
+    cfg.StrOpt('storage', default='cassandra',
                help='Storage driver to use'),
 ]
 

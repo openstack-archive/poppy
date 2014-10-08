@@ -246,8 +246,7 @@ class ServicesController(base.ServicesController):
         # returns the dictionary
         exec_results = self.session.execute(CQL_GET_PROVIDER_DETAILS, args)
         results = {}
-        print exec_results
-        
+
         for provider_name in exec_results[0]:
             provider_detail_dict = json.loads(exec_results[0][provider_name])
 

@@ -140,6 +140,9 @@ class ServiceControllerTest(base.FunctionalTest):
 
     @ddt.file_data("data_create_service.json")
     def test_create(self, service_json):
+
+        service_json['flavorRef'] = self.flavor_id
+
         # create with good data
         response = self.app.post('/v1.0/services',
                                  params=json.dumps(service_json),
