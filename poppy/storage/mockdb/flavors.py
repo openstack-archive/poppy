@@ -26,18 +26,14 @@ class FlavorsController(base.FlavorsController):
     def list(self):
         f = flavor.Flavor(
             "standard",
-            [flavor.Provider("cloudfront", "www.cloudfront.com"),
-             flavor.Provider("fastly", "www.fastly.com"),
-             flavor.Provider("mock", "www.mock_provider.com")]
+            [flavor.Provider("mock", "www.mock_provider.com")]
         )
         return [f]
 
     def get(self, flavor_id):
         f = flavor.Flavor(
             "standard",
-            [flavor.Provider("cloudfront", "www.cloudfront.com"),
-             flavor.Provider("fastly", "www.fastly.com"),
-             flavor.Provider("mock", "www.mock_provider.com")]
+            [flavor.Provider("mock", "www.mock_provider.com")]
         )
         if flavor_id == "non_exist":
             raise LookupError("More than one flavor/no record was retrieved.")

@@ -1,10 +1,6 @@
 {         
-	"missing_origin": {
-        "name": "mocksite.com",
-        "domain": "my_domain.com"
-    },
-    "non_existing_flavor_input": {
-        "name": "mocksite.com",
+    "existing_name_service_json": {
+        "name": "override this",
         "domains": [
             {"domain": "test.mocksite.com" },
             {"domain": "blog.mocksite.com"}
@@ -16,7 +12,7 @@
                 "ssl": false
             }
         ],
-        "flavorRef": "non_exist",
+        "flavorRef": "mock",
         "caching": [
             {
                 "name": "default",

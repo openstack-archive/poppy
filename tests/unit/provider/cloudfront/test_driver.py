@@ -54,7 +54,12 @@ class TestDriver(base.TestCase):
         provider = driver.CDNProvider(self.conf)
         self.assertEqual(provider.provider_name, 'CloudFront')
 
-    def test_is_alive(self):
+    @mock.patch('requests.get')
+    def test_is_alive(self, mock_get):
+        response_object = util.dict2obj(
+            {'content': '', 'status_code': 200})
+        mock_get.return_value = response_object
+
         provider = driver.CDNProvider(self.conf)
         self.assertEqual(provider.is_alive(), True)
 
