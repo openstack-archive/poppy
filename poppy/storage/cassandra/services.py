@@ -164,7 +164,7 @@ class ServicesController(base.ServicesController):
         domains = [domain.Domain(json.loads(d)['domain']) for d in domains]
         flavorRef = result.get("flavor_id")
         s = service.Service(name, domains, origins, flavorRef)
-        provider_detail_results = result.get('provider_details')
+        provider_detail_results = result.get('provider_details') or {}
         provider_details_dict = {}
         for provider_name in provider_detail_results:
             provider_detail_dict = json.loads(
