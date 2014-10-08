@@ -12,7 +12,7 @@
                 "ssl": false
             }
         ],
-        "flavorRef": "standard",
+        "flavorRef": "mock",
         "caching": [
             {
                 "name": "default",

@@ -42,8 +42,13 @@ class TestDriver(base.TestCase):
         mock_connect.assert_called_once_with(
             provider._conf['drivers:provider:fastly'].apikey)
 
+    @mock.patch('requests.get')
     @mock.patch.object(driver, 'FASTLY_OPTIONS', new=FASTLY_OPTIONS)
-    def test_is_alive(self):
+    def test_is_alive(self, mock_get):
+        response_object = util.dict2obj(
+            {'content': '', 'status_code': 200})
+        mock_get.return_value = response_object
+
         provider = driver.CDNProvider(self.conf)
         self.assertEqual(provider.is_alive(), True)
 
