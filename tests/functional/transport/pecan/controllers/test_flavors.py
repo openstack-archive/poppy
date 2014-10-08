@@ -80,6 +80,7 @@ class FlavorControllerTest(base.FunctionalTest):
 
     @ddt.file_data('data_create_flavor.json')
     def test_create(self, value):
+        value['id'] = u'{0}_{1}'.format(value['id'], uuid.uuid1())
 
         # create with good data
         response = self.app.post('/v1.0/flavors',
