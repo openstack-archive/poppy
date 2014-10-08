@@ -26,3 +26,8 @@ class MockProviderDriverTest(base.TestCase):
 
     def test_mock_provider_driver_working(self):
         self.assertTrue(self.driver.is_alive())
+
+    def test_mock_provider_service_controller(self):
+        self.assertTrue(
+            self.driver.service_controller is not None
+        )
