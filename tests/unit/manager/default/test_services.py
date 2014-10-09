@@ -32,14 +32,16 @@ class DefaultManagerServiceTests(base.TestCase):
 
     @mock.patch('poppy.storage.base.driver.StorageDriverBase')
     @mock.patch('poppy.provider.base.driver.ProviderDriverBase')
-    def setUp(self, mock_driver, mock_provider):
+    @mock.patch('poppy.dns.base.driver.DNSDriverBase')
+    def setUp(self, mock_driver, mock_provider, mock_dns):
         super(DefaultManagerServiceTests, self).setUp()
 
         # create mocked config and driver
         conf = cfg.ConfigOpts()
         manager_driver = driver.DefaultManagerDriver(conf,
                                                      mock_driver,
-                                                     mock_provider)
+                                                     mock_provider,
+                                                     mock_dns)
 
         # stubbed driver
         self.sc = services.DefaultServicesController(manager_driver)
@@ -113,7 +115,7 @@ class DefaultManagerServiceTests(base.TestCase):
                         'Fastly': {'error': "fail to create servcice",
                                    'error_detail': 'Fastly Create failed'
                                    ' because of XYZ'}})
-                    )
+                )
                 ))
             else:
                 return mock.Mock(
