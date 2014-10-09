@@ -22,8 +22,9 @@ from poppy.manager.default import controllers
 
 class DefaultManagerDriver(base.Driver):
 
-    def __init__(self, conf, storage, providers):
-        super(DefaultManagerDriver, self).__init__(conf, storage, providers)
+    def __init__(self, conf, storage, providers, dns):
+        super(DefaultManagerDriver, self).__init__(
+            conf, storage, providers, dns)
 
     @decorators.lazy_property(write=False)
     def services_controller(self):

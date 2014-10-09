@@ -35,6 +35,8 @@ _DRIVER_OPTIONS = [
                help='Manager driver to use'),
     cfg.StrOpt('storage', default='mockdb',
                help='Storage driver to use'),
+    cfg.StrOpt('dns', default='designate',
+               help='DNS driver to use'),
 ]
 
 _DRIVER_GROUP = 'drivers'
@@ -57,6 +59,25 @@ class Bootstrap(object):
         log.setup('poppy')
 
         LOG.debug("init bootstrap")
+
+    @decorators.lazy_property(write=False)
+    def dns(self):
+        LOG.debug((u'Loading DNS driver'))
+
+        # create the driver manager to load the appropriate drivers
+        dns_type = 'poppy.dns'
+        dns_name = self.driver_conf.dns
+
+        args = [self.conf]
+
+        try:
+            mgr = driver.DriverManager(namespace=dns_type,
+                                       name=dns_name,
+                                       invoke_on_load=True,
+                                       invoke_args=args)
+            return mgr.driver
+        except RuntimeError as exc:
+            LOG.exception(exc)
 
     @decorators.lazy_property(write=False)
     def provider(self):
@@ -98,7 +119,7 @@ class Bootstrap(object):
         manager_type = 'poppy.manager'
         manager_name = self.driver_conf.manager
 
-        args = [self.conf, self.storage, self.provider]
+        args = [self.conf, self.storage, self.provider, self.dns]
 
         try:
             mgr = driver.DriverManager(namespace=manager_type,
