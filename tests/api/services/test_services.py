@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
 import uuid
 
 import ddt
@@ -132,6 +133,31 @@ class TestServiceActions(base.TestBase):
     def test_get_failed_service(self):
         # TODO(malini): Add test to verify that failed service will return
         # status 'failed' on get_service with error message from the provider.
+        # Placeholder till we figure out how to create provider side failure.
+        pass
+
+    def test_delete_service(self):
+        resp = self.client.delete_service(service_name=self.service_name)
+        self.assertEqual(resp.status_code, 202)
+
+        resp = self.client.get_service(service_name=self.service_name)
+        body = resp.json()
+        status = body['status']
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(status, 'delete_in_progress')
+
+        # TODO(malini): find a better solution instead of sleep
+        time.sleep(3)
+        resp = self.client.get_service(service_name=self.service_name)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_delete_non_existing_service(self):
+        resp = self.client.delete_service(service_name='this_cant_be_true')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_delete_failed_service(self):
+        # TODO(malini): Add test to verify that a failed service can be
+        # deleted.
         # Placeholder till we figure out how to create provider side failure.
         pass
 
