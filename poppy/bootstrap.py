@@ -23,6 +23,10 @@ from poppy.openstack.common import log
 
 LOG = log.getLogger(__name__)
 
+_DEFAULT_OPTIONS = [
+    cfg.StrOpt('datacenter', default='',
+               help='Host datacenter of the API')
+]
 
 _DRIVER_OPTIONS = [
     cfg.StrOpt('transport', default='pecan',
@@ -46,6 +50,7 @@ class Bootstrap(object):
 
     def __init__(self, conf):
         self.conf = conf
+        self.conf.register_opts(_DEFAULT_OPTIONS)
         self.conf.register_opts(_DRIVER_OPTIONS, group=_DRIVER_GROUP)
         self.driver_conf = self.conf[_DRIVER_GROUP]
 
