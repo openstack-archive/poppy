@@ -37,6 +37,13 @@ class CassandraStorageFlavorsTests(base.TestCase):
 
         # create mocked config and driver
         conf = cfg.ConfigOpts()
+        conf.register_opt(
+            cfg.StrOpt(
+                'datacenter',
+                default='',
+                help='datacenter where the C* cluster hosted'))
+        conf.register_opts(driver.CASSANDRA_OPTIONS,
+                           group=driver.CASSANDRA_GROUP)
         cassandra_driver = driver.CassandraStorageDriver(conf)
 
         # stubbed cassandra driver
