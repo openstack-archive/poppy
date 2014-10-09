@@ -21,11 +21,11 @@ import six
 @six.add_metaclass(abc.ABCMeta)
 class ManagerDriverBase(object):
     """Base class for driver manager."""
-
-    def __init__(self, conf, storage, providers):
+    def __init__(self, conf, storage, providers, dns):
         self._conf = conf
         self._storage = storage
         self._providers = providers
+        self._dns = dns
 
     @property
     def storage(self):
@@ -42,6 +42,10 @@ class ManagerDriverBase(object):
         :returns providers
         """
         return self._providers
+
+    @property
+    def dns(self):
+        return self._dns
 
     @abc.abstractproperty
     def services_controller(self):
