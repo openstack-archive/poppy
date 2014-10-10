@@ -15,9 +15,29 @@
 
 """DNS Provider implementation."""
 
+from oslo.config import cfg
+
 from poppy.dns import base
 from poppy.dns.rackspace import controllers
 from poppy.openstack.common import log as logging
+
+
+RACKSPACE_OPTIONS = [
+    cfg.StrOpt('project_id', default='',
+               help='Keystone Project ID'),
+    cfg.StrOpt('api_key', default='',
+               help='Keystone API Key'),
+    cfg.BoolOpt('sharding_enabled', default=True,
+                help='Enable Sharding?'),
+    cfg.IntOpt('num_shards', default=10, help='Number of Shards to use'),
+    cfg.StrOpt('shard_prefix', default='cdn',
+               help='The shard prefix to use'),
+    cfg.StrOpt('url', default='',
+               help='The url for customers to CNAME to \
+               (format: <domain>.<shard_prefix><shard#>.<url>)'),
+]
+
+RACKSPACE_GROUP = 'drivers:dns:rackspace'
 
 LOG = logging.getLogger(__name__)
 
@@ -26,8 +46,6 @@ class DNSProvider(base.Driver):
 
     def __init__(self, conf):
         super(DNSProvider, self).__init__(conf)
-
-        pass
 
     def is_alive(self):
         return False
