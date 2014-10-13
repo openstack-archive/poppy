@@ -30,7 +30,7 @@ class AuthClient(client.HTTPClient):
         self.default_headers['Content-Type'] = 'application/json'
         self.default_headers['Accept'] = 'application/json'
 
-    def get_auth_token(self, auth_url, user_name, api_key):
+    def authenticate_user(self, auth_url, user_name, api_key):
         """Get Auth Token using api_key
 
         TODO (malini-kamalambal): Support getting token with password (or)
@@ -49,20 +49,22 @@ class AuthClient(client.HTTPClient):
 
         response = self.request('POST', url, data=request_body)
         token = response.json()['access']['token']['id']
-        return token
+        project_id = response.json()['access']['token']['tenant']['id']
+        return token, project_id
 
 
 class PoppyClient(client.AutoMarshallingHTTPClient):
 
     """Client objects for all the Poppy api calls."""
 
-    def __init__(self, url, auth_token, serialize_format="json",
+    def __init__(self, url, auth_token, project_id, serialize_format="json",
                  deserialize_format="json"):
         super(PoppyClient, self).__init__(serialize_format,
                                           deserialize_format)
         self.url = url
         self.auth_token = auth_token
         self.default_headers['X-Auth-Token'] = auth_token
+        self.default_headers['X-Project-Id'] = project_id
         self.default_headers['Content-Type'] = 'application/json'
 
         self.serialize = serialize_format
@@ -100,6 +102,18 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
         url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
         return self.request('GET', url)
+
+    def list_services(self, param=None):
+        """Get a list of Services
+
+        :return: Response Object containing response code 200 and body with
+        list of services & details
+        GET
+        services
+        """
+
+        url = '{0}/v1.0/services'.format(self.url)
+        return self.request('GET', url, params=param)
 
     def delete_service(self, service_name):
         """Delete Service
