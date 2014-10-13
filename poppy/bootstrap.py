@@ -15,7 +15,7 @@
 
 from oslo.config import cfg
 from stevedore import driver
-from stevedore import extension
+from stevedore import named
 
 from poppy.common import decorators
 from poppy.openstack.common import log
@@ -35,6 +35,8 @@ _DRIVER_OPTIONS = [
                help='Manager driver to use'),
     cfg.StrOpt('storage', default='mockdb',
                help='Storage driver to use'),
+    cfg.ListOpt('providers', default=['mock'],
+                help='Provider driver(s) to use'),
 ]
 
 _DRIVER_GROUP = 'drivers'
@@ -65,10 +67,12 @@ class Bootstrap(object):
         # create the driver manager to load the appropriate drivers
         provider_type = 'poppy.provider'
         args = [self.conf]
+        provider_names = self.driver_conf.providers
 
-        mgr = extension.ExtensionManager(namespace=provider_type,
-                                         invoke_on_load=True,
-                                         invoke_args=args)
+        mgr = named.NamedExtensionManager(namespace=provider_type,
+                                          names=provider_names,
+                                          invoke_on_load=True,
+                                          invoke_args=args)
         return mgr
 
     @decorators.lazy_property(write=False)
