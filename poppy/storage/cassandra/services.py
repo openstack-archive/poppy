@@ -33,6 +33,21 @@ CQL_GET_ALL_SERVICES = '''
     WHERE project_id = %(project_id)s
 '''
 
+CQL_LIST_SERVICES = '''
+    SELECT project_id,
+        service_name,
+        domains,
+        origins,
+        caching_rules,
+        restrictions,
+        provider_details
+    FROM services
+    WHERE project_id = %(project_id)s
+        AND service_name > %(service_name)s
+    ORDER BY service_name
+    LIMIT %(limit)s
+'''
+
 CQL_GET_SERVICE = '''
     SELECT project_id,
         service_name,
@@ -113,30 +128,18 @@ class ServicesController(base.ServicesController):
     def session(self):
         return self._driver.database
 
-    def list(self, project_id, marker=None, limit=None):
+    def list(self, project_id, marker, limit):
 
-        # get all services
+        # list services
         args = {
-            'project_id': project_id
+            'project_id': project_id,
+            'service_name': marker,
+            'limit': limit
         }
 
-        results = self.session.execute(CQL_GET_ALL_SERVICES, args)
+        results = self.session.execute(CQL_LIST_SERVICES, args)
+        services = [self.format_result(r) for r in results]
 
-        # TODO(amitgandhinz) : build the formatted json structure from the
-        # result
-        # TODO(amitgandhinz): return services instead once its formatted.
-        services = []
-        for r in results:
-            name = r.get("service_name")
-            origins = r.get("origins", [])
-            domains = r.get("domains", [])
-            origins = [origin.Origin(json.loads(o)['origin'],
-                                     json.loads(o).get('port', 80),
-                                     json.loads(o).get('ssl', False))
-                       for o in origins]
-            domains = [domain.Domain(json.loads(d)['domain']) for d in domains]
-            flavorRef = r.get("flavor_id")
-            services.append(service.Service(name, domains, origins, flavorRef))
         return services
 
     def get(self, project_id, service_name):
@@ -154,31 +157,7 @@ class ServicesController(base.ServicesController):
         # at this point, it is certain that there's exactly 1 result in
         # results.
         result = results[0]
-        name = result.get('service_name')
-        origins = result.get('origins', [])
-        domains = result.get('domains', [])
-        origins = [origin.Origin(json.loads(o)['origin'],
-                                 json.loads(o).get('port', 80),
-                                 json.loads(o).get('ssl', False))
-                   for o in origins]
-        domains = [domain.Domain(json.loads(d)['domain']) for d in domains]
-        flavorRef = result.get("flavor_id")
-        s = service.Service(name, domains, origins, flavorRef)
-        provider_detail_results = result.get('provider_details')
-        provider_details_dict = {}
-        for provider_name in provider_detail_results:
-            provider_detail_dict = json.loads(
-                provider_detail_results[provider_name])
-            provider_service_id = provider_detail_dict.get('id', None)
-            access_urls = provider_detail_dict.get('access_urls', [])
-            status = provider_detail_dict.get('status', u'unknown')
-            provider_detail_obj = provider_details.ProviderDetail(
-                provider_service_id=provider_service_id,
-                access_urls=access_urls,
-                status=status)
-            provider_details_dict[provider_name] = provider_detail_obj
-        s.provider_details = provider_details_dict
-        return s
+        return self.format_result(result)
 
     def create(self, project_id, service_obj):
         # create the service in storage
@@ -245,6 +224,10 @@ class ServicesController(base.ServicesController):
         # if a list, the return the first item of a list. if it is a dictionary
         # returns the dictionary
         exec_results = self.session.execute(CQL_GET_PROVIDER_DETAILS, args)
+
+        if not exec_results:
+            return {}
+
         results = {}
         for provider_name in exec_results[0]:
             provider_detail_dict = json.loads(exec_results[0][provider_name])
@@ -283,3 +266,31 @@ class ServicesController(base.ServicesController):
         # if a list, the return the first item of a list. if it is a dictionary
         # returns the dictionary
         self.session.execute(CQL_UPDATE_PROVIDER_DETAILS, args)
+
+    @staticmethod
+    def format_result(result):
+        name = result.get('service_name')
+        origins = [json.loads(o) for o in result.get('origins', [])]
+        domains = [json.loads(d) for d in result.get('domains', [])]
+        origins = [origin.Origin(o['origin'],
+                                 o.get('port', 80),
+                                 o.get('ssl', False))
+                   for o in origins]
+        domains = [domain.Domain(d['domain']) for d in domains]
+        flavorRef = result.get('flavorRef')
+        s = service.Service(name, domains, origins, flavorRef)
+        provider_detail_results = result.get('provider_details') or {}
+        provider_details_dict = {}
+        for provider_name in provider_detail_results:
+            provider_detail_dict = json.loads(
+                provider_detail_results[provider_name])
+            provider_service_id = provider_detail_dict.get('id', None)
+            access_urls = provider_detail_dict.get('access_urls', [])
+            status = provider_detail_dict.get('status', u'unknown')
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
+                status=status)
+            provider_details_dict[provider_name] = provider_detail_obj
+        s.provider_details = provider_details_dict
+        return s
