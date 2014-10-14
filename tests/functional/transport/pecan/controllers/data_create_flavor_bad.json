@@ -17,5 +17,19 @@
                 ]
             }
         ]
+    },
+    "invalid_provider": {
+        "id" : "doesnt_exist",
+        "providers" : [
+            {
+                "provider" : "idontexist",
+                "links": [
+                    {
+                        "href": "http://www.idontexist.com",
+                        "rel": "provider_url"
+                    }
+                ]
+            }
+        ]
     }
 }
