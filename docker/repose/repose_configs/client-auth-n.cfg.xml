@@ -1,0 +1,13 @@
+<client-auth xmlns="http://docs.rackspacecloud.com/repose/client-auth/v1.0">
+  <openstack-auth delegable="false" tenanted="false" request-groups="false" token-cache-timeout="600000" user-cache-timeout="600000" xmlns="http://docs.openrepose.org/repose/client-auth/os-ids-auth/v1.0">
+    <identity-service username="admin" password="password" uri="keystone.endpoint.com" />
+  </openstack-auth>
+  <white-list>
+    <uri-pattern uri-regex="/v1.0/" />
+    <uri-pattern uri-regex="/v1.0/health/?" />
+    <uri-pattern uri-regex="/v1.0/ping" />
+    <uri-pattern uri-regex="/v1.0/services/?" />
+    <uri-pattern uri-regex="/v1.0/services/([-|\w]+)/assets" />
+    <uri-pattern uri-regex="/v1.0/flavors/?" />
+  </white-list>
+</client-auth>

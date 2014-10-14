@@ -1,0 +1,16 @@
+<system-model xmlns="http://docs.rackspacecloud.com/repose/system-model/v2.0">
+  <repose-cluster id="repose" rewrite-host-header="false">
+    <nodes>
+      <node id="docker" hostname="localhost" http-port="8080" />
+    </nodes>
+    <filters>
+      <filter name="content-normalization" />
+      <filter name="client-auth" />
+      <filter name="api-validator" />
+      <filter name="rate-limiting"/>
+    </filters>
+    <destinations>
+      <endpoint id="endpoint" protocol="http" hostname="localhost" root-path="" port="8888" default="true" />
+    </destinations>
+  </repose-cluster>
+</system-model>
