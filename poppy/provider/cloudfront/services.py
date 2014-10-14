@@ -57,11 +57,9 @@ class ServiceController(base.ServiceBase):
                 origin=aws_origin,
                 enabled=True)
             if distribution.status == 'InProgress':
-                status = 'in_progress'
-            elif distribution.status == 'Deployed':
-                status = 'deployed'
+                status = 'deploy_in_progress'
             else:
-                status = 'unknown'
+                status = 'deployed'
         except cloudfront.exception.CloudFrontServerError as e:
             return self.responder.failed(str(e))
         except Exception as e:
