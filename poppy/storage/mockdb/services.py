@@ -113,7 +113,6 @@ class ServicesController(base.ServicesController):
                                                      'http_host':
                                                      'www.mywebsite.com'}]}],
                         'provider_details': provider_details}
-
         service_result = self.format_result(service_dict)
         return service_result
 
@@ -127,27 +126,28 @@ class ServicesController(base.ServicesController):
         return ''
 
     def delete(self, project_id, service_name):
-
         # delete from providers
         return ''
 
     def get_provider_details(self, project_id, service_name):
+        if service_name == 'non_exist_service_name':
+            raise LookupError('Service non_exist_service_name does not exist')
         return {
-            "MaxCDN": provider_details.ProviderDetail(
+            'MaxCDN': provider_details.ProviderDetail(
                 provider_service_id=11942,
                 name='my_service_name',
                 access_urls=['my_service_name'
                              '.mycompanyalias.netdna-cdn.com']),
-            "Fastly": provider_details.ProviderDetail(
+            'Fastly': provider_details.ProviderDetail(
                 provider_service_id=3488,
                 name="my_service_name",
                 access_urls=['my_service_name'
                              '.global.prod.fastly.net']),
-            "CloudFront": provider_details.ProviderDetail(
+            'CloudFront': provider_details.ProviderDetail(
                 provider_service_id=5892,
                 access_urls=['my_service_name'
                              '.gibberish.amzcf.com']),
-            "Mock": provider_details.ProviderDetail(
+            'Mock': provider_details.ProviderDetail(
                 provider_service_id="73242",
                 access_urls=['my_service_name.mock.com'])}
 

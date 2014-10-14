@@ -90,6 +90,14 @@ class ServiceController(base.ServiceBase):
     def delete(self, provider_service_id):
         try:
             # Delete the service
+            fastly_service = self.client.get_service_details(
+                provider_service_id
+            )
+            # deactivate the service first
+            self.client.deactivate_version(
+                provider_service_id,
+                fastly_service.active_version['number']
+            )
             self.client.delete_service(provider_service_id)
 
             return self.responder.deleted(provider_service_id)

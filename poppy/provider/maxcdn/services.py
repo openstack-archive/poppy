@@ -16,6 +16,7 @@
 import hashlib
 import re
 
+
 from poppy.common import decorators
 from poppy.provider import base
 
@@ -65,7 +66,8 @@ class ServiceController(base.ServiceBase):
         try:
             # Create a new pull zone: maxcdn only supports 1 origin
             origin = service_obj.origins[0]
-            origin_prefix = 'https://' if origin.ssl else 'http://'
+            # for now we only support http and https origin in MaxCDN
+            origin_prefix = 'https://' if origin.port == 443 else 'http://'
             create_response = self.client.post('/zones/pull.json', data={
                 'name': self._map_service_name(service_obj.name),
                 # TODO(tonytan4ever): maxcdn takes origin with
