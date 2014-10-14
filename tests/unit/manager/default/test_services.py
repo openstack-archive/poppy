@@ -20,6 +20,7 @@ import mock
 from oslo.config import cfg
 
 from poppy.manager.default import driver
+from poppy.manager.default.service_async_workers import delete_service_worker
 from poppy.manager.default import services
 from poppy.model import flavor
 from poppy.model.helpers import provider_details
@@ -31,16 +32,28 @@ from tests.unit import base
 class DefaultManagerServiceTests(base.TestCase):
 
     @mock.patch('poppy.storage.base.driver.StorageDriverBase')
-    @mock.patch('poppy.provider.base.driver.ProviderDriverBase')
     @mock.patch('poppy.dns.base.driver.DNSDriverBase')
-    def setUp(self, mock_driver, mock_provider, mock_dns):
+    def setUp(self, mock_driver, mock_dns):
         super(DefaultManagerServiceTests, self).setUp()
 
         # create mocked config and driver
         conf = cfg.ConfigOpts()
+
+        # mock a steveodore provider extension
+        def get_provider_by_name(name):
+            name_p_name_mapping = {
+                'maxcdn': 'MaxCDN',
+                'cloudfront': 'CloudFront',
+                'fastly': 'Fastly',
+                'mock': 'Mock'
+            }
+            return mock.Mock(obj=mock.Mock(provider_name=(
+                name_p_name_mapping[name])))
+        mock_providers = mock.MagicMock()
+        mock_providers.__getitem__.side_effect = get_provider_by_name
         manager_driver = driver.DefaultManagerDriver(conf,
                                                      mock_driver,
-                                                     mock_provider,
+                                                     mock_providers,
                                                      mock_dns)
 
         # stubbed driver
@@ -95,42 +108,51 @@ class DefaultManagerServiceTests(base.TestCase):
         # to get code coverage
         def get_provider_extension_by_name(name):
             if name == "cloudfront":
-                return mock.Mock(
-                    obj=mock.Mock(
-                        service_controller=mock.Mock(
-                            create=mock.Mock(
-                                return_value={
-                                    'Cloudfront': {
-                                        'id':
-                                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
-                                        'links': [
-                                            {
-                                                'href': 'www.mysite.com',
-                                                'rel': 'access_url'}],
-                                        'status': "in_progress"}}),
-                        )))
+                return_mock = mock.Mock(
+                    return_value={
+                        'Cloudfront': {
+                            'id':
+                            '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                            'links': [
+                                {
+                                    'href': 'www.mysite.com',
+                                    'rel': 'access_url'}],
+                            'status': "deploy_in_progress"}})
+                service_controller = mock.Mock(
+                    create=return_mock)
+                return mock.Mock(obj=mock.Mock(
+                    provider_name='CloudFront',
+                    service_controller=service_controller)
+                )
             elif name == "fastly":
-                return mock.Mock(obj=mock.Mock(service_controller=mock.Mock(
-                    create=mock.Mock(return_value={
+                return_mock = mock.Mock(
+                    return_value={
                         'Fastly': {'error': "fail to create servcice",
                                    'error_detail': 'Fastly Create failed'
                                    ' because of XYZ'}})
+
+                service_controller = mock.Mock(
+                    create=return_mock)
+                return mock.Mock(obj=mock.Mock(
+                    provider_name=name.title(),
+                    service_controller=service_controller)
                 )
-                ))
             else:
-                return mock.Mock(
-                    obj=mock.Mock(
-                        service_controller=mock.Mock(
-                            create=mock.Mock(
-                                return_value={
-                                    name.title(): {
-                                        'id':
-                                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
-                                        'links': [
-                                            {
-                                                'href': 'www.mysite.com',
-                                                'rel': 'access_url'}]}}),
-                        )))
+                return_mock = mock.Mock(
+                    return_value={
+                        name.title(): {
+                            'id':
+                            '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                            'links': [
+                                {
+                                    'href': 'www.mysite.com',
+                                    'rel': 'access_url'}]}})
+                service_controller = mock.Mock(
+                    create=return_mock)
+                return mock.Mock(obj=mock.Mock(
+                    provider_name=name.title(),
+                    service_controller=service_controller)
+                )
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
 
@@ -148,12 +170,12 @@ class DefaultManagerServiceTests(base.TestCase):
             provider_detail_dict = json.loads(
                 provider_details_json[provider_name]
             )
-            provider_service_id = provider_detail_dict.get('id', None)
-            access_url = provider_detail_dict.get('access_url', None)
-            status = provider_detail_dict.get('status', u'unknown')
+            provider_service_id = provider_detail_dict.get("id", None)
+            access_urls = provider_detail_dict.get("access_urls", None)
+            status = provider_detail_dict.get("status", u'unknown')
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
-                access_urls=access_url,
+                access_urls=access_urls,
                 status=status)
             self.provider_details[provider_name] = provider_detail_obj
 
@@ -182,27 +204,152 @@ class DefaultManagerServiceTests(base.TestCase):
             provider_detail_dict = json.loads(
                 provider_details_json[provider_name]
             )
-            provider_service_id = provider_detail_dict.get('id', None)
-            access_urls = provider_detail_dict.get('access_urls', [])
-            status = provider_detail_dict.get('status', u'unknown')
+            provider_service_id = provider_detail_dict.get("id", None)
+            access_urls = provider_detail_dict.get("access_urls", None)
+            status = provider_detail_dict.get("status", u'deployed')
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
                 access_urls=access_urls,
                 status=status)
             self.provider_details[provider_name] = provider_detail_obj
 
-        self.sc.storage_controller.get_provider_details.return_value = (
+        self.sc.storage_controller._get_provider_details.return_value = (
             self.provider_details
         )
 
         self.sc.delete(self.project_id, self.service_name)
 
         # ensure the manager calls the storage driver with the appropriate data
-        self.sc.storage_controller.delete.assert_called_once_with(
+        # break into 2 lines.
+        sc = self.sc.storage_controller
+        sc.get_provider_details.assert_called_once_with(
             self.project_id,
-            self.service_name
-        )
-        # and that the providers are notified.
+            self.service_name)
+
+    @ddt.file_data('data_provider_details.json')
+    def test_detele_service_worker_success(self, provider_details_json):
+        self.provider_details = {}
+        for provider_name in provider_details_json:
+            provider_detail_dict = json.loads(
+                provider_details_json[provider_name]
+            )
+            provider_service_id = provider_detail_dict.get("id", None)
+            access_urls = provider_detail_dict.get("access_urls", None)
+            status = provider_detail_dict.get("status", u'deployed')
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
+                status=status)
+            self.provider_details[provider_name] = provider_detail_obj
+
         providers = self.sc._driver.providers
-        providers.map.assert_called_once_with(self.sc.provider_wrapper.delete,
-                                              self.provider_details)
+
+        def get_provider_extension_by_name(name):
+            if name == 'cloudfront':
+                return_mock = {
+                    'CloudFront': {
+                        'id':
+                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                    }
+                }
+                service_controller = mock.Mock(
+                    delete=mock.Mock(return_value=return_mock)
+                )
+                return mock.Mock(obj=mock.Mock(
+                    provider_name='CloudFront',
+                    service_controller=service_controller)
+                )
+            elif name == 'maxcdn':
+                return_mock = {
+                    'MaxCDN': {'id': "pullzone345"}
+                }
+                service_controller = mock.Mock(
+                    delete=mock.Mock(return_value=return_mock)
+                )
+                return mock.Mock(obj=mock.Mock(
+                    provider_name='MaxCDN',
+                    service_controller=service_controller)
+                )
+            else:
+                return_mock = {
+                    name.title(): {
+                        'id':
+                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                    }
+                }
+                service_controller = mock.Mock(
+                    delete=mock.Mock(return_value=return_mock)
+                )
+                return mock.Mock(obj=mock.Mock(
+                    provider_name=name.title(),
+                    service_controller=service_controller)
+                )
+
+        providers.__getitem__.side_effect = get_provider_extension_by_name
+
+        delete_service_worker.service_delete_worker(self.provider_details,
+                                                    self.sc,
+                                                    self.project_id,
+                                                    self.service_name)
+
+    @ddt.file_data('data_provider_details.json')
+    def test_detele_service_worker_with_error(self, provider_details_json):
+        self.provider_details = {}
+        for provider_name in provider_details_json:
+            provider_detail_dict = json.loads(
+                provider_details_json[provider_name]
+            )
+            provider_service_id = provider_detail_dict.get("id", None)
+            access_urls = provider_detail_dict.get("access_urls", None)
+            status = provider_detail_dict.get("status", u'deployed')
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
+                status=status)
+            self.provider_details[provider_name] = provider_detail_obj
+
+        providers = self.sc._driver.providers
+
+        def get_provider_extension_by_name(name):
+            if name == 'cloudfront':
+                return mock.Mock(
+                    obj=mock.Mock(
+                        provider_name='CloudFront',
+                        service_controller=mock.Mock(
+                            delete=mock.Mock(
+                                return_value={
+                                    'CloudFront': {
+                                        'id':
+                                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                                    }}),
+                        )))
+            elif name == 'maxcdn':
+                return mock.Mock(obj=mock.Mock(
+                    provider_name='MaxCDN',
+                    service_controller=mock.Mock(
+                        delete=mock.Mock(return_value={
+                            'MaxCDN': {'error': "fail to create servcice",
+                                       'error_detail':
+                                       'MaxCDN delete service'
+                                       ' failed because of XYZ'}})
+                    )
+                ))
+            else:
+                return mock.Mock(
+                    obj=mock.Mock(
+                        provider_name=name.title(),
+                        service_controller=mock.Mock(
+                            delete=mock.Mock(
+                                return_value={
+                                    name.title(): {
+                                        'id':
+                                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                                    }}),
+                        )))
+
+        providers.__getitem__.side_effect = get_provider_extension_by_name
+
+        delete_service_worker.service_delete_worker(self.provider_details,
+                                                    self.sc,
+                                                    self.project_id,
+                                                    self.service_name)

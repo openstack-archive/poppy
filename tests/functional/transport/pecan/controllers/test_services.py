@@ -281,3 +281,12 @@ class ServiceControllerTest(base.FunctionalTest):
     #     response = self.app.delete('/v1.0/services/fake_service_name_4')
 
     #     self.assertEqual(200, response.status_code)
+
+    def test_delete_non_eixst(self):
+        response = self.app.delete('/v1.0/%s/services/non_exist_service_name' %
+                                   self.project_id,
+                                   headers={
+                                       'Content-Type': 'application/json'
+                                   },
+                                   expect_errors=True)
+        self.assertEqual(404, response.status_code)

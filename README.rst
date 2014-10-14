@@ -119,6 +119,25 @@ similar to this::
     Content-Type: application/json-home
     Cache-Control: max-age=86400
 
+10. To run unit/functional test::
+
+    $ tox
+
+To run a full test suite with api test, you will need to put in correct
+CDN vendor configuration (in ``~/.poppy/poppy.conf``) first, e.g::
+
+    [drivers:provider:fastly]
+    apikey = "<your_fastly_api_key>"
+
+Then start a poppy server::
+
+    $ poppy-server -v
+
+ And run test suite with api test::
+
+    $ tox -- --exclude=none
+
+
 
 Installing Cassandra Locally
 -----------------------------
