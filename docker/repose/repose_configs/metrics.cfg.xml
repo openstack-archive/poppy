@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<metrics xmlns="http://docs.rackspacecloud.com/repose/metrics/v1.0" enabled="true">
+  <graphite>
+    <server host="{METRICS_HOST}" period="10" port="2003" prefix="{METRICS_PREFIX}" />
+  </graphite>
+</metrics>

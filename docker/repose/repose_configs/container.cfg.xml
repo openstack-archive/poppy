@@ -1,0 +1,7 @@
+<repose-container xmlns="http://docs.rackspacecloud.com/repose/container/v2.0">
+  <deployment-config>
+    <artifact-directory check-interval="10000">repose\artifacts</artifact-directory>
+    <deployment-directory auto-clean="true">repose\deployments</deployment-directory>
+    <logging-configuration href="log4j.properties.txt" />
+  </deployment-config>
+</repose-container>
