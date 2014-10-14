@@ -3,12 +3,6 @@
 ##
 ##
 
-# The following files should exist in this folder before running Dockerfile
-# - docker_rsa (private key) -> public key should be published to the private git repo
-# - poppy.conf (desired configuration for poppy api)
-# - logging.conf (desired logging configuration file)
-
-
 FROM ubuntu:14.04
 MAINTAINER Amit Gandhi <amit.gandhi@rackspace.com>
 
@@ -29,21 +23,8 @@ RUN python get-pip.py
 # uwsgi 
 RUN pip install uwsgi 
 
-# Make ssh dir
-RUN mkdir /root/.ssh/
-
-# Copy over private key, and set permissions
-ADD docker_rsa /root/.ssh/id_rsa
-
-RUN chmod 700 /root/.ssh/id_rsa
-RUN echo "Host github.com\n\tStrictHostKeyChecking no\n" >> /root/.ssh/config
-RUN echo "IdentityFile ~/.ssh/id_rsa" >> /etc/ssh/ssh_config
-
-# Create known_hosts
-RUN touch /root/.ssh/known_hosts
-
 # Pull project
-RUN git clone git@github.com:rackerlabs/cdn /home/poppy
+RUN git clone https://github.com/stackforge/poppy.git /home/poppy
 
 # Install Requirements
 RUN sudo pip install -r /home/poppy/requirements/requirements.txt
@@ -66,5 +47,5 @@ RUN chmod -R +w /var/run/poppy
 #RUN /usr/local/bin/uwsgi --ini /root/uwsgi.ini
 
 # Start Poppy
-EXPOSE 80
+EXPOSE 8081
 CMD ["/usr/local/bin/uwsgi", "--ini", "/root/uwsgi.ini"]

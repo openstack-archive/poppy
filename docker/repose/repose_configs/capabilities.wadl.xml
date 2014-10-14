@@ -1,0 +1,44 @@
+﻿<application xmlns="http://wadl.dev.java.net/2009/02" xmlns:rax="http://docs.rackspace.com/api">
+  <!-- Observer          rax:roles="cdn:observer observer cdn:admin admin identity:user-admin" -->
+  <!-- Creator & Higher  rax:roles="cdn:creator cdn:admin admin identity:user-admin" -->
+  <!-- Administrator     rax:roles="cdn:admin admin identity:user-admin" -->
+  <!-- Operator          rax:roles="cdn:operator" -->
+  <resources>
+    <resource path="/v1.0">
+      <method name="GET" rax:roles="cdn:observer observer cdn:admin admin identity:user-admin" />
+      <resource path="/services">
+        <method name="GET" rax:roles="cdn:observer observer cdn:admin admin identity:user-admin" />
+        <method name="POST" rax:roles="cdn:creator cdn:admin admin identity:user-admin"/>
+        <resource path="/{service_name}">
+          <param name="service_name" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          <method name="GET" rax:roles="cdn:observer observer cdn:admin admin identity:user-admin" />
+          <method name="DELETE" rax:roles="cdn:creator cdn:admin admin identity:user-admin"/>
+          <method name="PATCH" rax:roles="cdn:creator cdn:admin admin identity:user-admin"/>
+          <resource path="/assets">
+            <method name="GET" rax:roles="cdn:observer observer cdn:admin admin identity:user-admin" />
+            <method name="DELETE" rax:roles="cdn:creator cdn:admin admin identity:user-admin"/>
+          </resource>
+        </resource>
+      </resource>
+      <resource path="/flavors">
+        <method name="GET" rax:roles="cdn:operator cdn:observer observer cdn:creator cdn:admin admin identity:user-admin" />
+        <method name="POST" rax:roles="cdn:operator"/>
+        <resource path="/{flavor_id}">
+          <param name="flavor_id" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          <method name="GET" rax:roles="cdn:observer observer cdn:admin admin identity:user-admin" />
+          <method name="DELETE" rax:roles="cdn:operator"/>
+        </resource>
+      </resource>
+      <resource path="/ping">
+        <method name="GET" rax:roles="cdn:observer observer cdn:admin admin identity:user-admin" />
+      </resource>
+      <resource path="/health">
+        <method name="GET" rax:roles="cdn:operator" />
+        <resource path="/{node}">
+          <param name="node" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          <method name="GET" rax:roles="cdn:operator" />
+        </resource>
+      </resource>
+    </resource>
+  </resources>
+</application>

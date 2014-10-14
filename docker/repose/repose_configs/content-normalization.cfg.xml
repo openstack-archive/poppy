@@ -1,0 +1,21 @@
+<content-normalization xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://docs.api.rackspacecloud.com/repose/content-normalization/v1.0">
+  <header-filters>
+    <blacklist id="ReposeHeaders">
+      <header id="X-Authorization" />
+      <header id="X-Catalog" />
+      <header id="X-Default-Region" />
+      <header id="X-Identity-Status" />
+      <header id="X-Impersonator-Id" />
+      <header id="X-Impersonator-Name" />
+      <header id="X-PP-Groups" />
+      <header id="X-PP-User" />
+      <header id="X-Roles" />
+      <header id="X-Tenant-Id" />
+      <header id="X-Tenant-Name" />
+      <header id="X-Token-Expires" />
+      <header id="X-User-Id" />
+      <header id="X-User-Name" />
+    </blacklist>
+  </header-filters>
+  <media-types />
+</content-normalization>
