@@ -15,6 +15,7 @@
 
 """Cassandra storage driver implementation."""
 
+import multiprocessing
 import ssl
 
 import cassandra
@@ -120,10 +121,11 @@ class CassandraStorageDriver(base.Driver):
 
     def __init__(self, conf):
         super(CassandraStorageDriver, self).__init__(conf)
-
         conf.register_opts(CASSANDRA_OPTIONS, group=CASSANDRA_GROUP)
         self.cassandra_conf = conf[CASSANDRA_GROUP]
         self.datacenter = conf.datacenter
+        self.session = None
+        self.lock = multiprocessing.Lock()
 
     def change_namespace(self, namespace):
         self.cassandra_conf.keyspace = namespace
@@ -154,4 +156,18 @@ class CassandraStorageDriver(base.Driver):
 
     @property
     def database(self):
-        return self.connection
+        # if the session has been shutdown, reopen a session
+        self.lock.acquire()
+        if self.session is None or self.session.is_shutdown:
+            self.connect()
+        self.lock.release()
+        return self.session
+
+    def connect(self):
+        self.session = _connection(self.cassandra_conf, self.datacenter)
+
+    def close_connection(self):
+        self.lock.acquire()
+        self.session.cluster.shutdown()
+        self.session.shutdown()
+        self.lock.release()

@@ -213,7 +213,6 @@ class ServicesController(base.ServicesController):
         self.session.execute(CQL_DELETE_SERVICE, args)
 
     def get_provider_details(self, project_id, service_name):
-        # TODO(tonytan4ever): Use real CQL read provider details info
         args = {
             'project_id': project_id,
             'service_name': service_name
@@ -225,19 +224,15 @@ class ServicesController(base.ServicesController):
         # returns the dictionary
         exec_results = self.session.execute(CQL_GET_PROVIDER_DETAILS, args)
 
-        if not exec_results:
-            return {}
-
+        provider_details_result = exec_results[0]['provider_details'] or {}
         results = {}
-
-        provider_details_result = exec_results[0]['provider_details']
         for provider_name in provider_details_result:
             provider_detail_dict = json.loads(
                 provider_details_result[provider_name])
 
             provider_service_id = provider_detail_dict.get('id', None)
             access_urls = provider_detail_dict.get("access_urls", None)
-            status = provider_detail_dict.get("status", u'unknown')
+            status = provider_detail_dict.get("status", u'creating')
             error_info = provider_detail_dict.get("error_info", None)
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
