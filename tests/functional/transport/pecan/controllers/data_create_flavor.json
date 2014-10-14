@@ -3,10 +3,10 @@
         "id" : "asia",
         "providers" : [
             {
-                "provider" : "ChinaCache",
+                "provider" : "fastly",
                 "links": [
                     {
-                        "href": "http://www.chinacache.com",
+                        "href": "http://www.fastly.com",
                         "rel": "provider_url"
                     }
                 ]
@@ -17,19 +17,19 @@
         "id" : "asia",
         "providers" : [
             {
-                "provider" : "ChinaCache",
+                "provider" : "fastly",
                 "links": [
                     {
-                        "href": "http://www.chinacache.com",
+                        "href": "http://www.fastly.com",
                         "rel": "provider_url"
                     }
                 ]
             },
             {
-                "provider" : "KiwiCache",
+                "provider" : "maxcdn",
                 "links": [
                     {
-                        "href": "http://www.cdn.co.nz",
+                        "href": "http://www.maxcdn.com",
                         "rel": "provider_url"
                     }
                 ]
@@ -40,7 +40,7 @@
         "id" : "위키백과대문",
         "providers" : [
             {
-                "provider" : "KoreanCache",
+                "provider" : "cloudfront",
                 "links": [
                     {
                         "href": "http://www.위키백과대문.com",

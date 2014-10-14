@@ -27,6 +27,12 @@ class DefaultFlavorsController(base.FlavorsController):
         return self.storage.get(flavor_id)
 
     def add(self, new_flavor):
+        # do we have a valid extension for the providers
+        # listed in this new flavor?
+
+        # TODO(amitgandhinz): Check that the flavor extension exists.
+
+        # Create the flavor
         return self.storage.add(new_flavor)
 
     def delete(self, flavor_id):
