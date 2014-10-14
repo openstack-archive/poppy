@@ -13,15 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 
 from cafe.drivers.unittest import fixtures
 import jsonschema
-from oslo.config import cfg
 
 from tests.api.utils import client
 from tests.api.utils import config
-from tests.api.utils import server
 
 
 class TestBase(fixtures.BaseTestFixture):
@@ -56,16 +53,6 @@ class TestBase(fixtures.BaseTestFixture):
                                         deserialize_format='json')
 
         cls.test_config = config.TestConfig()
-        if cls.test_config.run_server:
-            conf_file = 'poppy_cassandra.conf'
-            conf_path = os.environ["POPPY_TESTS_CONFIGS_DIR"]
-            config_file = os.path.join(conf_path, conf_file)
-
-            conf = cfg.ConfigOpts()
-            conf(project='poppy', prog='poppy', args=[],
-                 default_config_files=[config_file])
-            cls.poppy_server = server.CDNServer()
-            cls.poppy_server.start(conf)
 
     def assertSchema(self, response_json, expected_schema):
         """Verify response schema aligns with the expected schema."""
@@ -77,6 +64,4 @@ class TestBase(fixtures.BaseTestFixture):
     @classmethod
     def tearDownClass(cls):
         """Deletes the added resources."""
-        if cls.test_config.run_server:
-            cls.poppy_server.stop()
         super(TestBase, cls).tearDownClass()
