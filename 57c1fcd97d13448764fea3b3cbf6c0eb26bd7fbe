@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Code-Review+2: Amit Gandhi <amit.gandhi@rackspace.com>
+Workflow+1: Amit Gandhi <amit.gandhi@rackspace.com>
+Code-Review+1: Mike Panetta <panetta.mike@gmail.com>
+Code-Review+1: Obulpathi <obulapathi.challa@rackspace.com>
+Submitted-by: Jenkins
+Submitted-at: Tue, 14 Oct 2014 14:35:41 +0000
+Reviewed-on: https://review.openstack.org/128085
+Project: stackforge/poppy
+Branch: refs/heads/master
