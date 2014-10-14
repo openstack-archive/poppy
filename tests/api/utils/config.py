@@ -38,11 +38,6 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
     SECTION_NAME = 'test_configuration'
 
     @property
-    def run_server(self):
-        """Boolean value indicating whether to start a Poppy server."""
-        return self.get_boolean('run_server')
-
-    @property
     def provider_validation(self):
         """Boolean value indicating if tests verify provider side details."""
         return self.get_boolean('provider_validation')
