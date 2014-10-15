@@ -30,62 +30,73 @@ class ServiceController(base.ServiceBase):
 
         self.driver = driver
 
-    def update(self, provider_service_id, service_obj):
-        return self.responder.updated(provider_service_id)
+    def create_new_service_version(self, service, service_obj):
+        # Create a new version of the service.
+        service_version = self.client.create_version(service.id)
+
+        # Create the domain for this service
+        for domain in service_obj.domains:
+            domain = self.client.create_domain(service.id,
+                                               service_version.number,
+                                               domain.domain)
+
+        # TODO(tonytan4ever): what if check_domains fail ?
+        # For right now we fail the who create process.
+        # But do we want to fail the whole service create ? probably not.
+        # we need to carefully divise our try_catch here.
+        domain_checks = self.client.check_domains(service.id,
+                                                  service_version.number)
+        links = [{"href": '.'.join([domain_check.domain.name,
+                                    "global.prod.fastly.net"]),
+                  "rel": 'access_url'}
+                 for domain_check in domain_checks]
+
+        for origin in service_obj.origins:
+            # Create the origins for this domain
+            self.client.create_backend(service.id,
+                                       service_version.number,
+                                       origin.origin.replace(":", "-"),
+                                       origin.origin,
+                                       origin.ssl,
+                                       origin.port)
+
+        # TODO(tonytan4ever): To incorporate caching, restriction change
+        # once standarnd/limitation on these service details have been
+        # figured out
+
+        # activate latest version of this fastly service
+        service_versions = self.client.list_versions(service.id)
+        latest_version_number = max([version.number
+                                     for version in service_versions])
+        self.client.activate_version(service.id, latest_version_number)
+
+        return links
 
     def create(self, service_obj):
-
         try:
             # Create a new service
             service = self.client.create_service(self.current_customer.id,
                                                  service_obj.name)
-
-            # Create a new version of the service.
-            service_version = self.client.create_version(service.id)
-
-            # Create the domain for this service
-            for domain in service_obj.domains:
-                domain = self.client.create_domain(service.id,
-                                                   service_version.number,
-                                                   domain.domain)
-
-            # TODO(tonytan4ever): what if check_domains fail ?
-            # For right now we fail the who create process.
-            # But do we want to fail the whole service create ? probably not.
-            # we need to carefully divise our try_catch here.
-            domain_checks = self.client.check_domains(service.id,
-                                                      service_version.number)
-            links = [{"href": '.'.join([domain_check.domain.name,
-                                        "global.prod.fastly.net"]),
-                      "rel": 'access_url'}
-                     for domain_check in domain_checks]
-
-            for origin in service_obj.origins:
-                # Create the origins for this domain
-                self.client.create_backend(service.id,
-                                           service_version.number,
-                                           origin.origin.replace(":", "-"),
-                                           origin.origin,
-                                           origin.ssl,
-                                           origin.port
-                                           )
-
-            # TODO(tonytan4ever): To incorporate caching, restriction change
-            # once standarnd/limitation on these service details have been
-            # figured out
-
-            # activate latest version of this fastly service
-            service_versions = self.client.list_versions(service.id)
-            latest_version_number = max([version.number
-                                         for version in service_versions])
-            self.client.activate_version(service.id, latest_version_number)
-
+            links = self.create_new_service_version(service, service_obj)
             return self.responder.created(service.id, links)
-
         except fastly.FastlyError:
             return self.responder.failed("failed to create service")
         except Exception:
             return self.responder.failed("failed to create service")
+
+    def update(self,
+               provider_service_id,
+               service_old,
+               service_updates,
+               service_obj):
+        try:
+            service = self.client.get_service_details(provider_service_id)
+            links = self.create_new_service_version(service, service_obj)
+            return self.responder.updated(service.id, links)
+        except fastly.FastlyError:
+            return self.responder.failed('failed to create service')
+        except Exception:
+            return self.responder.failed('failed to create service')
 
     def delete(self, provider_service_id):
         try:
