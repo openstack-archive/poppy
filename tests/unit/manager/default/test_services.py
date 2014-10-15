@@ -63,7 +63,7 @@ class DefaultManagerServiceTests(base.TestCase):
         self.project_id = 'mock_id'
         self.service_name = 'mock_service'
         self.service_json = {
-            "name": "fake_service_name",
+            "name": "mock_service",
             "domains": [
                 {"domain": "www.mywebsite.com"},
                 {"domain": "blog.mywebsite.com"},
@@ -243,39 +243,42 @@ class DefaultManagerServiceTests(base.TestCase):
                                                           service_obj)
         self.assertTrue(res is None)
 
-    @ddt.file_data('data_provider_details.json')
-    def test_update(self, provider_details_json):
-        self.provider_details = {}
-        for provider_name in provider_details_json:
-            provider_detail_dict = json.loads(
-                provider_details_json[provider_name]
-            )
-            provider_service_id = provider_detail_dict.get("id", None)
-            access_urls = provider_detail_dict.get("access_urls", None)
-            status = provider_detail_dict.get("status", u'unknown')
+    @ddt.file_data('service_update.json')
+    def test_update(self, update_json):
+        provider_details_dict = {
+            "MaxCDN": {"id": 11942, "access_urls": ["mypullzone.netdata.com"]},
+            "Mock": {"id": 73242, "access_urls": ["mycdn.mock.com"]},
+            "CloudFront": {
+                "id": "5ABC892", "access_urls": ["cf123.cloudcf.com"]},
+            "Fastly": {
+                "id": 3488, "access_urls": ["mockcf123.fastly.prod.com"]}
+        }
+        providers_details = {}
+        for name in provider_details_dict:
+            details = provider_details_dict[name]
             provider_detail_obj = provider_details.ProviderDetail(
-                provider_service_id=provider_service_id,
-                access_urls=access_urls,
-                status=status)
-            self.provider_details[provider_name] = provider_detail_obj
+                provider_service_id=details['id'],
+                access_urls=details['access_urls'],
+                status=details.get('status', u'unknown'))
+            providers_details[name] = provider_detail_obj
 
         providers = self.sc._driver.providers
 
         self.sc.storage_controller.get_provider_details.return_value = (
-            self.provider_details
+            providers_details
         )
 
-        self.sc.update(self.project_id, self.service_name, self.service_json)
+        service_obj = service.load_from_json(self.service_json)
+        service_obj.status = u'deployed'
+        self.sc.storage_controller.get.return_value = service_obj
+        service_update_obj = service.load_from_json(update_json)
+        self.sc.update(self.project_id, self.service_name, service_update_obj)
 
         # ensure the manager calls the storage driver with the appropriate data
-        self.sc.storage_controller.update.assert_called_once_with(
-            self.project_id,
-            self.service_name,
-            self.service_json)
+        self.sc.storage_controller.update.assert_called_once()
+
         # and that the providers are notified.
-        providers.map.assert_called_once_with(self.sc.provider_wrapper.update,
-                                              self.provider_details,
-                                              self.service_json)
+        providers.map.assert_called_once()
 
     @ddt.file_data('data_provider_details.json')
     def test_delete(self, provider_details_json):
