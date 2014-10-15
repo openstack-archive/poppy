@@ -127,11 +127,12 @@ class CassandraStorageServiceTests(base.TestCase):
     @ddt.file_data('../data/data_update_service.json')
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_update_service(self, value, mock_session, mock_execute):
+    def test_update_service(self, service_json, mock_session, mock_execute):
         # mock the response from cassandra
+        service_obj = req_service.load_from_json(service_json)
         actual_response = self.sc.update(self.project_id,
                                          self.service_name,
-                                         value)
+                                         service_obj)
 
         # Expect the response to be None as there are no providers passed
         # into the driver to respond to this call

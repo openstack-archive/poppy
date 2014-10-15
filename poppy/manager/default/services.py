@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import multiprocessing
 
 from poppy.manager import base
 from poppy.manager.default.service_async_workers import create_service_worker
 from poppy.manager.default.service_async_workers import delete_service_worker
+from poppy.manager.default.service_async_workers import update_service_worker
 
 
 class DefaultServicesController(base.ServicesController):
@@ -40,7 +42,6 @@ class DefaultServicesController(base.ServicesController):
         # raise a lookup error if the flavor is not found
         except LookupError as e:
             raise e
-
         providers = [p.provider_id for p in flavor.providers]
         service_name = service_obj.name
 
@@ -67,20 +68,38 @@ class DefaultServicesController(base.ServicesController):
         p.start()
         return
 
-    def update(self, project_id, service_name, service_obj):
-        self.storage_controller.update(
-            project_id,
-            service_name,
-            service_obj
-        )
+    def update(self, project_id, service_name, service_new):
+        # get the current state and update it
+        service_old = self.storage_controller.get(project_id, service_name)
+        service_obj = copy.deepcopy(service_old)
 
-        provider_details = self.storage_controller.get_provider_details(
-            project_id,
-            service_name)
-        return self._driver.providers.map(
-            self.provider_wrapper.update,
-            provider_details,
-            service_obj)
+        """
+        if service_obj.status != u'deployed':
+            raise errors.ServiceStatusNotDeployed(
+                "Service {0} not deployed".format(service_name))
+        """
+        # update service object
+        if service_new.name:
+            raise Exception("Currently this operation is not supported")
+        if service_new.domains:
+            service_obj.domains = service_new.domains
+        if service_new.origins:
+            service_obj.origins = service_new.origins
+        if service_new.caching:
+            raise Exception("Currently this operation is not supported")
+        if service_new.restrictions:
+            raise Exception("Currently this operation is not supported")
+        if service_new.flavorRef:
+            raise Exception("Currently this operation is not supported")
+
+        service_obj.status = u'updating'
+
+        self.storage_controller.update(
+            project_id, service_name, service_obj)
+        update_service_worker.update_worker(
+            self, project_id, service_name, service_old, service_new)
+
+        return
 
     def delete(self, project_id, service_name):
         try:
