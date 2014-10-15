@@ -1,5 +1,6 @@
 {
     "every_field": {
+        "flavorRef": "standard",
         "domains": [
             {"domain": "test.mocksite.com" },
             {"domain": "blog.mocksite.com"}

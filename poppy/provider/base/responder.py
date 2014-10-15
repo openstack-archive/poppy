@@ -66,17 +66,19 @@ class Responder(object):
             self.provider: provider_response
         }
 
-    def updated(self, provider_service_id):
+    def updated(self, provider_service_id, links):
         """updated.
 
         :param provider_service_id
         :returns provider msg{provider service id}
         """
-        # TODO(tonytan4ever): May need to add link information as return
+        provider_response = {
+            "id": provider_service_id,
+            "links": links
+        }
+
         return {
-            self.provider: {
-                'id': provider_service_id
-            }
+            self.provider: provider_response
         }
 
     def deleted(self, provider_service_id):
