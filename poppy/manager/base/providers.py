@@ -29,23 +29,26 @@ class ProviderWrapper(object):
 
         return ext.obj.service_controller.create(service_obj)
 
-    def update(self, ext, provider_details, service_json):
+    def update(self, ext, provider_details, service_old, service_updates,
+               service_obj):
         """Update a provider
 
         :param ext
         :param provider_details
-        :param service_json
+        :param service_old
+        :param service_updates
+        :param service_obj
         """
+
         try:
-            provider_detail = provider_details[ext.provider_name]
+            provider_detail = provider_details[ext.obj.provider_name]
         except KeyError:
             raise errors.BadProviderDetail(
                 "No provider detail information."
                 "Perhaps service has not been created")
         provider_service_id = provider_detail.provider_service_id
         return ext.obj.service_controller.update(
-            provider_service_id,
-            service_json)
+            provider_service_id, service_old, service_updates, service_obj)
 
     def delete(self, ext, provider_details):
         try:

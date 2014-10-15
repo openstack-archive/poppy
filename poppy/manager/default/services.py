@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import multiprocessing
 
+from poppy.common import errors
 from poppy.manager import base
 from poppy.manager.default.service_async_workers import create_service_worker
 from poppy.manager.default.service_async_workers import delete_service_worker
 from poppy.manager.default.service_async_workers import purge_service_worker
+from poppy.manager.default.service_async_workers import update_service_worker
 
 
 class DefaultServicesController(base.ServicesController):
@@ -29,6 +32,16 @@ class DefaultServicesController(base.ServicesController):
 
         self.storage_controller = self._driver.storage.services_controller
         self.flavor_controller = self._driver.storage.flavors_controller
+
+    def _get_provider_details(self, project_id, service_name):
+        try:
+            provider_details = self.storage_controller.get_provider_details(
+                project_id,
+                service_name)
+        except Exception:
+            raise LookupError(u'Service {0} does not exist'.format(
+                service_name))
+        return provider_details
 
     def list(self, project_id, marker=None, limit=None):
         """list.
@@ -61,7 +74,6 @@ class DefaultServicesController(base.ServicesController):
         # raise a lookup error if the flavor is not found
         except LookupError as e:
             raise e
-
         providers = [p.provider_id for p in flavor.providers]
         service_name = service_obj.name
 
@@ -88,26 +100,56 @@ class DefaultServicesController(base.ServicesController):
         p.start()
         return
 
-    def update(self, project_id, service_name, service_obj):
+    def update(self, project_id, service_name, service_updates):
         """update.
 
         :param project_id
         :param service_name
-        :param service_obj
+        :param service_updates
         """
-        self.storage_controller.update(
+        # get the current service object
+        service_old = self.storage_controller.get(project_id, service_name)
+        if service_old.status != u'deployed':
+            raise errors.ServiceStatusNotDeployed(
+                u'Service {0} not deployed'.format(service_name))
+
+        service_obj = copy.deepcopy(service_old)
+
+        # update service object
+        if service_updates.name:
+            raise Exception(u'Currently this operation is not supported')
+        if service_updates.domains:
+            service_obj.domains = service_updates.domains
+        if service_updates.origins:
+            service_obj.origins = service_updates.origins
+        if service_updates.caching:
+            raise Exception(u'Currently this operation is not supported')
+        if service_updates.restrictions:
+            raise Exception(u'Currently this operation is not supported')
+        if service_updates.flavor_ref:
+            raise Exception(u'Currently this operation is not supported')
+
+        # get provider details for this service
+        provider_details = self._get_provider_details(project_id, service_name)
+
+        # set status in provider details to u'update_in_progress'
+        for provider in provider_details:
+            provider_details[provider].status = u'update_in_progress'
+        self.storage_controller.update_provider_details(
             project_id,
             service_name,
-            service_obj
-        )
+            provider_details)
 
-        provider_details = self.storage_controller.get_provider_details(
-            project_id,
-            service_name)
-        return self._driver.providers.map(
-            self.provider_wrapper.update,
-            provider_details,
-            service_obj)
+        self.storage_controller._driver.close_connection()
+        p = multiprocessing.Process(
+            name=('Process: update poppy service {0} for project id: {1}'
+                  .format(service_name, project_id)),
+            target=update_service_worker.update_worker,
+            args=(self, project_id, service_name, service_old, service_updates,
+                  service_obj))
+        p.start()
+
+        return
 
     def delete(self, project_id, service_name):
         """delete.
@@ -116,12 +158,7 @@ class DefaultServicesController(base.ServicesController):
         :param service_name
         :raises LookupError
         """
-        try:
-            provider_details = self.storage_controller.get_provider_details(
-                project_id,
-                service_name)
-        except Exception:
-            raise LookupError('Service %s does not exist' % service_name)
+        provider_details = self._get_provider_details(project_id, service_name)
 
         # change each provider detail's status to delete_in_progress
         # TODO(tonytan4ever): what if this provider is in 'failed' status?
@@ -151,12 +188,7 @@ class DefaultServicesController(base.ServicesController):
 
     def purge(self, project_id, service_name, purge_url=None):
         '''If purge_url is none, all content of this service will be purge.'''
-        try:
-            provider_details = self.storage_controller.get_provider_details(
-                project_id,
-                service_name)
-        except Exception:
-            raise LookupError('Service %s does not exist' % service_name)
+        provider_details = self._get_provider_details(project_id, service_name)
 
         # possible validation of purge url here...
         self.storage_controller._driver.close_connection()
