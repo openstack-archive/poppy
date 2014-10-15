@@ -30,7 +30,8 @@ class ServiceController(base.ServiceBase):
 
         self.driver = driver
 
-    def update(self, provider_service_id, service_obj):
+    # TODO(obulpathi): update service
+    def update(self, provider_service_id, service_obj, service_obj_updates):
         return self.responder.updated(provider_service_id)
 
     def create(self, service_obj):

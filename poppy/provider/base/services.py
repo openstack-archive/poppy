@@ -30,11 +30,11 @@ class ServicesControllerBase(controller.ProviderControllerBase):
         self.responder = responder.Responder(driver.provider_name)
 
     @abc.abstractmethod
-    def update(self, provider_service_id, service_json):
+    def update(self, provider_service_id, service_obj, service_obj_updates):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create(self, service_name, service_json):
+    def create(self, service_name, service_obj):
         raise NotImplementedError
 
     @abc.abstractmethod

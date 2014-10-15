@@ -21,7 +21,7 @@ class ProviderWrapper(object):
     def create(self, ext, service_obj):
         return ext.obj.service_controller.create(service_obj)
 
-    def update(self, ext, provider_details, service_json):
+    def update(self, ext, provider_details, service_obj, service_obj_updates):
         try:
             provider_detail = provider_details[ext.provider_name]
         except KeyError:
@@ -30,8 +30,7 @@ class ProviderWrapper(object):
                 "Perhaps service has not been created")
         provider_service_id = provider_detail.provider_service_id
         return ext.obj.service_controller.update(
-            provider_service_id,
-            service_json)
+            provider_service_id, service_obj, service_obj_updates)
 
     def delete(self, ext, provider_details):
         try:

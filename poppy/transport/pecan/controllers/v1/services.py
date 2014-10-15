@@ -139,9 +139,6 @@ class ServicesController(base.Controller):
             stoplight_helpers.pecan_getter))
     def patch_one(self, service_name):
         services_controller = self._driver.manager.services_controller
-        service_json = json.loads(pecan.request.body.decode('utf-8'))
-        # TODO(tonytan4ever): convert service_json into a partial service model
-        # under poppy.models.helpers.service.py
-        # and pass service_json to update
-        return services_controller.update(self.project_id, service_name,
-                                          service_json)
+        service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
+        service_obj = req_service_model.load_from_json(service_json_dict)
+        return services_controller.update(self.project_id, service_name, service_obj)

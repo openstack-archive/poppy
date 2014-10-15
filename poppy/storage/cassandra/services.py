@@ -85,6 +85,8 @@ CQL_CREATE_SERVICE = '''
         %(provider_details)s)
 '''
 
+CQL_UPDATE_SERVICE = CQL_CREATE_SERVICE
+
 CQL_UPDATE_DOMAINS = '''
     UPDATE services
     SET domains = %(domains)s
@@ -197,12 +199,27 @@ class ServicesController(base.ServicesController):
         self.session.execute(CQL_CREATE_SERVICE, args)
 
     def update(self, project_id, service_name, service_obj):
-        # update configuration in storage
+        #TODO(obulpathi): Update provider_details
+        provider_details = service_obj.provider_details
 
-        # determine what changed.
+        domains = [json.dumps(service_new['domains'])]
+        origins = [json.dumps(service_new['origins'])]
+        caching_rules = [json.dumps(service_new['caching'])]
+        restrictions = [json.dumps(service_new['restrictions'])]
 
-        # update those columns provided only.
-        pass
+        # creates a new service
+        args = {
+            'project_id': project_id,
+            'service_name': service_name,
+            'flavor_id': service_new['flavorRef'],
+            'domains': domains,
+            'origins': origins,
+            'caching_rules': caching_rules,
+            'restrictions': restrictions,
+            'provider_details': provider_details
+        }
+
+        self.session.execute(CQL_UPDATE_SERVICE, args)
 
     def delete(self, project_id, service_name):
         # delete local configuration from storage

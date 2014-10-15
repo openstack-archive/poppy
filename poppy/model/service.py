@@ -122,3 +122,15 @@ class Service(common.DictSerializableModel):
         o = cls('unnamed', [], [], 'unnamed')
         o.from_dict(input_dict)
         return o
+
+    def update(self, other):
+        if other.domains:
+            self.domains = other.domains
+        if other.origins:
+            self.origins = other.origins
+        if other.caching:
+            self.caching = other.caching
+        if other.restrictions:
+            self.restrictions = other.restrictions
+        if other.flavorRef:
+            self.flavorRef = other.flavorRef

@@ -37,8 +37,8 @@ class ServiceController(base.ServiceBase):
     def get(self, service_name):
         return {'domains': [], 'origins': [], 'caching': []}
 
-    # TODo(obulpathi): update service
-    def update(self, service_name, service_obj):
+    # TODO(obulpathi): update service
+    def update(self, service_name, service_obj, service_obj_updates):
         return self.responder.updated(service_name)
 
     def create(self, service_obj):

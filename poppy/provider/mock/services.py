@@ -27,7 +27,7 @@ class ServiceController(base.ServiceBase):
     def __init__(self, driver):
         super(ServiceController, self).__init__(driver)
 
-    def update(self, provider_service_id, service_obj):
+    def update(self, provider_service_id, service_obj, service_obj_updates):
         return self.responder.updated(provider_service_id)
 
     def create(self, service_obj):

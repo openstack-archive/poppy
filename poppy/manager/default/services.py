@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.common import errors
 from poppy.manager import base
 from poppy.model.helpers import provider_details
 
@@ -86,20 +87,27 @@ class DefaultServicesController(base.ServicesController):
 
         return responders
 
-    def update(self, project_id, service_name, service_obj):
-        self.storage_controller.update(
-            project_id,
-            service_name,
-            service_obj
-        )
+    def update(self, project_id, service_name, service_obj_updates):
+        # get the current state and update it
+        service_obj = self.storage_controller.get(project_id, service_name)
+        if service_obj.status != u'deployed':
+            raise errors.ServiceStatusNotDeployed(
+                "Service {0} not deployed".format(service_name))
+        service_obj.update(service_obj_updates)
 
-        provider_details = self.storage_controller.get_provider_details(
-            project_id,
-            service_name)
-        return self._driver.providers.map(
-            self.provider_wrapper.update,
-            provider_details,
-            service_obj)
+        service_obj.status = u'in_progress'
+        self.storage_controller.update(
+            project_id, service_name, service_obj)
+
+        self.storage_controller._driver.close_connection()
+
+        p = multiprocessing.Process(
+            name='Process: update poppy service {0} for project id: {1}'.format(service_name, project_id),
+            target = async_workers.update_worker,
+            args = (self, project_id, service_name, service_obj, service_obj_updates))
+        p.start()
+
+        return
 
     def delete(self, project_id, service_name):
         self.storage_controller.delete(project_id, service_name)
