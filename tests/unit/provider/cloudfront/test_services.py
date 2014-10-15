@@ -33,6 +33,7 @@ class TestServices(base.TestCase):
         super(TestServices, self).setUp()
 
         self.service_name = uuid.uuid1()
+        self.provider_service_id = uuid.uuid1()
         self.mock_get_client = mock_get_client
         self.driver = MockDriver()
         self.controller = services.ServiceController(self.driver)
@@ -97,7 +98,10 @@ class TestServices(base.TestCase):
     @ddt.file_data('data_service.json')
     def test_update(self, service_json):
         service_obj = service.load_from_json(service_json)
-        resp = self.controller.update(self.service_name, service_obj)
+        service_old = service_obj
+        service_updates = service_obj
+        resp = self.controller.update(self.provider_service_id, service_old,
+                                      service_updates, service_obj)
         self.assertIn('id', resp[self.driver.provider_name])
 
     def test_delete_exceptions(self):
