@@ -27,3 +27,8 @@ class InvalidOperation(Exception):
 class BadProviderDetail(Exception):
 
     """Raised when attempted a non existent operation."""
+
+
+class ServiceStatusNotDeployed(Exception):
+
+    """Raised when attempted to update service who status is not deployed."""

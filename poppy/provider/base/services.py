@@ -31,7 +31,7 @@ class ServicesControllerBase(controller.ProviderControllerBase):
         self.responder = responder.Responder(driver.provider_name)
 
     @abc.abstractmethod
-    def update(self, provider_service_id, service_json):
+    def update(self, service_name, service_old, service_updates, service_obj):
         """update.
 
         :raises NotImplementedError
