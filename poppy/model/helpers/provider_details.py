@@ -17,6 +17,7 @@
 VALID_STATUSES = [
     u'deploy_in_progress',
     u'deployed',
+    u'updating',
     u'delete_in_progress',
     u'failed']
 

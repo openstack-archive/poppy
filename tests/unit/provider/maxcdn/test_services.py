@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import uuid
+
 import ddt
 import mock
 from oslo.config import cfg
@@ -90,8 +92,8 @@ class TestServices(base.TestCase):
 
     def setUp(self):
         super(TestServices, self).setUp()
-
         self.conf = cfg.ConfigOpts()
+        self.provider_service_id = uuid.uuid1()
 
     @mock.patch.object(driver.CDNProvider, 'client',
                        new=fake_maxcdn_api_client())
@@ -154,8 +156,10 @@ class TestServices(base.TestCase):
         controller = services.ServiceController(new_driver)
         # test create, everything goes through successfully
         service_obj = service.load_from_json(service_json)
-        service_name = 'test_service_name'
-        resp = controller.update(service_name, service_obj)
+        service_old = service_obj
+        service_updates = service_obj
+        resp = controller.update(self.provider_service_id, service_old,
+                                 service_updates, service_obj)
         self.assertIn('id', resp[new_driver.provider_name])
 
     @ddt.file_data('data_service.json')
@@ -170,14 +174,14 @@ class TestServices(base.TestCase):
                                         fake_maxcdn_client_get_return_value
                                         })
 
-        service_name = 'test_service_name'
-
         controller_with_update_exception = services.ServiceController(driver)
         controller_with_update_exception.client.configure_mock(**{
             'put.side_effect':
             RuntimeError('Updating service mysteriously failed.')})
         resp = controller_with_update_exception.update(
-            service_name,
+            self.provider_service_id,
+            service_json,
+            service_json,
             service_json)
         self.assertIn('error', resp[driver.provider_name])
 
@@ -188,7 +192,9 @@ class TestServices(base.TestCase):
         })
         service_obj = service.load_from_json(service_json)
         resp = controller_with_update_exception.update(
-            service_name,
+            self.provider_service_id,
+            service_obj,
+            service_obj,
             service_obj)
         self.assertIn('error', resp[driver.provider_name])
 
