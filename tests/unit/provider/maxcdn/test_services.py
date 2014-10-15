@@ -17,6 +17,7 @@
 import ddt
 import mock
 from oslo.config import cfg
+import uuid
 
 from poppy.provider.maxcdn import driver
 from poppy.provider.maxcdn import services
@@ -90,8 +91,8 @@ class TestServices(base.TestCase):
 
     def setUp(self):
         super(TestServices, self).setUp()
-
         self.conf = cfg.ConfigOpts()
+        self.provider_service_id = uuid.uuid1()
 
     @mock.patch.object(driver.CDNProvider, 'client',
                        new=fake_maxcdn_api_client())
@@ -155,7 +156,7 @@ class TestServices(base.TestCase):
         # test create, everything goes through successfully
         service_obj = service.load_from_json(service_json)
         service_name = 'test_service_name'
-        resp = controller.update(service_name, service_obj)
+        resp = controller.update(self.provider_service_id, service_name, service_obj)
         self.assertIn('id', resp[new_driver.provider_name])
 
     @ddt.file_data('data_service.json')
@@ -177,6 +178,7 @@ class TestServices(base.TestCase):
             'put.side_effect':
             RuntimeError('Updating service mysteriously failed.')})
         resp = controller_with_update_exception.update(
+            self.provider_service_id,
             service_name,
             service_json)
         self.assertIn('error', resp[driver.provider_name])
@@ -188,6 +190,7 @@ class TestServices(base.TestCase):
         })
         service_obj = service.load_from_json(service_json)
         resp = controller_with_update_exception.update(
+            self.provider_service_id,
             service_name,
             service_obj)
         self.assertIn('error', resp[driver.provider_name])

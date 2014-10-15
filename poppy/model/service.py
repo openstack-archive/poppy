@@ -16,7 +16,7 @@
 from poppy.model import common
 
 
-VALID_STATUSES = [u'creating', u'deployed', u'delete_in_progress']
+VALID_STATUSES = [u'creating', u'deployed', u'updating', u'delete_in_progress']
 
 
 class Service(common.DictSerializableModel):
