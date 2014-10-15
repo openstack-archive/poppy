@@ -18,6 +18,7 @@ import json
 from oslo.config import cfg
 import pecan
 
+from poppy.common import errors
 from poppy.common import uri
 from poppy.transport.pecan.controllers import base
 from poppy.transport.pecan.models.request import service as req_service_model
@@ -146,9 +147,31 @@ class ServicesController(base.Controller):
             stoplight_helpers.pecan_getter))
     def patch_one(self, service_name):
         services_controller = self._driver.manager.services_controller
-        service_json = json.loads(pecan.request.body.decode('utf-8'))
-        # TODO(tonytan4ever): convert service_json into a partial service model
-        # under poppy.models.helpers.service.py
-        # and pass service_json to update
-        return services_controller.update(self.project_id, service_name,
-                                          service_json)
+        service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
+        service_obj = req_service_model.load_from_json(service_json_dict)
+
+        # TODO(obulpathi): remove these restrictions, once cachingrule and
+        # restrictions models are implemented is implemented
+        if 'caching' in service_json_dict:
+            pecan.abort(400, detail='This operation is yet not supported')
+        elif 'restrictions' in service_json_dict:
+            pecan.abort(400, detail='This operation is yet not supported')
+
+        # if service_json is empty, abort
+        if not service_json_dict:
+            pecan.abort(400, detail='No details provided to update')
+
+        try:
+            services_controller.update(
+                self.project_id, service_name, service_obj)
+        except errors.ServiceStatusNotDeployed as e:
+            pecan.abort(400, detail=str(e))
+        except Exception as e:
+            pecan.abort(400, detail=str(e))
+
+        service_url = str(
+            uri.encode(u'{0}/v1.0/services/{1}'.format(
+                pecan.request.host_url,
+                service_name)))
+        pecan.response.status = 202
+        pecan.response.headers["Location"] = service_url
