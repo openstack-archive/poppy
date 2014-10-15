@@ -234,7 +234,9 @@ class TestServices(base.TestCase):
     def test_update(self, service_json):
         provider_service_id = uuid.uuid1()
         controller = services.ServiceController(self.driver)
-        resp = controller.update(provider_service_id, service_json)
+        controller.client.list_versions.return_value = [self.version]
+        service_obj = service.load_from_json(service_json)
+        resp = controller.update(provider_service_id, service_obj, service_obj)
         self.assertIn('id', resp[self.driver.provider_name])
 
     def test_purge_with_exception(self):

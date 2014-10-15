@@ -37,9 +37,10 @@ class ServiceController(base.ServiceBase):
     def get(self, service_name):
         return {'domains': [], 'origins': [], 'caching': []}
 
-    # TODo(obulpathi): update service
-    def update(self, service_name, service_obj):
-        return self.responder.updated(service_name)
+    # TODO(obulpathi): update service
+    def update(self, service_name, service_old, service_new):
+        links = {}
+        return self.responder.updated(service_name, links)
 
     def create(self, service_obj):
         # TODO(obulpathi): create a single distribution for multiple origins
