@@ -39,7 +39,7 @@ class ServiceController(base.ServiceBase):
 
         self.driver = driver
 
-    def update(self, pullzone_id, service_obj):
+    def update(self, pullzone_id, service_old, service_new):
         '''MaxCDN update.
 
          manager needs to pass in pullzone id to delete.
@@ -49,11 +49,12 @@ class ServiceController(base.ServiceBase):
             # to a dictionary passed into maxcdn call.
             update_response = self.client.put('/zones/pull.json/%s'
                                               % pullzone_id,
-                                              params=service_obj.to_dict())
+                                              params=service_new.to_dict())
             if update_response['code'] != 200:
                 return self.responder.failed('failed to update service')
+            links = {}
             return self.responder.updated(
-                update_response['data']['pullzone']['id'])
+                update_response['data']['pullzone']['id'], links)
         except Exception:
             # this exception branch will most likely for a network failure
             return self.responder.failed('failed to update service')
