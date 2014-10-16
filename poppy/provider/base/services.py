@@ -42,6 +42,10 @@ class ServicesControllerBase(controller.ProviderControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def purge(self, provider_service_id, purge_urls=None):
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def get(self, service_name):
         """Get details of the service, as stored by the provider."""
         raise NotImplementedError

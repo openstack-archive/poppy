@@ -103,12 +103,23 @@ class TestServices(base.TestCase):
     def test_delete_exceptions(self):
         # delete_distribution: Exception
         self.controller.client.delete_distribution.side_effect = Exception(
-            'Creating service failed.')
+            'Deleting service failed.')
         resp = self.controller.delete(self.service_name)
         self.assertIn('error', resp[self.driver.provider_name])
 
     def test_delete(self):
         resp = self.controller.delete(self.service_name)
+        self.assertIn('id', resp[self.driver.provider_name])
+
+    def test_purge_exceptions(self):
+        self.controller.client.create_invalidation_request.side_effect = (
+            Exception('Purging service failed.')
+        )
+        resp = self.controller.purge(self.service_name)
+        self.assertIn('error', resp[self.driver.provider_name])
+
+    def test_purge(self):
+        resp = self.controller.purge(self.service_name)
         self.assertIn('id', resp[self.driver.provider_name])
 
     def test_client(self):

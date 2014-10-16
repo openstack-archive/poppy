@@ -37,7 +37,14 @@ LIMITS_OPTIONS = [
 LIMITS_GROUP = 'drivers:transport:limits'
 
 
+class ServiceAssetsController(base.Controller):
+    pass
+
+
 class ServicesController(base.Controller):
+
+    # TODO(tonytan4ever): Add assets controller for purge, etc
+    # assets = ServiceAssetsController()
 
     def __init__(self, driver):
         super(ServicesController, self).__init__(driver)
