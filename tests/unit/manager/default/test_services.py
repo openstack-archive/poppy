@@ -20,6 +20,7 @@ import mock
 from oslo.config import cfg
 
 from poppy.manager.default import driver
+from poppy.manager.default.service_async_workers import purge_service_worker
 from poppy.manager.default import services
 from poppy.model import flavor
 from poppy.model.helpers import provider_details
@@ -206,3 +207,157 @@ class DefaultManagerServiceTests(base.TestCase):
         providers = self.sc._driver.providers
         providers.map.assert_called_once_with(self.sc.provider_wrapper.delete,
                                               self.provider_details)
+
+    @ddt.file_data('data_provider_details.json')
+    def test_purge(self, provider_details_json):
+        self.provider_details = {}
+        for provider_name in provider_details_json:
+            provider_detail_dict = json.loads(
+                provider_details_json[provider_name]
+            )
+            provider_service_id = provider_detail_dict.get('id', None)
+            access_urls = provider_detail_dict.get('access_urls', [])
+            status = provider_detail_dict.get('status', u'unknown')
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
+                status=status)
+            self.provider_details[provider_name] = provider_detail_obj
+
+        self.sc.storage_controller.get_provider_details.return_value = (
+            self.provider_details
+        )
+
+        self.sc.purge(self.project_id, self.service_name, None)
+
+        # ensure the manager calls the storage driver with the appropriate data
+        sc = self.sc.storage_controller
+        sc.get_provider_details.assert_called_once_with(
+            self.project_id,
+            self.service_name,
+        )
+
+    @ddt.file_data('data_provider_details.json')
+    def test_purge_service_worker_success(self, provider_details_json):
+        self.provider_details = {}
+        for provider_name in provider_details_json:
+            provider_detail_dict = json.loads(
+                provider_details_json[provider_name]
+            )
+            provider_service_id = provider_detail_dict.get("id", None)
+            access_urls = provider_detail_dict.get("access_urls", None)
+            status = provider_detail_dict.get("status", u'deployed')
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
+                status=status)
+            self.provider_details[provider_name] = provider_detail_obj
+
+        providers = self.sc._driver.providers
+
+        def get_provider_extension_by_name(name):
+            if name == 'cloudfront':
+                return mock.Mock(
+                    obj=mock.Mock(
+                        provider_name='CloudFront',
+                        service_controller=mock.Mock(
+                            purge=mock.Mock(
+                                return_value={
+                                    'CloudFront': {
+                                        'id':
+                                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                                    }}),
+                        )))
+            elif name == 'maxcdn':
+                return mock.Mock(obj=mock.Mock(
+                    provider_name='MaxCDN',
+                    service_controller=mock.Mock(
+                        purge=mock.Mock(return_value={
+                            'MaxCDN': {'id':
+                                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6'
+                                        }})
+                    )
+                ))
+            else:
+                return mock.Mock(
+                    obj=mock.Mock(
+                        provider_name=name.title(),
+                        service_controller=mock.Mock(
+                            purge=mock.Mock(
+                                return_value={
+                                    name.title(): {
+                                        'id':
+                                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                                    }}),
+                        )))
+
+        providers.__getitem__.side_effect = get_provider_extension_by_name
+
+        purge_service_worker.service_purge_worker(self.provider_details,
+                                                  self.sc,
+                                                  self.project_id,
+                                                  self.service_name,
+                                                  None)
+
+    @ddt.file_data('data_provider_details.json')
+    def test_purge_service_worker_with_error(self, provider_details_json):
+        self.provider_details = {}
+        for provider_name in provider_details_json:
+            provider_detail_dict = json.loads(
+                provider_details_json[provider_name]
+            )
+            provider_service_id = provider_detail_dict.get("id", None)
+            access_urls = provider_detail_dict.get("access_urls", None)
+            status = provider_detail_dict.get("status", u'deployed')
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
+                status=status)
+            self.provider_details[provider_name] = provider_detail_obj
+
+        providers = self.sc._driver.providers
+
+        def get_provider_extension_by_name(name):
+            if name == 'cloudfront':
+                return mock.Mock(
+                    obj=mock.Mock(
+                        provider_name='CloudFront',
+                        service_controller=mock.Mock(
+                            purge=mock.Mock(
+                                return_value={
+                                    'CloudFront': {
+                                        'id':
+                                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                                    }}),
+                        )))
+            elif name == 'maxcdn':
+                return mock.Mock(obj=mock.Mock(
+                    provider_name='MaxCDN',
+                    service_controller=mock.Mock(
+                        purge=mock.Mock(return_value={
+                            'MaxCDN': {'error': "fail to create servcice",
+                                       'error_detail':
+                                       'MaxCDN purge service'
+                                       ' failed because of XYZ'}})
+                    )
+                ))
+            else:
+                return mock.Mock(
+                    obj=mock.Mock(
+                        provider_name=name.title(),
+                        service_controller=mock.Mock(
+                            purge=mock.Mock(
+                                return_value={
+                                    name.title(): {
+                                        'id':
+                                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                                    }}),
+                        )))
+
+        providers.__getitem__.side_effect = get_provider_extension_by_name
+
+        purge_service_worker.service_purge_worker(self.provider_details,
+                                                  self.sc,
+                                                  self.project_id,
+                                                  self.service_name,
+                                                  None)
