@@ -58,11 +58,11 @@ class ServicesControllerBase(controller.ProviderControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def purge(self, provider_service_id, purge_urls=None):
+    def purge(self, provider_service_id, purge_url=None):
         """purge.
 
         :param provider_service_id
-        :param purge_urls
+        :param purge_url
         :raises NotImplementedError
         """
         raise NotImplementedError

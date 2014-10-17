@@ -91,16 +91,16 @@ class Responder(object):
             }
         }
 
-    def purged(self, provider_service_id, purge_urls):
+    def purged(self, provider_service_id, purge_url):
         """purged.
 
         :param provider_service_id
-        :param purge_urls
+        :param purge_url
         :returns provider msg{provider service id, purge urls}
         """
         provider_response = {
             'id': provider_service_id,
-            'purge_urls': purge_urls
+            'purge_url': purge_url
         }
         return {
             self.provider: provider_response

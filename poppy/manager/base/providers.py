@@ -56,3 +56,15 @@ class ProviderWrapper(object):
                 "Perhaps service has not been created")
         provider_service_id = provider_detail.provider_service_id
         return ext.obj.service_controller.delete(provider_service_id)
+
+    def purge(self, ext, provider_details, purge_url=None):
+        try:
+            provider_detail = provider_details[ext.obj.provider_name]
+        except KeyError:
+            raise errors.BadProviderDetail(
+                "No provider detail information."
+                "Perhaps service has not been created")
+        provider_service_id = provider_detail.provider_service_id
+        return ext.obj.service_controller.purge(
+            provider_service_id,
+            purge_url)
