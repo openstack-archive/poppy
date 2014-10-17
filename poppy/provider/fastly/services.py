@@ -134,20 +134,20 @@ class ServiceController(base.ServiceBase):
         except Exception:
             return self.responder.failed("failed to GET service")
 
-    def purge(self, service_id, purge_urls=None):
+    def purge(self, service_id, purge_url=None):
         try:
             # Get the service
-            if purge_urls is None:
+            if purge_url is None:
                 self.client.purge_service(service_id)
-                return self.responder.purged(service_id, purge_urls=purge_urls)
+                return self.responder.purged(service_id, purge_url=purge_url)
             else:
                 service_domains = self.client.list_domains(service_id)
                 domain_names = [service_domain.name for service_domain
                                 in service_domains]
-                for purge_url in purge_urls:
-                    for domain_name in domain_names:
-                        self.client.purge_url(domain_name, purge_url)
-                return self.responder.purged(service_id, purge_urls=purge_urls)
+                for domain_name in domain_names:
+                    self.client.purge_url(domain_name, purge_url)
+
+                return self.responder.purged(service_id, purge_url=purge_url)
         except fastly.FastlyError:
             return self.responder.failed("failed to PURGE service")
 

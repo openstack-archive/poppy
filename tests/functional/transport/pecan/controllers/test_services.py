@@ -153,3 +153,17 @@ class ServiceControllerTest(base.FunctionalTest):
         response = self.app.delete('/v1.0/0001/services/fake_service_name_4')
 
         self.assertEqual(200, response.status_code)
+
+    def test_purge_non_exist(self):
+        # This is for coverage 100%
+        self.assertRaises(app.AppError, self.app.delete,
+                          "/v1.0/0001/services/non_exist_service_name/assets",
+                          headers={
+                              "Content-Type": "application/json"
+                          })
+
+    def test_purge(self):
+        response = self.app.delete(
+            '/v1.0/0001/services/fake_service_name_4/assets')
+
+        self.assertEqual(202, response.status_code)

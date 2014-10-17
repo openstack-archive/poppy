@@ -40,3 +40,9 @@ class MockDBStorageDriverTests(base.TestCase):
 
     def test_flavors_controller(self):
         self.assertTrue(self.mockdb_driver.flavors_controller.session is None)
+
+    def test_connect(self):
+        self.assertTrue(self.mockdb_driver.connect() == "")
+
+    def test_close_connection(self):
+        self.assertTrue(self.mockdb_driver.close_connection() == "")
