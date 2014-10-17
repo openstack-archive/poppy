@@ -38,20 +38,39 @@ LIMITS_GROUP = 'drivers:transport:limits'
 
 
 class ServiceAssetsController(base.Controller):
-    pass
+
+    @pecan.expose()
+    def delete(self, service_name):
+        purge_url = pecan.request.GET.get('url', None)
+        purge_all = pecan.request.GET.get('all', False)
+        purge_all = (
+            True if purge_all and purge_all.lower() == 'true' else False)
+        if purge_url is None and not purge_all:
+            pecan.abort(400, detail='No purge url provided '
+                        'when not purging all...')
+        services_controller = self._driver.manager.services_controller
+        try:
+            services_controller.purge(self.project_id, service_name,
+                                      purge_url)
+        except LookupError as e:
+            pecan.abort(404, detail=str(e))
+        pecan.response.status = 202
 
 
 class ServicesController(base.Controller):
 
-    # TODO(tonytan4ever): Add assets controller for purge, etc
-    # assets = ServiceAssetsController()
-
     def __init__(self, driver):
         super(ServicesController, self).__init__(driver)
+
         self._conf = driver.conf
         self._conf.register_opts(LIMITS_OPTIONS, group=LIMITS_GROUP)
         self.limits_conf = self._conf[LIMITS_GROUP]
         self.max_services_per_page = self.limits_conf.max_services_per_page
+        # Add assets controller here
+        # need to initialize a nested controller with a parameter driver,
+        # so added it in __init__ method.
+        # see more in: http://pecan.readthedocs.org/en/latest/rest.html
+        self.__class__.assets = ServiceAssetsController(driver)
 
     @pecan.expose('json')
     def get_all(self):

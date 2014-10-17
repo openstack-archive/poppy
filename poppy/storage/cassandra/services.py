@@ -229,7 +229,6 @@ class ServicesController(base.ServicesController):
         for provider_name in provider_details_result:
             provider_detail_dict = json.loads(
                 provider_details_result[provider_name])
-
             provider_service_id = provider_detail_dict.get('id', None)
             access_urls = provider_detail_dict.get("access_urls", None)
             status = provider_detail_dict.get("status", u'creating')

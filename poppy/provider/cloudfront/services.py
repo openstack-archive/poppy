@@ -81,13 +81,15 @@ class ServiceController(base.ServiceBase):
         except Exception as e:
             return self.responder.failed(str(e))
 
-    def purge(self, distribution_id, purge_urls=None):
+    def purge(self, distribution_id, purge_url=None):
+        # NOTE(tonytan4ever): boto does not have an API to efficiently
+        # purge all urls yet
         try:
-            purge_urls = [] if purge_urls is None else purge_urls
+            purge_url = [] if purge_url is None else purge_url
             self.client.create_invalidation_request(distribution_id,
-                                                    purge_urls)
+                                                    purge_url)
             return self.responder.purged(distribution_id,
-                                         purge_urls=purge_urls)
+                                         purge_url=purge_url)
         except Exception:
             return self.responder.failed("failed to PURGE service")
 

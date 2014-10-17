@@ -18,6 +18,7 @@ import multiprocessing
 from poppy.manager import base
 from poppy.manager.default.service_async_workers import create_service_worker
 from poppy.manager.default.service_async_workers import delete_service_worker
+from poppy.manager.default.service_async_workers import purge_service_worker
 
 
 class DefaultServicesController(base.ServicesController):
@@ -113,5 +114,33 @@ class DefaultServicesController(base.ServicesController):
                 self,
                 project_id,
                 service_name))
+        p.start()
+        return
+
+    def purge(self, project_id, service_name, purge_url=None):
+        '''If purge_url is none, all content of this service will be purge.'''
+        try:
+            provider_details = self.storage_controller.get_provider_details(
+                project_id,
+                service_name)
+        except Exception:
+            raise LookupError('Service %s does not exist' % service_name)
+
+        # possible validation of purge url here...
+        self.storage_controller._driver.close_connection()
+        p = multiprocessing.Process(
+            name='Process: Purge poppy service %s for'
+            ' project id: %s'
+            ' on %s' %
+            (service_name,
+             project_id,
+             'all' if purge_url is None else purge_url),
+            target=purge_service_worker.service_purge_worker,
+            args=(
+                provider_details,
+                self,
+                project_id,
+                service_name,
+                purge_url))
         p.start()
         return
