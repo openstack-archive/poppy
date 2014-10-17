@@ -140,6 +140,8 @@ class ServicesController(base.ServicesController):
         return ''
 
     def get_provider_details(self, project_id, service_name):
+        if service_name == 'non_exist_service_name':
+            raise LookupError('Service non_exist_service_name does not exist')
         return {
             "MaxCDN": provider_details.ProviderDetail(
                 provider_service_id=11942,

@@ -145,7 +145,6 @@ class CassandraStorageServiceTests(base.TestCase):
         # mock the response from cassandra
         mock_execute.execute.return_value = [
             {'provider_details': provider_details_json}]
-
         actual_response = self.sc.get_provider_details(self.project_id,
                                                        self.service_name)
         self.assertTrue("MaxCDN" in actual_response)

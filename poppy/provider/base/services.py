@@ -42,7 +42,7 @@ class ServicesControllerBase(controller.ProviderControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def purge(self, provider_service_id, purge_urls=None):
+    def purge(self, provider_service_id, purge_url=None):
         raise NotImplementedError
 
     @abc.abstractmethod
