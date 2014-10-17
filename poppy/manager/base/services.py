@@ -81,3 +81,8 @@ class ServicesControllerBase(controller.ManagerControllerBase):
        :raises: NotImplementedError
        """
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def purge(self, project_id, service_name, purge_url=None):
+        '''If purge_url is none, all content of this service will be purge.'''
+        raise NotImplementedError

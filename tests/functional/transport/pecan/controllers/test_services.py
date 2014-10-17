@@ -279,7 +279,6 @@ class ServiceControllerTest(base.FunctionalTest):
     # TODO(amitgandhinz): commented this out until the Delete Patch lands
     # due to this test failing.
     #     response = self.app.delete('/v1.0/services/fake_service_name_4')
-
     #     self.assertEqual(200, response.status_code)
 
     def test_delete_non_eixst(self):
@@ -290,3 +289,57 @@ class ServiceControllerTest(base.FunctionalTest):
                                    },
                                    expect_errors=True)
         self.assertEqual(404, response.status_code)
+
+    def test_purge_non_exist(self):
+        # This is for coverage 100%
+        response = self.app.delete(
+            "/v1.0/services/non_exist_service_name/assets?all=true",
+            headers={
+                "Content-Type": "application/json",
+                'X-Project-ID': self.project_id
+            },
+            expect_errors=True)
+        self.assertEqual(404, response.status_code)
+
+    def test_purge_error_parms(self):
+        response = self.app.delete(
+            '/v1.0/services/fake_service_name_4/assets',
+            headers={
+                "Content-Type": "application/json",
+                'X-Project-ID': self.project_id
+            },
+            expect_errors=True)
+
+        self.assertEqual(400, response.status_code)
+
+        response = self.app.delete(
+            '/v1.0/services/fake_service_name_4/assets?all=true&url=/abc',
+            headers={
+                "Content-Type": "application/json",
+                'X-Project-ID': self.project_id
+            },
+            expect_errors=True)
+
+        self.assertEqual(400, response.status_code)
+
+    def test_purge_all(self):
+        response = self.app.delete(
+            '/v1.0/services/fake_service_name_4/assets?all=true',
+            headers={
+                "Content-Type": "application/json",
+                'X-Project-ID': self.project_id
+            },
+            expect_errors=True)
+
+        self.assertEqual(202, response.status_code)
+
+    def test_purge_single_url(self):
+        response = self.app.delete(
+            '/v1.0/services/fake_service_name_4/assets?url=/abc',
+            headers={
+                "Content-Type": "application/json",
+                'X-Project-ID': self.project_id
+            },
+            expect_errors=True)
+
+        self.assertEqual(202, response.status_code)
