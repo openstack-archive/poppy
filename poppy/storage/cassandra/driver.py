@@ -104,9 +104,6 @@ def _connection(conf, datacenter):
 
 def _create_keyspace(session, keyspace, replication_strategy):
     # replication factor will come in as a string with quotes already
-    replication_strategy['replication_factor'] = int(
-        replication_strategy['replication_factor']
-    )
     session.execute(
         "CREATE KEYSPACE " + keyspace + " " +
         "WITH REPLICATION = " + str(replication_strategy) + ";"
