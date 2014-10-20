@@ -13,12 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Pecan Hooks"""
+import uuid
 
-from poppy.transport.pecan.hooks import context
-from poppy.transport.pecan.hooks import error
+from webtest import app
+
+from tests.functional.transport.pecan import base
 
 
-# Hoist into package namespace
-Context = context.ContextHook
-Error = error.ErrorHook
+class ErrorHookTest(base.FunctionalTest):
+
+    def setUp(self):
+        super(ErrorHookTest, self).setUp()
+
+        self.headers = {'X-Auth-Token': str(uuid.uuid4())}
+
+    def test_404_error(self):
+        self.headers['X-Project-Id'] = '000001'
+        self.assertRaises(app.AppError, self.app.get,
+                          '/v1.0/services/non_exist_service_name',
+                          headers=self.headers)
