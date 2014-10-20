@@ -1,0 +1,45 @@
+{
+"all_fields":
+    {"limits": [
+        {"origins": {"min": 1, "max": 5}},
+        {"domains": {"min": 1, "max": 5}},
+        {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
+     "provider_list": [
+        {"provider": "ChinaCache",
+         "links": [{"href": "http://www.chinacache.com",
+                    "rel": "provider_url"}]}]},
+"non_ASCII_flavor":
+    {"flavor_id": "երանգ",
+     "limits": [
+        {"origins": {"min": 1, "max": 5}},
+        {"domains": {"min": 1, "max": 5}},
+        {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
+     "provider_list": [
+        {"provider": "Armenia",
+         "links": [{"href": "http://www.armenia.com",
+                    "rel": "provider_url"}]}]},
+"non_ASCII_provider":
+    {
+    "limits": [
+        {"origins": {"min": 1, "max": 5}},
+        {"domains": {"min": 1, "max": 5}},
+        {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
+    "provider_list": [
+        {"provider": "नेपाललिपि",
+         "links": [{"href": "http://العربية.com",
+                    "rel": "provider_url"}]}]},
+"multiple_providers":
+    {
+    "limits": [
+        {"origins": {"min": 1, "max": 5}},
+        {"domains": {"min": 1, "max": 5}},
+        {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
+    "provider_list": [
+        {"provider": "ChinaCache",
+         "links": [{"href": "http://www.chinacache.com",
+                    "rel": "provider_url"}]},
+        {"provider": "OUIIICache",
+         "links": [{"href": "http://111.222.333.444",
+                    "rel": "provider_url"}]}
+    ]}
+ }

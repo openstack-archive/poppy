@@ -22,7 +22,7 @@ import ddt
 
 from tests.api import base
 from tests.api import providers
-from tests.api.utils.schema import response
+from tests.api.utils.schema import services
 
 
 @ddt.ddt
@@ -53,7 +53,7 @@ class TestCreateService(providers.TestProviderBase):
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
-        self.assertSchema(body, response.get_service)
+        self.assertSchema(body, services.get_service)
 
         self.assertEqual(body['domains'], domain_list)
         self.assertEqual(body['origins'], origin_list)
@@ -142,7 +142,7 @@ class TestListServices(base.TestBase):
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
-        self.assertSchema(body, response.list_services)
+        self.assertSchema(body, services.list_services)
 
     def test_list_services_no_service(self):
         resp = self.client.list_services()
@@ -162,7 +162,7 @@ class TestListServices(base.TestBase):
 
         body = resp.json()
         self.assertEqual(len(body['services']), limit)
-        self.assertSchema(body, response.list_services)
+        self.assertSchema(body, services.list_services)
 
     def test_list_services_multiple_page(self):
         self.skipTest('Exceeds max number of services allowed by Fastly')
@@ -173,7 +173,7 @@ class TestListServices(base.TestBase):
         body = resp.json()
         # TODO(malini): remove hard coded value with configurable value
         self.assertEqual(len(body['services']), 10)
-        self.assertSchema(body, response.list_services)
+        self.assertSchema(body, services.list_services)
 
     @ddt.data(-1, -10000000000, 0, 10000000, 'invalid', '学校', '')
     def test_list_services_invalid_limits(self, limit):
@@ -229,7 +229,7 @@ class TestServiceActions(base.TestBase):
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
-        self.assertSchema(body, response.get_service)
+        self.assertSchema(body, services.get_service)
         self.assertEqual(body['domains'], self.domain_list)
         self.assertEqual(body['origins'], self.origin_list)
         # TODO(malini): uncomment below after caching list is implemented.
