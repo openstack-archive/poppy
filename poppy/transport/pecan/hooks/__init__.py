@@ -16,7 +16,9 @@
 """Pecan Hooks"""
 
 from poppy.transport.pecan.hooks import context
+from poppy.transport.pecan.hooks import error
 
 
 # Hoist into package namespace
 Context = context.ContextHook
+Error = error.ErrorHook
