@@ -13,15 +13,15 @@ Building the Poppy Server Docker Image
 
 From the docker/api folder::
 
-    $ docker build -t poppy-server .
+    $ docker build -t poppy .
 
 
 Running the Poppy Docker Container
 --------------------------------------
 
-Name the container 'poppy-server'::
+Name the container 'poppy'::
 
-    $ docker run -d -p 81:8081 --name poppy-server poppy-server
+    $ docker run -d -p 81:8081 --name poppy poppy
 
 
 Testing

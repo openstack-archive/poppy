@@ -15,8 +15,13 @@ RUN rm /etc/repose/*.cfg.xml
 # Copy our configuration files in.
 COPY ./repose_configs /etc/repose
 
+# Deploy startup script
+ADD init.sh /usr/local/bin/repose-docker
+RUN chmod 755 /usr/local/bin/repose-docker
+
 # Expose Port 8080 -- Change this to use other ports for Repose
 EXPOSE 8080
  
 # Start Repose
-CMD java -jar /usr/share/lib/repose/repose-valve.jar
+USER root
+CMD repose-docker
