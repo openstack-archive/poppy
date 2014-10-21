@@ -16,13 +16,14 @@ Name the container 'repose'
 
     $ docker run -d -p 80:8080 --name repose repose_img_1
 
+Or with an Interactive Bash Shell::
+
+    $ docker run -t -i -p 80:8080 --name repose repose_img_1 /bin/bash
 
 Other Notes
 -----------
 
 The docker container will use the configuration files stored in the "repose_configs" folder.  Please modify these files for your needs.
-
-* client-auth-n.cfg.xml - update admin credentials to keystone
 
 
 Currently the following configurations are defined (system-model.cfg)::
