@@ -10,7 +10,7 @@
       <filter name="api-validator" />
     </filters>
     <destinations>
-      <endpoint id="endpoint" protocol="http" hostname="192.168.59.103" root-path="" port="81" default="true" />
+      <endpoint id="endpoint" protocol="http" hostname="DESTINATION_HOST" root-path="" port="DESTINATION_PORT" default="true" />
     </destinations>
   </repose-cluster>
 </system-model>
