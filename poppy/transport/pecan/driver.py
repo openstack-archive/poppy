@@ -63,7 +63,7 @@ class PecanTransportDriver(transport.Driver):
         home_controller.add_controller('services', v1.Services(self))
         home_controller.add_controller('flavors', v1.Flavors(self))
 
-        pecan_hooks = [hooks.Context()]
+        pecan_hooks = [hooks.Context(), hooks.Error()]
         self._app = pecan.make_app(root_controller, hooks=pecan_hooks)
 
     def listen(self):
