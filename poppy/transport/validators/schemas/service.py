@@ -54,7 +54,10 @@ class ServiceSchema(schema_base.SchemaBase):
                         'minItems': 1},
                     'origins': {
                         'type': 'array',
-                        'items': {
+                        # the first origin does not have to
+                        # have rules field, it will be defaulted
+                        # to global url matching
+                        'items': [{
                             'type': 'object',
                             'properties': {
                                 'origin': {
@@ -73,10 +76,69 @@ class ServiceSchema(schema_base.SchemaBase):
                                         80,
                                         443]},
                                 'ssl': {
-                                    'type': 'boolean'}},
-                        },
-                        'required': True,
-                        'minItems': 1},
+                                    'type': 'boolean'},
+                                'rules': {
+                                    'type': 'array',
+                                    'items': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'name': {
+                                                'type': 'string',
+                                                'required': True
+                                            },
+                                            'request_url': {
+                                                'type': 'string',
+                                                'required': True
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }],
+                        'minItems': 1,
+                        # the 2nd and successive items must have
+                        # 'rules' field which has at least one rule
+                        "additionalItems": {
+                            'type': 'object',
+                            'properties': {
+                                'origin': {
+                                    'type': 'string',
+                                    'pattern': re.compile(
+                                        '^(([^:/?#]+):)?'
+                                        '(//([^/?#]*))?'
+                                        '([^?#]*)(\?([^#]*))?'
+                                        '(#(.*))?$',
+                                        re.UNICODE
+                                    ),
+                                    'required': True},
+                                'port': {
+                                    'type': 'integer',
+                                    'enum': [
+                                        80,
+                                        443]},
+                                'ssl': {
+                                    'type': 'boolean'},
+                                'rules': {
+                                    'type': 'array',
+                                    'items': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'name': {
+                                                'type': 'string',
+                                                'required': True
+                                            },
+                                            'request_url': {
+                                                'type': 'string',
+                                                'required': True
+                                            }
+                                        }
+                                    },
+                                    'required': True,
+                                    'minItems': 1,
+                                },
+                                }
+                            }
+                    },
                     'caching': {
                         'type': 'array',
                         'items': {
@@ -114,6 +176,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'type': 'object',
                                         'properties': {
                                             'name': {
+                                                'type': 'string'},
+                                            'referrer': {
                                                 'type': 'string'},
                                             'request_url': {
                                                 'type': 'string'},
@@ -166,8 +230,10 @@ class ServiceSchema(schema_base.SchemaBase):
                     'origins': {
                         'type': 'array',
                         'required': False,
-                        'minItems': 1,
-                        'items': {
+                        # the first origin does not have to
+                        # have rules field, it will be defaulted
+                        # to global url matching
+                        'items': [{
                             'type': 'object',
                             'properties': {
                                 'origin': {
@@ -186,8 +252,68 @@ class ServiceSchema(schema_base.SchemaBase):
                                         80,
                                         443]},
                                 'ssl': {
-                                    'type': 'boolean'}},
-                        },
+                                    'type': 'boolean'},
+                                'rules': {
+                                    'type': 'array',
+                                    'items': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'name': {
+                                                'type': 'string',
+                                                'required': True
+                                            },
+                                            'request_url': {
+                                                'type': 'string',
+                                                'required': True
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }],
+                        'minItems': 1,
+                        # the 2nd and successive items must have
+                        # 'rules' field which has at least one rule
+                        "additionalItems": {
+                            'type': 'object',
+                            'properties': {
+                                'origin': {
+                                    'type': 'string',
+                                    'pattern': re.compile(
+                                        '^(([^:/?#]+):)?'
+                                        '(//([^/?#]*))?'
+                                        '([^?#]*)(\?([^#]*))?'
+                                        '(#(.*))?$',
+                                        re.UNICODE
+                                    ),
+                                    'required': True},
+                                'port': {
+                                    'type': 'integer',
+                                    'enum': [
+                                        80,
+                                        443]},
+                                'ssl': {
+                                    'type': 'boolean'},
+                                'rules': {
+                                    'type': 'array',
+                                    'items': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'name': {
+                                                'type': 'string',
+                                                'required': True
+                                            },
+                                            'request_url': {
+                                                'type': 'string',
+                                                'required': True
+                                            }
+                                        }
+                                    },
+                                    'required': True,
+                                    'minItems': 1,
+                                },
+                                }
+                            }
                     },
                     'caching': {
                         'type': 'array',
@@ -228,6 +354,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                             'name': {
                                                 'type': 'string'},
                                             'request_url': {
+                                                'type': 'string'},
+                                            'referrer': {
                                                 'type': 'string'},
                                             'http_host': {
                                                 'type': 'string'},

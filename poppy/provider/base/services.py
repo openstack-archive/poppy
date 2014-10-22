@@ -39,11 +39,11 @@ class ServicesControllerBase(controller.ProviderControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create(self, service_name, service_json):
+    def create(self, service_name, service_obj):
         """create.
 
         :param service_name
-        :param service_json
+        :param service_obj
         :raises NotImplementedError
         """
         raise NotImplementedError

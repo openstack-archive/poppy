@@ -40,6 +40,8 @@ tests/logs
 .pydevproject
 venv
 docker_rsa*
+write_file
+.settings/*
 
 Dockerfile
 
