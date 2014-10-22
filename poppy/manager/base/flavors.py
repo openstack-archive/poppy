@@ -28,6 +28,7 @@ class FlavorsControllerBase(controller.ManagerControllerBase):
         super(FlavorsControllerBase, self).__init__(manager)
 
         self._storage = self.driver.storage.flavors_controller
+        self._providers = self.driver.providers
 
     @property
     def storage(self):
@@ -36,6 +37,14 @@ class FlavorsControllerBase(controller.ManagerControllerBase):
         :returns: the storage object
         """
         return self._storage
+
+    @property
+    def providers(self):
+        """storage
+
+        :returns: the list of provider drivers
+        """
+        return self._providers
 
     @abc.abstractmethod
     def list(self):

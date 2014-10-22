@@ -28,6 +28,14 @@ class ManagerDriverBase(object):
         self._providers = providers
 
     @property
+    def conf(self):
+        """conf
+
+        :returns conf
+        """
+        return self._conf
+
+    @property
     def storage(self):
         """storage
 

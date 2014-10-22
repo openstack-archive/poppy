@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import uuid
 
 import mock
@@ -31,8 +32,13 @@ class DefaultManagerFlavorTests(base.TestCase):
         super(DefaultManagerFlavorTests, self).setUp()
 
         # create mocked config and driver
-        conf = cfg.ConfigOpts()
-        manager_driver = driver.DefaultManagerDriver(conf,
+        tests_path = os.path.abspath(os.path.dirname(
+            os.path.dirname(
+                os.path.dirname(os.path.dirname(__file__)))))
+        conf_path = os.path.join(tests_path, 'etc', 'default_functional.conf')
+        cfg.CONF(args=[], default_config_files=[conf_path])
+
+        manager_driver = driver.DefaultManagerDriver(cfg.CONF,
                                                      mock_driver,
                                                      mock_provider)
 
@@ -60,9 +66,9 @@ class DefaultManagerFlavorTests(base.TestCase):
         flavor_id = uuid.uuid1()
         providers = []
 
-        providers.append(flavor.Provider(uuid.uuid1(), uuid.uuid1()))
-        providers.append(flavor.Provider(uuid.uuid1(), uuid.uuid1()))
-        providers.append(flavor.Provider(uuid.uuid1(), uuid.uuid1()))
+        providers.append(flavor.Provider("mock", uuid.uuid1()))
+        providers.append(flavor.Provider("mock", uuid.uuid1()))
+        providers.append(flavor.Provider("mock", uuid.uuid1()))
 
         new_flavor = flavor.Flavor(flavor_id, providers)
 

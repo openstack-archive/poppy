@@ -8,11 +8,25 @@
         "id" : "asia",
         "providers" : [
             {
-                "invalid_field" : "ChinaCache",
+                "invalid_field" : "fastly",
                 "links": [
                     {
                         "href": "http://www.chinacache.com",
                         "rel": "invalid_url"
+                    }
+                ]
+            }
+        ]
+    },
+    "nonexistant_provider": {
+        "id" : "doesnt_exist",
+        "providers" : [
+            {
+                "provider" : "idontexist",
+                "links": [
+                    {
+                        "href": "http://www.idontexist.com",
+                        "rel": "provider_url"
                     }
                 ]
             }
