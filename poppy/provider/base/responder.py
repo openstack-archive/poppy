@@ -15,12 +15,17 @@
 
 import traceback
 
+from poppy.openstack.common import log
+
+LOG = log.getLogger(__name__)
+
 
 class Responder(object):
     def __init__(self, provider_type):
         self.provider = provider_type
 
     def failed(self, msg):
+        LOG.info('Provider operation error: %s' % traceback.format_exc())
         return {
             self.provider: {
                 'error': msg,
