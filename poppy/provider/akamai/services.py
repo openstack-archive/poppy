@@ -53,6 +53,22 @@ class ServiceController(base.ServiceBase):
         for origin in service_obj.origins:
             self._process_new_origin(origin, post_data['rules'])
 
+        # referrer restriction implementaiton for akamai
+        # get a list of referrer restriction domains/hosts
+        referrer_restriction_list = [rule.referrer
+                                     for restriction in
+                                     service_obj.restrictions
+                                     for rule in restriction.rules]
+
+        if any(referrer_restriction_list):
+            referrer_whitelist_value = ''.join(['*%s*' % referrer
+                                                for referrer
+                                                in referrer_restriction_list
+                                                if referrer is not None])
+            for rule in post_data['rules']:
+                self._process_referrer_restriction(referrer_whitelist_value,
+                                                   rule)
+
         classified_domains = self._classify_domains(service_obj.domains)
 
         try:
@@ -66,7 +82,6 @@ class ServiceController(base.ServiceBase):
                 # of each group
                 dp = self._process_new_domain(classified_domain,
                                               post_data['rules'])
-
                 resp = self.policy_api_client.put(
                     self.policy_api_base_url.format(
                         policy_name=dp),
@@ -76,6 +91,7 @@ class ServiceController(base.ServiceBase):
                 LOG.info('akamai response text: %s' % resp.text)
                 if resp.status_code != 200:
                     raise RuntimeError(resp.text)
+
                 ids.append(dp)
                 # TODO(tonytan4ever): leave empty links for now
                 # may need to work with dns integration
@@ -141,7 +157,6 @@ class ServiceController(base.ServiceBase):
                 'name': 'url-scheme',
                 'value': 'HTTPS'
             })
-
         origin_behavior_dict['params']['originDomain'] = (
             origin.origin
         )
@@ -156,8 +171,15 @@ class ServiceController(base.ServiceBase):
 
         for rule in rules_list:
             for behavior in rule['behaviors']:
-                behavior['params']['digitalProperty'] = dp
+                if 'params' in behavior:
+                    behavior['params']['digitalProperty'] = dp
         return dp
+
+    def _process_referrer_restriction(self, referrer_blacklist_value, rule):
+        rule['behaviors'].append({
+            'name': 'referer-whitelist',
+            'value': referrer_blacklist_value
+        })
 
     def get(self, service_name):
         pass
@@ -203,10 +225,22 @@ class ServiceController(base.ServiceBase):
                 policy_content['rules'] = []
                 for origin in service_obj.origins:
                     self._process_new_origin(origin, policy_content['rules'])
-            else:
-                # to incorporate caching rule or referrer restriciton
-                # if necessary
-                pass
+
+            # referrer restriction implementaiton for akamai
+            # get a list of referrer restriction domains/hosts
+            referrer_restriction_list = [rule.referrer
+                                         for restriction in
+                                         service_obj.restrictions
+                                         for rule in restriction.rules]
+
+            if any(referrer_restriction_list):
+                referrer_blacklist_value = ''.join(['*%s*' % referrer
+                                                   for referrer
+                                                   in referrer_restriction_list
+                                                   if referrer is not None])
+                for rule in policy_content['rules']:
+                    self._process_referrer_restriction(
+                        referrer_blacklist_value, rule)
 
             # Update domain if necessary ( by adjust digital property)
             classified_domains = self._classify_domains(service_obj.domains)
@@ -283,11 +317,22 @@ class ServiceController(base.ServiceBase):
                     for origin in service_obj.origins:
                         self._process_new_origin(origin,
                                                  policy_content['rules'])
-                else:
-                    # TODO(tonytan4ever):
-                    # to incorporate caching rule and
-                    # referrer restriciton if necessary
-                    pass
+                # referrer restriction implementaiton for akamai
+                # get a list of referrer restriction domains/hosts
+                referrer_restriction_list = [rule.referrer
+                                             for restriction in
+                                             service_obj.restrictions
+                                             for rule in restriction.rules]
+
+                if any(referrer_restriction_list):
+                    referrer_blacklist_value = ''.join(
+                        ['*%s*' % referrer for referrer
+                         in referrer_restriction_list
+                         if referrer is not None])
+                    for rule in policy_content['rules']:
+                        self._process_referrer_restriction(
+                            referrer_blacklist_value, rule)
+
                 # post new policies back with Akamai Policy API
                 try:
                     LOG.info('Start to update policy %s ' % policy)
