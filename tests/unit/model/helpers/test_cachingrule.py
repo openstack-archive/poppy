@@ -39,5 +39,5 @@ class TestCachingRule(base.TestCase):
         self.assertEqual(caching_rule.ttl, ttl)
         self.assertRaises(AttributeError, setattr, caching_rule, 'ttl', ttl)
 
-        # rules
-        self.assertRaises(AttributeError, getattr, caching_rule, 'rules')
+        # default rule is empty list []
+        self.assertEqual(caching_rule.rules, [])

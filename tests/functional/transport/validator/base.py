@@ -75,6 +75,9 @@ class DummyRequest(object):
                  },
                 {"name": "images",
                  "ttl": 12800,
+                 "rules": [
+                     {"name": "img", "request_url": "/img/*"}
+                 ]
                  }
             ],
             "flavor_ref": "https://www.poppycdn.io/v1.0/flavors/standard"

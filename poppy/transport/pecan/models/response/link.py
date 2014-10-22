@@ -20,7 +20,7 @@ except ImportError:           # pragma: no cover
 
 
 class Model(collections.OrderedDict):
-    'response class for Domain.'
+    'response class for Link.'
     def __init__(self, href, rel):
         super(Model, self).__init__()
         self['href'] = href

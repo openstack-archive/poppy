@@ -8,6 +8,20 @@
         "origins": [    
             {"origin": "mockdomain.com", "ssl": false, "port": 80}
         ],
+        "caching": [
+            {"name": "default", "ttl": 1200 },
+            {"name": "img-only",
+             "ttl": 1800,
+             "rules": [
+                { "name": "jpeg-rules",
+                  "request_url": "/*.jpeg"
+                },
+                { "name": "gif-rules",
+                  "request_url": "/*.gif"
+                }       
+             ]
+            }
+        ],
         "restrictions": [
              {
                 "name": "website only",
