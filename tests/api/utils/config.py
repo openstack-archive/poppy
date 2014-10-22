@@ -42,6 +42,16 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         """Boolean value indicating if tests verify provider side details."""
         return self.get_boolean('provider_validation')
 
+    @property
+    def status_check_retry_interval(self):
+        """Int value to set retry intervals for status check."""
+        return int(self.get('status_check_retry_interval'))
+
+    @property
+    def status_check_retry_timeout(self):
+        """Int value to set timeout for status check."""
+        return int(self.get('status_check_retry_timeout'))
+
 
 class AuthConfig(data_interfaces.ConfigSectionInterface):
     """Defines the auth config values."""

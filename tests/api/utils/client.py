@@ -16,6 +16,7 @@
 # limitations under the License.
 
 import json
+import time
 
 from cafe.engine.http import client
 
@@ -92,7 +93,20 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('POST', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def get_service(self, service_name):
+    def patch_service(self, service_name=None, request_body=None,
+                      requestslib_kwargs=None):
+        """Updates Service
+
+        :return: Response code 202 with location header
+        PATCH
+        services/{service_name}
+        """
+        url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
+        request_object = requests.PatchService(request_body=request_body)
+        return self.request('PATCH', url, request_entity=request_object,
+                            requestslib_kwargs=requestslib_kwargs)
+
+    def get_service(self, location=None, service_name=None):
         """Get Service
 
         :return: Response Object containing response code 200 and body with
@@ -101,7 +115,10 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         services/{service_name}
         """
 
-        url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
+        if location:
+            url = location
+        else:
+            url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
         return self.request('GET', url)
 
     def list_services(self, param=None):
@@ -195,3 +212,20 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
             url = u'{0}/v1.0/flavors/{1}'.format(self.url, flavor_id)
 
         return self.request('DELETE', url)
+
+    def wait_for_service_status(self, service_name, status, retry_interval=2,
+                                retry_timeout=30):
+        """Waits for a service to reach a given status."""
+        current_status = ''
+        start_time = int(time.time())
+        stop_time = start_time + retry_timeout
+        while current_status != status:
+            time.sleep(retry_interval)
+            service = self.get_service(service_name=service_name)
+            body = service.json()
+            current_status = body['status']
+            if (current_status == status):
+                return
+            current_time = int(time.time())
+            if current_time > stop_time:
+                return
