@@ -130,6 +130,7 @@ CQL_UPDATE_PROVIDER_DETAILS = '''
 
 
 class ServicesController(base.ServicesController):
+
     """Services Controller."""
 
     @property
@@ -342,10 +343,16 @@ class ServicesController(base.ServicesController):
         name = result.get('service_name')
         origins = [json.loads(o) for o in result.get('origins', [])]
         domains = [json.loads(d) for d in result.get('domains', [])]
-        origins = [origin.Origin(o['origin'],
-                                 o.get('port', 80),
-                                 o.get('ssl', False))
-                   for o in origins]
+        origins = [
+            origin.Origin(
+                o['origin'], o.get(
+                    'port', 80), o.get(
+                    'ssl', False), [
+                    rule.Rule(
+                        rule_i.get('name'),
+                        request_url=rule_i.get('request_url'))
+                        for rule_i in o.get(
+                            'rules', [])]) for o in origins]
         domains = [domain.Domain(d['domain']) for d in domains]
         flavor_ref = result.get('flavor_id')
 
