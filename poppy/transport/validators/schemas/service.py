@@ -79,8 +79,10 @@ class ServiceSchema(schema_base.SchemaBase):
                         'minItems': 1},
                     'caching': {
                         'type': 'array',
-                        'items': {
+                        'required': False,
+                        'items': [{
                             'type': 'object',
+                            'required': False,
                             'properties': {
                                 'name': {
                                     'type': 'string',
@@ -98,7 +100,35 @@ class ServiceSchema(schema_base.SchemaBase):
                                             'request_url': {
                                                 'type': 'string'}}},
                                 }},
+                        }],
+                        "additionalItems": {
+                            'type': 'object',
+                            'required': False,
+                            'properties': {
+                                'name': {
+                                    'type': 'string',
+                                    'pattern': re.compile(
+                                        '^(?!default$).*',
+                                        re.IGNORECASE
+                                    ),
+                                    'required': True},
+                                'ttl': {
+                                    'type': 'integer',
+                                    'required': True},
+                                'rules': {
+                                    'type': 'array',
+                                    'required': True,
+                                    'minItems': 1,
+                                    'items': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'name': {
+                                                'type': 'string'},
+                                            'request_url': {
+                                                'type': 'string'}}},
+                                }},
                         },
+                        "uniqueItems": True,
                     },
                     'restrictions': {
                         'type': 'array',
@@ -193,8 +223,10 @@ class ServiceSchema(schema_base.SchemaBase):
                     },
                     'caching': {
                         'type': 'array',
-                        'items': {
+                        'required': False,
+                        'items': [{
                             'type': 'object',
+                            'required': False,
                             'properties': {
                                 'name': {
                                     'type': 'string',
@@ -212,7 +244,34 @@ class ServiceSchema(schema_base.SchemaBase):
                                             'request_url': {
                                                 'type': 'string'}}},
                                 }},
+                        }],
+                        "additionalItems": {
+                            'type': 'object',
+                            'required': False,
+                            'properties': {
+                                'name': {
+                                    'type': 'string',
+                                    'pattern': re.compile(
+                                        '^(?!default$).*'
+                                    ),
+                                    'required': True},
+                                'ttl': {
+                                    'type': 'integer',
+                                    'required': True},
+                                'rules': {
+                                    'type': 'array',
+                                    'required': True,
+                                    'minItems': 1,
+                                    'items': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'name': {
+                                                'type': 'string'},
+                                            'request_url': {
+                                                'type': 'string'}}},
+                                }},
                         },
+                        "uniqueItems": True,
                     },
                     'restrictions': {
                         'type': 'array',

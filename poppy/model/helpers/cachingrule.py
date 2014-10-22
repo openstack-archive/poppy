@@ -17,13 +17,16 @@ from poppy.model import common
 
 
 class CachingRule(common.DictSerializableModel):
+
     """CachingRule
 
     :param DictSerializableModel:
     """
-    def __init__(self, name, ttl):
+
+    def __init__(self, name, ttl, rules=[]):
         self._name = name
         self._ttl = ttl
+        self._rules = rules
 
     @property
     def name(self):
@@ -48,3 +51,18 @@ class CachingRule(common.DictSerializableModel):
         :returns rules
         """
         return self._rules
+
+    @rules.setter
+    def rules(self, value):
+        """rules.
+
+        :returns rules
+        """
+        self._rules = value
+
+    def to_dict(self):
+        result = common.DictSerializableModel.to_dict(self)
+        # need to deserialize the nested rules object
+        rules_obj_list = result['rules']
+        result['rules'] = [r.to_dict() for r in rules_obj_list]
+        return result
