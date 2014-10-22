@@ -23,7 +23,7 @@ Features
 ---------
 
 + Wraps third party CDN provider API's
-    - Fastly (http://www.fastly.net)
+    - Fastly (http://www.fastly.com)
     - Amazon CloudFront
     - MaxCDN
     - Your CDN Here...
