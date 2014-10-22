@@ -1,0 +1,14 @@
+{
+    "single_domain_list": [
+        "www.mysite.com",
+        "www.myawsomesite.com",
+        "www.myawsomesite2.com"
+    ],
+    "multiple_domain_list": [
+        "www.mysite.com",
+        "blog.mysite.com",
+        "www.myawsomesite.com",
+        "test.myawsomesite.com",
+        "www.myawsomesite2.com"
+    ]
+}

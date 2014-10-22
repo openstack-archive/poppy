@@ -13,16 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.model.helpers import origin
-from poppy.transport.pecan.models.request import rule
+from poppy.provider.akamai import driver
 
-
-def load_from_json(json_data):
-    origin_name = json_data.get("origin")
-    port = json_data.get("port", 80)
-    ssl = json_data.get("ssl", False)
-    rules = json_data.get("rules", [])
-    rules = [rule.load_from_json(r) for r in rules]
-    result = origin.Origin(origin_name, port, ssl)
-    result.rules = rules
-    return result
+# Hoist classes into package namespace
+Driver = driver.CDNProvider
