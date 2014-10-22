@@ -29,3 +29,14 @@ class Restriction(common.DictSerializableModel):
     @property
     def rules(self):
         return self._rules
+
+    @rules.setter
+    def rules(self, value):
+        self._rules = value
+
+    def to_dict(self):
+        result = common.DictSerializableModel.to_dict(self)
+        # need to deserialize the nested rules object
+        rules_obj_list = result['rules']
+        result['rules'] = [r.to_dict() for r in rules_obj_list]
+        return result

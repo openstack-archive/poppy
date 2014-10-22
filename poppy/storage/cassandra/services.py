@@ -178,7 +178,7 @@ class ServicesController(base.ServicesController):
                    for origin in service_obj.origins]
         caching_rules = [json.dumps(caching_rule.to_dict())
                          for caching_rule in service_obj.caching]
-        restrictions = [json.dumps(restriction)
+        restrictions = [json.dumps(restriction.to_dict())
                         for restriction in service_obj.restrictions]
 
         # creates a new service
