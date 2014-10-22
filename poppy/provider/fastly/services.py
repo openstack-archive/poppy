@@ -73,11 +73,12 @@ class ServiceController(base.ServiceBase):
         # this list. It is equivalent of 'if the list is not empty' and
         # if any item is not None
         if any(referrer_restriction_list):
-            host_pattern_stament = ' || '.join(
+            host_pattern_statement = ' || '.join(
                 ['req.http.referer' ' !~ "%s"' % referrer
-                 for referrer in referrer_restriction_list])
+                 for referrer in referrer_restriction_list
+                 if referrer is not None])
             condition_stmt = ('req.http.referer && (%s)'
-                              % host_pattern_stament)
+                              % host_pattern_statement)
             # create a fastly condition for referer restriction
             request_condition = self.client.create_condition(
                 service.id,
