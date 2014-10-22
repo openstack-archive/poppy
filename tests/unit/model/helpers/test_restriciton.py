@@ -33,6 +33,7 @@ class TestRestriction(base.TestCase):
         self.assertEqual(myrestriction.name, name)
         self.assertRaises(AttributeError, setattr, myrestriction, 'name', name)
 
-        # rules
+        # rules test:
+        # We need to be able to set the rule now so previous setattr
+        # will be gone
         self.assertEqual(myrestriction.rules, [])
-        self.assertRaises(AttributeError, setattr, myrestriction, 'rules', [])
