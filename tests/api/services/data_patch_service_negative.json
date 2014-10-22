@@ -1,0 +1,89 @@
+{
+    "empty_domain_list": {
+        "domains": []
+    },
+    "empty_list": {},
+    "too_short_name": {
+        "service_name": "ab"
+    },
+    "too_long_name": {
+        "service_name": "too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name"
+    },
+    "empty_domain_list": {
+        "service_name": "empty_domain_list",
+        "domain_list": [],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "flavorRef": "standard",
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+    },
+    "invalid_domain_value": {
+        "domains": [{"domain": "ftp://BOOOOOOM"},
+                        {"domain": "abc://BAAAAAAM"}]
+    },
+    "empty_origin_list": {
+        "origins": []
+    },
+    "invalid_origin_value": {
+        "origins": [{"origin": "^%}invalid_origin_value",
+                         "port": 443,
+                         "ssl": false}]
+    },
+    "non_numeric_origin_port": {
+        "service_name": "non_numeric_origin_port",
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "invalid_origin_value",
+                         "port": "fourfourthree",
+                         "ssl": false}],
+        "flavorRef": "standard",
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+    },
+    "non_boolean_origin_ssl": {
+        "service_name": "non_boolean_origin_ssl",
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "invalid_origin_value",
+                         "port": 443,
+                         "ssl": "Arggg"}],
+        "flavorRef": "standard",
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+    },
+    "invalid_flavor": {
+        "service_name": "invalid_flavor",
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "flavorRef": "non_exist",
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+    },
+    "caching_list_no_name": {
+        "service_name": "caching_list_no_name",
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "flavorRef": "standard",
+        "caching_list": [{"ttl": 3600}]
+    }
+}

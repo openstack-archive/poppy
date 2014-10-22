@@ -223,6 +223,50 @@ class TestServiceActions(base.TestBase):
                                    caching_list=self.caching_list,
                                    flavorRef='standard')
 
+    @ddt.file_data('data_patch_service.json')
+    def test_patch_service(self, test_data):
+        '''Implemented - PATCH Origins & Domains'''
+
+        resp = self.client.patch_service(service_name=self.service_name,
+                                         request_body=test_data)
+
+        self.assertEqual(resp.status_code, 202)
+
+        location = resp.headers['location']
+        resp = self.client.get_service(location=location)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertEqual(body['status'], 'create_in_progress')
+
+        if 'domain_list' in test_data:
+            self.assertEqual(sorted(test_data['domain_list']),
+                             sorted(body['domains']))
+
+        if 'origin_list' in test_data:
+            self.assertEqual(sorted(test_data['origin_list']),
+                             sorted(body['origins']))
+        # TODO(malini): Uncomment after caching is implemented
+        # if 'caching_list' in test_data:
+        #    self.assertEqual(sorted(test_data['caching_list']),
+        #                     sorted(body['caching']))
+
+    @ddt.file_data('data_patch_service_negative.json')
+    def test_patch_service_HTTP_400(self, test_data):
+
+        resp = self.client.patch_service(service_name=self.service_name,
+                                         request_body=test_data)
+        self.assertEqual(resp.status_code, 400)
+
+        resp = self.client.get_service(service_name=self.service_name)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertEqual(body['status'], 'deployed')
+        self.assertEqual(sorted(self.domain_list), sorted(body['domains']))
+        self.assertEqual(sorted(self.origin_list), sorted(body['origins']))
+        self.assertEqual(sorted(self.caching_list), sorted(body['caching']))
+
     def test_get_service(self):
 
         resp = self.client.get_service(service_name=self.service_name)
