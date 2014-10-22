@@ -53,6 +53,7 @@ class ServiceController(base.ServiceBase):
                 # cannot specify ssl like this yet, CF takes a port #
                 # https_port=origin.ssl,
                 origin_protocol_policy='match-viewer')
+            # TODO(tonytan4ever): Implement CF referer restriction
             distribution = self.client.create_distribution(
                 origin=aws_origin,
                 enabled=True)

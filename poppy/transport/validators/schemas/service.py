@@ -112,6 +112,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'properties': {
                                             'name': {
                                                 'type': 'string'},
+                                            'referrer': {
+                                                'type': 'string'},
                                             'request_url': {
                                                 'type': 'string'},
                                             'http_host': {
@@ -215,6 +217,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                             'name': {
                                                 'type': 'string'},
                                             'request_url': {
+                                                'type': 'string'},
+                                            'referrer': {
                                                 'type': 'string'},
                                             'http_host': {
                                                 'type': 'string'},
