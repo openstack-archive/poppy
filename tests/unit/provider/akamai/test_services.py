@@ -167,3 +167,49 @@ class TestServices(base.TestCase):
         resp = controller.update(
             provider_service_id, service_obj, service_obj, service_obj)
         self.assertIn('id', resp[self.driver.provider_name])
+
+    def test_purge_all(self):
+        provider_service_id = json.dumps([str(uuid.uuid1())])
+        controller = services.ServiceController(self.driver)
+        resp = controller.purge(provider_service_id, None)
+        self.assertIn('error', resp[self.driver.provider_name])
+
+    def test_purge_with_get_exception(self):
+        provider_service_id = json.dumps([str(uuid.uuid1())])
+        controller = services.ServiceController(self.driver)
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=400,
+            text='Some get error happened'
+        )
+        resp = controller.purge(provider_service_id, '/img/abc.jpeg')
+        self.assertIn('error', resp[self.driver.provider_name])
+
+    @ddt.file_data('policy_detail.json')
+    def test_purge_with_ccu_exception(self, policy_detail_json):
+        provider_service_id = json.dumps([str(uuid.uuid1())])
+        controller = services.ServiceController(self.driver)
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            text=json.dumps(policy_detail_json)
+        )
+        controller.ccu_api_client.post.return_value = mock.Mock(
+            status_code=400,
+            text="purge request post failed"
+        )
+        resp = controller.purge(provider_service_id, '/img/abc.jpeg')
+        self.assertIn('error', resp[self.driver.provider_name])
+
+    @ddt.file_data('policy_detail.json')
+    def test_purge(self, policy_detail_json):
+        provider_service_id = json.dumps([str(uuid.uuid1())])
+        controller = services.ServiceController(self.driver)
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            text=json.dumps(policy_detail_json)
+        )
+        controller.ccu_api_client.post.return_value = mock.Mock(
+            status_code=201,
+            text="purge request post complete"
+        )
+        resp = controller.purge(provider_service_id, '/img/abc.jpeg')
+        self.assertIn('id', resp[self.driver.provider_name])
