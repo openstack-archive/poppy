@@ -18,9 +18,9 @@ from poppy.model import common
 
 class Restriction(common.DictSerializableModel):
 
-    def __init__(self, name):
+    def __init__(self, name, rules=[]):
         self._name = name
-        self._rules = []
+        self._rules = rules
 
     @property
     def name(self):
@@ -29,3 +29,14 @@ class Restriction(common.DictSerializableModel):
     @property
     def rules(self):
         return self._rules
+
+    @rules.setter
+    def rules(self, value):
+        self._rules = value
+
+    def to_dict(self):
+        result = common.DictSerializableModel.to_dict(self)
+        # need to deserialize the nested rules object
+        rules_obj_list = result['rules']
+        result['rules'] = [r.to_dict() for r in rules_obj_list]
+        return result

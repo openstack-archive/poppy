@@ -148,6 +148,60 @@ class TestServices(base.TestCase):
         resp = self.controller.create(service_obj)
         self.assertIn('error', resp[self.driver.provider_name])
 
+    @ddt.file_data('data_service_no_restrictions.json')
+    def test_create_with_no_restriction(self, service_json):
+        # instantiate
+        # this case needs to set all return value for each call
+        service_obj = service.load_from_json(service_json)
+
+        controller = services.ServiceController(self.driver)
+
+        controller.client.create_service.return_value = self.service_instance
+        controller.client.create_version.return_value = self.version
+        controller.client.list_versions.return_value = [self.version]
+        controller.client.active_version.return_value = self.version
+
+        fastly_fake_domain_check = type(
+            'FastlyDomain', (object,), {
+                'name': 'fake_domain.global.prod.fastly.net'})
+        controller.client.check_domains.return_value = [
+            mock.Mock(domain=fastly_fake_domain_check)
+        ]
+
+        resp = controller.create(service_obj)
+
+        controller.client.create_service.assert_called_once_with(
+            controller.current_customer.id, service_obj.name)
+
+        controller.client.create_version.assert_called_once_with(
+            self.service_instance.id)
+
+        controller.client.create_domain.assert_any_call(
+            self.service_instance.id,
+            self.version.number,
+            service_obj.domains[0].domain)
+
+        controller.client.create_domain.assert_any_call(
+            self.service_instance.id,
+            self.version.number,
+            service_obj.domains[1].domain)
+
+        controller.client.check_domains.assert_called_once_with(
+            self.service_instance.id, self.version.number)
+
+        self.assertEqual(False, controller.client.create_condition.called)
+        self.assertEqual(False,
+                         controller.client.create_response_object.called)
+
+        controller.client.create_backend.assert_has_any_call(
+            self.service_instance.id, 1,
+            service_obj.origins[0].origin.replace(":", "-"),
+            service_obj.origins[0].origin,
+            service_obj.origins[0].ssl,
+            service_obj.origins[0].port)
+
+        self.assertIn('links', resp[self.driver.provider_name])
+
     @ddt.file_data('data_service.json')
     def test_create(self, service_json):
         # instantiate
@@ -188,6 +242,26 @@ class TestServices(base.TestCase):
 
         controller.client.check_domains.assert_called_once_with(
             self.service_instance.id, self.version.number)
+
+        referrer_resctriction_list = [rule.http_host
+                                      for restriction in
+                                      service_obj.restrictions
+                                      for rule in restriction.rules]
+
+        host_pattern_stament = ' || '.join(['request.http.referer'
+                                            ' !~ %s' % host for host in
+                                            referrer_resctriction_list])
+        condition_stmt = ('req.http.referer && (%s)'
+                          % host_pattern_stament)
+
+        controller.client.create_condition.assert_has_any_call(
+            self.service_instance.id, 1,
+            'Referrer Restriction Matching Rules',
+            fastly.FastlyConditionType.REQUEST,
+            condition_stmt,
+            priority=10)
+
+        controller.client.create_response_object.assert_has_any_call()
 
         controller.client.create_backend.assert_has_any_call(
             self.service_instance.id, 1,

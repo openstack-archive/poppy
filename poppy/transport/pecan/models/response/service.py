@@ -22,6 +22,7 @@ from poppy.common import uri
 from poppy.transport.pecan.models.response import domain
 from poppy.transport.pecan.models.response import link
 from poppy.transport.pecan.models.response import origin
+from poppy.transport.pecan.models.response import restriction
 
 
 class Model(collections.OrderedDict):
@@ -33,6 +34,8 @@ class Model(collections.OrderedDict):
         self["name"] = service_obj.name
         self["domains"] = [domain.Model(d) for d in service_obj.domains]
         self["origins"] = [origin.Model(o) for o in service_obj.origins]
+        self["restrictions"] = [restriction.Model(r) for r in
+                                service_obj.restrictions]
         self["status"] = service_obj.status
         self["flavorRef"] = uri.encode(u'{0}/v1.0/flavors/{1}'.format(
             request.host_url,

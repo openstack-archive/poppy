@@ -18,16 +18,28 @@ from poppy.model import common
 
 class Rule(common.DictSerializableModel):
 
-    def __init__(self, name):
+    def __init__(self, name,
+                 referrer=None, http_host=None, client_ip=None,
+                 http_method=None, request_url=None):
         self._name = name
-        self.http_host = None
-        self.client_ip = None
-        self.http_method = None
-        self.request_url = None
+        self.referrer = referrer
+        self.http_host = http_host
+        self.http_host = http_host
+        self.client_ip = client_ip
+        self.http_method = http_method
+        self.request_url = request_url
 
     @property
     def name(self):
         return self._name
+
+    @property
+    def referrer(self):
+        return self._referrer
+
+    @referrer.setter
+    def referrer(self, value):
+        self._referrer = value
 
     @property
     def http_host(self):
