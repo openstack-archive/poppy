@@ -21,6 +21,7 @@ from poppy.model.helpers import cachingrule
 from poppy.model.helpers import domain
 from poppy.model.helpers import origin
 from poppy.model.helpers import restriction
+from poppy.model.helpers import rule
 from poppy.model import service
 from tests.unit import base
 
@@ -45,7 +46,12 @@ class TestServiceModel(base.TestCase):
         self.mydomains.append(domain.Domain('oursite.org'))
         self.mydomains.append(domain.Domain('wiki.cc'))
 
-        self.myrestrictions.append(restriction.Restriction('referrer_site'))
+        # test a rule with referrer restriction
+        r1 = restriction.Restriction('referrer_site')
+        self.r1_rules = [rule.Rule('referrer_restriction_rule_1')]
+        self.r1_rules[0].http_host = 'www.some_bad_site.com'
+        r1.rules = self.r1_rules
+        self.myrestrictions.append(r1)
         self.myrestrictions.append(restriction.Restriction('client_ip'))
 
         self.mycaching.append(cachingrule.CachingRule('images', 3600))
