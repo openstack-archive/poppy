@@ -1,3 +1,6 @@
+# TODO (malini) : This JSON has failing tests assocaited with create_flavor.
+# non_ASCII_flavor currently returns 400. Once this bug is fixed, replace
+# data_create_flavor.json with this file.
 {
 "all_fields":
     {"limits": [
@@ -7,6 +10,16 @@
      "provider_list": [
         {"provider": "ChinaCache",
          "links": [{"href": "http://www.chinacache.com",
+                    "rel": "provider_url"}]}]},
+"non_ASCII_flavor":
+    {"flavor_id": "երանգ",
+     "limits": [
+        {"origins": {"min": 1, "max": 5}},
+        {"domains": {"min": 1, "max": 5}},
+        {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
+     "provider_list": [
+        {"provider": "Armenia",
+         "links": [{"href": "http://www.armenia.com",
                     "rel": "provider_url"}]}]},
 "non_ASCII_provider":
     {
