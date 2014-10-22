@@ -264,6 +264,18 @@ class TestServices(base.TestCase):
 
         controller.client.create_response_object.assert_has_any_call()
 
+        # cache rule asset
+        # create condition first
+        for caching_rule in service_obj.caching:
+            if caching_rule.name.lower() == 'default':
+                controller.client.update_settings.assert_called_once_with(
+                    self.service_instance.id,
+                    self.version.number,
+                    {'general.default_ttl': caching_rule.ttl}
+                )
+            else:
+                controller.client.create_cache_settings.assert_has_any_call()
+
         controller.client.create_backend.assert_has_any_call(
             self.service_instance.id, 1,
             service_obj.origins[0].origin.replace(":", "-"),
