@@ -1,3 +1,5 @@
+# coding= utf-8
+
 # Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -190,6 +192,6 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         if flavor_location:
             url = flavor_location
         else:
-            url = '{0}/v1.0/flavors/{1}'.format(self.url, flavor_id)
+            url = u'{0}/v1.0/flavors/{1}'.format(self.url, flavor_id)
 
         return self.request('DELETE', url)

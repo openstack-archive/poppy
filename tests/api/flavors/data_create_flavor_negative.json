@@ -21,8 +21,8 @@
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
     "provider_list": [
-        {"provider": "ChinaCache",
-         "links": [{"href": "http://www.chinacache.com"}]},
+        {"provider": "fastly",
+         "links": [{"href": "http://www.fastly.com"}]},
         {"provider": "maxCDN",
          "links": [{"href": "http://www.maxcdn.com/", "rel": "provider_url"}]}]
     },
@@ -32,9 +32,9 @@
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
     "provider_list": [
-        {"provider": "ChinaCache",
-         "links": [{"href": "http://www.chinacache.com", "rel": ""}]},
-        {"provider": "maxCDN",
+        {"provider": "fastly",
+         "links": [{"href": "http://www.cloudfront.com", "rel": ""}]},
+        {"provider": "akamai",
          "links": [{"href": "http://www.maxcdn.com/", "rel": "provider_url"}]}]
     },
 "empty_href": {
@@ -43,7 +43,7 @@
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
     "provider_list": [
-        {"provider": "ChinaCache",
+        {"provider": "fastly",
          "links": [{"href": "", "rel": "provider_url"}]}]},
 "invalid_href": {
     "limits": [
@@ -51,33 +51,33 @@
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
     "provider_list": [
-        {"provider": "ChinaCache",
+        {"provider": "fastly",
          "links": [{"href": "watermelon", "rel": "provider_url"}]}]},
 "empty_limits": {
     "limits": [],
     "provider_list": [
-        {"provider": "ChinaCache",
+        {"provider": "fastly",
          "links": [{"href": "watermelon", "rel": "provider_url"}]}]},
 "missing_limits_origins": {
     "limits": [
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
     "provider_list": [
-        {"provider": "ChinaCache",
+        {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "missing_limits_domains": {
     "limits": [
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
     "provider_list": [
-        {"provider": "ChinaCache",
+        {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "missing_limits_caching": {
     "limits": [
         {"origins": {"min": 1, "max": 5}},
         {"domains": {"min": 1, "max": 5}}],
     "provider_list": [
-        {"provider": "ChinaCache",
+        {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "empty_limits_origins": {
     "limits": [
@@ -85,7 +85,7 @@
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
     "provider_list": [
-        {"provider": "ChinaCache",
+        {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "empty_limits_domains": {
     "limits": [
@@ -93,7 +93,7 @@
         {"domains": {}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
     "provider_list": [
-        {"provider": "ChinaCache",
+        {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "empty_limits_caching": {
     "limits": [
@@ -101,7 +101,7 @@
         {"domains": {"min": 1, "max": 5}},
         {"caching": {}}],
     "provider_list": [
-        {"provider": "ChinaCache",
+        {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "invalid_limits_origins": {
     "limits": [
@@ -109,7 +109,7 @@
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
     "provider_list": [
-        {"provider": "ChinaCache",
+        {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "invalid_limits_domains": {
     "limits": [
@@ -117,7 +117,7 @@
         {"domains": {"min": 100000000000000000000000000000000000000, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
     "provider_list": [
-        {"provider": "ChinaCache",
+        {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "invalid_limits_caching": {
     "limits": [
@@ -125,7 +125,15 @@
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": "string"}}],
     "provider_list": [
-        {"provider": "ChinaCache",
-         "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]}
-
+        {"provider": "fastly",
+         "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
+"invalid_provider":
+    {"limits": [
+        {"origins": {"min": 1, "max": 5}},
+        {"domains": {"min": 1, "max": 5}},
+        {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
+     "provider_list": [
+        {"provider": "genie",
+         "links": [{"href": "http://www.magiclamp.com",
+                    "rel": "provider_url"}]}]}
 }

@@ -31,20 +31,24 @@ provider = {'type': 'object',
             'additionalProperties': False}
 
 link = {'type': 'object',
-        'properties': {
-            'href': {'type': 'string',
-                     'pattern':
-                     '^(https?)(:/{1,3})([a-z0-9\.\-:]{1,400})'
-                     '/v1\.0/flavors/[a-zA-Z0-9_-]{1,64}$'},
-            'rel': {'type': 'string', 'enum': ['self']}},
-        'required': ['href', 'rel'],
-        'additionalProperties': False}
+        'properties':
+       {'href': {'type': 'string',
+                 'pattern': '^(https?)(:/{1,3})([a-z0-9\.\-:]{1,400})'
+                 '/v1\.0/flavors/'},
+        #'/v1\.0/flavors/[a-zA-Z0-9_-]{1,64}$'},
+           'rel': {'type': 'string', 'enum': ['self']}},
+        'required':
+        ['href', 'rel'],
+        'additionalProperties':
+        False}
 
 # Response Schema definition for Get Flavor API
 
 get_flavor = {
-    'type': 'object',
-    'properties': {
+    'type':
+    'object',
+    'properties':
+    {
         'id': {'type': 'string'},
         'providers': {'type': 'array',
                       'items': provider,
@@ -55,6 +59,8 @@ get_flavor = {
                   'minItems': 1,
                   'maxItems': 1}
     },
-    'required': ['id', 'providers', 'links'],
-    'additionalProperties': False
+    'required':
+    ['id', 'providers', 'links'],
+    'additionalProperties':
+    False
 }
