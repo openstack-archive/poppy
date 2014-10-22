@@ -18,6 +18,8 @@ try:
 except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
 
+from poppy.transport.pecan.models.response import rule
+
 
 class Model(collections.OrderedDict):
 
@@ -28,3 +30,4 @@ class Model(collections.OrderedDict):
         self['origin'] = origin.origin
         self['port'] = origin.port
         self['ssl'] = origin.ssl
+        self['rules'] = [rule.Model(r) for r in origin.rules]

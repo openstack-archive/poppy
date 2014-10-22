@@ -2,6 +2,7 @@
 -r docs.txt
 -r transport/pecan.txt
 -r storage/cassandra.txt
+-r provider/akamai.txt
 -r provider/cloudfront.txt
 -r provider/fastly.txt
 -r provider/maxcdn.txt
