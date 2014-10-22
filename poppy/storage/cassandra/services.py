@@ -18,6 +18,8 @@ import json
 from poppy.model.helpers import domain
 from poppy.model.helpers import origin
 from poppy.model.helpers import provider_details
+from poppy.model.helpers import restriction
+from poppy.model.helpers import rule
 from poppy.model import service
 from poppy.storage import base
 
@@ -52,6 +54,7 @@ CQL_LIST_SERVICES = '''
 CQL_GET_SERVICE = '''
     SELECT project_id,
         service_name,
+        flavor_id,
         domains,
         flavor_id,
         origins,
@@ -127,6 +130,7 @@ CQL_UPDATE_PROVIDER_DETAILS = '''
 
 
 class ServicesController(base.ServicesController):
+
     """Services Controller."""
 
     @property
@@ -210,7 +214,7 @@ class ServicesController(base.ServicesController):
                    for origin in service_obj.origins]
         caching_rules = [json.dumps(caching_rule.to_dict())
                          for caching_rule in service_obj.caching]
-        restrictions = [json.dumps(restriction)
+        restrictions = [json.dumps(restriction.to_dict())
                         for restriction in service_obj.restrictions]
 
         # creates a new service
@@ -339,13 +343,28 @@ class ServicesController(base.ServicesController):
         name = result.get('service_name')
         origins = [json.loads(o) for o in result.get('origins', [])]
         domains = [json.loads(d) for d in result.get('domains', [])]
-        origins = [origin.Origin(o['origin'],
-                                 o.get('port', 80),
-                                 o.get('ssl', False))
-                   for o in origins]
+        origins = [
+            origin.Origin(
+                o['origin'], o.get(
+                    'port', 80), o.get(
+                    'ssl', False), [
+                    rule.Rule(
+                        rule_i.get('name'),
+                        request_url=rule_i.get('request_url'))
+                        for rule_i in o.get(
+                            'rules', [])]) for o in origins]
         domains = [domain.Domain(d['domain']) for d in domains]
         flavor_ref = result.get('flavor_id')
+
+        restrictions = [json.loads(r) for r in result.get('restrictions', [])]
+        restrictions_res = [restriction.Restriction(
+            restriction_i.get('name'),
+            [rule.Rule(rule_i.get('name'),
+                       referrer=rule_i.get('referrer'))
+             for rule_i in restriction_i['rules']])
+            for restriction_i in restrictions]
         s = service.Service(name, domains, origins, flavor_ref)
+        s.restrictions = restrictions_res
         provider_detail_results = result.get('provider_details') or {}
         provider_details_dict = {}
         for provider_name in provider_detail_results:

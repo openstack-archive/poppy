@@ -65,6 +65,46 @@ class ServiceController(base.ServiceBase):
         # once standarnd/limitation on these service details have been
         # figured out
 
+        # get a list of referrer restriction domains/hosts
+        referrer_restriction_list = [rule.referrer
+                                     for restriction in
+                                     service_obj.restrictions
+                                     for rule in restriction.rules]
+
+        # if there is a referrer_restricted host/domains at all in
+        # this list. It is equivalent of 'if the list is not empty' and
+        # if any item is not None
+        if any(referrer_restriction_list):
+            host_pattern_stament = ' || '.join(
+                ['req.http.referer' ' !~ "%s"' % referrer
+                 for referrer in referrer_restriction_list])
+            condition_stmt = ('req.http.referer && (%s)'
+                              % host_pattern_stament)
+            # create a fastly condition for referer restriction
+            request_condition = self.client.create_condition(
+                service.id,
+                service_version.number,
+                'Referrer Restriction Matching Rules',
+                fastly.FastlyConditionType.REQUEST,
+                condition_stmt,
+                priority=10
+            )
+            # apply this condition with a 403 response so
+            # any request that does not from a list of permitted
+            # domains will be locked (getting a 403)
+            self.client.create_response_object(
+                service.id,
+                service_version.number,
+                'Referrer Restriction response rule(s)',
+                status='403',
+                content='Referring from a non-permitted domain',
+                request_condition=request_condition.name
+            )
+
+        # TODO(tonytan4ever): To incorporate caching, restriction change
+        # once standarnd/limitation on these service details have been
+        # figured out
+
         # activate latest version of this fastly service
         service_versions = self.client.list_versions(service.id)
         latest_version_number = max([version.number
