@@ -16,6 +16,7 @@
 from poppy.model import service
 from poppy.transport.pecan.models.request import domain
 from poppy.transport.pecan.models.request import origin
+from poppy.transport.pecan.models.request import restriction
 
 
 def load_from_json(json_data):
@@ -23,6 +24,10 @@ def load_from_json(json_data):
     origins = json_data.get("origins", [])
     domains = json_data.get("domains", [])
     flavor_ref = json_data.get("flavor_ref")
-    origins = [origin.load_from_json(d) for d in origins]
+    restrictions = json_data.get("restrictions", [])
+    origins = [origin.load_from_json(o) for o in origins]
     domains = [domain.load_from_json(d) for d in domains]
-    return service.Service(name, domains, origins, flavor_ref)
+    restrictions = [restriction.load_from_json(r) for r in restrictions]
+    res = service.Service(name, domains, origins, flavor_ref)
+    res.restrictions = restrictions
+    return res
