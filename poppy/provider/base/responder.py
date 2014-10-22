@@ -41,7 +41,6 @@ class Responder(object):
              'error_detail': traceback.format_exc()
              }
         )
-
         return {
             self.provider: {
                 'error': msg,

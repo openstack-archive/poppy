@@ -92,8 +92,6 @@ class Service(common.DictSerializableModel):
 
     @restrictions.setter
     def restrictions(self, value):
-        # TODO(tonytan4ever): convert a list of dictionaries into a list of
-        # restriction
         self._restrictions = value
 
     @property
