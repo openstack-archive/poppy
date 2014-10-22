@@ -33,9 +33,8 @@ provider = {'type': 'object',
 link = {'type': 'object',
         'properties': {
             'href': {'type': 'string',
-                     'pattern':
-                     '^(https?)(:/{1,3})([a-z0-9\.\-:]{1,400})'
-                     '/v1\.0/flavors/[a-zA-Z0-9_-]{1,64}$'},
+                     'pattern': '^(https?)(:/{1,3})([a-z0-9\.\-:]{1,400})'
+                     '/v1\.0/flavors/'},
             'rel': {'type': 'string', 'enum': ['self']}},
         'required': ['href', 'rel'],
         'additionalProperties': False}
@@ -43,7 +42,8 @@ link = {'type': 'object',
 # Response Schema definition for Get Flavor API
 
 get_flavor = {
-    'type': 'object',
+    'type':
+    'object',
     'properties': {
         'id': {'type': 'string'},
         'providers': {'type': 'array',

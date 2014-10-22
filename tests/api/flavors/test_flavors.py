@@ -37,9 +37,8 @@ class TestCreateFlavors(base.TestBase):
         limits = test_data['limits']
 
         if 'flavor_id' in test_data:
-            flavor_id = test_data['flavor_id']
-        else:
-            flavor_id = self.flavor_id
+            self.flavor_id = test_data['flavor_id']
+        flavor_id = self.flavor_id
 
         resp = self.client.create_flavor(flavor_id=flavor_id,
                                          provider_list=provider_list,
@@ -53,10 +52,12 @@ class TestCreateFlavors(base.TestBase):
 
         response_body = resp.json()
         self.assertSchema(response_body, flavors.get_flavor)
-        self.assertEqual(response_body['providers'], provider_list)
+        self.assertEqual(sorted(response_body['providers']),
+                         sorted(provider_list))
 
     @ddt.file_data('data_create_flavor_negative.json')
     def test_create_flavor_negative_tests(self, test_data):
+        self.skipTest('Not Implemented - bp# post-flavors-error-handling')
         provider_list = test_data['provider_list']
         limits = test_data['limits']
 

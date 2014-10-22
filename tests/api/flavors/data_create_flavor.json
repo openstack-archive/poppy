@@ -5,7 +5,7 @@
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
      "provider_list": [
-        {"provider": "ChinaCache",
+        {"provider": "fastly",
          "links": [{"href": "http://www.chinacache.com",
                     "rel": "provider_url"}]}]},
 "non_ASCII_flavor":
@@ -15,17 +15,17 @@
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
      "provider_list": [
-        {"provider": "Armenia",
-         "links": [{"href": "http://www.armenia.com",
+        {"provider": "fastly",
+         "links": [{"href": "http://www.fastly.com",
                     "rel": "provider_url"}]}]},
-"non_ASCII_provider":
+"non_ASCII_provider_url":
     {
     "limits": [
         {"origins": {"min": 1, "max": 5}},
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
     "provider_list": [
-        {"provider": "नेपाललिपि",
+        {"provider": "fastly",
          "links": [{"href": "http://العربية.com",
                     "rel": "provider_url"}]}]},
 "multiple_providers":
@@ -35,10 +35,10 @@
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
     "provider_list": [
-        {"provider": "ChinaCache",
-         "links": [{"href": "http://www.chinacache.com",
+        {"provider": "fastly",
+         "links": [{"href": "http://www.fastly.com",
                     "rel": "provider_url"}]},
-        {"provider": "OUIIICache",
+        {"provider": "akamai",
          "links": [{"href": "http://111.222.333.444",
                     "rel": "provider_url"}]}
     ]}
