@@ -223,6 +223,33 @@ class TestServiceActions(base.TestBase):
                                    caching_list=self.caching_list,
                                    flavorRef='standard')
 
+    @ddt.file_data('data_patch_service.json')
+    def test_patch_service(self, test_data):
+
+        resp = self.client.patch_service(service_name=self.service_name,
+                                         request_body=test_data)
+        self.assertEqual(resp.status_code, 202)
+
+        location = resp.headers('Location')
+        resp = self.client.get_service(location=location)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertEqual(body['status'], 'create_in_progress')
+
+    @ddt.file_data('data_patch_service_negative.json')
+    def test_patch_service_HTTP_400(self, test_data):
+
+        resp = self.client.patch_service(service_name=self.service_name,
+                                         request_body=test_data)
+        self.assertEqual(resp.status_code, 400)
+
+        resp = self.client.get_service(service_name=self.service_name)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertEqual(body['status'], 'create_in_progress')
+
     def test_get_service(self):
 
         resp = self.client.get_service(service_name=self.service_name)

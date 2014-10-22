@@ -90,7 +90,20 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('POST', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def get_service(self, service_name):
+    def patch_service(self, service_name=None, request_body=None,
+                      requestslib_kwargs=None):
+        """Updates Service
+
+        :return: Response code 202 with location header
+        PATCH
+        services/{service_name}
+        """
+        url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
+        request_object = requests.PatchService(request_body=request_body)
+        return self.request('PATCH', url, request_entity=request_object,
+                            requestslib_kwargs=requestslib_kwargs)
+
+    def get_service(self, location=None, service_name=None):
         """Get Service
 
         :return: Response Object containing response code 200 and body with
@@ -99,7 +112,10 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         services/{service_name}
         """
 
-        url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
+        if location:
+            url = location
+        else:
+            url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
         return self.request('GET', url)
 
     def list_services(self, param=None):
