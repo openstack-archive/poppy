@@ -23,7 +23,7 @@ from poppy.transport.pecan.models.response import rule
 
 class Model(collections.OrderedDict):
 
-    'request class for origin'
+    'response class for Restriction'
 
     def __init__(self, restriction):
         super(Model, self).__init__()

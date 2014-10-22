@@ -21,7 +21,7 @@ except ImportError:        # pragma: no cover
 
 class Model(collections.OrderedDict):
 
-    'request class for origin'
+    'response class for rule'
 
     def __init__(self, rule):
         super(Model, self).__init__()
