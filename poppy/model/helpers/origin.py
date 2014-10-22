@@ -19,11 +19,11 @@ from poppy.model import common
 class Origin(common.DictSerializableModel):
     """Origin."""
 
-    def __init__(self, origin, port=80, ssl=False):
+    def __init__(self, origin, port=80, ssl=False, rules=[]):
         self._origin = origin
         self._port = port
         self._ssl = ssl
-        self._rules = []
+        self._rules = rules
 
     @property
     def origin(self):
@@ -90,3 +90,10 @@ class Origin(common.DictSerializableModel):
         o.port = dict_obj.get("port", 80)
         o.ssl = dict_obj.get("ssl", False)
         return o
+
+    def to_dict(self):
+        result = common.DictSerializableModel.to_dict(self)
+        # need to deserialize the nested rules object
+        rules_obj_list = result['rules']
+        result['rules'] = [r.to_dict() for r in rules_obj_list]
+        return result
