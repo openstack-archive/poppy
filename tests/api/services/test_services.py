@@ -223,6 +223,13 @@ class TestServiceActions(base.TestBase):
                                    caching_list=self.caching_list,
                                    flavorRef='standard')
 
+    @ddt.file_data('data_patch_service.json')
+    def test_patch_service(self, test_data):
+
+        resp = self.client.patch_service(service_name=self.service_name,
+                                         request_body=test_data)
+        self.assertEqual(resp.status_code, 202)
+
     def test_get_service(self):
 
         resp = self.client.get_service(service_name=self.service_name)
