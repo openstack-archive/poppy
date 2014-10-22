@@ -40,6 +40,19 @@ class CreateService(base.AutoMarshallingModel):
         return json.dumps(create_service_request)
 
 
+class PatchService(base.AutoMarshallingModel):
+    """Marshalling for Patch Service requests."""
+
+    def __init__(self, request_body=None):
+        super(PatchService, self).__init__()
+
+        self.request_body = request_body
+
+    def _obj_to_json(self):
+        patch_service_request = self.request_body
+        return json.dumps(patch_service_request)
+
+
 class CreateFlavor(base.AutoMarshallingModel):
     """Marshalling for Create Flavor requests."""
 
