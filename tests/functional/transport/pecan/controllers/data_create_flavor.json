@@ -49,9 +49,5 @@
                 ]
             }
         ]
-    },
-    "no_providers": {
-        "id" : "asia",
-        "providers" : []
     }
 }

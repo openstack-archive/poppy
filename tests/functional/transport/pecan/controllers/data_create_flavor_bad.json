@@ -31,5 +31,9 @@
                 ]
             }
         ]
+    },
+    "empty_provider_list": {
+        "id" : "empty_providers",
+        "providers" : []
     }
 }

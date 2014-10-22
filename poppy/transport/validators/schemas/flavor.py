@@ -33,6 +33,7 @@ class FlavorSchema(schema_base.SchemaBase):
                     },
                     "providers": {
                         "type": "array",
+                        "required": True,
                         "items": {
                             "type": "object",
                             "properties": {
@@ -61,7 +62,7 @@ class FlavorSchema(schema_base.SchemaBase):
                                 }
                             }
                         },
-                        "minItems": 0
+                        "minItems": 1
                     }
                 }
             }
