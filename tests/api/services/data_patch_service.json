@@ -1,0 +1,24 @@
+{
+   "update_domain_list": {
+        "domains": [{"domain": "woooznewwebsite.com"},
+                    {"domain": "woooznewblog.mywebsite.com"}]
+    },
+    "update_origin_list": {
+        "origins": [{"origin": "www.wooozneworigin.com",
+                     "port": 443, "ssl": false}]
+    },
+    "update_caching_list": {
+        "caching": [{"newname": "default", "ttl": 3600},
+                    {"name": "home",
+                     "ttl": 1200,
+                     "rules": [{"name" : "index", 
+                                "request_url" : "/index.htm"}]}]
+    },
+   "update_multiple_values": {
+        "domains": [{"domain": "wooozymynewwebsite.com"},
+                        {"domain": "wooozynewblog.mywebsite.com"}],
+        "origins": [{"origin": "www.wooozyneworigin.com",
+                         "port": 443,
+                         "ssl": false}]
+    }
+}

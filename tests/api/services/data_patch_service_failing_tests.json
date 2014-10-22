@@ -1,0 +1,24 @@
+{
+    "update_name": {
+        "name": "my_new_name"
+    },
+   "update_domain_list": {
+        "domain_list": [{"domain": "mynewwebsite.com"},
+                        {"domain": "newblog.mywebsite.com"}]
+    },
+    "update_origin_list": {
+        "origin_list": [{"origin": "www.neworigin.com",
+                         "port": 443,
+                         "ssl": false}]
+    },
+    "update_flavorRef": {
+        "flavorRef": "premium"
+    },
+    "update_caching_list": {
+        "caching_list": [{"newname": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+    }
+}

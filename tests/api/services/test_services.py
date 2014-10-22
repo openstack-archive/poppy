@@ -207,10 +207,11 @@ class TestServiceActions(base.TestBase):
     def setUp(self):
         super(TestServiceActions, self).setUp()
         self.service_name = str(uuid.uuid1())
-        self.domain_list = [{"domain": "mywebsite.com"},
-                            {"domain": "blog.mywebsite.com"}]
+        domain = str(uuid.uuid1()) + '.com'
+        self.domain_list = [{"domain": domain}]
 
-        self.origin_list = [{"origin": "mywebsite.com",
+        origin = str(uuid.uuid1()) + '.com'
+        self.origin_list = [{"origin": origin,
                              "port": 443, "ssl": False}]
 
         self.caching_list = [{"name": "default", "ttl": 3600},
@@ -223,6 +224,64 @@ class TestServiceActions(base.TestBase):
                                    origin_list=self.origin_list,
                                    caching_list=self.caching_list,
                                    flavor_ref='standard')
+        self.client.wait_for_service_status(
+            service_name=self.service_name,
+            status='deployed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+    @ddt.file_data('data_patch_service.json')
+    def test_patch_service(self, test_data):
+        '''Implemented - PATCH Origins & Domains.'''
+
+        resp = self.client.patch_service(service_name=self.service_name,
+                                         request_body=test_data)
+
+        self.assertEqual(resp.status_code, 202)
+
+        location = resp.headers['location']
+        resp = self.client.get_service(location=location)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertEqual(body['status'], 'updating')
+        self.client.wait_for_service_status(
+            service_name=self.service_name,
+            status='deployed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        resp = self.client.get_service(service_name=self.service_name)
+        body = resp.json()
+
+        if 'domain_list' in test_data:
+            self.assertEqual(sorted(test_data['domain_list']),
+                             sorted(body['domains']))
+
+        if 'origin_list' in test_data:
+            self.assertEqual(sorted(test_data['origin_list']),
+                             sorted(body['origins']))
+        # TODO(malini): Uncomment after caching is implemented
+        # if 'caching_list' in test_data:
+        #    self.assertEqual(sorted(test_data['caching_list']),
+        #                     sorted(body['caching']))
+
+    @ddt.file_data('data_patch_service_negative.json')
+    def test_patch_service_HTTP_400(self, test_data):
+
+        resp = self.client.patch_service(service_name=self.service_name,
+                                         request_body=test_data)
+        self.assertEqual(resp.status_code, 400)
+
+        resp = self.client.get_service(service_name=self.service_name)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertEqual(body['status'], 'deployed')
+        self.assertEqual(sorted(self.domain_list), sorted(body['domains']))
+        self.assertEqual(sorted(self.origin_list), sorted(body['origins']))
+        # TODO(malini): Uncomment below after caching is implemented.
+        # self.assertEqual(sorted(self.caching_list), sorted(body['caching']))
 
     def test_get_service(self):
 
@@ -257,8 +316,7 @@ class TestServiceActions(base.TestBase):
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
-        # self.assertEqual(body['status'], 'delete_in_progress')
-        self.assertEqual(body['status'], 'deployed')
+        self.assertEqual(body['status'], 'delete_in_progress')
 
         # TODO(malini): find a better solution
         # As is, the servvice is still available in the DB till deleted from
