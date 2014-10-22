@@ -73,9 +73,8 @@ get_service = {
                   'items': links,
                   'minItems': 1},
         'status': {'type': 'string',
-                   'enum': ['creating',
-                            'in_progress', 'deployed',
-                            'unknown', 'failed']},
+                   'enum': ['create_in_progress',
+                            'delete_in_progress', 'deployed']},
         'restrictions': restrictions,
         'flavorRef': flavor_id
     },

@@ -27,10 +27,9 @@ class TestHealth(base.TestBase):
         super(TestHealth, self).setUp()
 
     def test_health(self):
-        self.skipTest('Endpoint Not Implemented')
 
         resp = self.client.check_health()
-        self.assertEqual(resp.status_code, 204)
+        self.assertEqual(resp.status_code, 200)
 
     def test_ping(self):
 
