@@ -72,8 +72,8 @@ class FlavorsController(base.Controller):
             pecan.response.status = 204
             pecan.response.headers["Location"] = flavor_url
 
-        except Exception:
-            pecan.response.status = 400
+        except Exception as e:
+            pecan.abort(400, detail=str(e))
 
     @pecan.expose('json')
     def delete(self, flavor_id):

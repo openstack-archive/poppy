@@ -59,7 +59,8 @@ class FlavorsController(base.FlavorsController):
             flavor.Flavor(
                 f['flavor_id'],
                 [flavor.Provider(p_id, p_url)
-                    for p_id, p_url in f['providers'].items()])
+                 for p_id, p_url in f['providers'].items()]
+                if f['providers'] is not None else [])
             for f in result]
 
         return flavors
@@ -77,6 +78,7 @@ class FlavorsController(base.FlavorsController):
                 f['flavor_id'],
                 [flavor.Provider(p_id, p_url)
                  for p_id, p_url in f['providers'].items()]
+                if f['providers'] is not None else []
             )
             for f in result]
 

@@ -24,6 +24,11 @@ from poppy.storage import base
 
 class ServicesController(base.ServicesController):
 
+    def __init__(self, driver):
+        super(ServicesController, self).__init__(driver)
+
+        self.created_service_names = []
+
     @property
     def session(self):
         return self._driver.database
@@ -118,8 +123,11 @@ class ServicesController(base.ServicesController):
         return service_result
 
     def create(self, project_id, service_obj):
-        if service_obj.name == "mockdb1_service_name":
+        if service_obj.name in self.created_service_names:
             raise ValueError("Service %s already exists..." % service_obj.name)
+        else:
+            self.created_service_names.append(service_obj.name)
+
         return ""
 
     def update(self, project_id, service_name, service_json):

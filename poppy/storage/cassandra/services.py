@@ -229,8 +229,11 @@ class ServicesController(base.ServicesController):
             return {}
 
         results = {}
-        for provider_name in exec_results[0]:
-            provider_detail_dict = json.loads(exec_results[0][provider_name])
+
+        provider_details_result = exec_results[0]['provider_details']
+        for provider_name in provider_details_result:
+            provider_detail_dict = json.loads(
+                provider_details_result[provider_name])
 
             provider_service_id = provider_detail_dict.get('id', None)
             access_urls = provider_detail_dict.get("access_urls", None)
