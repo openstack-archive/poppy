@@ -73,6 +73,7 @@ get_service = {
                   'items': links,
                   'minItems': 1},
         'status': {'type': 'string',
+                   # TODO(malini): Update below after status is implemented
                    'enum': ['creating',
                             'in_progress', 'deployed',
                             'unknown', 'failed']},
