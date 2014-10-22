@@ -75,7 +75,8 @@ class ServiceController(base.ServiceBase):
         if any(referrer_restriction_list):
             host_pattern_stament = ' || '.join(
                 ['req.http.referer' ' !~ "%s"' % referrer
-                 for referrer in referrer_restriction_list])
+                 for referrer in referrer_restriction_list
+                 if referrer is not None])
             condition_stmt = ('req.http.referer && (%s)'
                               % host_pattern_stament)
             # create a fastly condition for referer restriction
