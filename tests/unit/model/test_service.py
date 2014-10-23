@@ -91,7 +91,7 @@ class TestServiceModel(base.TestCase):
         self.assertEqual(myservice.caching, [])
 
         # status
-        self.assertEqual(myservice.status, u'creating')
+        self.assertEqual(myservice.status, u'create_in_progress')
 
     def test_init_from_dict_method(self):
         # this should generate a service copy from my service
@@ -114,7 +114,7 @@ class TestServiceModel(base.TestCase):
 
         self.assertRaises(ValueError, setattr, myservice, 'status', status)
 
-    @ddt.data(u'creating', u'deployed', u'delete_in_progress')
+    @ddt.data(u'create_in_progress', u'deployed', u'delete_in_progress')
     def test_set_valid_status(self, status):
         myservice = service.Service(
             self.service_name,

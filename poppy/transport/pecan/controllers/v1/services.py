@@ -97,10 +97,6 @@ class ServicesController(base.Controller):
         except ValueError:
             pecan.abort(404, detail='service %s is not found' %
                         service_name)
-        # TODO(tonytan4ever): hardcode for deployed right now,
-        # late needs to pull in provider tail to check each provider's
-        # real status
-        service_obj.status = u"deployed"
         # convert a service model into a response service model
         return resp_service_model.Model(service_obj, pecan.request)
 

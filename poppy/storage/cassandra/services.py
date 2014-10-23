@@ -190,7 +190,6 @@ class ServicesController(base.ServicesController):
             'origins': origins,
             'caching_rules': caching_rules,
             'restrictions': restrictions,
-            # TODO(tonytan4ever): Incorporate flavor change.
             'provider_details': {}
         }
 

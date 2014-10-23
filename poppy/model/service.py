@@ -16,7 +16,7 @@
 from poppy.model import common
 
 
-VALID_STATUSES = [u'creating', u'deployed', u'delete_in_progress']
+VALID_STATUSES = [u'create_in_progress', u'deployed', u'delete_in_progress']
 
 
 class Service(common.DictSerializableModel):
@@ -34,7 +34,7 @@ class Service(common.DictSerializableModel):
         self._flavorRef = flavorRef
         self._caching = caching
         self._restrictions = restrictions
-        self._status = u'creating'
+        self._status = 'create_in_progress'
         self._provider_details = {}
 
     @property
@@ -89,6 +89,27 @@ class Service(common.DictSerializableModel):
 
     @property
     def status(self):
+        # derived fiedls of service status:
+        # service will be in creating during service creation
+        # if any of the provider services are still in 'deploy_in_progress'
+        # status or 'failed' status, the poppy service is still in
+        # 'creating' status.
+        # if all provider services are in 'deployed' status. the poppy service
+        # will be in 'deployed' status
+        # if all provider services are in 'delete_in_progress' status.
+        # the poppy service will be in 'delete_in_progress' status
+        for provider_name in self.provider_details:
+            provider_detail = self.provider_details[provider_name]
+            if provider_detail.status == 'delete_in_progress':
+                self._status = 'delete_in_progress'
+                break
+            elif provider_detail.status == 'deploy_in_progress' or (
+                self._status == 'failed'
+            ):
+                break
+        else:
+            if self.provider_details != {}:
+                self._status = 'deployed'
         return self._status
 
     @status.setter
