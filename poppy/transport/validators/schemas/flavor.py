@@ -48,7 +48,7 @@ class FlavorSchema(schema_base.SchemaBase):
                                         "properties": {
                                             "href": {
                                                 "type": "string",
-                                                "format": "uri",
+                                                "minLength": 2,
                                                 "required": True
                                             },
                                             "rel": {
