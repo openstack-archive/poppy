@@ -35,5 +35,19 @@
     "empty_provider_list": {
         "id" : "empty_providers",
         "providers" : []
+    },
+    "missing_uri_in_provider": {
+        "id" : "doesnt_exist",
+        "providers" : [
+            {
+                "provider" : "mock",
+                "links": [
+                    {
+                        "href": "",
+                        "rel": "provider_url"
+                    }
+                ]
+            }
+        ]
     }
 }
