@@ -30,5 +30,6 @@ Where local ip is the ip address of your running docker container
 Import Schema
 ---------------
 
-Import the schema file from the poppy/storage/cassandra/schema.cql file.
+Import the schema file from the [poppy/storage/cassandra/schema.cql](../poppy/storage/cassandra/schema.cql) file:
 
+    $ cqlsh -f ../../poppy/storage/cassandra/schema.cql <local ip> 9160
