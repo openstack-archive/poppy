@@ -3,7 +3,7 @@
         "id" : "asia",
         "providers" : [
             {
-                "provider" : "ChinaCache",
+                "provider" : "fastly",
                 "links": [
                     {
                         "href": "http://www.chinacache.com",
@@ -17,7 +17,7 @@
         "id" : "asia",
         "providers" : [
             {
-                "provider" : "ChinaCache",
+                "provider" : "fastly",
                 "links": [
                     {
                         "href": "http://www.chinacache.com",
@@ -26,7 +26,7 @@
                 ]
             },
             {
-                "provider" : "KiwiCache",
+                "provider" : "mock",
                 "links": [
                     {
                         "href": "http://www.cdn.co.nz",
@@ -40,7 +40,7 @@
         "id" : "위키백과대문",
         "providers" : [
             {
-                "provider" : "KoreanCache",
+                "provider" : "fastly",
                 "links": [
                     {
                         "href": "http://www.위키백과대문.com",

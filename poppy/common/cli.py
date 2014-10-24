@@ -69,7 +69,7 @@ def runnable(func):
     @functools.wraps(func)
     def _wrapper():
         atexit.register(_enable_echo, True)
-        _enable_echo(False)
+        _enable_echo(True)
 
         try:
             logging.setup('poppy')
