@@ -16,8 +16,8 @@
 import json
 import re
 
-from poppy.transport.validators.stoplight import decorators
-from poppy.transport.validators.stoplight import exceptions
+from stoplight import decorators
+from stoplight import exceptions
 from tests.functional import base
 
 

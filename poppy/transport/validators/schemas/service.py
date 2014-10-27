@@ -16,10 +16,10 @@
 
 import re
 
-from poppy.transport.validators import schema_base
+from poppy.transport.validators.schemas import base
 
 
-class ServiceSchema(schema_base.SchemaBase):
+class ServiceSchema(base.SchemaBase):
 
     '''JSON Schmema validation for /service.'''
 

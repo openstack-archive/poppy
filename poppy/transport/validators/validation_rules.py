@@ -13,19 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-class ValidationFailed(ValueError):
-
-    """User input was inconsistent with API restrictions."""
-
-    def __init__(self, msg, *args, **kwargs):
-        super(ValidationFailed, self).__init__(msg)
+from stoplight import decorators
 
 
-class ValidationProgrammingError(ValueError):
+@decorators.validation_function
+def is_valid_service_name(service_name):
+    pass
 
-    """Caller did not map validations correctly."""
 
-    def __init__(self, msg, *args, **kwargs):
-        msg = msg.format(*args, **kwargs)
-        super(ValidationProgrammingError, self).__init__(msg)
+@decorators.validation_function
+def is_valid_flavor_id(flavor_id):
+    pass

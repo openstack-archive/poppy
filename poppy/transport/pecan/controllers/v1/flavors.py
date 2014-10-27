@@ -16,16 +16,15 @@
 import json
 
 import pecan
+from stoplight import decorators
+from stoplight import rule
 
 from poppy.common import uri
 from poppy.transport.pecan.controllers import base
 from poppy.transport.pecan.models.request import flavor as flavor_request
 from poppy.transport.pecan.models.response import flavor as flavor_response
-from poppy.transport.validators import helpers
+from poppy.transport.validators import pecan_helpers as helpers
 from poppy.transport.validators.schemas import flavor as schema
-from poppy.transport.validators.stoplight import decorators
-from poppy.transport.validators.stoplight import helpers as stoplight_helpers
-from poppy.transport.validators.stoplight import rule
 
 
 class FlavorsController(base.Controller):
@@ -56,7 +55,7 @@ class FlavorsController(base.Controller):
             helpers.json_matches_schema(
                 schema.FlavorSchema.get_schema("flavor", "POST")),
             helpers.abort_with_message,
-            stoplight_helpers.pecan_getter))
+            helpers.pecan_getter))
     def post(self):
         flavors_controller = self.driver.manager.flavors_controller
         flavor_json = json.loads(pecan.request.body.decode('utf-8'))

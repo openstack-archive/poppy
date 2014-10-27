@@ -17,17 +17,18 @@ import json
 
 from oslo.config import cfg
 import pecan
+from stoplight import decorators
+from stoplight import rule
 
 from poppy.common import uri
 from poppy.transport.pecan.controllers import base
 from poppy.transport.pecan.models.request import service as req_service_model
 from poppy.transport.pecan.models.response import link
 from poppy.transport.pecan.models.response import service as resp_service_model
-from poppy.transport.validators import helpers
+from poppy.transport.validators import pecan_helpers as helpers
+from poppy.transport.validators import validation_rules
 from poppy.transport.validators.schemas import service
-from poppy.transport.validators.stoplight import decorators
-from poppy.transport.validators.stoplight import helpers as stoplight_helpers
-from poppy.transport.validators.stoplight import rule
+
 
 LIMITS_OPTIONS = [
     cfg.IntOpt('max_services_per_page', default=20,
@@ -110,7 +111,7 @@ class ServicesController(base.Controller):
             helpers.json_matches_schema(
                 service.ServiceSchema.get_schema("service", "POST")),
             helpers.abort_with_message,
-            stoplight_helpers.pecan_getter))
+            helpers.pecan_getter))
     def post(self):
         services_controller = self._driver.manager.services_controller
         service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
@@ -141,13 +142,13 @@ class ServicesController(base.Controller):
     @pecan.expose('json')
     @decorators.validate(
         service_name=rule.Rule(
-            helpers.is_valid_service_name(),
+            validation_rules.is_valid_service_name(),
             helpers.abort_with_message),
         request=rule.Rule(
             helpers.json_matches_schema(
                 service.ServiceSchema.get_schema("service", "PATCH")),
             helpers.abort_with_message,
-            stoplight_helpers.pecan_getter))
+            helpers.pecan_getter))
     def patch_one(self, service_name):
         services_controller = self._driver.manager.services_controller
         service_json = json.loads(pecan.request.body.decode('utf-8'))

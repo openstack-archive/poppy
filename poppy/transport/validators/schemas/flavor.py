@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.transport.validators import schema_base
+from poppy.transport.validators.schemas import base
 
 
-class FlavorSchema(schema_base.SchemaBase):
+class FlavorSchema(base.SchemaBase):
 
     """JSON Schmema validation for /flavor."""
 

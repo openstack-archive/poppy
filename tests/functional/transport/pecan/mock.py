@@ -16,20 +16,17 @@
 import json
 
 import pecan
+import stoplight
 
-from poppy.transport.validators import helpers
+from poppy.transport.validators import pecan_helpers as helpers
 from poppy.transport.validators.schemas import service
-from poppy.transport.validators.stoplight import decorators
-from poppy.transport.validators.stoplight import exceptions
-from poppy.transport.validators.stoplight import helpers as stoplight_helpers
-from poppy.transport.validators.stoplight import rule
 
 
 class MockPecanEndpoint(object):
 
     testing_schema = service.ServiceSchema.get_schema("service", "POST")
 
-    @decorators.validation_function
+    @stoplight.decorators.validation_function
     def is_valid_json(r):
         """Test for a valid JSON string."""
         if len(r.body) == 0:
@@ -39,20 +36,21 @@ class MockPecanEndpoint(object):
                 json.loads(r.body.decode('utf-8'))
             except Exception as e:
                 e
-                raise exceptions.ValidationFailed('Invalid JSON string')
+                raise stoplight.exceptions.ValidationFailed(
+                    'Invalid JSON string')
             else:
                 return
 
     @pecan.expose(generic=True)
-    @helpers.with_schema_pecan(pecan.request, schema=testing_schema)
+    @helpers.with_schema(pecan.request, schema=testing_schema)
     def index(self):
         return "Hello, World!"
 
     @index.when(method='PUT')
-    @decorators.validate(
-        request=rule.Rule(is_valid_json(),
-                          lambda error_info: pecan.abort(400),
-                          stoplight_helpers.pecan_getter)
+    @stoplight.decorators.validate(
+        request=stoplight.rule.Rule(is_valid_json(),
+                                    lambda error_info: pecan.abort(400),
+                                    helpers.pecan_getter)
     )
     def index_put(self):
         return "Hello, World!"
