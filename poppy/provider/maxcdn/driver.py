@@ -33,9 +33,11 @@ MAXCDN_OPTIONS = [
 ]
 
 MAXCDN_GROUP = 'drivers:provider:maxcdn'
+MAXCDN_ENDPOINT = 'https://rws.maxcdn.com/'
 
 
 class CDNProvider(base.Driver):
+    """MaxCND Provider."""
 
     def __init__(self, conf):
         """Init constructor."""
@@ -50,6 +52,10 @@ class CDNProvider(base.Driver):
                                            self.maxcdn_conf.consumer_secret)
 
     def is_alive(self):
+        """is_alive.
+
+        :return boolean
+        """
         response = requests.get('https://rws.maxcdn.com/')
         if response.status_code == 200:
             return True
@@ -57,15 +63,24 @@ class CDNProvider(base.Driver):
 
     @property
     def provider_name(self):
-        """For name."""
+        """provider name.
+
+        :return 'MaxCDN'
+        """
         return "MaxCDN"
 
     @property
     def client(self):
-        """client to this provider."""
+        """client to this provider.
+
+        :return client
+        """
         return self.maxcdn_client
 
     @property
     def service_controller(self):
-        """Hook for service controller."""
+        """Hook for service controller.
+
+        :return service controller
+        """
         return controllers.ServiceController(self)

@@ -17,11 +17,16 @@ from poppy.manager.base import health
 
 
 class DefaultHealthController(health.HealthControllerBase):
+    """Default Health Controller."""
 
     def __init__(self, manager):
         super(DefaultHealthController, self).__init__(manager)
 
     def health(self):
+        """health.
+
+        :returns is_alive, health_map
+        """
         health_map = {}
         is_alive = True
 

@@ -17,10 +17,17 @@ import traceback
 
 
 class Responder(object):
+    """Responder Class."""
+
     def __init__(self, provider_type):
         self.provider = provider_type
 
     def failed(self, msg):
+        """failed.
+
+        :param msg
+        :returns provider msg{msg, error details}
+        """
         return {
             self.provider: {
                 'error': msg,
@@ -29,6 +36,13 @@ class Responder(object):
         }
 
     def created(self, provider_service_id, links, **extras):
+        """failed.
+
+        :param provider_service_id
+        :param links
+        :param **extras
+        :returns provider msg{id, links}
+        """
         provider_response = {
             'id': provider_service_id,
             'links': links
@@ -39,6 +53,11 @@ class Responder(object):
         }
 
     def updated(self, provider_service_id):
+        """updated.
+
+        :param provider_service_id
+        :returns provider msg{provider service id}
+        """
         # TODO(tonytan4ever): May need to add link information as return
         return {
             self.provider: {
@@ -47,6 +66,11 @@ class Responder(object):
         }
 
     def deleted(self, provider_service_id):
+        """deleted.
+
+        :param provider_service_id
+        :returns provider msg{provider service id}
+        """
         return {
             self.provider: {
                 'id': provider_service_id
@@ -54,6 +78,12 @@ class Responder(object):
         }
 
     def purged(self, provider_service_id, purge_urls):
+        """purged.
+
+        :param provider_service_id
+        :param purge_urls
+        :returns provider msg{provider service id, purge urls}
+        """
         provider_response = {
             'id': provider_service_id,
             'purge_urls': purge_urls
@@ -63,6 +93,13 @@ class Responder(object):
         }
 
     def get(self, domain_list, origin_list, cache_list):
+        """get.
+
+        :param domain_list
+        :param origin_list
+        :param cache_list
+        :returns provider msg{domain, origins, caching}
+        """
         return {
             self.provider: {
                 'domains': domain_list,
