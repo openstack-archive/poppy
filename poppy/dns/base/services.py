@@ -23,5 +23,7 @@ from poppy.dns.base import controller
 @six.add_metaclass(abc.ABCMeta)
 class ServicesControllerBase(controller.DNSControllerBase):
 
+    """Services Controller Base class."""
+
     def __init__(self, driver):
         super(ServicesControllerBase, self).__init__(driver)

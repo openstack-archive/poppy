@@ -22,38 +22,86 @@ from poppy.storage.base import controller
 
 @six.add_metaclass(abc.ABCMeta)
 class ServicesControllerBase(controller.StorageControllerBase):
+    """Services Controller Base definition."""
 
     def __init__(self, driver):
         super(ServicesControllerBase, self).__init__(driver)
 
     @abc.abstractmethod
     def list(self, project_id, marker=None, limit=None):
+        """list
+
+        :param project_id
+        :param marker
+        :param limit
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def create(self, project_id, service_name, service_json):
+        """create
+
+        :param project_id
+        :param service_name
+        :param service_json
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def update(self, project_id, service_name, service_json):
+        """update
+
+        :param project_id
+        :param service_name
+        :param service_json
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def delete(self, project_id, service_name):
+        """delete
+
+        :param project_id
+        :param service_name
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get(self):
+        """get
+
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get_provider_details(self, project_id, service_name):
+        """get_provider_details
+
+        :param project_id
+        :param service_name
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def update_provider_details(self, provider_details):
+        """update_provider_details
+
+        :param provider_details
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     @staticmethod
     def format_result(result):
+        """format_result
+
+        :param result
+        :raise NotImplementedError
+        """
         raise NotImplementedError
