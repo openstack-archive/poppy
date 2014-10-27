@@ -23,10 +23,15 @@ class Domain(common.DictSerializableModel):
 
     @property
     def domain(self):
+        """domain.
+
+        :returns domain
+        """
         return self._domain
 
     @domain.setter
     def domain(self, value):
+        """domain setter."""
         self._domain = value
 
     @classmethod
@@ -34,6 +39,9 @@ class Domain(common.DictSerializableModel):
         """Construct a model instance from a dictionary.
 
         This serves as a 2nd constructor
+
+        :param dict_obj: dictionary object
+        :returns o
         """
         o = cls("unnamed")
         o.domain = dict_obj.get("domain", "unnamed")
