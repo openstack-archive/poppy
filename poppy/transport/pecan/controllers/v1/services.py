@@ -66,7 +66,9 @@ class ServicesController(base.Controller):
                     self.max_services_per_page)
                 pecan.abort(400, detail=error)
         except ValueError:
-            pecan.abort(400, detail=u'Invalid limit: {0}'.format(limit))
+            error = (u'Limit should be an integer greater than 0 and less'
+                     u' or equal to {0}'.format(self.max_services_per_page))
+            pecan.abort(400, detail=error)
 
         services_controller = self._driver.manager.services_controller
         service_resultset = services_controller.list(
