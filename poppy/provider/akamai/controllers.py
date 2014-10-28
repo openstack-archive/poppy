@@ -13,9 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Fastly CDN Extension for CDN"""
+"""Exports Akamai poppy controllers.
 
-from poppy.provider.fastly import driver
+Field Mappings:
+    In order to reduce the disk / memory space used,
+    fields name will be, most of the time, the first
+    letter of their long name. Fields mapping will be
+    updated and documented in each controller class.
+"""
 
-# Hoist classes into package namespace
-Driver = driver.CDNProvider
+from poppy.provider.akamai import services
+
+ServiceController = services.ServiceController

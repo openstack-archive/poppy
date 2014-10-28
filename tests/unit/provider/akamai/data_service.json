@@ -1,0 +1,14 @@
+{
+    "service_json": {
+        "name" : "mysite.com",
+        "domains": [
+            {"domain": "parsely.sage.com"},
+            {"domain": "densely.sage.com"},
+            {"domain": "rosemary.thyme.net"}
+        ],
+        "origins": [    
+            {"origin": "mockdomain.com", "ssl": false, "port": 80}
+        ],
+        "flavor_ref" : "standard"
+    }
+}
