@@ -52,7 +52,7 @@ class ServicesControllerBase(controller.ManagerControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create(self, project_id, service_obj):
+    def create(self, project_id, service_obj, service_json):
         """create
 
         :param project_id
