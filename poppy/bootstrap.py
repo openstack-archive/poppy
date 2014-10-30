@@ -157,3 +157,6 @@ class Bootstrap(object):
 
     def run(self):
         self.transport.listen()
+
+    def run_delegate_daemon(self):
+        self.manager.run()
