@@ -34,7 +34,8 @@ class DefaultManagerServiceTests(base.TestCase):
 
     @mock.patch('poppy.storage.base.driver.StorageDriverBase')
     @mock.patch('poppy.dns.base.driver.DNSDriverBase')
-    def setUp(self, mock_driver, mock_dns):
+    @mock.patch('poppy.queue.base.driver.QueueDriverBase')
+    def setUp(self, mock_driver, mock_dns, mock_queue):
         super(DefaultManagerServiceTests, self).setUp()
 
         # create mocked config and driver
@@ -55,7 +56,8 @@ class DefaultManagerServiceTests(base.TestCase):
         manager_driver = driver.DefaultManagerDriver(conf,
                                                      mock_driver,
                                                      mock_providers,
-                                                     mock_dns)
+                                                     mock_dns,
+                                                     mock_queue)
 
         # stubbed driver
         self.sc = services.DefaultServicesController(manager_driver)

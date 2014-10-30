@@ -29,7 +29,8 @@ class DefaultManagerFlavorTests(base.TestCase):
     @mock.patch('poppy.storage.base.driver.StorageDriverBase')
     @mock.patch('poppy.provider.base.driver.ProviderDriverBase')
     @mock.patch('poppy.dns.base.driver.DNSDriverBase')
-    def setUp(self, mock_driver, mock_provider, mock_dns):
+    @mock.patch('poppy.queue.zaqar.driver.QueueProvider')
+    def setUp(self, mock_driver, mock_provider, mock_dns, mock_queue):
         super(DefaultManagerFlavorTests, self).setUp()
 
         # create mocked config and driver
@@ -42,7 +43,8 @@ class DefaultManagerFlavorTests(base.TestCase):
         manager_driver = driver.DefaultManagerDriver(cfg.CONF,
                                                      mock_driver,
                                                      mock_provider,
-                                                     mock_dns)
+                                                     mock_dns,
+                                                     mock_queue)
 
         # stubbed driver
         self.fc = flavors.DefaultFlavorsController(manager_driver)

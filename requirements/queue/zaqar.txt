@@ -1,0 +1,1 @@
+git+https://github.com/malini-kamalambal/python-zaqarclient.git#egg=python-zaqarclient
