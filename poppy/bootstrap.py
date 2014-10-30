@@ -39,6 +39,8 @@ _DRIVER_OPTIONS = [
                 help='Provider driver(s) to use'),
     cfg.StrOpt('dns', default='default',
                help='DNS driver to use'),
+    cfg.StrOpt('queue', default='zaqar',
+               help='Queue driver to use'),
 ]
 
 _DRIVER_GROUP = 'drivers'
@@ -120,10 +122,11 @@ class Bootstrap(object):
         LOG.debug((u'Loading manager driver'))
 
         # create the driver manager to load the appropriate drivers
+
         manager_type = 'poppy.manager'
         manager_name = self.driver_conf.manager
 
-        args = [self.conf, self.storage, self.provider, self.dns]
+        args = [self.conf, self.storage, self.provider, self.dns, self.queue]
 
         try:
             mgr = driver.DriverManager(namespace=manager_type,
@@ -155,5 +158,27 @@ class Bootstrap(object):
         except RuntimeError as exc:
             LOG.exception(exc)
 
+    @decorators.lazy_property(write=False)
+    def queue(self):
+        LOG.debug((u'Loading Queue driver'))
+
+        # create the driver manager to load the appropriate drivers
+        queue_type = 'poppy.queue'
+        queue_name = self.driver_conf.queue
+
+        args = [self.conf]
+
+        try:
+            mgr = driver.DriverManager(namespace=queue_type,
+                                       name=queue_name,
+                                       invoke_on_load=True,
+                                       invoke_args=args)
+            return mgr.driver
+        except RuntimeError as exc:
+            LOG.exception(exc)
+
     def run(self):
         self.transport.listen()
+
+    def run_delegate_daemon(self):
+        self.manager.run()

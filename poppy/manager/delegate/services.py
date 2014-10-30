@@ -14,21 +14,19 @@
 # limitations under the License.
 
 import multiprocessing
-import uuid
 
 from poppy.manager import base
 from poppy.manager.default.service_async_workers import create_service_worker
 from poppy.manager.default.service_async_workers import delete_service_worker
 
 
-class DefaultServicesController(base.ServicesController):
+class DelegateServicesController(base.ServicesController):
 
     def __init__(self, manager):
-        super(DefaultServicesController, self).__init__(manager)
+        super(DelegateServicesController, self).__init__(manager)
 
         self.storage_controller = self._driver.storage.services_controller
         self.flavor_controller = self._driver.storage.flavors_controller
-        self.queue = self._driver.queue
 
     def list(self, project_id, marker=None, limit=None):
         return self.storage_controller.list(project_id, marker, limit)
@@ -36,12 +34,15 @@ class DefaultServicesController(base.ServicesController):
     def get(self, project_id, service_name):
         return self.storage_controller.get(project_id, service_name)
 
-    def create(self, project_id, service_obj, service_json):
+    def create(self, project_id, service_obj):
         try:
-            flavor = self.flavor_controller.get(service_obj.flavor_ref)
+            flavor = self.flavor_controller.get(service_obj.flavorRef)
         # raise a lookup error if the flavor is not found
         except LookupError as e:
             raise e
+
+        providers = [p.provider_id for p in flavor.providers]
+        service_name = service_obj.name
 
         try:
             self.storage_controller.create(
@@ -51,19 +52,19 @@ class DefaultServicesController(base.ServicesController):
         except ValueError as e:
             raise e
 
-        message = {}
-        message['action'] = 'create'
-        message['project_id'] = project_id
-        message['body'] = service_json
-
-        # send service_json to a queue
-        ack = self.queue.enqueue(message)
-        if ack:
-            # everything is good
-            pass
-        else:
-            raise Exception
-
+        self.storage_controller._driver.close_connection()
+        p = multiprocessing.Process(
+            name='Process: create poppy service %s for'
+            ' project id: %s' %
+            (service_name,
+             project_id),
+            target=create_service_worker.service_create_worker,
+            args=(
+                providers,
+                self,
+                project_id,
+                service_name, service_obj))
+        p.start()
         return
 
     def update(self, project_id, service_name, service_obj):

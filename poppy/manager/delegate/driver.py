@@ -15,17 +15,24 @@
 
 """Default manager driver implementation."""
 
+import mock
+
 from poppy.common import decorators
 from poppy.manager import base
-from poppy.manager.default import controllers
-from poppy.manager.default import manager_daemon
+from poppy.manager.delegate import controllers
+from poppy.manager.delegate import manager_daemon
 
 
-class DefaultManagerDriver(base.Driver):
+class DelegateManagerDriver(base.Driver):
 
-    def __init__(self, conf, storage, providers, dns, queue):
-        super(DefaultManagerDriver, self).__init__(
-            conf, storage, providers, dns, queue)
+    def __init__(self, conf, storage, providers, dns):
+        super(DelegateManagerDriver, self).__init__(
+            conf, storage, providers, dns)
+        self._queue = mock.Mock()
+
+    @property
+    def queue(self):
+        return self._queue
 
     @decorators.lazy_property(write=False)
     def services_controller(self):
@@ -42,7 +49,6 @@ class DefaultManagerDriver(base.Driver):
     @decorators.lazy_property(write=False)
     def health_controller(self):
         return controllers.Health(self)
-    
+
     def run_delegate_daemon(self):
         manager_daemon.manager_daemon(self)
-
