@@ -16,6 +16,8 @@ poppy:
      - "81:8081"
     links:
      - cassandra
+    volumes:
+     - ../../:/home/poppy_dev
 cassandra:
     build: ../cassandra/.
     ports:
