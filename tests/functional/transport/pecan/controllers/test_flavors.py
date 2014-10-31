@@ -86,7 +86,7 @@ class FlavorControllerTest(base.FunctionalTest):
         response = self.app.post('/v1.0/flavors',
                                  params=json.dumps(value),
                                  headers={"Content-Type": "application/json"})
-        self.assertEqual(204, response.status_code)
+        self.assertEqual(201, response.status_code)
 
     def test_delete(self):
         response = self.app.delete('/v1.0/flavors/{0}'.format(uuid.uuid1()))

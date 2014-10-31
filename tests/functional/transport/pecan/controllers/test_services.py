@@ -59,7 +59,7 @@ class ServiceControllerTest(base.FunctionalTest):
         response = self.app.post('/v1.0/flavors',
                                  params=json.dumps(flavor_json),
                                  headers={"Content-Type": "application/json"})
-        self.assertEqual(204, response.status_code)
+        self.assertEqual(201, response.status_code)
 
         # create an initial service to be used by the tests
         service_json = {
