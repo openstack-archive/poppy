@@ -16,7 +16,7 @@
                 "ssl": false
             }
         ],
-        "flavorRef": "non_exist",
+        "flavor_ref": "non_exist",
         "caching": [
             {
                 "name": "default",

@@ -36,7 +36,7 @@ class DefaultServicesController(base.ServicesController):
 
     def create(self, project_id, service_obj):
         try:
-            flavor = self.flavor_controller.get(service_obj.flavorRef)
+            flavor = self.flavor_controller.get(service_obj.flavor_ref)
         # raise a lookup error if the flavor is not found
         except LookupError as e:
             raise e

@@ -128,7 +128,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                 }},
                         },
                     },
-                    'flavorRef': {
+                    'flavor_ref': {
                         'type': 'string',
                         'required': True,
                     }
@@ -230,7 +230,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                 }},
                         },
                     },
-                    'flavorRef': {
+                    'flavor_ref': {
                         'type': 'string',
                     }
                 }},

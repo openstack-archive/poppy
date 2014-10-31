@@ -53,7 +53,7 @@ class ServicesController(base.ServicesController):
                      'origins': [json.dumps({'origin': 'mywebsite.com',
                                              'port': 80,
                                              'ssl': False})],
-                     'flavorRef': 'standard',
+                     'flavor_ref': 'standard',
                      'caching': [{'name': 'default',
                                   'ttl': 3600},
                                  {'name': 'home',
@@ -102,7 +102,7 @@ class ServicesController(base.ServicesController):
         service_dict = {'name': service_name,
                         'domains': [domain_json],
                         'origins': [origin_json],
-                        'flavorRef': 'standard',
+                        'flavor_ref': 'standard',
                         'caching': [{'name': 'default',
                                      'ttl': 3600},
                                     {'name': 'home',
@@ -173,8 +173,8 @@ class ServicesController(base.ServicesController):
                                  o.get('ssl', False))
                    for o in origins]
         domains = [domain.Domain(d['domain']) for d in domains]
-        flavorRef = result.get('flavorRef')
-        s = service.Service(name, domains, origins, flavorRef)
+        flavor_ref = result.get('flavor_ref')
+        s = service.Service(name, domains, origins, flavor_ref)
         provider_detail_results = result.get('provider_details') or {}
         provider_details_dict = {}
         for provider_name in provider_detail_results:

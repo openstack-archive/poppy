@@ -77,7 +77,7 @@ class DummyRequest(object):
                  "ttl": 12800,
                  }
             ],
-            "flavorRef": "https://www.poppycdn.io/v1.0/flavors/standard"
+            "flavor_ref": "https://www.poppycdn.io/v1.0/flavors/standard"
         })
 
 
@@ -116,7 +116,7 @@ fake_request_bad_missing_domain.body = json.dumps({
                  ]
          }
     ],
-    "flavorRef": "https://www.poppycdn.io/v1.0/flavors/standard"
+    "flavor_ref": "https://www.poppycdn.io/v1.0/flavors/standard"
 })
 fake_request_bad_invalid_json_body = DummyRequest()
 fake_request_bad_invalid_json_body.body = "{"

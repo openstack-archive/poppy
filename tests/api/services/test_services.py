@@ -39,13 +39,13 @@ class TestCreateService(providers.TestProviderBase):
         domain_list = test_data['domain_list']
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
-        flavor = test_data['flavorRef']
+        flavor = test_data['flavor_ref']
 
         resp = self.client.create_service(service_name=self.service_name,
                                           domain_list=domain_list,
                                           origin_list=origin_list,
                                           caching_list=caching_list,
-                                          flavorRef=flavor)
+                                          flavor_ref=flavor)
         self.assertEqual(resp.status_code, 202)
 
         resp = self.client.get_service(service_name=self.service_name)
@@ -92,13 +92,13 @@ class TestCreateService(providers.TestProviderBase):
         domain_list = test_data['domain_list']
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
-        flavor = test_data['flavorRef']
+        flavor = test_data['flavor_ref']
 
         resp = self.client.create_service(service_name=service_name,
                                           domain_list=domain_list,
                                           origin_list=origin_list,
                                           caching_list=caching_list,
-                                          flavorRef=flavor)
+                                          flavor_ref=flavor)
         self.assertEqual(resp.status_code, 400)
 
     def tearDown(self):
@@ -128,7 +128,7 @@ class TestListServices(base.TestBase):
                                    domain_list=self.domain_list,
                                    origin_list=self.origin_list,
                                    caching_list=self.caching_list,
-                                   flavorRef='standard')
+                                   flavor_ref='standard')
         return service_name
 
     def setUp(self):
@@ -222,7 +222,7 @@ class TestServiceActions(base.TestBase):
                                    domain_list=self.domain_list,
                                    origin_list=self.origin_list,
                                    caching_list=self.caching_list,
-                                   flavorRef='standard')
+                                   flavor_ref='standard')
 
     def test_get_service(self):
 

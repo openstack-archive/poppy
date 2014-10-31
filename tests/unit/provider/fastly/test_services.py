@@ -292,7 +292,7 @@ class TestProviderValidation(base.TestCase):
                         "domains": [{"domain": "parsely.sage.com"}],
                         "origins": [{"origin": "mockdomain.com",
                                      "ssl": False, "port": 80}],
-                        "flavorRef": "standard"}
+                        "flavor_ref": "standard"}
         service_obj = service.load_from_json(service_json)
         self.controller.create(service_obj)
 

@@ -34,9 +34,9 @@ class Model(collections.OrderedDict):
         self["domains"] = [domain.Model(d) for d in service_obj.domains]
         self["origins"] = [origin.Model(o) for o in service_obj.origins]
         self["status"] = service_obj.status
-        self["flavorRef"] = uri.encode(u'{0}/v1.0/flavors/{1}'.format(
+        self["flavor_ref"] = uri.encode(u'{0}/v1.0/flavors/{1}'.format(
             request.host_url,
-            service_obj.flavorRef))
+            service_obj.flavor_ref))
 
         # TODO(tonytan4ever) : add access_url links.
         # This has things to do with provider_detail change. (CDN-172)

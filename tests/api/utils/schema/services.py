@@ -78,9 +78,9 @@ get_service = {
                    'enum': ['create_in_progress', 'creating',
                             'delete_in_progress', 'deployed']},
         'restrictions': restrictions,
-        'flavorRef': flavor_id
+        'flavor_ref': flavor_id
     },
-    'required': ['domains', 'origins', 'links', 'flavorRef', 'status'],
+    'required': ['domains', 'origins', 'links', 'flavor_ref', 'status'],
     'additionalProperties': False}
 
 list_services_link = {

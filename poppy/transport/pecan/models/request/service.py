@@ -22,7 +22,7 @@ def load_from_json(json_data):
     name = json_data.get("name")
     origins = json_data.get("origins", [])
     domains = json_data.get("domains", [])
-    flavorRef = json_data.get("flavorRef")
+    flavor_ref = json_data.get("flavor_ref")
     origins = [origin.load_from_json(d) for d in origins]
     domains = [domain.load_from_json(d) for d in domains]
-    return service.Service(name, domains, origins, flavorRef)
+    return service.Service(name, domains, origins, flavor_ref)

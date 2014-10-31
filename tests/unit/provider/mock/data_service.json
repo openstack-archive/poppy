@@ -8,6 +8,6 @@
         "origins": [
             {"origin": "mockdomain.com", "ssl": false, "port": 80}
         ],
-        "flavorRef" : "standard"
+        "flavor_ref" : "standard"
     }
 }
