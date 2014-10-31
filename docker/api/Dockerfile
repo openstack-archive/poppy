@@ -44,6 +44,11 @@ RUN chmod -R +w /var/log/poppy
 RUN mkdir -p /var/run/poppy
 RUN chmod -R +w /var/run/poppy
 
+# Mount volume for local code development
+VOLUME /home/poppy_dev
+RUN rm -rf /home/poppy/poppy
+RUN ln -s /home/poppy_dev/poppy /home/poppy/poppy
+
 #RUN /usr/local/bin/uwsgi --ini /root/uwsgi.ini
 
 # Start Poppy
