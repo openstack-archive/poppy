@@ -1,4 +1,6 @@
-Install Fig::
+## Prerequisites
+
+1. Install Fig::
 
     $ sudo pip install -U fig
 
@@ -22,4 +24,3 @@ To get the most-updated code of poppy::
 
     $ fig run poppy git --git-dir=/home/poppy/.git pull
     $ fig run poppy uwsgi --reload /var/run/poppy/poppy.pid
-
