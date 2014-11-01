@@ -1,0 +1,25 @@
+repose:
+  build: ../repose/.
+  ports:
+   - "80:8080"
+  environment:
+   KEYSTONE_ADMIN: Username
+   KEYSTONE_PASSWORD: Password
+   KEYSTONE_URI: Uri
+   DESTINATION_HOST: poppy
+   DESTINATION_PORT: 8081
+  links:
+   - poppydev
+poppydev:
+    build: ../../.
+    ports:
+     - "81:8081"
+    links:
+     - cassandra
+    volumes:
+     - ../../:/home/poppy
+cassandra:
+    build: ../cassandra/.
+    ports:
+     - "9160:9160"
+     - "9042:9042"
