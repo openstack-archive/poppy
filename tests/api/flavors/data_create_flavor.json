@@ -38,7 +38,7 @@
         {"provider": "fastly",
          "links": [{"href": "http://www.fastly.com",
                     "rel": "provider_url"}]},
-        {"provider": "akamai",
+        {"provider": "cloudfront",
          "links": [{"href": "http://111.222.333.444",
                     "rel": "provider_url"}]}
     ]}

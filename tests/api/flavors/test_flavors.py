@@ -43,7 +43,7 @@ class TestCreateFlavors(base.TestBase):
         resp = self.client.create_flavor(flavor_id=flavor_id,
                                          provider_list=provider_list,
                                          limits=limits)
-        self.assertEqual(resp.status_code, 204)
+        self.assertEqual(resp.status_code, 201)
 
         # Get on Created Flavor
         location = resp.headers['location']
@@ -85,8 +85,8 @@ class TestFlavorActions(base.TestBase):
         super(TestFlavorActions, self).setUp()
         self.flavor_id = str(uuid.uuid1())
         self.provider_list = [
-            {"provider": "ChinaCache",
-             "links": [{"href": "http://www.chinacache.com",
+            {"provider": "fastly",
+             "links": [{"href": "http://www.fastly.com",
                         "rel": "provider_url"}]}]
         self.client.create_flavor(flavor_id=self.flavor_id,
                                   provider_list=self.provider_list)

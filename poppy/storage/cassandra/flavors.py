@@ -67,7 +67,6 @@ class FlavorsController(base.FlavorsController):
 
     def get(self, flavor_id):
         """Get the specified Flavor."""
-
         args = {
             'flavor_id': flavor_id
         }
@@ -86,11 +85,11 @@ class FlavorsController(base.FlavorsController):
             return flavors[0]
         elif (len(flavors) > 1):
             raise LookupError(
-                "More than one flavor with the id '{0}' was retrieved."
+                u"More than one flavor with the id '{0}' was retrieved."
                 .format(flavor_id))
         else:
             raise LookupError(
-                "Could not find a flavor with the id '{0}'".format(flavor_id))
+                u"Could not find a flavor with the id '{0}'".format(flavor_id))
 
     def add(self, flavor):
         """Add a new flavor."""
