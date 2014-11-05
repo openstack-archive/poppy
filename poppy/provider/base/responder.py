@@ -38,12 +38,14 @@ class Responder(object):
             self.provider: provider_response
         }
 
-    def updated(self, provider_service_id):
-        # TODO(tonytan4ever): May need to add link information as return
+    def updated(self, provider_service_id, links):
+        provider_response = {
+            "id": provider_service_id,
+            "links": links
+        }
+
         return {
-            self.provider: {
-                'id': provider_service_id
-            }
+            self.provider: provider_response
         }
 
     def deleted(self, provider_service_id):
