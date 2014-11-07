@@ -55,10 +55,13 @@ class ServiceController(base.ServiceBase):
             # we need to carefully divise our try_catch here.
             domain_checks = self.client.check_domains(service.id,
                                                       service_version.number)
-            links = [{"href": '.'.join([domain_check.domain.name,
-                                        "global.prod.fastly.net"]),
+            links = [{"href": domain_check.domain.name,
                       "rel": 'access_url'}
                      for domain_check in domain_checks]
+            links.extend([{"href": '.'.join([domain_check.domain.name,
+                                             "global.prod.fastly.net"]),
+                           "rel": 'access_url'}
+                          for domain_check in domain_checks])
 
             for origin in service_obj.origins:
                 # Create the origins for this domain
