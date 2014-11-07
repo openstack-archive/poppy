@@ -28,6 +28,8 @@ def service_delete_worker(provider_details, service_controller,
         responder = service_controller.provider_wrapper.delete(
             service_controller._driver.providers[provider.lower()],
             provider_details)
+        responder = service_controller.dns_controller.delete(provider_details,
+            responder)
         responders.append(responder)
         LOG.info('Deleting service from %s complete...' % provider)
 

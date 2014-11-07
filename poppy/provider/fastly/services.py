@@ -57,7 +57,8 @@ class ServiceController(base.ServiceBase):
                                                       service_version.number)
             links = [{"href": '.'.join([domain_check.domain.name,
                                         "global.prod.fastly.net"]),
-                      "rel": 'access_url'}
+                      "rel": 'access_url',
+                      "domain": domain_check.domain.name}
                      for domain_check in domain_checks]
 
             for origin in service_obj.origins:
@@ -79,7 +80,6 @@ class ServiceController(base.ServiceBase):
             latest_version_number = max([version.number
                                          for version in service_versions])
             self.client.activate_version(service.id, latest_version_number)
-
             return self.responder.created(service.id, links)
 
         except fastly.FastlyError:

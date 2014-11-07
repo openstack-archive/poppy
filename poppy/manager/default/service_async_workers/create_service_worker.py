@@ -29,6 +29,10 @@ def service_create_worker(providers_list, service_controller,
             service_obj)
         responders.append(responder)
 
+    # create dns mapping, only if providers succeed
+    dns = service_controller.dns_controller
+    responders = dns.create(responders)
+
     provider_details_dict = {}
     for responder in responders:
         for provider_name in responder:

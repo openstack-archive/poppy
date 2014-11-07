@@ -25,3 +25,12 @@ class ServicesControllerBase(controller.DNSControllerBase):
 
     def __init__(self, driver):
         super(ServicesControllerBase, self).__init__(driver)
+
+    def update(self):
+        raise NotImplementedError
+
+    def delete(self):
+        raise NotImplementedError
+
+    def create(self, responders):
+        raise NotImplementedError

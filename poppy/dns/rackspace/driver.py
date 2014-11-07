@@ -17,6 +17,9 @@
 
 from oslo.config import cfg
 
+import pyrax
+import pyrax.exceptions as exc
+
 from poppy.dns import base
 from poppy.dns.rackspace import controllers
 from poppy.openstack.common import log as logging
@@ -46,6 +49,12 @@ class DNSProvider(base.Driver):
     def __init__(self, conf):
         super(DNSProvider, self).__init__(conf)
 
+        self._conf.register_opts(RACKSPACE_OPTIONS, group=RACKSPACE_GROUP)
+        self.rackdns_conf = self._conf[RACKSPACE_GROUP]
+        pyrax.set_setting("identity_type", "rackspace")
+        pyrax.set_credentials(self.rackdns_conf.project_id, self.rackdns_conf.api_key)
+        self.rackdns_client = pyrax.cloud_dns
+
     def is_alive(self):
         return True
 
@@ -54,5 +63,9 @@ class DNSProvider(base.Driver):
         return "Rackspace Cloud DNS"
 
     @property
-    def service_controller(self):
-        return controllers.ServiceController(self)
+    def client(self):
+        return self.rackdns_client
+
+    @property
+    def services_controller(self):
+        return controllers.ServicesController(self)

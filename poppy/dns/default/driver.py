@@ -35,5 +35,5 @@ class DNSProvider(base.Driver):
         return "Default"
 
     @property
-    def service_controller(self):
-        return controllers.ServiceController(self)
+    def services_controller(self):
+        return controllers.ServicesController(self)
