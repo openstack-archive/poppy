@@ -16,9 +16,9 @@
 from poppy.dns import base
 
 
-class ServiceController(base.ServiceBase):
+class ServicesController(base.ServicesBase):
 
     def __init__(self, driver):
-        super(ServiceController, self).__init__(driver)
+        super(ServicesController, self).__init__(driver)
 
         self.driver = driver

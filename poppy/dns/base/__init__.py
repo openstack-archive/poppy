@@ -18,4 +18,4 @@ from poppy.dns.base import services
 
 
 Driver = driver.DNSDriverBase
-ServiceBase = services.ServicesControllerBase
+ServicesBase = services.ServicesControllerBase
