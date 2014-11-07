@@ -43,14 +43,29 @@ class DNSDriverBase(object):
 
         :raises NotImplementedError
         """
+
         raise NotImplementedError
 
     @abc.abstractproperty
     def dns_name(self):
+        """Name of this provider.
+
+        :raises NotImplementedError
+        """
+
+        raise NotImplementedError
+
+    @property
+    def client(self):
+        """Client for this provider.
+
+        :raises NotImplementedError
+        """
+
         raise NotImplementedError
 
     @abc.abstractproperty
-    def service_controller(self):
+    def services_controller(self):
         """Returns the driver's hostname controller.
 
          :raises NotImplementedError
