@@ -49,10 +49,10 @@ class Model(collections.OrderedDict):
                     request.host_url,
                     self['name']))),
             'self')]
-
         for provider_name in service_obj.provider_details:
-            for access_url in (
-                    service_obj.provider_details[provider_name].access_urls):
+            provider_detail = service_obj.provider_details[provider_name]
+            access_urls = provider_detail.access_urls
+            for access_url in access_urls:
                 self["links"].append(link.Model(
-                    access_url,
+                    access_url['operator_url'],
                     'access_url'))

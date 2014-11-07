@@ -371,7 +371,7 @@ class ServicesController(base.ServicesController):
             provider_detail_dict = json.loads(
                 provider_detail_results[provider_name])
             provider_service_id = provider_detail_dict.get('id', None)
-            access_urls = provider_detail_dict.get('access_urls', [])
+            access_urls = provider_detail_dict.get('access_urls', {})
             status = provider_detail_dict.get('status', u'unknown')
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
