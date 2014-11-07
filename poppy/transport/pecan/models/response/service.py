@@ -48,8 +48,8 @@ class Model(collections.OrderedDict):
             'self')]
 
         for provider_name in service_obj.provider_details:
-            for access_url in (
-                    service_obj.provider_details[provider_name].access_urls):
+            provider_detail = service_obj.provider_details[provider_name]
+            for access_url in provider_detail.access_urls:
                 self["links"].append(link.Model(
-                    access_url,
+                    provider_detail.access_urls[access_url],
                     'access_url'))
