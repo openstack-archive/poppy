@@ -37,16 +37,17 @@ class ServicesController(base.ServicesController):
         provider_details = {
             'MaxCDN': json.dumps(
                 {'id': 11942,
-                 'access_urls': ['mypullzone.netdata.com']}),
+                 'access_urls': [{'operator_url': 'mypullzone.netdata.com'}]}),
             'Mock': json.dumps(
                 {'id': 73242,
-                 'access_urls': ['mycdn.mock.com']}),
+                 'access_urls': [{'operator_url': 'mycdn.mock.com'}]}),
             'CloudFront': json.dumps(
                 {'id': '5ABC892',
-                 'access_urls': ['cf123.cloudcf.com']}),
+                 'access_urls': [{'operator_url': 'cf123.cloudcf.com'}]}),
             'Fastly': json.dumps(
                 {'id': 3488,
-                 'access_urls': ['mockcf123.fastly.prod.com']})}
+                 'access_urls':
+                    [{'operator_url': 'mockcf123.fastly.prod.com'}]})}
 
         services = [{'name': 'mockdb1_service_name',
                      'domains': [json.dumps({'domain': 'www.mywebsite.com'})],
@@ -88,16 +89,17 @@ class ServicesController(base.ServicesController):
         provider_details = {
             'MaxCDN': json.dumps(
                 {'id': 11942,
-                 'access_urls': ['mypullzone.netdata.com']}),
+                 'access_urls': [{'operator_url': 'mypullzone.netdata.com'}]}),
             'Mock': json.dumps(
                 {'id': 73242,
-                 'access_urls': ['mycdn.mock.com']}),
+                 'access_urls': [{'operator_url': 'mycdn.mock.com'}]}),
             'CloudFront': json.dumps(
                 {'id': '5ABC892',
-                 'access_urls': ['cf123.cloudcf.com']}),
+                 'access_urls': [{'operator_url': 'cf123.cloudcf.com'}]}),
             'Fastly': json.dumps(
                 {'id': 3488,
-                 'access_urls': ['mockcf123.fastly.prod.com']})}
+                 'access_urls':
+                    [{'operator_url': 'mockcf123.fastly.prod.com'}]})}
 
         service_dict = {'name': service_name,
                         'domains': [domain_json],
