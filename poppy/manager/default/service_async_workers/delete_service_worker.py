@@ -31,6 +31,9 @@ def service_delete_worker(provider_details, service_controller,
         responders.append(responder)
         LOG.info('Deleting service from %s complete...' % provider)
 
+    # delete associated cname records from DNS
+    dns_responder = service_controller.dns_controller.delete(provider_details)
+
     for responder in responders:
         # this is the item of responder, if there's "error"
         # key in it, it means the deletion for this provider failed.
@@ -43,13 +46,19 @@ def service_delete_worker(provider_details, service_controller,
                      (provider_name, service_name))
             # stores the error info for debugging purposes.
             provider_details[provider_name].error_info = (
-                responder[provider_name].get('error_info')
-            )
+                responder[provider_name].get('error_info'))
+        elif 'error' in dns_responder[provider_name]:
+            LOG.info('Delete service from DNS failed')
+            LOG.info('Updating provider detail status of %s for %s'.foramt(
+                     (provider_name, service_name)))
+            # stores the error info for debugging purposes.
+            provider_details[provider_name].error_info = (
+                dns_responder[provider_name].get('error_info'))
         else:
             # delete service successful, remove this provider detail record
             del provider_details[provider_name]
 
-    service_controller.storage_controller._driver.connect()
+        service_controller.storage_controller._driver.connect()
     if provider_details == {}:
         # Only if all provider successfully deleted we can delete
         # the poppy service.
