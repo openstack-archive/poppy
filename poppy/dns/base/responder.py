@@ -13,27 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""DNS Provider implementation."""
-
-from poppy.dns import base
-from poppy.dns.default import controllers
-from poppy.openstack.common import log as logging
-
-LOG = logging.getLogger(__name__)
+import traceback
 
 
-class DNSProvider(base.Driver):
+class Responder(object):
+    def __init__(self, dns_name):
+        self.dns = dns_name
 
-    def __init__(self, conf):
-        super(DNSProvider, self).__init__(conf)
+    def failed(self, msg):
+        return {
+            'error': msg,
+            'error_detail': traceback.format_exc()
+        }
 
-    def is_alive(self):
-        return False
+    def created(self, dns_details):
+        return dns_details
 
-    @property
-    def dns_name(self):
-        return "Default"
+    def updated(self, dns_details):
+        return dns_details
 
-    @property
-    def services_controller(self):
-        return controllers.ServicesController(self)
+    def deleted(self, dns_details):
+        return dns_details
