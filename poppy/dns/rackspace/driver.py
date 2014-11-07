@@ -16,6 +16,7 @@
 """DNS Provider implementation."""
 
 from oslo.config import cfg
+import pyrax
 
 from poppy.dns import base
 from poppy.dns.rackspace import controllers
@@ -34,6 +35,8 @@ RACKSPACE_OPTIONS = [
                help='The shard prefix to use'),
     cfg.StrOpt('url', default='',
                help='The url for customers to CNAME to'),
+    cfg.StrOpt('email', help='The email to be provided to Rackspace DNS for'
+               'creating subdomains'),
 ]
 
 RACKSPACE_GROUP = 'drivers:dns:rackspace'
@@ -46,6 +49,13 @@ class DNSProvider(base.Driver):
     def __init__(self, conf):
         super(DNSProvider, self).__init__(conf)
 
+        self._conf.register_opts(RACKSPACE_OPTIONS, group=RACKSPACE_GROUP)
+        self.rackdns_conf = self._conf[RACKSPACE_GROUP]
+        pyrax.set_setting("identity_type", "rackspace")
+        pyrax.set_credentials(self.rackdns_conf.project_id,
+                              self.rackdns_conf.api_key)
+        self.rackdns_client = pyrax.cloud_dns
+
     def is_alive(self):
         return True
 
@@ -54,5 +64,9 @@ class DNSProvider(base.Driver):
         return "Rackspace Cloud DNS"
 
     @property
-    def service_controller(self):
-        return controllers.ServiceController(self)
+    def client(self):
+        return self.rackdns_client
+
+    @property
+    def services_controller(self):
+        return controllers.ServicesController(self)
