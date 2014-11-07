@@ -24,4 +24,4 @@ Field Mappings:
 
 from poppy.dns.rackspace import services
 
-ServiceController = services.ServiceController
+ServicesController = services.ServicesController

@@ -40,3 +40,6 @@ tests/logs
 .pydevproject
 venv
 docker_rsa*
+
+# patch files
+*.patch

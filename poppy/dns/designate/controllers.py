@@ -24,4 +24,4 @@ Field Mappings:
 
 from poppy.dns.designate import services
 
-ServiceController = services.ServiceController
+ServicesController = services.ServicesController

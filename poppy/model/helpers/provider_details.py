@@ -25,7 +25,7 @@ class ProviderDetail(object):
 
     """ProviderDetail object for each provider."""
 
-    def __init__(self, provider_service_id=None, access_urls=[],
+    def __init__(self, provider_service_id=None, access_urls={},
                  status=u"deploy_in_progress", name=None, error_info=None):
         self._provider_service_id = provider_service_id
         self._id = provider_service_id
@@ -44,12 +44,12 @@ class ProviderDetail(object):
         self._provider_service_id = value
 
     @property
-    def access_urls(self):
-        return self._access_urls
-
-    @property
     def name(self):
         return self._name
+
+    @property
+    def access_urls(self):
+        return self._access_urls
 
     @access_urls.setter
     def access_urls(self, value):

@@ -29,29 +29,33 @@ def service_create_worker(providers_list, service_controller,
             service_obj)
         responders.append(responder)
 
+    # create dns mapping, only if providers succeed
+    dns = service_controller.dns_controller
+    dns_responder = dns.create(responders)
+
     provider_details_dict = {}
     for responder in responders:
         for provider_name in responder:
-            if 'error' not in responder[provider_name]:
+            if 'error' in responder[provider_name]:
+                error_info = responder[provider_name]['error_detail']
+                provider_details_dict[provider_name] = (
+                    provider_details.ProviderDetail(error_info=error_info))
+                provider_details_dict[provider_name].status = 'failed'
+            elif 'error' in dns_responder[provider_name]:
+                error_info = dns_responder[provider_name]['error_detail']
+                provider_details_dict[provider_name] = (
+                    provider_details.ProviderDetail(error_info=error_info))
+                provider_details_dict[provider_name].status = 'failed'
+            else:
                 provider_details_dict[provider_name] = (
                     provider_details.ProviderDetail(
                         provider_service_id=responder[provider_name]['id'],
-                        access_urls=[link['href'] for link in
-                                     responder[provider_name]['links']])
-                )
+                        access_urls=dns_responder[provider_name]))
                 if 'status' in responder[provider_name]:
                     provider_details_dict[provider_name].status = (
                         responder[provider_name]['status'])
                 else:
-                    provider_details_dict[provider_name].status = (
-                        'deployed')
-            else:
-                provider_details_dict[provider_name] = (
-                    provider_details.ProviderDetail(
-                        error_info=responder[provider_name]['error_detail']
-                    )
-                )
-                provider_details_dict[provider_name].status = 'failed'
+                    provider_details_dict[provider_name].status = 'deployed'
 
     service_controller.storage_controller.update_provider_details(
         project_id,
