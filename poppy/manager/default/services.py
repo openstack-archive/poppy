@@ -27,6 +27,7 @@ class DefaultServicesController(base.ServicesController):
 
         self.storage_controller = self._driver.storage.services_controller
         self.flavor_controller = self._driver.storage.flavors_controller
+        self.dns_controller = self._driver.dns.services_controller
 
     def list(self, project_id, marker=None, limit=None):
         return self.storage_controller.list(project_id, marker, limit)
@@ -53,6 +54,13 @@ class DefaultServicesController(base.ServicesController):
             raise e
 
         self.storage_controller._driver.close_connection()
+
+        create_service_worker.service_create_worker(providers,
+        self,
+        project_id,
+        service_name, service_obj)
+
+        """
         p = multiprocessing.Process(
             name='Process: create poppy service %s for'
             ' project id: %s' %
@@ -65,6 +73,7 @@ class DefaultServicesController(base.ServicesController):
                 project_id,
                 service_name, service_obj))
         p.start()
+        """
         return
 
     def update(self, project_id, service_name, service_obj):

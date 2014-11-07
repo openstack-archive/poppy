@@ -38,6 +38,7 @@ class ErrorHook(hooks.PecanHook):
         :returns: webob.Response -- JSON response with the error
             message.
         '''
+        import pdb; pdb.set_trace()
         exception_payload = {
             'status': 500,
         }
