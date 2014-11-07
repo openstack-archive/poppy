@@ -32,17 +32,20 @@ def update_worker(service_controller, project_id, service_name,
         responders.append(responder)
         LOG.info(u'Updating service from {0} complete'.format(provider))
 
+    # create dns mapping
+    dns = service_controller.dns_controller
+    dns_responder = dns.update(service_old, service_updates, responders)
+
     # gather links and status for service from providers
     provider_details_dict = {}
     for responder in responders:
         for provider_name in responder:
             if 'error' not in responder[provider_name]:
+                access_urls = dns_responder[provider_name]['access_urls']
                 provider_details_dict[provider_name] = (
                     provider_details.ProviderDetail(
                         provider_service_id=responder[provider_name]['id'],
-                        access_urls=[link['href'] for link in
-                                     responder[provider_name]['links']])
-                )
+                        access_urls=access_urls))
                 if 'status' in responder[provider_name]:
                     provider_details_dict[provider_name].status = (
                         responder[provider_name]['status'])
