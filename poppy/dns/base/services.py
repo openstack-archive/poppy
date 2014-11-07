@@ -18,6 +18,7 @@ import abc
 import six
 
 from poppy.dns.base import controller
+from poppy.dns.base import responder
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -27,3 +28,34 @@ class ServicesControllerBase(controller.DNSControllerBase):
 
     def __init__(self, driver):
         super(ServicesControllerBase, self).__init__(driver)
+
+        self.responder = responder.Responder(driver.dns_name)
+
+    def update(self, service_old, service_updates, responders):
+        """update.
+
+        :param service_old: previous service state
+        :param service_updates: updates to service state
+        :param responders: responders from providers
+        :raises NotImplementedError
+        """
+
+        raise NotImplementedError
+
+    def delete(self, provider_details):
+        """delete.
+
+        :param provider_details
+        :raises NotImplementedError
+        """
+
+        raise NotImplementedError
+
+    def create(self, responders):
+        """create.
+
+        :param responders
+        :raises NotImplementedError
+        """
+
+        raise NotImplementedError

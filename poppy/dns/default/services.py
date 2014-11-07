@@ -16,9 +16,64 @@
 from poppy.dns import base
 
 
-class ServiceController(base.ServiceBase):
+class ServicesController(base.ServicesBase):
 
     def __init__(self, driver):
-        super(ServiceController, self).__init__(driver)
+        super(ServicesController, self).__init__(driver)
 
         self.driver = driver
+
+    def update(self, service_old, service_updates, responders):
+        """Default DNS update.
+
+        :param service_old: previous service state
+        :param service_updates: updates to service state
+        :param responders: responders from providers
+        """
+
+        dns_details = {}
+        for responder in responders:
+            for provider_name in responder:
+                if 'error' in responder[provider_name]:
+                    continue
+                access_urls = []
+                for link in responder[provider_name]['links']:
+                    access_url = {
+                        'domain': link['domain'],
+                        'provider_url': link['href'],
+                        'operator_url': link['href']}
+                    access_urls.append(access_url)
+                dns_details[provider_name] = {'access_urls': access_urls}
+        return self.responder.created(dns_details)
+
+    def delete(self, provider_details):
+        """Default DNS delete.
+
+        :param provider_details
+        """
+
+        dns_details = {}
+        for provider_name in provider_details:
+            dns_details[provider_name] = self.responder.deleted({})
+        return dns_details
+
+    def create(self, responders):
+        """Default DNS create.
+
+        :param responders: responders from providers
+        """
+
+        dns_details = {}
+        for responder in responders:
+            for provider_name in responder:
+                if 'error' in responder[provider_name]:
+                    continue
+                access_urls = []
+                for link in responder[provider_name]['links']:
+                    access_url = {
+                        'domain': link['domain'],
+                        'provider_url': link['href'],
+                        'operator_url': link['href']}
+                    access_urls.append(access_url)
+                dns_details[provider_name] = {'access_urls': access_urls}
+        return self.responder.created(dns_details)

@@ -32,6 +32,7 @@ class DefaultServicesController(base.ServicesController):
 
         self.storage_controller = self._driver.storage.services_controller
         self.flavor_controller = self._driver.storage.flavors_controller
+        self.dns_controller = self._driver.dns.services_controller
 
     def _get_provider_details(self, project_id, service_name):
         try:
@@ -86,6 +87,7 @@ class DefaultServicesController(base.ServicesController):
             raise e
 
         self.storage_controller._driver.close_connection()
+
         p = multiprocessing.Process(
             name='Process: create poppy service %s for'
             ' project id: %s' %
@@ -141,6 +143,7 @@ class DefaultServicesController(base.ServicesController):
             provider_details)
 
         self.storage_controller._driver.close_connection()
+
         p = multiprocessing.Process(
             name=('Process: update poppy service {0} for project id: {1}'
                   .format(service_name, project_id)),
@@ -172,6 +175,7 @@ class DefaultServicesController(base.ServicesController):
             provider_details)
 
         self.storage_controller._driver.close_connection()
+
         p = multiprocessing.Process(
             name='Process: delete poppy service %s for'
             ' project id: %s' %
@@ -184,6 +188,7 @@ class DefaultServicesController(base.ServicesController):
                 project_id,
                 service_name))
         p.start()
+
         return
 
     def purge(self, project_id, service_name, purge_url=None):

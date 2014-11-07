@@ -23,17 +23,42 @@ LOG = logging.getLogger(__name__)
 
 
 class DNSProvider(base.Driver):
+    """Default DNS Provider."""
 
     def __init__(self, conf):
         super(DNSProvider, self).__init__(conf)
 
     def is_alive(self):
-        return False
+        """is_alive.
+
+        :return boolean
+        """
+
+        return True
 
     @property
     def dns_name(self):
-        return "Default"
+        """DNS provider name.
+
+        :return 'Default'
+        """
+
+        return 'Default'
 
     @property
-    def service_controller(self):
-        return controllers.ServiceController(self)
+    def client(self):
+        """Client to this provider.
+
+        :return None
+        """
+
+        return None
+
+    @property
+    def services_controller(self):
+        """Hook for service controller.
+
+        :return service_controller
+        """
+
+        return controllers.ServicesController(self)

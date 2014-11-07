@@ -16,6 +16,7 @@
 """DNS Provider implementation."""
 
 from oslo.config import cfg
+import pyrax
 
 from poppy.dns import base
 from poppy.dns.rackspace import controllers
@@ -34,6 +35,8 @@ RACKSPACE_OPTIONS = [
                help='The shard prefix to use'),
     cfg.StrOpt('url', default='',
                help='The url for customers to CNAME to'),
+    cfg.StrOpt('email', help='The email to be provided to Rackspace DNS for'
+               'creating subdomains'),
 ]
 
 RACKSPACE_GROUP = 'drivers:dns:rackspace'
@@ -42,17 +45,51 @@ LOG = logging.getLogger(__name__)
 
 
 class DNSProvider(base.Driver):
+    """Rackspace DNS Provider."""
 
     def __init__(self, conf):
         super(DNSProvider, self).__init__(conf)
 
+        self._conf.register_opts(RACKSPACE_OPTIONS, group=RACKSPACE_GROUP)
+        self.rackdns_conf = self._conf[RACKSPACE_GROUP]
+        pyrax.set_setting("identity_type", "rackspace")
+        pyrax.set_credentials(self.rackdns_conf.project_id,
+                              self.rackdns_conf.api_key)
+        self.rackdns_client = pyrax.cloud_dns
+
     def is_alive(self):
+        """is_alive.
+
+        :return boolean
+        """
+
+        # TODO(obulpathi): Implement health check
+        # and add DNS to health endpoint
         return True
 
     @property
     def dns_name(self):
-        return "Rackspace Cloud DNS"
+        """DNS provider name.
+
+        :return 'Rackspace Cloud DNS'
+        """
+
+        return 'Rackspace Cloud DNS'
 
     @property
-    def service_controller(self):
-        return controllers.ServiceController(self)
+    def client(self):
+        """Client to this provider.
+
+        :return client
+        """
+
+        return self.rackdns_client
+
+    @property
+    def services_controller(self):
+        """Hook for service controller.
+
+        :return service_controller
+        """
+
+        return controllers.ServicesController(self)

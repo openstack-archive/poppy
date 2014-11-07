@@ -50,7 +50,8 @@ class ServiceController(base.ServiceBase):
                                                   service_version.number)
         links = [{"href": '.'.join([domain_check.domain.name,
                                     "global.prod.fastly.net"]),
-                  "rel": 'access_url'}
+                  "rel": 'access_url',
+                  "domain": domain_check.domain.name}
                  for domain_check in domain_checks]
 
         for origin in service_obj.origins:

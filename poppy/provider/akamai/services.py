@@ -98,7 +98,8 @@ class ServiceController(base.ServiceBase):
                 LOG.info('Creating policy %s on domain %s complete' %
                          (dp, ','.join(classified_domain)))
             links.append({'href': self.driver.akamai_access_url_link,
-                          "rel": 'access_url'
+                          'rel': 'access_url',
+                          'domain': service_obj.name
                           })
         except Exception:
             return self.responder.failed("failed to create service")
@@ -279,7 +280,8 @@ class ServiceController(base.ServiceBase):
                     LOG.info('Creating/Updateing policy %s on domain %s '
                              'complete' % (dp, ','.join(classified_domain)))
                 links.append({'href': self.driver.akamai_access_url_link,
-                              'rel': 'access_url'
+                              'rel': 'access_url',
+                              'domain': service_obj.name
                               })
             except Exception:
                 return self.responder.failed("failed to update service")
@@ -348,7 +350,9 @@ class ServiceController(base.ServiceBase):
                     return self.responder.failed("failed to update service")
             ids = policies
             links.append({'href': self.driver.akamai_access_url_link,
-                          'rel': 'access_url'})
+                          'rel': 'access_url',
+                          'domain': service_obj.name
+                          })
         return self.responder.updated(json.dumps(ids), links)
 
     def delete(self, provider_service_id):
