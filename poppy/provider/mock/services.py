@@ -37,6 +37,7 @@ class ServiceController(base.ServiceBase):
         service_id = uuid.uuid1()
         return self.responder.created(str(service_id), [{
             "href": "www.mysite.com",
+            "domain": "www.mydomain.com",
             'rel': "access_url"}])
 
     def delete(self, provider_service_id):
