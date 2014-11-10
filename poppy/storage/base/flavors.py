@@ -22,22 +22,39 @@ from poppy.storage.base import controller
 
 @six.add_metaclass(abc.ABCMeta)
 class FlavorsControllerBase(controller.StorageControllerBase):
+    """Flavors Controller Base definition."""
 
     def __init__(self, driver):
         super(FlavorsControllerBase, self).__init__(driver)
 
     @abc.abstractmethod
     def list(self):
+        """list.
+
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get(self, flavor_id):
+        """get.
+
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def add(self, flavor):
+        """add.
+
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def delete(self, flavor_id):
+        """delete.
+
+        :raise NotImplementedError
+        """
         raise NotImplementedError

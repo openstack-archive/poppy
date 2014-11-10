@@ -21,6 +21,7 @@ from poppy.manager.default import controllers
 
 
 class DefaultManagerDriver(base.Driver):
+    """Default Manager Driver."""
 
     def __init__(self, conf, storage, providers, dns):
         super(DefaultManagerDriver, self).__init__(

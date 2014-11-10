@@ -63,6 +63,11 @@ CASSANDRA_GROUP = 'drivers:storage:cassandra'
 
 
 def _connection(conf, datacenter):
+    """connection.
+
+    :param datacenter
+    :returns session
+    """
     ssl_options = None
     if conf.ssl_enabled:
         ssl_options = {
@@ -104,6 +109,11 @@ def _connection(conf, datacenter):
 
 
 def _create_keyspace(session, keyspace, replication_strategy):
+    """create_keyspace.
+
+    :param keyspace
+    :param replication_strategy
+    """
     # replication factor will come in as a string with quotes already
     session.execute(
         "CREATE KEYSPACE " + keyspace + " " +
@@ -118,6 +128,7 @@ def _create_keyspace(session, keyspace, replication_strategy):
 
 
 class CassandraStorageDriver(base.Driver):
+    """Cassandra Storage Driver."""
 
     def __init__(self, conf):
         super(CassandraStorageDriver, self).__init__(conf)
@@ -128,9 +139,17 @@ class CassandraStorageDriver(base.Driver):
         self.lock = multiprocessing.Lock()
 
     def change_namespace(self, namespace):
+        """change_namespace.
+
+        :param namespace
+        """
         self.cassandra_conf.keyspace = namespace
 
     def delete_namespace(self, namespace):
+        """delete_namespace.
+
+        :param namespace
+        """
         self.connection.execute('DROP KEYSPACE ' + namespace)
 
     def is_alive(self):
@@ -138,7 +157,10 @@ class CassandraStorageDriver(base.Driver):
 
     @property
     def storage_name(self):
-        """For name."""
+        """storage name.
+
+        :returns 'Cassandra'
+        """
         return 'Cassandra'
 
     @property
@@ -148,14 +170,26 @@ class CassandraStorageDriver(base.Driver):
 
     @property
     def services_controller(self):
+        """services_controller.
+
+        :returns service controller
+        """
         return controllers.ServicesController(self)
 
     @property
     def flavors_controller(self):
+        """flavors_controller.
+
+        :returns flavor controller
+        """
         return controllers.FlavorsController(self)
 
     @property
     def database(self):
+        """database.
+
+        :returns session
+        """
         # if the session has been shutdown, reopen a session
         self.lock.acquire()
         if self.session is None or self.session.is_shutdown:
@@ -164,9 +198,15 @@ class CassandraStorageDriver(base.Driver):
         return self.session
 
     def connect(self):
+        """connect.
+
+        :returns connection
+        """
         self.session = _connection(self.cassandra_conf, self.datacenter)
 
     def close_connection(self):
+        """close_connection."""
+
         self.lock.acquire()
         self.session.cluster.shutdown()
         self.session.shutdown()

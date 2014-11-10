@@ -20,6 +20,7 @@ VALID_STATUSES = [u'create_in_progress', u'deployed', u'delete_in_progress']
 
 
 class Service(common.DictSerializableModel):
+    """Service Class."""
 
     def __init__(self,
                  name,
@@ -39,6 +40,7 @@ class Service(common.DictSerializableModel):
 
     @property
     def name(self):
+        """Get or set name."""
         return self._name
 
     @name.setter
@@ -47,6 +49,7 @@ class Service(common.DictSerializableModel):
 
     @property
     def domains(self):
+        """Get or set domains."""
         return self._domains
 
     @domains.setter
@@ -55,6 +58,7 @@ class Service(common.DictSerializableModel):
 
     @property
     def origins(self):
+        """Get or set origins."""
         return self._origins
 
     @origins.setter
@@ -63,6 +67,7 @@ class Service(common.DictSerializableModel):
 
     @property
     def flavor_ref(self):
+        """Get or set flavor ref."""
         return self._flavor_ref
 
     @flavor_ref.setter
@@ -71,6 +76,7 @@ class Service(common.DictSerializableModel):
 
     @property
     def caching(self):
+        """Get or set caching."""
         return self._caching
 
     @caching.setter
@@ -79,6 +85,7 @@ class Service(common.DictSerializableModel):
 
     @property
     def restrictions(self):
+        """Get or set restrictions."""
         return self._restrictions
 
     @restrictions.setter
@@ -89,6 +96,10 @@ class Service(common.DictSerializableModel):
 
     @property
     def status(self):
+        """Get or set status.
+
+        :returns boolean
+        """
         # derived fiedls of service status:
         # service will be in creating during service creation
         # if any of the provider services are still in 'deploy_in_progress'
@@ -125,6 +136,7 @@ class Service(common.DictSerializableModel):
 
     @property
     def provider_details(self):
+        """Get or set provider details."""
         return self._provider_details
 
     @provider_details.setter

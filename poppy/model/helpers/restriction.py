@@ -17,6 +17,7 @@ from poppy.model import common
 
 
 class Restriction(common.DictSerializableModel):
+    """Restricion."""
 
     def __init__(self, name):
         self._name = name
@@ -24,8 +25,10 @@ class Restriction(common.DictSerializableModel):
 
     @property
     def name(self):
+        """name."""
         return self._name
 
     @property
     def rules(self):
+        """rules."""
         return self._rules

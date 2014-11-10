@@ -20,10 +20,17 @@ from poppy.transport.pecan.models.response import health as health_response
 
 
 class StorageHealthController(base.Controller):
+    """Storage Health Controller."""
 
     @pecan.expose('json')
     def get(self, storage_name):
-        """Returns the health of storage."""
+        """GET.
+
+        Returns the health of storage
+
+        :param storage_name
+        :returns JSON storage model or HTTP 404
+        """
 
         health_controller = self._driver.manager.health_controller
 

@@ -44,13 +44,21 @@ CQL_CREATE = '''
 
 
 class FlavorsController(base.FlavorsController):
+    """Flavors Controller."""
 
     @property
     def session(self):
+        """Get session.
+
+        :returns database
+        """
         return self._driver.database
 
     def list(self):
-        """List the supported flavors."""
+        """list.
+
+        :returns list List the supported flavors
+        """
 
         # get all
         result = self.session.execute(CQL_GET_ALL)
@@ -66,7 +74,11 @@ class FlavorsController(base.FlavorsController):
         return flavors
 
     def get(self, flavor_id):
-        """Get the specified Flavor."""
+        """get.
+
+        :param flavor_id
+        :returns flavor The specified Flavor
+        """
         args = {
             'flavor_id': flavor_id
         }
@@ -92,7 +104,13 @@ class FlavorsController(base.FlavorsController):
                 u"Could not find a flavor with the id '{0}'".format(flavor_id))
 
     def add(self, flavor):
-        """Add a new flavor."""
+        """add.
+
+        Add a new flavor
+
+        :param flavor
+        :raises ValueError
+        """
 
         # check if the flavor already exist.
         # Note: If it does, no LookupError will be raised
@@ -115,7 +133,12 @@ class FlavorsController(base.FlavorsController):
         self.session.execute(CQL_CREATE, args)
 
     def delete(self, flavor_id):
-        """Delete a flavor."""
+        """delete.
+
+        Delete a flavor.
+
+        :param flavor_id
+        """
 
         args = {
             'flavor_id': flavor_id

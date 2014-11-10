@@ -21,6 +21,7 @@ from poppy.manager.default.service_async_workers import delete_service_worker
 
 
 class DefaultServicesController(base.ServicesController):
+    """Default Services Controller."""
 
     def __init__(self, manager):
         super(DefaultServicesController, self).__init__(manager)
@@ -29,12 +30,31 @@ class DefaultServicesController(base.ServicesController):
         self.flavor_controller = self._driver.storage.flavors_controller
 
     def list(self, project_id, marker=None, limit=None):
+        """list.
+
+        :param project_id
+        :param marker
+        :param limit
+        :return list
+        """
         return self.storage_controller.list(project_id, marker, limit)
 
     def get(self, project_id, service_name):
+        """get.
+
+        :param project_id
+        :param service_name
+        :return controller
+        """
         return self.storage_controller.get(project_id, service_name)
 
     def create(self, project_id, service_obj):
+        """create.
+
+        :param project_id
+        :param service_obj
+        :raises LoookupError, ValueError
+        """
         try:
             flavor = self.flavor_controller.get(service_obj.flavor_ref)
         # raise a lookup error if the flavor is not found
@@ -68,6 +88,12 @@ class DefaultServicesController(base.ServicesController):
         return
 
     def update(self, project_id, service_name, service_obj):
+        """update.
+
+        :param project_id
+        :param service_name
+        :param service_obj
+        """
         self.storage_controller.update(
             project_id,
             service_name,
@@ -83,6 +109,12 @@ class DefaultServicesController(base.ServicesController):
             service_obj)
 
     def delete(self, project_id, service_name):
+        """delete.
+
+        :param project_id
+        :param service_name
+        :raises LookupError
+        """
         try:
             provider_details = self.storage_controller.get_provider_details(
                 project_id,
