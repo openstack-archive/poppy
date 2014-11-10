@@ -32,9 +32,11 @@ CLOUDFRONT_OPTIONS = [
 ]
 
 CLOUDFRONT_GROUP = 'drivers:provider:cloudfront'
+CLOUDFRONT_ENDPOINT = 'http://aws.amazon.com/cloudfront/'
 
 
 class CDNProvider(base.Driver):
+    """CloudFront CNDProvider."""
 
     def __init__(self, conf):
         super(CDNProvider, self).__init__(conf)
@@ -46,19 +48,35 @@ class CDNProvider(base.Driver):
             aws_secret_access_key=self.cloudfront_conf.aws_secret_access_key)
 
     def is_alive(self):
-        response = requests.get('http://aws.amazon.com/cloudfront/')
+        """is_alive.
+
+        :return boolean
+        """
+        response = requests.get(CLOUDFRONT_ENDPOINT)
         if response.status_code == 200:
             return True
         return False
 
     @property
     def provider_name(self):
+        """provider name.
+
+        :return 'CloudFront'
+        """
         return 'CloudFront'
 
     @property
     def client(self):
+        """client to this provider.
+
+        :return client
+        """
         return self.cloudfront_client
 
     @property
     def service_controller(self):
+        """Hook for service controller.
+
+        :return service controller
+        """
         return controllers.ServiceController(self)

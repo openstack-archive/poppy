@@ -17,19 +17,34 @@ from poppy.model import common
 
 
 class CachingRule(common.DictSerializableModel):
+    """CachingRule
 
+    :param DictSerializableModel:
+    """
     def __init__(self, name, ttl):
         self._name = name
         self._ttl = ttl
 
     @property
     def name(self):
+        """name.
+
+        :returns name
+        """
         return self._name
 
     @property
     def ttl(self):
+        """ttl.
+
+        :returns ttl
+        """
         return self._ttl
 
     @property
     def rules(self):
+        """rules.
+
+        :returns rules
+        """
         return self._rules

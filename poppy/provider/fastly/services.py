@@ -20,6 +20,7 @@ from poppy.provider import base
 
 
 class ServiceController(base.ServiceBase):
+    """Fastly Service Controller Class."""
 
     @property
     def client(self):

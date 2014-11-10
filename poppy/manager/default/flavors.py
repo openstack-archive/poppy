@@ -18,17 +18,33 @@ from poppy.manager import base
 
 
 class DefaultFlavorsController(base.FlavorsController):
+    """Default Flavors Controller."""
 
     def __init__(self, manager):
         super(DefaultFlavorsController, self).__init__(manager)
 
     def list(self):
+        """list.
+
+        :return list
+        """
         return self.storage.list()
 
     def get(self, flavor_id):
+        """get.
+
+        ":param flavor_id
+        :return flavor id
+        """
         return self.storage.get(flavor_id)
 
     def add(self, new_flavor):
+        """add.
+
+        :param new_flavor
+        :return new flavor
+        :raise LookupError
+        """
         # is this a valid flavor?
         provider_list = self.driver.conf[bootstrap._DRIVER_GROUP].providers
 
@@ -42,4 +58,9 @@ class DefaultFlavorsController(base.FlavorsController):
         return self.storage.add(new_flavor)
 
     def delete(self, flavor_id):
+        """delete.
+
+        :param flavor_id
+        :return flavor_id
+        """
         return self.storage.delete(flavor_id)
