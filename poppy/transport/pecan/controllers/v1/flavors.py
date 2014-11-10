@@ -29,9 +29,12 @@ from poppy.transport.validators.stoplight import rule
 
 
 class FlavorsController(base.Controller):
+    """Flavors Controller."""
 
     @pecan.expose('json')
     def get_all(self):
+        """get all flavor list."""
+
         flavors_controller = self.driver.manager.flavors_controller
         result = flavors_controller.list()
 
@@ -42,6 +45,11 @@ class FlavorsController(base.Controller):
 
     @pecan.expose('json')
     def get_one(self, flavor_id):
+        """get_one
+
+        :param flavor_model
+        :returns JSON flavor(HTTP 200) or HTTP 404
+        """
         flavors_controller = self.driver.manager.flavors_controller
         try:
             result = flavors_controller.get(flavor_id)
@@ -58,6 +66,10 @@ class FlavorsController(base.Controller):
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
     def post(self):
+        """POST
+
+        :returns JSON flavor(HTTP 200) or HTTP 400
+        """
         flavors_controller = self.driver.manager.flavors_controller
         flavor_json = json.loads(pecan.request.body.decode('utf-8'))
         try:
@@ -80,6 +92,11 @@ class FlavorsController(base.Controller):
 
     @pecan.expose('json')
     def delete(self, flavor_id):
+        """DELETE
+
+        :param flavor_model
+        :returns HTTP 204
+        """
         flavors_controller = self.driver.manager.flavors_controller
         flavors_controller.delete(flavor_id)
         pecan.response.status = 204

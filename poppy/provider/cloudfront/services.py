@@ -23,6 +23,7 @@ LOG = log.getLogger(__name__)
 
 
 class ServiceController(base.ServiceBase):
+    """Base Service Controller Class."""
 
     @property
     def client(self):

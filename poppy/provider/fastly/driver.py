@@ -33,6 +33,7 @@ FASTLY_GROUP = 'drivers:provider:fastly'
 
 
 class CDNProvider(base.Driver):
+    """Fastly CNDProvider."""
 
     def __init__(self, conf):
         super(CDNProvider, self).__init__(conf)
@@ -44,6 +45,10 @@ class CDNProvider(base.Driver):
         self.fastly_client = fastly.connect(self.fastly_conf.apikey)
 
     def is_alive(self):
+        """is_alive.
+
+        :return boolean
+        """
         response = requests.get('https://api.fastly.com/')
         if response.status_code == 200:
             return True
@@ -51,12 +56,24 @@ class CDNProvider(base.Driver):
 
     @property
     def provider_name(self):
+        """provider name.
+
+        :return 'Fastly'
+        """
         return "Fastly"
 
     @property
     def client(self):
+        """client to this provider.
+
+        :return client
+        """
         return self.fastly_client
 
     @property
     def service_controller(self):
+        """Hook for service controller.
+
+        :return service controller
+        """
         return controllers.ServiceController(self)

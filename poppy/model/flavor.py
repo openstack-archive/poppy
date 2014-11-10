@@ -15,6 +15,7 @@
 
 
 class Flavor(object):
+    """Flavor Class."""
 
     def __init__(self,
                  flavor_id, providers=[]):
@@ -24,14 +25,23 @@ class Flavor(object):
 
     @property
     def flavor_id(self):
+        """Get flavor id.
+
+        :returns flavor id
+        """
         return self._flavor_id
 
     @property
     def providers(self):
+        """Get providers
+
+        :returns providers
+        """
         return self._providers
 
 
 class Provider(object):
+    """Provider Class."""
 
     def __init__(self,
                  provider_id,
@@ -41,8 +51,16 @@ class Provider(object):
 
     @property
     def provider_id(self):
+        """Get provider id.
+
+        :returns provider id
+        """
         return self._provider_id
 
     @property
     def provider_url(self):
+        """Get provider url.
+
+        :returns provider url
+        """
         return self._provider_url

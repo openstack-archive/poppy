@@ -64,6 +64,8 @@ class Bootstrap(object):
 
     @decorators.lazy_property(write=False)
     def dns(self):
+        """DNS."""
+
         LOG.debug((u'Loading DNS driver'))
 
         # create the driver manager to load the appropriate drivers
@@ -83,6 +85,11 @@ class Bootstrap(object):
 
     @decorators.lazy_property(write=False)
     def provider(self):
+        """provider.
+
+        :returns mgr
+        """
+
         LOG.debug((u'Loading provider extension(s)'))
 
         # create the driver manager to load the appropriate drivers
@@ -98,6 +105,11 @@ class Bootstrap(object):
 
     @decorators.lazy_property(write=False)
     def storage(self):
+        """storage.
+
+        :returns mgr driver
+        """
+
         LOG.debug((u'Loading storage driver'))
 
         # create the driver manager to load the appropriate drivers
@@ -117,6 +129,10 @@ class Bootstrap(object):
 
     @decorators.lazy_property(write=False)
     def manager(self):
+        """manager.
+
+        :returns mgr driver
+        """
         LOG.debug((u'Loading manager driver'))
 
         # create the driver manager to load the appropriate drivers
@@ -136,6 +152,10 @@ class Bootstrap(object):
 
     @decorators.lazy_property(write=False)
     def transport(self):
+        """transport.
+
+        :returns mgr driver
+        """
         LOG.debug("loading transport")
 
         # create the driver manager to load the appropriate drivers

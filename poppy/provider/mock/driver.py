@@ -23,17 +23,30 @@ LOG = logging.getLogger(__name__)
 
 
 class CDNProvider(base.Driver):
+    """Mock CDNProvider."""
 
     def __init__(self, conf):
         super(CDNProvider, self).__init__(conf)
 
     def is_alive(self):
+        """is_alive.
+
+        :return True
+        """
         return True
 
     @property
     def provider_name(self):
+        """provider name.
+
+        :return 'Mock'
+        """
         return "Mock"
 
     @property
     def service_controller(self):
+        """Hook for service controller.
+
+        :return service controller
+        """
         return controllers.ServiceController(self)
