@@ -48,19 +48,31 @@ class StorageDriverBase(object):
 
     @abc.abstractmethod
     def is_alive(self):
-        """Check whether the storage is ready."""
+        """Check whether the storage is ready.
+
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractproperty
     def services_controller(self):
-        """Returns the driver's hostname controller."""
+        """Returns the driver's hostname controller.
+
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractproperty
     def flavors_controller(self):
-        """Returns the driver's hostname controller."""
+        """Returns the driver's hostname controller.
+
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
     def storage_name(self):
-        """For name."""
+        """For name.
+
+        :raise NotImplementedError
+        """
         raise NotImplementedError

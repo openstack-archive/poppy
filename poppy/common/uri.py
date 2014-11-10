@@ -32,7 +32,11 @@ _ALL_ALLOWED = _UNRESERVED + _DELIMITERS
 
 
 def _create_char_encoder(allowed_chars):
+    """create_char_encoder.
 
+    :param allowed_chars: characters to encode
+    :returns __getitem__: hash of encoded characters
+    """
     lookup = {}
 
     for code_point in range(256):
@@ -50,6 +54,11 @@ def _create_char_encoder(allowed_chars):
 
 
 def _create_str_encoder(is_value):
+    """create_str_encoder.
+
+    :param is_value: boolean
+    :returns encoder: encoder
+    """
 
     allowed_chars = _UNRESERVED if is_value else _ALL_ALLOWED
     encode_char = _create_char_encoder(allowed_chars)

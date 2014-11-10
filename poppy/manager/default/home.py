@@ -37,10 +37,16 @@ JSON_HOME = {
 
 
 class DefaultHomeController(base.HomeController):
+    """Default Home Controller."""
+
     def __init__(self, manager):
         super(DefaultHomeController, self).__init__(manager)
 
         self.JSON_HOME = JSON_HOME
 
     def get(self):
+        """get.
+
+        :return json home
+        """
         return self.JSON_HOME

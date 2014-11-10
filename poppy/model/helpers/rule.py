@@ -17,6 +17,7 @@ from poppy.model import common
 
 
 class Rule(common.DictSerializableModel):
+    """Rule."""
 
     def __init__(self, name):
         self._name = name
@@ -27,10 +28,12 @@ class Rule(common.DictSerializableModel):
 
     @property
     def name(self):
+        """name."""
         return self._name
 
     @property
     def http_host(self):
+        """http_host."""
         return self._http_host
 
     @http_host.setter

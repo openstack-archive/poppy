@@ -24,10 +24,7 @@ MAXCDN_NAMING_REGEX = re.compile('^[a-zA-Z0-9-]{3,32}$')
 
 
 class ServiceController(base.ServiceBase):
-
-    '''MaxCDN Service Controller.
-
-    '''
+    """MaxCDN Service Controller."""
 
     @property
     def client(self):

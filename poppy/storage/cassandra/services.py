@@ -123,13 +123,25 @@ CQL_UPDATE_PROVIDER_DETAILS = '''
 
 
 class ServicesController(base.ServicesController):
+    """Services Controller."""
 
     @property
     def session(self):
+        """Get session.
+
+        :returns session
+        """
         return self._driver.database
 
     def list(self, project_id, marker, limit):
+        """list.
 
+        :param project_id
+        :param marker
+        :param limit
+
+        :returns services
+        """
         # list services
         args = {
             'project_id': project_id,
@@ -143,6 +155,14 @@ class ServicesController(base.ServicesController):
         return services
 
     def get(self, project_id, service_name):
+        """get.
+
+        :param project_id
+        :param service_name
+
+        :returns result The requested service
+        :raises ValueError
+        """
         # get the requested service from storage
         args = {
             'project_id': project_id,
@@ -160,6 +180,13 @@ class ServicesController(base.ServicesController):
         return self.format_result(result)
 
     def create(self, project_id, service_obj):
+        """create.
+
+        :param project_id
+        :param service_obj
+
+        :raises ValueError
+        """
         # create the service in storage
         service_name = service_obj.name
 
@@ -204,6 +231,10 @@ class ServicesController(base.ServicesController):
         pass
 
     def delete(self, project_id, service_name):
+        """delete.
+
+        Delete local configuration storage
+        """
         # delete local configuration from storage
         args = {
             'project_id': project_id,
@@ -212,6 +243,13 @@ class ServicesController(base.ServicesController):
         self.session.execute(CQL_DELETE_SERVICE, args)
 
     def get_provider_details(self, project_id, service_name):
+        """get_provider_details.
+
+        :param project_id
+        :param service_name
+        :returns results Provider details
+        """
+
         args = {
             'project_id': project_id,
             'service_name': service_name
@@ -243,6 +281,12 @@ class ServicesController(base.ServicesController):
 
     def update_provider_details(self, project_id, service_name,
                                 provider_details):
+        """update_provider_details.
+
+        :param project_id
+        :param service_name
+        :param provider_details
+        """
         provider_detail_dict = {}
         for provider_name in provider_details:
             provider_detail_dict[provider_name] = json.dumps({
@@ -266,6 +310,11 @@ class ServicesController(base.ServicesController):
 
     @staticmethod
     def format_result(result):
+        """format_result.
+
+        :param result
+        :returns formatted result
+        """
         name = result.get('service_name')
         origins = [json.loads(o) for o in result.get('origins', [])]
         domains = [json.loads(d) for d in result.get('domains', [])]

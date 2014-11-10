@@ -34,17 +34,32 @@ class TransportDriverBase(object):
 
     @property
     def app(self):
+        """Get app.
+
+        :returns app
+        """
         return self._app
 
     @property
     def conf(self):
+        """Get conf.
+
+        :returns conf
+        """
         return self._conf
 
     @property
     def manager(self):
+        """Get manager
+
+        :returns manager
+        """
         return self._manager
 
     @abc.abstractmethod
-    def listen():
-        """Start listening for client requests (self-hosting mode)."""
+    def listen(self):
+        """Start listening for client requests (self-hosting mode).
+
+        :raises NotImplementedError
+        """
         raise NotImplementedError

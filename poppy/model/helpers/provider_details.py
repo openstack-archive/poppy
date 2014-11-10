@@ -23,7 +23,7 @@ VALID_STATUSES = [
 
 class ProviderDetail(object):
 
-    '''ProviderDetail object for each provider.'''
+    """ProviderDetail object for each provider."""
 
     def __init__(self, provider_service_id=None, access_urls=[],
                  status=u"deploy_in_progress", name=None, error_info=None):
@@ -36,6 +36,7 @@ class ProviderDetail(object):
 
     @property
     def provider_service_id(self):
+        """provider_service_id."""
         return self._provider_service_id
 
     @provider_service_id.setter

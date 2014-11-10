@@ -39,7 +39,10 @@ class DNSDriverBase(object):
 
     @abc.abstractmethod
     def is_alive(self):
-        """Check whether the dns provider is ready."""
+        """Check whether the dns provider is ready.
+
+        :raises NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractproperty
@@ -48,5 +51,8 @@ class DNSDriverBase(object):
 
     @abc.abstractproperty
     def service_controller(self):
-        """Returns the driver's hostname controller."""
+        """Returns the driver's hostname controller.
+
+         :raises NotImplementedError
+        """
         raise NotImplementedError

@@ -23,6 +23,7 @@ from poppy.provider.base import responder
 
 @six.add_metaclass(abc.ABCMeta)
 class ServicesControllerBase(controller.ProviderControllerBase):
+    """Services Controller Base."""
 
     def __init__(self, driver):
         super(ServicesControllerBase, self).__init__(driver)
@@ -31,23 +32,48 @@ class ServicesControllerBase(controller.ProviderControllerBase):
 
     @abc.abstractmethod
     def update(self, provider_service_id, service_json):
+        """update.
+
+        :raises NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def create(self, service_name, service_json):
+        """create.
+
+        :param service_name
+        :param service_json
+        :raises NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def delete(self, provider_service_id):
+        """delete.
+
+        :param provider_service_id
+        :raises NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def purge(self, provider_service_id, purge_urls=None):
+        """purge.
+
+        :param provider_service_id
+        :param purge_urls
+        :raises NotImplementedError
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get(self, service_name):
-        """Get details of the service, as stored by the provider."""
+        """Get details of the service, as stored by the provider.
+
+        :param service_name
+        :raises NotImplementedError
+        """
         raise NotImplementedError
 
     def _map_service_name(self, service_name):
@@ -55,6 +81,9 @@ class ServicesControllerBase(controller.ProviderControllerBase):
 
          Map a poppy service name to a provider's service name so it
          can comply provider's naming convention.
+
+        :param service_name
+        :raises NotImplementedError
         """
         return service_name
 
@@ -64,6 +93,9 @@ class ServicesControllerBase(controller.ProviderControllerBase):
 
         This will needed call each provider's customer API,
         useful for certain providers ( e.g fastly) and manage
-        master-sub account
+        master-sub account.
+
+        :param service_name
+        :raises NotImplementedError
         """
         raise NotImplementedError

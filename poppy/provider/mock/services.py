@@ -23,6 +23,7 @@ LOG = log.getLogger(__name__)
 
 
 class ServiceController(base.ServiceBase):
+    """Mock Service Controller."""
 
     def __init__(self, driver):
         super(ServiceController, self).__init__(driver)
