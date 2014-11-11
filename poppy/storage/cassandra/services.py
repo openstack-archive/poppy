@@ -439,7 +439,7 @@ class ServicesController(base.ServicesController):
 
         if (result):
             domains_list = [json.loads(d).get('domain')
-                            for d in result.get('domains')]
+                            for d in result.get('domains', [])]
             # NOTE(obulpathi): Convert a OrderedMapSerializedKey to a Dict
             pds = result.get('provider_details', {}) or {}
             pds = {key: value for key, value in pds.items()}
@@ -450,10 +450,10 @@ class ServicesController(base.ServicesController):
                     'service_id': result.get('service_id'),
                     'service_name': result.get('service_name'),
                     'flavor_id': result.get('flavor_id'),
-                    'domains': result.get('domains'),
-                    'origins': result.get('origins'),
-                    'caching_rules': result.get('caching_rules'),
-                    'restrictions': result.get('restrictions'),
+                    'domains': result.get('domains', []),
+                    'origins': result.get('origins', []),
+                    'caching_rules': result.get('caching_rules', []),
+                    'restrictions': result.get('restrictions', []),
                     'provider_details': pds,
                     'archived_time': datetime.datetime.utcnow(),
                     'domains_list': query.ValueSequence(domains_list)
