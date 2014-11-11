@@ -54,6 +54,11 @@ CASSANDRA_OPTIONS = [
         },
         help='Replication strategy for Cassandra cluster'
     ),
+    cfg.StrOpt(
+        'migrations_path',
+        default='./poppy/storage/cassandra/migrations',
+        help='Path to directory containing CQL migration scripts',
+    ),
     cfg.BoolOpt('archive_on_delete', default=True,
                 help='Archive services on delete?'),
 ]
@@ -74,6 +79,12 @@ class CassandraStorageDriverTests(base.TestCase):
         conf.register_opts(CASSANDRA_OPTIONS,
                            group=driver.CASSANDRA_GROUP)
         self.cassandra_driver = driver.CassandraStorageDriver(conf)
+
+        migrations_patcher = mock.patch(
+            'cdeploy.migrator.Migrator'
+        )
+        migrations_patcher.start()
+        self.addCleanup(migrations_patcher.stop)
 
     def test_storage_driver(self):
         # assert that the configs are set up based on what was passed in

@@ -23,12 +23,12 @@ from cassandra import auth
 from cassandra import cluster
 from cassandra import policies
 from cassandra import query
+from cdeploy import migrator
 from oslo.config import cfg
 
 from poppy.openstack.common import log as logging
 from poppy.storage import base
 from poppy.storage.cassandra import controllers
-from poppy.storage.cassandra import schema
 
 
 LOG = logging.getLogger(__name__)
@@ -61,6 +61,11 @@ CASSANDRA_OPTIONS = [
             'replication_factor': '1'
         },
         help='Replication strategy for Cassandra cluster'
+    ),
+    cfg.StrOpt(
+        'migrations_path',
+        default='./poppy/storage/cassandra/migrations',
+        help='Path to directory containing CQL migration scripts',
     ),
     cfg.BoolOpt('archive_on_delete', default=True,
                 help='Archive services on delete?'),
@@ -112,6 +117,8 @@ def _connection(conf, datacenter, keyspace=None):
     except cassandra.InvalidRequest:
         _create_keyspace(session, keyspace, conf.replication_strategy)
 
+    _run_migrations(conf.migrations_path, session)
+
     session.row_factory = query.dict_factory
 
     return session
@@ -123,6 +130,8 @@ def _create_keyspace(session, keyspace, replication_strategy):
     :param keyspace
     :param replication_strategy
     """
+    LOG.debug('Creating keyspace: ' + keyspace)
+
     # replication factor will come in as a string with quotes already
     session.execute(
         "CREATE KEYSPACE " + keyspace + " " +
@@ -130,10 +139,12 @@ def _create_keyspace(session, keyspace, replication_strategy):
     )
     session.set_keyspace(keyspace)
 
-    for statement in schema.schema_statements:
-        session.execute(statement)
 
-    LOG.debug('Creating keyspace: ' + keyspace)
+def _run_migrations(migrations_path, session):
+    LOG.debug('Running schema migration(s)')
+
+    schema_migrator = migrator.Migrator(migrations_path, session)
+    schema_migrator.run_migrations()
 
 
 class CassandraStorageDriver(base.Driver):

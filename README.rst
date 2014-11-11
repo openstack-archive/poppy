@@ -71,6 +71,7 @@ installed and running.
     [drivers:storage:cassandra]
     cluster = "localhost"
     keyspace = poppy
+	migrations_path = /home/poppy/poppy/storage/cassandra/migrations
 
 4. By using cassandra storage plugin, you will need to create the default 
    keyspace "poppy" on your cassandra host/cluster. So log into cqlsh, do::
