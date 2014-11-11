@@ -15,6 +15,7 @@
 
 import copy
 import multiprocessing
+import signal
 
 from poppy.common import errors
 from poppy.manager import base
@@ -88,6 +89,7 @@ class DefaultServicesController(base.ServicesController):
 
         self.storage_controller._driver.close_connection()
 
+        signal.signal(signal.SIGCHLD, signal.SIG_IGN)
         p = multiprocessing.Process(
             name='Process: create poppy service %s for'
             ' project id: %s' %
@@ -99,7 +101,6 @@ class DefaultServicesController(base.ServicesController):
                 self,
                 project_id,
                 service_name, service_obj))
-        multiprocessing.active_children()
         p.start()
         return
 
@@ -145,13 +146,13 @@ class DefaultServicesController(base.ServicesController):
 
         self.storage_controller._driver.close_connection()
 
+        signal.signal(signal.SIGCHLD, signal.SIG_IGN)
         p = multiprocessing.Process(
             name=('Process: update poppy service {0} for project id: {1}'
                   .format(service_name, project_id)),
             target=update_service_worker.update_worker,
             args=(self, project_id, service_name, service_old, service_updates,
                   service_obj))
-        multiprocessing.active_children()
         p.start()
 
         return
@@ -178,6 +179,7 @@ class DefaultServicesController(base.ServicesController):
 
         self.storage_controller._driver.close_connection()
 
+        signal.signal(signal.SIGCHLD, signal.SIG_IGN)
         p = multiprocessing.Process(
             name='Process: delete poppy service %s for'
             ' project id: %s' %
@@ -189,7 +191,6 @@ class DefaultServicesController(base.ServicesController):
                 self,
                 project_id,
                 service_name))
-        multiprocessing.active_children()
         p.start()
 
         return
@@ -200,6 +201,7 @@ class DefaultServicesController(base.ServicesController):
 
         # possible validation of purge url here...
         self.storage_controller._driver.close_connection()
+        signal.signal(signal.SIGCHLD, signal.SIG_IGN)
         p = multiprocessing.Process(
             name='Process: Purge poppy service %s for'
             ' project id: %s'
@@ -214,6 +216,5 @@ class DefaultServicesController(base.ServicesController):
                 project_id,
                 service_name,
                 purge_url))
-        multiprocessing.active_children()
         p.start()
         return
