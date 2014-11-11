@@ -13,13 +13,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+AVAILABLE_PROTOCOLS = [
+    u'http',
+    u'https']
+
 from poppy.model import common
 
 
 class Domain(common.DictSerializableModel):
 
-    def __init__(self, domain):
+    def __init__(self, domain, protocol='http'):
         self._domain = domain
+
+        if (protocol in AVAILABLE_PROTOCOLS):
+            self._protocol = protocol
+        else:
+            raise ValueError(
+                u'Protocol: {0} not in currently available'
+                ' protocols: {1}'.format(
+                    protocol,
+                    AVAILABLE_PROTOCOLS)
+            )
 
     @property
     def domain(self):
@@ -34,6 +48,22 @@ class Domain(common.DictSerializableModel):
         """domain setter."""
         self._domain = value
 
+    @property
+    def protocol(self):
+        return self._protocol
+
+    @protocol.setter
+    def protocol(self, value):
+        if (value in AVAILABLE_PROTOCOLS):
+            self._protocol = value
+        else:
+            raise ValueError(
+                u'Protocol: {0} not in currently available'
+                ' protocols: {1}'.format(
+                    value,
+                    AVAILABLE_PROTOCOLS)
+            )
+
     @classmethod
     def init_from_dict(cls, dict_obj):
         """Construct a model instance from a dictionary.
@@ -45,4 +75,5 @@ class Domain(common.DictSerializableModel):
         """
         o = cls("unnamed")
         o.domain = dict_obj.get("domain", "unnamed")
+        o.protocol = dict_obj.get("protocol", "http")
         return o
