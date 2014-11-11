@@ -99,6 +99,7 @@ class DefaultServicesController(base.ServicesController):
                 self,
                 project_id,
                 service_name, service_obj))
+        multiprocessing.active_children()
         p.start()
         return
 
@@ -150,6 +151,7 @@ class DefaultServicesController(base.ServicesController):
             target=update_service_worker.update_worker,
             args=(self, project_id, service_name, service_old, service_updates,
                   service_obj))
+        multiprocessing.active_children()
         p.start()
 
         return
@@ -187,6 +189,7 @@ class DefaultServicesController(base.ServicesController):
                 self,
                 project_id,
                 service_name))
+        multiprocessing.active_children()
         p.start()
 
         return
@@ -211,5 +214,6 @@ class DefaultServicesController(base.ServicesController):
                 project_id,
                 service_name,
                 purge_url))
+        multiprocessing.active_children()
         p.start()
         return
