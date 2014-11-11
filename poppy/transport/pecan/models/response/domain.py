@@ -26,3 +26,4 @@ class Model(collections.OrderedDict):
     def __init__(self, domain):
         super(Model, self).__init__()
         self['domain'] = domain.domain
+        self['protocol'] = domain.protocol

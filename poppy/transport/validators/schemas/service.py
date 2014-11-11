@@ -49,6 +49,9 @@ class ServiceSchema(schema_base.SchemaBase):
                                         '(#(.*))?$',
                                         re.UNICODE
                                     )
+                                },
+                                'protocol': {
+                                    'type': 'string'
                                 }}},
                         'required': True,
                         'minItems': 1},
@@ -256,7 +259,10 @@ class ServiceSchema(schema_base.SchemaBase):
                                         re.UNICODE
                                     ),
                                     'required': True
-                                }}},
+                                },
+                                'protocol': {
+                                    'type': 'string'
+                                }}}
                     },
                     'origins': {
                         'type': 'array',

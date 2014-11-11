@@ -13,10 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.model.helpers import domain
+import ConfigParser
+import os
+
+import fastly
 
 
-def load_from_json(json_data):
-    domain_name = json_data.get("domain")
-    protocol = json_data.get("protocol", 'http')
-    return domain.Domain(domain_name, protocol)
+# get apikey
+configParser = ConfigParser.RawConfigParser()
+configFilePath = os.path.expanduser('~/.poppy/poppy.conf')
+configParser.read(configFilePath)
+apikey = configParser.get('drivers:provider:fastly', 'apikey')
+
+# Connects to Fastly using API key.
+client = fastly.connect(apikey)
+
+# List all services.
+services = client.list_services()
+
+for service in services:
+    client.deactivate_version(service.id, service.active_version)
+    client.delete_service(service.id)
