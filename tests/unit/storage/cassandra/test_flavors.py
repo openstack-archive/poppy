@@ -44,7 +44,14 @@ class CassandraStorageFlavorsTests(base.TestCase):
                 help='datacenter where the C* cluster hosted'))
         conf.register_opts(driver.CASSANDRA_OPTIONS,
                            group=driver.CASSANDRA_GROUP)
+
         cassandra_driver = driver.CassandraStorageDriver(conf)
+
+        migrations_patcher = mock.patch(
+            'cdeploy.migrator.Migrator'
+        )
+        migrations_patcher.start()
+        self.addCleanup(migrations_patcher.stop)
 
         # stubbed cassandra driver
         self.fc = flavors.FlavorsController(cassandra_driver)
