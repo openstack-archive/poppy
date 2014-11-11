@@ -25,7 +25,10 @@ LOG = log.getLogger(__name__)
 
 _DEFAULT_OPTIONS = [
     cfg.StrOpt('datacenter', default='',
-               help='Host datacenter of the API')
+               help='Host datacenter of the API'),
+    cfg.BoolOpt('project_id_in_url', default=False,
+                help='Indicating if the project id'
+                ' should be presented in the url')
 ]
 
 _DRIVER_OPTIONS = [
