@@ -88,6 +88,9 @@ class ServiceController(base.ServiceBase):
                 # of each group
                 dp = self._process_new_domain(classified_domain,
                                               post_data['rules'])
+                # TODO(tonytan4ever): also classify domains based on their
+                # protocols. http and https domains needs to be created
+                # with separate base urls.
                 resp = self.policy_api_client.put(
                     self.policy_api_base_url.format(
                         policy_name=dp),
@@ -329,6 +332,9 @@ class ServiceController(base.ServiceBase):
                         # in this case we should update existing policy
                         # instead of create a new policy
                         LOG.info('Start to update policy %s' % dp)
+                        # TODO(tonytan4ever): also classify domains based on
+                        # their protocols. http and https domains needs to be
+                        # created  with separate base urls.
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
                                 policy_name=dp),
@@ -448,6 +454,9 @@ class ServiceController(base.ServiceBase):
         try:
             for policy in policies:
                 LOG.info('Starting to delete policy %s' % policy)
+                # TODO(tonytan4ever): needs to look at if service
+                # domain is an https domain, if it is then a different
+                # base url is needed
                 resp = self.policy_api_client.delete(
                     self.policy_api_base_url.format(policy_name=policy))
                 LOG.info('akamai response code: %s' % resp.status_code)
