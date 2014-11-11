@@ -52,6 +52,8 @@ class ErrorHook(hooks.PecanHook):
         # poppy does not have internal exception/eternal exceptions
         # yet, so just catch the HTTPException from pecan.abort
         # and send out a a json body
+        import traceback
+        traceback.print_exc()
         message['message'] = str(exception)
         exception_payload['status'] = exception.status
 
