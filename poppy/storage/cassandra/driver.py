@@ -191,10 +191,21 @@ class CassandraStorageDriver(base.Driver):
         :returns session
         """
         # if the session has been shutdown, reopen a session
-        self.lock.acquire()
-        if self.session is None or self.session.is_shutdown:
-            self.connect()
-        self.lock.release()
+        # Add a time out when acquiring lock to avoid deadlock
+        # typically the lock acquiring will not hit timeout,
+        # in the case of massive database connection in a short
+        # amount of time, timeout can help avoid deadlock and
+        # can keep system running fine
+        # see https://docs.python.org/2/library/multiprocessing.html#
+        # synchronization-primitives for more details
+        lock_success = False
+        try:
+            lock_success = self.lock.acquire(block=True, timeout=10)
+            if self.session is None or self.session.is_shutdown:
+                self.connect()
+        finally:
+            if lock_success:
+                self.lock.release()
         return self.session
 
     def connect(self):
@@ -205,9 +216,11 @@ class CassandraStorageDriver(base.Driver):
         self.session = _connection(self.cassandra_conf, self.datacenter)
 
     def close_connection(self):
-        """close_connection."""
-
-        self.lock.acquire()
-        self.session.cluster.shutdown()
-        self.session.shutdown()
-        self.lock.release()
+        lock_success = False
+        try:
+            lock_success = self.lock.acquire(block=True, timeout=10)
+            self.session.cluster.shutdown()
+            self.session.shutdown()
+        finally:
+            if lock_success:
+                self.lock.release()
