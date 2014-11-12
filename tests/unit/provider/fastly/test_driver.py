@@ -25,6 +25,12 @@ FASTLY_OPTIONS = [
     cfg.StrOpt('apikey',
                default='123456',
                help='Fastly API Key'),
+    cfg.StrOpt('scheme',
+               default='http',
+               help='Scheme to connect to fastly host - http (or) https'),
+    cfg.StrOpt('host',
+               default='api.fastly.com',
+               help='Fastly API Host'),
 ]
 
 

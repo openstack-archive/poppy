@@ -27,6 +27,8 @@ LOG = logging.getLogger(__name__)
 
 FASTLY_OPTIONS = [
     cfg.StrOpt('apikey', help='Fastly API Key'),
+    cfg.StrOpt('host', help='Fastly Host'),
+    cfg.StrOpt('scheme', help='Fastly Scheme - HTTP (or) HTTPS'),
 ]
 
 FASTLY_GROUP = 'drivers:provider:fastly'
@@ -42,6 +44,15 @@ class CDNProvider(base.Driver):
                                  group=FASTLY_GROUP)
         self.fastly_conf = self._conf[FASTLY_GROUP]
 
+        # Override the hardcoded values in the fastly client with
+        # values defined in poppy.conf.
+        module_name = 'fastly'
+        fastly_host = 'FASTLY_HOST'
+        fastly_scheme = 'FASTLY_SCHEME'
+        obj = globals()[module_name]
+        setattr(obj, fastly_host, self.fastly_conf.host)
+        setattr(obj, fastly_scheme, self.fastly_conf.scheme)
+
         self.fastly_client = fastly.connect(self.fastly_conf.apikey)
 
     def is_alive(self):
@@ -49,7 +60,8 @@ class CDNProvider(base.Driver):
 
         :return boolean
         """
-        response = requests.get('https://api.fastly.com/')
+        fastly_url = self.fastly_conf.scheme + self.fastly_conf.host
+        response = requests.get(fastly_url)
         if response.status_code == 200:
             return True
         return False
