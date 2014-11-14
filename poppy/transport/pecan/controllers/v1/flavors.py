@@ -41,7 +41,9 @@ class FlavorsController(base.Controller):
         flavor_list = [
             flavor_response.Model(item, pecan.request) for item in result]
 
-        return flavor_list
+        return {
+            'flavors': flavor_list
+        }
 
     @pecan.expose('json')
     def get_one(self, flavor_id):
