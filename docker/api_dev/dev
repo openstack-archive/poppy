@@ -1,0 +1,11 @@
+#!/bin/sh
+
+THIS_DIR=$(dirname $0)
+PROJECT_ROOT_DIR=$THIS_DIR/../..
+
+# Copy Dockerfile from this folder to project root folder
+cp $THIS_DIR/Dockerfile $PROJECT_ROOT_DIR/
+
+# Bring up development environment
+cd $THIS_DIR/../fig
+FIG_FILE=fig_dev.yml fig $@

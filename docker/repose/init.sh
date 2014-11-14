@@ -11,4 +11,4 @@ sed -i -e "s/DESTINATION_HOST/$DESTINATION_HOST/"              $CONFIG/system-mo
 sed -i -e "s/DESTINATION_PORT/$DESTINATION_PORT/"               $CONFIG/system-model.cfg.xml
 
 echo "Starting Repose"
-java -jar /usr/share/lib/repose/repose-valve.jar
+java -jar /usr/share/repose/repose-valve.jar
