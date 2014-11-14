@@ -27,7 +27,6 @@ import pecan
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import exceptions
 
-
 def req_accepts_json_pecan(request, desired_content_type='application/json'):
     # Assume the transport is pecan for now
     # for falcon the syntax should actually be:
