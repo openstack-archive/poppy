@@ -37,6 +37,7 @@ CQL_LIST_SERVICES = '''
     SELECT project_id,
         service_name,
         domains,
+        flavor_id,
         origins,
         caching_rules,
         restrictions,
@@ -52,6 +53,7 @@ CQL_GET_SERVICE = '''
     SELECT project_id,
         service_name,
         domains,
+        flavor_id,
         origins,
         caching_rules,
         restrictions,
@@ -322,7 +324,7 @@ class ServicesController(base.ServicesController):
                                  o.get('ssl', False))
                    for o in origins]
         domains = [domain.Domain(d['domain']) for d in domains]
-        flavor_ref = result.get('flavor_ref')
+        flavor_ref = result.get('flavor_id')
         s = service.Service(name, domains, origins, flavor_ref)
         provider_detail_results = result.get('provider_details') or {}
         provider_details_dict = {}
