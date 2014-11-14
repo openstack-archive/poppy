@@ -107,12 +107,12 @@ class ServiceController(base.ServiceBase):
             # this exception branch will most likely for a network failure
             return self.responder.failed('failed to delete service')
 
-    def purge(self, pullzone_id, purge_urls=None):
+    def purge(self, pullzone_id, purge_url=None):
         try:
-            purge_response = self.client.purge(pullzone_id, purge_urls)
+            purge_response = self.client.purge(pullzone_id, purge_url)
             if purge_response['code'] != 200:
                 return self.responder.failed('failed to PURGE service')
-            return self.responder.purged(pullzone_id, purge_urls=purge_urls)
+            return self.responder.purged(pullzone_id, purge_url=purge_url)
         except Exception:
             return self.responder.failed("failed to PURGE service")
 
