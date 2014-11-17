@@ -28,8 +28,14 @@ from tests.functional.transport.pecan import base
 @ddt.ddt
 class FlavorControllerTest(base.FunctionalTest):
 
+    def setUp(self):
+        super(FlavorControllerTest, self).setUp()
+
+        self.project_id = str(uuid.uuid1())
+
     def test_get_all(self):
-        response = self.app.get('/v1.0/flavors')
+        response = self.app.get('/v1.0/flavors',
+                                headers={'X-Project-ID': self.project_id})
         self.assertEqual(200, response.status_code)
 
     @ddt.file_data('data_create_flavor.json')
@@ -43,12 +49,13 @@ class FlavorControllerTest(base.FunctionalTest):
         mock_manager.get.return_value = mock_response
 
         url = u'/v1.0/flavors/{0}'.format(uri.encode(value['id']))
-        response = self.app.get(url)
+        response = self.app.get(url, headers={'X-Project-ID': self.project_id})
 
         self.assertEqual(200, response.status_code)
 
     def test_get_not_found(self):
         response = self.app.get('/v1.0/flavors/{0}'.format("non_exist"),
+                                headers={'X-Project-ID': self.project_id},
                                 status=404,
                                 expect_errors=True)
 
@@ -59,7 +66,9 @@ class FlavorControllerTest(base.FunctionalTest):
 
         response = self.app.post('/v1.0/flavors',
                                  params=json.dumps(value),
-                                 headers={"Content-Type": "application/json"},
+                                 headers={
+                                     "Content-Type": "application/json",
+                                     'X-Project-ID': self.project_id},
                                  status=400,
                                  expect_errors=True)
 
@@ -73,7 +82,9 @@ class FlavorControllerTest(base.FunctionalTest):
         # create with good data
         response = self.app.post('/v1.0/flavors',
                                  params=json.dumps(value),
-                                 headers={"Content-Type": "application/json"},
+                                 headers={
+                                     "Content-Type": "application/json",
+                                     'X-Project-ID': self.project_id},
                                  expect_errors=True)
 
         self.assertEqual(400, response.status_code)
@@ -85,10 +96,15 @@ class FlavorControllerTest(base.FunctionalTest):
         # create with good data
         response = self.app.post('/v1.0/flavors',
                                  params=json.dumps(value),
-                                 headers={"Content-Type": "application/json"})
+                                 headers={
+                                     "Content-Type": "application/json",
+                                     'X-Project-ID': self.project_id})
         self.assertEqual(201, response.status_code)
 
     def test_delete(self):
-        response = self.app.delete('/v1.0/flavors/{0}'.format(uuid.uuid1()))
+        response = self.app.delete(
+            '/v1.0/flavors/{0}'.format(uuid.uuid1()),
+            headers={'X-Project-ID': self.project_id}
+        )
 
         self.assertEqual(204, response.status_code)
