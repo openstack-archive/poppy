@@ -14,11 +14,17 @@
 # limitations under the License.
 
 import pecan
+from pecan import hooks
 
 from poppy.transport.pecan.controllers import base
+from poppy.transport.pecan import hooks as poppy_hooks
 
 
-class PingController(base.Controller):
+class PingController(base.Controller, hooks.HookController):
+
+    # no poppy_hooks.Context() required here as
+    # project_id is not required to be submitted
+    __hooks__ = [poppy_hooks.Error()]
 
     @pecan.expose()
     def get(self):

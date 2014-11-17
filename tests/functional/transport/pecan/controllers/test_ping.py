@@ -13,12 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import uuid
+
 from tests.functional.transport.pecan import base
 
 
 class TestPing(base.FunctionalTest):
 
     def test_ping(self):
-        response = self.app.get('/v1.0/ping')
+        response = self.app.get('/v1.0/ping',
+                                headers={
+                                    'X-Project-ID': str(uuid.uuid1())
+                                })
 
+        self.assertEqual(response.status_code, 204)
+
+    def test_ping_no_project_id(self):
+        response = self.app.get('/v1.0/ping')
         self.assertEqual(response.status_code, 204)

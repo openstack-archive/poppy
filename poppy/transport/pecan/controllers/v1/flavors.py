@@ -16,9 +16,11 @@
 import json
 
 import pecan
+from pecan import hooks
 
 from poppy.common import uri
 from poppy.transport.pecan.controllers import base
+from poppy.transport.pecan import hooks as poppy_hooks
 from poppy.transport.pecan.models.request import flavor as flavor_request
 from poppy.transport.pecan.models.response import flavor as flavor_response
 from poppy.transport.validators import helpers
@@ -28,7 +30,10 @@ from poppy.transport.validators.stoplight import helpers as stoplight_helpers
 from poppy.transport.validators.stoplight import rule
 
 
-class FlavorsController(base.Controller):
+class FlavorsController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
     """Flavors Controller."""
 
     @pecan.expose('json')

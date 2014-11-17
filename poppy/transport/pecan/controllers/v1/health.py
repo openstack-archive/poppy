@@ -14,12 +14,17 @@
 # limitations under the License.
 
 import pecan
+from pecan import hooks
 
 from poppy.transport.pecan.controllers import base
+from poppy.transport.pecan import hooks as poppy_hooks
 from poppy.transport.pecan.models.response import health as health_response
 
 
-class StorageHealthController(base.Controller):
+class StorageHealthController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
     """Storage Health Controller."""
 
     @pecan.expose('json')
@@ -41,7 +46,9 @@ class StorageHealthController(base.Controller):
             pecan.response.status = 404
 
 
-class ProviderHealthController(base.Controller):
+class ProviderHealthController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
     @pecan.expose('json')
     def get(self, provider_name):
@@ -56,7 +63,9 @@ class ProviderHealthController(base.Controller):
             pecan.response.status = 404
 
 
-class HealthController(base.Controller):
+class HealthController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
     @pecan.expose('json')
     def get(self):
