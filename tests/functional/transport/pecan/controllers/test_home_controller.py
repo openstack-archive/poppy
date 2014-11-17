@@ -13,15 +13,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import uuid
+
 from poppy.manager.default import home
 from tests.functional.transport.pecan import base
 
 
 class HomeControllerTest(base.FunctionalTest):
 
+    def setUp(self):
+        super(HomeControllerTest, self).setUp()
+
+        self.project_id = str(uuid.uuid1())
+
     def test_get_all(self):
-        response = self.app.get('/v1.0/00001')
+        response = self.app.get('/v1.0/',
+                                headers={'X-Project-ID': self.project_id})
 
         self.assertEqual(200, response.status_code)
         # Temporary until actual implementation
         self.assertEqual(home.JSON_HOME, response.json)
+
+    def test_get_without_project_id(self):
+        response = self.app.get('/v1.0/',
+                                expect_errors=True)
+
+        self.assertEqual(400, response.status_code)

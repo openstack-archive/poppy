@@ -14,11 +14,15 @@
 # limitations under the License.
 
 import pecan
+from pecan import hooks
 
 from poppy.transport.pecan.controllers import base
+from poppy.transport.pecan import hooks as poppy_hooks
 
 
-class HomeController(base.Controller):
+class HomeController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
     @pecan.expose('json')
     def get(self):
