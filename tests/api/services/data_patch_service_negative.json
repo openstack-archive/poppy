@@ -22,17 +22,8 @@
                      "rules": [{"name" : "index",
                                 "request_url" : "/index.htm"}]}]
     },
-    "invalid_domain_value": {
-        "domains": [{"domain": "ftp://BOOOOOOM"},
-                    {"domain": "abc://BAAAAAAM"}]
-    },
     "empty_origin_list": {
         "origins": []
-    },
-    "invalid_origin_value": {
-        "origins": [{"origin": "^%}invalid_origin_value",
-                     "port": 443,
-                     "ssl": false}]
     },
     "non_numeric_origin_port": {
         "service_name": "non_numeric_origin_port",

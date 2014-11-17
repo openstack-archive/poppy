@@ -244,7 +244,7 @@ class TestServiceActions(base.TestBase):
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
-        self.assertEqual(body['status'], 'updating')
+        self.assertEqual(body['status'], u'update_in_progress')
         self.client.wait_for_service_status(
             service_name=self.service_name,
             status='deployed',

@@ -139,8 +139,16 @@ class ServiceSchema(schema_base.SchemaBase):
             'PATCH': {
                 'type': 'object',
                 'properties': {
+                    'service_name': {
+                        'type': 'string',
+                        'required': False,
+                        'minLength': 3,
+                        'maxLength': 256
+                    },
                     'domains': {
                         'type': 'array',
+                        'required': False,
+                        'minItems': 1,
                         'items': {
                             'type': 'object',
                             'properties': {
@@ -157,6 +165,8 @@ class ServiceSchema(schema_base.SchemaBase):
                     },
                     'origins': {
                         'type': 'array',
+                        'required': False,
+                        'minItems': 1,
                         'items': {
                             'type': 'object',
                             'properties': {
