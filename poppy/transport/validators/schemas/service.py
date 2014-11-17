@@ -31,6 +31,8 @@ class ServiceSchema(schema_base.SchemaBase):
                     'name': {
                         'type': 'string',
                         'required': True,
+                        'minLength': 3,
+                        'maxLength': 256
                     },
                     'domains': {
                         'type': 'array',
