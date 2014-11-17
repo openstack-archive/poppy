@@ -39,6 +39,7 @@ class ServiceSchema(schema_base.SchemaBase):
                             'properties': {
                                 'domain': {
                                     'type': 'string',
+                                    'required': True,
                                     'pattern': re.compile(
                                         '^(([^:/?#]+):)?'
                                         '(//([^/?#]*))?'
