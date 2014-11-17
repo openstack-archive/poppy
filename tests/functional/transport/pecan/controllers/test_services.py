@@ -58,7 +58,10 @@ class ServiceControllerTest(base.FunctionalTest):
         }
         response = self.app.post('/v1.0/flavors',
                                  params=json.dumps(flavor_json),
-                                 headers={"Content-Type": "application/json"})
+                                 headers={
+                                     "Content-Type": "application/json",
+                                     "X-Project-ID": self.project_id})
+
         self.assertEqual(201, response.status_code)
 
         # create an initial service to be used by the tests
@@ -258,9 +261,10 @@ class ServiceControllerTest(base.FunctionalTest):
                                   expect_errors=True)
         self.assertEqual(404, response.status_code)
 
-        response = self.app.patch("/v1.0/" + self.project_id,
+        response = self.app.patch("/v1.0/",
                                   headers={
-                                      'Content-Type': 'application/json'
+                                      'Content-Type': 'application/json',
+                                      'X-Project-ID': self.project_id
                                   },
                                   expect_errors=True)
         self.assertEqual(404, response.status_code)
@@ -285,7 +289,8 @@ class ServiceControllerTest(base.FunctionalTest):
         response = self.app.delete('/v1.0/%s/services/non_exist_service_name' %
                                    self.project_id,
                                    headers={
-                                       'Content-Type': 'application/json'
+                                       'Content-Type': 'application/json',
+                                       'X-Project-ID': self.project_id
                                    },
                                    expect_errors=True)
         self.assertEqual(404, response.status_code)

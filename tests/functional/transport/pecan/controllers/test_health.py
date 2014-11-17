@@ -13,13 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import uuid
+
 import mock
 
 from poppy.common import util
 from tests.functional.transport.pecan import base
 
 
-class TestHealth(base.FunctionalTest):
+class HealthControllerTest(base.FunctionalTest):
+
+    def setUp(self):
+        super(HealthControllerTest, self).setUp()
+
+        self.project_id = str(uuid.uuid1())
 
     @mock.patch('requests.get')
     def test_health(self, mock_requests):
@@ -27,7 +34,8 @@ class TestHealth(base.FunctionalTest):
             {'content': '', 'status_code': 200})
         mock_requests.return_value = response_object
 
-        response = self.app.get('/v1.0/health')
+        response = self.app.get('/v1.0/health',
+                                headers={'X-Project-ID': self.project_id})
         self.assertEqual(200, response.status_code)
 
     @mock.patch('requests.get')
@@ -36,16 +44,19 @@ class TestHealth(base.FunctionalTest):
             {'content': '', 'status_code': 200})
         mock_requests.return_value = response_object
 
-        response = self.app.get('/v1.0/health')
+        response = self.app.get('/v1.0/health',
+                                headers={'X-Project-ID': self.project_id})
         for name in response.json['storage']:
-                endpoint = '/v1.0/health/storage/{0}'.format(
-                    name)
-                response = self.app.get(endpoint)
-                self.assertEqual(200, response.status_code)
-                self.assertIn('true', str(response.body))
+            endpoint = '/v1.0/health/storage/{0}'.format(
+                name)
+            response = self.app.get(endpoint,
+                                    headers={'X-Project-ID': self.project_id})
+            self.assertEqual(200, response.status_code)
+            self.assertIn('true', str(response.body))
 
     def test_get_unknown_storage(self):
         response = self.app.get('/v1.0/health/storage/unknown',
+                                headers={'X-Project-ID': self.project_id},
                                 expect_errors=True)
         self.assertEqual(404, response.status_code)
 
@@ -55,15 +66,18 @@ class TestHealth(base.FunctionalTest):
             {'content': '', 'status_code': 200})
         mock_requests.return_value = response_object
 
-        response = self.app.get('/v1.0/health')
+        response = self.app.get('/v1.0/health',
+                                headers={'X-Project-ID': self.project_id})
         for name in response.json['providers']:
-                endpoint = '/v1.0/health/provider/{0}'.format(
-                    name)
-                response = self.app.get(endpoint)
-                self.assertEqual(200, response.status_code)
-                self.assertIn('true', str(response.body))
+            endpoint = '/v1.0/health/provider/{0}'.format(
+                name)
+            response = self.app.get(endpoint,
+                                    headers={'X-Project-ID': self.project_id})
+            self.assertEqual(200, response.status_code)
+            self.assertIn('true', str(response.body))
 
     def test_get_unknown_provider(self):
         response = self.app.get('/v1.0/health/provider/unknown',
+                                headers={'X-Project-ID': self.project_id},
                                 expect_errors=True)
         self.assertEqual(404, response.status_code)

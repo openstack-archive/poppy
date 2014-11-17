@@ -27,7 +27,7 @@ class ContextHookTest(base.FunctionalTest):
         self.headers = {'X-Auth-Token': str(uuid.uuid4())}
 
     def test_project_id_in_header(self):
-        self.headers['X-Project-Id'] = '000001'
+        self.headers['X-Project-Id'] = str(uuid.uuid1())
         response = self.app.get('/v1.0', headers=self.headers)
 
         self.assertEqual(200, response.status_code)
@@ -35,9 +35,9 @@ class ContextHookTest(base.FunctionalTest):
         # Temporary until actual implementation
         self.assertEqual(home.JSON_HOME, response.json)
 
-    def test_project_id_in_url(self):
-        response = self.app.get('/v1.0/000001', headers=self.headers)
+    def test_project_id_missing(self):
+        response = self.app.get('/v1.0/',
+                                headers=self.headers,
+                                expect_errors=True)
 
-        self.assertEqual(200, response.status_code)
-        # Temporary until actual implementation
-        self.assertEqual(home.JSON_HOME, response.json)
+        self.assertEqual(400, response.status_code)
