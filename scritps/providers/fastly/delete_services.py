@@ -37,5 +37,6 @@ client = fastly.connect(apikey)
 services = client.list_services()
 
 for service in services:
-    client.deactivate_version(service.id, service.active_version)
+    service_details = client.get_service_details(service.id)
+    client.deactivate_version(service.id, service_details.active_version['number'])
     client.delete_service(service.id)
