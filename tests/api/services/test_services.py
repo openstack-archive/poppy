@@ -32,6 +32,16 @@ class TestCreateService(providers.TestProviderBase):
     def setUp(self):
         super(TestCreateService, self).setUp()
         self.service_name = str(uuid.uuid1())
+        self.flavor_id = self.test_config.default_flavor
+
+        if self.test_config.generate_flavors:
+            # create the flavor
+            self.flavor_id = str(uuid.uuid1())
+            self.client.create_flavor(flavor_id=self.flavor_id,
+                                      provider_list=[{
+                                          "provider": "fastly",
+                                          "links": [{"href": "www.fastly.com",
+                                                     "rel": "provider_url"}]}])
 
     @ddt.file_data('data_create_service.json')
     def test_create_service(self, test_data):
@@ -39,13 +49,13 @@ class TestCreateService(providers.TestProviderBase):
         domain_list = test_data['domain_list']
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
-        flavor = test_data['flavor_ref']
+        # flavor = test_data['flavor_ref']
 
         resp = self.client.create_service(service_name=self.service_name,
                                           domain_list=domain_list,
                                           origin_list=origin_list,
                                           caching_list=caching_list,
-                                          flavor_ref=flavor)
+                                          flavor_ref=self.flavor_id)
         self.assertEqual(resp.status_code, 202)
 
         resp = self.client.get_service(service_name=self.service_name)
@@ -63,8 +73,8 @@ class TestCreateService(providers.TestProviderBase):
         # Verify the service is updated at all Providers for the flavor
         if self.test_config.provider_validation:
             service_details = (
-                self.getServiceFromFlavor(flavor, self.service_name))
-            provider_list = self.config.flavor[flavor]
+                self.getServiceFromFlavor(self.flavor_id, self.service_name))
+            provider_list = self.config.flavor[self.flavor_id]
 
             # Verify that the service stored in each provider (that is part of
             # the flavor) is what Poppy sent them.
@@ -92,22 +102,27 @@ class TestCreateService(providers.TestProviderBase):
         domain_list = test_data['domain_list']
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
-        flavor = test_data['flavor_ref']
+        # flavor = test_data['flavor_ref']
 
         resp = self.client.create_service(service_name=service_name,
                                           domain_list=domain_list,
                                           origin_list=origin_list,
                                           caching_list=caching_list,
-                                          flavor_ref=flavor)
+                                          flavor_ref=self.flavor_id)
         self.assertEqual(resp.status_code, 400)
 
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
+
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
+
         super(TestCreateService, self).tearDown()
 
 
 @ddt.ddt
 class TestListServices(base.TestBase):
+
     """Tests for List Services."""
 
     def _create_test_service(self):
@@ -128,12 +143,19 @@ class TestListServices(base.TestBase):
                                    domain_list=self.domain_list,
                                    origin_list=self.origin_list,
                                    caching_list=self.caching_list,
-                                   flavor_ref='standard')
+                                   flavor_ref=self.flavor_id)
         return service_name
 
     def setUp(self):
         super(TestListServices, self).setUp()
         self.service_list = []
+        self.flavor_id = str(uuid.uuid1())
+        # ensure the flavor referred to exists
+        self.client.create_flavor(flavor_id=self.flavor_id,
+                                  provider_list=[{
+                                      "provider": "fastly",
+                                      "links": [{"href": "www.fastly.com",
+                                                 "rel": "provider_url"}]}])
 
     def test_list_single_service(self):
         self.service_list.append(self._create_test_service())
@@ -144,7 +166,7 @@ class TestListServices(base.TestBase):
         self.assertSchema(body, services.list_services)
 
     def test_list_services_no_service(self):
-        self.skipTest('Non deterministic - Replace this with an unit test?')
+        # self.skipTest('Non deterministic - Replace this with an unit test?')
         resp = self.client.list_services()
         self.assertEqual(resp.status_code, 200)
 
@@ -173,9 +195,6 @@ class TestListServices(base.TestBase):
         self.assertEqual(len(body['services']), 10)
         self.assertSchema(body, services.list_services)
 
-    # TODO(malini):
-    # Uncomment after bug fix - https://bugs.launchpad.net/poppy/+bug/1384271
-    # @ddt.data(-1, -10000000000, 0, 10000000, 'invalid', '学校', '')
     @ddt.data(-1, -10000000000, 0, 10000000, 'invalid', '')
     def test_list_services_invalid_limits(self, limit):
         url_param = {'limit': limit}
@@ -196,6 +215,9 @@ class TestListServices(base.TestBase):
     def tearDown(self):
         for service in self.service_list:
             self.client.delete_service(service_name=service)
+
+        self.client.delete_flavor(flavor_id=self.flavor_id)
+
         super(TestListServices, self).tearDown()
 
 
@@ -207,6 +229,14 @@ class TestServiceActions(base.TestBase):
     def setUp(self):
         super(TestServiceActions, self).setUp()
         self.service_name = str(uuid.uuid1())
+        self.flavor_id = str(uuid.uuid1())
+        # ensure the flavor referred to exists
+        self.client.create_flavor(flavor_id=self.flavor_id,
+                                  provider_list=[{
+                                      "provider": "fastly",
+                                      "links": [{"href": "www.fastly.com",
+                                                 "rel": "provider_url"}]}])
+
         domain = str(uuid.uuid1()) + '.com'
         self.domain_list = [{"domain": domain}]
 
@@ -223,7 +253,7 @@ class TestServiceActions(base.TestBase):
                                    domain_list=self.domain_list,
                                    origin_list=self.origin_list,
                                    caching_list=self.caching_list,
-                                   flavor_ref='standard')
+                                   flavor_ref=self.flavor_id)
         self.client.wait_for_service_status(
             service_name=self.service_name,
             status='deployed',
@@ -338,4 +368,5 @@ class TestServiceActions(base.TestBase):
 
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
+        self.client.delete_flavor(flavor_id=self.flavor_id)
         super(TestServiceActions, self).tearDown()
