@@ -208,14 +208,14 @@ class ServicesController(base.ServicesController):
         else:
             raise ValueError("Service %s already exists..." % service_name)
 
-        domains = [json.dumps(domain.to_dict())
-                   for domain in service_obj.domains]
-        origins = [json.dumps(origin.to_dict())
-                   for origin in service_obj.origins]
+        domains = [json.dumps(d.to_dict())
+                   for d in service_obj.domains]
+        origins = [json.dumps(o.to_dict())
+                   for o in service_obj.origins]
         caching_rules = [json.dumps(caching_rule.to_dict())
                          for caching_rule in service_obj.caching]
-        restrictions = [json.dumps(restriction.to_dict())
-                        for restriction in service_obj.restrictions]
+        restrictions = [json.dumps(r.to_dict())
+                        for r in service_obj.restrictions]
 
         # creates a new service
         args = {
@@ -233,14 +233,14 @@ class ServicesController(base.ServicesController):
 
     def update(self, project_id, service_name, service_obj):
 
-        domains = [json.dumps(domain.to_dict())
-                   for domain in service_obj.domains]
-        origins = [json.dumps(origin.to_dict())
-                   for origin in service_obj.origins]
+        domains = [json.dumps(d.to_dict())
+                   for d in service_obj.domains]
+        origins = [json.dumps(o.to_dict())
+                   for o in service_obj.origins]
         caching_rules = [json.dumps(caching_rule.to_dict())
                          for caching_rule in service_obj.caching]
-        restrictions = [json.dumps(restriction.to_dict())
-                        for restriction in service_obj.restrictions]
+        restrictions = [json.dumps(r.to_dict())
+                        for r in service_obj.restrictions]
 
         # updates an existing new service
         args = {
@@ -341,30 +341,39 @@ class ServicesController(base.ServicesController):
         :returns formatted result
         """
         name = result.get('service_name')
-        origins = [json.loads(o) for o in result.get('origins', [])]
-        domains = [json.loads(d) for d in result.get('domains', [])]
+
+        flavor_ref = result.get('flavor_id')
+        origins = [json.loads(o) for o in result.get('origins', []) or []]
+        domains = [json.loads(d) for d in result.get('domains', []) or []]
+        restrictions = [json.loads(r)
+                        for r in result.get('restrictions', []) or []]
+
+        # create models for each item
         origins = [
             origin.Origin(
-                o['origin'], o.get(
-                    'port', 80), o.get(
-                    'ssl', False), [
+                o['origin'],
+                o.get('port', 80),
+                o.get('ssl', False), [
                     rule.Rule(
                         rule_i.get('name'),
                         request_url=rule_i.get('request_url'))
-                        for rule_i in o.get(
-                            'rules', [])]) for o in origins]
-        domains = [domain.Domain(d['domain']) for d in domains]
-        flavor_ref = result.get('flavor_id')
+                    for rule_i in o.get(
+                        'rules', [])]) for o in origins]
 
-        restrictions = [json.loads(r) for r in result.get('restrictions', [])]
-        restrictions_res = [restriction.Restriction(
-            restriction_i.get('name'),
-            [rule.Rule(rule_i.get('name'),
-                       referrer=rule_i.get('referrer'))
-             for rule_i in restriction_i['rules']])
-            for restriction_i in restrictions]
-        s = service.Service(name, domains, origins, flavor_ref)
-        s.restrictions = restrictions_res
+        domains = [domain.Domain(d['domain'])
+                   for d in domains]
+
+        restrictions = [restriction.Restriction(
+            r.get('name'),
+            [rule.Rule(r_rule.get('name'),
+                       referrer=r_rule.get('referrer'))
+             for r_rule in r['rules']])
+            for r in restrictions]
+
+        # create the service object
+        s = service.Service(name, domains, origins, flavor_ref, restrictions)
+
+        # format the provider details
         provider_detail_results = result.get('provider_details') or {}
         provider_details_dict = {}
         for provider_name in provider_detail_results:
@@ -379,4 +388,6 @@ class ServicesController(base.ServicesController):
                 status=status)
             provider_details_dict[provider_name] = provider_detail_obj
         s.provider_details = provider_details_dict
+
+        # return the service
         return s
