@@ -62,7 +62,8 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
                                       purge_url)
         except LookupError as e:
             pecan.abort(404, detail=str(e))
-        pecan.response.status = 202
+
+        return pecan.Response(None, 202)
 
 
 class ServicesController(base.Controller, hooks.HookController):
@@ -153,8 +154,8 @@ class ServicesController(base.Controller, hooks.HookController):
             uri.encode(u'{0}/v1.0/services/{1}'.format(
                 pecan.request.host_url,
                 service_name)))
-        pecan.response.status = 202
-        pecan.response.headers["Location"] = service_url
+
+        return pecan.Response(None, 202, headers={"Location": service_url})
 
     @pecan.expose('json')
     def delete(self, service_name):
@@ -163,7 +164,8 @@ class ServicesController(base.Controller, hooks.HookController):
             services_controller.delete(self.project_id, service_name)
         except LookupError as e:
             pecan.abort(404, detail=str(e))
-        pecan.response.status = 202
+
+        return pecan.Response(None, 202)
 
     @pecan.expose('json')
     @decorators.validate(
@@ -204,5 +206,5 @@ class ServicesController(base.Controller, hooks.HookController):
             uri.encode(u'{0}/v1.0/services/{1}'.format(
                 pecan.request.host_url,
                 service_name)))
-        pecan.response.status = 202
-        pecan.response.headers["Location"] = service_url
+
+        return pecan.Response(None, 202, headers={"Location": service_url})
