@@ -76,7 +76,7 @@ get_service = {
                    # TODO(malini): Remove creating from the status list
                    # after status update patch is merged.
                    'enum': ['create_in_progress', 'creating',
-                            'delete_in_progress', 'deployed']},
+                            'delete_in_progress', 'deployed', 'failed']},
         'restrictions': restrictions,
         'flavor_ref': flavor_id
     },
