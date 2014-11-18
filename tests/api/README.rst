@@ -39,3 +39,11 @@ run via tox. It is assumed you already have the Cassandra instance up &
 running locally. You can make the API tests part of tox, by overriding the
 default positional argument in tox.ini::
     example : tox -- --exclude=None
+
+Alternatively,  you can run tox with docker containers running Cassandra::
+
+    This will require docker (or boot2docker for MacOSX) to already be installed on the system.
+    Dont forget to update your ~/.poppy/tests.conf to point to your docker ip.
+
+    example : tox -e apidocker
+
