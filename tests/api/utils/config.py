@@ -52,6 +52,16 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         """Int value to set timeout for status check."""
         return int(self.get('status_check_retry_timeout'))
 
+    @property
+    def generate_flavors(self):
+        """Boolean value to create unique flavors in tests."""
+        return self.get_boolean('generate_flavors')
+
+    @property
+    def default_flavor(self):
+        """String value to set the default flavor to use in tests."""
+        return self.get('default_flavor')
+
 
 class AuthConfig(data_interfaces.ConfigSectionInterface):
     """Defines the auth config values."""

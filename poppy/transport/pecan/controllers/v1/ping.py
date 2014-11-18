@@ -28,4 +28,4 @@ class PingController(base.Controller, hooks.HookController):
 
     @pecan.expose()
     def get(self):
-        pecan.response.status = 204
+        return pecan.Response(None, 204)
