@@ -2,7 +2,6 @@ Before Starting
 ---------------
 
 The following files should exist in this folder before running Dockerfile
-* docker_rsa (private key) -> public key should be published to the private git repo
 * poppy.conf (desired configuration for poppy api)
 * logging.conf (desired logging configuration file)
 
