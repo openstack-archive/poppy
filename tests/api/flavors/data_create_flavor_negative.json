@@ -45,20 +45,14 @@
     "provider_list": [
         {"provider": "fastly",
          "links": [{"href": "", "rel": "provider_url"}]}]},
-"invalid_href": {
-    "limits": [
-        {"origins": {"min": 1, "max": 5}},
-        {"domains": {"min": 1, "max": 5}},
-        {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
-    "provider_list": [
-        {"provider": "fastly",
-         "links": [{"href": "watermelon", "rel": "provider_url"}]}]},
 "empty_limits": {
+    "skip_test": true,
     "limits": [],
     "provider_list": [
         {"provider": "fastly",
          "links": [{"href": "watermelon", "rel": "provider_url"}]}]},
 "missing_limits_origins": {
+    "skip_test": true,
     "limits": [
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
@@ -66,6 +60,7 @@
         {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "missing_limits_domains": {
+    "skip_test": true,
     "limits": [
         {"domains": {"min": 1, "max": 5}},
         {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
@@ -73,6 +68,7 @@
         {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "missing_limits_caching": {
+    "skip_test": true,
     "limits": [
         {"origins": {"min": 1, "max": 5}},
         {"domains": {"min": 1, "max": 5}}],
@@ -80,6 +76,7 @@
         {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "empty_limits_origins": {
+    "skip_test": true,
     "limits": [
         {"origins": {}},
         {"domains": {"min": 1, "max": 5}},
@@ -88,6 +85,7 @@
         {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "empty_limits_domains": {
+    "skip_test": true,
     "limits": [
         {"origins": {"min": 1, "max": 5}},
         {"domains": {}},
@@ -96,6 +94,7 @@
         {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "empty_limits_caching": {
+    "skip_test": true,
     "limits": [
         {"origins": {"min": 1, "max": 5}},
         {"domains": {"min": 1, "max": 5}},
@@ -104,6 +103,7 @@
         {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "invalid_limits_origins": {
+    "skip_test": true,
     "limits": [
         {"origins": {"min": 1, "max": -5}},
         {"domains": {"min": 1, "max": 5}},
@@ -112,6 +112,7 @@
         {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "invalid_limits_domains": {
+    "skip_test": true,
     "limits": [
         {"origins": {"min": 1, "max": 5}},
         {"domains": {"min": 100000000000000000000000000000000000000, "max": 5}},
@@ -120,6 +121,7 @@
         {"provider": "fastly",
          "links": [{"href": "www.watermelon.com", "rel": "provider_url"}]}]},
 "invalid_limits_caching": {
+    "skip_test": true,
     "limits": [
         {"origins": {"min": 1, "max": 5}},
         {"domains": {"min": 1, "max": 5}},

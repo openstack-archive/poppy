@@ -57,7 +57,9 @@ class TestCreateFlavors(base.TestBase):
 
     @ddt.file_data('data_create_flavor_negative.json')
     def test_create_flavor_negative_tests(self, test_data):
-        self.skipTest('Not Implemented - bp# post-flavors-error-handling')
+        if 'skip_test' in test_data:
+            self.skipTest('Not Implemented - bp# post-flavors-error-handling')
+
         provider_list = test_data['provider_list']
         limits = test_data['limits']
 
