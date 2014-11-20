@@ -162,7 +162,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                         '([^?#]*)(\?([^#]*))?'
                                         '(#(.*))?$',
                                         re.UNICODE
-                                    )
+                                    ),
+                                    'required': True
                                 }}},
                     },
                     'origins': {
