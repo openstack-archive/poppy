@@ -49,11 +49,12 @@ class ErrorHook(hooks.PecanHook):
         }
         log_level = logging.ERROR
 
-        # poppy does not have internal exception/eternal exceptions
+        # poppy does not have internal exception/external exceptions
         # yet, so just catch the HTTPException from pecan.abort
         # and send out a a json body
         message['message'] = str(exception)
-        exception_payload['status'] = exception.status
+        if hasattr(exception, 'status'):
+            exception_payload['status'] = exception.status
 
         LOG.log(
             log_level,
