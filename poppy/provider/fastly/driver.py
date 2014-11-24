@@ -61,7 +61,7 @@ class CDNProvider(base.Driver):
 
         :return boolean
         """
-        fastly_url = self.fastly_conf.scheme + self.fastly_conf.host
+        fastly_url = self.fastly_conf.scheme + '://' + self.fastly_conf.host
         response = requests.get(fastly_url)
         if response.status_code == 200:
             return True
