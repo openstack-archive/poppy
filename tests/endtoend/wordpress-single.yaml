@@ -1,0 +1,390 @@
+heat_template_version: 2013-05-23
+
+description: |
+  This is a Heat template to deploy a single Linux server running WordPress.
+
+parameter_groups:
+
+- label: Server Settings
+  parameters:
+  - server_hostname
+  - image
+  - flavor
+
+- label: WordPress Settings
+  parameters:
+  - domain
+  - username
+
+- label: rax-dev-params
+  # These are parameters that will not be displayed in the portal. The purpose
+  # of these parameters are for users who are developing or testing newer or
+  # different setups. If any of these parameters are changed, there is a good
+  # chance this stack will fail to properly deploy.
+  parameters:
+  - kitchen
+  - chef_version
+  - version
+  - prefix
+
+parameters:
+
+  # Server settings
+  server_hostname:
+    label: Server Name
+    description: Hostname to use for the server that's built.
+    type: string
+    default: WordPress
+    constraints:
+    - length:
+        min: 1
+        max: 64
+    - allowed_pattern: "^[a-zA-Z][a-zA-Z0-9-]*$"
+      description: |
+        Must begin with a letter and contain only alphanumeric characters.
+
+  image:
+    label: Operating System
+    description: |
+      Required: Server image used for all servers that are created as a part of
+      this deployment.
+    type: string
+    default: Ubuntu 12.04 LTS (Precise Pangolin) (PVHVM)
+    constraints:
+    - allowed_values:
+      - Ubuntu 12.04 LTS (Precise Pangolin) (PVHVM)
+      description: Must be a supported operating system.
+
+  flavor:
+    label: Server Size
+    description: |
+      Required: Rackspace Cloud Server flavor to use. The size is based on the
+      amount of RAM for the provisioned server.
+    type: string
+    default: 4 GB General Purpose v1
+    constraints:
+    - allowed_values:
+      - 1 GB General Purpose v1
+      - 2 GB General Purpose v1
+      - 4 GB General Purpose v1
+      - 8 GB General Purpose v1
+      - 15 GB I/O v1
+      - 30 GB I/O v1
+      - 1GB Standard Instance
+      - 2GB Standard Instance
+      - 4GB Standard Instance
+      - 8GB Standard Instance
+      - 15GB Standard Instance
+      - 30GB Standard Instance
+      description: |
+        Must be a valid Rackspace Cloud Server flavor for the region you have
+        selected to deploy into.
+
+  # WordPress settings
+  domain:
+    label: Site Domain
+    description: Domain to be used with WordPress site
+    type: string
+    default: "example.com"
+    constraints:
+    - allowed_pattern: "^[a-zA-Z0-9.-]{1,255}.[a-zA-Z]{2,15}$"
+      description: Must be a valid domain name
+
+  version:
+    label: WordPress Version
+    description: Version of WordPress to install
+    type: string
+    default: "3.9.2"
+    constraints:
+    - allowed_values:
+      - "3.9.2"
+
+  # Optional Apache settings (SSL certs)
+  # ssl_private_key:
+  #  description: Private SSL key
+  #  type: string
+  #  default: ""
+  #  constraints:
+  #  - allowed_pattern: "^(.){0,5000}$"
+  #    description: "Key values must be under 5,000 characters"
+
+  # ssl_certificate:
+  #  description: Public SSL key
+  #  type: string
+  #  default: ""
+  #  constraints:
+  #  - allowed_pattern: "^(.){0,5000}$"
+  #    description: "Certificate values must be under 5,000 characters"
+
+  # ssl_intermediate_key:
+  #  description: Intermediate SSL key
+  #  type: string
+  #  default: ""
+  #  constraints:
+  #  - allowed_pattern: "^(.){0,5000}$"
+  #    description: "Intermediate values must be under 5,000 characters."
+
+  # Database and system user configuration
+  prefix:
+    label: Database Prefix
+    description: Prefix to use for WordPress database tables
+    type: string
+    default: wp_
+    constraints:
+    - allowed_pattern: "^[0-9a-zA-Z$_]{0,10}$"
+      description: |
+        Prefix must be shorter than 10 characters, and can only include
+        letters, numbers, $, and/or underscores.
+
+  database_name:
+    label: Database Name
+    description: WordPress database name
+    type: string
+    default: wordpress
+    constraints:
+    - allowed_pattern: "^[0-9a-zA-Z$_]{1,64}$"
+      description: |
+        Maximum length of 64 characters, may only contain letters, numbers, and
+        underscores.
+
+  username:
+    label: Username
+    description: "Username for system, database, and WordPress logins."
+    type: string
+    default: wp_user
+    constraints:
+    - allowed_pattern: "^[a-zA-Z0-9 _.@-]{1,16}$"
+      description: |
+        Must be shorter than 16 characters and may only contain alphanumeric
+        characters, ' ', '_', '.', '@', and/or '-'.
+
+  kitchen:
+    label: Kitchen URL
+    description: "URL for a git repo containing required cookbooks"
+    type: string
+    default: https://github.com/rackspace-orchestration-templates/wordpress-single.git
+
+  chef_version:
+    label: Chef Version
+    description: Version of chef client to use
+    type: string
+    default: 11.16.2
+
+resources:
+  # Random password generation
+  database_password:
+    type: "OS::Heat::RandomString"
+    properties:
+      length: 16
+      sequence: lettersdigits
+
+  mysql_root_password:
+    type: "OS::Heat::RandomString"
+    properties:
+      length: 16
+      sequence: lettersdigits
+
+  mysql_repl_password:
+    type: "OS::Heat::RandomString"
+    properties:
+      length: 16
+      sequence: lettersdigits
+
+  mysql_debian_password:
+    type: "OS::Heat::RandomString"
+    properties:
+      length: 16
+      sequence: lettersdigits
+
+  # Random strings for WP salting
+  wp_auth:
+    type: "OS::Heat::RandomString"
+    properties:
+      length: 32
+      sequence: hexdigits
+
+  wp_logged_in:
+    type: "OS::Heat::RandomString"
+    properties:
+      length: 32
+      sequence: hexdigits
+
+  wp_nonce:
+    type: "OS::Heat::RandomString"
+    properties:
+      length: 32
+      sequence: hexdigits
+
+  wp_secure_auth:
+    type: "OS::Heat::RandomString"
+    properties:
+      length: 32
+      sequence: hexdigits
+
+  # SSH KEYS
+  sync_key:
+    type: "OS::Nova::KeyPair"
+    properties:
+      name:
+        str_replace:
+          template: "%stack_id%-sync"
+          params:
+            "%stack_id%": { get_param: "OS::stack_id" }
+      save_private_key: true
+
+  ssh_key:
+    type: "OS::Nova::KeyPair"
+    properties:
+      name: { get_param: "OS::stack_id" }
+      save_private_key: true
+
+  # Server resources
+  wordpress_server:
+    type: "Rackspace::Cloud::Server"
+    properties:
+      name: { get_param: server_hostname }
+      flavor: { get_param: flavor }
+      image: { get_param: image }
+      key_name: { get_resource: ssh_key }
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+
+  # Chef resources
+  wordpress_setup:
+    type: "OS::Heat::ChefSolo"
+    depends_on: wordpress_server
+    properties:
+      username: root
+      private_key: { get_attr: [ssh_key, private_key] }
+      host: { get_attr: [wordpress_server, accessIPv4] }
+      kitchen: { get_param: kitchen }
+      chef_version: { get_param: chef_version }
+      node:
+        apache:
+          listen_ports: [8080]
+          timeout: 30
+          serversignature: "Off"
+          traceenable: "Off"
+        hollandbackup:
+          main:
+            backup_directory: "/var/lib/mysqlbackup"
+            mysqldump:
+              user: "root"
+              host: "localhost"
+              password: { get_attr: [mysql_root_password, value] }
+        lsyncd:
+          interval: 5
+        memcached:
+          listen: "127.0.0.1"
+        monit:
+          notify_email: 'root@localhost'
+          mail_format:
+            from: 'monit@localhost'
+        mysql:
+          bind_address: "127.0.0.1"
+          server_root_password: { get_attr: [mysql_root_password, value] }
+          server_repl_password: { get_attr: [mysql_repl_password, value] }
+          server_debian_password: { get_attr: [mysql_debian_password, value] }
+          remove_test_database: true
+          remove_anonymous_users: true
+        sysctl:
+          values:
+            fs.inotify.max_user_watches: 1000000
+        varnish:
+          version: "3.0"
+          listen_port: "80"
+        vsftpd:
+          ipaddress: ''
+          write_enable: true
+          local_umask: "002"
+          chroot_local_user: false
+          hide_ids: false
+          ssl_enable: true
+          ssl_ciphers: "AES256-SHA"
+        wordpress:
+          version: { get_param: version }
+          server_aliases: [{ get_param: domain }]
+          dir:
+            str_replace:
+              template: "/var/www/vhosts/%domain%"
+              params:
+                "%domain%": { get_param: domain }
+          db:
+            name: { get_param: database_name }
+            user: { get_param: username }
+            pass: { get_attr: [database_password, value] }
+            host: "127.0.0.1"
+          keys:
+            auth: { get_attr: [wp_auth, value] }
+            logged_in: { get_attr: [wp_logged_in, value] }
+            nonce_key: { get_attr: [wp_nonce, value] }
+            secure_auth_key: { get_attr: [wp_secure_auth, value] }
+        rax:
+          apache:
+            # ssl_private_key: { get_param: ssl_private_key }
+            # ssl_certificate: { get_param: ssl_certificate }
+            # ssl_intermediate_certs: { get_param: ssl_intermediate_certs }
+            domain: { get_param: domain }
+          lsyncd:
+            ssh:
+              private_key: { get_attr: [sync_key, private_key] }
+          packages:
+            - php5-imagick
+          varnish:
+            master_backend: "localhost"
+          wordpress:
+            admin_user: { get_param: username }
+            admin_pass: { get_attr: [database_password, value] }
+            user:
+              name: { get_param: username }
+              group: { get_param: username }
+        run_list: ["recipe[apt]",
+                   "recipe[build-essential]",
+                   "recipe[rax-wordpress::apache-prep]",
+                   "recipe[sysctl::attribute_driver]",
+                   "recipe[mysql::server]",
+                   "recipe[rax-wordpress::mysql]",
+                   "recipe[hollandbackup]",
+                   "recipe[hollandbackup::mysqldump]",
+                   "recipe[hollandbackup::main]",
+                   "recipe[hollandbackup::backupsets]",
+                   "recipe[hollandbackup::cron]",
+                   "recipe[rax-wordpress::x509]",
+                   "recipe[memcached]",
+                   "recipe[php]",
+                   "recipe[rax-install-packages]",
+                   "recipe[wordpress]",
+                   "recipe[rax-wordpress::wp-setup]",
+                   "recipe[rax-wordpress::user]",
+                   "recipe[rax-wordpress::memcache]",
+                   "recipe[lsyncd]",
+                   "recipe[vsftpd]",
+                   "recipe[rax-wordpress::vsftpd]",
+                   "recipe[varnish::repo]",
+                   "recipe[varnish]",
+                   "recipe[rax-wordpress::apache]",
+                   "recipe[rax-wordpress::varnish]",
+                   "recipe[rax-wordpress::firewall]",
+                   "recipe[rax-wordpress::vsftpd-firewall]",
+                   "recipe[rax-wordpress::lsyncd]"]
+
+outputs:
+  private_key:
+    description: SSH Private Key
+    value: { get_attr: [ssh_key, private_key] }
+
+  server_ip:
+    description: Server IP
+    value: { get_attr: [wordpress_server, accessIPv4] }
+
+  wordpress_user:
+    description: WordPress User
+    value: { get_param: username }
+
+  wordpress_password:
+    description: WordPress Password
+    value: { get_attr: [database_password, value] }
+
+  mysql_root_password:
+    description: MySQL Root Password
+    value: { get_attr: [mysql_root_password, value] }
