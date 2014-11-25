@@ -8,3 +8,4 @@ openstack.nose_plugin
 oslotest
 requests
 testtools
+python-heatclient
