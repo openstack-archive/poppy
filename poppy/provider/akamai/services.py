@@ -317,7 +317,15 @@ class ServiceController(base.ServiceBase):
             return self.responder.deleted(provider_service_id)
 
     def purge(self, service_id, purge_urls=None):
-        pass
+        try:
+            # Get the service
+            if purge_urls is None:
+                raise RuntimeError('Akamai purge-all functionality has not'
+                                   ' been implemented')
+            else:
+                pass
+        except Exception:
+            return self.responder.failed("failed to PURGE service")
 
     @decorators.lazy_property(write=False)
     def current_customer(self):
