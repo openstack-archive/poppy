@@ -53,6 +53,22 @@ class ServiceController(base.ServiceBase):
         for origin in service_obj.origins:
             self._process_new_origin(origin, post_data['rules'])
 
+        # referrer restriction implementaiton for akamai
+        # get a list of referrer restriction domains/hosts
+        referrer_restriction_list = [rule.referrer
+                                     for restriction in
+                                     service_obj.restrictions
+                                     for rule in restriction.rules]
+
+        if any(referrer_restriction_list):
+            referrer_blacklist_value = ''.join(['*%s*' % referrer
+                                               for referrer
+                                               in referrer_restriction_list
+                                               if referrer is not None])
+            for rule in post_data['rules']:
+                self._process_referrer_restriction(referrer_blacklist_value,
+                                                   rule)
+
         classified_domains = self._classify_domains(service_obj.domains)
 
         try:
@@ -66,7 +82,6 @@ class ServiceController(base.ServiceBase):
                 # of each group
                 dp = self._process_new_domain(classified_domain,
                                               post_data['rules'])
-
                 resp = self.policy_api_client.put(
                     self.policy_api_base_url.format(
                         policy_name=classified_domain[0]),
@@ -150,8 +165,15 @@ class ServiceController(base.ServiceBase):
 
         for rule in rules_list:
             for behavior in rule['behaviors']:
-                behavior['params']['digitalProperty'] = dp
+                if 'params' in behavior:
+                    behavior['params']['digitalProperty'] = dp
         return dp
+
+    def _process_referrer_restriction(self, referrer_blacklist_value, rule):
+        rule['behaviors'].append({
+            'name': 'referer-blacklist',
+            'value': referrer_blacklist_value
+        })
 
     def get(self, service_name):
         pass
