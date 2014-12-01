@@ -21,6 +21,10 @@ From this folder, run::
 Note that `dev` is a wrapper around the [`fig` CLI](http://www.fig.sh/cli.html) so
 any sub-commands that work with the fig CLI will work with `dev` as well.
 
+Also note that the `fig_dev.yml` file in this folder cannot be used directly with
+`fig`. Please invoke `dev` instead as it does some extra setup before internally
+invoking `fig`.
+
 Testing
 --------
 

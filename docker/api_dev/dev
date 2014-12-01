@@ -7,5 +7,4 @@ PROJECT_ROOT_DIR=$THIS_DIR/../..
 cp $THIS_DIR/Dockerfile $PROJECT_ROOT_DIR/
 
 # Bring up development environment
-cd $THIS_DIR/../fig
 FIG_FILE=fig_dev.yml fig $@
