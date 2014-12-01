@@ -20,6 +20,7 @@ from poppy.provider import base
 
 
 class ServiceController(base.ServiceBase):
+
     """Fastly Service Controller Class."""
 
     @property
@@ -61,11 +62,7 @@ class ServiceController(base.ServiceBase):
                                        origin.ssl,
                                        origin.port)
 
-        # TODO(tonytan4ever): To incorporate caching, restriction change
-        # once standarnd/limitation on these service details have been
-        # figured out
-
-        # referrer restriction implementaiton for fastly
+        # Fastly referrer restriction implementation
         # get a list of referrer restriction domains/hosts
         referrer_restriction_list = [rule.referrer
                                      for restriction in
@@ -101,6 +98,40 @@ class ServiceController(base.ServiceBase):
                 content='Referring from a non-permitted domain',
                 request_condition=request_condition.name
             )
+
+        # Fastly cachine rule implementation
+        for caching_rule in service_obj.caching:
+            if caching_rule.name.lower() == 'default':
+                self.client.update_settings(service.id,
+                                            service_version.number,
+                                            {'general.default_ttl':
+                                             caching_rule.ttl
+                                             }
+                                            )
+            else:
+                # create condition first
+                url_matching_stament = ' || '.join(
+                    ['req.url' ' ~ "^%s"' % rule.request_url
+                     for rule in caching_rule.rules])
+                # create a fastly condition for referer restriction
+                cachingrule_request_condition = self.client.create_condition(
+                    service.id,
+                    service_version.number,
+                    'CachingRules condition for %s' % caching_rule.name,
+                    fastly.FastlyConditionType.CACHE,
+                    url_matching_stament,
+                    priority=10
+                )
+                # create caching settings
+                self.client.create_cache_settings(
+                    service.id,
+                    service_version.number,
+                    caching_rule.name,
+                    None,  # action field
+                    ttl=caching_rule.ttl,
+                    stale_ttl=0,
+                    cache_condition=cachingrule_request_condition.name
+                )
 
         # activate latest version of this fastly service
         service_versions = self.client.list_versions(service.id)
