@@ -41,7 +41,7 @@
         ],
         "flavor_ref" : "standard"
     },
-    "multiple_origins_complicated_with_referrer_restriction": {
+    "multiple_origins_complicated_with_referrer_restriction_and_caching": {
         "name" : "mysite.com",
         "domains": [
             {"domain": "parsely.sage.com"},
@@ -56,7 +56,7 @@
              "rules": [{"name": "img", "request_url": "/img"}] }
         ],
         "restrictions": [
-             {
+            {
                 "name": "website only",
                 "rules": [
                     {
@@ -74,6 +74,20 @@
                     }
                 ]
             }
+        ],
+        "caching": [
+            {"name": "default", "ttl": 1200 },
+            {"name": "img-only",
+             "ttl": 1800,
+             "rules": [
+                { "name": "jpeg-rules",
+                  "request_url": "/*.jpeg"
+                },
+                { "name": "gif-rules",
+                  "request_url": "/*.gif"
+                }       
+             ]
+		    }
         ],
         "flavor_ref" : "standard"
     }
