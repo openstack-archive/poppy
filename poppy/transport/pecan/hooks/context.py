@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pecan
 from pecan import hooks
 
 from poppy.openstack.common import context
@@ -28,7 +29,7 @@ class PoppyRequestContext(context.RequestContext):
 
 class ContextHook(hooks.PecanHook):
 
-    def on_route(self, state):
+    def before(self, state):
         context_kwargs = {}
 
         if 'X-Project-ID' in state.request.headers:
@@ -37,24 +38,19 @@ class ContextHook(hooks.PecanHook):
                 state.request.host_url +
                 '/'.join(state.request.path.split('/')[0:2]))
 
-        if 'tenant' not in context_kwargs:
-            # Didn't find the X-Project-Id header, pull from URL instead
-            # Expects form /v1/{project_id}/path
-            context_kwargs['tenant'] = state.request.path.split('/')[2]
-            context_kwargs['base_url'] = (
-                state.request.host_url +
-                '/'.join(state.request.path.split('/')[0:3]))
-
         if 'X-Auth-Token' in state.request.headers:
             context_kwargs['auth_token'] = (
                 state.request.headers['X-Auth-Token']
             )
 
+        # if we still dont have a tenant, then return a 400
+        if 'tenant' not in context_kwargs:
+            pecan.abort(400, detail="The Project ID must be provided.")
+
         request_context = PoppyRequestContext(**context_kwargs)
         state.request.context = request_context
         local.store.context = request_context
 
-    def before(self, state):
         '''Attach tenant_id as a member variable project_id to controller.'''
         state.controller.__self__.project_id = getattr(local.store.context,
                                                        "tenant", None)

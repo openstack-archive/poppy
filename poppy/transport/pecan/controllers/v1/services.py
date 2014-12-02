@@ -17,10 +17,12 @@ import json
 
 from oslo.config import cfg
 import pecan
+from pecan import hooks
 
 from poppy.common import errors
 from poppy.common import uri
 from poppy.transport.pecan.controllers import base
+from poppy.transport.pecan import hooks as poppy_hooks
 from poppy.transport.pecan.models.request import service as req_service_model
 from poppy.transport.pecan.models.response import link
 from poppy.transport.pecan.models.response import service as resp_service_model
@@ -38,7 +40,9 @@ LIMITS_OPTIONS = [
 LIMITS_GROUP = 'drivers:transport:limits'
 
 
-class ServiceAssetsController(base.Controller):
+class ServiceAssetsController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
     @pecan.expose()
     def delete(self, service_name):
@@ -61,7 +65,9 @@ class ServiceAssetsController(base.Controller):
         pecan.response.status = 202
 
 
-class ServicesController(base.Controller):
+class ServicesController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
     def __init__(self, driver):
         super(ServicesController, self).__init__(driver)
