@@ -15,6 +15,7 @@
 
 import json
 
+from poppy.model.helpers import cachingrule
 from poppy.model.helpers import domain
 from poppy.model.helpers import origin
 from poppy.model.helpers import provider_details
@@ -363,8 +364,18 @@ class ServicesController(base.ServicesController):
                        referrer=rule_i.get('referrer'))
              for rule_i in restriction_i['rules']])
             for restriction_i in restrictions]
+        caching_rules = [json.loads(c) for c in result.get('caching_rules', [])
+                         or []]
+        caching_rules = [cachingrule.CachingRule(
+            caching_rule.get('name'),
+            caching_rule.get('ttl'),
+            [rule.Rule(rule_i.get('name'),
+                       referrer=rule_i.get('request_url'))
+             for rule_i in caching_rule['rules']])
+            for caching_rule in caching_rules]
         s = service.Service(name, domains, origins, flavor_ref)
         s.restrictions = restrictions_res
+        s.caching = caching_rules
         provider_detail_results = result.get('provider_details') or {}
         provider_details_dict = {}
         for provider_name in provider_detail_results:

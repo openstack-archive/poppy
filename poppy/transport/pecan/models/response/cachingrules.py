@@ -29,4 +29,5 @@ class Model(collections.OrderedDict):
         super(Model, self).__init__()
         self['name'] = caching.name
         self['ttl'] = caching.ttl
-        self['rules'] = [rule.Model(r) for r in caching.rules]
+        if caching.rules != []:
+            self['rules'] = [rule.Model(r) for r in caching.rules]
