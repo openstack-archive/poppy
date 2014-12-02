@@ -1,0 +1,15 @@
+cassandra:
+    build: ../cassandra/.
+mimic:
+    build: ../mimic/.
+poppy:
+    build: ../../.
+    ports:
+        - "80:8081"
+    volumes:
+        - ../../:/home/poppy
+    command:
+        - /root/start_poppy.sh
+    links:
+        - cassandra
+        - mimic
