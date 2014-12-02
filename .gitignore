@@ -43,7 +43,7 @@ docker_rsa*
 write_file
 .settings/*
 
-Dockerfile
+/Dockerfile
 
 # patch files
 *.patch
