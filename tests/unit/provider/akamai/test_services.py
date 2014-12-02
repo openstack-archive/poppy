@@ -77,7 +77,7 @@ class TestServices(base.TestCase):
         service_obj = service.load_from_json(service_json)
 
         # test exception
-        self.controller.policy_api_client.delete.return_value = mock.Mock(
+        self.controller.policy_api_client.put.return_value = mock.Mock(
             status_code=400,
             text='Some create service error happened'
         )
@@ -88,9 +88,14 @@ class TestServices(base.TestCase):
     @ddt.file_data('data_service.json')
     def test_create(self, service_json):
         service_obj = service.load_from_json(service_json)
+        self.controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
         self.controller.create(service_obj)
-
         self.controller.policy_api_client.put.assert_called_once()
+        # make sure all the caching rules are processed
+        self.assertTrue(service_obj.caching == [])
 
     def test_delete_with_exception(self):
         provider_service_id = json.dumps([str(uuid.uuid1())])

@@ -40,5 +40,35 @@
              "rules": [{"name": "img", "request_url": "/img"}] }
         ],
         "flavor_ref" : "standard"
+    },
+    "multiple_origins_complicated_with_caching": {
+        "name" : "mysite.com",
+        "domains": [
+            {"domain": "parsely.sage.com"},
+            {"domain": "densely.sage.com"},
+            {"domain": "rosemary.thyme.net"}
+        ],
+        "origins": [
+            {"origin": "mockdomain-text.com", "ssl": false, "port": 80,
+             "rules": [{"name": "global", "request_url": "/*"},
+                       {"name": "text", "request_url": "/text"}]},
+            {"origin": "mockdomain-image.com",
+             "rules": [{"name": "img", "request_url": "/img"}] }
+        ],
+        "caching": [
+            {"name": "default", "ttl": 1200 },
+            {"name": "img-only",
+             "ttl": 1800,
+             "rules": [
+                { "name": "jpeg-rules",
+                  "request_url": "/*.jpeg"
+                },
+                { "name": "gif-rules",
+                  "request_url": "/*.gif"
+                }       
+             ]
+            }
+        ],
+        "flavor_ref" : "standard"
     }
 }
