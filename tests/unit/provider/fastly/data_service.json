@@ -42,6 +42,6 @@
                 ]
             }
         ],
-        "flavor_ref" : "standard"
+        "flavor_id" : "standard"
     }
 }

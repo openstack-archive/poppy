@@ -221,7 +221,7 @@ class ServicesController(base.ServicesController):
         args = {
             'project_id': project_id,
             'service_name': service_name,
-            'flavor_id': service_obj.flavor_ref,
+            'flavor_id': service_obj.flavor_id,
             'domains': domains,
             'origins': origins,
             'caching_rules': caching_rules,
@@ -246,7 +246,7 @@ class ServicesController(base.ServicesController):
         args = {
             'project_id': project_id,
             'service_name': service_name,
-            'flavor_id': service_obj.flavor_ref,
+            'flavor_id': service_obj.flavor_id,
             'domains': domains,
             'origins': origins,
             'caching_rules': caching_rules,
@@ -354,7 +354,7 @@ class ServicesController(base.ServicesController):
                         for rule_i in o.get(
                             'rules', [])]) for o in origins]
         domains = [domain.Domain(d['domain']) for d in domains]
-        flavor_ref = result.get('flavor_id')
+        flavor_id = result.get('flavor_id')
 
         restrictions = [json.loads(r) for r in result.get('restrictions', [])]
         restrictions_res = [restriction.Restriction(
@@ -363,7 +363,7 @@ class ServicesController(base.ServicesController):
                        referrer=rule_i.get('referrer'))
              for rule_i in restriction_i['rules']])
             for restriction_i in restrictions]
-        s = service.Service(name, domains, origins, flavor_ref)
+        s = service.Service(name, domains, origins, flavor_id)
         s.restrictions = restrictions_res
         provider_detail_results = result.get('provider_details') or {}
         provider_details_dict = {}

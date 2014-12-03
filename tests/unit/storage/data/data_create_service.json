@@ -12,7 +12,7 @@
                 "ssl": false
             }
         ],
-        "flavor_ref": "standard",
+        "flavor_id": "standard",
         "caching": [
             {
                 "name": "default",
