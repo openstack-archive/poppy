@@ -71,7 +71,7 @@ class DefaultServicesController(base.ServicesController):
         :raises LoookupError, ValueError
         """
         try:
-            flavor = self.flavor_controller.get(service_obj.flavor_ref)
+            flavor = self.flavor_controller.get(service_obj.flavor_id)
         # raise a lookup error if the flavor is not found
         except LookupError as e:
             raise e
@@ -128,7 +128,7 @@ class DefaultServicesController(base.ServicesController):
             raise Exception(u'Currently this operation is not supported')
         if service_updates.restrictions:
             raise Exception(u'Currently this operation is not supported')
-        if service_updates.flavor_ref:
+        if service_updates.flavor_id:
             raise Exception(u'Currently this operation is not supported')
 
         # get provider details for this service

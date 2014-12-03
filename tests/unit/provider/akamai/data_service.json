@@ -9,7 +9,7 @@
         "origins": [
             {"origin": "mockdomain.com", "ssl": false, "port": 80}
         ],
-        "flavor_ref" : "standard"
+        "flavor_id" : "standard"
     },
     "multiple_origins": {
         "name" : "mysite.com",
@@ -23,7 +23,7 @@
             {"origin": "mockdomain-image.com",
              "rules": [{"name": "img", "request_url": "/img"}] }
         ],
-        "flavor_ref" : "standard"
+        "flavor_id" : "standard"
     },
     "multiple_origins_complicated": {
         "name" : "mysite.com",
@@ -39,7 +39,7 @@
             {"origin": "mockdomain-image.com",
              "rules": [{"name": "img", "request_url": "/img"}] }
         ],
-        "flavor_ref" : "standard"
+        "flavor_id" : "standard"
     },
     "multiple_origins_complicated_with_referrer_restriction_and_caching": {
         "name" : "mysite.com",
@@ -89,6 +89,6 @@
              ]
 		    }
         ],
-        "flavor_ref" : "standard"
+        "flavor_id" : "standard"
     }
 }

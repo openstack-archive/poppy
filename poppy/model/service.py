@@ -28,13 +28,13 @@ class Service(common.DictSerializableModel):
                  name,
                  domains,
                  origins,
-                 flavor_ref,
+                 flavor_id,
                  caching=[],
                  restrictions=[]):
         self._name = name
         self._domains = domains
         self._origins = origins
-        self._flavor_ref = flavor_ref
+        self._flavor_id = flavor_id
         self._caching = caching
         self._restrictions = restrictions
         self._status = 'create_in_progress'
@@ -68,13 +68,13 @@ class Service(common.DictSerializableModel):
         self._origins = value
 
     @property
-    def flavor_ref(self):
+    def flavor_id(self):
         """Get or set flavor ref."""
-        return self._flavor_ref
+        return self._flavor_id
 
-    @flavor_ref.setter
-    def flavor_ref(self, value):
-        self._flavor_ref = value
+    @flavor_id.setter
+    def flavor_id(self, value):
+        self._flavor_id = value
 
     @property
     def caching(self):

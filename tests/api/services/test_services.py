@@ -49,13 +49,13 @@ class TestCreateService(providers.TestProviderBase):
         domain_list = test_data['domain_list']
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
-        # flavor = test_data['flavor_ref']
+        flavor_id = test_data['flavor_id']
 
         resp = self.client.create_service(service_name=self.service_name,
                                           domain_list=domain_list,
                                           origin_list=origin_list,
                                           caching_list=caching_list,
-                                          flavor_ref=self.flavor_id)
+                                          flavor_id=flavor_id)
         self.assertEqual(resp.status_code, 202)
         self.assertEqual(resp.text, '')
 
@@ -74,8 +74,8 @@ class TestCreateService(providers.TestProviderBase):
         # Verify the service is updated at all Providers for the flavor
         if self.test_config.provider_validation:
             service_details = (
-                self.getServiceFromFlavor(self.flavor_id, self.service_name))
-            provider_list = self.config.flavor[self.flavor_id]
+                self.getServiceFromFlavor(flavor_id, self.service_name))
+            provider_list = self.config.flavor[flavor_id]
 
             # Verify that the service stored in each provider (that is part of
             # the flavor) is what Poppy sent them.
@@ -103,13 +103,13 @@ class TestCreateService(providers.TestProviderBase):
         domain_list = test_data['domain_list']
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
-        # flavor = test_data['flavor_ref']
+        flavor_id = test_data['flavor_id']
 
         resp = self.client.create_service(service_name=service_name,
                                           domain_list=domain_list,
                                           origin_list=origin_list,
                                           caching_list=caching_list,
-                                          flavor_ref=self.flavor_id)
+                                          flavor_id=flavor_id)
         self.assertEqual(resp.status_code, 400)
 
     def tearDown(self):
@@ -144,7 +144,7 @@ class TestListServices(base.TestBase):
                                    domain_list=self.domain_list,
                                    origin_list=self.origin_list,
                                    caching_list=self.caching_list,
-                                   flavor_ref=self.flavor_id)
+                                   flavor_id=self.flavor_id)
         return service_name
 
     def setUp(self):
@@ -254,7 +254,7 @@ class TestServiceActions(base.TestBase):
                                    domain_list=self.domain_list,
                                    origin_list=self.origin_list,
                                    caching_list=self.caching_list,
-                                   flavor_ref=self.flavor_id)
+                                   flavor_id=self.flavor_id)
         self.client.wait_for_service_status(
             service_name=self.service_name,
             status='deployed',
