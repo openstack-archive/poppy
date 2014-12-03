@@ -31,7 +31,7 @@ def abort(code):
 
 @decorators.validation_function
 def is_valid_json(r):
-    """Test for a valid JSON string."""
+    '''Test for a valid JSON string.'''
     if len(r.body) == 0:
         return
     else:
@@ -48,29 +48,33 @@ class DummyRequest(object):
 
     def __init__(self):
         self.headers = dict(header1='headervalue1')
-        self.method = "POST"
+        self.method = 'POST'
         self.body = json.dumps({
-            "name": "fake_service_name",
-            "domains": [
-                {"domain": "www.mywebsite.com"},
-                {"domain": "blog.mywebsite.com"},
+            'name': 'fake_service_name',
+            'domains': [
+                {'domain': 'www.mywebsite.com'},
+                {'domain': 'blog.mywebsite.com'},
             ],
-            "origins": [
+            'origins': [
                 {
-                    "origin": "mywebsite.com",
-                    "port": 80,
-                    "ssl": False
+                    'origin': 'mywebsite.com',
+                    'port': 80,
+                    'ssl': False
                 },
                 {
-                    "origin": "mywebsite.com",
+                    'origin': 'mywebsite.com',
+                    'rules': [{
+                        'name': 'img',
+                        'request_url': '/img'
+                    }]
                 }
             ],
-            "caching": [
-                {"name": "default", "ttl": 3600},
-                {"name": "home",
-                 "ttl": 17200,
-                 "rules": [
-                     {"name": "index", "request_url": "/index.htm"}
+            'caching': [
+                {'name': 'default', 'ttl': 3600},
+                {'name': 'home',
+                 'ttl': 17200,
+                 'rules': [
+                     {'name': 'index', 'request_url': '/index.htm'}
                  ]
                  },
                 {"name": "images",
@@ -80,7 +84,7 @@ class DummyRequest(object):
                  ]
                  }
             ],
-            "flavor_ref": "https://www.poppycdn.io/v1.0/flavors/standard"
+            'flavor_ref': 'https://www.poppycdn.io/v1.0/flavors/standard'
         })
 
 
@@ -96,38 +100,38 @@ class DummyRequestWithInvalidHeader(DummyRequest):
 fake_request_good = DummyRequest()
 fake_request_bad_missing_domain = DummyRequest()
 fake_request_bad_missing_domain.body = json.dumps({
-    "name": "fake_service_name",
-    "origins": [
+    'name': 'fake_service_name',
+    'origins': [
         {
-            "origin": "mywebsite.com",
-            "port": 80,
-            "ssl": False
+            'origin': 'mywebsite.com',
+            'port': 80,
+            'ssl': False
         }
     ],
-    "caching": [
-        {"name": "default", "ttl": 3600},
-        {"name": "home",
-         "ttl": 17200,
-                 "rules": [
-                     {"name": "index", "request_url": "/index.htm"}
+    'caching': [
+        {'name': 'default', 'ttl': 3600},
+        {'name': 'home',
+         'ttl': 17200,
+                 'rules': [
+                     {'name': 'index', 'request_url': '/index.htm'}
                  ]
          },
-        {"name": "images",
-                 "ttl": 12800,
-                 "rules": [
-                     {"name": "images", "request_url": "*.png"}
+        {'name': 'images',
+                 'ttl': 12800,
+                 'rules': [
+                     {'name': 'images', 'request_url': '*.png'}
                  ]
          }
     ],
-    "flavor_ref": "https://www.poppycdn.io/v1.0/flavors/standard"
+    'flavor_ref': 'https://www.poppycdn.io/v1.0/flavors/standard'
 })
 fake_request_bad_invalid_json_body = DummyRequest()
-fake_request_bad_invalid_json_body.body = "{"
+fake_request_bad_invalid_json_body.body = '{'
 
 
 class _AssertRaisesContext(object):
 
-    """A context manager used to implement TestCase.assertRaises* methods."""
+    '''A context manager used to implement TestCase.assertRaises* methods.'''
 
     def __init__(self, expected, test_case, expected_regexp=None):
         self.expected = expected
@@ -144,7 +148,7 @@ class _AssertRaisesContext(object):
             except AttributeError:
                 exc_name = str(self.expected)
             raise self.failureException(
-                "{0} not raised".format(exc_name))
+                '{0} not raised'.format(exc_name))
         if not issubclass(exc_type, self.expected):
             return False  # let unexpected exceptions pass through
         self.exception = exc_value  # store for later retrieval
@@ -170,7 +174,7 @@ class _AssertRaisesContext(object):
 class BaseTestCase(base.TestCase):
 
     def assertRaises(self, excClass, callableObj=None, *args, **kwargs):
-        """Check the expected Exception is raised.
+        '''Check the expected Exception is raised.
 
            Fail unless an exception of class excClass is raised
            by callableObj when invoked with arguments args and keyword
@@ -193,7 +197,7 @@ class BaseTestCase(base.TestCase):
                    do_something()
                the_exception = cm.exception
                self.assertEqual(the_exception.error_code, 3)
-        """
+        '''
         context = _AssertRaisesContext(excClass, self)
         if callableObj is None:
             return context
@@ -202,7 +206,7 @@ class BaseTestCase(base.TestCase):
 
     def assertRaisesRegexp(self, expected_exception, expected_regexp,
                            callable_obj=None, *args, **kwargs):
-        """Asserts that the message in a raised exception matches a regexp."""
+        '''Asserts that the message in a raised exception matches a regexp.'''
         context = _AssertRaisesContext(expected_exception, self,
                                        expected_regexp)
         if callable_obj is None:

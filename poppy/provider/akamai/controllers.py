@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Rackspace, Inc.
+# Copyright (c) 2013 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,16 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.model.helpers import origin
-from poppy.transport.pecan.models.request import rule
+"""Exports Akamai poppy controllers.
 
+Field Mappings:
+    In order to reduce the disk / memory space used,
+    fields name will be, most of the time, the first
+    letter of their long name. Fields mapping will be
+    updated and documented in each controller class.
+"""
 
-def load_from_json(json_data):
-    origin_name = json_data.get("origin")
-    port = json_data.get("port", 80)
-    ssl = json_data.get("ssl", False)
-    rules = json_data.get("rules", [])
-    rules = [rule.load_from_json(r) for r in rules]
-    result = origin.Origin(origin_name, port, ssl)
-    result.rules = rules
-    return result
+from poppy.provider.akamai import services
+
+ServiceController = services.ServiceController
