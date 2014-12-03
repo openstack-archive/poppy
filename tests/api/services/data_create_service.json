@@ -6,7 +6,7 @@
         "origin_list": [{"origin": "mywebsite1.com",
                          "port": 443,
                          "ssl": false}],
-        "flavor_ref": "standard",
+        "flavor_id": "standard",
         "caching_list": [{"name": "default", "ttl": 3600},
                          {"name": "home",
                           "ttl": 1200,
@@ -20,7 +20,7 @@
         "origin_list": [{"origin": "mywebsite1.com",
                          "port": 443,
                          "ssl": false}],
-        "flavor_ref": "standard",
+        "flavor_id": "standard",
         "caching_list": []
     },
     "non_ASCII": {
@@ -30,7 +30,7 @@
         "origin_list": [{"origin": "www.இணையதளத்தில்.com",
                          "port": 443,
                          "ssl": false}],
-        "flavor_ref": "standard",
+        "flavor_id": "standard",
         "caching_list": [{"name": "default", "ttl": 3600},
                          {"name": "home",
                           "ttl": 1200,

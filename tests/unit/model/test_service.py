@@ -33,7 +33,7 @@ class TestServiceModel(base.TestCase):
         super(TestServiceModel, self).setUp()
 
         self.service_name = uuid.uuid1()
-        self.flavor_ref = "strawberry"
+        self.flavor_id = "strawberry"
 
         self.myorigins = []
         self.mydomains = []
@@ -59,7 +59,7 @@ class TestServiceModel(base.TestCase):
 
     def test_create(self):
         myservice = service.Service(
-            self.service_name, self.mydomains, self.myorigins, self.flavor_ref,
+            self.service_name, self.mydomains, self.myorigins, self.flavor_id,
             self.mycaching, self.myrestrictions)
 
         # test all properties
@@ -69,8 +69,8 @@ class TestServiceModel(base.TestCase):
         myservice.name = changed_service_name
         self.assertEqual(myservice.name, changed_service_name)
 
-        # flavor_ref
-        # self.assertEqual(myservice.flavor_ref, self.flavor_ref)
+        # flavor_id
+        # self.assertEqual(myservice.flavor_id, self.flavor_id)
 
         # domains
         self.assertEqual(myservice.domains, self.mydomains)
@@ -82,10 +82,10 @@ class TestServiceModel(base.TestCase):
         myservice.origins = []
         self.assertEqual(myservice.origins, [])
 
-        # flavor_ref
-        self.assertEqual(myservice.flavor_ref, self.flavor_ref)
-        myservice.flavor_ref = "standard"
-        self.assertEqual(myservice.flavor_ref, "standard")
+        # flavor_id
+        self.assertEqual(myservice.flavor_id, self.flavor_id)
+        myservice.flavor_id = "standard"
+        self.assertEqual(myservice.flavor_id, "standard")
 
         self.assertEqual(myservice.restrictions, self.myrestrictions)
         myservice.restrictions = []
@@ -102,13 +102,13 @@ class TestServiceModel(base.TestCase):
     def test_init_from_dict_method(self):
         # this should generate a service copy from my service
         myservice = service.Service(
-            self.service_name, self.mydomains, self.myorigins, self.flavor_ref,
+            self.service_name, self.mydomains, self.myorigins, self.flavor_id,
             self.mycaching, self.myrestrictions)
         cloned_service = service.Service.init_from_dict(myservice.to_dict())
 
         self.assertEqual(cloned_service.domains, myservice.domains)
         self.assertEqual(cloned_service.origins, myservice.origins)
-        self.assertEqual(cloned_service.flavor_ref, myservice.flavor_ref)
+        self.assertEqual(cloned_service.flavor_id, myservice.flavor_id)
 
     @ddt.data(u'', u'apple')
     def test_set_invalid_status(self, status):
@@ -116,7 +116,7 @@ class TestServiceModel(base.TestCase):
             self.service_name,
             self.mydomains,
             self.myorigins,
-            self.flavor_ref)
+            self.flavor_id)
 
         self.assertRaises(ValueError, setattr, myservice, 'status', status)
 
@@ -126,7 +126,7 @@ class TestServiceModel(base.TestCase):
             self.service_name,
             self.mydomains,
             self.myorigins,
-            self.flavor_ref)
+            self.flavor_id)
 
         myservice.status = status
 
