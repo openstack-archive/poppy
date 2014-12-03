@@ -91,7 +91,7 @@ class DefaultManagerServiceTests(base.TestCase):
                  "ttl": 12800,
                  }
             ],
-            "flavor_ref": "https://www.poppycdn.io/v1.0/flavors/standard"
+            "flavor_id": "standard"
         }
 
     def test_create(self):

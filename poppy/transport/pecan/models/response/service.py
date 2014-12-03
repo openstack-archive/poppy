@@ -37,18 +37,23 @@ class Model(collections.OrderedDict):
         self["restrictions"] = [restriction.Model(r) for r in
                                 service_obj.restrictions]
         self["status"] = service_obj.status
-        self["flavor_ref"] = uri.encode(u'{0}/v1.0/flavors/{1}'.format(
-            request.host_url,
-            service_obj.flavor_ref))
+        self["flavor_id"] = service_obj.flavor_id
 
         # TODO(tonytan4ever) : add access_url links.
         # This has things to do with provider_detail change. (CDN-172)
-        self["links"] = [link.Model(
-            str(
-                uri.encode(u'{0}/v1.0/services/{1}'.format(
-                    request.host_url,
-                    self['name']))),
-            'self')]
+        self["links"] = [
+            link.Model(
+                str(
+                    uri.encode(u'{0}/v1.0/services/{1}'.format(
+                        request.host_url,
+                        self['name']))),
+                'self'),
+            link.Model(
+                str(
+                    uri.encode(u'{0}/v1.0/flavors/{1}'.format(
+                        request.host_url,
+                        service_obj.flavor_id))),
+                'flavor')]
 
         for provider_name in service_obj.provider_details:
             for access_url in (

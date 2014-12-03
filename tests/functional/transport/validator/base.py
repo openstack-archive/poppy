@@ -80,7 +80,7 @@ class DummyRequest(object):
                  ]
                  }
             ],
-            "flavor_ref": "https://www.poppycdn.io/v1.0/flavors/standard"
+            "flavor_id": "standard"
         })
 
 
@@ -119,7 +119,7 @@ fake_request_bad_missing_domain.body = json.dumps({
                  ]
          }
     ],
-    "flavor_ref": "https://www.poppycdn.io/v1.0/flavors/standard"
+    "flavor_id": "standard"
 })
 fake_request_bad_invalid_json_body = DummyRequest()
 fake_request_bad_invalid_json_body.body = "{"

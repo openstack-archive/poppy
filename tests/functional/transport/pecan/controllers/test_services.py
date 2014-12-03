@@ -75,7 +75,7 @@ class ServiceControllerTest(base.FunctionalTest):
                     "ssl": False
                 }
             ],
-            "flavor_ref": self.flavor_id,
+            "flavor_id": self.flavor_id,
             "caching": [
                 {
                     "name": "default",
@@ -161,9 +161,9 @@ class ServiceControllerTest(base.FunctionalTest):
     @ddt.file_data("data_create_service.json")
     def test_create(self, service_json):
 
-        # override the hardcoded flavor_ref in the ddt file with
+        # override the hardcoded flavor_id in the ddt file with
         # a custom one defined in setUp()
-        service_json['flavor_ref'] = self.flavor_id
+        service_json['flavor_id'] = self.flavor_id
 
         # create with good data
         response = self.app.post('/v1.0/services',
@@ -200,7 +200,7 @@ class ServiceControllerTest(base.FunctionalTest):
     def test_create_with_duplicate_name(self, service_json):
         # override name
         service_json['name'] = self.service_name
-        service_json['flavor_ref'] = self.flavor_id
+        service_json['flavor_id'] = self.flavor_id
 
         response = self.app.post('/v1.0/services',
                                  params=json.dumps(service_json),
