@@ -377,8 +377,56 @@ class ServiceController(base.ServiceBase):
         else:
             return self.responder.deleted(provider_service_id)
 
-    def purge(self, service_id, purge_urls=None):
-        pass
+    def purge(self, provider_service_id, purge_url=None):
+        try:
+            # Get the service
+            if purge_url is None:
+                raise RuntimeError('Akamai purge-all functionality has not'
+                                   ' been implemented')
+            else:
+                try:
+                    policies = json.loads(provider_service_id)
+                except Exception:
+                    # raise a more meaningful error for debugging info
+                    try:
+                        raise RuntimeError('Mal-formed Akaimai policy ids: %s'
+                                           % provider_service_id)
+                    except Exception:
+                        return self.responder.failed("failed to delete "
+                                                     "service")
+
+                for policy in policies:
+                    resp = self.policy_api_client.get(
+                        self.policy_api_base_url.format(policy_name=policy),
+                        headers=self.request_header)
+                    if resp.status_code != 200:
+                        raise RuntimeError(resp.text)
+                    else:
+                        url_scheme = 'http'
+                        policy_content = json.loads(resp.text)
+                        # loop over matches to get the correct url scheme
+                        for m_item in policy_content['rules'][0]['matches']:
+                            if m_item['name'] == 'url-scheme':
+                                url_scheme = m_item['value']
+                                break
+                        actual_purge_url = url_scheme + "://www." + policy + (
+                            purge_url)
+                        data = {
+                            'objects': [
+                                actual_purge_url
+                            ]
+                        }
+                        resp = self.ccu_api_client.post(self.ccu_api_base_url,
+                                                        data=json.dumps(data),
+                                                        headers=(
+                                                            self.request_header
+                                                        ))
+                        if resp.status_code != 201:
+                            raise RuntimeError(resp.text)
+                return self.responder.purged(provider_service_id,
+                                             purge_url=purge_url)
+        except Exception:
+            return self.responder.failed("failed to PURGE service")
 
     @decorators.lazy_property(write=False)
     def current_customer(self):
