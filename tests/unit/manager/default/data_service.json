@@ -9,7 +9,7 @@
             {"origin": "mydomain.com", "ssl": false, "port": 80},
             {"origin": "youdomain.com", "ssl": true, "port": 443}
         ],
-        "flavor_ref" : "standard",
+        "flavor_id" : "standard",
         "status" : "deployed"
     }
 }
