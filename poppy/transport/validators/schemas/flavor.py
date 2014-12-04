@@ -43,6 +43,7 @@ class FlavorSchema(schema_base.SchemaBase):
                                 },
                                 "links": {
                                     "type": "array",
+                                    "required": True,
                                     "items": {
                                         "type": "object",
                                         "properties": {
