@@ -69,6 +69,12 @@ class ServiceController(base.ServiceBase):
                 self._process_referrer_restriction(referrer_whitelist_value,
                                                    rule)
 
+        # implementing caching-rules for akamai
+        # we do not have to use copy here, since caching is only used once
+        caching_rules = service_obj.caching
+        # Traverse existing rules list to add caching rules necessarys
+        self._process_caching_rules(caching_rules, post_data['rules'])
+
         classified_domains = self._classify_domains(service_obj.domains)
 
         try:
@@ -182,6 +188,66 @@ class ServiceController(base.ServiceBase):
             'value': referrer_whitelist_value
         })
 
+    def _process_caching_rules(self, caching_rules, rules_list):
+        for caching_rule in caching_rules:
+            if caching_rule.name.lower() == 'default':
+                for rule in rules_list:
+                    # this branch could not be hit when there is no
+                    # 'default' origin rule
+                    matches_dict = rule['matches'][0]
+                    if (matches_dict['name'] == 'url-wildcard' or
+                        matches_dict['name'] == 'url-path') and (
+                       matches_dict['value'] == '/*'):
+                        rule['behaviors'].append({
+                            'name': 'caching',
+                            'type': 'fixed',
+                            # assuming the input number to caching rule
+                            # ttl is in second
+                            'value': '%ss' % caching_rule.ttl
+                        })
+                        caching_rules.remove(caching_rule)
+            else:
+                for rule in rules_list:
+                    matches_dict = rule['matches'][0]
+                    if matches_dict['name'] == 'url-wildcard':
+                        for r in caching_rule.rules:
+                            if r.request_url == matches_dict['value']:
+                                rule['behaviors'].append({
+                                    'name': 'caching',
+                                    'type': 'fixed',
+                                    # assuming the input number to caching rule
+                                    # ttl is in second
+                                    'value': '%ss' % caching_rule.ttl
+                                })
+                                caching_rule.rules.remove(r)
+                        if caching_rule.rules == []:
+                            # in this case all the rule for this caching
+                            # rule has been processed
+                            caching_rules.remove(caching_rule)
+
+        # at this point, all the unprocessed rules are still left in caching
+        # rules list, wee need to add separate rule for that
+        for caching_rule in caching_rules:
+            rule_dict_template = {
+                'matches': [],
+                'behaviors': []
+            }
+            for rule in caching_rule.rules:
+                match_rule = {
+                    'name': 'url-wildcard',
+                    'value': rule.request_url
+                }
+                rule_dict_template['matches'].append(match_rule)
+            rule_dict_template['behaviors'].append({
+                'name': 'caching',
+                'type': 'fixed',
+                # assuming the input number to caching rule
+                # ttl is in second
+                'value': '%ss' % caching_rule.ttl
+            })
+            rules_list.append(rule_dict_template)
+            caching_rules.remove(caching_rule)
+
     def get(self, service_name):
         pass
 
@@ -242,6 +308,12 @@ class ServiceController(base.ServiceBase):
                 for rule in policy_content['rules']:
                     self._process_referrer_restriction(
                         referrer_whitelist_value, rule)
+
+            # implementing caching-rules for akamai
+            # we do not have to use copy here, since caching is only used once
+            caching_rules = service_obj.caching
+            # Traverse existing rules list to add caching rules necessarys
+            self._process_caching_rules(caching_rules, policy_content['rules'])
 
             # Update domain if necessary ( by adjust digital property)
             classified_domains = self._classify_domains(service_obj.domains)
@@ -334,6 +406,12 @@ class ServiceController(base.ServiceBase):
                     for rule in policy_content['rules']:
                         self._process_referrer_restriction(
                             referrer_whitelist_value, rule)
+
+                # implementing caching-rules for akamai
+                caching_rules = service_obj.caching
+                # Traverse existing rules list to add caching rules necessarys
+                self._process_caching_rules(caching_rules,
+                                            policy_content['rules'])
 
                 # post new policies back with Akamai Policy API
                 try:

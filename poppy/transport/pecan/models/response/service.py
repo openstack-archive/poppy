@@ -19,6 +19,7 @@ except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
 
 from poppy.common import uri
+from poppy.transport.pecan.models.response import cachingrules
 from poppy.transport.pecan.models.response import domain
 from poppy.transport.pecan.models.response import link
 from poppy.transport.pecan.models.response import origin
@@ -36,6 +37,8 @@ class Model(collections.OrderedDict):
         self["origins"] = [origin.Model(o) for o in service_obj.origins]
         self["restrictions"] = [restriction.Model(r) for r in
                                 service_obj.restrictions]
+        self["caching"] = [cachingrules.Model(c) for c in
+                           service_obj.caching]
         self["status"] = service_obj.status
         self["flavor_ref"] = uri.encode(u'{0}/v1.0/flavors/{1}'.format(
             request.host_url,
