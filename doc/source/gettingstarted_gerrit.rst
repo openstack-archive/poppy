@@ -17,7 +17,7 @@ Using Gerrit
 Before you begin
 ~~~~~~~~~~~~~~~~
 
-To familiarize yourself with Poppy, try it out using the information in our [https://github.com/stackforge/poppy repo]. When you are ready to start contributing, you will need to execute an [https://wiki.openstack.org/wiki/How_To_Contribute#Contributors_License_Agreement OpenStack CLA]. This is required before you can submit reviews to our [https://github.com/stackforge/poppy Poppy StackForge Repo]. For information about how prepare for contribution, please consult the [https://wiki.openstack.org/wiki/How_To_Contribute How To Contribute]] wiki page.
+To familiarize yourself with Poppy, try it out using the information in our [https://github.com/stackforge/poppy repo]. When you are ready to start contributing, you will need to execute an [http://docs.openstack.org/infra/manual/developers.html#account-setup OpenStack CLA]. This is required before you can submit reviews to our [https://git.openstack.org/cgit/stackforge/poppy Poppy StackForge Repo]. For information about how prepare for contribution, please consult the [http://docs.openstack.org/infra/manual/developers.html developer guide]].
 
 Learn about Gerrit
 ------------------
