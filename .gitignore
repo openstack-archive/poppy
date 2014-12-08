@@ -44,6 +44,7 @@ write_file
 .settings/*
 
 /Dockerfile
+/docker/fig/fig_local.yml
 
 # patch files
 *.patch
