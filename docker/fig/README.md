@@ -2,9 +2,16 @@ Install Fig::
 
     $ sudo pip install -U fig
 
+Before you begin
+----------------
 
-Install Poppy from Upstream
----------------------------
+Update the appropriate fig file being used with the appropriate credentials.
+
+Warning - never git commit your secret credentials to upstream!
+
+
+Install Poppy from Upstream (fig.yml)
+-------------------------------------
 
 Build and Run::
 
@@ -28,8 +35,8 @@ To get the most-updated code of poppy::
     $ fig run poppy uwsgi --reload /var/run/poppy/poppy.pid
 
 
-Mounting a local Poppy Volume
------------------------------
+Mounting a local Poppy Volume (fig_dev.yml)
+-------------------------------------------
 
 1. Build and Run::
 
@@ -43,16 +50,8 @@ Also note that the `fig_dev.yml` file in this folder cannot be used directly wit
 invoking `fig`.
 
 
-Testing
---------
-
-Access the running poppy api instance home document::
-
-    $ curl <docker_ip>/v1.0/
-
-
-Building and Running the Poppy API Server w/Mimic
--------------------------------------------------
+Building and Running the Poppy API Server w/Mimic (fig_mimic.yml)
+-----------------------------------------------------------------
 
 From this folder, run:
 
@@ -78,3 +77,11 @@ Note that `dev_mimic` is a wrapper around [`fig`](http://www.fig.sh/cli.html) so
 any sub-commands that work with the fig CLI will work with `dev_mimic` as well.
 
 Note that `dev_mimic` does not run a repose container.
+
+
+Testing
+--------
+
+Access the running poppy api instance home document::
+
+    $ curl <docker_ip>/v1.0/
