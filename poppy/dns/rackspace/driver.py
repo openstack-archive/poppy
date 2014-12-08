@@ -24,8 +24,8 @@ from poppy.openstack.common import log as logging
 
 
 RACKSPACE_OPTIONS = [
-    cfg.StrOpt('project_id', default='',
-               help='Keystone Project ID'),
+    cfg.StrOpt('username', default='',
+               help='Keystone Username'),
     cfg.StrOpt('api_key', default='',
                help='Keystone API Key'),
     cfg.BoolOpt('sharding_enabled', default=True,
@@ -53,7 +53,7 @@ class DNSProvider(base.Driver):
         self._conf.register_opts(RACKSPACE_OPTIONS, group=RACKSPACE_GROUP)
         self.rackdns_conf = self._conf[RACKSPACE_GROUP]
         pyrax.set_setting("identity_type", "rackspace")
-        pyrax.set_credentials(self.rackdns_conf.project_id,
+        pyrax.set_credentials(self.rackdns_conf.username,
                               self.rackdns_conf.api_key)
         self.rackdns_client = pyrax.cloud_dns
 
