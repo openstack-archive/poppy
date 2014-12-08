@@ -222,7 +222,7 @@ class ServicesController(base.ServicesController):
         args = {
             'project_id': project_id,
             'service_name': service_name,
-            'flavor_id': service_obj.flavor_ref,
+            'flavor_id': service_obj.flavor_id,
             'domains': domains,
             'origins': origins,
             'caching_rules': caching_rules,
@@ -247,7 +247,7 @@ class ServicesController(base.ServicesController):
         args = {
             'project_id': project_id,
             'service_name': service_name,
-            'flavor_id': service_obj.flavor_ref,
+            'flavor_id': service_obj.flavor_id,
             'domains': domains,
             'origins': origins,
             'caching_rules': caching_rules,
@@ -343,7 +343,7 @@ class ServicesController(base.ServicesController):
         """
         name = result.get('service_name')
 
-        flavor_ref = result.get('flavor_id')
+        flavor_id = result.get('flavor_id')
         origins = [json.loads(o) for o in result.get('origins', []) or []]
         domains = [json.loads(d) for d in result.get('domains', []) or []]
         restrictions = [json.loads(r)
@@ -382,7 +382,7 @@ class ServicesController(base.ServicesController):
             for caching_rule in caching_rules]
 
         # create the service object
-        s = service.Service(name, domains, origins, flavor_ref,
+        s = service.Service(name, domains, origins, flavor_id,
                             caching=caching_rules,
                             restrictions=restrictions)
 

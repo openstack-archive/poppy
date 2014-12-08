@@ -9,7 +9,7 @@
         "origins": [
             {"origin": "mockdomain.com", "ssl": false, "port": 80}
         ],
-        "flavor_ref" : "standard"
+        "flavor_id" : "standard"
     },
     "multiple_origins_with_domains": {
         "name" : "mysite.com",
@@ -23,14 +23,14 @@
             {"origin": "mockdomain-image.com",
              "rules": [{"name": "img", "request_url": "/img"}] }
         ],
-        "flavor_ref" : "standard"
+        "flavor_id" : "standard"
     },
     "single_one_origin_without_domains": {
         "name" : "mysite.com",
         "origins": [
             {"origin": "mockdomain.com", "ssl": false, "port": 80}
         ],
-        "flavor_ref" : "standard"
+        "flavor_id" : "standard"
     },
     "multiple_origins_without_domains": {
         "name" : "mysite.com",
@@ -39,7 +39,7 @@
             {"origin": "mockdomain-image.com",
              "rules": [{"name": "img", "request_url": "/img"}] }
         ],
-        "flavor_ref" : "standard"
+        "flavor_id" : "standard"
     },
     "no_origin_with_domains": {
         "name" : "mysite.com",
@@ -48,10 +48,10 @@
             {"domain": "densely.sage.com"},
             {"domain": "rosemary.thyme.net"}
         ],
-        "flavor_ref" : "standard"
+        "flavor_id" : "standard"
     },
     "no_origin_without_domains": {
         "name" : "mysite.com",
-        "flavor_ref" : "standard"
+        "flavor_id" : "standard"
     }
 }
