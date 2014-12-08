@@ -32,9 +32,13 @@ RUN sudo pip install -r /home/poppy/requirements/requirements.txt
 RUN sudo pip install -e /home/poppy/.
 
 # Set up the configuration files
-ADD ./poppy.conf /etc/poppy.conf
-ADD ./logging.conf /etc/logging.conf
-ADD ./uwsgi.ini /root/uwsgi.ini
+ADD ./docker/api/poppy.conf /etc/poppy.conf
+ADD ./docker/api/logging.conf /etc/logging.conf
+ADD ./docker/api/uwsgi.ini /root/uwsgi.ini
+
+# Deploy startup script
+ADD ./docker/api/init.sh /usr/local/bin/poppy_startup
+RUN chmod 755 /usr/local/bin/poppy_startup
 
 # create uwsgi log directory
 RUN mkdir -p /var/log/poppy
@@ -44,8 +48,6 @@ RUN chmod -R +w /var/log/poppy
 RUN mkdir -p /var/run/poppy
 RUN chmod -R +w /var/run/poppy
 
-#RUN /usr/local/bin/uwsgi --ini /root/uwsgi.ini
-
 # Start Poppy
 EXPOSE 8081
-CMD ["/usr/local/bin/uwsgi", "--ini", "/root/uwsgi.ini"]
+CMD poppy-startup
