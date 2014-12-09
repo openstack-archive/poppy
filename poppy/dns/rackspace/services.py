@@ -59,7 +59,7 @@ class ServicesController(base.ServicesBase):
         num_shards = self._driver.rackdns_conf.num_shards
 
         # randomly select a shard
-        shard_id = random.randint(0, num_shards - 1)
+        shard_id = random.randint(1, num_shards)
         subdomain_name = '{0}{1}.{2}'.format(shard_prefix, shard_id,
                                              cdn_domain_name)
         subdomain = self._get_subdomain(subdomain_name)
