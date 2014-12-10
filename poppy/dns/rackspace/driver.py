@@ -37,6 +37,8 @@ RACKSPACE_OPTIONS = [
                help='The url for customers to CNAME to'),
     cfg.StrOpt('email', help='The email to be provided to Rackspace DNS for'
                'creating subdomains'),
+    cfg.StrOpt('auth_endpoint', default='',
+                help='Authentication end point for DNS'),
 ]
 
 RACKSPACE_GROUP = 'drivers:dns:rackspace'
@@ -52,6 +54,8 @@ class DNSProvider(base.Driver):
 
         self._conf.register_opts(RACKSPACE_OPTIONS, group=RACKSPACE_GROUP)
         self.rackdns_conf = self._conf[RACKSPACE_GROUP]
+        if self.rackdns_conf.auth_endpoint:
+            pyrax.set_setting("auth_endpoint", self.rackdns_conf.auth_endpoint)
         pyrax.set_setting("identity_type", "rackspace")
         pyrax.set_credentials(self.rackdns_conf.username,
                               self.rackdns_conf.api_key)
