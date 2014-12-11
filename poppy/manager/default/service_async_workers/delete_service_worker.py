@@ -35,9 +35,6 @@ def service_delete_worker(provider_details, service_controller,
     dns_responder = service_controller.dns_controller.delete(provider_details)
 
     for responder in responders:
-        # this is the item of responder, if there's "error"
-        # key in it, it means the deletion for this provider failed.
-        # in that case we cannot delete service from poppy storage.
         provider_name = list(responder.items())[0][0]
 
         if 'error' in responder[provider_name]:
@@ -49,7 +46,7 @@ def service_delete_worker(provider_details, service_controller,
                 responder[provider_name].get('error_info'))
         elif 'error' in dns_responder[provider_name]:
             LOG.info('Delete service from DNS failed')
-            LOG.info('Updating provider detail status of %s for %s'.foramt(
+            LOG.info('Updating provider detail status of %s for %s'.format(
                      (provider_name, service_name)))
             # stores the error info for debugging purposes.
             provider_details[provider_name].error_info = (
@@ -59,19 +56,21 @@ def service_delete_worker(provider_details, service_controller,
             del provider_details[provider_name]
 
         service_controller.storage_controller._driver.connect()
-    if provider_details == {}:
-        # Only if all provider successfully deleted we can delete
-        # the poppy service.
-        LOG.info('Deleting poppy service %s from all providers successful'
-                 % service_name)
-        service_controller.storage_controller.delete(project_id, service_name)
-        LOG.info('Deleting poppy service %s succeeded' % service_name)
-    else:
-        # Leave failed provider details with error infomation for further
+
+    if provider_details != {}:
+        # Store failed provider details with error infomation for further
         # action, maybe for debug and/or support.
-        LOG.info('Updating poppy service provider details for %s' %
+        LOG.info('Delete failed for one or more providers'
+                 'Updating poppy service provider details for %s' %
                  service_name)
         service_controller.storage_controller.update_provider_details(
             project_id,
             service_name,
             provider_details)
+
+    # always delete from Poppy.  Provider Details will contain
+    # any provider issues that may have occurred.
+    LOG.info('Deleting poppy service %s from all providers successful'
+             % service_name)
+    service_controller.storage_controller.delete(project_id, service_name)
+    LOG.info('Deleting poppy service %s succeeded' % service_name)

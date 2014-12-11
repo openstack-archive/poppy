@@ -285,15 +285,44 @@ class ServiceControllerTest(base.FunctionalTest):
         patch_ret_val = self.test_fake_controller._handle_patch('patch', '')
         self.assertTrue(len(patch_ret_val) == 2)
 
-    # def test_delete(self):
-    # TODO(amitgandhinz): commented this out until the Delete Patch lands
-    # due to this test failing.
-    #     response = self.app.delete('/v1.0/services/fake_service_name_4')
-    #     self.assertEqual(200, response.status_code)
+    def test_delete(self):
+        response = self.app.delete(
+            '/v1.0/services/%s' % self.service_name,
+            headers={
+                'Content-Type': 'application/json',
+                'X-Project-ID': self.project_id
+            }
+        )
+        self.assertEqual(202, response.status_code)
 
-    def test_delete_non_eixst(self):
-        response = self.app.delete('/v1.0/%s/services/non_exist_service_name' %
-                                   self.project_id,
+        # TODO(amitgandhinz): commented out as thread model
+        # is not allowing thread to process with test
+
+        # # check if it actually gets deleted
+        # status_code = 0
+        # count = 0
+        # while (count < 5):
+        #     service_deleted = self.app.get(
+        #         '/v1.0/services/' + self.service_name,
+        #         headers={'X-Project-ID': self.project_id},
+        #         expect_errors=True)
+
+        #     status_code = service_deleted.status_code
+        #     print("service delete status: %s" % status_code)
+
+        #     if status_code == 200:
+        #         print 'not yet deleted, so try again in 1s'
+        #         import time
+        #         time.sleep(1)
+        #     else:
+        #         break
+
+        #     count = count + 1
+
+        # self.assertEqual(404, status_code)
+
+    def test_delete_non_exist(self):
+        response = self.app.delete('/v1.0/services/non_exist_service_name',
                                    headers={
                                        'Content-Type': 'application/json',
                                        'X-Project-ID': self.project_id

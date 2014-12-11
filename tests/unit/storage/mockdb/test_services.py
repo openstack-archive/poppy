@@ -37,7 +37,3 @@ class MockDBStorageFlavorsTests(base.TestCase):
         self.sc = services.ServicesController(mockdb_driver)
         self.project_id = "fake_project_id"
         self.service_name = "fake_service_name"
-
-    def test_delete_service(self):
-        self.assertTrue(self.sc.delete(self.project_id, self.service_name)
-                        == '')
