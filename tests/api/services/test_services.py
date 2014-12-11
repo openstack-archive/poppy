@@ -99,6 +99,8 @@ class TestCreateService(providers.TestProviderBase):
                     msg='Caching List Not Correct for {0} service name {1}'.
                         format(provider, self.service_name))
 
+    test_create_service_positive.tags = ['smoke']
+
     @ddt.file_data('data_create_service_negative.json')
     def test_create_service_negative(self, test_data):
 
@@ -117,6 +119,8 @@ class TestCreateService(providers.TestProviderBase):
                                           caching_list=caching_list,
                                           flavor_id=flavor_id)
         self.assertEqual(resp.status_code, 400)
+
+    test_create_service_negative.tags = ['smoke']
 
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
@@ -172,6 +176,8 @@ class TestListServices(base.TestBase):
         body = resp.json()
         self.assertSchema(body, services.list_services)
 
+    test_list_single_service.tags = ['smoke']
+
     def test_list_services_no_service(self):
         self.skipTest('Non deterministic - Replace this with an unit test?')
         resp = self.client.list_services()
@@ -192,6 +198,8 @@ class TestListServices(base.TestBase):
         self.assertEqual(len(body['services']), limit)
         self.assertSchema(body, services.list_services)
 
+    test_list_services_valid_limit.tags = ['smoke']
+
     def test_list_services_multiple_page(self):
         self.service_list = [self._create_test_service() for _ in range(15)]
         resp = self.client.list_services()
@@ -208,16 +216,22 @@ class TestListServices(base.TestBase):
         resp = self.client.list_services(param=url_param)
         self.assertEqual(resp.status_code, 400)
 
+    test_list_services_invalid_limits.tags = ['smoke']
+
     @ddt.data(-1, -10000000000, 0, 10000000, 'invalid', '学校', '')
     def test_list_services_various_markers(self, marker):
         url_param = {'marker': marker}
         resp = self.client.list_services(param=url_param)
         self.assertEqual(resp.status_code, 200)
 
+    test_list_services_various_markers.tags = ['smoke']
+
     def test_list_services_invalid_param(self):
         url_param = {'yummy': 123}
         resp = self.client.list_services(param=url_param)
         self.assertEqual(resp.status_code, 200)
+
+    test_list_services_invalid_param.tags = ['smoke']
 
     def tearDown(self):
         for service in self.service_list:
@@ -359,7 +373,7 @@ class TestServiceActions(base.TestBase):
         self.assertEqual(body['status'], 'delete_in_progress')
 
         # TODO(malini): find a better solution
-        # As is, the servvice is still available in the DB till deleted from
+        # As is, the service is still available in the DB till deleted from
         # the provider. The test should be able to handle this with
         # exponential sleep or whatever(!).
         # time.sleep(20)
