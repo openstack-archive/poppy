@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import random
+
 import mock
 from oslo.config import cfg
 
@@ -31,7 +33,7 @@ AKAMAI_OPTIONS = [
         'policy_api_access_token', default='aaa',
         help='Akamai access token for policy API'),
     cfg.StrOpt(
-        'policy_api_base_url', default='/abc',
+        'policy_api_base_url', default='/abc/',
         help='Akamai policy API base URL'),
     # credentials && base URL for CCU API
     # for purging
@@ -45,11 +47,22 @@ AKAMAI_OPTIONS = [
         'ccu_api_access_token', default='aaa',
         help='Akamai access token for CCU API'),
     cfg.StrOpt(
-        'ccu_api_base_url', default='/abc',
+        'ccu_api_base_url', default='/abc/',
         help='Akamai CCU Purge API base URL'),
     # Access URL in Akamai chain
     cfg.StrOpt(
         'akamai_access_url_link', default='abc.def.org',
+        help='Akamai domain access_url link'),
+    cfg.StrOpt(
+        'akamai_https_access_url_suffix', default='ssl.abc',
+        help='Akamai domain ssl access url suffix'),
+    # Akama client specific configuration numbers
+    cfg.StrOpt(
+        'akamai_http_config_number', default=str(random.randint(10000, 99999)),
+        help='Akamai domain access_url link'),
+    cfg.StrOpt(
+        'akamai_https_config_number',
+        default=str(random.randint(10000, 99999)),
         help='Akamai domain access_url link'),
 ]
 
@@ -85,6 +98,7 @@ class TestDriver(base.TestCase):
         )
         self.assertEqual('Akamai', provider.provider_name)
 
+    @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
     def test_is_alive(self):
         provider = driver.CDNProvider(self.conf)
         self.assertEqual(True, provider.is_alive())
