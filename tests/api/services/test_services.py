@@ -49,7 +49,7 @@ class TestCreateService(providers.TestProviderBase):
         domain_list = test_data['domain_list']
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
-        flavor_id = test_data['flavor_id']
+        flavor_id = self.flavor_id
 
         resp = self.client.create_service(service_name=self.service_name,
                                           domain_list=domain_list,
@@ -66,6 +66,9 @@ class TestCreateService(providers.TestProviderBase):
         self.assertSchema(body, services.get_service)
 
         self.assertEqual(body['domains'], domain_list)
+        for item in origin_list:
+            if 'rules' not in 'item':
+                item[u'rules'] = []
         self.assertEqual(body['origins'], origin_list)
 
         # TODO(malini): uncomment below after caching list is implemented.
@@ -103,7 +106,10 @@ class TestCreateService(providers.TestProviderBase):
         domain_list = test_data['domain_list']
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
-        flavor_id = test_data['flavor_id']
+        if 'flavor_id' in test_data:
+            flavor_id = test_data['flavor_id']
+        else:
+            flavor_id = self.flavor_id
 
         resp = self.client.create_service(service_name=service_name,
                                           domain_list=domain_list,
@@ -123,16 +129,14 @@ class TestCreateService(providers.TestProviderBase):
 
 @ddt.ddt
 class TestListServices(base.TestBase):
-
     """Tests for List Services."""
 
     def _create_test_service(self):
         service_name = str(uuid.uuid1())
 
-        self.domain_list = [{"domain": "mywebsite.com"},
-                            {"domain": "blog.mywebsite.com"}]
+        self.domain_list = [{"domain": str(uuid.uuid1()) + '.com'}]
 
-        self.origin_list = [{"origin": "mywebsite.com",
+        self.origin_list = [{"origin": str(uuid.uuid1()) + '.com',
                              "port": 443, "ssl": False}]
 
         self.caching_list = [{"name": "default", "ttl": 3600},
@@ -150,13 +154,15 @@ class TestListServices(base.TestBase):
     def setUp(self):
         super(TestListServices, self).setUp()
         self.service_list = []
-        self.flavor_id = str(uuid.uuid1())
-        # ensure the flavor referred to exists
-        self.client.create_flavor(flavor_id=self.flavor_id,
-                                  provider_list=[{
-                                      "provider": "fastly",
-                                      "links": [{"href": "www.fastly.com",
-                                                 "rel": "provider_url"}]}])
+        if self.test_config.generate_flavors:
+            self.flavor_id = str(uuid.uuid1())
+            self.client.create_flavor(
+                flavor_id=self.flavor_id,
+                provider_list=[{"provider": "fastly",
+                                "links": [{"href": "www.fastly.com",
+                                           "rel": "provider_url"}]}])
+        else:
+            self.flavor_id = self.test_config.default_flavor
 
     def test_list_single_service(self):
         self.service_list.append(self._create_test_service())
@@ -167,7 +173,7 @@ class TestListServices(base.TestBase):
         self.assertSchema(body, services.list_services)
 
     def test_list_services_no_service(self):
-        # self.skipTest('Non deterministic - Replace this with an unit test?')
+        self.skipTest('Non deterministic - Replace this with an unit test?')
         resp = self.client.list_services()
         self.assertEqual(resp.status_code, 200)
 
@@ -187,7 +193,7 @@ class TestListServices(base.TestBase):
         self.assertSchema(body, services.list_services)
 
     def test_list_services_multiple_page(self):
-        self.service_list = [self._create_test_service() for _ in range(25)]
+        self.service_list = [self._create_test_service() for _ in range(15)]
         resp = self.client.list_services()
         self.assertEqual(resp.status_code, 200)
 
@@ -217,7 +223,8 @@ class TestListServices(base.TestBase):
         for service in self.service_list:
             self.client.delete_service(service_name=service)
 
-        self.client.delete_flavor(flavor_id=self.flavor_id)
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
 
         super(TestListServices, self).tearDown()
 
@@ -230,13 +237,15 @@ class TestServiceActions(base.TestBase):
     def setUp(self):
         super(TestServiceActions, self).setUp()
         self.service_name = str(uuid.uuid1())
-        self.flavor_id = str(uuid.uuid1())
-        # ensure the flavor referred to exists
-        self.client.create_flavor(flavor_id=self.flavor_id,
-                                  provider_list=[{
-                                      "provider": "fastly",
-                                      "links": [{"href": "www.fastly.com",
-                                                 "rel": "provider_url"}]}])
+        if self.test_config.generate_flavors:
+            self.flavor_id = str(uuid.uuid1())
+            self.client.create_flavor(
+                flavor_id=self.flavor_id,
+                provider_list=[{"provider": "fastly",
+                                "links": [{"href": "www.fastly.com",
+                                           "rel": "provider_url"}]}])
+        else:
+            self.flavor_id = self.test_config.default_flavor
 
         domain = str(uuid.uuid1()) + '.com'
         self.domain_list = [{"domain": domain}]
@@ -369,5 +378,6 @@ class TestServiceActions(base.TestBase):
 
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
-        self.client.delete_flavor(flavor_id=self.flavor_id)
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
         super(TestServiceActions, self).tearDown()
