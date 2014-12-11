@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import ddt
+from nose.plugins import attrib
 
 from tests.api import base
 
@@ -31,6 +32,7 @@ class TestHealth(base.TestBase):
         resp = self.client.check_health()
         self.assertEqual(resp.status_code, 200)
 
+    @attrib.attr('smoke')
     def test_ping(self):
 
         resp = self.client.ping()

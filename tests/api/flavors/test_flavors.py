@@ -16,6 +16,7 @@
 import uuid
 
 import ddt
+from nose.plugins import attrib
 
 from tests.api import base
 from tests.api.utils.schema import flavors
@@ -93,6 +94,7 @@ class TestFlavorActions(base.TestBase):
         self.client.create_flavor(flavor_id=self.flavor_id,
                                   provider_list=self.provider_list)
 
+    @attrib.attr('smoke')
     def test_get_flavor(self):
 
         resp = self.client.get_flavor(flavor_id=self.flavor_id)

@@ -66,6 +66,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
                                           deserialize_format)
         self.url = url
         self.auth_token = auth_token
+        self.project_id = project_id
         self.default_headers['X-Auth-Token'] = auth_token
         self.default_headers['X-Project-Id'] = project_id
         self.default_headers['Content-Type'] = 'application/json'
@@ -84,7 +85,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         PUT
         services/{service_name}
         """
-        url = '{0}/v1.0/services'.format(self.url)
+        url = '{0}/services'.format(self.url)
         request_object = requests.CreateService(service_name=service_name,
                                                 domain_list=domain_list,
                                                 origin_list=origin_list,
@@ -101,7 +102,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         PATCH
         services/{service_name}
         """
-        url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
+        url = '{0}/services/{1}'.format(self.url, service_name)
         request_object = requests.PatchService(request_body=request_body)
         return self.request('PATCH', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
@@ -118,7 +119,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         if location:
             url = location
         else:
-            url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
+            url = '{0}/services/{1}'.format(self.url, service_name)
         return self.request('GET', url)
 
     def list_services(self, param=None):
@@ -130,7 +131,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         services
         """
 
-        url = '{0}/v1.0/services'.format(self.url)
+        url = '{0}/services'.format(self.url)
         return self.request('GET', url, params=param)
 
     def delete_service(self, service_name):
@@ -141,7 +142,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         services/{service_name}
         """
 
-        url = '{0}/v1.0/services/{1}'.format(self.url, service_name)
+        url = '{0}/services/{1}'.format(self.url, service_name)
         return self.request('DELETE', url)
 
     def check_health(self):
@@ -152,7 +153,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         health
         """
 
-        url = '{0}/v1.0/health'.format(self.url)
+        url = '{0}/health'.format(self.url)
         return self.request('GET', url)
 
     def ping(self):
@@ -163,7 +164,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         ping
         """
 
-        url = '{0}/v1.0/ping'.format(self.url)
+        url = '{0}/ping'.format(self.url)
         return self.request('GET', url)
 
     def create_flavor(self, flavor_id=None, provider_list=None, limits=None,
@@ -175,7 +176,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         PUT
         flavors/{flavor_id}
         """
-        url = '{0}/v1.0/flavors'.format(self.url)
+        url = '{0}/flavors'.format(self.url)
         request_object = requests.CreateFlavor(
             flavor_id=flavor_id,
             provider_list=provider_list,
@@ -195,7 +196,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         if flavor_location:
             url = flavor_location
         else:
-            url = '{0}/v1.0/flavors/{1}'.format(self.url, flavor_id)
+            url = '{0}/flavors/{1}'.format(self.url, flavor_id)
 
         return self.request('GET', url)
 
@@ -209,7 +210,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         if flavor_location:
             url = flavor_location
         else:
-            url = u'{0}/v1.0/flavors/{1}'.format(self.url, flavor_id)
+            url = u'{0}/flavors/{1}'.format(self.url, flavor_id)
 
         return self.request('DELETE', url)
 
