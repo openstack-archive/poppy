@@ -91,8 +91,14 @@ class ServiceController(base.ServiceBase):
                 # TODO(tonytan4ever): also classify domains based on their
                 # protocols. http and https domains needs to be created
                 # with separate base urls.
+                configuration_number = None
+                if classified_domain.protocol == 'http':
+                    configuration_number = self.driver.http_conf_number
+                elif classified_domain.protocol == 'https':
+                    configuration_number = self.driver.https_conf_number
                 resp = self.policy_api_client.put(
                     self.policy_api_base_url.format(
+                        configuration_number=configuration_number,
                         policy_name=dp),
                     data=json.dumps(post_data),
                     headers=self.request_header)
@@ -101,15 +107,23 @@ class ServiceController(base.ServiceBase):
                 if resp.status_code != 200:
                     raise RuntimeError(resp.text)
 
-                ids.append(dp)
+                dp_obj = {'policy_name': dp,
+                          'protocol': classified_domain.protocol}
+                ids.append(dp_obj)
                 # TODO(tonytan4ever): leave empty links for now
                 # may need to work with dns integration
                 LOG.info('Creating policy %s on domain %s complete' %
-                         (dp, ','.join(classified_domain)))
-            links.append({'href': self.driver.akamai_access_url_link,
-                          'rel': 'access_url',
-                          'domain': service_obj.name
-                          })
+                         (dp, classified_domain.domain))
+                provider_access_url = None
+                if classified_domain.protocol == 'http':
+                    provider_access_url = self.driver.akamai_access_url_link
+                elif classified_domain.protocol == 'https':
+                    provider_access_url = '.'.join(
+                        [dp, self.driver.akamai_https_access_url_suffix])
+                links.append({'href': provider_access_url,
+                              'rel': 'access_url',
+                              'domain': dp
+                              })
         except Exception:
             return self.responder.failed("failed to create service")
         else:
@@ -118,15 +132,8 @@ class ServiceController(base.ServiceBase):
     def _classify_domains(self, domains_list):
         # classify domains into different categories based on first two level
         # of domains, group them together
-        result_dict = {}
-        for domain in domains_list:
-            # get the content_realm (1st and 2nd level domain of each domains)
-            content_realm = '.'.join(domain.domain.split('.')[-2:])
-            if content_realm not in result_dict:
-                result_dict[content_realm] = [domain.domain]
-            else:
-                result_dict[content_realm].append(domain.domain)
-        return [domain_mapping[1] for domain_mapping in result_dict.items()]
+        # for right now we just use the whole domain as the digital property
+        return domains_list
 
     def _process_new_origin(self, origin, rules_list):
         rule_dict_template = {
@@ -177,7 +184,7 @@ class ServiceController(base.ServiceBase):
         rules_list.append(rule_dict_template)
 
     def _process_new_domain(self, domain, rules_list):
-        dp = '.'.join(domain[0].split('.')[-2:])
+        dp = domain.domain
 
         for rule in rules_list:
             for behavior in rule['behaviors']:
@@ -280,9 +287,15 @@ class ServiceController(base.ServiceBase):
             # and creates new policy for the new domains,
             # old policies ought to be deleted.
             try:
+                configuration_number = None
+                if policies[0]['protocol'] == 'http':
+                    configuration_number = self.driver.http_conf_number
+                elif policies[0]['protocol'] == 'https':
+                    configuration_number = self.driver.https_conf_number
                 resp = self.policy_api_client.get(
                     self.policy_api_base_url.format(
-                        policy_name=policies[0]),
+                        configuration_number=configuration_number,
+                        policy_name=policies[0]['policy_name']),
                     headers=self.request_header)
                 if resp.status_code != 200:
                     raise RuntimeError(resp.text)
@@ -328,7 +341,21 @@ class ServiceController(base.ServiceBase):
                     dp = self._process_new_domain(classified_domain,
                                                   policy_content['rules'])
 
-                    if dp in policies:
+                    configuration_number = None
+                    if classified_domain.protocol == 'http':
+                        configuration_number = self.driver.http_conf_number
+                    elif classified_domain.protocol == 'https':
+                        configuration_number = self.driver.https_conf_number
+
+                    # verify the same policy
+                    policy_names = [policy['policy_name'] for policy
+                                    in policies]
+
+                    # Only if a same domain with a same protocol
+                    # do we need to update a existing policy
+                    if dp in policy_names and (
+                            policies[policy_names.index(dp)]['protocol'] == (
+                            classified_domain.protocol)):
                         # in this case we should update existing policy
                         # instead of create a new policy
                         LOG.info('Start to update policy %s' % dp)
@@ -337,14 +364,20 @@ class ServiceController(base.ServiceBase):
                         # created  with separate base urls.
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
+                                configuration_number=(
+                                    self.driver.http_conf_number),
                                 policy_name=dp),
                             data=json.dumps(policy_content),
                             headers=self.request_header)
-                        policies.remove(dp)
+                        dp_obj = {'policy_name': dp,
+                                  'protocol': classified_domain.protocol}
+                        policies.remove(dp_obj)
                     else:
                         LOG.info('Start to create new policy %s' % dp)
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
+                                configuration_number=(
+                                    configuration_number),
                                 policy_name=dp),
                             data=json.dumps(policy_content),
                             headers=self.request_header)
@@ -352,29 +385,49 @@ class ServiceController(base.ServiceBase):
                     LOG.info('akamai response text: %s' % resp.text)
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
-                    ids.append(classified_domain[0])
+
+                    dp_obj = {'policy_name': dp,
+                              'protocol': classified_domain.protocol}
+                    ids.append(dp_obj)
                     # TODO(tonytan4ever): leave empty links for now
                     # may need to work with dns integration
                     LOG.info('Creating/Updateing policy %s on domain %s '
-                             'complete' % (dp, ','.join(classified_domain)))
-                links.append({'href': self.driver.akamai_access_url_link,
-                              'rel': 'access_url',
-                              'domain': service_obj.name
-                              })
+                             'complete' % (dp, classified_domain.domain))
+
+                    provider_access_url = None
+                    if classified_domain.protocol == 'http':
+                        provider_access_url = (
+                            self.driver.akamai_access_url_link)
+                    elif classified_domain.protocol == 'https':
+                        provider_access_url = '.'.join(
+                            [dp, self.driver.akamai_https_access_url_suffix])
+                    links.append({'href': provider_access_url,
+                                  'rel': 'access_url',
+                                  'domain': dp
+                                  })
             except Exception:
                 return self.responder.failed("failed to update service")
 
             try:
                 for policy in policies:
-                    LOG.info('Starting to delete old policy %s' % policy)
+                    configuration_number = None
+                    if policy["protocol"] == 'http':
+                        configuration_number = self.driver.http_conf_number
+                    elif policy["protocol"] == 'https':
+                        configuration_number = self.driver.https_conf_number
+
+                    LOG.info('Starting to delete old policy %s' %
+                             policy['policy_name'])
                     resp = self.policy_api_client.delete(
                         self.policy_api_base_url.format(
-                            policy_name=policy))
+                            configuration_number=configuration_number,
+                            policy_name=policy['policy_name']))
                     LOG.info('akamai response code: %s' % resp.status_code)
                     LOG.info('akamai response text: %s' % resp.text)
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
-                    LOG.info('Delete old policy %s complete' % policy)
+                    LOG.info('Delete old policy %s complete' %
+                             policy['policy_name'])
             except Exception:
                 return self.responder.failed("failed to update service")
 
@@ -382,8 +435,16 @@ class ServiceController(base.ServiceBase):
             # in this case we only need to adjust the existing policies
             for policy in policies:
                 try:
+                    configuration_number = None
+                    if policy["protocol"] == 'http':
+                        configuration_number = self.driver.http_conf_number
+                    elif policy["protocol"] == 'https':
+                        configuration_number = self.driver.https_conf_number
+
                     resp = self.policy_api_client.get(
-                        self.policy_api_base_url.format(policy_name=policy),
+                        self.policy_api_base_url.format(
+                            configuration_number=configuration_number,
+                            policy_name=policy['policy_name']),
                         headers=self.request_header)
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
@@ -424,19 +485,28 @@ class ServiceController(base.ServiceBase):
                     LOG.info('Start to update policy %s ' % policy)
                     resp = self.policy_api_client.put(
                         self.policy_api_base_url.format(
-                            policy_name=policy),
+                            configuration_number=configuration_number,
+                            policy_name=policy['policy_name']),
                         data=json.dumps(policy_content),
                         headers=self.request_header)
                     LOG.info('akamai response code: %s' % resp.status_code)
                     LOG.info('akamai response text: %s' % resp.text)
-                    LOG.info('Update policy %s complete' % policy)
+                    LOG.info('Update policy %s complete' %
+                             policy['policy_name'])
                 except Exception:
                     return self.responder.failed("failed to update service")
+                provider_access_url = None
+                if policy['protocol'] == 'http':
+                    provider_access_url = (
+                        self.driver.akamai_access_url_link)
+                elif policy['protocol'] == 'https':
+                    provider_access_url = '.'.join(
+                        [dp, self.driver.akamai_https_access_url_suffix])
+                links.append({'href': provider_access_url,
+                              'rel': 'access_url',
+                              'domain': policy['policy_name']
+                              })
             ids = policies
-            links.append({'href': self.driver.akamai_access_url_link,
-                          'rel': 'access_url',
-                          'domain': service_obj.name
-                          })
         return self.responder.updated(json.dumps(ids), links)
 
     def delete(self, provider_service_id):
@@ -457,8 +527,16 @@ class ServiceController(base.ServiceBase):
                 # TODO(tonytan4ever): needs to look at if service
                 # domain is an https domain, if it is then a different
                 # base url is needed
+                configuration_number = None
+                if policy["protocol"] == 'http':
+                    configuration_number = self.driver.http_conf_number
+                elif policy["protocol"] == 'https':
+                    configuration_number = self.driver.https_conf_number
+
                 resp = self.policy_api_client.delete(
-                    self.policy_api_base_url.format(policy_name=policy))
+                    self.policy_api_base_url.format(
+                        configuration_number=configuration_number,
+                        policy_name=policy['policy_name']))
                 LOG.info('akamai response code: %s' % resp.status_code)
                 LOG.info('akamai response text: %s' % resp.text)
                 if resp.status_code != 200:
@@ -487,33 +565,27 @@ class ServiceController(base.ServiceBase):
                                                      "service")
 
                 for policy in policies:
-                    resp = self.policy_api_client.get(
-                        self.policy_api_base_url.format(policy_name=policy),
-                        headers=self.request_header)
-                    if resp.status_code != 200:
+                    url_scheme = None
+                    if policy['protocol'] == 'http':
+                        url_scheme = 'http://'
+                    elif policy['protocol'] == 'https':
+                        url_scheme = 'https://'
+
+                    actual_purge_url = '.'.join([url_scheme,
+                                                 policy['policy_name'],
+                                                 purge_url])
+                    data = {
+                        'objects': [
+                            actual_purge_url
+                        ]
+                    }
+                    resp = self.ccu_api_client.post(self.ccu_api_base_url,
+                                                    data=json.dumps(data),
+                                                    headers=(
+                                                        self.request_header
+                                                    ))
+                    if resp.status_code != 201:
                         raise RuntimeError(resp.text)
-                    else:
-                        url_scheme = 'http'
-                        policy_content = json.loads(resp.text)
-                        # loop over matches to get the correct url scheme
-                        for m_item in policy_content['rules'][0]['matches']:
-                            if m_item['name'] == 'url-scheme':
-                                url_scheme = m_item['value']
-                                break
-                        actual_purge_url = url_scheme + "://www." + policy + (
-                            purge_url)
-                        data = {
-                            'objects': [
-                                actual_purge_url
-                            ]
-                        }
-                        resp = self.ccu_api_client.post(self.ccu_api_base_url,
-                                                        data=json.dumps(data),
-                                                        headers=(
-                                                            self.request_header
-                                                        ))
-                        if resp.status_code != 201:
-                            raise RuntimeError(resp.text)
                 return self.responder.purged(provider_service_id,
                                              purge_url=purge_url)
         except Exception:
