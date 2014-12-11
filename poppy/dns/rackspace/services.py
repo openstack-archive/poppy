@@ -123,6 +123,9 @@ class ServicesController(base.ServicesBase):
                     if link['rel'] == 'access_url':
                         links[link['domain']] = link['href']
 
+        if not links:
+            return self.responder.created({})
+
         # create CNAME records
         try:
             dns_links = self._create_cname_records(links)
@@ -145,7 +148,7 @@ class ServicesController(base.ServicesBase):
                             'provider_url': link['href'],
                             'operator_url': dns_links[link['href']]}
                         access_urls.append(access_url)
-            dns_details[provider_name] = {'access_urls': access_urls}
+                dns_details[provider_name] = {'access_urls': access_urls}
         return self.responder.created(dns_details)
 
     def delete(self, provider_details):
@@ -341,6 +344,6 @@ class ServicesController(base.ServicesBase):
                             'provider_url': link['href'],
                             'operator_url': operator_url}
                         access_urls.append(access_url)
-            dns_details[provider_name] = {'access_urls': access_urls}
+                dns_details[provider_name] = {'access_urls': access_urls}
 
         return self.responder.updated(dns_details)
