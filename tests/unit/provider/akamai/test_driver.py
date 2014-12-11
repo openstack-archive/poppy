@@ -53,14 +53,17 @@ AKAMAI_OPTIONS = [
     cfg.StrOpt(
         'akamai_access_url_link', default='abc.def.org',
         help='Akamai domain access_url link'),
+    cfg.StrOpt(
+        'akamai_https_access_url_suffix', default='ssl.abc',
+        help='Akamai domain ssl access url suffix'),
     # Akama client specific configuration numbers
     cfg.StrOpt(
         'akamai_http_config_number', default=str(random.randint(10000, 99999)),
-        help='Akamai domain access_url link'),
+        help='Akamai configuration number for http policies'),
     cfg.StrOpt(
         'akamai_https_config_number',
         default=str(random.randint(10000, 99999)),
-        help='Akamai domain access_url link'),
+        help='Akamai configuration number for https policies'),
 ]
 
 
