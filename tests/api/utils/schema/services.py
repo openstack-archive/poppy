@@ -46,7 +46,8 @@ cache = {'type': 'object',
 links = {'type': 'object',
          'properties': {
              'href': {'type': 'string', 'format': 'uri'},
-             'rel': {'type': 'string', 'enum': ['self', 'access_url']}}
+             'rel': {'type': 'string', 'enum': ['self', 'access_url',
+                                                'flavor']}}
          }
 
 restrictions = {'type': 'array'}
