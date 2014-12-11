@@ -48,7 +48,9 @@ CASSANDRA_OPTIONS = [
             'replication_factor': '1'
         },
         help='Replication strategy for Cassandra cluster'
-    )
+    ),
+    cfg.BoolOpt('archive_on_delete', default=True,
+                help='Archive services on delete?'),
 ]
 
 
