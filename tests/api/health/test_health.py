@@ -36,5 +36,7 @@ class TestHealth(base.TestBase):
         resp = self.client.ping()
         self.assertEqual(resp.status_code, 204)
 
+    test_ping.tags = ['smoke']
+
     def tearDown(self):
         super(TestHealth, self).tearDown()
