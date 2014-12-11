@@ -34,7 +34,7 @@ class ServicesController(base.ServicesController):
         return self._driver.database
 
     def list(self, project_id, marker=None, limit=None):
-        provider_details = {
+        provider_details_list = {
             'MaxCDN': json.dumps(
                 {'id': 11942,
                  'access_urls': [{'operator_url': 'mypullzone.netdata.com'}]}),
@@ -49,27 +49,33 @@ class ServicesController(base.ServicesController):
                  'access_urls':
                     [{'operator_url': 'mockcf123.fastly.prod.com'}]})}
 
-        services = [{'name': 'mockdb1_service_name',
-                     'domains': [json.dumps({'domain': 'www.mywebsite.com'})],
-                     'origins': [json.dumps({'origin': 'mywebsite.com',
-                                             'port': 80,
-                                             'ssl': False})],
-                     'flavor_id': 'standard',
-                     'caching': [{'name': 'default',
-                                  'ttl': 3600},
-                                 {'name': 'home',
-                                  'ttl': 17200,
-                                  'rules': [{'name': 'index',
-                                             'request_url': '/index.htm'}]},
-                                 {'name': 'images',
-                                  'ttl': 12800,
-                                  'rules': [{'name': 'images',
-                                             'request_url': '*.png'}]}],
-                     'restrictions': [{'name': 'website only',
-                                       'rules': [{'name': 'mywebsite.com',
-                                                  'http_host':
-                                                  'www.mywebsite.com'}]}],
-                     'provider_details': provider_details}]
+        services = []
+        for i in self.created_service_names:
+            services = [{'name': i,
+                         'domains': [json.dumps(
+                             {'domain': 'www.mywebsite.com'})
+                         ],
+                         'origins': [json.dumps({'origin': 'mywebsite.com',
+                                                 'port': 80,
+                                                 'ssl': False})],
+                         'flavor_id': 'standard',
+                         'caching': [{'name': 'default',
+                                      'ttl': 3600},
+                                     {'name': 'home',
+                                      'ttl': 17200,
+                                      'rules': [
+                                          {'name': 'index',
+                                           'request_url': '/index.htm'}
+                                      ]},
+                                     {'name': 'images',
+                                      'ttl': 12800,
+                                      'rules': [{'name': 'images',
+                                                 'request_url': '*.png'}]}],
+                         'restrictions': [{'name': 'website only',
+                                           'rules': [{'name': 'mywebsite.com',
+                                                      'http_host':
+                                                      'www.mywebsite.com'}]}],
+                         'provider_details': provider_details_list}]
 
         services_result = []
         for r in services:
@@ -80,64 +86,70 @@ class ServicesController(base.ServicesController):
 
     def get(self, project_id, service_name):
         # get the requested service from storage
-        if service_name == "non_exist_service_name":
+        if service_name not in self.created_service_names:
             raise ValueError("service: % does not exist")
-        origin_json = json.dumps({'origin': 'mywebsite.com',
-                                  'port': 80,
-                                  'ssl': False})
-        domain_json = json.dumps({'domain': 'www.mywebsite.com'})
-        provider_details = {
-            'MaxCDN': json.dumps(
-                {'id': 11942,
-                 'access_urls': [{'operator_url': 'mypullzone.netdata.com'}]}),
-            'Mock': json.dumps(
-                {'id': 73242,
-                 'access_urls': [{'operator_url': 'mycdn.mock.com'}]}),
-            'CloudFront': json.dumps(
-                {'id': '5ABC892',
-                 'access_urls': [{'operator_url': 'cf123.cloudcf.com'}]}),
-            'Fastly': json.dumps(
-                {'id': 3488,
-                 'access_urls':
-                    [{'operator_url': 'mockcf123.fastly.prod.com'}]})}
+        else:
+            origin_json = json.dumps({'origin': 'mywebsite.com',
+                                      'port': 80,
+                                      'ssl': False})
+            domain_json = json.dumps({'domain': 'www.mywebsite.com'})
+            provider_details_list = {
+                'MaxCDN': json.dumps(
+                    {'id': 11942,
+                     'access_urls': [
+                         {'operator_url': 'mypullzone.netdata.com'}]}),
+                'Mock': json.dumps(
+                    {'id': 73242,
+                     'access_urls': [
+                         {'operator_url': 'mycdn.mock.com'}]}),
+                'CloudFront': json.dumps(
+                    {'id': '5ABC892',
+                     'access_urls': [
+                         {'operator_url': 'cf123.cloudcf.com'}]}),
+                'Fastly': json.dumps(
+                    {'id': 3488,
+                     'access_urls':
+                        [{'operator_url': 'mockcf123.fastly.prod.com'}]})}
 
-        service_dict = {'name': service_name,
-                        'domains': [domain_json],
-                        'origins': [origin_json],
-                        'flavor_id': 'standard',
-                        'caching': [{'name': 'default',
-                                     'ttl': 3600},
-                                    {'name': 'home',
-                                     'ttl': 17200,
-                                     'rules': [{'name': 'index',
-                                                'request_url': '/index.htm'}]},
-                                    {'name': 'images',
-                                     'ttl': 12800,
-                                     'rules': [{'name': 'images',
-                                                'request_url': '*.png'}]}],
-                        'restrictions': [{'name': 'website only',
-                                          'rules': [{'name': 'mywebsite.com',
-                                                     'http_host':
-                                                     'www.mywebsite.com'}]}],
-                        'provider_details': provider_details}
-        service_result = self.format_result(service_dict)
-        return service_result
+            service_dict = {'name': service_name,
+                            'domains': [domain_json],
+                            'origins': [origin_json],
+                            'flavor_id': 'standard',
+                            'caching': [{'name': 'default',
+                                         'ttl': 3600},
+                                        {'name': 'home',
+                                         'ttl': 17200,
+                                         'rules': [
+                                             {'name': 'index',
+                                              'request_url': '/index.htm'}]},
+                                        {'name': 'images',
+                                         'ttl': 12800,
+                                         'rules': [{'name': 'images',
+                                                    'request_url': '*.png'}]}],
+                            'restrictions': [{'name': 'website only',
+                                              'rules': [
+                                                  {'name': 'mywebsite.com',
+                                                   'http_host':
+                                                   'www.mywebsite.com'}]}],
+                            'provider_details': provider_details_list}
+            service_result = self.format_result(service_dict)
+            return service_result
 
     def create(self, project_id, service_obj):
         if service_obj.name in self.created_service_names:
-            raise ValueError("Service %s already exists..." % service_obj.name)
+            raise ValueError("Service %s already exists." % service_obj.name)
         else:
+            # TODO(amitgandhinz): append the entire service
+            # instead of just the name
             self.created_service_names.append(service_obj.name)
-
-        return ""
 
     def update(self, project_id, service_name, service_json):
         # update configuration in storage
         return ''
 
     def delete(self, project_id, service_name):
-        # delete from providers
-        return ''
+        if (service_name in self.created_service_names):
+            self.created_service_names.remove(service_name)
 
     def get_provider_details(self, project_id, service_name):
         if service_name == 'non_exist_service_name':
