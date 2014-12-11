@@ -353,9 +353,21 @@ class TestServiceActions(base.TestBase):
         # As is, the servvice is still available in the DB till deleted from
         # the provider. The test should be able to handle this with
         # exponential sleep or whatever(!).
-        # time.sleep(20)
-        # resp = self.client.get_service(service_name=self.service_name)
-        # self.assertEqual(resp.status_code, 404)
+        status_code = 0
+        count = 0
+        while (count < 5):
+            service_deleted = self.client.get_service(
+                service_name=self.service_name)
+            status_code = service_deleted.status_code
+            if status_code == 200:
+                import time
+                time.sleep(1)
+            else:
+                break
+
+            count = count + 1
+
+        self.assertEqual(404, status_code)
 
     def test_delete_non_existing_service(self):
         resp = self.client.delete_service(service_name='this_cant_be_true')

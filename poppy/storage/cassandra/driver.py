@@ -57,6 +57,8 @@ CASSANDRA_OPTIONS = [
         },
         help='Replication strategy for Cassandra cluster'
     ),
+    cfg.BoolOpt('archive_on_delete', default=True,
+                help='Archive services on delete?'),
 ]
 
 CASSANDRA_GROUP = 'drivers:storage:cassandra'
@@ -136,6 +138,7 @@ class CassandraStorageDriver(base.Driver):
         self.cassandra_conf = conf[CASSANDRA_GROUP]
         self.datacenter = conf.datacenter
         self.session = None
+        self.archive_on_delete = self.cassandra_conf.archive_on_delete
         self.lock = multiprocessing.Lock()
 
     def change_namespace(self, namespace):
