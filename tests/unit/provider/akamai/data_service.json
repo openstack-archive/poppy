@@ -3,8 +3,10 @@
         "name" : "mysite.com",
         "domains": [
             {"domain": "parsely.sage.com"},
-            {"domain": "densely.sage.com"},
-            {"domain": "rosemary.thyme.net"}
+            {"domain": "densely.sage.com",
+            "protocol": "https"},
+            {"domain": "rosemary.thyme.net",
+            "protocol": "http"}
         ],
         "origins": [
             {"origin": "mockdomain.com", "ssl": false, "port": 80}
@@ -19,7 +21,7 @@
             {"domain": "rosemary.thyme.net"}
         ],
         "origins": [
-            {"origin": "mockdomain.com", "ssl": false, "port": 80},
+            {"origin": "mockdomain.com", "ssl": true, "port": 443},
             {"origin": "mockdomain-image.com",
              "rules": [{"name": "img", "request_url": "/img"}] }
         ],
