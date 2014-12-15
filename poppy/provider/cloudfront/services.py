@@ -93,8 +93,8 @@ class ServiceController(base.ServiceBase):
                                                     purge_url)
             return self.responder.purged(distribution_id,
                                          purge_url=purge_url)
-        except Exception:
-            return self.responder.failed("failed to PURGE service")
+        except Exception as e:
+            return self.responder.failed(str(e))
 
     @decorators.lazy_property(write=False)
     def current_customer(self):
