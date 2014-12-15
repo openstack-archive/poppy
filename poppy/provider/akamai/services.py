@@ -90,6 +90,7 @@ class ServiceController(base.ServiceBase):
                                               post_data['rules'])
                 resp = self.policy_api_client.put(
                     self.policy_api_base_url.format(
+                        configuration_number=self.driver.http_conf_number,
                         policy_name=dp),
                     data=json.dumps(post_data),
                     headers=self.request_header)
@@ -102,11 +103,11 @@ class ServiceController(base.ServiceBase):
                 # TODO(tonytan4ever): leave empty links for now
                 # may need to work with dns integration
                 LOG.info('Creating policy %s on domain %s complete' %
-                         (dp, ','.join(classified_domain)))
-            links.append({'href': self.driver.akamai_access_url_link,
-                          'rel': 'access_url',
-                          'domain': service_obj.name
-                          })
+                         (dp, classified_domain.domain))
+                links.append({'href': self.driver.akamai_access_url_link,
+                              'rel': 'access_url',
+                              'domain': dp
+                              })
         except Exception:
             return self.responder.failed("failed to create service")
         else:
@@ -115,15 +116,8 @@ class ServiceController(base.ServiceBase):
     def _classify_domains(self, domains_list):
         # classify domains into different categories based on first two level
         # of domains, group them together
-        result_dict = {}
-        for domain in domains_list:
-            # get the content_realm (1st and 2nd level domain of each domains)
-            content_realm = '.'.join(domain.domain.split('.')[-2:])
-            if content_realm not in result_dict:
-                result_dict[content_realm] = [domain.domain]
-            else:
-                result_dict[content_realm].append(domain.domain)
-        return [domain_mapping[1] for domain_mapping in result_dict.items()]
+        # for right now we just use the whole domain as the digital property
+        return domains_list
 
     def _process_new_origin(self, origin, rules_list):
         rule_dict_template = {
@@ -174,7 +168,7 @@ class ServiceController(base.ServiceBase):
         rules_list.append(rule_dict_template)
 
     def _process_new_domain(self, domain, rules_list):
-        dp = '.'.join(domain[0].split('.')[-2:])
+        dp = domain.domain
 
         for rule in rules_list:
             for behavior in rule['behaviors']:
@@ -279,6 +273,7 @@ class ServiceController(base.ServiceBase):
             try:
                 resp = self.policy_api_client.get(
                     self.policy_api_base_url.format(
+                        configuration_number=self.driver.http_conf_number,
                         policy_name=policies[0]),
                     headers=self.request_header)
                 if resp.status_code != 200:
@@ -331,6 +326,8 @@ class ServiceController(base.ServiceBase):
                         LOG.info('Start to update policy %s' % dp)
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
+                                configuration_number=(
+                                    self.driver.http_conf_number),
                                 policy_name=dp),
                             data=json.dumps(policy_content),
                             headers=self.request_header)
@@ -339,6 +336,8 @@ class ServiceController(base.ServiceBase):
                         LOG.info('Start to create new policy %s' % dp)
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
+                                configuration_number=(
+                                    self.driver.http_conf_number),
                                 policy_name=dp),
                             data=json.dumps(policy_content),
                             headers=self.request_header)
@@ -346,15 +345,15 @@ class ServiceController(base.ServiceBase):
                     LOG.info('akamai response text: %s' % resp.text)
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
-                    ids.append(classified_domain[0])
+                    ids.append(dp)
                     # TODO(tonytan4ever): leave empty links for now
                     # may need to work with dns integration
                     LOG.info('Creating/Updateing policy %s on domain %s '
-                             'complete' % (dp, ','.join(classified_domain)))
-                links.append({'href': self.driver.akamai_access_url_link,
-                              'rel': 'access_url',
-                              'domain': service_obj.name
-                              })
+                             'complete' % (dp, classified_domain.domain))
+                    links.append({'href': self.driver.akamai_access_url_link,
+                                  'rel': 'access_url',
+                                  'domain': dp
+                                  })
             except Exception:
                 return self.responder.failed("failed to update service")
 
@@ -363,6 +362,7 @@ class ServiceController(base.ServiceBase):
                     LOG.info('Starting to delete old policy %s' % policy)
                     resp = self.policy_api_client.delete(
                         self.policy_api_base_url.format(
+                            configuration_number=self.driver.http_conf_number,
                             policy_name=policy))
                     LOG.info('akamai response code: %s' % resp.status_code)
                     LOG.info('akamai response text: %s' % resp.text)
@@ -377,7 +377,9 @@ class ServiceController(base.ServiceBase):
             for policy in policies:
                 try:
                     resp = self.policy_api_client.get(
-                        self.policy_api_base_url.format(policy_name=policy),
+                        self.policy_api_base_url.format(
+                            configuration_number=self.driver.http_conf_number,
+                            policy_name=policy),
                         headers=self.request_header)
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
@@ -418,6 +420,7 @@ class ServiceController(base.ServiceBase):
                     LOG.info('Start to update policy %s ' % policy)
                     resp = self.policy_api_client.put(
                         self.policy_api_base_url.format(
+                            configuration_number=self.driver.http_conf_number,
                             policy_name=policy),
                         data=json.dumps(policy_content),
                         headers=self.request_header)
@@ -426,11 +429,11 @@ class ServiceController(base.ServiceBase):
                     LOG.info('Update policy %s complete' % policy)
                 except Exception:
                     return self.responder.failed("failed to update service")
+                links.append({'href': self.driver.akamai_access_url_link,
+                              'rel': 'access_url',
+                              'domain': policy
+                              })
             ids = policies
-            links.append({'href': self.driver.akamai_access_url_link,
-                          'rel': 'access_url',
-                          'domain': service_obj.name
-                          })
         return self.responder.updated(json.dumps(ids), links)
 
     def delete(self, provider_service_id):
@@ -449,7 +452,9 @@ class ServiceController(base.ServiceBase):
             for policy in policies:
                 LOG.info('Starting to delete policy %s' % policy)
                 resp = self.policy_api_client.delete(
-                    self.policy_api_base_url.format(policy_name=policy))
+                    self.policy_api_base_url.format(
+                        configuration_number=self.driver.http_conf_number,
+                        policy_name=policy))
                 LOG.info('akamai response code: %s' % resp.status_code)
                 LOG.info('akamai response text: %s' % resp.text)
                 if resp.status_code != 200:
@@ -479,7 +484,9 @@ class ServiceController(base.ServiceBase):
 
                 for policy in policies:
                     resp = self.policy_api_client.get(
-                        self.policy_api_base_url.format(policy_name=policy),
+                        self.policy_api_base_url.format(
+                            configuration_number=self.driver.http_conf_number,
+                            policy_name=policy),
                         headers=self.request_header)
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
