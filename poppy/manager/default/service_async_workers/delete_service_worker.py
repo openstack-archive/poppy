@@ -49,7 +49,7 @@ def service_delete_worker(provider_details, service_controller,
                 responder[provider_name].get('error_info'))
         elif 'error' in dns_responder[provider_name]:
             LOG.info('Delete service from DNS failed')
-            LOG.info('Updating provider detail status of %s for %s'.foramt(
+            LOG.info('Updating provider detail status of %s for %s'.format(
                      (provider_name, service_name)))
             # stores the error info for debugging purposes.
             provider_details[provider_name].error_info = (

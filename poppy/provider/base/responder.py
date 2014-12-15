@@ -49,7 +49,7 @@ class Responder(object):
         }
 
     def created(self, provider_service_id, links, **extras):
-        """failed.
+        """created.
 
         :param provider_service_id
         :param links

@@ -48,13 +48,13 @@ class ServiceController(base.ServiceBase):
                                               % pullzone_id,
                                               params=service_obj.to_dict())
             if update_response['code'] != 200:
-                return self.responder.failed('failed to update service')
+                return self.responder.failed(update_response.text)
             links = {}
             return self.responder.updated(
                 update_response['data']['pullzone']['id'], links)
-        except Exception:
+        except Exception as e:
             # this exception branch will most likely for a network failure
-            return self.responder.failed('failed to update service')
+            return self.responder.failed(str(e))
 
     def create(self, service_obj):
         '''MaxCDN create.
@@ -76,7 +76,7 @@ class ServiceController(base.ServiceBase):
             })
 
             if create_response['code'] != 201:
-                return self.responder.failed('failed to create service')
+                return self.responder.failed(create_response.text)
 
             created_zone_info = create_response['data']['pullzone']
 
@@ -90,9 +90,9 @@ class ServiceController(base.ServiceBase):
                 links.append({'href': domain.domain, "rel": "access_url"})
             # TODO(tonytan4ever): What if it fails during add domains ?
             return self.responder.created(created_zone_info['id'], links)
-        except Exception:
+        except Exception as e:
             # this exception branch will most likely for a network failure
-            return self.responder.failed('failed to create service')
+            return self.responder.failed(str(e))
 
     def delete(self, pullzone_id):
         '''MaxCDN create.
@@ -103,20 +103,20 @@ class ServiceController(base.ServiceBase):
             delete_response = self.client.delete('/zones/pull.json/%s'
                                                  % pullzone_id)
             if delete_response['code'] != 200:
-                return self.responder.failed('failed to delete service')
+                return self.responder.failed(delete_response.text)
             return self.responder.deleted(pullzone_id)
-        except Exception:
+        except Exception as e:
             # this exception branch will most likely for a network failure
-            return self.responder.failed('failed to delete service')
+            return self.responder.failed(str(e))
 
     def purge(self, pullzone_id, purge_url=None):
         try:
             purge_response = self.client.purge(pullzone_id, purge_url)
             if purge_response['code'] != 200:
-                return self.responder.failed('failed to PURGE service')
+                return self.responder.failed(purge_response.text)
             return self.responder.purged(pullzone_id, purge_url=purge_url)
-        except Exception:
-            return self.responder.failed("failed to PURGE service")
+        except Exception as e:
+            return self.responder.failed(str(e))
 
     # TODO(tonytan4ever): get service
     def get(self, service_name):

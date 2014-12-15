@@ -183,6 +183,7 @@ class CassandraStorageServiceTests(base.TestCase):
                     provider_details_dict[provider_name].access_urls),
                 "status": provider_details_dict[provider_name].status,
                 "name": provider_details_dict[provider_name].name,
+                "error_message": None,
                 "error_info": None
             })
         args = {

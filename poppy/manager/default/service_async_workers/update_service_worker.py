@@ -55,8 +55,9 @@ def update_worker(service_controller, project_id, service_name,
             else:
                 provider_details_dict[provider_name] = (
                     provider_details.ProviderDetail(
+                        status='failed',
+                        error_message=responder[provider_name]['error'],
                         error_info=responder[provider_name]['error_detail']))
-                provider_details_dict[provider_name].status = 'failed'
 
     # update the service object
     service_controller.storage_controller.update(project_id, service_name,

@@ -150,10 +150,10 @@ class ServiceController(base.ServiceBase):
                                                  service_obj.name)
             links = self._create_new_service_version(service, service_obj)
             return self.responder.created(service.id, links)
-        except fastly.FastlyError:
-            return self.responder.failed("failed to create service")
-        except Exception:
-            return self.responder.failed("failed to create service")
+        except fastly.FastlyError as e:
+            return self.responder.failed(str(e))
+        except Exception as e:
+            return self.responder.failed(str(e))
 
     def update(self,
                provider_service_id,
@@ -164,10 +164,10 @@ class ServiceController(base.ServiceBase):
             service = self.client.get_service_details(provider_service_id)
             links = self._create_new_service_version(service, service_obj)
             return self.responder.updated(service.id, links)
-        except fastly.FastlyError:
-            return self.responder.failed('failed to create service')
-        except Exception:
-            return self.responder.failed('failed to create service')
+        except fastly.FastlyError as e:
+            return self.responder.failed(str(e))
+        except Exception as e:
+            return self.responder.failed(str(e))
 
     def delete(self, provider_service_id):
         try:
@@ -183,8 +183,8 @@ class ServiceController(base.ServiceBase):
             self.client.delete_service(provider_service_id)
 
             return self.responder.deleted(provider_service_id)
-        except Exception:
-            return self.responder.failed("failed to delete service")
+        except Exception as e:
+            return self.responder.failed(str(e))
 
     def get(self, service_name):
         try:
@@ -219,10 +219,10 @@ class ServiceController(base.ServiceBase):
 
             return self.responder.get(domain_list, origin_list, cache_list)
 
-        except fastly.FastlyError:
-            return self.responder.failed("failed to GET service")
-        except Exception:
-            return self.responder.failed("failed to GET service")
+        except fastly.FastlyError as e:
+            return self.responder.failed(str(e))
+        except Exception as e:
+            return self.responder.failed(str(e))
 
     def purge(self, service_id, purge_url=None):
         try:
@@ -240,8 +240,8 @@ class ServiceController(base.ServiceBase):
                     self.client.purge_url(domain_name, purge_url)
 
                 return self.responder.purged(service_id, purge_url=purge_url)
-        except fastly.FastlyError:
-            return self.responder.failed("failed to PURGE service")
+        except fastly.FastlyError as e:
+            return self.responder.failed(str(e))
 
     @decorators.lazy_property(write=False)
     def current_customer(self):

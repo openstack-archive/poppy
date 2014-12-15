@@ -37,21 +37,31 @@ def service_create_worker(providers_list, service_controller,
     for responder in responders:
         for provider_name in responder:
             if 'error' in responder[provider_name]:
+                error_msg = responder[provider_name]['error']
                 error_info = responder[provider_name]['error_detail']
+
                 provider_details_dict[provider_name] = (
-                    provider_details.ProviderDetail(error_info=error_info))
-                provider_details_dict[provider_name].status = 'failed'
+                    provider_details.ProviderDetail(
+                        error_info=error_info,
+                        status='failed',
+                        error_message=error_msg))
+
             elif 'error' in dns_responder[provider_name]:
+                error_msg = responder[provider_name]['error']
                 error_info = dns_responder[provider_name]['error_detail']
+
                 provider_details_dict[provider_name] = (
-                    provider_details.ProviderDetail(error_info=error_info))
-                provider_details_dict[provider_name].status = 'failed'
+                    provider_details.ProviderDetail(
+                        error_info=error_info,
+                        status='failed',
+                        error_message=error_msg))
             else:
                 access_urls = dns_responder[provider_name]['access_urls']
                 provider_details_dict[provider_name] = (
                     provider_details.ProviderDetail(
                         provider_service_id=responder[provider_name]['id'],
                         access_urls=access_urls))
+
                 if 'status' in responder[provider_name]:
                     provider_details_dict[provider_name].status = (
                         responder[provider_name]['status'])
