@@ -62,7 +62,7 @@ CASSANDRA_OPTIONS = [
 CASSANDRA_GROUP = 'drivers:storage:cassandra'
 
 
-def _connection(conf, datacenter):
+def _connection(conf, datacenter, keyspace=None):
     """connection.
 
     :param datacenter
@@ -97,11 +97,12 @@ def _connection(conf, datacenter):
     )
 
     session = cluster_connection.connect()
-
+    if not keyspace:
+        keyspace = conf.keyspace
     try:
-        session.set_keyspace(conf.keyspace)
+        session.set_keyspace(keyspace)
     except cassandra.InvalidRequest:
-        _create_keyspace(session, conf.keyspace, conf.replication_strategy)
+        _create_keyspace(session, keyspace, conf.replication_strategy)
 
     session.row_factory = query.dict_factory
 
@@ -153,6 +154,16 @@ class CassandraStorageDriver(base.Driver):
         self.connection.execute('DROP KEYSPACE ' + namespace)
 
     def is_alive(self):
+        """Health check for Cassandra."""
+
+        try:
+            session = _connection(self.cassandra_conf,
+                                  self.datacenter,
+                                  keyspace='system')
+            session.execute("SELECT cluster_name, data_center FROM local;")
+            session.shutdown()
+        except Exception:
+            return False
         return True
 
     @property
