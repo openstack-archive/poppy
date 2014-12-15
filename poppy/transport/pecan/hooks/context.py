@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from oslo.config import cfg
 import pecan
 from pecan import hooks
 
@@ -37,6 +38,12 @@ class ContextHook(hooks.PecanHook):
             context_kwargs['base_url'] = (
                 state.request.host_url +
                 '/'.join(state.request.path.split('/')[0:2]))
+            # hack: if the configuration is set, the project_id
+            # will be appended into the base_url
+            if cfg.CONF.project_id_in_url:
+                context_kwargs['base_url'] = '/'.join([
+                    context_kwargs['base_url'],
+                    state.request.headers['X-Project-ID']])
 
         if 'X-Auth-Token' in state.request.headers:
             context_kwargs['auth_token'] = (
