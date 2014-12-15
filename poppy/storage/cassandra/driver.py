@@ -153,6 +153,13 @@ class CassandraStorageDriver(base.Driver):
         self.connection.execute('DROP KEYSPACE ' + namespace)
 
     def is_alive(self):
+        """Health check for Cassandra."""
+
+        try:
+            session = self.database
+            session.execute("SELECT * FROM flavors;")
+        except Exception:
+            return False
         return True
 
     @property
