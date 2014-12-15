@@ -58,10 +58,10 @@ AKAMAI_OPTIONS = [
     # Akama client specific configuration numbers
     cfg.StrOpt(
         'akamai_http_config_number',
-        help='Akamai domain access_url link'),
+        help='Akamai configuration number for http policies'),
     cfg.StrOpt(
         'akamai_https_config_number',
-        help='Akamai domain access_url link'),
+        help='Akamai configuration number for https policies'),
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
