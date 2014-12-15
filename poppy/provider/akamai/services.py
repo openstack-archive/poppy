@@ -90,6 +90,7 @@ class ServiceController(base.ServiceBase):
                                               post_data['rules'])
                 resp = self.policy_api_client.put(
                     self.policy_api_base_url.format(
+                        configuration_number=self.driver.http_conf_number,
                         policy_name=dp),
                     data=json.dumps(post_data),
                     headers=self.request_header)
@@ -279,6 +280,7 @@ class ServiceController(base.ServiceBase):
             try:
                 resp = self.policy_api_client.get(
                     self.policy_api_base_url.format(
+                        configuration_number=self.driver.http_conf_number,
                         policy_name=policies[0]),
                     headers=self.request_header)
                 if resp.status_code != 200:
@@ -331,6 +333,8 @@ class ServiceController(base.ServiceBase):
                         LOG.info('Start to update policy %s' % dp)
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
+                                configuration_number=(
+                                    self.driver.http_conf_number),
                                 policy_name=dp),
                             data=json.dumps(policy_content),
                             headers=self.request_header)
@@ -339,6 +343,8 @@ class ServiceController(base.ServiceBase):
                         LOG.info('Start to create new policy %s' % dp)
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
+                                configuration_number=(
+                                    self.driver.http_conf_number),
                                 policy_name=dp),
                             data=json.dumps(policy_content),
                             headers=self.request_header)
@@ -363,6 +369,7 @@ class ServiceController(base.ServiceBase):
                     LOG.info('Starting to delete old policy %s' % policy)
                     resp = self.policy_api_client.delete(
                         self.policy_api_base_url.format(
+                            configuration_number=self.driver.http_conf_number,
                             policy_name=policy))
                     LOG.info('akamai response code: %s' % resp.status_code)
                     LOG.info('akamai response text: %s' % resp.text)
@@ -377,7 +384,9 @@ class ServiceController(base.ServiceBase):
             for policy in policies:
                 try:
                     resp = self.policy_api_client.get(
-                        self.policy_api_base_url.format(policy_name=policy),
+                        self.policy_api_base_url.format(
+                            configuration_number=self.driver.http_conf_number,
+                            policy_name=policy),
                         headers=self.request_header)
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
@@ -418,6 +427,7 @@ class ServiceController(base.ServiceBase):
                     LOG.info('Start to update policy %s ' % policy)
                     resp = self.policy_api_client.put(
                         self.policy_api_base_url.format(
+                            configuration_number=self.driver.http_conf_number,
                             policy_name=policy),
                         data=json.dumps(policy_content),
                         headers=self.request_header)
@@ -449,7 +459,9 @@ class ServiceController(base.ServiceBase):
             for policy in policies:
                 LOG.info('Starting to delete policy %s' % policy)
                 resp = self.policy_api_client.delete(
-                    self.policy_api_base_url.format(policy_name=policy))
+                    self.policy_api_base_url.format(
+                        configuration_number=self.driver.http_conf_number,
+                        policy_name=policy))
                 LOG.info('akamai response code: %s' % resp.status_code)
                 LOG.info('akamai response text: %s' % resp.text)
                 if resp.status_code != 200:
@@ -479,7 +491,9 @@ class ServiceController(base.ServiceBase):
 
                 for policy in policies:
                     resp = self.policy_api_client.get(
-                        self.policy_api_base_url.format(policy_name=policy),
+                        self.policy_api_base_url.format(
+                            configuration_number=self.driver.http_conf_number,
+                            policy_name=policy),
                         headers=self.request_header)
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
