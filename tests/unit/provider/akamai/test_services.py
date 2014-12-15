@@ -44,22 +44,8 @@ class TestServices(base.TestCase):
     def test_classify_domains(self, domains_list):
         domains_list = [domain.Domain(domain_s) for domain_s in domains_list]
         c_domains_list = self.controller._classify_domains(domains_list)
-        prev_content_realm = ''
-        for c_domains in c_domains_list:
-            self.assertTrue(len(c_domains) >= 1)
-            content_realm = '.'.join(c_domains[0].split('.')[-2:])
-            if len(c_domains) > 1:
-                # inside a group the content realm should be
-                # the same
-                for c_domain in c_domains:
-                    self.assertEqual(content_realm,
-                                     '.'.join(c_domain.split('.')[-2:]))
-            next_content_realm = content_realm
-            # assert different group's content real is not eaual
-            self.assertNotEqual(prev_content_realm, next_content_realm,
-                                'classified domains\'s content realm'
-                                ' should not equal')
-            prev_content_realm = next_content_realm
+        self.assertEqual(domains_list, c_domains_list, 'Domain list not equal'
+                         ' classified domain list')
 
     @ddt.file_data('data_service.json')
     def test_create_with_exception(self, service_json):
