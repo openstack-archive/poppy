@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
 import uuid
 
 import ddt
@@ -237,10 +238,95 @@ class TestListServices(base.TestBase):
         super(TestListServices, self).tearDown()
 
 
+class TestDeleteService(base.TestBase):
+    def setUp(self):
+        super(TestDeleteService, self).setUp()
+        self.service_name = str(uuid.uuid1())
+        self.flavor_id = str(uuid.uuid1())
+        if self.test_config.generate_flavors:
+            self.flavor_id = str(uuid.uuid1())
+            self.client.create_flavor(
+                flavor_id=self.flavor_id,
+                provider_list=[{"provider": "fastly",
+                                "links": [{"href": "www.fastly.com",
+                                           "rel": "provider_url"}]}])
+        else:
+            self.flavor_id = self.test_config.default_flavor
+
+        # ensure the flavor referred to exists
+        self.client.create_flavor(flavor_id=self.flavor_id,
+                                  provider_list=[{
+                                      "provider": "fastly",
+                                      "links": [{"href": "www.fastly.com",
+                                                 "rel": "provider_url"}]}])
+
+        domain = str(uuid.uuid1()) + '.com'
+        self.domain_list = [{"domain": domain}]
+
+        origin = str(uuid.uuid1()) + '.com'
+        self.origin_list = [{"origin": origin,
+                             "port": 443, "ssl": False}]
+
+        self.caching_list = [{"name": "default", "ttl": 3600},
+                             {"name": "home", "ttl": 1200,
+                              "rules": [{"name": "index",
+                                         "request_url": "/index.htm"}]}]
+
+        self.client.create_service(service_name=self.service_name,
+                                   domain_list=self.domain_list,
+                                   origin_list=self.origin_list,
+                                   caching_list=self.caching_list,
+                                   flavor_id=self.flavor_id)
+
+    def test_delete_service(self):
+        resp = self.client.delete_service(service_name=self.service_name)
+        self.assertEqual(resp.status_code, 202)
+
+        resp = self.client.get_service(service_name=self.service_name)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertEqual(body['status'], 'delete_in_progress')
+
+        # TODO(malini): find a better solution
+        # As is, the servvice is still available in the DB till deleted from
+        # the provider. The test should be able to handle this with
+        # exponential sleep or whatever(!).
+        status_code = 0
+        count = 0
+        while (count < 5):
+            service_deleted = self.client.get_service(
+                service_name=self.service_name)
+            status_code = service_deleted.status_code
+            if status_code == 200:
+                time.sleep(1)
+            else:
+                break
+
+            count = count + 1
+
+        self.assertEqual(404, status_code)
+
+    def test_delete_non_existing_service(self):
+        resp = self.client.delete_service(service_name='this_cant_be_true')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_delete_failed_service(self):
+        # TODO(malini): Add test to verify that a failed service can be
+        # deleted.
+        # Placeholder till we figure out how to create provider side failure.
+        pass
+
+    def tearDown(self):
+        self.client.delete_service(service_name=self.service_name)
+        self.client.delete_flavor(flavor_id=self.flavor_id)
+        super(TestDeleteService, self).tearDown()
+
+
 @ddt.ddt
 class TestServiceActions(base.TestBase):
 
-    """Tests for PATCH, GET & DELETE Services."""
+    """Tests for PATCH, GET Services."""
 
     def setUp(self):
         super(TestServiceActions, self).setUp()
@@ -353,34 +439,6 @@ class TestServiceActions(base.TestBase):
     def test_get_failed_service(self):
         # TODO(malini): Add test to verify that failed service will return
         # status 'failed' on get_service with error message from the provider.
-        # Placeholder till we figure out how to create provider side failure.
-        pass
-
-    def test_delete_service(self):
-        resp = self.client.delete_service(service_name=self.service_name)
-        self.assertEqual(resp.status_code, 202)
-
-        resp = self.client.get_service(service_name=self.service_name)
-        self.assertEqual(resp.status_code, 200)
-
-        body = resp.json()
-        self.assertEqual(body['status'], 'delete_in_progress')
-
-        # TODO(malini): find a better solution
-        # As is, the service is still available in the DB till deleted from
-        # the provider. The test should be able to handle this with
-        # exponential sleep or whatever(!).
-        # time.sleep(20)
-        # resp = self.client.get_service(service_name=self.service_name)
-        # self.assertEqual(resp.status_code, 404)
-
-    def test_delete_non_existing_service(self):
-        resp = self.client.delete_service(service_name='this_cant_be_true')
-        self.assertEqual(resp.status_code, 404)
-
-    def test_delete_failed_service(self):
-        # TODO(malini): Add test to verify that a failed service can be
-        # deleted.
         # Placeholder till we figure out how to create provider side failure.
         pass
 

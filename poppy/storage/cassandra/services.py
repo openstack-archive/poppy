@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import json
 
 from poppy.model.helpers import cachingrule
@@ -29,6 +30,7 @@ CQL_GET_ALL_SERVICES = '''
     SELECT project_id,
         service_name,
         domains,
+        flavor_id,
         origins,
         caching_rules,
         restrictions
@@ -57,7 +59,6 @@ CQL_GET_SERVICE = '''
         service_name,
         flavor_id,
         domains,
-        flavor_id,
         origins,
         caching_rules,
         restrictions,
@@ -65,6 +66,33 @@ CQL_GET_SERVICE = '''
     FROM services
     WHERE project_id = %(project_id)s AND service_name = %(service_name)s
 '''
+
+CQL_ARCHIVE_SERVICE = '''
+    BEGIN BATCH
+        INSERT INTO archives (project_id,
+            service_name,
+            flavor_id,
+            domains,
+            origins,
+            caching_rules,
+            restrictions,
+            provider_details,
+            archived_time
+            )
+        VALUES (%(project_id)s,
+            %(service_name)s,
+            %(flavor_id)s,
+            %(domains)s,
+            %(origins)s,
+            %(caching_rules)s,
+            %(restrictions)s,
+            %(provider_details)s,
+            %(archived_time)s)
+
+        DELETE FROM services
+        WHERE project_id = %(project_id)s AND service_name = %(service_name)s;
+    APPLY BATCH;
+    '''
 
 CQL_DELETE_SERVICE = '''
     DELETE FROM services
@@ -260,14 +288,36 @@ class ServicesController(base.ServicesController):
     def delete(self, project_id, service_name):
         """delete.
 
-        Delete local configuration storage
+        Archive local configuration storage
         """
         # delete local configuration from storage
         args = {
             'project_id': project_id,
             'service_name': service_name
         }
-        self.session.execute(CQL_DELETE_SERVICE, args)
+
+        if self._driver.archive_on_delete:
+            # get the existing service
+            results = self.session.execute(CQL_GET_SERVICE, args)
+            result = results[0]
+
+            if (result):
+                archive_args = {
+                    'project_id': result.get('project_id'),
+                    'service_name': result.get('service_name'),
+                    'flavor_id': result.get('flavor_id'),
+                    'domains': result.get('domains'),
+                    'origins': result.get('origins'),
+                    'caching_rules': result.get('caching_rules'),
+                    'restrictions': result.get('restrictions'),
+                    'provider_details': result.get('provider_details'),
+                    'archived_time': datetime.datetime.utcnow()
+                }
+
+                # archive and delete the service
+                self.session.execute(CQL_ARCHIVE_SERVICE, archive_args)
+        else:
+            self.session.execute(CQL_DELETE_SERVICE, args)
 
     def get_provider_details(self, project_id, service_name):
         """get_provider_details.
