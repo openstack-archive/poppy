@@ -177,8 +177,30 @@ class CassandraStorageDriverTests(base.TestCase):
             self.assertTrue(mock_session.execute.called)
             mock_session.execute.assert_called_with('DROP KEYSPACE test')
 
+    def test_is_alive_no_connection(self):
+        """No connection test for checking the health of Cassandra."""
+
+        self.cassandra_driver.session = None
+        self.assertFalse(self.cassandra_driver.is_alive())
+
+    def test_is_alive_with_exception(self):
+        """Broken connection test for checking the health of Cassandra."""
+
+        self.cassandra_driver.session = None
+        self.cassandra_driver.connect = mock.Mock()
+        self.cassandra_driver.session = mock.Mock(is_shutdown=False)
+        self.cassandra_driver.session.execute = mock.Mock(
+            side_effect=Exception('Cassandra Not Available'))
+        self.assertTrue(self.cassandra_driver.database is not None)
+        self.assertFalse(self.cassandra_driver.is_alive())
+
     def test_is_alive(self):
-        self.assertTrue(self.cassandra_driver.is_alive())
+        """Happy path test for checking the health of Cassandra."""
+
+        self.cassandra_driver.session = None
+        self.cassandra_driver.connect = mock.Mock()
+        self.assertTrue(self.cassandra_driver.database is None)
+        self.assertFalse(self.cassandra_driver.is_alive())
 
     @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_connection(self, mock_cluster):
