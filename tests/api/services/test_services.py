@@ -238,9 +238,10 @@ class TestListServices(base.TestBase):
         super(TestListServices, self).tearDown()
 
 
-class TestDeleteService(base.TestBase):
+@ddt.ddt
+class TestServiceActions(base.TestBase):
     def setUp(self):
-        super(TestDeleteService, self).setUp()
+        super(TestServiceActions, self).setUp()
         self.service_name = str(uuid.uuid1())
         self.flavor_id = str(uuid.uuid1())
         if self.test_config.generate_flavors:
@@ -317,19 +318,30 @@ class TestDeleteService(base.TestBase):
         # Placeholder till we figure out how to create provider side failure.
         pass
 
+    @ddt.file_data('data_get_service_by_name.json')
+    def test_get_service_by_name(self, value):
+        self.client.create_service(service_name=value,
+                                   domain_list=self.domain_list,
+                                   origin_list=self.origin_list,
+                                   caching_list=self.caching_list,
+                                   flavor_id=self.flavor_id)
+
+        resp = self.client.get_service(service_name=value)
+        self.assertEqual(resp.status_code, 200)
+
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
         self.client.delete_flavor(flavor_id=self.flavor_id)
-        super(TestDeleteService, self).tearDown()
+        super(TestServiceActions, self).tearDown()
 
 
 @ddt.ddt
-class TestServiceActions(base.TestBase):
+class TestServiceDeployedActions(base.TestBase):
 
     """Tests for PATCH, GET Services."""
 
     def setUp(self):
-        super(TestServiceActions, self).setUp()
+        super(TestServiceDeployedActions, self).setUp()
         self.service_name = str(uuid.uuid1())
         if self.test_config.generate_flavors:
             self.flavor_id = str(uuid.uuid1())
@@ -446,4 +458,4 @@ class TestServiceActions(base.TestBase):
         self.client.delete_service(service_name=self.service_name)
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
-        super(TestServiceActions, self).tearDown()
+        super(TestServiceDeployedActions, self).tearDown()
