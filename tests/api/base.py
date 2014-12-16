@@ -45,14 +45,17 @@ class TestBase(fixtures.BaseTestFixture):
             auth_token = 'dummy'
             project_id = 'dummy'
 
+        cls.test_config = config.TestConfig()
+
         cls.config = config.PoppyConfig()
-        cls.url = cls.config.base_url
+        if cls.test_config.project_id_in_url:
+            cls.url = cls.config.base_url + '/v1.0/' + project_id
+        else:
+            cls.url = cls.config.base_url + '/v1.0'
 
         cls.client = client.PoppyClient(cls.url, auth_token, project_id,
                                         serialize_format='json',
                                         deserialize_format='json')
-
-        cls.test_config = config.TestConfig()
 
     def assertSchema(self, response_json, expected_schema):
         """Verify response schema aligns with the expected schema."""
