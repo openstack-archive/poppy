@@ -17,7 +17,6 @@
 
 import random
 import string
-import uuid
 
 from tests.endtoend import base
 
@@ -26,38 +25,42 @@ class TestWebsiteCDN(base.TestBase):
 
     """Tests for CDN enabling a website."""
 
+    def _random_string(self, length=12):
+        return ''.join([random.choice(string.ascii_letters)
+                        for _ in range(length)])
+
     def setUp(self):
         super(TestWebsiteCDN, self).setUp()
 
-        def _random_string(length=12):
-            return ''.join([random.choice(string.ascii_letters)
-                            for _ in range(length)])
+        self.stack_name = self._random_string()
 
-        self.stack_name = _random_string()
-
-        self.domain_name = 'TestCDN-' + _random_string() + '.org'
+        sub_domain = 'TestCDN-' + self._random_string()
+        self.test_domain = sub_domain + '.' + self.dns_config.test_domain
 
         # Deploys a test website to a cloud server
         self.heat_client.create_stack(yaml_path=self.heat_config.yaml_path,
                                       stack_name=self.stack_name,
-                                      domain_name=self.domain_name)
+                                      domain_name=self.dns_config.test_domain)
         print('Stack Name', self.stack_name)
-        print('Domain Name', self.domain_name)
+        print('Domain Name', self.test_domain)
 
         self.heat_client.wait_for_stack_status(stack_name=self.stack_name)
         self.origin = self.heat_client.get_server_ip(
             stack_name=self.stack_name)
+
+        self.rec = self.dns_client.add_a_rec(
+            ip=self.origin)
         print('Origin', self.origin)
 
     def test_enable_cdn(self):
 
         # Create a Poppy Service for the test website
-        domain_list = [{"domain": self.domain_name}]
+        domain_list = [{"domain": self.test_domain}]
         origin_list = [{"origin": self.origin,
                         "port": 80,
                         "ssl": False}]
         caching_list = []
-        self.service_name = str(uuid.uuid1())
+        self.service_name = 'testService-' + self._random_string()
 
         resp = self.poppy_client.create_service(
             service_name=self.service_name,
@@ -67,17 +70,22 @@ class TestWebsiteCDN(base.TestBase):
             flavor_id=self.poppy_config.flavor)
 
         self.assertEqual(resp.status_code, 202)
+        service_location = resp.headers['location']
         self.poppy_client.wait_for_service_status(
-            service_name=self.service_name,
+            location=service_location,
             status='DEPLOYED')
 
-        resp = self.poppy_client.get_service(service_name=self.service_name)
+        resp = self.poppy_client.get_service(location=service_location)
         links = resp.json()['links']
         access_url = [link['href'] for link in links if
                       link['rel'] == 'access_url']
-        access_url = 'http://' + access_url[0]
+        self.cname_rec = self.dns_client.add_cname_rec(
+            name=self.test_domain, data=access_url[0])
+
         origin_url = 'http://' + self.origin
-        self.assertSameContent(origin_url=origin_url, access_url=access_url)
+        cdn_enabled_url = 'http://' + self.test_domain
+        self.assertSameContent(origin_url=origin_url,
+                               cdn_url=cdn_enabled_url)
 
         # Benchmark page load metrics for the CDN enabled website
         wpt_test_results = {}
@@ -94,6 +102,7 @@ class TestWebsiteCDN(base.TestBase):
         print(wpt_test_results)
 
     def tearDown(self):
-        self.heat_client.delete_stack(stack_name=self.stack_name)
-        self.poppy_client.delete_service(service_name=self.service_name)
+        # self.heat_client.delete_stack(stack_name=self.stack_name)
+        # self.poppy_client.delete_service(service_name=self.service_name)
+        # self.dns_client.delete_record(self.rec)
         super(TestWebsiteCDN, self).tearDown()
