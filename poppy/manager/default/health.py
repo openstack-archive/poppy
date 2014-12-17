@@ -30,6 +30,14 @@ class DefaultHealthController(health.HealthControllerBase):
         health_map = {}
         is_alive = True
 
+        dns_name = self._dns.dns_name.lower()
+        dns_alive = self._dns.is_alive()
+        health_dns = {'dns_name': dns_name,
+                      'is_alive': dns_alive}
+        health_map['dns'] = health_dns
+        if not dns_alive:
+            is_alive = False
+
         storage_name = self._storage.storage_name.lower()
         storage_alive = self._storage.is_alive()
         health_storage = {'storage_name': storage_name,
@@ -61,5 +69,13 @@ class DefaultHealthController(health.HealthControllerBase):
 
         if storage_name == self._storage.storage_name.lower():
             return self._storage.is_alive()
+        else:
+            raise KeyError
+
+    def is_dns_alive(self, dns_name):
+        """Returns the health of DNS Provider."""
+
+        if dns_name == self._dns.dns_name.lower():
+            return self._dns.is_alive()
         else:
             raise KeyError

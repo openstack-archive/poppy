@@ -21,6 +21,16 @@ except ImportError:
 from poppy.transport.pecan.models.response import link
 
 
+class DNSModel(collections.OrderedDict):
+    def __init__(self, is_alive):
+        super(DNSModel, self).__init__()
+
+        if is_alive:
+            self['online'] = 'true'
+        else:
+            self['online'] = 'false'
+
+
 class StorageModel(collections.OrderedDict):
     def __init__(self, is_alive):
         super(StorageModel, self).__init__()
@@ -45,6 +55,20 @@ class HealthModel(collections.OrderedDict):
 
     def __init__(self, request, health_map):
         super(HealthModel, self).__init__()
+
+        health_dns = collections.OrderedDict()
+        if health_map['dns']['is_alive']:
+            health_dns['online'] = 'true'
+        else:
+            health_dns['online'] = 'false'
+
+        health_dns['links'] = link.Model(
+            u'{0}/v1.0/health/dns/{1}'.format(
+                request.host_url, health_map['dns']['dns_name']),
+            'self')
+
+        self['dns'] = {
+            health_map['dns']['dns_name']: health_dns}
 
         health_storage = collections.OrderedDict()
         if health_map['storage']['is_alive']:
