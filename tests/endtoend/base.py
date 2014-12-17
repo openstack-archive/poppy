@@ -19,6 +19,7 @@ import requests
 
 from tests.api.utils import client
 from tests.endtoend.utils import config
+from tests.endtoend.utils import dnsclient
 from tests.endtoend.utils import heatclient
 from tests.endtoend.utils import wptclient
 
@@ -52,6 +53,12 @@ class TestBase(fixtures.BaseTestFixture):
             cls.url, auth_token, project_id,
             serialize_format='json',
             deserialize_format='json')
+
+        cls.dns_config = config.DNSConfig()
+        cls.dns_client = dnsclient.DNSClient(
+            user_name=cls.auth_config.user_name,
+            api_key=cls.auth_config.api_key,
+            test_domain=cls.dns_config.test_domain)
 
         cls.test_config = config.TestConfig()
 
