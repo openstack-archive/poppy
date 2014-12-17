@@ -19,6 +19,7 @@ import requests
 
 from tests.api.utils import client
 from tests.endtoend.utils import config
+from tests.endtoend.utils import dnsclient
 from tests.endtoend.utils import heatclient
 from tests.endtoend.utils import wptclient
 
@@ -45,15 +46,25 @@ class TestBase(fixtures.BaseTestFixture):
             cls.auth_config.user_name,
             cls.auth_config.api_key)
 
+        cls.test_config = config.TestConfig()
+        cls.test_config.project_id_in_url = True
+
         cls.poppy_config = config.PoppyConfig()
-        cls.url = cls.poppy_config.base_url
+        if cls.test_config.project_id_in_url:
+            cls.url = cls.poppy_config.base_url + '/v1.0/' + project_id
+        else:
+            cls.url = cls.poppy_config.base_url + '/v1.0'
 
         cls.poppy_client = client.PoppyClient(
             cls.url, auth_token, project_id,
             serialize_format='json',
             deserialize_format='json')
 
-        cls.test_config = config.TestConfig()
+        cls.dns_config = config.DNSConfig()
+        cls.dns_client = dnsclient.RackspaceDNSClient(
+            user_name=cls.auth_config.user_name,
+            api_key=cls.auth_config.api_key,
+            test_domain=cls.dns_config.test_domain)
 
         cls.heat_config = config.OrchestrationConfig()
         heat_url = cls.heat_config.base_url + '/' + project_id
@@ -71,18 +82,18 @@ class TestBase(fixtures.BaseTestFixture):
         :returns: content fetched from the url
         """
         response = requests.get(url)
-        content = BeautifulSoup.BeautifulSoup(response.text)
+        content = BeautifulSoup(response.text)
         return content.findAll()
 
-    def assertSameContent(self, origin_url, access_url):
+    def assertSameContent(self, origin_url, cdn_url):
         """Asserts that the origin & access_url serve the same content
 
         :param origin: Origin website
-        :param access_url: CDN enabled url of the origin website
+        :param cdn_url: CDN enabled url of the origin website
         :returns: True/False
         """
         origin_content = self.get_content(url=origin_url)
-        cdn_content = self.get_content(url=access_url)
+        cdn_content = self.get_content(url=cdn_url)
         self.assertEqual(origin_content, cdn_content)
 
     @classmethod
