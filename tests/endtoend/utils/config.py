@@ -30,16 +30,6 @@ class PoppyConfig(data_interfaces.ConfigSectionInterface):
         """poppy flavor to use in create service call."""
         return self.get('flavor')
 
-
-class TestConfig(data_interfaces.ConfigSectionInterface):
-    """Defines the config values specific to test execution."""
-    SECTION_NAME = 'test_configuration'
-
-    @property
-    def provider_validation(self):
-        """Boolean value indicating if tests verify provider side details."""
-        return self.get_boolean('provider_validation')
-
     @property
     def status_check_retry_interval(self):
         """Int value to set retry intervals for status check."""
@@ -49,6 +39,26 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
     def status_check_retry_timeout(self):
         """Int value to set timeout for status check."""
         return int(self.get('status_check_retry_timeout'))
+
+
+class TestConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the config values specific to test execution."""
+    SECTION_NAME = 'test_configuration'
+
+    @property
+    def wordpress_origin(self):
+        """IP address for wordpress origin."""
+        return self.get('wordpress_origin')
+
+    @property
+    def wordpress_origin(self):
+        """IP address for wordpress origin."""
+        return self.get('wordpress_origin')
+
+    @property
+    def webpagetest_enabled(self):
+        """Flag to indicate if webpagetest tests should be run."""
+        return self.get_boolean('webpagetest_enabled')
 
 
 class AuthConfig(data_interfaces.ConfigSectionInterface):
@@ -104,3 +114,23 @@ class WebPageTestConfig(data_interfaces.ConfigSectionInterface):
     def test_locations(self):
         """Locations from which to test page load."""
         return self.get('test_locations').split(',')
+
+
+class DNSConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the DNS config values."""
+    SECTION_NAME = 'dns'
+
+    @property
+    def email(self):
+        """Email address."""
+        return self.get('email')
+
+    @property
+    def test_domain(self):
+        """The Domain to use in tests."""
+        return self.get('test_domain')
+
+    @property
+    def retry_interval(self):
+        """Int value to set timeout for status check."""
+        return int(self.get('retry_interval'))

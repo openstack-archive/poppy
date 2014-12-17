@@ -24,7 +24,7 @@ class WebpageTestClient(object):
         self.wpt_url = wpt_url
         self.api_key = api_key
 
-    def start_test(self, access_url, test_location, runs=5):
+    def start_test(self, test_url, test_location, runs=5):
         """Starts webpage test
 
         :param access_url: the url which needs performance metrics
@@ -32,7 +32,7 @@ class WebpageTestClient(object):
         :param runs: number of test runs
         :returns: url to access the test details
         """
-        start_url = (self.wpt_url + '/runtest.php?url=' + access_url +
+        start_url = (self.wpt_url + '/runtest.php?url=' + test_url +
                      '&k=' + self.api_key + '&location=' + test_location +
                      '&runs=' + str(runs) + '&f=json')
         response = requests.post(start_url)
