@@ -27,7 +27,8 @@ class Model(collections.OrderedDict):
         super(Model, self).__init__()
         self['name'] = rule.name
         for attr_name in ['http_host', 'http_method',
-                          'client_ip', 'request_url']:
+                          'client_ip', 'request_url',
+                          'referrer']:
             attr = getattr(rule, attr_name, None)
             if attr is not None:
                 self[attr_name] = attr
