@@ -21,6 +21,31 @@ from poppy.transport.pecan import hooks as poppy_hooks
 from poppy.transport.pecan.models.response import health as health_response
 
 
+class DNSHealthController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    """DNS Health Controller."""
+
+    @pecan.expose('json')
+    def get(self, dns_name):
+        """GET.
+
+        Returns the health of DNS Provider
+
+        :param dns_name
+        :returns JSON storage model or HTTP 404
+        """
+
+        health_controller = self._driver.manager.health_controller
+
+        try:
+            is_alive = health_controller.is_dns_alive(dns_name)
+            return health_response.DNSModel(is_alive)
+        except KeyError:
+            pecan.response.status = 404
+
+
 class StorageHealthController(base.Controller, hooks.HookController):
 
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]

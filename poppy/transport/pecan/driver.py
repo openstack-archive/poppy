@@ -57,6 +57,7 @@ class PecanTransportDriver(transport.Driver):
         home_controller.add_controller('ping', v1.Ping(self))
         health_controller = v1.Health(self)
         home_controller.add_controller('health', health_controller)
+        health_controller.add_controller('dns', v1.DNSHealth(self))
         health_controller.add_controller('storage', v1.StorageHealth(self))
         health_controller.add_controller('provider', v1.ProviderHealth(self))
         home_controller.add_controller('services', v1.Services(self))

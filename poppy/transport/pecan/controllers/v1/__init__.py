@@ -28,5 +28,6 @@ Services = services.ServicesController
 Flavors = flavors.FlavorsController
 Ping = ping.PingController
 Health = health.HealthController
+DNSHealth = health.DNSHealthController
 StorageHealth = health.StorageHealthController
 ProviderHealth = health.ProviderHealthController
