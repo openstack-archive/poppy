@@ -133,6 +133,7 @@ class TestCreateService(providers.TestProviderBase):
 
 @ddt.ddt
 class TestListServices(base.TestBase):
+
     """Tests for List Services."""
 
     def _create_test_service(self):
@@ -240,6 +241,7 @@ class TestListServices(base.TestBase):
 
 @ddt.ddt
 class TestServiceActions(base.TestBase):
+
     def setUp(self):
         super(TestServiceActions, self).setUp()
         self.service_name = str(uuid.uuid1())
@@ -261,22 +263,53 @@ class TestServiceActions(base.TestBase):
                                       "links": [{"href": "www.fastly.com",
                                                  "rel": "provider_url"}]}])
 
-        domain = str(uuid.uuid1()) + '.com'
-        self.domain_list = [{"domain": domain}]
+        domain = str(uuid.uuid1()) + u'.com'
+        self.domain_list = [
+            {"domain": domain}
+        ]
 
-        origin = str(uuid.uuid1()) + '.com'
-        self.origin_list = [{"origin": origin,
-                             "port": 443, "ssl": False}]
+        origin = str(uuid.uuid1()) + u'.com'
+        self.origin_list = [
+            {
+                u"origin": origin,
+                u"port": 443,
+                u"ssl": False,
+                u"rules": []
+            }
+        ]
 
-        self.caching_list = [{"name": "default", "ttl": 3600},
-                             {"name": "home", "ttl": 1200,
-                              "rules": [{"name": "index",
-                                         "request_url": "/index.htm"}]}]
+        self.caching_list = [
+            {
+                u"name": u"default",
+                u"ttl": 3600
+            },
+            {
+                u"name": u"home",
+                u"ttl": 1200,
+                u"rules": [{
+                    u"name": u"index",
+                    u"request_url": u"/index.htm"
+                }]
+            }
+        ]
+
+        self.restrictions_list = [
+            {
+                u"name": u"website only",
+                u"rules": [
+                    {
+                        u"name": domain,
+                        u"referrer": domain
+                    }
+                ]
+            }
+        ]
 
         self.client.create_service(service_name=self.service_name,
                                    domain_list=self.domain_list,
                                    origin_list=self.origin_list,
                                    caching_list=self.caching_list,
+                                   restrictions_list=self.restrictions_list,
                                    flavor_id=self.flavor_id)
 
     def test_delete_service(self):
@@ -329,6 +362,28 @@ class TestServiceActions(base.TestBase):
         resp = self.client.get_service(service_name=value)
         self.assertEqual(resp.status_code, 200)
 
+    def test_get_service(self):
+        resp = self.client.get_service(service_name=self.service_name)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertSchema(body, services.get_service)
+        self.assertEqual(body['domains'], self.domain_list)
+        self.assertEqual(body['origins'], self.origin_list)
+        self.assertEqual(body['caching'], self.caching_list)
+        self.assertEqual(body['restrictions'], self.restrictions_list)
+        self.assertEqual(body['flavor_id'], self.flavor_id)
+
+    def test_get_non_existing_service(self):
+        resp = self.client.get_service(service_name='this_cant_be_true')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_get_failed_service(self):
+        # TODO(malini): Add test to verify that failed service will return
+        # status 'failed' on get_service with error message from the provider.
+        # Placeholder till we figure out how to create provider side failure.
+        pass
+
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
         self.client.delete_flavor(flavor_id=self.flavor_id)
@@ -336,12 +391,12 @@ class TestServiceActions(base.TestBase):
 
 
 @ddt.ddt
-class TestServiceDeployedActions(base.TestBase):
+class TestServicePatch(base.TestBase):
 
-    """Tests for PATCH, GET Services."""
+    """Tests for PATCH Services."""
 
     def setUp(self):
-        super(TestServiceDeployedActions, self).setUp()
+        super(TestServicePatch, self).setUp()
         self.service_name = str(uuid.uuid1())
         if self.test_config.generate_flavors:
             self.flavor_id = str(uuid.uuid1())
@@ -429,33 +484,8 @@ class TestServiceDeployedActions(base.TestBase):
         # TODO(malini): Uncomment below after caching is implemented.
         # self.assertEqual(sorted(self.caching_list), sorted(body['caching']))
 
-    def test_get_service(self):
-
-        resp = self.client.get_service(service_name=self.service_name)
-        self.assertEqual(resp.status_code, 200)
-
-        body = resp.json()
-        self.assertSchema(body, services.get_service)
-        self.assertEqual(body['domains'], self.domain_list)
-        self.assertEqual(body['origins'], self.origin_list)
-        # TODO(malini): uncomment below after caching list is implemented.
-        # self.assertEqual(body['caching_list'], self.caching_list)
-        # self.assertEqual(body['status'], 'create_in_progress')
-        self.assertEqual(body['status'], 'deployed')
-
-    def test_get_non_existing_service(self):
-
-        resp = self.client.get_service(service_name='this_cant_be_true')
-        self.assertEqual(resp.status_code, 404)
-
-    def test_get_failed_service(self):
-        # TODO(malini): Add test to verify that failed service will return
-        # status 'failed' on get_service with error message from the provider.
-        # Placeholder till we figure out how to create provider side failure.
-        pass
-
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
-        super(TestServiceDeployedActions, self).tearDown()
+        super(TestServicePatch, self).tearDown()

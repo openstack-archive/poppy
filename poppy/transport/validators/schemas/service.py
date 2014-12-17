@@ -136,8 +136,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                     'required': True,
                                     'minItems': 1,
                                 },
-                                }
                             }
+                        }
                     },
                     'caching': {
                         'type': 'array',
@@ -343,8 +343,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                     'required': True,
                                     'minItems': 1,
                                 },
-                                }
                             }
+                        }
                     },
                     'caching': {
                         'type': 'array',
@@ -413,21 +413,9 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'properties': {
                                             'name': {
                                                 'type': 'string'},
-                                            'request_url': {
-                                                'type': 'string'},
                                             'referrer': {
-                                                'type': 'string'},
-                                            'http_host': {
-                                                'type': 'string'},
-                                            'client_ip': {
-                                                'type': 'string'},
-                                            'http_method': {
-                                                'type': 'string',
-                                                'enum': [
-                                                    'GET',
-                                                    'PUT',
-                                                    'POST',
-                                                    'PATCH']}}},
+                                                'type': 'string'}
+                                        }},
                                 }},
                         },
                     },
