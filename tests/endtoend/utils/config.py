@@ -104,3 +104,18 @@ class WebPageTestConfig(data_interfaces.ConfigSectionInterface):
     def test_locations(self):
         """Locations from which to test page load."""
         return self.get('test_locations').split(',')
+
+
+class DNSConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the DNS config values."""
+    SECTION_NAME = 'dns'
+
+    @property
+    def email(self):
+        """Email address."""
+        return self.get('email')
+
+    @property
+    def test_domain(self):
+        """The Domain to use in tests."""
+        return self.get('test_domain')

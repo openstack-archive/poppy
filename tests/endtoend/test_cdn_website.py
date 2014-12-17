@@ -35,24 +35,33 @@ class TestWebsiteCDN(base.TestBase):
 
         self.stack_name = _random_string()
 
-        self.domain_name = 'TestCDN-' + _random_string() + '.org'
+        '''sub_domain = 'TestCDN-' + _random_string()
+        test_domain = sub_domain + '.' + self.dns_config.test_domain
+        '''
 
         # Deploys a test website to a cloud server
         self.heat_client.create_stack(yaml_path=self.heat_config.yaml_path,
                                       stack_name=self.stack_name,
-                                      domain_name=self.domain_name)
+                                      domain_name=self.dns_config.test_domain)
         print('Stack Name', self.stack_name)
-        print('Domain Name', self.domain_name)
+        print('Domain Name', self.dns_config.test_domain)
 
         self.heat_client.wait_for_stack_status(stack_name=self.stack_name)
         self.origin = self.heat_client.get_server_ip(
             stack_name=self.stack_name)
+
+        '''self.domain_name = self.dns_client.create_sub_domain(
+            sub_domain=sub_domain, email=self.dns_config.email)
+        '''
+
+        self.dns_client.add_a_rec(ip=self.origin,
+                                  domain_name=self.dns_config.test_domain)
         print('Origin', self.origin)
 
     def test_enable_cdn(self):
 
         # Create a Poppy Service for the test website
-        domain_list = [{"domain": self.domain_name}]
+        domain_list = [{"domain": self.dns_config.test_domain}]
         origin_list = [{"origin": self.origin,
                         "port": 80,
                         "ssl": False}]
