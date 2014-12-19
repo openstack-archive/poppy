@@ -16,8 +16,8 @@
 import random
 try:
     import sets
-except ImportError:  # pragma no cover
-    pass  # pragma no cover
+except ImportError:  # pragma: no cover
+    pass  # pragma: no cover
 
 import pyrax.exceptions as exc
 
@@ -34,7 +34,7 @@ class ServicesController(base.ServicesBase):
 
         self.client = driver.client
 
-    def _get_subdomain(self, subdomain_name):
+    def _get_create_subdomain(self, subdomain_name):
         """Returns a subdomain, if it does not exist, create it
 
         :param subdomain_name
@@ -65,7 +65,7 @@ class ServicesController(base.ServicesBase):
         shard_id = random.randint(1, num_shards)
         subdomain_name = '{0}{1}.{2}'.format(shard_prefix, shard_id,
                                              cdn_domain_name)
-        subdomain = self._get_subdomain(subdomain_name)
+        subdomain = self._get_create_subdomain(subdomain_name)
         # create CNAME record for adding
         cname_records = []
         dns_links = {}
@@ -276,24 +276,18 @@ class ServicesController(base.ServicesBase):
         :return dns_details: Map from provider_name to update errors
         """
 
-        # get old domains
-        old_domains = sets.Set()
+        old_domains = sets.Set([domain.domain
+                               for domain in service_old.domains])
+        new_domains = sets.Set([domain.domain
+                               for domain in service_updates.domains])
+
+        # gather old access urls
         old_access_urls_map = {}
         provider_details = service_old.provider_details
         for provider_name in provider_details:
             provider_detail = provider_details[provider_name]
             access_urls = provider_detail.access_urls
             old_access_urls_map[provider_name] = {'access_urls': access_urls}
-            for access_url in access_urls:
-                old_domains.add(access_url['domain'])
-
-        # get new_domains
-        new_domains = sets.Set()
-        for responder in responders:
-            for provider_name in responder:
-                links = responder[provider_name]['links']
-                for link in links:
-                    new_domains.add(link['domain'])
 
         # if domains have not been updated, return
         if not service_updates.domains:
@@ -315,8 +309,15 @@ class ServicesController(base.ServicesBase):
         provider_details = service_old.provider_details
         self._update_removed_domains(provider_details, removed_domains)
 
-        # gather the CNAMED links and remove stale links
         dns_details = {}
+        # in case of DNS error, return
+        if 'error' in dns_links:
+            for provider_name in service_old.provider_details:
+                error_msg = self.responder.failed(dns_links['error_detail'])
+                dns_details[provider_name] = error_msg
+            return dns_details
+
+        # gather the CNAMED links and remove stale links
         for responder in responders:
             for provider_name in responder:
                 if 'error' in responder[provider_name]:

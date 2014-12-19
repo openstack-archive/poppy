@@ -144,6 +144,10 @@ class DefaultServicesController(base.ServicesController):
 
         self.storage_controller._driver.close_connection()
 
+        """
+        update_service_worker.update_worker(self, project_id, service_name,
+            service_old, service_updates, service_obj)
+        """
         p = multiprocessing.Process(
             name=('Process: update poppy service {0} for project id: {1}'
                   .format(service_name, project_id)),
