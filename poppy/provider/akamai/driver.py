@@ -54,6 +54,14 @@ AKAMAI_OPTIONS = [
     cfg.StrOpt(
         'akamai_access_url_link',
         help='Akamai domain access_url link'),
+
+    # Akama client specific configuration numbers
+    cfg.StrOpt(
+        'akamai_http_config_number',
+        help='Akamai domain access_url link'),
+    cfg.StrOpt(
+        'akamai_https_config_number',
+        help='Akamai domain access_url link'),
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
@@ -67,9 +75,19 @@ class CDNProvider(base.Driver):
         self._conf.register_opts(AKAMAI_OPTIONS,
                                  group=AKAMAI_GROUP)
         self.akamai_conf = self._conf[AKAMAI_GROUP]
-        self.akamai_policy_api_base_url = self.akamai_conf.policy_api_base_url
-        self.akamai_ccu_api_base_url = (
-            self.akamai_conf.ccu_api_base_url)
+        self.akamai_policy_api_base_url = ''.join([
+            str(self.akamai_conf.policy_api_base_url),
+            'partner-api/v1/network/production/properties/',
+            '{configuration_number}/sub-properties/{policy_name}/policy'
+        ])
+        self.akamai_ccu_api_base_url = ''.join([
+            str(self.akamai_conf.ccu_api_base_url),
+            'ccu/v2/queues/default'
+        ])
+
+        self.http_conf_number = self.akamai_conf.akamai_http_config_number
+        self.https_conf_number = self.akamai_conf.akamai_https_config_number
+
         self.akamai_access_url_link = self.akamai_conf.akamai_access_url_link
 
         self.akamai_policy_api_client = requests.Session()
