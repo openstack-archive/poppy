@@ -15,6 +15,10 @@
 
 import datetime
 import json
+try:
+    import ordereddict as collections
+except ImportError:        # pragma: no cover
+    import collections     # pragma: no cover
 
 from poppy.model.helpers import cachingrule
 from poppy.model.helpers import domain
@@ -367,14 +371,21 @@ class ServicesController(base.ServicesController):
         """
         provider_detail_dict = {}
         for provider_name in provider_details:
-            provider_detail_dict[provider_name] = json.dumps({
-                "id": provider_details[provider_name].provider_service_id,
-                "access_urls": provider_details[provider_name].access_urls,
-                "status": provider_details[provider_name].status,
-                "name": provider_details[provider_name].name,
-                "error_info": provider_details[provider_name].error_info,
-                "error_message": provider_details[provider_name].error_message
-            })
+            the_provider_detail_dict = collections.OrderedDict()
+            the_provider_detail_dict["id"] = (
+                provider_details[provider_name].provider_service_id)
+            the_provider_detail_dict["access_urls"] = (
+                provider_details[provider_name].access_urls)
+            the_provider_detail_dict["status"] = (
+                provider_details[provider_name].status)
+            the_provider_detail_dict["name"] = (
+                provider_details[provider_name].name)
+            the_provider_detail_dict["error_info"] = (
+                provider_details[provider_name].error_info)
+            the_provider_detail_dict["error_message"] = (
+                provider_details[provider_name].error_message)
+            provider_detail_dict[provider_name] = json.dumps(
+                the_provider_detail_dict)
         args = {
             'project_id': project_id,
             'service_name': service_name,
