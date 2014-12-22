@@ -57,6 +57,22 @@ class TestBase(fixtures.BaseTestFixture):
                                         serialize_format='json',
                                         deserialize_format='json')
 
+        if cls.auth_config.multi_user:
+            alt_auth_token, alt_project_id = cls.auth_client.authenticate_user(
+                cls.auth_config.base_url,
+                cls.auth_config.alt_user_name,
+                cls.auth_config.alt_api_key)
+            if cls.test_config.project_id_in_url:
+                cls.alt_url = cls.config.base_url + '/v1.0/' + alt_project_id
+            else:
+                cls.alt_url = cls.config.base_url + '/v1.0'
+
+            cls.alt_user_client = client.PoppyClient(
+                cls.alt_url, alt_auth_token,
+                alt_project_id,
+                serialize_format='json',
+                deserialize_format='json')
+
     def assertSchema(self, response_json, expected_schema):
         """Verify response schema aligns with the expected schema."""
         try:

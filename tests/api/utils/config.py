@@ -93,9 +93,19 @@ class AuthConfig(data_interfaces.ConfigSectionInterface):
         return self.get_raw('api_key')
 
     @property
-    def tenant_id(self):
-        """The user's tenant_id, if applicable."""
-        return self.get('tenant_id')
+    def multi_user(self):
+        """Flag to indicate if the tests need multiple accounts."""
+        return self.get_boolean('multi_user')
+
+    @property
+    def alt_user_name(self):
+        """The name of the alternate user, if applicable."""
+        return self.get('alt_user_name')
+
+    @property
+    def alt_api_key(self):
+        """The alternate user's api key, if applicable."""
+        return self.get_raw('alt_api_key')
 
 
 class FastlyConfig(data_interfaces.ConfigSectionInterface):
