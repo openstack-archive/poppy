@@ -20,6 +20,8 @@ import os
 import pip
 import setuptools
 
+pip_session = pip.download.PipSession(retries=3)
+
 requirement_files = []
 # walk the requirements directory and gather requirement files
 for root, dirs, files in os.walk('requirements'):
@@ -27,7 +29,8 @@ for root, dirs, files in os.walk('requirements'):
         requirements_file_path = os.path.join(root, requirements_file)
         # parse_requirements() returns generator of requirement objects
         requirement_files.append(
-            pip.req.parse_requirements(requirements_file_path))
+            pip.req.parse_requirements(requirements_file_path,
+                                       session=pip_session))
 
 # parse all requirement files and generate requirements
 requirements = set()

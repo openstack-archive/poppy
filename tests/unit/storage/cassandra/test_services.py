@@ -14,6 +14,10 @@
 # limitations under the License.
 
 import json
+try:
+    import ordereddict as collections
+except ImportError:        # pragma: no cover
+    import collections     # pragma: no cover
 
 import cassandra
 import ddt
@@ -177,15 +181,21 @@ class CassandraStorageServiceTests(base.TestCase):
         # this is for update_provider_details unittest code coverage
         arg_provider_details_dict = {}
         for provider_name in provider_details_dict:
-            arg_provider_details_dict[provider_name] = json.dumps({
-                "id": provider_details_dict[provider_name].provider_service_id,
-                "access_urls": (
-                    provider_details_dict[provider_name].access_urls),
-                "status": provider_details_dict[provider_name].status,
-                "name": provider_details_dict[provider_name].name,
-                "error_message": None,
-                "error_info": None
-            })
+            the_provider_detail_dict = collections.OrderedDict()
+            the_provider_detail_dict["id"] = (
+                provider_details_dict[provider_name].provider_service_id)
+            the_provider_detail_dict["access_urls"] = (
+                provider_details_dict[provider_name].access_urls)
+            the_provider_detail_dict["status"] = (
+                provider_details_dict[provider_name].status)
+            the_provider_detail_dict["name"] = (
+                provider_details_dict[provider_name].name)
+            the_provider_detail_dict["error_info"] = (
+                provider_details_dict[provider_name].error_info)
+            the_provider_detail_dict["error_message"] = (
+                provider_details_dict[provider_name].error_message)
+            arg_provider_details_dict[provider_name] = json.dumps(
+                the_provider_detail_dict)
         args = {
             'project_id': self.project_id,
             'service_name': self.service_name,
