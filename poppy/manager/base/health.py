@@ -27,6 +27,7 @@ class HealthControllerBase(controller.ManagerControllerBase):
     def __init__(self, manager):
         super(HealthControllerBase, self).__init__(manager)
 
+        self._dns = self.driver.dns
         self._storage = self.driver.storage
         self._providers = self.driver.providers
 
@@ -43,6 +44,15 @@ class HealthControllerBase(controller.ManagerControllerBase):
         """Returns the health of provider
 
         :param provider_name
+        :raises: NotImplementedError
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def is_dns_alive(self, dns_name):
+        """Returns the health of DNS Provider
+
+        :param dns_name
         :raises: NotImplementedError
         """
         raise NotImplementedError

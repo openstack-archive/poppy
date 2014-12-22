@@ -20,6 +20,20 @@ from poppy.transport.pecan.models.response import health
 from tests.unit import base
 
 
+class TestDNSModel(base.TestCase):
+
+    def setUp(self):
+        super(TestDNSModel, self).setUp()
+
+    def test_dns_is_alive(self):
+        dns_model = health.DNSModel(True)
+        self.assertEqual('true', dns_model['online'])
+
+    def test_dns_is_not_alive(self):
+        dns_model = health.DNSModel(False)
+        self.assertEqual('false', dns_model['online'])
+
+
 class TestStorageModel(base.TestCase):
 
     def setUp(self):
@@ -62,6 +76,16 @@ class TestHealthModel(base.TestCase):
         storage_name = health_map['storage']['storage_name']
         self.assertEqual('true',
                          health_model['storage'][storage_name]['online'])
+        dns_name = health_map['dns']['dns_name']
+        self.assertEqual('true',
+                         health_model['dns'][dns_name]['online'])
+
+    @ddt.file_data('health_map_dns_not_available.json')
+    def test_health_dns_not_available(self, health_map):
+        health_model = health.HealthModel(self.mock_request, health_map)
+        dns_name = health_map['dns']['dns_name']
+        self.assertEqual('false',
+                         health_model['dns'][dns_name]['online'])
 
     @ddt.file_data('health_map_storage_not_available.json')
     def test_health_storage_not_available(self, health_map):
