@@ -228,46 +228,24 @@ class TestServices(base.TestCase):
             RuntimeError('Deleting service mysteriously failed.')})
         resp = controller_with_delete_exception.delete(service_name)
         self.assertEqual(resp[driver.provider_name]['error'],
-                         'failed to delete service')
-
-        controller_with_delete_exception.client.reset_mock()
-        controller_with_delete_exception.client.configure_mock(**{
-            'delete.side_effect': None,
-            'delete.return_value': fake_maxcdn_client_400_return_value
-        })
-        resp = controller_with_delete_exception.delete(service_name)
-        self.assertEqual(resp[driver.provider_name]['error'],
-                         'failed to delete service')
-
-    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider.client')
-    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider')
-    def test_purge_with_error(self, mock_controllerclient, mock_driver):
-        # test create with exceptions
-        driver = mock_driver()
-        driver.attach_mock(mock_controllerclient, 'client')
-        driver.client.configure_mock(**{'purge.return_value':
-                                        fake_maxcdn_client_400_return_value
-                                        })
-        controller_purge_with_error = services.ServiceController(driver)
-        pullzone_id = 'test_random_pullzone_id'
-        resp = controller_purge_with_error.purge(pullzone_id)
-        self.assertEqual(resp[driver.provider_name]['error'],
-                         'failed to PURGE service')
+                         'Deleting service mysteriously failed.')
 
     @mock.patch('poppy.provider.maxcdn.driver.CDNProvider.client')
     @mock.patch('poppy.provider.maxcdn.driver.CDNProvider')
     def test_purge_with_exception(self, mock_controllerclient, mock_driver):
         # test create with exceptions
+        error_message = "ding"
+
         driver = mock_driver()
         driver.attach_mock(mock_controllerclient, 'client')
         driver.client.configure_mock(**{'purge.side_effect':
-                                        RuntimeError("ding")
+                                        RuntimeError(error_message)
                                         })
         controller_purge_with_error = services.ServiceController(driver)
         pullzone_id = 'test_random_pullzone_id'
         resp = controller_purge_with_error.purge(pullzone_id)
         self.assertEqual(resp[driver.provider_name]['error'],
-                         'failed to PURGE service')
+                         error_message)
 
     @mock.patch('poppy.provider.maxcdn.driver.CDNProvider.client')
     @mock.patch('poppy.provider.maxcdn.driver.CDNProvider')

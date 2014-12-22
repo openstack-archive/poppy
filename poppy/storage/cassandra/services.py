@@ -347,11 +347,13 @@ class ServicesController(base.ServicesController):
             access_urls = provider_detail_dict.get("access_urls", [])
             status = provider_detail_dict.get("status", u'creating')
             error_info = provider_detail_dict.get("error_info", None)
+            error_message = provider_detail_dict.get("error_message", None)
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
                 access_urls=access_urls,
                 status=status,
-                error_info=error_info)
+                error_info=error_info,
+                error_message=error_message)
             results[provider_name] = provider_detail_obj
         return results
 
@@ -370,7 +372,8 @@ class ServicesController(base.ServicesController):
                 "access_urls": provider_details[provider_name].access_urls,
                 "status": provider_details[provider_name].status,
                 "name": provider_details[provider_name].name,
-                "error_info": provider_details[provider_name].error_info
+                "error_info": provider_details[provider_name].error_info,
+                "error_message": provider_details[provider_name].error_message
             })
         args = {
             'project_id': project_id,
@@ -445,10 +448,13 @@ class ServicesController(base.ServicesController):
             provider_service_id = provider_detail_dict.get('id', None)
             access_urls = provider_detail_dict.get('access_urls', [])
             status = provider_detail_dict.get('status', u'unknown')
+            error_message = provider_detail_dict.get('error_message', None)
+
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
                 access_urls=access_urls,
-                status=status)
+                status=status,
+                error_message=error_message)
             provider_details_dict[provider_name] = provider_detail_obj
         s.provider_details = provider_details_dict
 

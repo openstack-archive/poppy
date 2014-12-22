@@ -42,6 +42,8 @@ class Model(collections.OrderedDict):
         self["status"] = service_obj.status
         self["flavor_id"] = service_obj.flavor_id
 
+        self["errors"] = []
+
         # TODO(tonytan4ever) : add access_url links.
         # This has things to do with provider_detail change. (CDN-172)
         self["links"] = [
@@ -60,8 +62,15 @@ class Model(collections.OrderedDict):
 
         for provider_name in service_obj.provider_details:
             provider_detail = service_obj.provider_details[provider_name]
+
+            # add the access urls
             access_urls = provider_detail.access_urls
             for access_url in access_urls:
                 self["links"].append(link.Model(
                     access_url['operator_url'],
                     'access_url'))
+
+            # add any errors
+            error_message = provider_detail.error_message
+            if error_message:
+                self["errors"].append({"message": error_message})
