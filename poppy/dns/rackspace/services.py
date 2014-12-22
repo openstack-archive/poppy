@@ -15,9 +15,9 @@
 
 import random
 try:
-    import sets
-except ImportError:  # pragma no cover
-    pass  # pragma no cover
+    set
+except NameError:  # noqa  pragma: no cover
+    from sets import Set as set  # noqa  pragma: no cover
 
 import pyrax.exceptions as exc
 
@@ -277,7 +277,7 @@ class ServicesController(base.ServicesBase):
         """
 
         # get old domains
-        old_domains = sets.Set()
+        old_domains = set()
         old_access_urls_map = {}
         provider_details = service_old.provider_details
         for provider_name in provider_details:
@@ -287,8 +287,14 @@ class ServicesController(base.ServicesBase):
             for access_url in access_urls:
                 old_domains.add(access_url['domain'])
 
+        # if there is a provider error, don't try dns update
+        for responder in responders:
+            for provider_name in responder:
+                if 'error' in responder[provider_name]:
+                    return old_access_urls_map
+
         # get new_domains
-        new_domains = sets.Set()
+        new_domains = set()
         for responder in responders:
             for provider_name in responder:
                 links = responder[provider_name]['links']
