@@ -287,6 +287,12 @@ class ServicesController(base.ServicesBase):
             for access_url in access_urls:
                 old_domains.add(access_url['domain'])
 
+        # if there is a provider error, don't try dns update
+        for responder in responders:
+            for provider_name in responder:
+                if 'error' in responder[provider_name]:
+                    return old_access_urls_map
+
         # get new_domains
         new_domains = sets.Set()
         for responder in responders:
