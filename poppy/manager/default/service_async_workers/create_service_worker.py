@@ -45,9 +45,8 @@ def service_create_worker(providers_list, service_controller,
                         error_info=error_info,
                         status='failed',
                         error_message=error_msg))
-
             elif 'error' in dns_responder[provider_name]:
-                error_msg = responder[provider_name]['error']
+                error_msg = dns_responder[provider_name]['error']
                 error_info = dns_responder[provider_name]['error_detail']
 
                 provider_details_dict[provider_name] = (
