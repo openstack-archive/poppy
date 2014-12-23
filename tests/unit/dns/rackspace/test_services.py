@@ -18,6 +18,8 @@ import mock
 from oslo.config import cfg
 
 from poppy.dns.rackspace import driver
+from poppy.model.helpers import domain
+from poppy.model import service
 from tests.unit import base
 
 RACKSPACE_OPTIONS = [
@@ -42,12 +44,12 @@ RACKSPACE_GROUP = 'drivers:dns:rackspace'
 
 
 @ddt.ddt
-class TestServices(base.TestCase):
+class TestServicesCreate(base.TestCase):
 
     @mock.patch('pyrax.set_credentials')
     @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
     def setUp(self, mock_set_credentials):
-        super(TestServices, self).setUp()
+        super(TestServicesCreate, self).setUp()
         provider = driver.DNSProvider(self.conf)
         self.controller = provider.services_controller
 
@@ -76,3 +78,71 @@ class TestServices(base.TestCase):
                 ]}
             }]
         self.controller.create(responders)
+
+
+@ddt.ddt
+class TestServicesUpdate(base.TestCase):
+
+    @mock.patch('pyrax.set_credentials')
+    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
+    def setUp(self, mock_set_credentials):
+        super(TestServicesUpdate, self).setUp()
+        provider = driver.DNSProvider(self.conf)
+        self.controller = provider.services_controller
+
+        self.domains_old = [domain.Domain('test.domain.com'),
+                            domain.Domain('blog.domain.com')]
+        self.origins_old = []
+
+        fastly_access_urls_old = [
+            {
+                u'provider_url': u'test.domain.com.global.prod.fastly.net',
+                u'domain': u'test.domain.com',
+                u'operator_url': u'test.domain.com.cdn80.myaltcdn.com'
+            },
+            {
+                u'provider_url': u'test.domain.com.global.prod.fastly.net',
+                u'domain': u'test.domain.com',
+                u'operator_url': u'test.domain.com.cdn80.myaltcdn.com'
+            }]
+
+        fastly_provider_details_old = mock.Mock()
+        fastly_provider_details_old.access_urls = fastly_access_urls_old
+
+        provider_details_old = {
+            'Fastly': fastly_provider_details_old
+        }
+
+        self.service_old = service.Service(name='myservice',
+                                           domains=self.domains_old,
+                                           origins=self.origins_old,
+                                           flavor_id='standard')
+        self.service_old.provider_details = provider_details_old
+
+    def test_update_add_domains_provider_error(self):
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        client = mock.Mock()
+        client.find = mock.Mock(return_value=subdomain)
+        # records = [mock.Mock(), mock.Mock()]
+        # client.search_records = mock.Mock(return_value=records)
+        self.controller.client = client
+
+        domains_new = [domain.Domain('www.domain1.com'),
+                       domain.Domain('www.domain2.com'),
+                       domain.Domain('www.domain3.com')]
+        service_updates = service.Service(name='myservice',
+                                          domains=domains_new,
+                                          origins=[],
+                                          flavor_id='standard')
+
+        responders = [{
+            'Fastly': {
+                'id': u'4PRhL3lHlZhrXr1mJUt24M',
+                'error': 'Create service failed'
+                }
+            }]
+
+        self.controller.update(self.service_old,
+                               service_updates,
+                               responders)
