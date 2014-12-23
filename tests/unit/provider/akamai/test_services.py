@@ -73,6 +73,23 @@ class TestServices(base.TestCase):
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_service.json')
+    def test_create_with_multiple_domains(self, service_json):
+        service_obj = service.load_from_json(service_json)
+        self.controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
+        provider_responses = self.controller.create(service_obj)
+        for provider_name in provider_responses:
+            provider_response = provider_responses[provider_name]
+            num_of_domains = len(service_obj.domains)
+            num_of_links = len(provider_response['links'])
+            # make sure we have same number of domains and links
+            self.assertEqual(num_of_domains, num_of_links)
+
+        self.controller.policy_api_client.put.assert_called_once()
+
+    @ddt.file_data('data_service.json')
     def test_create(self, service_json):
         service_obj = service.load_from_json(service_json)
         self.controller.policy_api_client.put.return_value = mock.Mock(
