@@ -68,9 +68,13 @@ class TestCreateService(providers.TestProviderBase):
         body = resp.json()
         self.assertSchema(body, services.get_service)
 
+        for item in domain_list:
+            if 'protocol' not in item:
+                item['protocol'] = 'http'
         self.assertEqual(body['domains'], domain_list)
+
         for item in origin_list:
-            if 'rules' not in 'item':
+            if 'rules' not in item:
                 item[u'rules'] = []
         self.assertEqual(body['origins'], origin_list)
 
@@ -256,13 +260,6 @@ class TestServiceActions(base.TestBase):
         else:
             self.flavor_id = self.test_config.default_flavor
 
-        # ensure the flavor referred to exists
-        self.client.create_flavor(flavor_id=self.flavor_id,
-                                  provider_list=[{
-                                      "provider": "fastly",
-                                      "links": [{"href": "www.fastly.com",
-                                                 "rel": "provider_url"}]}])
-
         domain = str(uuid.uuid1()) + u'.com'
         self.domain_list = [
             {"domain": domain}
@@ -316,13 +313,6 @@ class TestServiceActions(base.TestBase):
         resp = self.client.delete_service(service_name=self.service_name)
         self.assertEqual(resp.status_code, 202)
 
-        resp = self.client.get_service(service_name=self.service_name)
-        self.assertEqual(resp.status_code, 200)
-
-        body = resp.json()
-        self.assertEqual(body['status'], 'delete_in_progress')
-
-        # TODO(malini): find a better solution
         # As is, the servvice is still available in the DB till deleted from
         # the provider. The test should be able to handle this with
         # exponential sleep or whatever(!).
@@ -368,7 +358,12 @@ class TestServiceActions(base.TestBase):
 
         body = resp.json()
         self.assertSchema(body, services.get_service)
+
+        for item in self.domain_list:
+            if 'protocol' not in item:
+                item['protocol'] = 'http'
         self.assertEqual(body['domains'], self.domain_list)
+
         self.assertEqual(body['origins'], self.origin_list)
         self.assertEqual(body['caching'], self.caching_list)
         self.assertEqual(body['restrictions'], self.restrictions_list)
@@ -445,8 +440,6 @@ class TestServicePatch(base.TestBase):
         resp = self.client.get_service(location=location)
         self.assertEqual(resp.status_code, 200)
 
-        body = resp.json()
-        self.assertEqual(body['status'], u'update_in_progress')
         self.client.wait_for_service_status(
             service_name=self.service_name,
             status='deployed',
@@ -457,6 +450,9 @@ class TestServicePatch(base.TestBase):
         body = resp.json()
 
         if 'domain_list' in test_data:
+            for item in test_data['domain_list']:
+                if 'protocol' not in item:
+                    item['protocol'] = 'http'
             self.assertEqual(sorted(test_data['domain_list']),
                              sorted(body['domains']))
 
@@ -480,7 +476,14 @@ class TestServicePatch(base.TestBase):
 
         body = resp.json()
         self.assertEqual(body['status'], 'deployed')
+        for item in self.domain_list:
+            if 'protocol' not in item:
+                item['protocol'] = 'http'
         self.assertEqual(sorted(self.domain_list), sorted(body['domains']))
+
+        for item in self.origin_list:
+            if 'rules' not in item:
+                item[u'rules'] = []
         self.assertEqual(sorted(self.origin_list), sorted(body['origins']))
         # TODO(malini): Uncomment below after caching is implemented.
         # self.assertEqual(sorted(self.caching_list), sorted(body['caching']))
