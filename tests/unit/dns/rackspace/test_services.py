@@ -53,13 +53,6 @@ class TestServicesCreate(base.TestCase):
         provider = driver.DNSProvider(self.conf)
         self.controller = provider.services_controller
 
-    def test_create_with_provider_failure(self):
-        responders = [{
-            'Fastly':
-                {'error_detail': 'Error in create',
-                 'error': 'failed to create service'}}]
-        self.controller.create(responders)
-
     def test_create(self):
         responders = [{
             'Fastly': {

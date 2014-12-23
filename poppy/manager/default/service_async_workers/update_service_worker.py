@@ -40,7 +40,22 @@ def update_worker(service_controller, project_id, service_name,
     provider_details_dict = {}
     for responder in responders:
         for provider_name in responder:
-            if 'error' not in responder[provider_name]:
+            if 'error' in responder[provider_name]:
+                provider_details_dict[provider_name] = (
+                    provider_details.ProviderDetail(
+                        status='failed',
+                        error_message=responder[provider_name]['error'],
+                        error_info=responder[provider_name]['error_detail']))
+            elif 'error' in dns_responder[provider_name]:
+                error_msg = dns_responder[provider_name]['error']
+                error_info = dns_responder[provider_name]['error_detail']
+
+                provider_details_dict[provider_name] = (
+                    provider_details.ProviderDetail(
+                        error_info=error_info,
+                        status='failed',
+                        error_message=error_msg))
+            else:
                 access_urls = dns_responder[provider_name]['access_urls']
                 provider_details_dict[provider_name] = (
                     provider_details.ProviderDetail(
@@ -52,12 +67,6 @@ def update_worker(service_controller, project_id, service_name,
                 else:
                     provider_details_dict[provider_name].status = (
                         'deployed')
-            else:
-                provider_details_dict[provider_name] = (
-                    provider_details.ProviderDetail(
-                        status='failed',
-                        error_message=responder[provider_name]['error'],
-                        error_info=responder[provider_name]['error_detail']))
 
     # update the service object
     service_controller.storage_controller.update(project_id, service_name,
