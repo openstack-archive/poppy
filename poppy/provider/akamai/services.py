@@ -123,7 +123,7 @@ class ServiceController(base.ServiceBase):
                         [dp, self.driver.akamai_https_access_url_suffix])
                 links.append({'href': provider_access_url,
                               'rel': 'access_url',
-                              'domain': dp
+                              'domain': classified_domain.domain
                               })
         except Exception:
             return self.responder.failed("failed to create service")

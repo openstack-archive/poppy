@@ -16,6 +16,7 @@
 import ddt
 import mock
 from oslo.config import cfg
+import six
 
 from poppy.dns.rackspace import driver
 from poppy.model.helpers import domain
@@ -54,11 +55,12 @@ class TestServicesCreate(base.TestCase):
         self.controller = provider.services_controller
 
     def test_create_with_provider_failure(self):
-        responders = [{
-            'Fastly':
-                {'error_detail': 'Error in create',
-                 'error': 'failed to create service'}}]
-        self.controller.create(responders)
+        if six.PY2:
+            responders = [{
+                'Fastly':
+                    {'error_detail': 'Error in create',
+                     'error': 'failed to create service'}}]
+            self.controller.create(responders)
 
     def test_create(self):
         responders = [{
