@@ -32,7 +32,7 @@ conf(project='poppy', prog='poppy', args=[])
 
 
 def service_purge_worker(provider_details,
-                         project_id, service_name, purge_url):
+                         project_id, service_id, purge_url):
     LOG.logger.setLevel(logging.INFO)
     bootstrap_obj = bootstrap.Bootstrap(conf)
     service_controller = bootstrap_obj.manager.services_controller
@@ -72,7 +72,7 @@ def service_purge_worker(provider_details,
         if 'error' in responder[provider_name]:
             LOG.info('Purging content from %s failed' % provider_name)
             LOG.info('Updating provider detail status of %s for %s' %
-                     (provider_name, service_name))
+                     (provider_name, service_id))
             # stores the error info for debugging purposes.
             changed_provider_details_dict[provider_name] = (
                 provider_details[provider_name]
@@ -88,7 +88,7 @@ def service_purge_worker(provider_details,
         provider_details.update(changed_provider_details_dict)
         service_controller.storage_controller.update_provider_details(
             project_id,
-            service_name,
+            service_id,
             provider_details)
 
     service_controller.storage_controller._driver.close_connection()
@@ -104,12 +104,12 @@ if __name__ == '__main__':
 
     parser.add_argument('provider_details', action="store")
     parser.add_argument('project_id', action="store")
-    parser.add_argument('service_name', action="store")
+    parser.add_argument('service_id', action="store")
     parser.add_argument('purge_url', action="store")
 
     result = parser.parse_args()
     provider_details = result.provider_details
     project_id = result.project_id
-    service_name = result.service_name
+    service_id = result.service_id
     purge_url = result.purge_url
-    service_purge_worker(provider_details, project_id, service_name, purge_url)
+    service_purge_worker(provider_details, project_id, service_id, purge_url)

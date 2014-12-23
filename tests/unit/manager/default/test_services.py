@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import json
+import uuid
 
 import ddt
 import mock
@@ -41,7 +42,7 @@ class DefaultManagerServiceTests(base.TestCase):
         # create mocked config and driver
         conf = cfg.ConfigOpts()
 
-        # mock a steveodore provider extension
+        # mock a stevedore provider extension
         def get_provider_by_name(name):
             name_p_name_mapping = {
                 'maxcdn': 'MaxCDN',
@@ -61,10 +62,11 @@ class DefaultManagerServiceTests(base.TestCase):
         # stubbed driver
         self.sc = services.DefaultServicesController(manager_driver)
 
-        self.project_id = 'mock_id'
-        self.service_name = 'mock_service'
+        self.project_id = str(uuid.uuid4())
+        self.service_name = str(uuid.uuid4())
+        self.service_id = str(uuid.uuid4())
         self.service_json = {
-            "name": "mock_service",
+            "name": self.service_name,
             "domains": [
                 {"domain": "www.mywebsite.com"},
                 {"domain": "blog.mywebsite.com"},
@@ -240,7 +242,7 @@ class DefaultManagerServiceTests(base.TestCase):
         res = create_service_worker.service_create_worker(
             json.dumps(providers_list),
             self.project_id,
-            self.service_name,
+            self.service_id,
             json.dumps(service_obj.to_dict()))
         self.assertTrue(res is None)
 
@@ -273,7 +275,7 @@ class DefaultManagerServiceTests(base.TestCase):
         service_obj.status = u'deployed'
         self.sc.storage_controller.get.return_value = service_obj
         service_update_obj = service.load_from_json(update_json)
-        self.sc.update(self.project_id, self.service_name, service_update_obj)
+        self.sc.update(self.project_id, self.service_id, service_update_obj)
 
         # ensure the manager calls the storage driver with the appropriate data
         self.sc.storage_controller.update.assert_called_once()
@@ -301,14 +303,14 @@ class DefaultManagerServiceTests(base.TestCase):
             self.provider_details
         )
 
-        self.sc.delete(self.project_id, self.service_name)
+        self.sc.delete(self.project_id, self.service_id)
 
         # ensure the manager calls the storage driver with the appropriate data
         # break into 2 lines.
         sc = self.sc.storage_controller
         sc.get_provider_details.assert_called_once_with(
             self.project_id,
-            self.service_name)
+            self.service_id)
 
     @ddt.file_data('data_provider_details.json')
     def test_detele_service_worker_success(self, provider_details_json):
@@ -376,10 +378,10 @@ class DefaultManagerServiceTests(base.TestCase):
                              for k, v in
                              self.provider_details.items()])),
             self.project_id,
-            self.service_name)
+            self.service_id)
 
     @ddt.file_data('data_provider_details.json')
-    def test_detele_service_worker_with_error(self, provider_details_json):
+    def test_delete_service_worker_with_error(self, provider_details_json):
         self.provider_details = {}
         for provider_name in provider_details_json:
             provider_detail_dict = json.loads(
@@ -441,7 +443,7 @@ class DefaultManagerServiceTests(base.TestCase):
                              for k, v in
                              self.provider_details.items()])),
             self.project_id,
-            self.service_name)
+            self.service_id)
 
     @ddt.file_data('data_provider_details.json')
     def test_purge(self, provider_details_json):
@@ -463,13 +465,13 @@ class DefaultManagerServiceTests(base.TestCase):
             self.provider_details
         )
 
-        self.sc.purge(self.project_id, self.service_name, None)
+        self.sc.purge(self.project_id, self.service_id, None)
 
         # ensure the manager calls the storage driver with the appropriate data
         sc = self.sc.storage_controller
         sc.get_provider_details.assert_called_once_with(
             self.project_id,
-            self.service_name,
+            self.service_id,
         )
 
     @ddt.file_data('data_provider_details.json')
@@ -508,9 +510,11 @@ class DefaultManagerServiceTests(base.TestCase):
                     provider_name='MaxCDN',
                     service_controller=mock.Mock(
                         purge=mock.Mock(return_value={
-                            'MaxCDN': {'id':
-                                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6'
-                                        }})
+                            'MaxCDN': {
+                                'id':
+                                '08d2e326-377e-11e4-b531-3c15c2b8d2d6'
+                            }
+                        })
                     )
                 ))
             else:
@@ -533,7 +537,7 @@ class DefaultManagerServiceTests(base.TestCase):
                              for k, v in
                              self.provider_details.items()])),
             self.project_id,
-            self.service_name,
+            self.service_id,
             str(None))
 
     @ddt.file_data('data_provider_details.json')
@@ -587,5 +591,5 @@ class DefaultManagerServiceTests(base.TestCase):
                              for k, v in
                              self.provider_details.items()])),
             self.project_id,
-            self.service_name,
+            self.service_id,
             str(None))

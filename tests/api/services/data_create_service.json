@@ -1,8 +1,8 @@
 {
     "all_fields": {
         "name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com"},
-                        {"domain": "blog.mywebsite.com"}],
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
         "origin_list": [{"origin": "mywebsite1.com",
                          "port": 443,
                          "ssl": false}],
@@ -14,8 +14,8 @@
     },
    "caching_empty": {
         "name": "caching_empty",
-        "domain_list": [{"domain": "mywebsite.com"},
-                        {"domain": "blog.mywebsite.com"}],
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
         "origin_list": [{"origin": "mywebsite1.com",
                          "port": 443,
                          "ssl": false}],
@@ -23,8 +23,8 @@
     },
     "non_ASCII": {
         "name": "איבערזעצן",
-        "domain_list": [{"domain": "сайт.com"},
-                        {"domain": "ਦੀ ਵੈੱਬਸਾਈਟ.com"}],
+        "domain_list": [{"domain": "сайт.com", "protocol": "http"},
+                        {"domain": "ਦੀ ਵੈੱਬਸਾਈਟ.com", "protocol": "http"}],
         "origin_list": [{"origin": "www.இணையதளத்தில்.com",
                          "port": 443,
                          "ssl": false}],

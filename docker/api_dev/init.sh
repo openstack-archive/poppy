@@ -24,5 +24,4 @@ sed -i -e "s/AKAM_SECURE_URL_LINK/$AKAM_SECURE_URL_LINK/"                   $CON
 sed -i -e "s/AKAM_HTTP_POLICY/$AKAM_HTTP_POLICY/"                           $CONFIG
 sed -i -e "s/AKAM_HTTPS_POLICY/$AKAM_HTTPS_POLICY/"                         $CONFIG
 
-
 /usr/local/bin/uwsgi --ini /root/uwsgi.ini

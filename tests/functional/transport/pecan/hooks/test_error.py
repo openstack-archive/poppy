@@ -30,8 +30,9 @@ class ErrorHookTest(base.FunctionalTest):
         self.headers['X-Project-Id'] = '000001'
         # use try except to actually catch the response body in
         # exception part
+        service_id = str(uuid.uuid4())
         response = self.app.get(
-            '/v1.0/services/non_exist_service_name',
+            '/v1.0/services/' + service_id,
             headers=self.headers,
             status=404)
 
@@ -39,5 +40,5 @@ class ErrorHookTest(base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         response_json = json.loads(response.body.decode('utf-8'))
         self.assertTrue('message' in response_json)
-        self.assertEqual('service non_exist_service_name is not found',
+        self.assertEqual('service {0} could not be found'.format(service_id),
                          response_json['message'])

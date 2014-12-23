@@ -1,5 +1,6 @@
 {
     "using_all_fields": {
+        "service_id": "00000000-0000-0000-0000-000000000000",
         "name": "mocksite.com",
         "domains": [
             {"domain": "test.mocksite.com" },
