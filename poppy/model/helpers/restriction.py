@@ -17,6 +17,7 @@ from poppy.model import common
 
 
 class Restriction(common.DictSerializableModel):
+
     """Restriction."""
 
     def __init__(self, name, rules=[]):
@@ -42,6 +43,21 @@ class Restriction(common.DictSerializableModel):
     @rules.setter
     def rules(self, value):
         self._rules = value
+
+    @classmethod
+    def init_from_dict(cls, dict_obj):
+        """Construct a model instance from a dictionary.
+
+        This serves as a 2nd constructor
+
+        :param dict_obj: dictionary object
+        :returns o
+        """
+        o = cls(
+            dict_obj.get("name", "unnamed"),
+            dict_obj.get("rules", [])
+        )
+        return o
 
     def to_dict(self):
         result = common.DictSerializableModel.to_dict(self)

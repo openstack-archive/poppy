@@ -16,6 +16,10 @@
 # limitations under the License.
 
 import time
+try:
+    import urllib.parse as urlparse
+except ImportError:
+    import urlparse
 import uuid
 
 import ddt
@@ -33,6 +37,7 @@ class TestCreateService(providers.TestProviderBase):
 
     def setUp(self):
         super(TestCreateService, self).setUp()
+        self.service_url = ''
         self.service_name = str(uuid.uuid1())
         self.flavor_id = self.test_config.default_flavor
 
@@ -61,8 +66,9 @@ class TestCreateService(providers.TestProviderBase):
                                           flavor_id=flavor_id)
         self.assertEqual(resp.status_code, 202)
         self.assertEqual(resp.text, '')
+        self.service_url = resp.headers['location']
 
-        resp = self.client.get_service(service_name=self.service_name)
+        resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
@@ -124,10 +130,14 @@ class TestCreateService(providers.TestProviderBase):
                                           origin_list=origin_list,
                                           caching_list=caching_list,
                                           flavor_id=flavor_id)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+
         self.assertEqual(resp.status_code, 400)
 
     def tearDown(self):
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
@@ -153,12 +163,14 @@ class TestListServices(base.TestBase):
                               "rules": [{"name": "index",
                                          "request_url": "/index.htm"}]}]
 
-        self.client.create_service(service_name=service_name,
-                                   domain_list=self.domain_list,
-                                   origin_list=self.origin_list,
-                                   caching_list=self.caching_list,
-                                   flavor_id=self.flavor_id)
-        return service_name
+        resp = self.client.create_service(service_name=service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id)
+
+        self.service_url = resp.headers["location"]
+        return self.service_url
 
     def setUp(self):
         super(TestListServices, self).setUp()
@@ -222,8 +234,14 @@ class TestListServices(base.TestBase):
 
     @attrib.attr('smoke')
     @ddt.data(-1, -10000000000, 0, 10000000, 'invalid', '学校', '')
-    def test_list_services_various_markers(self, marker):
+    def test_list_services_various_invalid_markers(self, marker):
         url_param = {'marker': marker}
+        resp = self.client.list_services(param=url_param)
+        self.assertEqual(resp.status_code, 400)
+
+    @attrib.attr('smoke')
+    def test_list_services_markers(self):
+        url_param = {'marker': str(uuid.uuid4())}
         resp = self.client.list_services(param=url_param)
         self.assertEqual(resp.status_code, 200)
 
@@ -235,7 +253,7 @@ class TestListServices(base.TestBase):
 
     def tearDown(self):
         for service in self.service_list:
-            self.client.delete_service(service_name=service)
+            self.client.delete_service(location=service)
 
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
@@ -262,7 +280,7 @@ class TestServiceActions(base.TestBase):
 
         domain = str(uuid.uuid1()) + u'.com'
         self.domain_list = [
-            {"domain": domain}
+            {"domain": domain, "protocol": "http"}
         ]
 
         origin = str(uuid.uuid1()) + u'.com'
@@ -302,25 +320,28 @@ class TestServiceActions(base.TestBase):
             }
         ]
 
-        self.client.create_service(service_name=self.service_name,
-                                   domain_list=self.domain_list,
-                                   origin_list=self.origin_list,
-                                   caching_list=self.caching_list,
-                                   restrictions_list=self.restrictions_list,
-                                   flavor_id=self.flavor_id)
+        resp = self.client.create_service(
+            service_name=self.service_name,
+            domain_list=self.domain_list,
+            origin_list=self.origin_list,
+            caching_list=self.caching_list,
+            restrictions_list=self.restrictions_list,
+            flavor_id=self.flavor_id)
+
+        self.service_url = resp.headers["location"]
 
     def test_delete_service(self):
-        resp = self.client.delete_service(service_name=self.service_name)
+        resp = self.client.delete_service(location=self.service_url)
         self.assertEqual(resp.status_code, 202)
 
-        # As is, the servvice is still available in the DB till deleted from
+        # As is, the service is still available in the DB till deleted from
         # the provider. The test should be able to handle this with
         # exponential sleep or whatever(!).
         status_code = 0
         count = 0
         while (count < 5):
             service_deleted = self.client.get_service(
-                service_name=self.service_name)
+                location=self.service_url)
             status_code = service_deleted.status_code
             if status_code == 200:
                 time.sleep(1)
@@ -332,7 +353,12 @@ class TestServiceActions(base.TestBase):
         self.assertEqual(404, status_code)
 
     def test_delete_non_existing_service(self):
-        resp = self.client.delete_service(service_name='this_cant_be_true')
+        parsed_url = urlparse.urlparse(self.service_url)
+        url = "{0}://{1}{2}{3}".format(parsed_url.scheme,
+                                       parsed_url.netloc,
+                                       '/v1.0/services/',
+                                       uuid.uuid4())
+        resp = self.client.delete_service(location=url)
         self.assertEqual(resp.status_code, 404)
 
     def test_delete_failed_service(self):
@@ -343,17 +369,20 @@ class TestServiceActions(base.TestBase):
 
     @ddt.file_data('data_get_service_by_name.json')
     def test_get_service_by_name(self, value):
-        self.client.create_service(service_name=value,
-                                   domain_list=self.domain_list,
-                                   origin_list=self.origin_list,
-                                   caching_list=self.caching_list,
-                                   flavor_id=self.flavor_id)
+        resp = self.client.create_service(service_name=value,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id)
 
-        resp = self.client.get_service(service_name=value)
+        self.assertEqual(resp.status_code, 202)
+        url = resp.headers["location"]
+
+        resp = self.client.get_service(location=url)
         self.assertEqual(resp.status_code, 200)
 
     def test_get_service(self):
-        resp = self.client.get_service(service_name=self.service_name)
+        resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
@@ -370,7 +399,12 @@ class TestServiceActions(base.TestBase):
         self.assertEqual(body['flavor_id'], self.flavor_id)
 
     def test_get_non_existing_service(self):
-        resp = self.client.get_service(service_name='this_cant_be_true')
+        parsed_url = urlparse.urlparse(self.service_url)
+        url = "{0}://{1}{2}{3}".format(parsed_url.scheme,
+                                       parsed_url.netloc,
+                                       '/v1.0/services/',
+                                       uuid.uuid4())
+        resp = self.client.get_service(location=url)
         self.assertEqual(resp.status_code, 404)
 
     def test_get_failed_service(self):
@@ -380,7 +414,7 @@ class TestServiceActions(base.TestBase):
         pass
 
     def tearDown(self):
-        self.client.delete_service(service_name=self.service_name)
+        self.client.delete_service(location=self.service_url)
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
         super(TestServiceActions, self).tearDown()
@@ -416,13 +450,16 @@ class TestServicePatch(base.TestBase):
                               "rules": [{"name": "index",
                                          "request_url": "/index.htm"}]}]
 
-        self.client.create_service(service_name=self.service_name,
-                                   domain_list=self.domain_list,
-                                   origin_list=self.origin_list,
-                                   caching_list=self.caching_list,
-                                   flavor_id=self.flavor_id)
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id)
+
+        self.service_url = resp.headers["location"]
+
         self.client.wait_for_service_status(
-            service_name=self.service_name,
+            location=self.service_url,
             status='deployed',
             retry_interval=self.test_config.status_check_retry_interval,
             retry_timeout=self.test_config.status_check_retry_timeout)
@@ -431,22 +468,20 @@ class TestServicePatch(base.TestBase):
     def test_patch_service(self, test_data):
         '''Implemented - PATCH Origins & Domains.'''
 
-        resp = self.client.patch_service(service_name=self.service_name,
+        resp = self.client.patch_service(location=self.service_url,
                                          request_body=test_data)
-
         self.assertEqual(resp.status_code, 202)
 
-        location = resp.headers['location']
-        resp = self.client.get_service(location=location)
+        resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 200)
 
         self.client.wait_for_service_status(
-            service_name=self.service_name,
+            location=self.service_url,
             status='deployed',
             retry_interval=self.test_config.status_check_retry_interval,
             retry_timeout=self.test_config.status_check_retry_timeout)
 
-        resp = self.client.get_service(service_name=self.service_name)
+        resp = self.client.get_service(location=self.service_url)
         body = resp.json()
 
         if 'domain_list' in test_data:
@@ -467,11 +502,11 @@ class TestServicePatch(base.TestBase):
     @ddt.file_data('data_patch_service_negative.json')
     def test_patch_service_HTTP_400(self, test_data):
 
-        resp = self.client.patch_service(service_name=self.service_name,
+        resp = self.client.patch_service(location=self.service_url,
                                          request_body=test_data)
         self.assertEqual(resp.status_code, 400)
 
-        resp = self.client.get_service(service_name=self.service_name)
+        resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
@@ -489,7 +524,7 @@ class TestServicePatch(base.TestBase):
         # self.assertEqual(sorted(self.caching_list), sorted(body['caching']))
 
     def tearDown(self):
-        self.client.delete_service(service_name=self.service_name)
+        self.client.delete_service(location=self.service_url)
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
         super(TestServicePatch, self).tearDown()

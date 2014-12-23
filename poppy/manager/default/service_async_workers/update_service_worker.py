@@ -30,7 +30,7 @@ conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
 
 
-def update_worker(project_id, service_name,
+def update_worker(project_id, service_id,
                   service_old, service_updates, service_obj):
     LOG.logger.setLevel(logging.INFO)
     bootstrap_obj = bootstrap.Bootstrap(conf)
@@ -88,12 +88,12 @@ def update_worker(project_id, service_name,
                         'deployed')
 
     # update the service object
-    service_controller.storage_controller.update(project_id, service_name,
+    service_controller.storage_controller.update(project_id, service_id,
                                                  service_obj)
     # update the provider details
     service_controller.storage_controller.update_provider_details(
         project_id,
-        service_name,
+        service_id,
         provider_details_dict)
 
     service_controller.storage_controller._driver.close_connection()
@@ -108,16 +108,16 @@ if __name__ == '__main__':
                                      ' script arg parser')
 
     parser.add_argument('project_id', action="store")
-    parser.add_argument('service_name', action="store")
+    parser.add_argument('service_id', action="store")
     parser.add_argument('service_old', action="store")
     parser.add_argument('service_updates', action="store")
     parser.add_argument('service_obj', action="store")
 
     result = parser.parse_args()
     project_id = result.project_id
-    service_name = result.service_name
+    service_id = result.service_id
     service_old = result.service_old
     service_updates = result.service_updates
     service_obj = result.service_obj
-    update_worker(project_id, service_name, service_old, service_updates,
+    update_worker(project_id, service_id, service_old, service_updates,
                   service_obj)

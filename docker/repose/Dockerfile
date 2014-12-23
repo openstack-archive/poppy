@@ -1,6 +1,6 @@
 # Dockerfile for Repose (www.openrepose.org)
 
-FROM ubuntu
+FROM ubuntu:14.04
 
 MAINTAINER Felix Sargent (felix.sargent@rackspace.com)
 
