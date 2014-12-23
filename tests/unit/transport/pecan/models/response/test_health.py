@@ -67,12 +67,12 @@ class TestHealthModel(base.TestCase):
 
     def setUp(self):
         super(TestHealthModel, self).setUp()
-        self.mock_request = util.dict2obj(
-            {'host_url': 'https://www.poppycdn.io/'})
+        self.mock_controller = util.dict2obj(
+            {'base_url': 'https://www.poppycdn.io/'})
 
     @ddt.file_data('health_map.json')
     def test_health(self, health_map):
-        health_model = health.HealthModel(self.mock_request, health_map)
+        health_model = health.HealthModel(self.mock_controller, health_map)
         storage_name = health_map['storage']['storage_name']
         self.assertEqual('true',
                          health_model['storage'][storage_name]['online'])
@@ -82,21 +82,21 @@ class TestHealthModel(base.TestCase):
 
     @ddt.file_data('health_map_dns_not_available.json')
     def test_health_dns_not_available(self, health_map):
-        health_model = health.HealthModel(self.mock_request, health_map)
+        health_model = health.HealthModel(self.mock_controller, health_map)
         dns_name = health_map['dns']['dns_name']
         self.assertEqual('false',
                          health_model['dns'][dns_name]['online'])
 
     @ddt.file_data('health_map_storage_not_available.json')
     def test_health_storage_not_available(self, health_map):
-        health_model = health.HealthModel(self.mock_request, health_map)
+        health_model = health.HealthModel(self.mock_controller, health_map)
         storage_name = health_map['storage']['storage_name']
         self.assertEqual('false',
                          health_model['storage'][storage_name]['online'])
 
     @ddt.file_data('health_map_provider_not_available.json')
     def test_health_provider_not_available(self, health_map):
-        health_model = health.HealthModel(self.mock_request, health_map)
+        health_model = health.HealthModel(self.mock_controller, health_map)
         providers = health_map['providers']
 
         for provider in providers:

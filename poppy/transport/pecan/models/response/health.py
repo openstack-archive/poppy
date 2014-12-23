@@ -53,7 +53,7 @@ class ProviderModel(collections.OrderedDict):
 
 class HealthModel(collections.OrderedDict):
 
-    def __init__(self, request, health_map):
+    def __init__(self, controller, health_map):
         super(HealthModel, self).__init__()
 
         health_dns = collections.OrderedDict()
@@ -64,7 +64,7 @@ class HealthModel(collections.OrderedDict):
 
         health_dns['links'] = link.Model(
             u'{0}/v1.0/health/dns/{1}'.format(
-                request.host_url, health_map['dns']['dns_name']),
+                controller.base_url, health_map['dns']['dns_name']),
             'self')
 
         self['dns'] = {
@@ -78,7 +78,7 @@ class HealthModel(collections.OrderedDict):
 
         health_storage['links'] = link.Model(
             u'{0}/v1.0/health/storage/{1}'.format(
-                request.host_url, health_map['storage']['storage_name']),
+                controller.base_url, health_map['storage']['storage_name']),
             'self')
 
         self['storage'] = {
@@ -94,7 +94,7 @@ class HealthModel(collections.OrderedDict):
 
             health_provider['links'] = link.Model(
                 u'{0}/v1.0/health/provider/{1}'.format(
-                    request.host_url, provider['provider_name']),
+                    controller.base_url, provider['provider_name']),
                 'self')
 
             self['providers'][provider['provider_name']] = health_provider

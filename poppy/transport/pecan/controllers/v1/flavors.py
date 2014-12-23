@@ -44,7 +44,7 @@ class FlavorsController(base.Controller, hooks.HookController):
         result = flavors_controller.list()
 
         flavor_list = [
-            flavor_response.Model(item, pecan.request) for item in result]
+            flavor_response.Model(item, self) for item in result]
 
         return {
             'flavors': flavor_list
@@ -63,7 +63,7 @@ class FlavorsController(base.Controller, hooks.HookController):
         except LookupError as e:
             pecan.abort(404, detail=str(e))
         else:
-            return flavor_response.Model(result, pecan.request)
+            return flavor_response.Model(result, self)
 
     @pecan.expose('json')
     @decorators.validate(
@@ -86,13 +86,13 @@ class FlavorsController(base.Controller, hooks.HookController):
             # form the success response
             flavor_url = str(
                 uri.encode(u'{0}/v1.0/flavors/{1}'.format(
-                    pecan.request.host_url,
+                    self.base_url,
                     new_flavor.flavor_id)))
             pecan.response.status = 201
             pecan.response.headers["Location"] = flavor_url
 
             result = flavors_controller.get(new_flavor.flavor_id)
-            return flavor_response.Model(result, pecan.request)
+            return flavor_response.Model(result, self)
 
         except Exception as e:
             pecan.abort(400, detail=str(e))
