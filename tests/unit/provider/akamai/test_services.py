@@ -38,6 +38,7 @@ class TestServices(base.TestCase):
               mock_driver):
         super(TestServices, self).setUp()
         self.driver = mock_driver()
+        self.driver.akamai_https_access_url_suffix = str(uuid.uuid1())
         self.controller = services.ServiceController(self.driver)
 
     @ddt.file_data('domains_list.json')
@@ -84,7 +85,8 @@ class TestServices(base.TestCase):
         self.assertTrue(service_obj.caching == [])
 
     def test_delete_with_exception(self):
-        provider_service_id = json.dumps([str(uuid.uuid1())])
+        provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
+                                           'protocol': 'http'}])
 
         # test exception
         exception = RuntimeError('ding')
@@ -100,7 +102,8 @@ class TestServices(base.TestCase):
         self.assertIn('error', resp[self.driver.provider_name])
 
     def test_delete_with_4xx_return(self):
-        provider_service_id = json.dumps([str(uuid.uuid1())])
+        provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
+                                           'protocol': 'http'}])
 
         # test exception
         self.controller.policy_api_client.delete.return_value = mock.Mock(
@@ -112,14 +115,16 @@ class TestServices(base.TestCase):
         self.assertIn('error', resp[self.driver.provider_name])
 
     def test_delete(self):
-        provider_service_id = json.dumps([str(uuid.uuid1())])
+        provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
+                                           'protocol': 'http'}])
 
         self.controller.delete(provider_service_id)
         self.controller.policy_api_client.delete.assert_called_once()
 
     @ddt.file_data('data_update_service.json')
     def test_update_with_get_error(self, service_json):
-        provider_service_id = json.dumps([str(uuid.uuid1())])
+        provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
+                                           'protocol': 'http'}])
         controller = services.ServiceController(self.driver)
         controller.policy_api_client.get.return_value = mock.Mock(
             status_code=400,
@@ -139,8 +144,40 @@ class TestServices(base.TestCase):
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_update_service.json')
+    def test_update_with_service_id_json_load_error(self, service_json):
+        # This should trigger a json.loads error
+        provider_service_id = None
+        service_obj = service.load_from_json(service_json)
+        resp = self.controller.update(
+            provider_service_id, service_obj, service_obj, service_obj)
+        self.assertIn('error', resp[self.driver.provider_name])
+
+    @ddt.file_data('data_update_service.json')
     def test_update(self, service_json):
-        provider_service_id = json.dumps([str(uuid.uuid1())])
+        provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
+                                           'protocol': 'http'}])
+        controller = services.ServiceController(self.driver)
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            text=json.dumps(dict(rules=[]))
+        )
+        controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
+        controller.policy_api_client.delete.return_value = mock.Mock(
+            status_code=200,
+            text='Delete successful'
+        )
+        service_obj = service.load_from_json(service_json)
+        resp = controller.update(
+            provider_service_id, service_obj, service_obj, service_obj)
+        self.assertIn('id', resp[self.driver.provider_name])
+
+    @ddt.file_data('data_update_service.json')
+    def test_update_with_domain_protocol_change(self, service_json):
+        provider_service_id = json.dumps([{'policy_name': "densely.sage.com",
+                                           'protocol': 'http'}])
         controller = services.ServiceController(self.driver)
         controller.policy_api_client.get.return_value = mock.Mock(
             status_code=200,
@@ -160,29 +197,22 @@ class TestServices(base.TestCase):
         self.assertIn('id', resp[self.driver.provider_name])
 
     def test_purge_all(self):
-        provider_service_id = json.dumps([str(uuid.uuid1())])
+        provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
+                                           'protocol': 'http'}])
         controller = services.ServiceController(self.driver)
         resp = controller.purge(provider_service_id, None)
         self.assertIn('error', resp[self.driver.provider_name])
 
-    def test_purge_with_get_exception(self):
-        provider_service_id = json.dumps([str(uuid.uuid1())])
+    def test_purge_with_service_id_json_load_error(self):
+        provider_service_id = None
         controller = services.ServiceController(self.driver)
-        controller.policy_api_client.get.return_value = mock.Mock(
-            status_code=400,
-            text='Some get error happened'
-        )
-        resp = controller.purge(provider_service_id, '/img/abc.jpeg')
+        resp = controller.purge(provider_service_id, None)
         self.assertIn('error', resp[self.driver.provider_name])
 
-    @ddt.file_data('policy_detail.json')
-    def test_purge_with_ccu_exception(self, policy_detail_json):
-        provider_service_id = json.dumps([str(uuid.uuid1())])
+    def test_purge_with_ccu_exception(self):
+        provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
+                                           'protocol': 'http'}])
         controller = services.ServiceController(self.driver)
-        controller.policy_api_client.get.return_value = mock.Mock(
-            status_code=200,
-            text=json.dumps(policy_detail_json)
-        )
         controller.ccu_api_client.post.return_value = mock.Mock(
             status_code=400,
             text="purge request post failed"
@@ -190,14 +220,10 @@ class TestServices(base.TestCase):
         resp = controller.purge(provider_service_id, '/img/abc.jpeg')
         self.assertIn('error', resp[self.driver.provider_name])
 
-    @ddt.file_data('policy_detail.json')
-    def test_purge(self, policy_detail_json):
-        provider_service_id = json.dumps([str(uuid.uuid1())])
+    def test_purge(self):
+        provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
+                                           'protocol': 'https'}])
         controller = services.ServiceController(self.driver)
-        controller.policy_api_client.get.return_value = mock.Mock(
-            status_code=200,
-            text=json.dumps(policy_detail_json)
-        )
         controller.ccu_api_client.post.return_value = mock.Mock(
             status_code=201,
             text="purge request post complete"
