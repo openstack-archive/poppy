@@ -75,7 +75,10 @@ class ServicesController(base.ServicesBase):
                             'name': name,
                             'data': links[link],
                             'ttl': 300}
-            dns_links[links[link]] = name
+            dns_links[link] = {
+                'provider_url': links[link],
+                'operator_url': name
+            }
             cname_records.append(cname_record)
         # add the cname records
         subdomain.add_records(cname_records)
@@ -116,18 +119,25 @@ class ServicesController(base.ServicesBase):
         :param responders: responders from providers
         :return dns_links: Map from provider urls to DNS urls
         """
+
+        providers = []
+        for responder in responders:
+            for provider in responder:
+                providers.append(provider)
+
+        for responder in responders:
+            for provider_name in responder:
+                if 'error' in responder[provider_name]:
+                    error_msg = responder[provider_name]['error_detail']
+                    return self.responder.failed(providers, error_msg)
+
         # gather the provider urls and cname them
         links = {}
         for responder in responders:
             for provider_name in responder:
-                if 'error' in responder[provider_name]:
-                    continue
                 for link in responder[provider_name]['links']:
                     if link['rel'] == 'access_url':
                         links[link['domain']] = link['href']
-
-        if not links:
-            return self.responder.created({})
 
         # create CNAME records
         try:
@@ -135,21 +145,21 @@ class ServicesController(base.ServicesBase):
         except Exception as e:
             error_msg = 'Rackspace DNS Exception: {0}'.format(e)
             LOG.error(error_msg)
-            return self.responder.failed(error_msg)
+            return self.responder.failed(providers, error_msg)
 
         # gather the CNAMED links
         dns_details = {}
         for responder in responders:
             for provider_name in responder:
-                if 'error' in responder[provider_name]:
-                    continue
                 access_urls = []
                 for link in responder[provider_name]['links']:
                     if link['rel'] == 'access_url':
                         access_url = {
                             'domain': link['domain'],
-                            'provider_url': link['href'],
-                            'operator_url': dns_links[link['href']]}
+                            'provider_url':
+                                dns_links[link['domain']]['provider_url'],
+                            'operator_url':
+                                dns_links[link['domain']]['operator_url']}
                         access_urls.append(access_url)
                 dns_details[provider_name] = {'access_urls': access_urls}
         return self.responder.created(dns_details)
@@ -160,6 +170,10 @@ class ServicesController(base.ServicesBase):
         :param provider_details
         :return dns_details: Map from provider_name to delete errors
         """
+
+        providers = []
+        for provider in provider_details:
+            providers.append(provider)
 
         dns_details = {}
         for provider_name in provider_details:
@@ -179,11 +193,14 @@ class ServicesController(base.ServicesBase):
                 except Exception as e:
                     LOG.error('Exception: {0}'.format(e))
                     error_msg = error_msg + 'Exception: {0}'.format(e)
-            # format the error or success message for this provider
-            if error_msg:
-                dns_details[provider_name] = self.responder.failed(error_msg)
-            else:
+            # format the error message for this provider
+            if not error_msg:
                 dns_details[provider_name] = self.responder.deleted({})
+
+        # format the error message
+        if error_msg:
+            return self.responder.failed(providers, error_msg)
+
         return dns_details
 
     def _update_added_domains(self, responders, added_domains):
@@ -194,15 +211,18 @@ class ServicesController(base.ServicesBase):
         if not added_domains:
             for responder in responders:
                 for provider_name in responder:
-                    dns_details[provider_name] = {'access_urls': {}}
+                    dns_details[provider_name] = {'access_urls': []}
             return dns_details
+
+        providers = []
+        for responder in responders:
+            for provider in responder:
+                providers.append(provider)
 
         # gather the provider links for the added domains
         links = {}
         for responder in responders:
             for provider_name in responder:
-                if 'error' in responder[provider_name]:
-                    continue
                 for link in responder[provider_name]['links']:
                     domain_added = (link['rel'] == 'access_url' and
                                     link['domain'] in added_domains)
@@ -215,17 +235,21 @@ class ServicesController(base.ServicesBase):
         except Exception as e:
             error_msg = 'Rackspace DNS Exception: {0}'.format(e)
             LOG.error(error_msg)
-            return self.responder.failed(error_msg)
+            return self.responder.failed(providers, error_msg)
 
         # gather the CNAMED links for added domains
         for responder in responders:
             for provider_name in responder:
-                if 'error' in responder[provider_name]:
-                    continue
-                access_urls = {}
+                access_urls = []
                 for link in responder[provider_name]['links']:
                     if link['domain'] in added_domains:
-                        access_urls[link['href']] = dns_links[link['href']]
+                        access_url = {
+                            'domain': link['domain'],
+                            'provider_url':
+                                dns_links[link['domain']]['provider_url'],
+                            'operator_url':
+                                dns_links[link['domain']]['operator_url']}
+                        access_urls.append(access_url)
                 dns_details[provider_name] = {'access_urls': access_urls}
         return dns_details
 
@@ -236,8 +260,12 @@ class ServicesController(base.ServicesBase):
         dns_details = {}
         if not removed_domains:
             for provider_name in provider_details:
-                dns_details[provider_name] = {'access_urls': {}}
+                dns_details[provider_name] = {'access_urls': []}
             return dns_details
+
+        providers = []
+        for provider in provider_details:
+            providers.append(provider)
 
         # delete the records for deleted domains
         for provider_name in provider_details:
@@ -259,11 +287,14 @@ class ServicesController(base.ServicesBase):
                 except Exception as e:
                     LOG.error('Exception: {0}'.format(e))
                     error_msg = error_msg + 'Exception: {0}'.format(e)
-            # format the error or success message for this provider
-            if error_msg:
-                dns_details[provider_name] = self.responder.failed(error_msg)
-            else:
+            # format the success message for this provider
+            if not error_msg:
                 dns_details[provider_name] = self.responder.deleted({})
+
+        # format the error message
+        if error_msg:
+            return self.responder.failed(providers, error_msg)
+
         return dns_details
 
     def update(self, service_old, service_updates, responders):
@@ -321,21 +352,35 @@ class ServicesController(base.ServicesBase):
         provider_details = service_old.provider_details
         self._update_removed_domains(provider_details, removed_domains)
 
+        providers = []
+        for responder in responders:
+            for provider in responder:
+                providers.append(provider)
+
+        # in case of DNS error, return
+        for provider_name in dns_links:
+            if 'error' in dns_links[provider_name]:
+                error_msg = dns_links[provider_name]['error_detail']
+                return self.responder.failed(providers, error_msg)
+
         # gather the CNAMED links and remove stale links
         dns_details = {}
         for responder in responders:
             for provider_name in responder:
-                if 'error' in responder[provider_name]:
-                    continue
                 provider_detail = service_old.provider_details[provider_name]
                 old_access_urls = provider_detail.access_urls
-                operator_urls = dns_links[provider_name]['access_urls']
+                new_access_urls = dns_links[provider_name]['access_urls']
                 access_urls = []
                 for link in responder[provider_name]['links']:
                     if link['domain'] in removed_domains:
                         continue
                     elif link['domain'] in added_domains:
-                        operator_url = operator_urls[link['href']]
+                        # iterate through new access urls and get access url
+                        operator_url = None
+                        for new_access_url in new_access_urls:
+                            if new_access_url['domain'] == link['domain']:
+                                operator_url = new_access_url['operator_url']
+                                break
                         access_url = {
                             'domain': link['domain'],
                             'provider_url': link['href'],

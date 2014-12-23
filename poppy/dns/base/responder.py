@@ -22,17 +22,21 @@ class Responder(object):
     def __init__(self, dns_name):
         self.dns = dns_name
 
-    def failed(self, msg):
+    def failed(self, providers, msg):
         """failed.
 
         :param msg
         :returns {error, error details}
         """
 
-        return {
-            'error': msg,
-            'error_detail': traceback.format_exc()
-        }
+        error_details = {}
+        for provider in providers:
+            error_details[provider] = {
+                'error': msg,
+                'error_detail': traceback.format_exc()
+            }
+
+        return error_details
 
     def created(self, dns_details):
         """created.
