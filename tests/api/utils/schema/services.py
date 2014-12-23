@@ -50,14 +50,23 @@ links = {'type': 'object',
                                                 'flavor']}}
          }
 
+error_message = {'type': 'object',
+                 'properties': {
+                     'message': {'type': 'string'}
+                 }
+                 }
+
 restrictions = {'type': 'array'}
 flavor_id = {'type': 'string', 'pattern': '([a-zA-Z0-9_\-]{1,256})'}
 service_name = {'type': 'string', 'pattern': '([a-zA-Z0-9_\-\.]{1,256})'}
+uuid4 = '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'  # noqa
+service_id = {'type': 'string', 'pattern': uuid4}
 
 # Response Schema Definition for Get Service API
 get_service = {
     'type': 'object',
     'properties': {
+        'id': service_id,
         'name': service_name,
         'domains': {'type': 'array',
                     'items': domain,
@@ -80,7 +89,9 @@ get_service = {
                    'enum': ['create_in_progress', 'creating',
                             'delete_in_progress', 'deployed', 'failed']},
         'restrictions': restrictions,
-        'flavor_id': flavor_id
+        'flavor_id': flavor_id,
+        'errors': {'type': 'array',
+                   'items': error_message}
     },
     'required': ['domains', 'origins', 'links', 'flavor_id', 'status',
                  'errors'],
@@ -94,7 +105,7 @@ list_services_link = {
                  'pattern':
                  '(https?)(:/{1,3})([a-z0-9\.\-:]{1,400})'
                  '(/v1\.0/([a-z0-9]{1,400})/services'
-                 '\?marker=)([a-zA-Z0-9_\-\.]{1,256})'
+                 '\?marker=)(' + uuid4 + ')'
                  '(&limit=)([1-9]|1[0-9])'}},
         'required': ['rel', 'href'],
         'additionalProperties': False}

@@ -17,6 +17,7 @@
 schema_statements = [
     '''CREATE TABLE services (
     project_id VARCHAR,
+    service_id UUID,
     service_name VARCHAR,
     flavor_id VARCHAR,
     domains LIST<TEXT>,
@@ -24,7 +25,7 @@ schema_statements = [
     caching_rules LIST<TEXT>,
     restrictions LIST<TEXT>,
     provider_details MAP<TEXT, TEXT>,
-    PRIMARY KEY (project_id, service_name)
+    PRIMARY KEY (project_id, service_id)
     );
     ''',
     '''CREATE TABLE flavors (
@@ -33,8 +34,16 @@ schema_statements = [
     PRIMARY KEY (flavor_id)
     );
     ''',
+    '''CREATE TABLE service_names (
+    project_id VARCHAR,
+    service_id UUID,
+    service_name VARCHAR,
+    PRIMARY KEY (service_name)
+    );
+    ''',
     '''CREATE TABLE archives (
     project_id VARCHAR,
+    service_id UUID,
     service_name VARCHAR,
     flavor_id VARCHAR,
     domains LIST<TEXT>,
@@ -43,7 +52,7 @@ schema_statements = [
     restrictions LIST<TEXT>,
     provider_details MAP<TEXT, TEXT>,
     archived_time timestamp,
-    PRIMARY KEY (project_id, service_name, archived_time)
+    PRIMARY KEY (project_id, service_id, archived_time)
     );
     '''
 ]
