@@ -60,8 +60,26 @@ class TestDriver(base.TestCase):
     @mock.patch('pyrax.set_credentials')
     @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
     def test_is_alive(self, mock_set_credentials):
+        """Happy path test for checking the health of DNS."""
         provider = driver.DNSProvider(self.conf)
-        self.assertEqual(provider.is_alive(), True)
+        provider.rackdns_client = mock.Mock()
+        self.assertTrue(provider.is_alive())
+
+    @mock.patch('pyrax.set_credentials')
+    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
+    def test_is_alive_dns_down(self, mock_set_credentials):
+        """Negative test for checking the health of DNS."""
+        provider = driver.DNSProvider(self.conf)
+        provider.rackdns_client = mock.Mock()
+        provider.rackdns_client.list = mock.Mock(side_effect=Exception('foo'))
+        self.assertFalse(provider.is_alive())
+
+    @mock.patch('pyrax.set_credentials')
+    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
+    def test_is_alive_wrong_credentials(self, mock_set_credentials):
+        """Negative test for checking the health of DNS."""
+        provider = driver.DNSProvider(self.conf)
+        self.assertFalse(provider.is_alive())
 
     @mock.patch('pyrax.set_credentials')
     @mock.patch('pyrax.set_setting')

@@ -1,5 +1,6 @@
 {
     "storage_not_available" : {
+        "dns": {"dns_name": "rackspace_cloud_dns", "is_alive": 1},
         "storage": {"storage_name": "cassandra", "is_alive": 0},
         "providers": [{"provider_name": "fastly", "is_alive": 1}]
     }

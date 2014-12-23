@@ -67,8 +67,10 @@ class DNSProvider(base.Driver):
         :return boolean
         """
 
-        # TODO(obulpathi): Implement health check
-        # and add DNS to health endpoint
+        try:
+            self.rackdns_client.list()
+        except Exception:
+            return False
         return True
 
     @property
@@ -78,7 +80,7 @@ class DNSProvider(base.Driver):
         :return 'Rackspace Cloud DNS'
         """
 
-        return 'Rackspace Cloud DNS'
+        return 'Rackspace_Cloud_DNS'
 
     @property
     def client(self):
