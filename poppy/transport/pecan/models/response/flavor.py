@@ -23,7 +23,7 @@ from poppy.transport.pecan.models.response import link
 
 class Model(collections.OrderedDict):
 
-    def __init__(self, flavor, request):
+    def __init__(self, flavor, controller):
         super(Model, self).__init__()
 
         self['id'] = flavor.flavor_id
@@ -41,6 +41,6 @@ class Model(collections.OrderedDict):
         self['links'] = []
         self['links'].append(
             link.Model(
-                u'{0}/v1.0/flavors/{1}'.format(request.host_url,
-                                               flavor.flavor_id),
+                u'{0}/flavors/{1}'.format(controller.base_url,
+                                          flavor.flavor_id),
                 'self'))

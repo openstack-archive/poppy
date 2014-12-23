@@ -104,7 +104,7 @@ class ServicesController(base.Controller, hooks.HookController):
         service_resultset = services_controller.list(
             self.project_id, marker, limit)
         results = [
-            resp_service_model.Model(s, pecan.request)
+            resp_service_model.Model(s, self)
             for s in service_resultset]
         # TODO(obulpathi): edge case: when the total number of services is a
         # multiple of limit, the last batch has a non-null marker.
@@ -130,7 +130,7 @@ class ServicesController(base.Controller, hooks.HookController):
             pecan.abort(404, detail='service %s is not found' %
                         service_name)
         # convert a service model into a response service model
-        return resp_service_model.Model(service_obj, pecan.request)
+        return resp_service_model.Model(service_obj, self)
 
     @pecan.expose('json')
     @decorators.validate(

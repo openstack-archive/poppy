@@ -30,7 +30,7 @@ class Model(collections.OrderedDict):
 
     'Service Response Model.'
 
-    def __init__(self, service_obj, request):
+    def __init__(self, service_obj, controller):
         super(Model, self).__init__()
         self["name"] = service_obj.name
         self["domains"] = [domain.Model(d) for d in service_obj.domains]
@@ -49,14 +49,14 @@ class Model(collections.OrderedDict):
         self["links"] = [
             link.Model(
                 str(
-                    uri.encode(u'{0}/v1.0/services/{1}'.format(
-                        request.host_url,
+                    uri.encode(u'{0}/services/{1}'.format(
+                        controller.base_url,
                         self['name']))),
                 'self'),
             link.Model(
                 str(
-                    uri.encode(u'{0}/v1.0/flavors/{1}'.format(
-                        request.host_url,
+                    uri.encode(u'{0}/flavors/{1}'.format(
+                        controller.base_url,
                         service_obj.flavor_id))),
                 'flavor')]
 

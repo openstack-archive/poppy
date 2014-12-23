@@ -102,4 +102,4 @@ class HealthController(base.Controller, hooks.HookController):
         if not is_alive:
             pecan.response.status = 503
 
-        return health_response.HealthModel(pecan.request, health_map)
+        return health_response.HealthModel(self, health_map)
