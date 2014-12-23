@@ -16,6 +16,7 @@
 import collections
 import functools
 import json
+import uuid
 
 try:
     import falcon
@@ -195,8 +196,11 @@ def json_matches_schema(input_schema):
 
 
 @decorators.validation_function
-def is_valid_service_name(service_name):
-    pass
+def is_valid_service_id(service_id):
+    try:
+        uuid.UUID(service_id)
+    except ValueError:
+        raise exceptions.ValidationFailed('Invalid service id')
 
 
 @decorators.validation_function

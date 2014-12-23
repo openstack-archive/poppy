@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import json
+import uuid
 try:
     import ordereddict as collections
 except ImportError:        # pragma: no cover
@@ -39,6 +40,7 @@ class CassandraStorageServiceTests(base.TestCase):
 
         # mock arguments to use
         self.project_id = '123456'
+        self.service_id = uuid.uuid4()
         self.service_name = 'mocksite'
 
         # create mocked config and driver
@@ -61,13 +63,14 @@ class CassandraStorageServiceTests(base.TestCase):
     def test_get_service(self, value, mock_session, mock_execute):
 
         # mock the response from cassandra
+        value[0]['service_id'] = self.service_id
         mock_execute.execute.return_value = value
 
-        actual_response = self.sc.get(self.project_id, self.service_name)
+        actual_response = self.sc.get(self.project_id, self.service_id)
 
         # TODO(amitgandhinz): assert the response
         # matches the expectation (using jsonschema)
-        self.assertEqual(actual_response.name, self.service_name)
+        self.assertEqual(str(actual_response.service_id), str(self.service_id))
 
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
@@ -77,12 +80,16 @@ class CassandraStorageServiceTests(base.TestCase):
         mock_execute.execute.return_value = []
 
         self.assertRaises(ValueError, self.sc.get,
-                          self.project_id, self.service_name)
+                          self.project_id, self.service_id)
 
     @ddt.file_data('../data/data_create_service.json')
+    @mock.patch.object(services.ServicesController,
+                       '_exists_elsewhere',
+                       return_value=False)
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_create_service(self, value, mock_session, mock_execute):
+    def test_create_service(self, value,
+                            mock_check, mock_session, mock_execute):
         service_obj = req_service.load_from_json(value)
         responses = self.sc.create(self.project_id, service_obj)
 
@@ -93,10 +100,13 @@ class CassandraStorageServiceTests(base.TestCase):
         # TODO(amitgandhinz): need to validate the create to cassandra worked.
 
     @ddt.file_data('../data/data_create_service.json')
+    @mock.patch.object(services.ServicesController,
+                       '_exists_elsewhere',
+                       return_value=True)
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_create_service_exist(self, value, mock_session, mock_execute):
-        value.update({'name': self.service_name})
+    def test_create_service_exist(self, value,
+                                  mock_check, mock_session, mock_execute):
         service_obj = req_service.load_from_json(value)
         self.sc.get = mock.Mock(return_value=service_obj)
 
@@ -122,25 +132,48 @@ class CassandraStorageServiceTests(base.TestCase):
     @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_delete_service(self, mock_session, mock_execute):
         # mock the response from cassandra
-        actual_response = self.sc.delete(self.project_id, self.service_name)
+        actual_response = self.sc.delete(self.project_id, self.service_id)
 
         # Expect the response to be None as there are no providers passed
         # into the driver to respond to this call
         self.assertEqual(actual_response, None)
 
     @ddt.file_data('../data/data_update_service.json')
+    @mock.patch.object(services.ServicesController,
+                       '_exists_elsewhere',
+                       return_value=False)
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_update_service(self, service_json, mock_session, mock_execute):
-        # mock the response from cassandra
+    def test_update_service(self, service_json,
+                            mock_check, mock_session, mock_execute):
+        mock_check.return_value = False
         service_obj = req_service.load_from_json(service_json)
         actual_response = self.sc.update(self.project_id,
-                                         self.service_name,
+                                         self.service_id,
                                          service_obj)
 
         # Expect the response to be None as there are no providers passed
         # into the driver to respond to this call
         self.assertEqual(actual_response, None)
+
+    @ddt.file_data('../data/data_update_service.json')
+    @mock.patch.object(services.ServicesController,
+                       '_exists_elsewhere',
+                       return_value=True)
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_update_service_duplicate_domain(self, service_json,
+                                             mock_check, mock_session,
+                                             mock_execute):
+        # mock the response from cassandra
+        service_obj = req_service.load_from_json(service_json)
+
+        # Expect the response to be a ValueError Exception
+        self.assertRaises(ValueError,
+                          self.sc.update,
+                          self.project_id,
+                          self.service_id,
+                          service_obj)
 
     @ddt.file_data('data_provider_details.json')
     @mock.patch.object(services.ServicesController, 'session')
@@ -151,7 +184,7 @@ class CassandraStorageServiceTests(base.TestCase):
         mock_execute.execute.return_value = [{'provider_details':
                                               provider_details_json}]
         actual_response = self.sc.get_provider_details(self.project_id,
-                                                       self.service_name)
+                                                       self.service_id)
         self.assertTrue("MaxCDN" in actual_response)
         self.assertTrue("Mock" in actual_response)
         self.assertTrue("CloudFront" in actual_response)
@@ -175,7 +208,7 @@ class CassandraStorageServiceTests(base.TestCase):
 
         self.sc.update_provider_details(
             self.project_id,
-            self.service_name,
+            self.service_id,
             provider_details_dict)
 
         # this is for update_provider_details unittest code coverage
@@ -198,7 +231,7 @@ class CassandraStorageServiceTests(base.TestCase):
                 the_provider_detail_dict)
         args = {
             'project_id': self.project_id,
-            'service_name': self.service_name,
+            'service_id': self.service_id,
             'provider_details': arg_provider_details_dict
         }
 

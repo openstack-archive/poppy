@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import json
+import uuid
 
 from poppy.model.helpers import domain
 from poppy.model.helpers import origin
@@ -27,7 +28,7 @@ class ServicesController(base.ServicesController):
     def __init__(self, driver):
         super(ServicesController, self).__init__(driver)
 
-        self.created_service_names = []
+        self.created_service_ids = []
 
     @property
     def session(self):
@@ -50,8 +51,9 @@ class ServicesController(base.ServicesController):
                     [{'operator_url': 'mockcf123.fastly.prod.com'}]})}
 
         services = []
-        for i in self.created_service_names:
-            services = [{'name': i,
+        for i in self.created_service_ids:
+            services = [{'service_id': i,
+                         'name': uuid.uuid4(),
                          'domains': [json.dumps(
                              {'domain': 'www.mywebsite.com'})
                          ],
@@ -84,10 +86,10 @@ class ServicesController(base.ServicesController):
 
         return services_result
 
-    def get(self, project_id, service_name):
+    def get(self, project_id, service_id):
         # get the requested service from storage
-        if service_name not in self.created_service_names:
-            raise ValueError("service: % does not exist")
+        if service_id not in self.created_service_ids:
+            raise ValueError("service {0} does not exist".format(service_id))
         else:
             origin_json = json.dumps({'origin': 'mywebsite.com',
                                       'port': 80,
@@ -111,7 +113,8 @@ class ServicesController(base.ServicesController):
                      'access_urls':
                         [{'operator_url': 'mockcf123.fastly.prod.com'}]})}
 
-            service_dict = {'name': service_name,
+            service_dict = {'service_id': service_id,
+                            'name': uuid.uuid4(),
                             'domains': [domain_json],
                             'origins': [origin_json],
                             'flavor_id': 'standard',
@@ -136,42 +139,44 @@ class ServicesController(base.ServicesController):
             return service_result
 
     def create(self, project_id, service_obj):
-        if service_obj.name in self.created_service_names:
-            raise ValueError("Service %s already exists." % service_obj.name)
-        else:
-            # TODO(amitgandhinz): append the entire service
-            # instead of just the name
-            self.created_service_names.append(service_obj.name)
+        if service_obj.service_id in self.created_service_ids:
+            raise ValueError("Service %s already exists." %
+                             service_obj.service_id)
 
-    def update(self, project_id, service_name, service_json):
+        # TODO(amitgandhinz): append the entire service
+        # instead of just the name
+        self.created_service_ids.append(service_obj.service_id)
+
+    def update(self, project_id, service_id, service_json):
         # update configuration in storage
         return ''
 
-    def delete(self, project_id, service_name):
-        if (service_name in self.created_service_names):
-            self.created_service_names.remove(service_name)
+    def delete(self, project_id, service_id):
+        if (service_id in self.created_service_ids):
+            self.created_service_ids.remove(service_id)
 
-    def get_provider_details(self, project_id, service_name):
-        if service_name == 'non_exist_service_name':
-            raise LookupError('Service non_exist_service_name does not exist')
-        return {
-            'MaxCDN': provider_details.ProviderDetail(
-                provider_service_id=11942,
-                name='my_service_name',
-                access_urls=['my_service_name'
-                             '.mycompanyalias.netdna-cdn.com']),
-            'Fastly': provider_details.ProviderDetail(
-                provider_service_id=3488,
-                name="my_service_name",
-                access_urls=['my_service_name'
-                             '.global.prod.fastly.net']),
-            'CloudFront': provider_details.ProviderDetail(
-                provider_service_id=5892,
-                access_urls=['my_service_name'
-                             '.gibberish.amzcf.com']),
-            'Mock': provider_details.ProviderDetail(
-                provider_service_id="73242",
-                access_urls=['my_service_name.mock.com'])}
+    def get_provider_details(self, project_id, service_id):
+        if service_id not in self.created_service_ids:
+            raise ValueError("service: % does not exist")
+        else:
+            return {
+                'MaxCDN': provider_details.ProviderDetail(
+                    provider_service_id=11942,
+                    name='my_service_name',
+                    access_urls=['my_service_name'
+                                 '.mycompanyalias.netdna-cdn.com']),
+                'Fastly': provider_details.ProviderDetail(
+                    provider_service_id=3488,
+                    name="my_service_name",
+                    access_urls=['my_service_name'
+                                 '.global.prod.fastly.net']),
+                'CloudFront': provider_details.ProviderDetail(
+                    provider_service_id=5892,
+                    access_urls=['my_service_name'
+                                 '.gibberish.amzcf.com']),
+                'Mock': provider_details.ProviderDetail(
+                    provider_service_id="73242",
+                    access_urls=['my_service_name.mock.com'])}
 
     def update_provider_details(self, project_id, service_name,
                                 provider_details):
@@ -179,6 +184,7 @@ class ServicesController(base.ServicesController):
 
     @staticmethod
     def format_result(result):
+        service_id = result.get('service_id')
         name = result.get('service_name')
         origins = [json.loads(o) for o in result.get('origins', [])]
         domains = [json.loads(d) for d in result.get('domains', [])]
@@ -188,7 +194,7 @@ class ServicesController(base.ServicesController):
                    for o in origins]
         domains = [domain.Domain(d['domain']) for d in domains]
         flavor_id = result.get('flavor_id')
-        s = service.Service(name, domains, origins, flavor_id)
+        s = service.Service(service_id, name, domains, origins, flavor_id)
         provider_detail_results = result.get('provider_details') or {}
         provider_details_dict = {}
         for provider_name in provider_detail_results:

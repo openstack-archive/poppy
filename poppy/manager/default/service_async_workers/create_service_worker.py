@@ -32,7 +32,7 @@ conf(project='poppy', prog='poppy', args=[])
 
 
 def service_create_worker(providers_list_json,
-                          project_id, service_name, service_obj_json):
+                          project_id, service_id, service_obj_json):
     LOG.logger.setLevel(logging.INFO)
     bootstrap_obj = bootstrap.Bootstrap(conf)
     service_controller = bootstrap_obj.manager.services_controller
@@ -90,7 +90,7 @@ def service_create_worker(providers_list_json,
 
     service_controller.storage_controller.update_provider_details(
         project_id,
-        service_name,
+        service_id,
         provider_details_dict)
 
     service_controller.storage_controller._driver.close_connection()
@@ -106,14 +106,14 @@ if __name__ == '__main__':
 
     parser.add_argument('providers_list_json', action="store")
     parser.add_argument('project_id', action="store")
-    parser.add_argument('service_name', action="store")
+    parser.add_argument('service_id', action="store")
     parser.add_argument('service_obj_json', action="store")
 
     result = parser.parse_args()
     providers_list_json = result.providers_list_json
     project_id = result.project_id
-    service_name = result.service_name
+    service_id = result.service_id
     service_obj_json = result.service_obj_json
     LOG.logger.setLevel(logging.INFO)
     service_create_worker(providers_list_json, project_id,
-                          service_name, service_obj_json)
+                          service_id, service_obj_json)

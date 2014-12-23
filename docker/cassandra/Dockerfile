@@ -3,7 +3,7 @@
 ##
 ##
 
-FROM ubuntu
+FROM ubuntu:14.04
 MAINTAINER Tony Tan, tonytan198211@gmail.com
 
 # Add PPA for the necessary JDK

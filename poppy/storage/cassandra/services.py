@@ -15,10 +15,13 @@
 
 import datetime
 import json
+import uuid
 try:
     import ordereddict as collections
 except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
+
+from cassandra import query
 
 from poppy.model.helpers import cachingrule
 from poppy.model.helpers import domain
@@ -27,11 +30,15 @@ from poppy.model.helpers import provider_details
 from poppy.model.helpers import restriction
 from poppy.model.helpers import rule
 from poppy.model import service
+from poppy.openstack.common import log as logging
 from poppy.storage import base
+
+LOG = logging.getLogger(__name__)
 
 
 CQL_GET_ALL_SERVICES = '''
     SELECT project_id,
+        service_id,
         service_name,
         domains,
         flavor_id,
@@ -44,6 +51,7 @@ CQL_GET_ALL_SERVICES = '''
 
 CQL_LIST_SERVICES = '''
     SELECT project_id,
+        service_id,
         service_name,
         domains,
         flavor_id,
@@ -53,13 +61,14 @@ CQL_LIST_SERVICES = '''
         provider_details
     FROM services
     WHERE project_id = %(project_id)s
-        AND service_name > %(service_name)s
-    ORDER BY service_name
+        AND service_id > %(marker)s
+    ORDER BY service_id
     LIMIT %(limit)s
 '''
 
 CQL_GET_SERVICE = '''
     SELECT project_id,
+        service_id,
         service_name,
         flavor_id,
         domains,
@@ -68,12 +77,30 @@ CQL_GET_SERVICE = '''
         restrictions,
         provider_details
     FROM services
-    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
+    WHERE project_id = %(project_id)s AND service_id = %(service_id)s
+'''
+
+CQL_VERIFY_DOMAIN = '''
+    SELECT project_id,
+        service_id,
+        domain_name
+    FROM domain_names
+    WHERE domain_name = %(domain_name)s
+'''
+
+CQL_CLAIM_DOMAIN = '''
+    INSERT INTO domain_names (domain_name,
+        project_id,
+        service_id)
+    VALUES (%(domain_name)s,
+        %(project_id)s,
+        %(service_id)s)
 '''
 
 CQL_ARCHIVE_SERVICE = '''
     BEGIN BATCH
         INSERT INTO archives (project_id,
+            service_id,
             service_name,
             flavor_id,
             domains,
@@ -84,6 +111,7 @@ CQL_ARCHIVE_SERVICE = '''
             archived_time
             )
         VALUES (%(project_id)s,
+            %(service_id)s,
             %(service_name)s,
             %(flavor_id)s,
             %(domains)s,
@@ -94,17 +122,26 @@ CQL_ARCHIVE_SERVICE = '''
             %(archived_time)s)
 
         DELETE FROM services
-        WHERE project_id = %(project_id)s AND service_name = %(service_name)s;
+        WHERE project_id = %(project_id)s AND service_id = %(service_id)s;
+
+        DELETE FROM domain_names
+        WHERE domain_name IN %(domain_list)s
     APPLY BATCH;
     '''
 
 CQL_DELETE_SERVICE = '''
-    DELETE FROM services
-    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
+    BEGIN BATCH
+        DELETE FROM services
+        WHERE project_id = %(project_id)s AND service_id = %(service_id)s
+
+        DELETE FROM domain_names
+        WHERE domain_name IN %(domain_list)s
+    APPLY BATCH
 '''
 
 CQL_CREATE_SERVICE = '''
     INSERT INTO services (project_id,
+        service_id,
         service_name,
         flavor_id,
         domains,
@@ -114,6 +151,7 @@ CQL_CREATE_SERVICE = '''
         provider_details
         )
     VALUES (%(project_id)s,
+        %(service_id)s,
         %(service_name)s,
         %(flavor_id)s,
         %(domains)s,
@@ -128,37 +166,37 @@ CQL_UPDATE_SERVICE = CQL_CREATE_SERVICE
 CQL_UPDATE_DOMAINS = '''
     UPDATE services
     SET domains = %(domains)s
-    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
+    WHERE project_id = %(project_id)s AND service_id = %(service_id)s
 '''
 
 CQL_UPDATE_ORIGINS = '''
     UPDATE services
     SET origins = %(origins)s
-    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
+    WHERE project_id = %(project_id)s AND service_id = %(service_id)s
 '''
 
 CQL_UPDATE_CACHING_RULES = '''
     UPDATE services
     SET caching_rules = %(caching_rules)s
-    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
+    WHERE project_id = %(project_id)s AND service_id = %(service_id)s
 '''
 
 CQL_UPDATE_RESTRICTIONS = '''
     UPDATE services
     SET restrictions = %(restrictions)s
-    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
+    WHERE project_id = %(project_id)s AND service_id = %(service_id)s
 '''
 
 CQL_GET_PROVIDER_DETAILS = '''
     SELECT provider_details
     FROM services
-    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
+    WHERE project_id = %(project_id)s AND service_id = %(service_id)s
 '''
 
 CQL_UPDATE_PROVIDER_DETAILS = '''
     UPDATE services
     set provider_details = %(provider_details)s
-    WHERE project_id = %(project_id)s AND service_name = %(service_name)s
+    WHERE project_id = %(project_id)s AND service_id = %(service_id)s
 '''
 
 
@@ -184,9 +222,12 @@ class ServicesController(base.ServicesController):
         :returns services
         """
         # list services
+        if marker is None:
+            marker = '00000000-00000000-00000000-00000000'
+
         args = {
             'project_id': project_id,
-            'service_name': marker,
+            'marker': uuid.UUID(str(marker)),
             'limit': limit
         }
 
@@ -195,7 +236,7 @@ class ServicesController(base.ServicesController):
 
         return services
 
-    def get(self, project_id, service_name):
+    def get(self, project_id, service_id):
         """get.
 
         :param project_id
@@ -207,19 +248,52 @@ class ServicesController(base.ServicesController):
         # get the requested service from storage
         args = {
             'project_id': project_id,
-            'service_name': service_name
+            'service_id': uuid.UUID(str(service_id))
         }
         results = self.session.execute(CQL_GET_SERVICE, args)
 
         if len(results) != 1:
-            raise ValueError('No service or multiple service found: %s'
-                             % service_name)
+            raise ValueError('No service found: %s'
+                             % service_id)
 
         # at this point, it is certain that there's exactly 1 result in
         # results.
         result = results[0]
 
         return self.format_result(result)
+
+    def _exists_elsewhere(self, domain_name, service_id):
+        """_exists_elsewhere
+
+        Check if a service with this domain name has already been created.
+
+        :param domain_name
+        :param service_id
+
+        :raises ValueError
+        :returns Boolean if the service exists with another user.
+        """
+        try:
+            LOG.info("Check if service '{0}' exists".format(domain_name))
+            args = {
+                'domain_name': domain_name.lower()
+            }
+            results = self.session.execute(CQL_VERIFY_DOMAIN, args)
+
+            if results:
+                for r in results:
+                    if r.get('service_id') != str(service_id):
+                        LOG.info(
+                            "Domain '{0}' has already been taken."
+                            .format(domain_name))
+                        return True
+                return False
+            else:
+                return False
+        except ValueError:
+            return False
+        else:
+            return False
 
     def create(self, project_id, service_obj):
         """create.
@@ -229,18 +303,18 @@ class ServicesController(base.ServicesController):
 
         :raises ValueError
         """
+
+        # check if the service domain names already exist
+        for d in service_obj.domains:
+            if self._exists_elsewhere(
+                    d.domain,
+                    service_obj.service_id) is True:
+                raise ValueError(
+                    "Domain %s has already been taken" % d.domain)
+
         # create the service in storage
+        service_id = service_obj.service_id
         service_name = service_obj.name
-
-        # check if the serivce already exist.
-        # Note: If it does, no LookupError will be raised
-        try:
-            self.get(project_id, service_name)
-        except ValueError:  # this value error means this service doesn't exist
-            pass
-        else:
-            raise ValueError("Service %s already exists..." % service_name)
-
         domains = [json.dumps(d.to_dict())
                    for d in service_obj.domains]
         origins = [json.dumps(o.to_dict())
@@ -250,9 +324,10 @@ class ServicesController(base.ServicesController):
         restrictions = [json.dumps(r.to_dict())
                         for r in service_obj.restrictions]
 
-        # creates a new service
-        args = {
+        # create a new service
+        service_args = {
             'project_id': project_id,
+            'service_id': uuid.UUID(service_id),
             'service_name': service_name,
             'flavor_id': service_obj.flavor_id,
             'domains': domains,
@@ -262,10 +337,32 @@ class ServicesController(base.ServicesController):
             'provider_details': {}
         }
 
-        self.session.execute(CQL_CREATE_SERVICE, args)
+        LOG.debug("Creating New Service - {0} ({1})".format(service_id,
+                                                            service_name))
+        batch = query.BatchStatement()
+        batch.add(query.SimpleStatement(CQL_CREATE_SERVICE), service_args)
 
-    def update(self, project_id, service_name, service_obj):
+        for d in service_obj.domains:
+            domain_args = {
+                'domain_name': d.domain,
+                'project_id': project_id,
+                'service_id': uuid.UUID(service_id),
+            }
+            batch.add(query.SimpleStatement(CQL_CLAIM_DOMAIN), domain_args)
 
+        self.session.execute(batch)
+
+    def update(self, project_id, service_id, service_obj):
+
+        # check if the service domain names already exist
+        for d in service_obj.domains:
+            if self._exists_elsewhere(
+                    d.domain,
+                    service_id) is True:
+                raise ValueError(
+                    "Domain %s has already been taken" % d)
+
+        service_name = service_obj.name
         domains = [json.dumps(d.to_dict())
                    for d in service_obj.domains]
         origins = [json.dumps(o.to_dict())
@@ -275,9 +372,10 @@ class ServicesController(base.ServicesController):
         restrictions = [json.dumps(r.to_dict())
                         for r in service_obj.restrictions]
 
-        # updates an existing new service
+        # updates an existing service
         args = {
             'project_id': project_id,
+            'service_id': uuid.UUID(str(service_id)),
             'service_name': service_name,
             'flavor_id': service_obj.flavor_id,
             'domains': domains,
@@ -289,7 +387,7 @@ class ServicesController(base.ServicesController):
 
         self.session.execute(CQL_UPDATE_SERVICE, args)
 
-    def delete(self, project_id, service_name):
+    def delete(self, project_id, service_id):
         """delete.
 
         Archive local configuration storage
@@ -297,17 +395,21 @@ class ServicesController(base.ServicesController):
         # delete local configuration from storage
         args = {
             'project_id': project_id,
-            'service_name': service_name
+            'service_id': uuid.UUID(str(service_id)),
         }
 
-        if self._driver.archive_on_delete:
-            # get the existing service
-            results = self.session.execute(CQL_GET_SERVICE, args)
-            result = results[0]
+        # get the existing service
+        results = self.session.execute(CQL_GET_SERVICE, args)
+        result = results[0]
 
-            if (result):
+        if (result):
+            domains_list = [d.get('domain')
+                            for d in result.get('domains')]
+
+            if self._driver.archive_on_delete:
                 archive_args = {
                     'project_id': result.get('project_id'),
+                    'service_id': result.get('service_id'),
                     'service_name': result.get('service_name'),
                     'flavor_id': result.get('flavor_id'),
                     'domains': result.get('domains'),
@@ -315,25 +417,31 @@ class ServicesController(base.ServicesController):
                     'caching_rules': result.get('caching_rules'),
                     'restrictions': result.get('restrictions'),
                     'provider_details': result.get('provider_details'),
-                    'archived_time': datetime.datetime.utcnow()
+                    'archived_time': datetime.datetime.utcnow(),
+                    'domains_list': domains_list
                 }
 
                 # archive and delete the service
                 self.session.execute(CQL_ARCHIVE_SERVICE, archive_args)
-        else:
-            self.session.execute(CQL_DELETE_SERVICE, args)
+            else:
+                delete_args = {
+                    'project_id': result.get('project_id'),
+                    'service_id': result.get('service_id'),
+                    'domains_list': domains_list
+                }
+                self.session.execute(CQL_DELETE_SERVICE, delete_args)
 
-    def get_provider_details(self, project_id, service_name):
+    def get_provider_details(self, project_id, service_id):
         """get_provider_details.
 
         :param project_id
-        :param service_name
+        :param service_id
         :returns results Provider details
         """
 
         args = {
             'project_id': project_id,
-            'service_name': service_name
+            'service_id': uuid.UUID(str(service_id))
         }
         # TODO(tonytan4ever): Not sure this returns a list or a single
         # dictionary.
@@ -361,12 +469,12 @@ class ServicesController(base.ServicesController):
             results[provider_name] = provider_detail_obj
         return results
 
-    def update_provider_details(self, project_id, service_name,
+    def update_provider_details(self, project_id, service_id,
                                 provider_details):
         """update_provider_details.
 
         :param project_id
-        :param service_name
+        :param service_id
         :param provider_details
         """
         provider_detail_dict = {}
@@ -388,7 +496,7 @@ class ServicesController(base.ServicesController):
                 the_provider_detail_dict)
         args = {
             'project_id': project_id,
-            'service_name': service_name,
+            'service_id': uuid.UUID(str(service_id)),
             'provider_details': provider_detail_dict
         }
         # TODO(tonytan4ever): Not sure this returns a list or a single
@@ -405,6 +513,7 @@ class ServicesController(base.ServicesController):
         :param result
         :returns formatted result
         """
+        service_id = result.get('service_id')
         name = result.get('service_name')
 
         flavor_id = result.get('flavor_id')
@@ -446,7 +555,7 @@ class ServicesController(base.ServicesController):
             for caching_rule in caching_rules]
 
         # create the service object
-        s = service.Service(name, domains, origins, flavor_id,
+        s = service.Service(service_id, name, domains, origins, flavor_id,
                             caching=caching_rules,
                             restrictions=restrictions)
 
