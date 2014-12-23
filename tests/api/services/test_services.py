@@ -386,7 +386,8 @@ class TestServiceActions(base.TestBase):
 
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
-        self.client.delete_flavor(flavor_id=self.flavor_id)
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
         super(TestServiceActions, self).tearDown()
 
 
