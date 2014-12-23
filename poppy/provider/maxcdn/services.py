@@ -36,7 +36,7 @@ class ServiceController(base.ServiceBase):
 
         self.driver = driver
 
-    def update(self, pullzone_id, service_old, service_updates, service_obj):
+    def update(self, pullzone_id, service_old, service_obj):
         '''MaxCDN update.
 
          manager needs to pass in pullzone id to delete.

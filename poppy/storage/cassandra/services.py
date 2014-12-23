@@ -355,12 +355,14 @@ class ServicesController(base.ServicesController):
     def update(self, project_id, service_id, service_obj):
 
         # check if the service domain names already exist
+        """
         for d in service_obj.domains:
             if self._exists_elsewhere(
                     d.domain,
                     service_id) is True:
                 raise ValueError(
                     "Domain %s has already been taken" % d)
+        """
 
         service_name = service_obj.name
         domains = [json.dumps(d.to_dict())
