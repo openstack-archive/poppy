@@ -42,11 +42,11 @@ class ServicesControllerBase(controller.ManagerControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, project_id, service_name):
+    def get(self, project_id, service_id):
         """GET
 
         :param project_id
-        :param service_name
+        :param service_id
         :raises: NotImplementedError
         """
         raise NotImplementedError
@@ -62,27 +62,27 @@ class ServicesControllerBase(controller.ManagerControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, project_id, service_name, service_obj):
+    def update(self, project_id, service_id, service_obj):
         """POST
 
         :param project_id
-        :param service_name
+        :param service_id
         :param service_obj
         :raises: NotImplementedError
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self, project_id, service_name):
+    def delete(self, project_id, service_id):
         """DELETE
 
        :param project_id
-       :param service_name
+       :param service_id
        :raises: NotImplementedError
        """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def purge(self, project_id, service_name, purge_url=None):
+    def purge(self, project_id, service_id, purge_url=None):
         '''If purge_url is none, all content of this service will be purge.'''
         raise NotImplementedError

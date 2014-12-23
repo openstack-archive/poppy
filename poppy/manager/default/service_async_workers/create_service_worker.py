@@ -20,7 +20,7 @@ LOG = log.getLogger(__name__)
 
 
 def service_create_worker(providers_list, service_controller,
-                          project_id, service_name, service_obj):
+                          project_id, service_id, service_obj):
     responders = []
     # try to create all service from each provider
     for provider in providers_list:
@@ -70,5 +70,5 @@ def service_create_worker(providers_list, service_controller,
 
     service_controller.storage_controller.update_provider_details(
         project_id,
-        service_name,
+        service_id,
         provider_details_dict)

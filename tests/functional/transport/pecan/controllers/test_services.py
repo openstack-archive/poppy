@@ -14,6 +14,10 @@
 # limitations under the License.
 
 import json
+try:
+    import urllib.parse as urlparse
+except ImportError:
+    import urlparse
 import uuid
 
 import ddt
@@ -105,6 +109,9 @@ class ServiceControllerTest(base.FunctionalTest):
                                      'Content-Type': 'application/json',
                                      'X-Project-ID': self.project_id})
         self.assertEqual(202, response.status_code)
+        self.assertTrue('Location' in response.headers)
+
+        self.service_url = urlparse.urlparse(response.headers["Location"]).path
 
     def tearDown(self):
         super(ServiceControllerTest, self).tearDown()
@@ -134,8 +141,8 @@ class ServiceControllerTest(base.FunctionalTest):
         self.limits_conf = self.conf[LIMITS_GROUP]
         self.max_services_per_page = self.limits_conf.max_services_per_page
 
-        response = self.app.get('/v1.0/0001/services', params={
-            "marker": 'service_name',
+        response = self.app.get('/v1.0/services', params={
+            "marker": uuid.uuid4(),
             "limit": self.max_services_per_page + 1
         }, expect_errors=True)
 
@@ -143,7 +150,7 @@ class ServiceControllerTest(base.FunctionalTest):
 
     def test_get_one(self):
         response = self.app.get(
-            '/v1.0/services/' + self.service_name,
+            self.service_url,
             headers={'X-Project-ID': self.project_id})
 
         self.assertEqual(200, response.status_code)
@@ -153,7 +160,7 @@ class ServiceControllerTest(base.FunctionalTest):
         self.assertTrue("origins" in response_dict)
 
     def test_get_one_not_exist(self):
-        response = self.app.get('/v1.0/services/non_exist_service_name',
+        response = self.app.get('/v1.0/services/' + str(uuid.uuid4()),
                                 headers={
                                     'Content-Type': 'application/json',
                                     'X-Project-ID': self.project_id},
@@ -216,7 +223,7 @@ class ServiceControllerTest(base.FunctionalTest):
 
     def test_update_with_bad_input(self):
         # update with erroneous data
-        response = self.app.patch('/v1.0/services/' + self.service_name,
+        response = self.app.patch(self.service_url,
                                   params=json.dumps({
                                       "origins": [
                                           {
@@ -236,12 +243,12 @@ class ServiceControllerTest(base.FunctionalTest):
 
     def test_update_with_good_input(self):
         response = self.app.get(
-            '/v1.0/services/' + self.service_name,
+            self.service_url,
             headers={'X-Project-ID': self.project_id})
         self.assertEqual(200, response.status_code)
 
         # update with good data
-        response = self.app.patch('/v1.0/services/' + self.service_name,
+        response = self.app.patch(self.service_url,
                                   params=json.dumps({
                                       "origins": [
                                           {
@@ -259,20 +266,22 @@ class ServiceControllerTest(base.FunctionalTest):
 
     def test_patch_non_exist(self):
         # This is for coverage 100%
-        response = self.app.patch("/v1.0",
-                                  headers={
-                                      'Content-Type': 'application/json',
-                                      'X-Project-ID': self.project_id
-                                  },
-                                  expect_errors=True)
-        self.assertEqual(404, response.status_code)
-
-        response = self.app.patch("/v1.0/",
-                                  headers={
-                                      'Content-Type': 'application/json',
-                                      'X-Project-ID': self.project_id
-                                  },
-                                  expect_errors=True)
+        response = self.app.patch(
+            "/v1.0/services/{0}".format(str(uuid.uuid4())),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Project-ID': self.project_id
+            },
+            params=json.dumps({
+                "origins": [
+                    {
+                        "origin": "44.33.22.11",
+                        "port": 80,
+                        "ssl": False
+                    }
+                ]
+            }),
+            expect_errors=True)
         self.assertEqual(404, response.status_code)
 
         class FakeController(c_base.Controller):
@@ -287,7 +296,7 @@ class ServiceControllerTest(base.FunctionalTest):
 
     def test_delete(self):
         response = self.app.delete(
-            '/v1.0/services/%s' % self.service_name,
+            self.service_url,
             headers={
                 'Content-Type': 'application/json',
                 'X-Project-ID': self.project_id
@@ -298,7 +307,7 @@ class ServiceControllerTest(base.FunctionalTest):
         # TODO(amitgandhinz): commented out as thread model
         # is not allowing thread to process with test
 
-        # # check if it actually gets deleted
+        # check if it actually gets deleted
         # status_code = 0
         # count = 0
         # while (count < 5):
@@ -322,18 +331,19 @@ class ServiceControllerTest(base.FunctionalTest):
         # self.assertEqual(404, status_code)
 
     def test_delete_non_exist(self):
-        response = self.app.delete('/v1.0/services/non_exist_service_name',
-                                   headers={
-                                       'Content-Type': 'application/json',
-                                       'X-Project-ID': self.project_id
-                                   },
-                                   expect_errors=True)
+        response = self.app.delete(
+            "/v1.0/services/{0}".format(str(uuid.uuid4())),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Project-ID': self.project_id
+            },
+            expect_errors=True)
         self.assertEqual(404, response.status_code)
 
     def test_purge_non_exist(self):
         # This is for coverage 100%
         response = self.app.delete(
-            "/v1.0/services/non_exist_service_name/assets?all=true",
+            "/v1.0/services/{0}/assets?all=true".format(str(uuid.uuid4())),
             headers={
                 "Content-Type": "application/json",
                 'X-Project-ID': self.project_id
@@ -343,7 +353,7 @@ class ServiceControllerTest(base.FunctionalTest):
 
     def test_purge_error_parms(self):
         response = self.app.delete(
-            '/v1.0/services/fake_service_name_4/assets',
+            self.service_url + '/assets',
             headers={
                 "Content-Type": "application/json",
                 'X-Project-ID': self.project_id
@@ -353,7 +363,7 @@ class ServiceControllerTest(base.FunctionalTest):
         self.assertEqual(400, response.status_code)
 
         response = self.app.delete(
-            '/v1.0/services/fake_service_name_4/assets?all=true&url=/abc',
+            self.service_url + '/assets?all=true&url=/abc',
             headers={
                 "Content-Type": "application/json",
                 'X-Project-ID': self.project_id
@@ -364,7 +374,7 @@ class ServiceControllerTest(base.FunctionalTest):
 
     def test_purge_all(self):
         response = self.app.delete(
-            '/v1.0/services/fake_service_name_4/assets?all=true',
+            self.service_url + '/assets?all=true',
             headers={
                 "Content-Type": "application/json",
                 'X-Project-ID': self.project_id
@@ -375,7 +385,7 @@ class ServiceControllerTest(base.FunctionalTest):
 
     def test_purge_single_url(self):
         response = self.app.delete(
-            '/v1.0/services/fake_service_name_4/assets?url=/abc',
+            self.service_url + '/assets?url=/abc',
             headers={
                 "Content-Type": "application/json",
                 'X-Project-ID': self.project_id

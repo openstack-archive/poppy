@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import json
+import uuid
 
 from oslo.config import cfg
 import pecan
@@ -45,7 +46,12 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
     @pecan.expose()
-    def delete(self, service_name):
+    @decorators.validate(
+        service_id=rule.Rule(
+            helpers.is_valid_service_id(),
+            helpers.abort_with_message)
+    )
+    def delete(self, service_id):
         purge_url = pecan.request.GET.get('url', None)
         purge_all = pecan.request.GET.get('all', False)
         purge_all = (
@@ -58,7 +64,7 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
                                     'and a url at the same time')
         services_controller = self._driver.manager.services_controller
         try:
-            services_controller.purge(self.project_id, service_name,
+            services_controller.purge(self.project_id, service_id,
                                       purge_url)
         except LookupError as e:
             pecan.abort(404, detail=str(e))
@@ -85,7 +91,7 @@ class ServicesController(base.Controller, hooks.HookController):
 
     @pecan.expose('json')
     def get_all(self):
-        marker = pecan.request.GET.get('marker', '')
+        marker = pecan.request.GET.get('marker', None)
         limit = pecan.request.GET.get('limit', 10)
         try:
             limit = int(limit)
@@ -100,6 +106,13 @@ class ServicesController(base.Controller, hooks.HookController):
                      u' or equal to {0}'.format(self.max_services_per_page))
             pecan.abort(400, detail=error)
 
+        try:
+            if marker:
+                marker = str(uuid.UUID(marker))
+
+        except ValueError:
+            pecan.abort(400, detail="Marker must be a valid UUID")
+
         services_controller = self._driver.manager.services_controller
         service_resultset = services_controller.list(
             self.project_id, marker, limit)
@@ -112,7 +125,9 @@ class ServicesController(base.Controller, hooks.HookController):
         if len(results) > 0:
             links.append(
                 link.Model(u'{0}/services?marker={1}&limit={2}'.format(
-                    self.base_url, results[-1]['name'], limit),
+                    self.base_url,
+                    results[-1]['id'],
+                    limit),
                     'next'))
 
         return {
@@ -121,14 +136,19 @@ class ServicesController(base.Controller, hooks.HookController):
         }
 
     @pecan.expose('json')
-    def get_one(self, service_name):
+    @decorators.validate(
+        service_id=rule.Rule(
+            helpers.is_valid_service_id(),
+            helpers.abort_with_message)
+    )
+    def get_one(self, service_id):
         services_controller = self._driver.manager.services_controller
         try:
             service_obj = services_controller.get(
-                self.project_id, service_name)
+                self.project_id, service_id)
         except ValueError:
-            pecan.abort(404, detail='service %s is not found' %
-                        service_name)
+            pecan.abort(404, detail='service %s could not be found' %
+                        service_id)
         # convert a service model into a response service model
         return resp_service_model.Model(service_obj, self)
 
@@ -143,7 +163,7 @@ class ServicesController(base.Controller, hooks.HookController):
         services_controller = self._driver.manager.services_controller
         service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
         service_obj = req_service_model.load_from_json(service_json_dict)
-        service_name = service_json_dict.get("name", None)
+        service_id = service_obj.service_id
         try:
             services_controller.create(self.project_id, service_obj)
         except LookupError as e:  # error handler for no flavor
@@ -153,15 +173,20 @@ class ServicesController(base.Controller, hooks.HookController):
         service_url = str(
             uri.encode(u'{0}/v1.0/services/{1}'.format(
                 pecan.request.host_url,
-                service_name)))
+                service_id)))
 
         return pecan.Response(None, 202, headers={"Location": service_url})
 
     @pecan.expose('json')
-    def delete(self, service_name):
+    @decorators.validate(
+        service_id=rule.Rule(
+            helpers.is_valid_service_id(),
+            helpers.abort_with_message)
+    )
+    def delete(self, service_id):
         services_controller = self._driver.manager.services_controller
         try:
-            services_controller.delete(self.project_id, service_name)
+            services_controller.delete(self.project_id, service_id)
         except LookupError as e:
             pecan.abort(404, detail=str(e))
 
@@ -169,15 +194,15 @@ class ServicesController(base.Controller, hooks.HookController):
 
     @pecan.expose('json')
     @decorators.validate(
-        service_name=rule.Rule(
-            helpers.is_valid_service_name(),
+        service_id=rule.Rule(
+            helpers.is_valid_service_id(),
             helpers.abort_with_message),
         request=rule.Rule(
             helpers.json_matches_schema(
                 service.ServiceSchema.get_schema("service", "PATCH")),
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
-    def patch_one(self, service_name):
+    def patch_one(self, service_id):
         service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
 
         # TODO(obulpathi): remove these restrictions, once cachingrule and
@@ -196,7 +221,9 @@ class ServicesController(base.Controller, hooks.HookController):
 
         try:
             services_controller.update(
-                self.project_id, service_name, service_updates)
+                self.project_id, service_id, service_updates)
+        except ValueError as e:
+            pecan.abort(404, detail='service could not be found')
         except errors.ServiceStatusNotDeployed as e:
             pecan.abort(400, detail=str(e))
         except Exception as e:
@@ -205,6 +232,6 @@ class ServicesController(base.Controller, hooks.HookController):
         service_url = str(
             uri.encode(u'{0}/v1.0/services/{1}'.format(
                 pecan.request.host_url,
-                service_name)))
+                service_id)))
 
         return pecan.Response(None, 202, headers={"Location": service_url})

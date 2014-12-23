@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import uuid
+
 import ddt
 import mock
 from oslo.config import cfg
@@ -56,8 +58,11 @@ class TestServicesCreate(base.TestCase):
     def test_create_with_provider_failure(self):
         responders = [{
             'Fastly':
-                {'error_detail': 'Error in create',
-                 'error': 'failed to create service'}}]
+            {
+                'error_detail': 'Error in create',
+                'error': 'failed to create service'
+            }
+        }]
         self.controller.create(responders)
 
     def test_create(self):
@@ -76,7 +81,7 @@ class TestServicesCreate(base.TestCase):
                         'rel': 'access_url'
                     }
                 ]}
-            }]
+        }]
         self.controller.create(responders)
 
 
@@ -113,7 +118,8 @@ class TestServicesUpdate(base.TestCase):
             'Fastly': fastly_provider_details_old
         }
 
-        self.service_old = service.Service(name='myservice',
+        self.service_old = service.Service(service_id=uuid.uuid4(),
+                                           name='myservice',
                                            domains=self.domains_old,
                                            origins=self.origins_old,
                                            flavor_id='standard')
@@ -131,7 +137,8 @@ class TestServicesUpdate(base.TestCase):
         domains_new = [domain.Domain('www.domain1.com'),
                        domain.Domain('www.domain2.com'),
                        domain.Domain('www.domain3.com')]
-        service_updates = service.Service(name='myservice',
+        service_updates = service.Service(service_id=uuid.uuid4(),
+                                          name='myservice',
                                           domains=domains_new,
                                           origins=[],
                                           flavor_id='standard')
@@ -140,8 +147,8 @@ class TestServicesUpdate(base.TestCase):
             'Fastly': {
                 'id': u'4PRhL3lHlZhrXr1mJUt24M',
                 'error': 'Create service failed'
-                }
-            }]
+            }
+        }]
 
         self.controller.update(self.service_old,
                                service_updates,

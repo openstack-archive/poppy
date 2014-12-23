@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import uuid
 
 from poppy.model import common
 
@@ -25,12 +26,14 @@ class Service(common.DictSerializableModel):
     """Service Class."""
 
     def __init__(self,
+                 service_id,
                  name,
                  domains,
                  origins,
                  flavor_id,
                  caching=[],
                  restrictions=[]):
+        self._service_id = str(service_id)
         self._name = name
         self._domains = domains
         self._origins = origins
@@ -39,6 +42,15 @@ class Service(common.DictSerializableModel):
         self._restrictions = restrictions
         self._status = 'create_in_progress'
         self._provider_details = {}
+
+    @property
+    def service_id(self):
+        """Get service id."""
+        return self._service_id
+
+    @service_id.setter
+    def service_id(self, value):
+        self._service_id = value
 
     @property
     def name(self):
@@ -157,6 +169,7 @@ class Service(common.DictSerializableModel):
         When converting a model into a request model,
         use to_dict.
         """
-        o = cls('unnamed', [], [], 'unnamed')
+        o = cls(service_id=uuid.uuid4(), name='unnamed',
+                domains=[], origins=[], flavor_id='unnamed')
         o.from_dict(input_dict)
         return o

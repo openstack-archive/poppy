@@ -19,7 +19,7 @@ from poppy.openstack.common import log
 LOG = log.getLogger(__name__)
 
 
-def update_worker(service_controller, project_id, service_name,
+def update_worker(service_controller, project_id, service_id,
                   service_old, service_updates, service_obj):
     responders = []
     # update service with each provider present in provider_details
@@ -60,10 +60,10 @@ def update_worker(service_controller, project_id, service_name,
                         error_info=responder[provider_name]['error_detail']))
 
     # update the service object
-    service_controller.storage_controller.update(project_id, service_name,
+    service_controller.storage_controller.update(project_id, service_id,
                                                  service_obj)
     # update the provider details
     service_controller.storage_controller.update_provider_details(
         project_id,
-        service_name,
+        service_id,
         provider_details_dict)

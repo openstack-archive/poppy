@@ -19,7 +19,7 @@ LOG = log.getLogger(__name__)
 
 
 def service_delete_worker(provider_details, service_controller,
-                          project_id, service_name):
+                          project_id, service_id):
     responders = []
     # try to delete all service from each provider presented
     # in provider_details
@@ -40,14 +40,14 @@ def service_delete_worker(provider_details, service_controller,
         if 'error' in responder[provider_name]:
             LOG.info('Delete service from %s failed' % provider_name)
             LOG.info('Updating provider detail status of %s for %s' %
-                     (provider_name, service_name))
+                     (provider_name, service_id))
             # stores the error info for debugging purposes.
             provider_details[provider_name].error_info = (
                 responder[provider_name].get('error_info'))
         elif 'error' in dns_responder[provider_name]:
             LOG.info('Delete service from DNS failed')
             LOG.info('Updating provider detail status of %s for %s'.format(
-                     (provider_name, service_name)))
+                     (provider_name, service_id)))
             # stores the error info for debugging purposes.
             provider_details[provider_name].error_info = (
                 dns_responder[provider_name].get('error_info'))
@@ -62,15 +62,15 @@ def service_delete_worker(provider_details, service_controller,
         # action, maybe for debug and/or support.
         LOG.info('Delete failed for one or more providers'
                  'Updating poppy service provider details for %s' %
-                 service_name)
+                 service_id)
         service_controller.storage_controller.update_provider_details(
             project_id,
-            service_name,
+            service_id,
             provider_details)
 
     # always delete from Poppy.  Provider Details will contain
     # any provider issues that may have occurred.
     LOG.info('Deleting poppy service %s from all providers successful'
-             % service_name)
-    service_controller.storage_controller.delete(project_id, service_name)
-    LOG.info('Deleting poppy service %s succeeded' % service_name)
+             % service_id)
+    service_controller.storage_controller.delete(project_id, service_id)
+    LOG.info('Deleting poppy service %s succeeded' % service_id)
