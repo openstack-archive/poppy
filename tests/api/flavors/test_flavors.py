@@ -86,13 +86,15 @@ class TestFlavorActions(base.TestBase):
 
     def setUp(self):
         super(TestFlavorActions, self).setUp()
-        self.flavor_id = str(uuid.uuid1())
-        self.provider_list = [
-            {"provider": "fastly",
-             "links": [{"href": "http://www.fastly.com",
-                        "rel": "provider_url"}]}]
-        self.client.create_flavor(flavor_id=self.flavor_id,
-                                  provider_list=self.provider_list)
+        if self.test_config.generate_flavors:
+            self.flavor_id = str(uuid.uuid1())
+            self.client.create_flavor(
+                flavor_id=self.flavor_id,
+                provider_list=[{"provider": "fastly",
+                                "links": [{"href": "www.fastly.com",
+                                           "rel": "provider_url"}]}])
+        else:
+            self.flavor_id = self.test_config.default_flavor
 
     @attrib.attr('smoke')
     def test_get_flavor(self):
@@ -113,5 +115,6 @@ class TestFlavorActions(base.TestBase):
         self.assertEqual(resp.status_code, 404)
 
     def tearDown(self):
-        self.client.delete_flavor(flavor_id=self.flavor_id)
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
         super(TestFlavorActions, self).tearDown()

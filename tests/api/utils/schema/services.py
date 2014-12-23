@@ -73,6 +73,7 @@ get_service = {
         'links': {'type': 'array',
                   'items': links,
                   'minItems': 1},
+        'errors': {'type': 'array'},
         'status': {'type': 'string',
                    # TODO(malini): Remove creating from the status list
                    # after status update patch is merged.
@@ -81,7 +82,8 @@ get_service = {
         'restrictions': restrictions,
         'flavor_id': flavor_id
     },
-    'required': ['domains', 'origins', 'links', 'flavor_id', 'status'],
+    'required': ['domains', 'origins', 'links', 'flavor_id', 'status',
+                 'errors'],
     'additionalProperties': False}
 
 list_services_link = {
@@ -91,7 +93,8 @@ list_services_link = {
         'href': {'type': 'string',
                  'pattern':
                  '(https?)(:/{1,3})([a-z0-9\.\-:]{1,400})'
-                 '(/v1\.0/services\?marker=)([a-zA-Z0-9_\-\.]{1,256})'
+                 '(/v1\.0/([a-z0-9]{1,400})/services'
+                 '\?marker=)([a-zA-Z0-9_\-\.]{1,256})'
                  '(&limit=)([1-9]|1[0-9])'}},
         'required': ['rel', 'href'],
         'additionalProperties': False}
