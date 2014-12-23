@@ -68,6 +68,10 @@ class TestCreateService(providers.TestProviderBase):
         body = resp.json()
         self.assertSchema(body, services.get_service)
 
+        for item in domain_list:
+            if 'protocol' not in item:
+                item['protocol'] = 'http'
+
         self.assertEqual(body['domains'], domain_list)
         for item in origin_list:
             if 'rules' not in 'item':
