@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.model import common
 
 VALID_STATUSES = [
     u'deploy_in_progress',
@@ -22,7 +23,7 @@ VALID_STATUSES = [
     u'failed']
 
 
-class ProviderDetail(object):
+class ProviderDetail(common.DictSerializableModel):
 
     """ProviderDetail object for each provider."""
 
