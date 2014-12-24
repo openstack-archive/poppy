@@ -13,29 +13,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
+import json
+
+from oslo.config import cfg
+
+from poppy import bootstrap
 from poppy.openstack.common import log
+from poppy.transport.pecan.models.request import (
+    provider_details as req_provider_details
+)
 
 LOG = log.getLogger(__name__)
+conf = cfg.CONF
+conf(project='poppy', prog='poppy', args=[])
 
 
-def service_purge_worker(provider_details, service_controller,
+def service_purge_worker(provider_details,
                          project_id, service_name, purge_url):
+    bootstrap_obj = bootstrap.Bootstrap(conf)
+    service_controller = bootstrap_obj.manager.services_controller
+    provider_details = json.loads(provider_details)
+    purge_url = None if purge_url == 'None' else purge_url
+
     responders = []
     # try to purge all service from each provider presented
     # in provider_details
     for provider in provider_details:
         # NOTE(tonytan4ever): if the purge_url is None, it means to purge
         # all content, else only purge a specific purge url
-        LOG.info('Starting to purge service from %s, purge_url: %s' %
-                 (provider,
+        provider_details[provider] = (
+            req_provider_details.load_from_json(provider_details[provider]))
+        print('Starting to purge service from %s, purge_url: %s' %
+              (provider,
                   'all' if purge_url is None else purge_url))
         responder = service_controller.provider_wrapper.purge(
             service_controller._driver.providers[provider.lower()],
             provider_details,
             purge_url)
         responders.append(responder)
-        LOG.info('Purge service %s  on  %s complete...' %
-                 (provider,
+        print('Purge service %s  on  %s complete...' %
+              (provider,
                   'all' if purge_url is None else purge_url))
 
     # Find any failed attempt of purging, and stores it in provider
@@ -49,9 +67,9 @@ def service_purge_worker(provider_details, service_controller,
         provider_name = list(responder.items())[0][0]
 
         if 'error' in responder[provider_name]:
-            LOG.info('Purging content from %s failed' % provider_name)
-            LOG.info('Updating provider detail status of %s for %s' %
-                     (provider_name, service_name))
+            print('Purging content from %s failed' % provider_name)
+            print('Updating provider detail status of %s for %s' %
+                  (provider_name, service_name))
             # stores the error info for debugging purposes.
             changed_provider_details_dict[provider_name] = (
                 provider_details[provider_name]
@@ -60,7 +78,7 @@ def service_purge_worker(provider_details, service_controller,
                 responder[provider_name].get('error_info')
             )
 
-    # if there is an error for any puring attempts on a provider
+    # if there is an error for any purging attempts on a provider
     # record it in storage for further debugging purpose
     if not changed_provider_details_dict == {}:
         service_controller.storage_controller._driver.connect()
@@ -69,3 +87,21 @@ def service_purge_worker(provider_details, service_controller,
             project_id,
             service_name,
             provider_details)
+
+if __name__ == '__main__':
+    bootstrap_obj = bootstrap.Bootstrap(conf)
+
+    parser = argparse.ArgumentParser(description='Delete service async worker'
+                                     ' script arg parser')
+
+    parser.add_argument('provider_details', action="store")
+    parser.add_argument('project_id', action="store")
+    parser.add_argument('service_name', action="store")
+    parser.add_argument('purge_url', action="store")
+
+    result = parser.parse_args()
+    provider_details = result.provider_details
+    project_id = result.project_id
+    service_name = result.service_name
+    purge_url = result.purge_url
+    service_purge_worker(provider_details, project_id, service_name, purge_url)

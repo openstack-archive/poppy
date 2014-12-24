@@ -108,8 +108,14 @@ class TestServiceModel(base.TestCase):
             self.mycaching, self.myrestrictions)
         cloned_service = service.Service.init_from_dict(myservice.to_dict())
 
-        self.assertEqual(cloned_service.domains, myservice.domains)
-        self.assertEqual(cloned_service.origins, myservice.origins)
+        self.assertEqual([domain.to_dict() for domain
+                          in cloned_service.domains],
+                         [domain.to_dict() for domain
+                          in myservice.domains])
+        self.assertEqual([origin.to_dict() for origin
+                          in cloned_service.origins],
+                         [origin.to_dict() for origin
+                          in myservice.origins])
         self.assertEqual(cloned_service.flavor_id, myservice.flavor_id)
 
     @ddt.data(u'', u'apple')
