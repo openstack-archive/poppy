@@ -14,14 +14,17 @@
 # limitations under the License.
 
 import copy
+import json
 import multiprocessing
+import os
+import subprocess
 
 from poppy.common import errors
 from poppy.manager import base
-from poppy.manager.default.service_async_workers import create_service_worker
-from poppy.manager.default.service_async_workers import delete_service_worker
 from poppy.manager.default.service_async_workers import purge_service_worker
-from poppy.manager.default.service_async_workers import update_service_worker
+from poppy.openstack.common import log
+
+LOG = log.getLogger(__name__)
 
 
 class DefaultServicesController(base.ServicesController):
@@ -70,6 +73,8 @@ class DefaultServicesController(base.ServicesController):
         :param service_obj
         :raises LoookupError, ValueError
         """
+        json.dumps(service_obj.to_dict())
+
         try:
             flavor = self.flavor_controller.get(service_obj.flavor_id)
         # raise a lookup error if the flavor is not found
@@ -86,21 +91,22 @@ class DefaultServicesController(base.ServicesController):
         except ValueError as e:
             raise e
 
-        self.storage_controller._driver.close_connection()
+        proxy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  'service_async_workers',
+                                  'sub_process_proxy.py')
+        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   'service_async_workers',
+                                   'create_service_worker.py')
+        cmd_list = ['python',
+                    proxy_path,
+                    script_path,
+                    json.dumps(providers),
+                    project_id, service_name,
+                    json.dumps(service_obj.to_dict())]
+        LOG.info('Starting create service subprocess: %s' % cmd_list)
+        p = subprocess.Popen(cmd_list)
+        p.communicate()
 
-        p = multiprocessing.Process(
-            name='Process: create poppy service %s for'
-            ' project id: %s' %
-            (service_name,
-             project_id),
-            target=create_service_worker.service_create_worker,
-            args=(
-                providers,
-                self,
-                project_id,
-                service_name, service_obj))
-        multiprocessing.active_children()
-        p.start()
         return
 
     def update(self, project_id, service_name, service_updates):
@@ -143,16 +149,22 @@ class DefaultServicesController(base.ServicesController):
             service_name,
             provider_details)
 
-        self.storage_controller._driver.close_connection()
-
-        p = multiprocessing.Process(
-            name=('Process: update poppy service {0} for project id: {1}'
-                  .format(service_name, project_id)),
-            target=update_service_worker.update_worker,
-            args=(self, project_id, service_name, service_old, service_updates,
-                  service_obj))
-        multiprocessing.active_children()
-        p.start()
+        proxy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  'service_async_workers',
+                                  'sub_process_proxy.py')
+        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   'service_async_workers',
+                                   'update_service_worker.py')
+        cmd_list = ['python',
+                    proxy_path,
+                    script_path,
+                    project_id, service_name,
+                    json.dumps(service_old.to_dict()),
+                    json.dumps(service_updates.to_dict()),
+                    json.dumps(service_obj.to_dict())]
+        LOG.info('Starting update service subprocess: %s' % cmd_list)
+        p = subprocess.Popen(cmd_list)
+        p.communicate()
 
         return
 
@@ -176,21 +188,21 @@ class DefaultServicesController(base.ServicesController):
             service_name,
             provider_details)
 
-        self.storage_controller._driver.close_connection()
-
-        p = multiprocessing.Process(
-            name='Process: delete poppy service %s for'
-            ' project id: %s' %
-            (service_name,
-             project_id),
-            target=delete_service_worker.service_delete_worker,
-            args=(
-                provider_details,
-                self,
-                project_id,
-                service_name))
-        multiprocessing.active_children()
-        p.start()
+        proxy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  'service_async_workers',
+                                  'sub_process_proxy.py')
+        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   'service_async_workers',
+                                   'delete_service_worker.py')
+        cmd_list = ["python",
+                    proxy_path,
+                    script_path,
+                    json.dumps(dict([(k, v.to_dict())
+                                     for k, v in provider_details.items()])),
+                    project_id, service_name]
+        LOG.info('Starting delete service subprocess: %s' % cmd_list)
+        p = subprocess.Popen(cmd_list)
+        p.communicate()
 
         return
 
