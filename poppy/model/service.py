@@ -14,6 +14,8 @@
 # limitations under the License.
 
 from poppy.model import common
+from poppy.model.helpers import domain
+from poppy.model.helpers import origin
 
 
 VALID_STATUSES = [u'create_in_progress', u'deployed', u'update_in_progress',
@@ -158,5 +160,43 @@ class Service(common.DictSerializableModel):
         use to_dict.
         """
         o = cls('unnamed', [], [], 'unnamed')
+        domains = input_dict.get('domains', [])
+        input_dict['domains'] = [domain.Domain.init_from_dict(d)
+                                 for d in domains]
+        origins = input_dict.get('origins', [])
+        input_dict['origins'] = [origin.Origin.init_from_dict(og)
+                                 for og in origins]
         o.from_dict(input_dict)
         return o
+
+    def to_dict(self):
+        """Construct a model instance from a dictionary.
+
+        This is only meant to be used for converting a
+        response model into a model.
+        When converting a model into a request model,
+        use to_dict.
+        """
+        result = common.DictSerializableModel.to_dict(self)
+        # need to deserialize the nested object
+        # need to deserialize the nested rules object
+        domain_obj_list = result['domains']
+        result['domains'] = [d.to_dict() for d in domain_obj_list]
+
+        origin_obj_list = result['origins']
+        result['origins'] = [o.to_dict() for o in origin_obj_list]
+
+        restrictions_obj_list = result['restrictions']
+        result['restrictions'] = [r.to_dict() for r in restrictions_obj_list]
+
+        caching_obj_list = result['caching']
+        result['caching'] = [c.to_dict() for c in caching_obj_list]
+
+        provider_details = result['provider_details']
+        new_provider_details = {}
+        for provider in provider_details:
+            new_provider_details[provider] = (
+                provider_details[provider].to_dict())
+        result['provider_details'] = new_provider_details
+
+        return result
