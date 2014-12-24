@@ -13,17 +13,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
+import json
+
+from oslo.config import cfg
+
+from poppy import bootstrap
 from poppy.openstack.common import log
+from poppy.transport.pecan.models.request import (
+    provider_details as req_provider_details
+)
 
 LOG = log.getLogger(__name__)
+conf = cfg.CONF
+conf(project='poppy', prog='poppy', args=[])
 
 
-def service_delete_worker(provider_details, service_controller,
+def service_delete_worker(provider_details,
                           project_id, service_name):
+    bootstrap_obj = bootstrap.Bootstrap(conf)
+    service_controller = bootstrap_obj.manager.services_controller
+    provider_details = json.loads(provider_details)
+
     responders = []
     # try to delete all service from each provider presented
     # in provider_details
     for provider in provider_details:
+        provider_details[provider] = (
+            req_provider_details.load_from_json(provider_details[provider]))
         LOG.info('Starting to delete service from %s' % provider)
         responder = service_controller.provider_wrapper.delete(
             service_controller._driver.providers[provider.lower()],
@@ -74,3 +91,20 @@ def service_delete_worker(provider_details, service_controller,
              % service_name)
     service_controller.storage_controller.delete(project_id, service_name)
     LOG.info('Deleting poppy service %s succeeded' % service_name)
+
+
+if __name__ == '__main__':
+    bootstrap_obj = bootstrap.Bootstrap(conf)
+
+    parser = argparse.ArgumentParser(description='Delete service async worker'
+                                     ' script arg parser')
+
+    parser.add_argument('provider_details', action="store")
+    parser.add_argument('project_id', action="store")
+    parser.add_argument('service_name', action="store")
+
+    result = parser.parse_args()
+    provider_details = result.provider_details
+    project_id = result.project_id
+    service_name = result.service_name
+    service_delete_worker(provider_details, project_id, service_name)

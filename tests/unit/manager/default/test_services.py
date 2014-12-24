@@ -237,11 +237,11 @@ class DefaultManagerServiceTests(base.TestCase):
         providers.__getitem__.side_effect = get_provider_extension_by_name
         providers_list = ['mock', 'cloudfront', 'fastly']
         # worker process returns None
-        res = create_service_worker.service_create_worker(providers_list,
-                                                          self.sc,
-                                                          self.project_id,
-                                                          self.service_name,
-                                                          service_obj)
+        res = create_service_worker.service_create_worker(
+            json.dumps(providers_list),
+            self.project_id,
+            self.service_name,
+            json.dumps(service_obj.to_dict()))
         self.assertTrue(res is None)
 
     @ddt.file_data('service_update.json')
@@ -371,10 +371,12 @@ class DefaultManagerServiceTests(base.TestCase):
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
 
-        delete_service_worker.service_delete_worker(self.provider_details,
-                                                    self.sc,
-                                                    self.project_id,
-                                                    self.service_name)
+        delete_service_worker.service_delete_worker(
+            json.dumps(dict([(k, v.to_dict())
+                             for k, v in
+                             self.provider_details.items()])),
+            self.project_id,
+            self.service_name)
 
     @ddt.file_data('data_provider_details.json')
     def test_detele_service_worker_with_error(self, provider_details_json):
@@ -433,10 +435,13 @@ class DefaultManagerServiceTests(base.TestCase):
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
 
-        delete_service_worker.service_delete_worker(self.provider_details,
-                                                    self.sc,
-                                                    self.project_id,
-                                                    self.service_name)
+        delete_service_worker.service_delete_worker(
+            json.dumps(dict([(k, v.to_dict()
+                              )
+                             for k, v in
+                             self.provider_details.items()])),
+            self.project_id,
+            self.service_name)
 
     @ddt.file_data('data_provider_details.json')
     def test_purge(self, provider_details_json):

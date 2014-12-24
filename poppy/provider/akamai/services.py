@@ -102,8 +102,8 @@ class ServiceController(base.ServiceBase):
                         policy_name=dp),
                     data=json.dumps(post_data),
                     headers=self.request_header)
-                LOG.info('akamai response code: %s' % resp.status_code)
-                LOG.info('akamai response text: %s' % resp.text)
+                print('akamai response code: %s' % resp.status_code)
+                print('akamai response text: %s' % resp.text)
                 if resp.status_code != 200:
                     raise RuntimeError(resp.text)
 
@@ -112,8 +112,8 @@ class ServiceController(base.ServiceBase):
                 ids.append(dp_obj)
                 # TODO(tonytan4ever): leave empty links for now
                 # may need to work with dns integration
-                LOG.info('Creating policy %s on domain %s complete' %
-                         (dp, classified_domain.domain))
+                print('Creating policy %s on domain %s complete' %
+                      (dp, classified_domain.domain))
                 provider_access_url = None
                 if classified_domain.protocol == 'http':
                     provider_access_url = self.driver.akamai_access_url_link
@@ -317,10 +317,10 @@ class ServiceController(base.ServiceBase):
                                          for rule in restriction.rules]
 
             if any(referrer_restriction_list):
-                referrer_whitelist_value = ''.join(['*%s*' % referrer
-                                                   for referrer
-                                                   in referrer_restriction_list
-                                                   if referrer is not None])
+                referrer_whitelist_value = ''.join(
+                    ['*%s*' % referrer
+                     for referrer in referrer_restriction_list
+                     if referrer is not None])
                 for rule in policy_content['rules']:
                     self._process_referrer_restriction(
                         referrer_whitelist_value, rule)
@@ -358,7 +358,7 @@ class ServiceController(base.ServiceBase):
                             classified_domain.protocol)):
                         # in this case we should update existing policy
                         # instead of create a new policy
-                        LOG.info('Start to update policy %s' % dp)
+                        print('Start to update policy %s' % dp)
                         # TODO(tonytan4ever): also classify domains based on
                         # their protocols. http and https domains needs to be
                         # created  with separate base urls.
@@ -373,7 +373,7 @@ class ServiceController(base.ServiceBase):
                                   'protocol': classified_domain.protocol}
                         policies.remove(dp_obj)
                     else:
-                        LOG.info('Start to create new policy %s' % dp)
+                        print('Start to create new policy %s' % dp)
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
                                 configuration_number=(
@@ -381,8 +381,8 @@ class ServiceController(base.ServiceBase):
                                 policy_name=dp),
                             data=json.dumps(policy_content),
                             headers=self.request_header)
-                    LOG.info('akamai response code: %s' % resp.status_code)
-                    LOG.info('akamai response text: %s' % resp.text)
+                    print('akamai response code: %s' % resp.status_code)
+                    print('akamai response text: %s' % resp.text)
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
                     dp_obj = {'policy_name': dp,
@@ -390,8 +390,8 @@ class ServiceController(base.ServiceBase):
                     ids.append(dp_obj)
                     # TODO(tonytan4ever): leave empty links for now
                     # may need to work with dns integration
-                    LOG.info('Creating/Updateing policy %s on domain %s '
-                             'complete' % (dp, classified_domain.domain))
+                    print('Creating/Updateing policy %s on domain %s '
+                          'complete' % (dp, classified_domain.domain))
                     provider_access_url = None
                     if classified_domain.protocol == 'http':
                         provider_access_url = (
@@ -414,18 +414,18 @@ class ServiceController(base.ServiceBase):
                     elif policy["protocol"] == 'https':
                         configuration_number = self.driver.https_conf_number
 
-                    LOG.info('Starting to delete old policy %s' %
-                             policy['policy_name'])
+                    print('Starting to delete old policy %s' %
+                          policy['policy_name'])
                     resp = self.policy_api_client.delete(
                         self.policy_api_base_url.format(
                             configuration_number=configuration_number,
                             policy_name=policy['policy_name']))
-                    LOG.info('akamai response code: %s' % resp.status_code)
-                    LOG.info('akamai response text: %s' % resp.text)
+                    print('akamai response code: %s' % resp.status_code)
+                    print('akamai response text: %s' % resp.text)
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
-                    LOG.info('Delete old policy %s complete' %
-                             policy['policy_name'])
+                    print('Delete old policy %s complete' %
+                          policy['policy_name'])
             except Exception:
                 return self.responder.failed("failed to update service")
 
@@ -480,17 +480,17 @@ class ServiceController(base.ServiceBase):
 
                 # post new policies back with Akamai Policy API
                 try:
-                    LOG.info('Start to update policy %s ' % policy)
+                    print('Start to update policy %s ' % policy)
                     resp = self.policy_api_client.put(
                         self.policy_api_base_url.format(
                             configuration_number=configuration_number,
                             policy_name=policy['policy_name']),
                         data=json.dumps(policy_content),
                         headers=self.request_header)
-                    LOG.info('akamai response code: %s' % resp.status_code)
-                    LOG.info('akamai response text: %s' % resp.text)
-                    LOG.info('Update policy %s complete' %
-                             policy['policy_name'])
+                    print('akamai response code: %s' % resp.status_code)
+                    print('akamai response text: %s' % resp.text)
+                    print('Update policy %s complete' %
+                          policy['policy_name'])
                 except Exception:
                     return self.responder.failed("failed to update service")
                 provider_access_url = None
@@ -521,7 +521,7 @@ class ServiceController(base.ServiceBase):
                 return self.responder.failed(str(e))
         try:
             for policy in policies:
-                LOG.info('Starting to delete policy %s' % policy)
+                print('Starting to delete policy %s' % policy)
                 # TODO(tonytan4ever): needs to look at if service
                 # domain is an https domain, if it is then a different
                 # base url is needed
@@ -535,8 +535,8 @@ class ServiceController(base.ServiceBase):
                     self.policy_api_base_url.format(
                         configuration_number=configuration_number,
                         policy_name=policy['policy_name']))
-                LOG.info('akamai response code: %s' % resp.status_code)
-                LOG.info('akamai response text: %s' % resp.text)
+                print('akamai response code: %s' % resp.status_code)
+                print('akamai response text: %s' % resp.text)
                 if resp.status_code != 200:
                     raise RuntimeError(resp.text)
         except Exception as e:

@@ -13,14 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
+import json
+
+from oslo.config import cfg
+
+from poppy import bootstrap
 from poppy.model.helpers import provider_details
 from poppy.openstack.common import log
+from poppy.transport.pecan.models.request import service
+
 
 LOG = log.getLogger(__name__)
+conf = cfg.CONF
+conf(project='poppy', prog='poppy', args=[])
 
 
-def service_create_worker(providers_list, service_controller,
-                          project_id, service_name, service_obj):
+def service_create_worker(providers_list_json,
+                          project_id, service_name, service_obj_json):
+    bootstrap_obj = bootstrap.Bootstrap(conf)
+    service_controller = bootstrap_obj.manager.services_controller
+
+    providers_list = json.loads(providers_list_json)
+    service_obj = service.load_from_json(json.loads(service_obj_json))
+
     responders = []
     # try to create all service from each provider
     for provider in providers_list:
@@ -72,3 +88,23 @@ def service_create_worker(providers_list, service_controller,
         project_id,
         service_name,
         provider_details_dict)
+
+
+if __name__ == '__main__':
+    bootstrap_obj = bootstrap.Bootstrap(conf)
+
+    parser = argparse.ArgumentParser(description='Create service async worker'
+                                     ' script arg parser')
+
+    parser.add_argument('providers_list_json', action="store")
+    parser.add_argument('project_id', action="store")
+    parser.add_argument('service_name', action="store")
+    parser.add_argument('service_obj_json', action="store")
+
+    result = parser.parse_args()
+    providers_list_json = result.providers_list_json
+    project_id = result.project_id
+    service_name = result.service_name
+    service_obj_json = result.service_obj_json
+    service_create_worker(providers_list_json, project_id,
+                          service_name, service_obj_json)
