@@ -20,6 +20,9 @@ sed -i -e "s/AKAM_CCU_API_CLIENT_SECRET/$AKAM_CCU_API_CLIENT_SECRET/"       $CON
 sed -i -e "s/AKAM_CCU_API_ACCESS_TOKEN/$AKAM_CCU_API_ACCESS_TOKEN/"         $CONFIG
 sed -i -e "s/AKAM_CCU_API_BASE_URL/$AKAM_CCU_API_BASE_URL/"                 $CONFIG
 sed -i -e "s/AKAM_ACCESS_URL_LINK/$AKAM_ACCESS_URL_LINK/"                   $CONFIG
+sed -i -e "s/AKAM_SECURE_URL_LINK/$AKAM_SECURE_URL_LINK/"                   $CONFIG
+sed -i -e "s/AKAM_HTTP_POLICY/$AKAM_HTTP_POLICY/"                           $CONFIG
+sed -i -e "s/AKAM_HTTPS_POLICY/$AKAM_HTTPS_POLICY/"                         $CONFIG
 
 
 /usr/local/bin/uwsgi --ini /root/uwsgi.ini
