@@ -157,13 +157,16 @@ class ServiceSchema(schema_base.SchemaBase):
                                     'required': True},
                                 'rules': {
                                     'type': 'array',
+                                    'required': False,
                                     'items': {
                                         'type': 'object',
                                         'properties': {
                                             'name': {
-                                                'type': 'string'},
+                                                'type': 'string',
+                                                'required': True},
                                             'request_url': {
-                                                'type': 'string'}}},
+                                                'type': 'string',
+                                                'required': True}}},
                                 }},
                         }],
                         "additionalItems": {
