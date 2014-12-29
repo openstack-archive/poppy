@@ -104,6 +104,15 @@ class TestFlavorActions(base.TestBase):
         self.assertSchema(response_body, flavors.get_flavor)
         self.assertEqual(response_body['providers'], self.provider_list)
 
+    @attrib.attr('smoke')
+    def test_list_flavors(self):
+
+        resp = self.client.list_flavors()
+        self.assertEqual(resp.status_code, 200)
+
+        response_body = resp.json()
+        self.assertSchema(response_body, flavors.list_flavors)
+
     def test_delete_flavor(self):
 
         resp = self.client.delete_flavor(flavor_id=self.flavor_id)

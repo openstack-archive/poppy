@@ -203,6 +203,18 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
         return self.request('GET', url)
 
+    def list_flavors(self):
+        """List Flavors
+
+        :return: Response Object containing response code 200 and body with
+        list of flavors
+        GET
+        flavors
+        """
+        url = '{0}/flavors'.format(self.url)
+
+        return self.request('GET', url)
+
     def delete_flavor(self, flavor_location=None, flavor_id=None):
         """Delete Flavor
 
