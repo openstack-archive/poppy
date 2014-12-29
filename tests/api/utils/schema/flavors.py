@@ -34,7 +34,7 @@ link = {'type': 'object',
         'properties': {
             'href': {'type': 'string',
                      'pattern': '^(https?)(:/{1,3})([a-z0-9\.\-:]{1,400})'
-                     '/v1\.0/flavors/'},
+                     '/v1\.0/([a-z0-9]{1,400})/flavors/'},
             'rel': {'type': 'string', 'enum': ['self']}},
         'required': ['href', 'rel'],
         'additionalProperties': False}
@@ -56,5 +56,18 @@ get_flavor = {
                   'maxItems': 1}
     },
     'required': ['id', 'providers', 'links'],
+    'additionalProperties': False
+}
+
+# Response Schema definition for List Flavors API
+list_flavors = {
+    'type': 'object',
+    'properties': {
+        'flavors': {'type': 'array',
+                    'items': get_flavor,
+                    'minItems': 1
+                    }
+    },
+    'required': ['flavors'],
     'additionalProperties': False
 }
