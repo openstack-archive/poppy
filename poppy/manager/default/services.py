@@ -17,6 +17,12 @@ import copy
 import json
 import os
 import subprocess
+import sys
+try:
+    import uwsgi
+    use_uwsgi = True
+except ImportError:
+    use_uwsgi = False
 
 from poppy.common import errors
 from poppy.manager import base
@@ -93,14 +99,18 @@ class DefaultServicesController(base.ServicesController):
         script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    'service_async_workers',
                                    'create_service_worker.py')
-        cmd_list = ['python',
+        if use_uwsgi:
+            executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
+        else:
+            executable = sys.executable
+        cmd_list = [executable,
                     proxy_path,
                     script_path,
                     json.dumps(providers),
                     project_id, service_name,
                     json.dumps(service_obj.to_dict())]
         LOG.info('Starting create service subprocess: %s' % cmd_list)
-        p = subprocess.Popen(cmd_list)
+        p = subprocess.Popen(cmd_list, env=os.environ.copy())
         p.communicate()
 
         return
@@ -151,7 +161,11 @@ class DefaultServicesController(base.ServicesController):
         script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    'service_async_workers',
                                    'update_service_worker.py')
-        cmd_list = ['python',
+        if use_uwsgi:
+            executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
+        else:
+            executable = sys.executable
+        cmd_list = [executable,
                     proxy_path,
                     script_path,
                     project_id, service_name,
@@ -159,7 +173,7 @@ class DefaultServicesController(base.ServicesController):
                     json.dumps(service_updates.to_dict()),
                     json.dumps(service_obj.to_dict())]
         LOG.info('Starting update service subprocess: %s' % cmd_list)
-        p = subprocess.Popen(cmd_list)
+        p = subprocess.Popen(cmd_list, env=os.environ.copy())
         p.communicate()
 
         return
@@ -190,14 +204,18 @@ class DefaultServicesController(base.ServicesController):
         script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    'service_async_workers',
                                    'delete_service_worker.py')
-        cmd_list = ["python",
+        if use_uwsgi:
+            executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
+        else:
+            executable = sys.executable
+        cmd_list = [executable,
                     proxy_path,
                     script_path,
                     json.dumps(dict([(k, v.to_dict())
                                      for k, v in provider_details.items()])),
                     project_id, service_name]
         LOG.info('Starting delete service subprocess: %s' % cmd_list)
-        p = subprocess.Popen(cmd_list)
+        p = subprocess.Popen(cmd_list, env=os.environ.copy())
         p.communicate()
 
         return
@@ -213,7 +231,11 @@ class DefaultServicesController(base.ServicesController):
         script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    'service_async_workers',
                                    'purge_service_worker.py')
-        cmd_list = ["python",
+        if use_uwsgi:
+            executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
+        else:
+            executable = sys.executable
+        cmd_list = [executable,
                     proxy_path,
                     script_path,
                     json.dumps(dict([(k, v.to_dict())
@@ -222,7 +244,7 @@ class DefaultServicesController(base.ServicesController):
                     str(purge_url)]
 
         LOG.info('Starting purge service subprocess: %s' % cmd_list)
-        p = subprocess.Popen(cmd_list)
+        p = subprocess.Popen(cmd_list, env=os.environ.copy())
         p.communicate()
 
         return
