@@ -51,7 +51,10 @@ class ServiceSchema(schema_base.SchemaBase):
                                     )
                                 },
                                 'protocol': {
-                                    'type': 'string'
+                                    'type': 'string',
+                                    'enum': [
+                                            'http',
+                                            'https']
                                 }}},
                         'required': True,
                         'minItems': 1},
