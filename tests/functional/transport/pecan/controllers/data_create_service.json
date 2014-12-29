@@ -30,6 +30,73 @@
                 ]
             }
         ]
+    },
+    "missing_caching_and_restrictions": {
+        "name": "mocksite.com",
+        "domains": [
+            {"domain": "test.mocksite.com" },
+            {"domain": "blog.mocksite.com"}
+        ],
+        "origins": [
+            {
+                "origin": "mocksite.com",
+                "port": 80,
+                "ssl": false
+            }
+        ],
+        "flavor_id": "mock"
+    },
+    "using_default_caching": {
+        "name": "mocksite.com",
+        "domains": [
+            {"domain": "test.mocksite.com" },
+            {"domain": "blog.mocksite.com"}
+        ],
+        "origins": [
+            {
+                "origin": "mocksite.com",
+                "port": 80,
+                "ssl": false
+            }
+        ],
+        "caching": [
+            {
+                "name": "default",
+                "ttl": 3600
+            }
+        ],
+        "flavor_id": "mock"
+    },
+    "using_custom_caching": {
+        "name": "mocksite.com",
+        "domains": [
+            {"domain": "test.mocksite.com" },
+            {"domain": "blog.mocksite.com"}
+        ],
+        "origins": [
+            {
+                "origin": "mocksite.com",
+                "port": 80,
+                "ssl": false
+            }
+        ],
+        "caching": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "images",
+                "ttl": 3600,
+                "rules": [
+                    {
+                        "name": "images",
+                        "request_url": "/images"
+                    }
+                ]
+            }
+        ],
+        "flavor_id": "mock"
     }
 }
 
