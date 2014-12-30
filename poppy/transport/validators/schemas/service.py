@@ -237,200 +237,31 @@ class ServiceSchema(schema_base.SchemaBase):
                     }
                 }},
             'PATCH': {
-                'type': 'object',
+                'type': 'array',
                 'properties': {
-                    'service_name': {
+                    'op': {
                         'type': 'string',
-                        'required': False,
-                        'minLength': 3,
-                        'maxLength': 256
+                        'enum': [
+                            'add',
+                            'replace'
+                        ]
                     },
-                    'domains': {
-                        'type': 'array',
-                        'required': False,
-                        'minItems': 1,
-                        'items': {
-                            'type': 'object',
-                            'properties': {
-                                'domain': {
-                                    'type': 'string',
-                                    'pattern': re.compile(
-                                        '^(([^:/?#]+):)?'
-                                        '(//([^/?#]*))?'
-                                        '([^?#]*)(\?([^#]*))?'
-                                        '(#(.*))?$',
-                                        re.UNICODE
-                                    ),
-                                    'required': True
-                                },
-                                'protocol': {
-                                    'type': 'string'
-                                }}}
-                    },
-                    'origins': {
-                        'type': 'array',
-                        'required': False,
-                        # the first origin does not have to
-                        # have rules field, it will be defaulted
-                        # to global url matching
-                        'items': [{
-                            'type': 'object',
-                            'properties': {
-                                'origin': {
-                                    'type': 'string',
-                                    'pattern': re.compile(
-                                        '^(([^:/?#]+):)?'
-                                        '(//([^/?#]*))?'
-                                        '([^?#]*)(\?([^#]*))?'
-                                        '(#(.*))?$',
-                                        re.UNICODE
-                                    ),
-                                    'required': True},
-                                'port': {
-                                    'type': 'integer',
-                                    'enum': [
-                                        80,
-                                        443]},
-                                'ssl': {
-                                    'type': 'boolean'},
-                                'rules': {
-                                    'type': 'array',
-                                    'items': {
-                                        'type': 'object',
-                                        'properties': {
-                                            'name': {
-                                                'type': 'string',
-                                                'required': True
-                                            },
-                                            'request_url': {
-                                                'type': 'string',
-                                                'required': True
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }],
-                        'minItems': 1,
-                        # the 2nd and successive items must have
-                        # 'rules' field which has at least one rule
-                        "additionalItems": {
-                            'type': 'object',
-                            'properties': {
-                                'origin': {
-                                    'type': 'string',
-                                    'pattern': re.compile(
-                                        '^(([^:/?#]+):)?'
-                                        '(//([^/?#]*))?'
-                                        '([^?#]*)(\?([^#]*))?'
-                                        '(#(.*))?$',
-                                        re.UNICODE
-                                    ),
-                                    'required': True},
-                                'port': {
-                                    'type': 'integer',
-                                    'enum': [
-                                        80,
-                                        443]},
-                                'ssl': {
-                                    'type': 'boolean'},
-                                'rules': {
-                                    'type': 'array',
-                                    'items': {
-                                        'type': 'object',
-                                        'properties': {
-                                            'name': {
-                                                'type': 'string',
-                                                'required': True
-                                            },
-                                            'request_url': {
-                                                'type': 'string',
-                                                'required': True
-                                            }
-                                        }
-                                    },
-                                    'required': True,
-                                    'minItems': 1,
-                                },
-                            }
-                        }
-                    },
-                    'caching': {
-                        'type': 'array',
-                        'required': False,
-                        'items': [{
-                            'type': 'object',
-                            'required': False,
-                            'properties': {
-                                'name': {
-                                    'type': 'string',
-                                    'required': True},
-                                'ttl': {
-                                    'type': 'integer',
-                                    'required': True},
-                                'rules': {
-                                    'type': 'array',
-                                    'items': {
-                                        'type': 'object',
-                                        'properties': {
-                                            'name': {
-                                                'type': 'string'},
-                                            'request_url': {
-                                                'type': 'string'}}},
-                                }},
-                        }],
-                        "additionalItems": {
-                            'type': 'object',
-                            'required': False,
-                            'properties': {
-                                'name': {
-                                    'type': 'string',
-                                    'pattern': re.compile(
-                                        '^(?!default$).*'
-                                    ),
-                                    'required': True},
-                                'ttl': {
-                                    'type': 'integer',
-                                    'required': True},
-                                'rules': {
-                                    'type': 'array',
-                                    'required': True,
-                                    'minItems': 1,
-                                    'items': {
-                                        'type': 'object',
-                                        'properties': {
-                                            'name': {
-                                                'type': 'string'},
-                                            'request_url': {
-                                                'type': 'string'}}},
-                                }},
-                        },
-                        "uniqueItems": True,
-                    },
-                    'restrictions': {
-                        'type': 'array',
-                        'items': {
-                            'type': 'object',
-                            'properties': {
-                                'name': {
-                                    'type': 'string',
-                                    'required': True},
-                                'rules': {
-                                    'type': 'array',
-                                    'items': {
-                                        'type': 'object',
-                                        'properties': {
-                                            'name': {
-                                                'type': 'string'},
-                                            'referrer': {
-                                                'type': 'string'}
-                                        }},
-                                }},
-                        },
-                    },
-                    'flavor_id': {
+                    'path': {
                         'type': 'string',
+                        'enum': [
+                            'service_name',
+                            'origins',
+                            'domains',
+                            'caching_rule'
+                        ]
+                    },
+                    'value': {
+                        'oneOf': [
+                            'string',
+                            'integer'
+                        ]
                     }
-                }},
+                }
+            },
         },
     }

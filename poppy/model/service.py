@@ -16,6 +16,9 @@
 from poppy.model import common
 from poppy.model.helpers import domain
 from poppy.model.helpers import origin
+from poppy.model.helpers import restriction
+from poppy.model.helpers import cachingrule
+from poppy.model.helpers import provider_details
 
 
 VALID_STATUSES = [u'create_in_progress', u'deployed', u'update_in_progress',
@@ -166,6 +169,16 @@ class Service(common.DictSerializableModel):
         origins = input_dict.get('origins', [])
         input_dict['origins'] = [origin.Origin.init_from_dict(og)
                                  for og in origins]
+        restrictions = input_dict.get('restrictions', [])
+        input_dict['restrictions'] = [restriction.Restriction.init_from_dict(r)
+                                 for r in restrictions]
+        caching_rules = input_dict.get('caching', [])
+        input_dict['caching'] = [cachingrule.CachingRule.init_from_dict(cr)
+                                 for cr in caching_rules]
+        pds = input_dict.get('provider_details', {})
+        for provider_name in pds:
+            pd = pds[provider_name]
+            input_dict['provider_details'][provider_name] = provider_details.ProviderDetail.init_from_dict(pd)
         o.from_dict(input_dict)
         return o
 
