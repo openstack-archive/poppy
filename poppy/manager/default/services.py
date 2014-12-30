@@ -15,6 +15,7 @@
 
 import copy
 import json
+import jsonpatch
 import os
 import subprocess
 import sys
@@ -26,6 +27,8 @@ except ImportError:
 
 from poppy.common import errors
 from poppy.manager import base
+from poppy.manager.default.service_async_workers import update_service_worker
+from poppy.model import service
 from poppy.openstack.common import log
 
 LOG = log.getLogger(__name__)
@@ -127,9 +130,29 @@ class DefaultServicesController(base.ServicesController):
         if service_old.status != u'deployed':
             raise errors.ServiceStatusNotDeployed(
                 u'Service {0} not deployed'.format(service_name))
+        service_old_dict = service_old.to_dict()
+        service_obj_dict = jsonpatch.apply_patch(
+            service_old_dict, service_updates)
+        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
+        service_obj = service.Service.init_from_dict(service_obj_dict)
 
-        service_obj = copy.deepcopy(service_old)
+        # we are using only the domains from service_updates
+        service_updates = service.Service(
+            name='',
+            domains=['test.domain.com'],
+            origins=[],
+            flavor_id=''
+        )
+        # get domains old and new and put the diff here.
 
+        # validate the patch
+        # service_patch.validate()
+
+        # if any operations are not supported, restrict them
+        # service_name, caching, restrictions, flavor_id
+
+        """
         # update service object
         if service_updates.name:
             raise Exception(u'Currently this operation is not supported')
@@ -143,10 +166,13 @@ class DefaultServicesController(base.ServicesController):
             raise Exception(u'Currently this operation is not supported')
         if service_updates.flavor_id:
             raise Exception(u'Currently this operation is not supported')
+        """
 
         # get provider details for this service
         provider_details = self._get_provider_details(project_id, service_name)
 
+        #uncomment me later
+        """
         # set status in provider details to u'update_in_progress'
         for provider in provider_details:
             provider_details[provider].status = u'update_in_progress'
@@ -154,7 +180,10 @@ class DefaultServicesController(base.ServicesController):
             project_id,
             service_name,
             provider_details)
-
+        """
+        update_service_worker.update_worker(project_id, service_name,
+                          service_old, service_updates, service_obj)
+        """
         proxy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                   'service_async_workers',
                                   'sub_process_proxy.py')
@@ -175,7 +204,7 @@ class DefaultServicesController(base.ServicesController):
         LOG.info('Starting update service subprocess: %s' % cmd_list)
         p = subprocess.Popen(cmd_list, env=os.environ.copy())
         p.communicate()
-
+        """
         return
 
     def delete(self, project_id, service_name):

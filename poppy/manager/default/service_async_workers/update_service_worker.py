@@ -15,6 +15,7 @@
 
 import argparse
 import json
+import jsonpatch
 import logging
 import os
 
@@ -36,9 +37,20 @@ def update_worker(project_id, service_name,
     bootstrap_obj = bootstrap.Bootstrap(conf)
     service_controller = bootstrap_obj.manager.services_controller
 
-    service_old = service.load_from_json(json.loads(service_old))
+
+    # remove encoding me
+    service_old = json.dumps(service_old.to_dict())
+    import pdb; pdb.set_trace()
+    service_obj = json.dumps(service_obj.to_dict())
+    service_updates = json.dumps(service_updates)
+
+    service_old_json = json.loads(service_old)
+    service_obj_json = jsonpatch.apply_patch(service_old_json, service_updates)
+    service_updates_json = jsonpatch.apply_patch({}, service_updates)
+
+    service_old = service.load_from_json(service_old_json)
+    service_obj = service.load_from_json(service_obj_json)
     service_updates = service.load_from_json(json.loads(service_updates))
-    service_obj = service.load_from_json(json.loads(service_obj))
 
     responders = []
     # update service with each provider present in provider_details

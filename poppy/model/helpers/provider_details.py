@@ -89,3 +89,31 @@ class ProviderDetail(common.DictSerializableModel):
     @error_message.setter
     def error_message(self, value):
         self._error_message = value
+
+    @classmethod
+    def init_from_dict(cls, dict_obj):
+        """Construct a model instance from a dictionary.
+
+        This serves as a 2nd constructor
+
+        :param dict_obj: dictionary object
+        :returns o
+        """
+
+        o = cls("unnamed")
+        o.provider_service_id = dict_obj.get("provider_service_id", "unkown_id")
+        o.access_urls = dict_obj.get("access_urls", {})
+        o.status = dict_obj.get("status", u"deploy_in_progress")
+        o.name = dict_obj.get("name", None)
+        o.error_info = dict_obj.get("error_info", None)
+        o.error_message = dict_obj.get("error_message", None)
+        return o
+
+    """
+    def to_dict(self):
+        result = common.DictSerializableModel.to_dict(self)
+        # need to deserialize the nested rules object
+        rules_obj_list = result['rules']
+        result['rules'] = [r.to_dict() for r in rules_obj_list]
+        return result
+    """
