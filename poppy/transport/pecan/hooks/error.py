@@ -59,9 +59,9 @@ class ErrorHook(hooks.PecanHook):
             extra=exception_payload
         )
 
-        message['message'] = str(exception)
         if hasattr(exception, 'status'):
             exception_payload['status'] = exception.status
+            message['message'] = str(exception)
 
         return webob.Response(
             json.dumps(message),
