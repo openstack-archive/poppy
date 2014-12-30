@@ -29,11 +29,11 @@ def load_from_json(json_data):
     restrictions = json_data.get("restrictions", [])
     pd = json_data.get("provider_details", {})
     # load caching rules json string from input
-    caching = json_data.get("caching", [])
     origins = [origin.load_from_json(o) for o in origins]
     domains = [domain.load_from_json(d) for d in domains]
     restrictions = [restriction.load_from_json(r) for r in restrictions]
     # convert caching rule jsong string list into object list
+    caching = json_data.get("caching", [])
     caching = [cachingrule.load_from_json(c) for c in caching]
     r = service.Service(name, domains, origins, flavor_id, caching,
                         restrictions)
