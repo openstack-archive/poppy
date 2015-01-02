@@ -12,7 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import cgi
 try:
     import ordereddict as collections
 except ImportError:        # pragma: no cover
@@ -27,7 +27,7 @@ class Model(collections.OrderedDict):
 
     def __init__(self, caching):
         super(Model, self).__init__()
-        self['name'] = caching.name
+        self['name'] = cgi.escape(caching.name)
         self['ttl'] = caching.ttl
         if caching.rules != []:
             self['rules'] = [rule.Model(r) for r in caching.rules]

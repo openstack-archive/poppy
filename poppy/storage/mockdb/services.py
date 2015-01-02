@@ -53,7 +53,7 @@ class ServicesController(base.ServicesController):
         services = []
         for i in self.created_service_ids:
             services = [{'service_id': i,
-                         'name': uuid.uuid4(),
+                         'service_name': uuid.uuid4(),
                          'domains': [json.dumps(
                              {'domain': 'www.mywebsite.com'})
                          ],
@@ -114,7 +114,7 @@ class ServicesController(base.ServicesController):
                         [{'operator_url': 'mockcf123.fastly.prod.com'}]})}
 
             service_dict = {'service_id': service_id,
-                            'name': uuid.uuid4(),
+                            'service_name': uuid.uuid4(),
                             'domains': [domain_json],
                             'origins': [origin_json],
                             'flavor_id': 'standard',
@@ -185,7 +185,7 @@ class ServicesController(base.ServicesController):
     @staticmethod
     def format_result(result):
         service_id = result.get('service_id')
-        name = result.get('service_name')
+        name = str(result.get('service_name'))
         origins = [json.loads(o) for o in result.get('origins', [])]
         domains = [json.loads(d) for d in result.get('domains', [])]
         origins = [origin.Origin(o['origin'],

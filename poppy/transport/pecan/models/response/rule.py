@@ -12,7 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import cgi
 try:
     import ordereddict as collections
 except ImportError:        # pragma: no cover
@@ -25,10 +25,10 @@ class Model(collections.OrderedDict):
 
     def __init__(self, rule):
         super(Model, self).__init__()
-        self['name'] = rule.name
+        self['name'] = cgi.escape(rule.name)
         for attr_name in ['http_host', 'http_method',
                           'client_ip', 'request_url',
                           'referrer']:
             attr = getattr(rule, attr_name, None)
             if attr is not None:
-                self[attr_name] = attr
+                self[attr_name] = cgi.escape(attr)

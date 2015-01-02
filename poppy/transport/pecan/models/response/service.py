@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cgi
 try:
     import ordereddict as collections
 except ImportError:        # pragma: no cover
@@ -32,7 +33,7 @@ class Model(collections.OrderedDict):
 
     def __init__(self, service_obj, controller):
         super(Model, self).__init__()
-        self["name"] = service_obj.name
+        self["name"] = cgi.escape(service_obj.name)
         self["id"] = str(service_obj.service_id)
         self["domains"] = [domain.Model(d) for d in service_obj.domains]
         self["origins"] = [origin.Model(o) for o in service_obj.origins]
