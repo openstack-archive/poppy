@@ -63,6 +63,11 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         return self.get('default_flavor')
 
     @property
+    def generated_provider(self):
+        """String value to set the provider to use with generated flavor."""
+        return self.get('generated_provider')
+
+    @property
     def project_id_in_url(self):
         """Flag to indicate if project_id should be present in the url."""
         return self.get_boolean('project_id_in_url')
