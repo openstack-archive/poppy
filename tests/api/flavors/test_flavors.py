@@ -86,25 +86,7 @@ class TestFlavorActions(base.TestBase):
 
     def setUp(self):
         super(TestFlavorActions, self).setUp()
-        if self.test_config.generate_flavors:
-            self.flavor_id = str(uuid.uuid1())
-            self.provider_list = [
-                {
-                    "provider": "fastly",
-                    "links": [
-                        {
-                            "href": "www.fastly.com",
-                            "rel": "provider_url"
-                        }
-                    ]
-                }
-            ]
-
-            self.client.create_flavor(
-                flavor_id=self.flavor_id,
-                provider_list=self.provider_list)
-        else:
-            self.flavor_id = self.test_config.default_flavor
+        self.flavor_id = self.test_flavor
 
     @attrib.attr('smoke')
     def test_get_flavor(self):
