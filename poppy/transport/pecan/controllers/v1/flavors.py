@@ -51,6 +51,11 @@ class FlavorsController(base.Controller, hooks.HookController):
         }
 
     @pecan.expose('json')
+    @decorators.validate(
+        flavor_id=rule.Rule(
+            helpers.is_valid_flavor_id(),
+            helpers.abort_with_message)
+    )
     def get_one(self, flavor_id):
         """get_one
 

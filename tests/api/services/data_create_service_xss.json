@@ -1,0 +1,75 @@
+{
+    "name_injection": {
+        "name": "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+    },
+    "domain_injection": {
+        "name": "bad_domain",
+        "domain_list": [
+            {
+                "domain": "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
+                "protocol": "http"
+            }
+        ],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": []
+    },
+    "origin_injection": {
+        "name": "bad_origin",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+    },
+    "caching_name_injection": {
+        "name": "bad_caching_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+    },
+    "caching_rule_injection": {
+        "name": "bad_caching_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "images",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>"}]}]
+    },
+    "caching_rule_name_injection": {
+        "name": "bad_caching_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "images",
+                          "ttl": 1200,
+                          "rules": [{"name" : "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
+                                     "request_url" : "/images"}]}]
+    }
+}

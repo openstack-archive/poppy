@@ -12,7 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import cgi
 try:
     import ordereddict as collections
 except ImportError:           # pragma: no cover
@@ -25,5 +25,5 @@ class Model(collections.OrderedDict):
 
     def __init__(self, domain):
         super(Model, self).__init__()
-        self['domain'] = domain.domain
+        self['domain'] = cgi.escape(domain.domain)
         self['protocol'] = domain.protocol
