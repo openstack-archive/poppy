@@ -16,6 +16,7 @@
 
 from cafe.drivers.unittest import fixtures
 import jsonschema
+import uuid
 
 from tests.api.utils import client
 from tests.api.utils import config
@@ -63,6 +64,23 @@ class TestBase(fixtures.BaseTestFixture):
             jsonschema.validate(response_json, expected_schema)
         except jsonschema.ValidationError as message:
             assert False, message
+
+    @property
+    def test_flavor(self):
+        if self.test_config.generate_flavors:
+            provider_name = self.test_config.generated_provider
+            # create the flavor
+            flavor_id = str(uuid.uuid1())
+            self.client.create_flavor(
+                flavor_id=flavor_id,
+                provider_list=[{
+                    "provider": provider_name,
+                    "links": [{"href": "www.{0}.com".format(provider_name),
+                               "rel": "provider_url"}]}])
+        else:
+            flavor_id = self.test_config.default_flavor
+
+        return flavor_id
 
     @classmethod
     def tearDownClass(cls):

@@ -39,16 +39,7 @@ class TestCreateService(providers.TestProviderBase):
         super(TestCreateService, self).setUp()
         self.service_url = ''
         self.service_name = str(uuid.uuid1())
-        self.flavor_id = self.test_config.default_flavor
-
-        if self.test_config.generate_flavors:
-            # create the flavor
-            self.flavor_id = str(uuid.uuid1())
-            self.client.create_flavor(flavor_id=self.flavor_id,
-                                      provider_list=[{
-                                          "provider": "fastly",
-                                          "links": [{"href": "www.fastly.com",
-                                                     "rel": "provider_url"}]}])
+        self.flavor_id = self.test_flavor
 
     @attrib.attr('smoke')
     @ddt.file_data('data_create_service.json')
@@ -175,15 +166,7 @@ class TestListServices(base.TestBase):
     def setUp(self):
         super(TestListServices, self).setUp()
         self.service_list = []
-        if self.test_config.generate_flavors:
-            self.flavor_id = str(uuid.uuid1())
-            self.client.create_flavor(
-                flavor_id=self.flavor_id,
-                provider_list=[{"provider": "fastly",
-                                "links": [{"href": "www.fastly.com",
-                                           "rel": "provider_url"}]}])
-        else:
-            self.flavor_id = self.test_config.default_flavor
+        self.flavor_id = self.test_flavor
 
     @attrib.attr('smoke')
     def test_list_single_service(self):
@@ -267,16 +250,7 @@ class TestServiceActions(base.TestBase):
     def setUp(self):
         super(TestServiceActions, self).setUp()
         self.service_name = str(uuid.uuid1())
-        self.flavor_id = str(uuid.uuid1())
-        if self.test_config.generate_flavors:
-            self.flavor_id = str(uuid.uuid1())
-            self.client.create_flavor(
-                flavor_id=self.flavor_id,
-                provider_list=[{"provider": "fastly",
-                                "links": [{"href": "www.fastly.com",
-                                           "rel": "provider_url"}]}])
-        else:
-            self.flavor_id = self.test_config.default_flavor
+        self.flavor_id = self.test_flavor
 
         domain = str(uuid.uuid1()) + u'.com'
         self.domain_list = [
@@ -428,15 +402,7 @@ class TestServicePatch(base.TestBase):
     def setUp(self):
         super(TestServicePatch, self).setUp()
         self.service_name = str(uuid.uuid1())
-        if self.test_config.generate_flavors:
-            self.flavor_id = str(uuid.uuid1())
-            self.client.create_flavor(
-                flavor_id=self.flavor_id,
-                provider_list=[{"provider": "fastly",
-                                "links": [{"href": "www.fastly.com",
-                                           "rel": "provider_url"}]}])
-        else:
-            self.flavor_id = self.test_config.default_flavor
+        self.flavor_id = self.test_flavor
 
         domain = str(uuid.uuid1()) + '.com'
         self.domain_list = [{"domain": domain}]
