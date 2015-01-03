@@ -353,11 +353,13 @@ class TestServiceActions(base.TestBase):
         self.assertEqual(404, status_code)
 
     def test_delete_non_existing_service(self):
-        parsed_url = urlparse.urlparse(self.service_url)
+        '''parsed_url = urlparse.urlparse(self.service_url)
         url = "{0}://{1}{2}{3}".format(parsed_url.scheme,
                                        parsed_url.netloc,
                                        '/v1.0/services/',
                                        uuid.uuid4())
+        '''
+        url = self.service_url.rsplit('/', 1)[0] + str(uuid.uuid4())
         resp = self.client.delete_service(location=url)
         self.assertEqual(resp.status_code, 404)
 
@@ -366,20 +368,6 @@ class TestServiceActions(base.TestBase):
         # deleted.
         # Placeholder till we figure out how to create provider side failure.
         pass
-
-    @ddt.file_data('data_get_service_by_name.json')
-    def test_get_service_by_name(self, value):
-        resp = self.client.create_service(service_name=value,
-                                          domain_list=self.domain_list,
-                                          origin_list=self.origin_list,
-                                          caching_list=self.caching_list,
-                                          flavor_id=self.flavor_id)
-
-        self.assertEqual(resp.status_code, 202)
-        url = resp.headers["location"]
-
-        resp = self.client.get_service(location=url)
-        self.assertEqual(resp.status_code, 200)
 
     def test_get_service(self):
         resp = self.client.get_service(location=self.service_url)
