@@ -59,7 +59,7 @@ error_message = {'type': 'object',
 restrictions = {'type': 'array'}
 flavor_id = {'type': 'string', 'pattern': '([a-zA-Z0-9_\-]{1,256})'}
 service_name = {'type': 'string', 'pattern': '([a-zA-Z0-9_\-\.]{1,256})'}
-uuid4 = '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'  # noqa
+uuid4 = '([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})'  # noqa
 service_id = {'type': 'string', 'pattern': uuid4}
 
 # Response Schema Definition for Get Service API
