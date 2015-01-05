@@ -42,6 +42,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                 'domain': {
                                     'type': 'string',
                                     'required': True,
+                                    'minLength': 3,
+                                    'maxLength': 253,
                                     'pattern': re.compile(
                                         '^(([^:/?#]+):)?'
                                         '(//([^/?#]*))?'
@@ -75,7 +77,9 @@ class ServiceSchema(schema_base.SchemaBase):
                                         '(#(.*))?$',
                                         re.UNICODE
                                     ),
-                                    'required': True},
+                                    'required': True,
+                                    'minLength': 3,
+                                    'maxLength': 253},
                                 'port': {
                                     'type': 'integer',
                                     'enum': [
@@ -90,11 +94,15 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'properties': {
                                             'name': {
                                                 'type': 'string',
-                                                'required': True
+                                                'required': True,
+                                                'minLength': 3,
+                                                'maxLength': 256
                                             },
                                             'request_url': {
                                                 'type': 'string',
-                                                'required': True
+                                                'required': True,
+                                                'minLength': 3,
+                                                'maxLength': 1024
                                             }
                                         }
                                     }
@@ -116,7 +124,9 @@ class ServiceSchema(schema_base.SchemaBase):
                                         '(#(.*))?$',
                                         re.UNICODE
                                     ),
-                                    'required': True},
+                                    'required': True,
+                                    'minLength': 3,
+                                    'maxLength': 253},
                                 'port': {
                                     'type': 'integer',
                                     'enum': [
@@ -131,11 +141,15 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'properties': {
                                             'name': {
                                                 'type': 'string',
-                                                'required': True
+                                                'required': True,
+                                                'minLength': 3,
+                                                'maxLength': 256,
                                             },
                                             'request_url': {
                                                 'type': 'string',
-                                                'required': True
+                                                'required': True,
+                                                'minLength': 3,
+                                                'maxLength': 1024,
                                             }
                                         }
                                     },
@@ -154,7 +168,9 @@ class ServiceSchema(schema_base.SchemaBase):
                             'properties': {
                                 'name': {
                                     'type': 'string',
-                                    'required': True},
+                                    'required': True,
+                                    'minLength': 3,
+                                    'maxLength': 256},
                                 'ttl': {
                                     'type': 'integer',
                                     'required': True},
@@ -166,10 +182,14 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'properties': {
                                             'name': {
                                                 'type': 'string',
-                                                'required': True},
+                                                'required': True,
+                                                'minLength': 3,
+                                                'maxLength': 256},
                                             'request_url': {
                                                 'type': 'string',
-                                                'required': True}}},
+                                                'required': True,
+                                                'minLength': 3,
+                                                'maxLength': 1024}}},
                                 }},
                         }],
                         "additionalItems": {
@@ -182,7 +202,9 @@ class ServiceSchema(schema_base.SchemaBase):
                                         '^(?!default$).*',
                                         re.IGNORECASE
                                     ),
-                                    'required': True},
+                                    'required': True,
+                                    'minLength': 3,
+                                    'maxLength': 256},
                                 'ttl': {
                                     'type': 'integer',
                                     'required': True},
@@ -194,9 +216,13 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'type': 'object',
                                         'properties': {
                                             'name': {
-                                                'type': 'string'},
+                                                'type': 'string',
+                                                'minLength': 3,
+                                                'maxLength': 256},
                                             'request_url': {
-                                                'type': 'string'}}},
+                                                'type': 'string',
+                                                'minLength': 3,
+                                                'maxLength': 1024}}},
                                 }},
                         },
                         "uniqueItems": True,
@@ -208,20 +234,30 @@ class ServiceSchema(schema_base.SchemaBase):
                             'properties': {
                                 'name': {
                                     'type': 'string',
-                                    'required': True},
+                                    'required': True,
+                                    'minLength': 3,
+                                    'maxLength': 256},
                                 'rules': {
                                     'type': 'array',
                                     'items': {
                                         'type': 'object',
                                         'properties': {
                                             'name': {
-                                                'type': 'string'},
+                                                'type': 'string',
+                                                'minLength': 3,
+                                                'maxLength': 256},
                                             'referrer': {
-                                                'type': 'string'},
+                                                'type': 'string',
+                                                'minLength': 3,
+                                                'maxLength': 1024},
                                             'request_url': {
-                                                'type': 'string'},
+                                                'type': 'string',
+                                                'minLength': 3,
+                                                'maxLength': 1024},
                                             'http_host': {
-                                                'type': 'string'},
+                                                'type': 'string',
+                                                'minLength': 3,
+                                                'maxLength': 256},
                                             'client_ip': {
                                                 'type': 'string'},
                                             'http_method': {
