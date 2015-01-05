@@ -32,6 +32,10 @@ class Restriction(common.DictSerializableModel):
         """
         return self._name
 
+    @name.setter
+    def name(self, value):
+        self._name = value
+
     @property
     def rules(self):
         """rules.
@@ -53,10 +57,11 @@ class Restriction(common.DictSerializableModel):
         :param dict_obj: dictionary object
         :returns o
         """
-        o = cls(
-            dict_obj.get("name", "unnamed"),
-            dict_obj.get("rules", [])
-        )
+
+        o = cls("unnamed")
+        o.restriction = dict_obj.get("restriction", "unnamed")
+        o.name = dict_obj.get("name", "unnamed")
+        o.value = dict_obj.get("ssl", [])
         return o
 
     def to_dict(self):

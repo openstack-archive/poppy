@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import json
 import os
 import subprocess
@@ -24,9 +23,14 @@ try:
 except ImportError:
     use_uwsgi = False
 
+import jsonpatch
+import jsonschema
+
 from poppy.common import errors
 from poppy.manager import base
+from poppy.model import service
 from poppy.openstack.common import log
+from poppy.transport.validators.schemas import service as service_schema
 
 LOG = log.getLogger(__name__)
 
@@ -129,21 +133,20 @@ class DefaultServicesController(base.ServicesController):
             raise errors.ServiceStatusNotDeployed(
                 u'Service {0} not deployed'.format(service_id))
 
-        service_obj = copy.deepcopy(service_old)
+        service_old_dict = service_old.to_dict()
+        service_obj_dict = jsonpatch.apply_patch(
+            service_old_dict, service_updates)
 
-        # update service object
-        if service_updates.name:
-            raise Exception(u'Currently this operation is not supported')
-        if service_updates.domains:
-            service_obj.domains = service_updates.domains
-        if service_updates.origins:
-            service_obj.origins = service_updates.origins
-        if service_updates.caching:
-            raise Exception(u'Currently this operation is not supported')
-        if service_updates.restrictions:
-            raise Exception(u'Currently this operation is not supported')
-        if service_updates.flavor_id:
-            raise Exception(u'Currently this operation is not supported')
+        service_obj = service.Service.init_from_dict(service_obj_dict)
+
+        # TODO(obulpathi): validate the updates
+        service_obj_json = json.loads(json.dumps(service_obj.to_dict()))
+        del service_obj_json['status']
+        del service_obj_json['provider_details']
+        del service_obj_json['service_id']
+
+        patch_schema = service_schema.ServiceSchema.get_schema("service", "POST")
+        jsonschema.validate(service_obj_json, patch_schema)
 
         # get provider details for this service
         provider_details = self._get_provider_details(project_id, service_id)
@@ -171,7 +174,6 @@ class DefaultServicesController(base.ServicesController):
                     script_path,
                     project_id, service_id,
                     json.dumps(service_old.to_dict()),
-                    json.dumps(service_updates.to_dict()),
                     json.dumps(service_obj.to_dict())]
         LOG.info('Starting update service subprocess: %s' % cmd_list)
         p = subprocess.Popen(cmd_list, env=os.environ.copy())
