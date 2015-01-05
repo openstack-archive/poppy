@@ -30,6 +30,7 @@ from poppy.transport.pecan.models.response import service as resp_service_model
 from poppy.transport.validators import helpers
 from poppy.transport.validators.schemas import service
 from poppy.transport.validators.stoplight import decorators
+from poppy.transport.validators.stoplight import exceptions
 from poppy.transport.validators.stoplight import helpers as stoplight_helpers
 from poppy.transport.validators.stoplight import rule
 
@@ -202,25 +203,19 @@ class ServicesController(base.Controller, hooks.HookController):
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
     def patch_one(self, service_id):
-        service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
+        service_updates = json.loads(pecan.request.body.decode('utf-8'))
 
-        # TODO(obulpathi): remove these restrictions, once cachingrule and
-        # restrictions models are implemented is implemented
-        if 'caching' in service_json_dict:
-            pecan.abort(400, detail='This operation is yet not supported')
-        elif 'restrictions' in service_json_dict:
-            pecan.abort(400, detail='This operation is yet not supported')
-
-        # if service_json is empty, abort
-        if not service_json_dict:
+        # if service_updates is empty, abort
+        if not service_updates:
             pecan.abort(400, detail='No details provided to update')
 
         services_controller = self._driver.manager.services_controller
-        service_updates = req_service_model.load_from_json(service_json_dict)
 
         try:
             services_controller.update(
                 self.project_id, service_id, service_updates)
+        except exceptions.ValidationFailed as e:
+            pecan.abort(400, detail=str(e))
         except ValueError as e:
             pecan.abort(404, detail='service could not be found')
         except errors.ServiceStatusNotDeployed as e:
