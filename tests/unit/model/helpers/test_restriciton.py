@@ -31,7 +31,10 @@ class TestRestriction(base.TestCase):
         # test all properties
         # name
         self.assertEqual(myrestriction.name, name)
-        self.assertRaises(AttributeError, setattr, myrestriction, 'name', name)
+        # change name and verify that its updated
+        name = "new_name"
+        myrestriction.name = name
+        self.assertEqual(myrestriction.name, name)
 
         # rules test:
         # We need to be able to set the rule now so previous setattr

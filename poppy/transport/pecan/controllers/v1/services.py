@@ -202,21 +202,13 @@ class ServicesController(base.Controller, hooks.HookController):
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
     def patch_one(self, service_id):
-        service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
+        service_updates = json.loads(pecan.request.body.decode('utf-8'))
 
-        # TODO(obulpathi): remove these restrictions, once cachingrule and
-        # restrictions models are implemented is implemented
-        if 'caching' in service_json_dict:
-            pecan.abort(400, detail='This operation is yet not supported')
-        elif 'restrictions' in service_json_dict:
-            pecan.abort(400, detail='This operation is yet not supported')
-
-        # if service_json is empty, abort
-        if not service_json_dict:
+        # if service_updates is empty, abort
+        if not service_updates:
             pecan.abort(400, detail='No details provided to update')
 
         services_controller = self._driver.manager.services_controller
-        service_updates = req_service_model.load_from_json(service_json_dict)
 
         try:
             services_controller.update(
