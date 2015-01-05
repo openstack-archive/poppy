@@ -117,5 +117,18 @@
                          "ssl": false}],
         "flavor_id": "standard",
         "caching_list": [{"ttl": 3600}]
+    },
+    "caching_negative_ttl": {
+        "name": "my_service_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": -1,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
     }
 }

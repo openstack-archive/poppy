@@ -157,7 +157,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                     'required': True},
                                 'ttl': {
                                     'type': 'integer',
-                                    'required': True},
+                                    'required': True,
+                                    "minimum": 0},
                                 'rules': {
                                     'type': 'array',
                                     'required': False,
@@ -185,7 +186,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                     'required': True},
                                 'ttl': {
                                     'type': 'integer',
-                                    'required': True},
+                                    'required': True,
+                                    "minimum": 0},
                                 'rules': {
                                     'type': 'array',
                                     'required': True,
