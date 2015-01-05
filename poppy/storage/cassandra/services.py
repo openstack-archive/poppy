@@ -125,10 +125,10 @@ CQL_ARCHIVE_SERVICE = '''
         WHERE project_id = %(project_id)s AND service_id = %(service_id)s;
 
         DELETE FROM domain_names
-        WHERE domain_name IN %(domain_list)s
+        WHERE domain_name IN %(domains_list)s
+
     APPLY BATCH;
     '''
-
 CQL_DELETE_SERVICE = '''
     BEGIN BATCH
         DELETE FROM services
@@ -282,7 +282,7 @@ class ServicesController(base.ServicesController):
 
             if results:
                 for r in results:
-                    if r.get('service_id') != str(service_id):
+                    if str(r.get('service_id')) != str(service_id):
                         LOG.info(
                             "Domain '{0}' has already been taken."
                             .format(domain_name))
@@ -360,7 +360,7 @@ class ServicesController(base.ServicesController):
                     d.domain,
                     service_id) is True:
                 raise ValueError(
-                    "Domain %s has already been taken" % d)
+                    "Domain {0} has already been taken".format(d.domain))
 
         service_name = service_obj.name
         domains = [json.dumps(d.to_dict())
@@ -403,7 +403,7 @@ class ServicesController(base.ServicesController):
         result = results[0]
 
         if (result):
-            domains_list = [d.get('domain')
+            domains_list = [json.loads(d).get('domain')
                             for d in result.get('domains')]
 
             if self._driver.archive_on_delete:
@@ -418,7 +418,7 @@ class ServicesController(base.ServicesController):
                     'restrictions': result.get('restrictions'),
                     'provider_details': result.get('provider_details'),
                     'archived_time': datetime.datetime.utcnow(),
-                    'domains_list': domains_list
+                    'domains_list': query.ValueSequence(domains_list)
                 }
 
                 # archive and delete the service
