@@ -16,6 +16,10 @@
 # limitations under the License.
 
 import time
+try:
+    import urllib.parse as urlparse
+except ImportError:
+    import urlparse
 import uuid
 
 import ddt
@@ -51,8 +55,6 @@ class TestCreateService(providers.TestProviderBase):
     def test_create_service_positive(self, test_data):
 
         domain_list = test_data['domain_list']
-        for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
@@ -332,22 +334,30 @@ class TestServiceActions(base.TestBase):
         resp = self.client.delete_service(location=self.service_url)
         self.assertEqual(resp.status_code, 202)
 
-        start_time = int(time.time())
-        stop_time = start_time + self.test_config.status_check_retry_timeout
-        current_status = 0
-        expected_status = 404
-        while (current_status != expected_status):
+        # As is, the service is still available in the DB till deleted from
+        # the provider. The test should be able to handle this with
+        # exponential sleep or whatever(!).
+        status_code = 0
+        count = 0
+        while (count < 5):
             service_deleted = self.client.get_service(
                 location=self.service_url)
-            current_status = service_deleted.status_code
-            current_time = int(time.time())
-            if current_time > stop_time:
+            status_code = service_deleted.status_code
+            if status_code == 200:
+                time.sleep(1)
+            else:
                 break
 
-        self.assertEqual(404, current_status)
+            count = count + 1
+
+        self.assertEqual(404, status_code)
 
     def test_delete_non_existing_service(self):
-        url = self.service_url.rsplit('/', 1)[0] + str(uuid.uuid4())
+        parsed_url = urlparse.urlparse(self.service_url)
+        url = "{0}://{1}{2}{3}".format(parsed_url.scheme,
+                                       parsed_url.netloc,
+                                       '/v1.0/services/',
+                                       uuid.uuid4())
         resp = self.client.delete_service(location=url)
         self.assertEqual(resp.status_code, 404)
 
@@ -356,6 +366,20 @@ class TestServiceActions(base.TestBase):
         # deleted.
         # Placeholder till we figure out how to create provider side failure.
         pass
+
+    @ddt.file_data('data_get_service_by_name.json')
+    def test_get_service_by_name(self, value):
+        resp = self.client.create_service(service_name=value,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id)
+
+        self.assertEqual(resp.status_code, 202)
+        url = resp.headers["location"]
+
+        resp = self.client.get_service(location=url)
+        self.assertEqual(resp.status_code, 200)
 
     def test_get_service(self):
         resp = self.client.get_service(location=self.service_url)
@@ -375,7 +399,11 @@ class TestServiceActions(base.TestBase):
         self.assertEqual(body['flavor_id'], self.flavor_id)
 
     def test_get_non_existing_service(self):
-        url = self.service_url.rsplit('/', 1)[0] + str(uuid.uuid4())
+        parsed_url = urlparse.urlparse(self.service_url)
+        url = "{0}://{1}{2}{3}".format(parsed_url.scheme,
+                                       parsed_url.netloc,
+                                       '/v1.0/services/',
+                                       uuid.uuid4())
         resp = self.client.get_service(location=url)
         self.assertEqual(resp.status_code, 404)
 

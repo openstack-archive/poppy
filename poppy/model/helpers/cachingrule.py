@@ -36,6 +36,10 @@ class CachingRule(common.DictSerializableModel):
         """
         return self._name
 
+    @name.setter
+    def name(self, value):
+        self._name = value
+
     @property
     def ttl(self):
         """ttl.
@@ -43,6 +47,10 @@ class CachingRule(common.DictSerializableModel):
         :returns ttl
         """
         return self._ttl
+
+    @ttl.setter
+    def ttl(self, value):
+        self._ttl = value
 
     @property
     def rules(self):
@@ -79,6 +87,25 @@ class CachingRule(common.DictSerializableModel):
     def to_dict(self):
         result = common.DictSerializableModel.to_dict(self)
         # need to deserialize the nested rules object
+        result['name'] = self._name
+        result['ttl'] = self._ttl
         rules_obj_list = result['rules']
         result['rules'] = [r.to_dict() for r in rules_obj_list]
         return result
+
+    @classmethod
+    def init_from_dict(cls, dict_obj):
+        """Construct a model instance from a dictionary.
+
+        This serves as a 2nd constructor
+
+        :param dict_obj: dictionary object
+        :returns o
+        """
+
+        o = cls("unnamed", 3600)
+        o.caching = dict_obj.get("caching", "unnamed")
+        o.name = dict_obj.get("name", "unnamed")
+        o.ttl = dict_obj.get("ttl", 3600)
+        o.rules = dict_obj.get("rules", [])
+        return o

@@ -29,8 +29,7 @@ class ProviderWrapper(object):
 
         return ext.obj.service_controller.create(service_obj)
 
-    def update(self, ext, provider_details, service_old, service_updates,
-               service_obj):
+    def update(self, ext, provider_details, service_old, service_obj):
         """Update a provider
 
         :param ext
@@ -48,7 +47,7 @@ class ProviderWrapper(object):
                 "Perhaps service has not been created")
         provider_service_id = provider_detail.provider_service_id
         return ext.obj.service_controller.update(
-            provider_service_id, service_old, service_updates, service_obj)
+            provider_service_id, service_old, service_obj)
 
     def delete(self, ext, provider_details):
         try:

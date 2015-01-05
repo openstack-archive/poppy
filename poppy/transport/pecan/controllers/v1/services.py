@@ -24,6 +24,7 @@ from poppy.common import errors
 from poppy.common import uri
 from poppy.transport.pecan.controllers import base
 from poppy.transport.pecan import hooks as poppy_hooks
+from poppy.transport.pecan.models.request import service_patch
 from poppy.transport.pecan.models.request import service as req_service_model
 from poppy.transport.pecan.models.response import link
 from poppy.transport.pecan.models.response import service as resp_service_model
@@ -201,22 +202,15 @@ class ServicesController(base.Controller, hooks.HookController):
                 service.ServiceSchema.get_schema("service", "PATCH")),
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
+
     def patch_one(self, service_id):
-        service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
+        service_updates = json.loads(pecan.request.body.decode('utf-8'))
 
-        # TODO(obulpathi): remove these restrictions, once cachingrule and
-        # restrictions models are implemented is implemented
-        if 'caching' in service_json_dict:
-            pecan.abort(400, detail='This operation is yet not supported')
-        elif 'restrictions' in service_json_dict:
-            pecan.abort(400, detail='This operation is yet not supported')
-
-        # if service_json is empty, abort
-        if not service_json_dict:
+        # if service_updates is empty, abort
+        if not service_updates:
             pecan.abort(400, detail='No details provided to update')
 
         services_controller = self._driver.manager.services_controller
-        service_updates = req_service_model.load_from_json(service_json_dict)
 
         try:
             services_controller.update(
