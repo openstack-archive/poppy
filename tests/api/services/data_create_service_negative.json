@@ -27,9 +27,37 @@
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}]
     },
+    "too_short_domain": {
+        "service_name": "abcdefg",
+        "domain_list": [{"domain": "ab"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "flavor_id": "standard",
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+    },
     "too_long_name": {
         "service_name": "too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name",
         "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "flavor_id": "standard",
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+    },
+    "too_long_domain_name": {
+        "service_name": "asdsad",
+        "domain_list": [{"domain": "too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": "mywebsite1.com",
                          "port": 443,
