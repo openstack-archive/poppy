@@ -101,6 +101,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                 }
                             }
                         }],
+                        'required': True,
                         'minItems': 1,
                         # the 2nd and successive items must have
                         # 'rules' field which has at least one rule
