@@ -117,10 +117,13 @@ class ServiceController(base.ServiceBase):
                       (dp, classified_domain.domain))
                 provider_access_url = None
                 if classified_domain.protocol == 'http':
-                    provider_access_url = self.driver.akamai_access_url_link
+                    provider_access_url = ''.join([
+                        'http://',
+                        self.driver.akamai_access_url_link])
                 elif classified_domain.protocol == 'https':
                     provider_access_url = '.'.join(
                         [dp, self.driver.akamai_https_access_url_suffix])
+                    provider_access_url = 'https://' + provider_access_url
                 links.append({'href': provider_access_url,
                               'rel': 'access_url',
                               'domain': classified_domain.domain
@@ -395,11 +398,13 @@ class ServiceController(base.ServiceBase):
                           'complete' % (dp, classified_domain.domain))
                     provider_access_url = None
                     if classified_domain.protocol == 'http':
-                        provider_access_url = (
-                            self.driver.akamai_access_url_link)
+                        provider_access_url = ''.join([
+                            'http://',
+                            self.driver.akamai_access_url_link])
                     elif classified_domain.protocol == 'https':
                         provider_access_url = '.'.join(
                             [dp, self.driver.akamai_https_access_url_suffix])
+                        provider_access_url = 'https://' + provider_access_url
                     links.append({'href': provider_access_url,
                                   'rel': 'access_url',
                                   'domain': dp
@@ -496,11 +501,13 @@ class ServiceController(base.ServiceBase):
                     return self.responder.failed("failed to update service")
                 provider_access_url = None
                 if policy['protocol'] == 'http':
-                    provider_access_url = (
-                        self.driver.akamai_access_url_link)
+                    provider_access_url = ''.join([
+                        'http://',
+                        self.driver.akamai_access_url_link])
                 elif policy['protocol'] == 'https':
                     provider_access_url = '.'.join(
                         [dp, self.driver.akamai_https_access_url_suffix])
+                    provider_access_url = 'https://' + provider_access_url
                 links.append({'href': provider_access_url,
                               'rel': 'access_url',
                               'domain': policy['policy_name']

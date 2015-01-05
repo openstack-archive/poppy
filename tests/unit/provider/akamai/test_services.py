@@ -38,6 +38,7 @@ class TestServices(base.TestCase):
               mock_driver):
         super(TestServices, self).setUp()
         self.driver = mock_driver()
+        self.driver.akamai_access_url_link = str(uuid.uuid1())
         self.driver.akamai_https_access_url_suffix = str(uuid.uuid1())
         self.controller = services.ServiceController(self.driver)
 
