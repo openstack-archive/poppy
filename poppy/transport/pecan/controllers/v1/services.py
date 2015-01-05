@@ -107,7 +107,7 @@ class ServicesController(base.Controller, hooks.HookController):
             pecan.abort(400, detail=error)
 
         try:
-            if marker:
+            if marker is not None:
                 marker = str(uuid.UUID(marker))
         except ValueError:
             pecan.abort(400, detail="Marker must be a valid UUID")
