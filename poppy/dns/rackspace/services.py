@@ -176,8 +176,8 @@ class ServicesController(base.ServicesBase):
             providers.append(provider)
 
         dns_details = {}
+        error_msg = ''
         for provider_name in provider_details:
-            error_msg = ''
             access_urls = provider_details[provider_name].access_urls
             for access_url in access_urls:
                 try:
@@ -268,8 +268,8 @@ class ServicesController(base.ServicesBase):
             providers.append(provider)
 
         # delete the records for deleted domains
+        error_msg = ''
         for provider_name in provider_details:
-            error_msg = ''
             provider_detail = provider_details[provider_name]
             for access_url in provider_detail.access_urls:
                 if access_url['domain'] not in removed_domains:

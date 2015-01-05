@@ -38,9 +38,8 @@ class MockProviderServicesTest(base.TestCase):
     def test_update(self, service_json):
         service_obj = service.load_from_json(service_json)
         service_old = service_obj
-        service_updates = service_obj
         response = self.sc.update(self.test_provider_service_id, service_old,
-                                  service_updates, service_obj)
+                                  service_obj)
         self.assertTrue(response is not None)
 
     def test_delete(self):

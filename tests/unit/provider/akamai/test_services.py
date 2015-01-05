@@ -157,7 +157,7 @@ class TestServices(base.TestCase):
         )
         service_obj = service.load_from_json(service_json)
         resp = controller.update(
-            provider_service_id, service_obj, service_obj, service_obj)
+            provider_service_id, service_obj, service_obj)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_update_service.json')
@@ -166,7 +166,7 @@ class TestServices(base.TestCase):
         provider_service_id = None
         service_obj = service.load_from_json(service_json)
         resp = self.controller.update(
-            provider_service_id, service_obj, service_obj, service_obj)
+            provider_service_id, service_obj, service_obj)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_update_service.json')
@@ -188,7 +188,7 @@ class TestServices(base.TestCase):
         )
         service_obj = service.load_from_json(service_json)
         resp = controller.update(
-            provider_service_id, service_obj, service_obj, service_obj)
+            provider_service_id, service_obj, service_obj)
         self.assertIn('id', resp[self.driver.provider_name])
 
     @ddt.file_data('data_update_service.json')
@@ -210,7 +210,7 @@ class TestServices(base.TestCase):
         )
         service_obj = service.load_from_json(service_json)
         resp = controller.update(
-            provider_service_id, service_obj, service_obj, service_obj)
+            provider_service_id, service_obj, service_obj)
         self.assertIn('id', resp[self.driver.provider_name])
 
     def test_purge_all(self):
