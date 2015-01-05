@@ -33,11 +33,17 @@ class TestCachingRule(base.TestCase):
         # test all properties
         # name
         self.assertEqual(caching_rule.name, name)
-        self.assertRaises(AttributeError, setattr, caching_rule, 'name', name)
+        # change name and verify that its updated
+        name = "new_name"
+        caching_rule.name = name
+        self.assertEqual(caching_rule.name, name)
 
         # ttl
         self.assertEqual(caching_rule.ttl, ttl)
-        self.assertRaises(AttributeError, setattr, caching_rule, 'ttl', ttl)
+        # change ttl and verify that its updated
+        ttl = 3600
+        caching_rule.ttl = ttl
+        self.assertEqual(caching_rule.ttl, ttl)
 
         # default rule is empty list []
         self.assertEqual(caching_rule.rules, [])

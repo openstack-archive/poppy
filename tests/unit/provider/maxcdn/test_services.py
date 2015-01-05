@@ -157,9 +157,8 @@ class TestServices(base.TestCase):
         # test create, everything goes through successfully
         service_obj = service.load_from_json(service_json)
         service_old = service_obj
-        service_updates = service_obj
         resp = controller.update(self.provider_service_id, service_old,
-                                 service_updates, service_obj)
+                                 service_obj)
         self.assertIn('id', resp[new_driver.provider_name])
 
     @ddt.file_data('data_service.json')
@@ -181,7 +180,6 @@ class TestServices(base.TestCase):
         resp = controller_with_update_exception.update(
             self.provider_service_id,
             service_json,
-            service_json,
             service_json)
         self.assertIn('error', resp[driver.provider_name])
 
@@ -193,7 +191,6 @@ class TestServices(base.TestCase):
         service_obj = service.load_from_json(service_json)
         resp = controller_with_update_exception.update(
             self.provider_service_id,
-            service_obj,
             service_obj,
             service_obj)
         self.assertIn('error', resp[driver.provider_name])
