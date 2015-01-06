@@ -217,7 +217,9 @@ class ServicesController(base.Controller, hooks.HookController):
         except exceptions.ValidationFailed as e:
             pecan.abort(400, detail=str(e))
         except ValueError as e:
-            pecan.abort(404, detail='service could not be found')
+            pecan.abort(400, detail=str(e))
+        except errors.ServiceNotFound as e:
+            pecan.abort(404, detail=str(e))
         except errors.ServiceStatusNotDeployed as e:
             pecan.abort(400, detail=str(e))
         except Exception as e:
