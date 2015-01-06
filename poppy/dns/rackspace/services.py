@@ -401,3 +401,20 @@ class ServicesController(base.ServicesBase):
                 dns_details[provider_name] = {'access_urls': access_urls}
 
         return self.responder.updated(dns_details)
+
+    def generate_shared_ssl_domain_suffix(self):
+        """Rackespace DNS secheme to generate a shared ssl domain suffix,
+
+        to be used with manager for shared ssl feature
+
+        """
+        shared_ssl_domain_suffix = (
+            self._driver.rackdns_conf.shared_ssl_domain_suffix)
+        shared_ssl_shard_prefix = (
+            self._driver.rackdns_conf.shared_ssl_shard_prefix)
+        shared_ssl_num_shards = self._driver.rackdns_conf.shared_ssl_num_shards
+
+        # randomly select a shard
+        shard_id = random.randint(1, shared_ssl_num_shards)
+        return '{0}{1}.{2}'.format(shared_ssl_shard_prefix, shard_id,
+                                   shared_ssl_domain_suffix)

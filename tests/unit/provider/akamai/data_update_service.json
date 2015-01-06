@@ -4,7 +4,8 @@
         "domains": [
             {"domain": "parsely.sage.com"},
             {"domain": "densely.sage.com",
-             "protocol": "https"},
+             "protocol": "https",
+             "shared_ssl": true},
             {"domain": "rosemary.thyme.net"}
         ],
         "origins": [
