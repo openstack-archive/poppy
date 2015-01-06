@@ -1,17 +1,5 @@
-{
-   "update_domain_list": {
-        "domains": [{"domain": "woooznewwebsite.com"},
-                    {"domain": "woooznewblog.mywebsite.com"}]
-    },
-    "update_origin_list": {
-        "origins": [{"origin": "www.wooozneworigin.com",
-                     "port": 443, "ssl": false}]
-    },
-   "update_multiple_values": {
-        "domains": [{"domain": "wooozymynewwebsite.com"},
-                        {"domain": "wooozynewblog.mywebsite.com"}],
-        "origins": [{"origin": "www.wooozyneworigin.com",
-                         "port": 443,
-                         "ssl": false}]
-    }
+{"add_domain_list": 
+    [{"op": "add",
+      "path": "/domains/0",
+      "value": {"domain": "added.newsite.com"}}]
 }

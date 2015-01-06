@@ -529,6 +529,7 @@ class TestServicePatch(base.TestBase):
         resp = self.client.get_service(location=self.service_url)
         body = resp.json()
 
+    '''
         if 'domain_list' in test_data:
             for item in test_data['domain_list']:
                 if 'protocol' not in item:
@@ -567,6 +568,7 @@ class TestServicePatch(base.TestBase):
         self.assertEqual(sorted(self.origin_list), sorted(body['origins']))
         # TODO(malini): Uncomment below after caching is implemented.
         # self.assertEqual(sorted(self.caching_list), sorted(body['caching']))
+    '''
 
     def tearDown(self):
         self.client.delete_service(location=self.service_url)
