@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from poppy.model import common
+from poppy.model.helpers import rule
 
 
 class Origin(common.DictSerializableModel):
@@ -89,6 +90,14 @@ class Origin(common.DictSerializableModel):
         o.origin = dict_obj.get("origin", "unnamed")
         o.port = dict_obj.get("port", 80)
         o.ssl = dict_obj.get("ssl", False)
+        rules_dict_list = dict_obj.get("rules", [])
+        o.rules = []
+        for rule_dict in rules_dict_list:
+            new_rule = rule.Rule(rule_dict['name'])
+            del rule_dict['name']
+            new_rule.from_dict(rule_dict)
+            o.rules.append(new_rule)
+        return o
         return o
 
     def to_dict(self):
