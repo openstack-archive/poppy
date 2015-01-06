@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from poppy.model import common
+from poppy.model.helpers import rule
 
 
 class Restriction(common.DictSerializableModel):
@@ -61,7 +62,13 @@ class Restriction(common.DictSerializableModel):
         o = cls("unnamed")
         o.restriction = dict_obj.get("restriction", "unnamed")
         o.name = dict_obj.get("name", "unnamed")
-        o.value = dict_obj.get("ssl", [])
+        rules_dict_list = dict_obj.get("rules", [])
+        o.rules = []
+        for rule_dict in rules_dict_list:
+            new_rule = rule.Rule(rule_dict['name'])
+            del rule_dict['name']
+            new_rule.from_dict(rule_dict)
+            o.rules.append(new_rule)
         return o
 
     def to_dict(self):
