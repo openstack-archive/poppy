@@ -20,6 +20,7 @@ import time
 import uuid
 
 import ddt
+import jsonpatch
 from nose.plugins import attrib
 
 from tests.api import base
@@ -503,15 +504,43 @@ class TestServicePatch(base.TestBase):
 
         self.service_url = resp.headers["location"]
 
+        self.expected_service_details = {
+            "name": self.service_name,
+            "domains": self.domain_list,
+            "origins": self.origin_list,
+            "caching": self.caching_list,
+            "restrictions": [],
+            "flavor_id": self.flavor_id}
+
         self.client.wait_for_service_status(
             location=self.service_url,
             status='deployed',
             retry_interval=self.test_config.status_check_retry_interval,
             retry_timeout=self.test_config.status_check_retry_timeout)
 
+    def _assert_service_details(self, actual_response, expected_response):
+        self.assertEqual(actual_response['service_name'],
+                         expected_response['service_name'])
+        self.assertEqual(sorted(actual_response['origins']),
+                         sorted(expected_response['origins']))
+        self.assertEqual(sorted(actual_response['caching']),
+                         sorted(expected_response['caching']))
+        self.assertEqual(sorted(actual_response['domains']),
+                         sorted(expected_response['domains']))
+        self.assertEqual(sorted(actual_response['restrictions']),
+                         sorted(expected_response['restrictions']))
+        self.assertEqual(actual_response['flavor_id'],
+                         expected_response['flavor_id'])
+
     @ddt.file_data('data_patch_service.json')
     def test_patch_service(self, test_data):
-        '''Implemented - PATCH Origins & Domains.'''
+
+        for item in test_data:
+            if 'domain' in item['path']:
+                item['value']['domain'] = str(uuid.uuid1()) + '.com'
+
+        patch = jsonpatch.JsonPatch(test_data)
+        expected_service_details = patch.apply(self.expected_service_details)
 
         resp = self.client.patch_service(location=self.service_url,
                                          request_body=test_data)
@@ -529,21 +558,9 @@ class TestServicePatch(base.TestBase):
         resp = self.client.get_service(location=self.service_url)
         body = resp.json()
 
-        if 'domain_list' in test_data:
-            for item in test_data['domain_list']:
-                if 'protocol' not in item:
-                    item['protocol'] = 'http'
-            self.assertEqual(sorted(test_data['domain_list']),
-                             sorted(body['domains']))
+        self._assert_service_details(body, expected_service_details)
 
-        if 'origin_list' in test_data:
-            self.assertEqual(sorted(test_data['origin_list']),
-                             sorted(body['origins']))
-        # TODO(malini): Uncomment after caching is implemented
-        # if 'caching_list' in test_data:
-        #    self.assertEqual(sorted(test_data['caching_list']),
-        #                     sorted(body['caching']))
-
+    '''
     @ddt.file_data('data_patch_service_negative.json')
     def test_patch_service_HTTP_400(self, test_data):
 
@@ -567,6 +584,7 @@ class TestServicePatch(base.TestBase):
         self.assertEqual(sorted(self.origin_list), sorted(body['origins']))
         # TODO(malini): Uncomment below after caching is implemented.
         # self.assertEqual(sorted(self.caching_list), sorted(body['caching']))
+    '''
 
     def tearDown(self):
         self.client.delete_service(location=self.service_url)

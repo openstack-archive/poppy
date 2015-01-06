@@ -1,17 +1,37 @@
 {
-   "update_domain_list": {
-        "domains": [{"domain": "woooznewwebsite.com"},
-                    {"domain": "woooznewblog.mywebsite.com"}]
-    },
-    "update_origin_list": {
-        "origins": [{"origin": "www.wooozneworigin.com",
-                     "port": 443, "ssl": false}]
-    },
-   "update_multiple_values": {
-        "domains": [{"domain": "wooozymynewwebsite.com"},
-                        {"domain": "wooozynewblog.mywebsite.com"}],
-        "origins": [{"origin": "www.wooozyneworigin.com",
-                         "port": 443,
-                         "ssl": false}]
-    }
+   "add_domain": [
+        {"op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com"}}
+    ],
+    "replace_domain":  [
+        {"op": "replace",
+         "path": "/domains/0",
+         "value": {"domain": "replaceme.com"}}
+    ],
+   "add_multiple_domains": [
+        {"op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com"}},
+        {"op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com"}}
+    ],
+   "add_and_remove_domains": [
+        {"op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com"}},
+        {"op": "remove",
+         "path": "/domains/0"}
+    ],
+    "add_domain_list": [
+        {"op": "add",
+         "path": "/domains",
+         "value": [{"domain": "replaceme.com"}]}
+    ],
+    "replace_service_name": [
+        {"op": "replace",
+         "path": "/name",
+         "value": "chimp"}
+    ]
 }
