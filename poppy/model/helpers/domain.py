@@ -22,7 +22,8 @@ from poppy.model import common
 
 class Domain(common.DictSerializableModel):
 
-    def __init__(self, domain, protocol='http'):
+    def __init__(self, domain, protocol='http',
+                 shared_ssl=False):
         self._domain = domain
 
         if (protocol in AVAILABLE_PROTOCOLS):
@@ -34,6 +35,12 @@ class Domain(common.DictSerializableModel):
                     protocol,
                     AVAILABLE_PROTOCOLS)
             )
+
+        # shared_ssl option only effective when protocol is https
+        if self._protocol == 'https':
+            self._shared_ssl = shared_ssl
+        else:
+            self._shared_ssl = False
 
     @property
     def domain(self):
@@ -47,6 +54,19 @@ class Domain(common.DictSerializableModel):
     def domain(self, value):
         """domain setter."""
         self._domain = value
+
+    @property
+    def shared_ssl(self):
+        """domain.
+
+        :returns domain
+        """
+        return self._shared_ssl
+
+    @shared_ssl.setter
+    def shared_ssl(self, value):
+        """domain setter."""
+        self._shared_ssl = value
 
     @property
     def protocol(self):
