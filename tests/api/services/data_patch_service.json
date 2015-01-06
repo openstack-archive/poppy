@@ -1,17 +1,91 @@
 {
-   "update_domain_list": {
-        "domains": [{"domain": "woooznewwebsite.com"},
-                    {"domain": "woooznewblog.mywebsite.com"}]
-    },
-    "update_origin_list": {
-        "origins": [{"origin": "www.wooozneworigin.com",
-                     "port": 443, "ssl": false}]
-    },
-   "update_multiple_values": {
-        "domains": [{"domain": "wooozymynewwebsite.com"},
-                        {"domain": "wooozynewblog.mywebsite.com"}],
-        "origins": [{"origin": "www.wooozyneworigin.com",
-                         "port": 443,
-                         "ssl": false}]
-    }
+   "add_domain": [
+        {"op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com", "protocol": "http"}}
+    ],
+    "replace_domain":  [
+        {"op": "replace",
+         "path": "/domains/0",
+         "value": {"domain": "replaceme.com", "protocol": "http"}}
+    ],
+   "add_multiple_domains": [
+        {"op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com", "protocol": "http"}},
+        {"op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com", "protocol": "http"}}
+    ],
+   "add_and_remove_domains": [
+        {"op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com", "protocol": "http"}},
+        {"op": "remove",
+         "path": "/domains/0"}
+    ],
+    "add_domain_list": [
+        {"op": "add",
+         "path": "/domains",
+         "value": [{"domain": "replaceme.com", "protocol": "http"}]}
+    ],
+    "replace_service_name": [
+        {"op": "replace",
+         "path": "/name",
+         "value": "chimp"}
+    ],
+   "replace_origin": [
+        {"op": "replace",
+         "path": "/origins/0",
+         "value": {"origin": "1.2.3.4", "port": 80, "rules": [], "ssl": false}}
+    ],
+   "add_origin": [
+        {"op": "add",
+         "path": "/origins/1",
+         "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                   "rules": [{"name" : "origin", "request_url" : "/origin.htm"}]}
+        }
+    ],
+   "add_multiple_origins": [
+        {"op": "add",
+         "path": "/origins/1",
+         "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                   "rules": [{"name" : "origin", "request_url" : "/origin.htm"}]}
+        },
+        {"op": "add",
+         "path": "/origins/2",
+         "value": {"origin": "4.2.5.4", "port": 80, "ssl": false,
+                   "rules": [{"name" : "origin", "request_url" : "/origin.htm"}]}
+        }
+    ],
+   "add_and_remove_origin": [
+        {"op": "add",
+         "path": "/origins/-",
+         "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                   "rules": [{"name" : "origin", "request_url" : "/origin.htm"}]}
+        },
+        {"op": "remove",
+         "path": "/origins/0"}
+    ],
+   "add_caching": [
+        {"op": "add",
+         "path": "/caching/-",
+         "value": {"name": "cache_name", "ttl": 111}}
+    ],
+   "replace_caching": [
+        {"op": "replace",
+         "path": "/caching/0",
+         "value": {"name": "cache_name", "ttl": 111}}
+    ],
+   "remove_caching": [
+        {"op": "remove",
+         "path": "/caching/0"}
+    ],
+   "add_multiple_caching": [
+        {"op": "add",
+         "path": "/caching/-",
+         "value": {"name": "cache_name", "ttl": 111,
+                   "rules": [{"name" : "index","request_url" : "/index.htm"}]}
+               }
+    ]
 }
