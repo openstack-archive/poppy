@@ -39,21 +39,17 @@ class TestRule(base.TestCase):
         self.assertRaises(AttributeError, setattr, myrule, 'name', name)
 
         # http_host
-        self.assertEqual(myrule.http_host, None)
         myrule.http_host = http_host
         self.assertEqual(myrule.http_host, http_host)
 
         # client_ip
-        self.assertEqual(myrule.client_ip, None)
         myrule.client_ip = client_ip
         self.assertEqual(myrule.client_ip, client_ip)
 
         # http_method
-        self.assertEqual(myrule.http_method, None)
         myrule.http_method = http_method
         self.assertEqual(myrule.http_method, http_method)
 
         # request_url
-        self.assertEqual(myrule.request_url, None)
         myrule.request_url = request_url
         self.assertEqual(myrule.request_url, request_url)
