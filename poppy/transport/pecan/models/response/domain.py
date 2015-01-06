@@ -27,3 +27,4 @@ class Model(collections.OrderedDict):
         super(Model, self).__init__()
         self['domain'] = cgi.escape(domain.domain)
         self['protocol'] = domain.protocol
+        self['shared_ssl'] = domain.shared_ssl
