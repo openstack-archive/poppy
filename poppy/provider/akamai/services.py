@@ -109,7 +109,8 @@ class ServiceController(base.ServiceBase):
                     raise RuntimeError(resp.text)
 
                 dp_obj = {'policy_name': dp,
-                          'protocol': classified_domain.protocol}
+                          'protocol': classified_domain.protocol,
+                          'shared_ssl': classified_domain.shared_ssl}
                 ids.append(dp_obj)
                 # TODO(tonytan4ever): leave empty links for now
                 # may need to work with dns integration
@@ -119,8 +120,11 @@ class ServiceController(base.ServiceBase):
                 if classified_domain.protocol == 'http':
                     provider_access_url = self.driver.akamai_access_url_link
                 elif classified_domain.protocol == 'https':
-                    provider_access_url = '.'.join(
-                        [dp, self.driver.akamai_https_access_url_suffix])
+                    if classified_domain.shared_ssl:
+                        provider_access_url = dp
+                    else:
+                        raise RuntimeError('vanity ssl domain '
+                                           'has not been impelmented yet')
                 links.append({'href': provider_access_url,
                               'rel': 'access_url',
                               'domain': classified_domain.domain
@@ -352,10 +356,13 @@ class ServiceController(base.ServiceBase):
                                     in policies]
 
                     # Only if a same domain with a same protocol
+                    # and the same shared_ssl property
                     # do we need to update a existing policy
                     if dp in policy_names and (
                             policies[policy_names.index(dp)]['protocol'] == (
-                            classified_domain.protocol)):
+                            classified_domain.protocol)) and (
+                            policies[policy_names.index(dp)]['shared_ssl'] == (
+                            classified_domain.shared_ssl)):
                         # in this case we should update existing policy
                         # instead of create a new policy
                         print('Start to update policy %s' % dp)
@@ -370,7 +377,8 @@ class ServiceController(base.ServiceBase):
                             data=json.dumps(policy_content),
                             headers=self.request_header)
                         dp_obj = {'policy_name': dp,
-                                  'protocol': classified_domain.protocol}
+                                  'protocol': classified_domain.protocol,
+                                  'shared_ssl': classified_domain.shared_ssl}
                         policies.remove(dp_obj)
                     else:
                         print('Start to create new policy %s' % dp)
@@ -386,7 +394,8 @@ class ServiceController(base.ServiceBase):
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
                     dp_obj = {'policy_name': dp,
-                              'protocol': classified_domain.protocol}
+                              'protocol': classified_domain.protocol,
+                              'shared_ssl': classified_domain.shared_ssl}
                     ids.append(dp_obj)
                     # TODO(tonytan4ever): leave empty links for now
                     # may need to work with dns integration
@@ -397,8 +406,11 @@ class ServiceController(base.ServiceBase):
                         provider_access_url = (
                             self.driver.akamai_access_url_link)
                     elif classified_domain.protocol == 'https':
-                        provider_access_url = '.'.join(
-                            [dp, self.driver.akamai_https_access_url_suffix])
+                        if classified_domain.shared_ssl:
+                            provider_access_url = dp
+                        else:
+                            raise RuntimeError('vanity ssl domain '
+                                               'has not been impelmented yet')
                     links.append({'href': provider_access_url,
                                   'rel': 'access_url',
                                   'domain': dp
@@ -498,8 +510,11 @@ class ServiceController(base.ServiceBase):
                     provider_access_url = (
                         self.driver.akamai_access_url_link)
                 elif policy['protocol'] == 'https':
-                    provider_access_url = '.'.join(
-                        [dp, self.driver.akamai_https_access_url_suffix])
+                    if policy['shared_ssl']:
+                        provider_access_url = dp
+                    else:
+                        raise RuntimeError('vanity ssl domain '
+                                           'has not been impelmented yet')
                 links.append({'href': provider_access_url,
                               'rel': 'access_url',
                               'domain': policy['policy_name']
