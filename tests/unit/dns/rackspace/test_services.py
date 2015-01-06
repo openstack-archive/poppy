@@ -35,6 +35,14 @@ RACKSPACE_OPTIONS = [
     cfg.IntOpt('num_shards', default=10, help='Number of Shards to use'),
     cfg.StrOpt('shard_prefix', default='cdn',
                help='The shard prefix to use'),
+    cfg.IntOpt('shared_ssl_num_shards', default=5, help='Number of Shards '
+               'to use in generating shared ssl domain suffix'),
+    cfg.StrOpt('shared_ssl_shard_prefix', default='scdn',
+               help='The shard prefix to use '
+               'in generating shared ssl domain suffix'),
+    cfg.StrOpt('shared_ssl_domain_suffix', default='',
+               help='The shared ssl domain suffix to generate'
+               ' shared ssl domain'),
     cfg.StrOpt('url', default='',
                help='The url for customers to CNAME to'),
     cfg.StrOpt('email', help='The email to be provided to Rackspace DNS for'
@@ -155,3 +163,24 @@ class TestServicesUpdate(base.TestCase):
         self.controller.update(self.service_old,
                                service_updates,
                                responders)
+
+
+class TestServicesGenerateSharedSSLDomainSuffix(base.TestCase):
+
+    @mock.patch('pyrax.set_credentials')
+    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
+    def setUp(self, mock_set_credentials):
+        super(TestServicesGenerateSharedSSLDomainSuffix, self).setUp()
+        provider = driver.DNSProvider(self.conf)
+        self.controller = provider.services_controller
+
+    def test_generate_shared_ssl_domain_suffix(self):
+        shared_ssl_domain_suffix = (
+            self.controller.generate_shared_ssl_domain_suffix())
+        self.assertTrue(shared_ssl_domain_suffix is not None)
+        self.assertTrue(
+            self.controller._driver.rackdns_conf.shared_ssl_shard_prefix in(
+                shared_ssl_domain_suffix))
+        self.assertTrue(
+            self.controller._driver.rackdns_conf.shared_ssl_domain_suffix in(
+                shared_ssl_domain_suffix))

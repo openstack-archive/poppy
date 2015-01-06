@@ -27,7 +27,7 @@ class ProviderDetail(common.DictSerializableModel):
 
     """ProviderDetail object for each provider."""
 
-    def __init__(self, provider_service_id=None, access_urls={},
+    def __init__(self, provider_service_id=None, access_urls=[],
                  status=u"deploy_in_progress", name=None, error_info=None,
                  error_message=None):
         self._provider_service_id = provider_service_id
@@ -107,7 +107,7 @@ class ProviderDetail(common.DictSerializableModel):
         o = cls("unnamed")
         o.provider_service_id = dict_obj.get("provider_service_id",
                                              "unkown_id")
-        o.access_urls = dict_obj.get("access_urls", {})
+        o.access_urls = dict_obj.get("access_urls", [])
         o.status = dict_obj.get("status", u"deploy_in_progress")
         o.name = dict_obj.get("name", None)
         o.error_info = dict_obj.get("error_info", None)

@@ -59,3 +59,13 @@ class ServicesControllerBase(controller.DNSControllerBase):
         """
 
         raise NotImplementedError
+
+    def generate_shared_ssl_domain_suffix(self):
+        """Generate a shared ssl domain suffix,
+
+        to be used with manager for shared ssl feature
+
+        :raises NotImplementedError
+        """
+
+        raise NotImplementedError

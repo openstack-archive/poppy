@@ -109,22 +109,37 @@ class ServiceController(base.ServiceBase):
                     raise RuntimeError(resp.text)
 
                 dp_obj = {'policy_name': dp,
-                          'protocol': classified_domain.protocol}
+                          'protocol': classified_domain.protocol,
+                          'shared_ssl': classified_domain.shared_ssl}
                 ids.append(dp_obj)
                 # TODO(tonytan4ever): leave empty links for now
                 # may need to work with dns integration
                 print('Creating policy %s on domain %s complete' %
                       (dp, classified_domain.domain))
                 provider_access_url = None
+                shared_ssl_flag = False
                 if classified_domain.protocol == 'http':
                     provider_access_url = self.driver.akamai_access_url_link
                 elif classified_domain.protocol == 'https':
-                    provider_access_url = '.'.join(
-                        [dp, self.driver.akamai_https_access_url_suffix])
-                links.append({'href': provider_access_url,
-                              'rel': 'access_url',
-                              'domain': classified_domain.domain
-                              })
+                    if classified_domain.shared_ssl:
+                        provider_access_url = '.'.join(
+                            # {shard}{number}.{access_url_suffix}
+                            dp.split('.')[1:] +
+                            [self.driver.akamai_https_access_url_suffix])
+                        shared_ssl_flag = True
+                    else:
+                        raise RuntimeError('vanity ssl domain '
+                                           'has not been impelmented yet')
+                link_dict_record = {'href': provider_access_url,
+                                    'rel': 'access_url',
+                                    'domain': classified_domain.domain,
+                                    }
+                # if the shared_ssl_flag flag is set to true,
+                # we take the domain field as directly as the domain name
+                # when we are trying to create in dns field
+                if shared_ssl_flag:
+                    link_dict_record['shared_ssl_flag'] = shared_ssl_flag
+                links.append(link_dict_record)
         except Exception:
             return self.responder.failed("failed to create service")
         else:
@@ -352,10 +367,13 @@ class ServiceController(base.ServiceBase):
                                     in policies]
 
                     # Only if a same domain with a same protocol
+                    # and the same shared_ssl property
                     # do we need to update a existing policy
                     if dp in policy_names and (
                             policies[policy_names.index(dp)]['protocol'] == (
-                            classified_domain.protocol)):
+                            classified_domain.protocol)) and (
+                            policies[policy_names.index(dp)]['shared_ssl'] == (
+                            classified_domain.shared_ssl)):
                         # in this case we should update existing policy
                         # instead of create a new policy
                         print('Start to update policy %s' % dp)
@@ -370,7 +388,8 @@ class ServiceController(base.ServiceBase):
                             data=json.dumps(policy_content),
                             headers=self.request_header)
                         dp_obj = {'policy_name': dp,
-                                  'protocol': classified_domain.protocol}
+                                  'protocol': classified_domain.protocol,
+                                  'shared_ssl': classified_domain.shared_ssl}
                         policies.remove(dp_obj)
                     else:
                         print('Start to create new policy %s' % dp)
@@ -386,23 +405,39 @@ class ServiceController(base.ServiceBase):
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
                     dp_obj = {'policy_name': dp,
-                              'protocol': classified_domain.protocol}
+                              'protocol': classified_domain.protocol,
+                              'shared_ssl': classified_domain.shared_ssl}
                     ids.append(dp_obj)
                     # TODO(tonytan4ever): leave empty links for now
                     # may need to work with dns integration
                     print('Creating/Updateing policy %s on domain %s '
                           'complete' % (dp, classified_domain.domain))
                     provider_access_url = None
+                    shared_ssl_flag = False
                     if classified_domain.protocol == 'http':
                         provider_access_url = (
                             self.driver.akamai_access_url_link)
                     elif classified_domain.protocol == 'https':
-                        provider_access_url = '.'.join(
-                            [dp, self.driver.akamai_https_access_url_suffix])
-                    links.append({'href': provider_access_url,
-                                  'rel': 'access_url',
-                                  'domain': dp
-                                  })
+                        if classified_domain.shared_ssl:
+                            provider_access_url = '.'.join(
+                                # {shard}{number}.{access_url_suffix}
+                                dp.split('.')[1:] +
+                                [self.driver.akamai_https_access_url_suffix])
+                            shared_ssl_flag = True
+                        else:
+                            raise RuntimeError('vanity ssl domain '
+                                               'has not been impelmented yet')
+                    link_dict_record = {'href': provider_access_url,
+                                        'rel': 'access_url',
+                                        'domain': classified_domain.domain,
+                                        }
+                    # if the shared_ssl_flag flag is set to true,
+                    # we take the domain field as directly as the domain name
+                    # when we are trying to create in dns field
+                    if shared_ssl_flag:
+                        link_dict_record['shared_ssl_flag'] = (
+                            shared_ssl_flag)
+                    links.append(link_dict_record)
             except Exception:
                 return self.responder.failed("failed to update service")
 
@@ -494,16 +529,30 @@ class ServiceController(base.ServiceBase):
                 except Exception:
                     return self.responder.failed("failed to update service")
                 provider_access_url = None
+                shared_ssl_flag = False
                 if policy['protocol'] == 'http':
                     provider_access_url = (
                         self.driver.akamai_access_url_link)
                 elif policy['protocol'] == 'https':
-                    provider_access_url = '.'.join(
-                        [dp, self.driver.akamai_https_access_url_suffix])
-                links.append({'href': provider_access_url,
-                              'rel': 'access_url',
-                              'domain': policy['policy_name']
-                              })
+                    if policy['shared_ssl']:
+                        provider_access_url = '.'.join(
+                            # {shard}{number}.{access_url_suffix}
+                            dp.split('.')[1:] +
+                            [self.driver.akamai_https_access_url_suffix])
+                        shared_ssl_flag = True
+                    else:
+                        raise RuntimeError('vanity ssl domain '
+                                           'has not been impelmented yet')
+                link_dict_record = {'href': provider_access_url,
+                                    'rel': 'access_url',
+                                    'domain': policy['policy_name'],
+                                    }
+                # if the shared_ssl_flag flag is set to true,
+                # we take the domain field as directly as the domain name
+                # when we are trying to create in dns field
+                if shared_ssl_flag:
+                    link_dict_record['shared_ssl_flag'] = shared_ssl_flag
+                links.append(link_dict_record)
             ids = policies
         return self.responder.updated(json.dumps(ids), links)
 
