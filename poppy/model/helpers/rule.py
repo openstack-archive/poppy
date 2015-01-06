@@ -23,11 +23,11 @@ class Rule(common.DictSerializableModel):
                  referrer=None, http_host=None, client_ip=None,
                  http_method=None, request_url=None):
         self._name = name
-        self.referrer = referrer
-        self.http_host = http_host
-        self.client_ip = client_ip
-        self.http_method = http_method
-        self.request_url = request_url
+        self._referrer = referrer
+        self._http_host = http_host
+        self._client_ip = client_ip
+        self._http_method = http_method
+        self._request_url = request_url
 
     @property
     def name(self):
@@ -74,3 +74,15 @@ class Rule(common.DictSerializableModel):
     @request_url.setter
     def request_url(self, value):
         self._request_url = value
+
+    def to_dict(self):
+        result = common.DictSerializableModel.to_dict(self)
+
+        result['name'] = self._name
+        result['referrer'] = self._referrer
+        result['http_host'] = self._http_host
+        result['client_ip'] = self._client_ip
+        result['http_method'] = self._http_method
+        result['request_url'] = self._request_url
+
+        return result

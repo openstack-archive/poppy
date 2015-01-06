@@ -76,13 +76,11 @@ class DefaultManagerServiceTests(base.TestCase):
                     "origin": "mywebsite.com",
                     "port": 80,
                     "ssl": False
-                },
-                {
-                    "origin": "mywebsite.com",
                 }
             ],
             "caching": [
-                {"name": "default", "ttl": 3600},
+                {"name": "default",
+                 "ttl": 3600},
                 {"name": "home",
                  "ttl": 17200,
                  "rules": [
@@ -91,6 +89,10 @@ class DefaultManagerServiceTests(base.TestCase):
                  },
                 {"name": "images",
                  "ttl": 12800,
+                 "rules": [
+                     {"name": "pictures",
+                      "request_url": "/pictures.htm"}
+                 ]
                  }
             ],
             "flavor_id": "standard"
@@ -248,7 +250,6 @@ class DefaultManagerServiceTests(base.TestCase):
 
     @ddt.file_data('service_update.json')
     def test_update(self, update_json):
-        self.skipTest('for now')
         provider_details_dict = {
             "MaxCDN": {"id": 11942, "access_urls": ["mypullzone.netdata.com"]},
             "Mock": {"id": 73242, "access_urls": ["mycdn.mock.com"]},
@@ -278,12 +279,8 @@ class DefaultManagerServiceTests(base.TestCase):
         service_updates = json.dumps([
             {
                 "op": "replace",
-                "path": "/origins/0",
-                "value": {
-                    "origin": "44.33.22.11",
-                    "port": 80,
-                    "ssl": "false"
-                }
+                "path": "/domains/0",
+                "value": {"domain": "added.mocksite4.com"}
             }
         ])
 
