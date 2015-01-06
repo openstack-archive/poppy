@@ -129,7 +129,11 @@ class DefaultServicesController(base.ServicesController):
         :param service_updates
         """
         # get the current service object
-        service_old = self.storage_controller.get(project_id, service_id)
+        try:
+            service_old = self.storage_controller.get(project_id, service_id)
+        except ValueError:
+            raise errors.ServiceNotFound("Service not found")
+
         if service_old.status != u'deployed':
             raise errors.ServiceStatusNotDeployed(
                 u'Service {0} not deployed'.format(service_id))
