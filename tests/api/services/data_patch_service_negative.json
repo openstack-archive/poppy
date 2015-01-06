@@ -1,80 +1,31 @@
 {
-    "empty_domain_list": {
-        "domains": []
-    },
-    "empty_list": {},
-    "too_short_name": {
-        "service_name": "ab"
-    },
-    "too_long_name": {
-        "service_name": "too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name"
-    },
-    "empty_domain_list": {
-        "service_name": "empty_domain_list",
-        "domains": [],
-        "origins": [{"origin": "mywebsite1.com",
-                         "port": 443,
-                         "ssl": false}],
-        "flavor_id": "standard",
-        "caching": [{"name": "default", "ttl": 3600},
-                    {"name": "home",
-                     "ttl": 1200,
-                     "rules": [{"name" : "index",
-                                "request_url" : "/index.htm"}]}]
-    },
-    "empty_origin_list": {
-        "origins": []
-    },
-    "non_numeric_origin_port": {
-        "service_name": "non_numeric_origin_port",
-        "domains": [{"domain": "mywebsite.com"},
-                    {"domain": "blog.mywebsite.com"}],
-        "origins": [{"origin": "invalid_origin_value",
-                     "port": "fourfourthree",
-                     "ssl": false}],
-        "flavor_id": "standard",
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "home",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
-    },
-    "non_boolean_origin_ssl": {
-        "service_name": "non_boolean_origin_ssl",
-        "domains": [{"domain": "mywebsite.com"},
-                    {"domain": "blog.mywebsite.com"}],
-        "origins": [{"origin": "invalid_origin_value",
-                     "port": 443,
-                     "ssl": "Arggg"}],
-        "flavor_id": "standard",
-        "caching": [{"name": "default", "ttl": 3600},
-                    {"name": "home",
-                     "ttl": 1200,
-                     "rules": [{"name" : "index",
-                                "request_url" : "/index.htm"}]}]
-    },
-    "invalid_flavor": {
-        "service_name": "invalid_flavor",
-        "domains": [{"domain": "mywebsite.com"},
-                    {"domain": "blog.mywebsite.com"}],
-        "origins": [{"origin": "mywebsite1.com",
-                     "port": 443,
-                     "ssl": false}],
-        "flavor_id": "non_exist",
-        "caching": [{"name": "default", "ttl": 3600},
-                    {"name": "home",
-                     "ttl": 1200,
-                     "rules": [{"name" : "index",
-                                "request_url" : "/index.htm"}]}]
-    },
-    "caching_list_no_name": {
-        "service_name": "caching_list_no_name",
-        "domains": [{"domain": "mywebsite.com"},
-                    {"domain": "blog.mywebsite.com"}],
-        "origins": [{"origin": "mywebsite1.com",
-                     "port": 443,
-                     "ssl": false}],
-        "flavor_id": "standard",
-        "caching": [{"ttl": 3600}]
-    }
+   "add_origin_no_rules": [
+        {"op": "add",
+         "path": "/origins/-",
+         "value": {"origin": "1.2.3.4", "port": 80}}
+    ],
+    "empty_list": [],
+    "empty_dict":[{}],
+    "remove_name": [
+        {"op": "remove",
+         "path": "/name"}
+    ],
+   "remove_origin": [
+        {"op": "remove",
+         "path": "/origins/0"}
+    ],
+   "remove_domain": [
+        {"op": "remove",
+         "path": "/domains/0"}
+    ],
+   "add_caching_no_rules": [
+        {"op": "add",
+         "path": "/caching/-",
+         "value": {"name": "cache_name", "ttl": 111}}
+    ],
+   "replace_domain_invalid_protocol": [
+        {"op": "replace",
+         "path": "/domains/0",
+         "value": {"domain": "meow", "protocol": "ftp"}}
+    ]
 }
