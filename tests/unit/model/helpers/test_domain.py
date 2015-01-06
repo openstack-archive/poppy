@@ -36,8 +36,14 @@ class TestDomain(base.TestCase):
         # test all properties
         # domain
         self.assertEqual(mydomain.domain, domain_name)
+        self.assertEqual(mydomain.protocol, 'http')
+        self.assertEqual(mydomain.shared_ssl, False)
         mydomain.domain = changed_domain_name
         self.assertEqual(mydomain.domain, changed_domain_name)
 
         my_other_domain = domain.Domain.init_from_dict({"domain": domain_name})
         self.assertEqual(my_other_domain.domain, domain_name)
+
+        m_https_ydomain = domain.Domain(domain_name, 'https', True)
+        self.assertEqual(m_https_ydomain.protocol, 'https')
+        self.assertEqual(m_https_ydomain.shared_ssl, True)
