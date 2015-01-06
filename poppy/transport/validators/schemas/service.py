@@ -242,11 +242,13 @@ class ServiceSchema(schema_base.SchemaBase):
                                     'maxLength': 256},
                                 'rules': {
                                     'type': 'array',
+                                    'required': True,
                                     'items': {
                                         'type': 'object',
                                         'properties': {
                                             'name': {
                                                 'type': 'string',
+                                                'required': True,
                                                 'minLength': 3,
                                                 'maxLength': 256},
                                             'referrer': {
