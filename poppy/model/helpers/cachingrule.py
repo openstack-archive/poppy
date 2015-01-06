@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from poppy.model import common
+from poppy.model.helpers import rule
 
 
 class CachingRule(common.DictSerializableModel):
@@ -82,7 +83,16 @@ class CachingRule(common.DictSerializableModel):
         o.caching = dict_obj.get("caching", "unnamed")
         o.name = dict_obj.get("name", "unnamed")
         o.ttl = dict_obj.get("ttl", 3600)
-        o.rules = dict_obj.get("rules", [])
+        rules_dict_list = dict_obj.get("rules", [])
+        o.rules = []
+        for rule_dict in rules_dict_list:
+            new_rule = rule.Rule(rule_dict['name'],
+                                 rule_dict.get('referrer', None),
+                                 rule_dict.get('http_host', None),
+                                 rule_dict.get('client_ip', None),
+                                 rule_dict.get('http_method', None),
+                                 rule_dict.get('request_url', None))
+            o.rules.append(new_rule)
         return o
 
     def to_dict(self):
