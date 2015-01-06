@@ -77,3 +77,11 @@ class ServicesController(base.ServicesBase):
                     access_urls.append(access_url)
                 dns_details[provider_name] = {'access_urls': access_urls}
         return self.responder.created(dns_details)
+
+    def generate_shared_ssl_domain_suffix(self):
+        """Default DNS Generate a shared ssl domain suffix,
+
+        to be used with manager for shared ssl feature
+
+        """
+        return 'scd023.secure.defaultcdn.com'

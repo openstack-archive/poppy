@@ -96,4 +96,5 @@ class Domain(common.DictSerializableModel):
         o = cls("")
         o.domain = dict_obj.get("domain", "")
         o.protocol = dict_obj.get("protocol", "http")
+        o.shared_ssl = dict_obj.get("shared_ssl", False)
         return o

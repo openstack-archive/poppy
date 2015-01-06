@@ -52,6 +52,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                         re.UNICODE
                                     )
                                 },
+                                'shared_ssl': {
+                                    'type': 'boolean'},
                                 'protocol': {
                                     'type': 'string',
                                     'enum': [
