@@ -37,27 +37,87 @@ class ServiceSchema(schema_base.SchemaBase):
                     'domains': {
                         'type': 'array',
                         'items': {
-                            'type': 'object',
-                            'properties': {
-                                'domain': {
-                                    'type': 'string',
-                                    'required': True,
-                                    'minLength': 3,
-                                    'maxLength': 253,
-                                    'pattern': re.compile(
-                                        '^(([^:/?#]+):)?'
-                                        '(//([^/?#]*))?'
-                                        '([^?#]*)(\?([^#]*))?'
-                                        '(#(.*))?$',
-                                        re.UNICODE
-                                    )
+                            'type': [{
+                                'type': 'object',
+                                'properties': {
+                                    'domain': {
+                                        'type': 'string',
+                                        'required': True,
+                                        'minLength': 3,
+                                        'maxLength': 253,
+                                        'pattern': re.compile(
+                                            '^(([^:/?#]+):)?'
+                                            '(//([^/?#]*))?'
+                                            '([^?#]*)(\?([^#]*))?'
+                                            '(#(.*))?$',
+                                            re.UNICODE
+                                        )
+                                    }
                                 },
-                                'protocol': {
-                                    'type': 'string',
-                                    'enum': [
-                                            'http',
-                                            'https']
-                                }}},
+                                "additionalProperties": False
+                            }, {
+                                'type': 'object',
+                                'properties': {
+                                    'domain': {
+                                        'type': 'string',
+                                        'required': True,
+                                        'minLength': 3,
+                                        'maxLength': 253,
+                                        'pattern': re.compile(
+                                            '^(([^:/?#]+):)?'
+                                            '(//([^/?#]*))?'
+                                            '([^?#]*)(\?([^#]*))?'
+                                            '(#(.*))?$',
+                                            re.UNICODE
+                                        )
+                                    },
+                                    'protocol': {
+                                        'required': True,
+                                        'type': 'string',
+                                        'enum': [
+                                                'http', ]
+                                    },
+                                    # When protocol is http
+                                    # certificate must be null
+                                    'certificate': {
+                                        'type': ['null']
+                                    },
+                                },
+                                "additionalProperties": False
+                            }, {
+                                'type': 'object',
+                                'properties': {
+                                    'domain': {
+                                        'type': 'string',
+                                        'required': True,
+                                        'minLength': 3,
+                                        'maxLength': 253,
+                                        'pattern': re.compile(
+                                            '^(([^:/?#]+):)?'
+                                            '(//([^/?#]*))?'
+                                            '([^?#]*)(\?([^#]*))?'
+                                            '(#(.*))?$',
+                                            re.UNICODE
+                                        )
+                                    },
+                                    'protocol': {
+                                        'required': True,
+                                        'type': 'string',
+                                        'enum': [
+                                                'https', ]
+                                    },
+                                    'certificate': {
+                                        'required': True,
+                                        'type': 'string',
+                                        'enum': [
+                                                'shared',
+                                                'san',
+                                                'custom']
+                                    },
+                                },
+                                "additionalProperties": False
+                            }]
+                        },
                         'required': True,
                         'minItems': 1,
                         'maxItems': 10},
