@@ -3,10 +3,10 @@
         "name" : "mysite.com",
         "domains": [
             {"domain": "parsely.sage.com"},
-            {"domain": "densely.sage.com",
-            "protocol": "https"},
+            {"domain": "densely.sage.com"},
             {"domain": "rosemary.thyme.net",
-            "protocol": "http"}
+            "protocol": "http",
+            "shared_ssl": true}
         ],
         "origins": [
             {"origin": "mockdomain.com", "ssl": false, "port": 80}
