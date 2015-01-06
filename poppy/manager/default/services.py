@@ -91,6 +91,20 @@ class DefaultServicesController(base.ServicesController):
         providers = [p.provider_id for p in flavor.providers]
         service_id = service_obj.service_id
 
+        # Get a list of of shared ssl domains
+        shared_ssl_domains = [domain for domain in service_obj.domains if
+                              domain.shared_ssl]
+        # We restrict the number of shared ssl domains to be at most 1
+        if len(shared_ssl_domains) > 1:
+            raise exceptions.ValidationFailed('At most 1 shared ssl domain'
+                                              ' is allowed')
+        elif len(shared_ssl_domains) == 1:
+            # we overwrites the only one shared ssl domain with domain name
+            # to be a uuid + shared_ssl_domain_suffix
+            shared_ssl_domains[0].domain = self._generate_shared_ssl_domain(
+                service_obj.service_id
+            )
+
         try:
             self.storage_controller.create(
                 project_id,
@@ -161,6 +175,21 @@ class DefaultServicesController(base.ServicesController):
                 ])}
                 for error in errors_list])
             raise exceptions.ValidationFailed(json.dumps(details))
+
+        # Get a list of of shared ssl domains
+        shared_ssl_domains = [domain for domain in service_obj.domains if
+                              domain.shared_ssl]
+
+        # We restrict the number of shared ssl domains to be at most 1
+        if len(shared_ssl_domains) > 1:
+            raise exceptions.ValidationFailed('At most 1 shared ssl domain'
+                                              ' is allowed')
+        elif len(shared_ssl_domains) == 1:
+            # we overwrites the only one shared ssl domain with domain name
+            # to be a uuid + shared_ssl_domain_suffix
+            shared_ssl_domains[0].domain = self._generate_shared_ssl_domain(
+                service_obj.service_id
+            )
 
         # get provider details for this service
         provider_details = self._get_provider_details(project_id, service_id)
@@ -265,3 +294,8 @@ class DefaultServicesController(base.ServicesController):
         p.communicate()
 
         return
+
+    def _generate_shared_ssl_domain(self, service_id):
+        shared_ssl_domain_suffix = (
+            self.dns_controller.generate_shared_ssl_domain_suffix())
+        return '.'.join([service_id, shared_ssl_domain_suffix])
