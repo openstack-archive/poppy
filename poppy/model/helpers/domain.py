@@ -17,12 +17,18 @@ AVAILABLE_PROTOCOLS = [
     u'http',
     u'https']
 
+CERTIFICATE_OPTIONS = [
+    u'shared',
+    u'SAN',
+    u'custom']
+
 from poppy.model import common
 
 
 class Domain(common.DictSerializableModel):
 
-    def __init__(self, domain, protocol='http'):
+    def __init__(self, domain, protocol='http',
+                 certificate=None):
         self._domain = domain.lower()
 
         if (protocol in AVAILABLE_PROTOCOLS):
@@ -34,6 +40,17 @@ class Domain(common.DictSerializableModel):
                     protocol,
                     AVAILABLE_PROTOCOLS)
             )
+
+        # certificate option only effective when protocol is https
+        self._certificate = certificate
+        if self._protocol == 'https':
+            if self._certificate not in CERTIFICATE_OPTIONS:
+                raise ValueError(
+                    u'Certificate option: {0} is not valid.'
+                    'Valid certificate options are: {1}'.format(
+                        certificate,
+                        CERTIFICATE_OPTIONS)
+                )
 
     @property
     def domain(self):
@@ -47,6 +64,29 @@ class Domain(common.DictSerializableModel):
     def domain(self, value):
         """domain setter."""
         self._domain = value.lower()
+
+    @property
+    def certificate(self):
+        """certificate option.
+
+        :returns certificate
+        """
+        return self._certificate
+
+    @certificate.setter
+    def certificate(self, value):
+        """domain certificate setter."""
+        if self._protocol != 'https':
+            raise ValueError('Cannot set certificate option for'
+                             ' non-https domain')
+        if value not in CERTIFICATE_OPTIONS:
+            raise ValueError(
+                u'Certificate option: {0} is not valid.'
+                'Valid certificate options are: {1}'.format(
+                    value,
+                    CERTIFICATE_OPTIONS)
+            )
+        self._certificate = value
 
     @property
     def protocol(self):
@@ -76,4 +116,6 @@ class Domain(common.DictSerializableModel):
         o = cls("")
         o.domain = dict_obj.get("domain").lower()
         o.protocol = dict_obj.get("protocol", "http")
+        if o.protocol == 'https':
+            o.certificate = dict_obj.get("certificate", None)
         return o

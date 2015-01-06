@@ -184,6 +184,31 @@ def is_valid_service_configuration(service, schema):
             else:
                 domains.append(domain_value)
 
+    # 4. domains protocols must be of the same type, and domains protocols must
+    # match the description (ssl/port) of the origin
+    cdn_protocol = None
+    if 'domains' in service:
+        for domain in service['domains']:
+            domain_protocol = domain.get('protocol', 'http')
+            if cdn_protocol is None:
+                cdn_protocol = domain_protocol
+            else:
+                if cdn_protocol != domain_protocol:
+                    raise exceptions.ValidationFailed(
+                        'Domains must in the same protocol')
+
+    protocol_port_mapping = {
+        'http': 80,
+        'https': 443
+    }
+
+    # origin port must match the domain's protocol
+    if 'origins' in service:
+        for origin in service['origins']:
+            origin_port = origin.get('port', 80)
+            if protocol_port_mapping[cdn_protocol] != origin_port:
+                raise exceptions.ValidationFailed(
+                    'Domain port does not match origin port')
     return
 
 
