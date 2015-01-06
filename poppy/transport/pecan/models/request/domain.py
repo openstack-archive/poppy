@@ -17,6 +17,7 @@ from poppy.model.helpers import domain
 
 
 def load_from_json(json_data):
-    domain_name = json_data.get("domain")
-    protocol = json_data.get("protocol", 'http')
-    return domain.Domain(domain_name, protocol)
+    domain_name = json_data.get('domain')
+    protocol = json_data.get('protocol', 'http')
+    certification_option = json_data.get('certificate', None)
+    return domain.Domain(domain_name, protocol, certification_option)
