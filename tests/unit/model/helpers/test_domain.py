@@ -36,8 +36,37 @@ class TestDomain(base.TestCase):
         # test all properties
         # domain
         self.assertEqual(mydomain.domain, domain_name)
+        self.assertEqual(mydomain.protocol, 'http')
+        self.assertEqual(mydomain.certificate, None)
         mydomain.domain = changed_domain_name
         self.assertEqual(mydomain.domain, changed_domain_name)
+        try:
+            mydomain.certificate = 'SAN'
+        except ValueError:
+            self.assertTrue(True)
+        else:
+            # this should not be hit
+            self.assertTrue(False)
 
         my_other_domain = domain.Domain.init_from_dict({"domain": domain_name})
         self.assertEqual(my_other_domain.domain, domain_name)
+
+        try:
+            domain.Domain(domain_name, 'https')
+        except ValueError:
+            self.assertTrue(True)
+        else:
+            # this should not be hit
+            self.assertTrue(False)
+
+        my_https_domain = domain.Domain(domain_name, 'https', 'SAN')
+        self.assertEqual(my_https_domain.protocol, 'https')
+        self.assertEqual(my_https_domain.certificate, 'SAN')
+
+        try:
+            my_https_domain.certificate = 'non-sense'
+        except ValueError:
+            self.assertTrue(True)
+        else:
+            # this should not be hit
+            self.assertTrue(False)
