@@ -27,3 +27,5 @@ class Model(collections.OrderedDict):
         super(Model, self).__init__()
         self['domain'] = cgi.escape(domain.domain)
         self['protocol'] = domain.protocol
+        if self['protocol'] == 'https':
+            self['certificate'] = domain.certificate
