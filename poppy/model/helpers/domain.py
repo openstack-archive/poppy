@@ -73,7 +73,7 @@ class Domain(common.DictSerializableModel):
         :param dict_obj: dictionary object
         :returns o
         """
-        o = cls("unnamed")
-        o.domain = dict_obj.get("domain", "unnamed")
+        o = cls("")
+        o.domain = dict_obj.get("domain", "")
         o.protocol = dict_obj.get("protocol", "http")
         return o
