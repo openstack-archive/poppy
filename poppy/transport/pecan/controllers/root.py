@@ -17,7 +17,10 @@ import re
 
 import pecan
 
+from poppy.openstack.common import log
 from poppy.transport.pecan.controllers import base
+
+LOG = log.getLogger(__name__)
 
 
 class RootController(base.Controller):
@@ -30,7 +33,7 @@ class RootController(base.Controller):
         super(RootController, self).add_controller(path, controller)
         self.paths.append(path)
 
-    @pecan.expose()
+    @pecan.expose('json')
     def _route(self, args, request=None):
         # Optionally allow OpenStack project ID in the URL
         # Remove it from the URL if it's present
@@ -42,4 +45,8 @@ class RootController(base.Controller):
         ):
             args.pop(1)
 
-        return super(RootController, self)._route(args, request)
+        try:
+            return super(RootController, self)._route(args, request)
+        except UnicodeDecodeError as e:
+            LOG.error(e)
+            pecan.abort(400)

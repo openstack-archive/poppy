@@ -31,3 +31,7 @@ class TestPing(base.FunctionalTest):
     def test_ping_no_project_id(self):
         response = self.app.get('/v1.0/ping')
         self.assertEqual(response.status_code, 204)
+
+    def test_ping_with_bytecode(self):
+        response = self.app.get('/v1.0/ping/%%aa', expect_errors=True)
+        self.assertEqual(response.status_code, 400)
