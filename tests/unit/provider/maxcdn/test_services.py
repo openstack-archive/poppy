@@ -53,7 +53,7 @@ fake_maxcdn_client_400_return_value = {
 }
 
 
-class fake_maxcdn_api_client:
+class fake_maxcdn_api_client(object):
 
     def get(self, url='/account.json'):
         return {u'code': 200,
