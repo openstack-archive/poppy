@@ -24,6 +24,11 @@
         {"op": "remove",
          "path": "/origins/0"}
     ],
+    "replace_origins_empty": [
+        {"path": "/origins/0",
+         "value": {},
+         "op": "replace"}
+    ],
    "remove_domain": [
         {"op": "remove",
          "path": "/domains/0"}
