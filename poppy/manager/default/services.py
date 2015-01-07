@@ -138,24 +138,22 @@ class DefaultServicesController(base.ServicesController):
             raise errors.ServiceStatusNotDeployed(
                 u'Service {0} not deployed'.format(service_id))
 
-        service_old_dict = service_old.to_dict()
-        service_obj_dict = jsonpatch.apply_patch(
-            service_old_dict, service_updates)
+        service_old_json = json.loads(json.dumps(service_old.to_dict()))
 
-        service_obj = service.Service.init_from_dict(service_obj_dict)
+        # remove fileds that cannot be part of PATCH
+        del service_old_json['service_id']
+        del service_old_json['status']
+        del service_old_json['provider_details']
+
+        service_new_json = jsonpatch.apply_patch(
+            service_old_json, service_updates)
 
         # validate the updates
-        service_obj_json = json.loads(json.dumps(service_obj.to_dict()))
-        del service_obj_json['status']
-        del service_obj_json['provider_details']
-        del service_obj_json['service_id']
-
         patch_schema = service_schema.ServiceSchema.get_schema("service",
                                                                "POST")
-
         errors_list = list(
             jsonschema.Draft3Validator(patch_schema).iter_errors(
-                service_obj_json))
+                service_new_json))
 
         if len(errors_list) > 0:
             details = dict(errors=[{
@@ -165,6 +163,9 @@ class DefaultServicesController(base.ServicesController):
                 ])}
                 for error in errors_list])
             raise exceptions.ValidationFailed(json.dumps(details))
+
+        service_new_json['service_id'] = service_old.service_id
+        service_new = service.Service.init_from_dict(service_new_json)
 
         # get provider details for this service
         provider_details = self._get_provider_details(project_id, service_id)
@@ -192,7 +193,7 @@ class DefaultServicesController(base.ServicesController):
                     script_path,
                     project_id, service_id,
                     json.dumps(service_old.to_dict()),
-                    json.dumps(service_obj.to_dict())]
+                    json.dumps(service_new.to_dict())]
         LOG.info('Starting update service subprocess: %s' % cmd_list)
         p = subprocess.Popen(cmd_list, env=os.environ.copy())
         p.communicate()
