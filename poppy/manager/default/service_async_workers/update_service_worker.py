@@ -42,6 +42,9 @@ def update_worker(project_id, service_id,
     service_old = service.load_from_json(service_old_json)
     service_obj = service.load_from_json(service_obj_json)
 
+    # save old provider details
+    old_provider_details = service_old.provider_details
+
     responders = []
     # update service with each provider present in provider_details
     for provider in service_old.provider_details:
@@ -57,16 +60,19 @@ def update_worker(project_id, service_id,
     dns_responder = dns.update(service_old, service_obj, responders)
 
     # gather links and status for service from providers
+    error_flag = False
     provider_details_dict = {}
     for responder in responders:
         for provider_name in responder:
             if 'error' in responder[provider_name]:
+                error_flag = True
                 provider_details_dict[provider_name] = (
                     provider_details.ProviderDetail(
                         status='failed',
                         error_message=responder[provider_name]['error'],
                         error_info=responder[provider_name]['error_detail']))
             elif 'error' in dns_responder[provider_name]:
+                error_flag = True
                 error_msg = dns_responder[provider_name]['error']
                 error_info = dns_responder[provider_name]['error_detail']
 
@@ -91,11 +97,25 @@ def update_worker(project_id, service_id,
     # update the service object
     service_controller.storage_controller.update(project_id, service_id,
                                                  service_obj)
-    # update the provider details
-    service_controller.storage_controller.update_provider_details(
-        project_id,
-        service_id,
-        provider_details_dict)
+
+    if error_flag:
+        # update the old provider details with errors
+        for provider_name in provider_details_dict:
+            error_info = provider_details_dict[provider_name].error_info
+            error_message = provider_details_dict[provider_name].error_message
+            old_provider_details[provider_name].error_info = error_info
+            old_provider_details[provider_name].error_message = error_message
+            old_provider_details[provider_name].status = 'failed'
+        service_controller.storage_controller.update_provider_details(
+            project_id,
+            service_id,
+            old_provider_details)
+    else:
+        # update the provider details
+        service_controller.storage_controller.update_provider_details(
+            project_id,
+            service_id,
+            provider_details_dict)
 
     service_controller.storage_controller._driver.close_connection()
     LOG.info('Update service worker process %s complete...' %

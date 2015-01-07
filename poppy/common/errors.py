@@ -33,6 +33,6 @@ class ServiceNotFound(Exception):
     """Raised when service is not found."""
 
 
-class ServiceStatusNotDeployed(Exception):
+class ServiceStatusNeitherDeployedNorFailed(Exception):
 
-    """Raised when attempted to update service who status is not deployed."""
+    """Raised when a neither deployed not failed service is updated with."""
