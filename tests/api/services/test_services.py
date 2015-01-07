@@ -110,6 +110,7 @@ class TestCreateService(providers.TestProviderBase):
         domain_list = test_data['domain_list']
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
+        restrictions_list = test_data['restrictions_list']
         if 'flavor_id' in test_data:
             flavor_id = test_data['flavor_id']
         else:
@@ -119,6 +120,7 @@ class TestCreateService(providers.TestProviderBase):
                                           domain_list=domain_list,
                                           origin_list=origin_list,
                                           caching_list=caching_list,
+                                          restrictions_list=restrictions_list,
                                           flavor_id=flavor_id)
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']

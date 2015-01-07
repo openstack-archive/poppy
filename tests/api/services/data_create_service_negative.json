@@ -11,7 +11,8 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     },
     "too_short_name": {
         "service_name": "ab",
@@ -25,7 +26,8 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     },
     "too_short_domain": {
         "service_name": "abcdefg",
@@ -39,7 +41,8 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     },
     "too_long_name": {
         "service_name": "too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name",
@@ -53,7 +56,8 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     },
     "too_long_domain_name": {
         "service_name": "asdsad",
@@ -67,7 +71,8 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     },
     "empty_domain_list": {
         "service_name": "empty_domain_list",
@@ -80,7 +85,8 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     },
     "empty_origin_list": {
         "service_name": "empty_origin_list",
@@ -92,7 +98,8 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     },
     "non_numeric_origin_port": {
         "service_name": "non_numeric_origin_port",
@@ -106,7 +113,8 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     },
     "non_boolean_origin_ssl": {
         "service_name": "non_boolean_origin_ssl",
@@ -120,7 +128,8 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     },
     "invalid_flavor": {
         "service_name": "invalid_flavor",
@@ -134,7 +143,8 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     },
     "caching_list_no_name": {
         "service_name": "caching_list_no_name",
@@ -144,10 +154,40 @@
                          "port": 443,
                          "ssl": false}],
         "flavor_id": "standard",
-        "caching_list": [{"ttl": 3600}]
+        "caching_list": [{"ttl": 3600}],
+        "restrictions_list": []
+    },
+    "caching_list_no_rule_name": {
+        "service_name": "caching_list_no_rule_name",
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "flavor_id": "standard",
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"request_url" : "/index.htm"}]}],
+        "restrictions_list": []
+    },
+    "caching_list_no_rule_url": {
+        "service_name": "caching_list_no_url",
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "flavor_id": "standard",
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index"
+                                     }]}],
+        "restrictions_list": []
     },
     "caching_negative_ttl": {
-        "name": "my_service_name",
+        "service_name": "my_service_name",
         "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
         "origin_list": [{"origin": "mywebsite1.com",
@@ -157,6 +197,50 @@
                          {"name": "home",
                           "ttl": -1,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
+    },
+    "restrictions_empty_item": {
+        "service_name": "my_service_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 3600,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": [{}]
+    },
+    "restrictions_no_rules": {
+        "service_name": "my_service_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 3600,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": [{"name":"default"}]
+    },
+    "restrictions_rule_no_name": {
+        "service_name": "my_service_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 3600,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": [{"name":"default",
+                                "rules": [{}]}]
     }
 }
