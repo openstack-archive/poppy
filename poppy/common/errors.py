@@ -29,6 +29,10 @@ class BadProviderDetail(Exception):
     """Raised when attempted a non existent operation."""
 
 
+class ServiceNotFound(Exception):
+    """Raised when service is not found."""
+
+
 class ServiceStatusNotDeployed(Exception):
 
     """Raised when attempted to update service who status is not deployed."""
