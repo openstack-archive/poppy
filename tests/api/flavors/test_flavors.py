@@ -37,6 +37,9 @@ class TestCreateFlavors(base.TestBase):
         provider_list = test_data['provider_list']
         limits = test_data['limits']
 
+        for item in provider_list:
+            item['provider'] = self.test_config.generated_provider
+
         if 'flavor_id' in test_data:
             self.flavor_id = test_data['flavor_id']
         flavor_id = self.flavor_id
@@ -74,6 +77,14 @@ class TestCreateFlavors(base.TestBase):
                                          limits=limits)
         self.assertEqual(resp.status_code, 400)
 
+    def test_delete_flavor(self):
+
+        resp = self.client.delete_flavor(flavor_id=self.flavor_id)
+        self.assertEqual(resp.status_code, 204)
+
+        resp = self.client.get_flavor(flavor_id=self.flavor_id)
+        self.assertEqual(resp.status_code, 404)
+
     def tearDown(self):
         self.client.delete_flavor(flavor_id=self.flavor_id)
         super(TestCreateFlavors, self).tearDown()
@@ -82,7 +93,7 @@ class TestCreateFlavors(base.TestBase):
 @ddt.ddt
 class TestFlavorActions(base.TestBase):
 
-    """Tests for GET & DELETE Flavors."""
+    """Tests for GET & LIST Flavors."""
 
     def setUp(self):
         super(TestFlavorActions, self).setUp()
@@ -96,15 +107,6 @@ class TestFlavorActions(base.TestBase):
 
         response_body = resp.json()
         self.assertSchema(response_body, flavors.get_flavor)
-        self.assertEqual(response_body['providers'], self.provider_list)
-
-    def test_delete_flavor(self):
-
-        resp = self.client.delete_flavor(flavor_id=self.flavor_id)
-        self.assertEqual(resp.status_code, 204)
-
-        resp = self.client.get_flavor(flavor_id=self.flavor_id)
-        self.assertEqual(resp.status_code, 404)
 
     def tearDown(self):
         if self.test_config.generate_flavors:

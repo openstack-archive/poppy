@@ -33,8 +33,11 @@ provider = {'type': 'object',
 link = {'type': 'object',
         'properties': {
             'href': {'type': 'string',
-                     'pattern': '^(https?)(:/{1,3})([a-z0-9\.\-:]{1,400})'
-                     '/v1\.0/flavors/'},
+                     'oneOf': [
+                         {'pattern': '^(https?)(:/{1,3})([a-z0-9\.\-:]{1,400})'
+                          '/v1\.0/flavors/'},
+                         {'pattern': '^(https?)(:/{1,3})([a-z0-9\.\-:]{1,400})'
+                          '/v1\.0/([a-z0-9]{1,400})/flavors/'}]},
             'rel': {'type': 'string', 'enum': ['self']}},
         'required': ['href', 'rel'],
         'additionalProperties': False}
