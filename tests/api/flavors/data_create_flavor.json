@@ -27,19 +27,5 @@
     "provider_list": [
         {"provider": "fastly",
          "links": [{"href": "http://العربية.com",
-                    "rel": "provider_url"}]}]},
-"multiple_providers":
-    {
-    "limits": [
-        {"origins": {"min": 1, "max": 5}},
-        {"domains": {"min": 1, "max": 5}},
-        {"caching": {"min": 3600, "max": 604800, "incr": 300}}],
-    "provider_list": [
-        {"provider": "fastly",
-         "links": [{"href": "http://www.fastly.com",
-                    "rel": "provider_url"}]},
-        {"provider": "cloudfront",
-         "links": [{"href": "http://111.222.333.444",
-                    "rel": "provider_url"}]}
-    ]}
+                    "rel": "provider_url"}]}]}
  }
