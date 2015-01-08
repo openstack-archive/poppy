@@ -134,9 +134,9 @@ class DefaultServicesController(base.ServicesController):
         except ValueError:
             raise errors.ServiceNotFound("Service not found")
 
-        if service_old.status != u'deployed':
-            raise errors.ServiceStatusNotDeployed(
-                u'Service {0} not deployed'.format(service_id))
+        if service_old.status not in [u'deployed', u'failed']:
+            raise errors.ServiceStatusNeitherDeployedNorFailed(
+                u'Service {0} neither deployed nor failed'.format(service_id))
 
         service_old_dict = service_old.to_dict()
         service_obj_dict = jsonpatch.apply_patch(
