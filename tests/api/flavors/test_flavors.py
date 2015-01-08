@@ -75,7 +75,8 @@ class TestCreateFlavors(base.TestBase):
         self.assertEqual(resp.status_code, 400)
 
     def tearDown(self):
-        self.client.delete_flavor(flavor_id=self.flavor_id)
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
         super(TestCreateFlavors, self).tearDown()
 
 
