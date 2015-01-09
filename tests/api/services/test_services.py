@@ -536,6 +536,7 @@ class TestServicePatch(base.TestBase):
     # @ddt.file_data('data_patch_subset.json')
     def test_patch_service(self, test_data):
 
+
         for item in test_data:
             if ('domain' in item['path']) and ('value' in item):
                 if isinstance(item['value'], (list)):
