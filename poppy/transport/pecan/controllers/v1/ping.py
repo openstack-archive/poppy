@@ -26,6 +26,6 @@ class PingController(base.Controller, hooks.HookController):
     # project_id is not required to be submitted
     __hooks__ = [poppy_hooks.Error()]
 
-    @pecan.expose()
+    @pecan.expose('json')
     def get(self):
         return pecan.Response(None, 204)

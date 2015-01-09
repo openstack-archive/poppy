@@ -46,7 +46,7 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
 
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
-    @pecan.expose()
+    @pecan.expose('json')
     @decorators.validate(
         service_id=rule.Rule(
             helpers.is_valid_service_id(),

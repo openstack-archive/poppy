@@ -161,7 +161,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         """
 
         url = '{0}/ping'.format(self.url)
-        return self.request('GET', url)
+        return self.request('GET', url, headers={'Accept': "application/json"})
 
     def create_flavor(self, flavor_id=None, provider_list=None, limits=None,
                       requestslib_kwargs=None):
