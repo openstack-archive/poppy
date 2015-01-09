@@ -14,24 +14,22 @@
 # limitations under the License.
 
 import json
-import logging
-import sys
 
 from oslo.config import cfg
+from taskflow.patterns import graph_flow
 from taskflow.patterns import linear_flow
+from taskflow import retry
 from taskflow import task
 
 from poppy import bootstrap
+from poppy.distributed_task.taskflow.task import common
+from poppy.distributed_task.taskflow.task import create_service_tasks
 from poppy.model.helpers import provider_details
+from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import service
 
 
-logging.basicConfig(level=logging.ERROR,
-                    format='%(levelname)s: %(message)s',
-                    stream=sys.stdout)
-
-LOG = logging.getLogger('Poppy Service Tasks')
-LOG.setLevel(logging.DEBUG)
+LOG = log.getLogger(__name__)
 
 
 conf = cfg.CONF
@@ -116,7 +114,16 @@ class CreateServiceTask(task.Task):
 
 
 def create_service():
-    flow = linear_flow.Flow('Creating poppy-service').add(
-        CreateServiceTask(),
+    flow = graph_flow.Flow('Creating poppy-service').add(
+        create_service_tasks.CreateProviderServicesTask(),
+        linear_flow.Flow('Create Service DNS Mapping flow',
+                         retry=retry.ParameterizedForEach(
+                             rebind=['time_seconds'],
+                             provides='retry_sleep_time')).add(
+            create_service_tasks.CreateServiceDNSMappingTask(
+                rebind=['responders'])),
+        create_service_tasks.GatherProviderDetailsTask(
+            rebind=['responders', 'dns_responder']),
+        common.UpdateProviderDetailTask(rebind=['provider_details_dict'])
     )
     return flow

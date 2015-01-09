@@ -14,25 +14,23 @@
 # limitations under the License.
 
 import json
-import logging
 import os
-import sys
 
 from oslo.config import cfg
+from taskflow.patterns import graph_flow
 from taskflow.patterns import linear_flow
 from taskflow import task
 
 from poppy import bootstrap
+from poppy.distributed_task.taskflow.task import common
+from poppy.distributed_task.taskflow.task import purge_service_tasks
+from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import (
     provider_details as req_provider_details
 )
 
-logging.basicConfig(level=logging.ERROR,
-                    format='%(levelname)s: %(message)s',
-                    stream=sys.stdout)
 
-LOG = logging.getLogger('Poppy Service Tasks')
-LOG.setLevel(logging.DEBUG)
+LOG = log.getLogger(__name__)
 
 
 conf = cfg.CONF
@@ -114,7 +112,11 @@ class PurgeServiceTask(task.Task):
 
 
 def purge_service():
-    flow = linear_flow.Flow('Purge poppy-service').add(
-        PurgeServiceTask(),
-    )
+    flow = graph_flow.Flow('Purging poppy-service').add(
+        purge_service_tasks.PurgeProviderServicesTask(),
+        linear_flow.Flow('Purge provider details').add(
+            common.UpdateProviderDetailErrorTask(
+                rebind=['responders'])),
+        common.UpdateProviderDetailIfNotEmptyTask(
+            rebind=['changed_provider_details_dict']))
     return flow
