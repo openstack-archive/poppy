@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import json
 
 from poppy.common import decorators
@@ -71,7 +72,7 @@ class ServiceController(base.ServiceBase):
 
         # implementing caching-rules for akamai
         # we do not have to use copy here, since caching is only used once
-        caching_rules = service_obj.caching
+        caching_rules = copy.deepcopy(service_obj.caching)
         # Traverse existing rules list to add caching rules necessarys
         self._process_caching_rules(caching_rules, post_data['rules'])
 
@@ -326,8 +327,9 @@ class ServiceController(base.ServiceBase):
                         referrer_whitelist_value, rule)
 
             # implementing caching-rules for akamai
-            # we do not have to use copy here, since caching is only used once
-            caching_rules = service_obj.caching
+            # we need deep copy since caching rules will be used in late
+            # upadate objects
+            caching_rules = copy.deepcopy(service_obj.caching)
             # Traverse existing rules list to add caching rules necessarys
             self._process_caching_rules(caching_rules, policy_content['rules'])
 
@@ -473,7 +475,7 @@ class ServiceController(base.ServiceBase):
                             referrer_whitelist_value, rule)
 
                 # implementing caching-rules for akamai
-                caching_rules = service_obj.caching
+                caching_rules = copy.deepcopy(service_obj.caching)
                 # Traverse existing rules list to add caching rules necessarys
                 self._process_caching_rules(caching_rules,
                                             policy_content['rules'])
