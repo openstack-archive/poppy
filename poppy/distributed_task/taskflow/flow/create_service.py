@@ -18,13 +18,16 @@ import logging
 import sys
 
 from oslo.config import cfg
+from taskflow.patterns import graph_flow
 from taskflow.patterns import linear_flow
 from taskflow import task
+from taskflow import retry
 
 from poppy import bootstrap
+from poppy.distributed_task.taskflow.task import common
+from poppy.distributed_task.taskflow.task import create_service_tasks
 from poppy.model.helpers import provider_details
 from poppy.transport.pecan.models.request import service
-
 
 logging.basicConfig(level=logging.ERROR,
                     format='%(levelname)s: %(message)s',
@@ -36,6 +39,7 @@ LOG.setLevel(logging.DEBUG)
 
 conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
+
 
 
 def service_create_task_func(providers_list_json,
@@ -115,8 +119,16 @@ class CreateServiceTask(task.Task):
         return True
 
 
+
 def create_service():
-    flow = linear_flow.Flow('Creating poppy-service').add(
-        CreateServiceTask(),
+    flow = graph_flow.Flow('Creating poppy-service').add(
+        create_service_tasks.CreateProviderServicesTask(),
+        linear_flow.Flow('Create Service DNS Mapping flow',
+                         retry=retry.Times(attempts=5)).add(
+            create_service_tasks.CreateServiceDNSMappingTask(
+                rebind=['responders'])),
+        create_service_tasks.GatherProviderDetailsTask(
+            rebind=['responders', 'dns_responder']),
+        common.UpdateProviderDetailTask(rebind=['provider_details_dict'])
     )
     return flow
