@@ -138,10 +138,13 @@ class ServiceControllerTest(base.FunctionalTest):
         self.limits_conf = self.conf[LIMITS_GROUP]
         self.max_services_per_page = self.limits_conf.max_services_per_page
 
-        response = self.app.get('/v1.0/services', params={
-            "marker": uuid.uuid4(),
-            "limit": self.max_services_per_page + 1
-        }, expect_errors=True)
+        response = self.app.get('/v1.0/services',
+                                headers={'X-Project-ID': self.project_id},
+                                params={
+                                    "marker": uuid.uuid4(),
+                                    "limit": self.max_services_per_page + 1
+                                },
+                                expect_errors=True)
 
         self.assertEqual(400, response.status_code)
 
