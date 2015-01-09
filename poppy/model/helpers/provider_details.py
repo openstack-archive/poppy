@@ -120,8 +120,8 @@ class ProviderDetail(common.DictSerializableModel):
         """
 
         o = cls("unnamed")
-        o.provider_service_id = dict_obj.get("provider_service_id",
-                                             "unkown_id")
+        o.provider_service_id = dict_obj.get("id",
+                                             "unknown_id")
         o.access_urls = dict_obj.get("access_urls", {})
         o.status = dict_obj.get("status", u"deploy_in_progress")
         o.name = dict_obj.get("name", None)

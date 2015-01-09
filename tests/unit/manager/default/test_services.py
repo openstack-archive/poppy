@@ -20,10 +20,10 @@ import ddt
 import mock
 from oslo.config import cfg
 
-
-from poppy.distributed_task.taskflow.flow import create_service
-from poppy.distributed_task.taskflow.flow import delete_service
-from poppy.distributed_task.taskflow.flow import purge_service
+from poppy.distributed_task.taskflow.task import common
+from poppy.distributed_task.taskflow.task import create_service_tasks
+from poppy.distributed_task.taskflow.task import delete_service_tasks
+from poppy.distributed_task.taskflow.task import purge_service_tasks
 from poppy.manager.default import driver
 
 
@@ -113,34 +113,60 @@ class DefaultManagerServiceTests(base.TestCase):
     @mock.patch('poppy.bootstrap.Bootstrap')
     def mock_purge_service(self, mock_bootstrap):
         mock_bootstrap.return_value = self.bootstrap_obj
-        purge_service.service_purge_task_func(
-            json.dumps(dict([(k, v.to_dict())
-                             for k, v in
-                             self.provider_details.items()])),
-            self.project_id,
-            self.service_id,
-            str(None))
+        purge_provider = purge_service_tasks.PurgeProviderServicesTask()
+        provider_details = json.dumps(
+            dict([(k, v.to_dict()) for k, v
+                  in self.provider_details.items()]))
+        responders = purge_provider.execute(provider_details, str(None))
+        error_update = common.UpdateProviderDetailErrorTask()
+        changed_provider_details_dict = error_update.execute(responders,
+                                                             self.service_id,
+                                                             provider_details)
+        not_empty_update = common.UpdateProviderDetailIfNotEmptyTask()
+        not_empty_update.execute(changed_provider_details_dict,
+                                 self.project_id,
+                                 self.service_id)
 
     @mock.patch('poppy.bootstrap.Bootstrap')
     def mock_delete_service(self, mock_bootstrap):
         mock_bootstrap.return_value = self.bootstrap_obj
-        delete_service.service_delete_task_func(
-            json.dumps(dict([(k, v.to_dict())
-                             for k, v in
-                             self.provider_details.items()])),
-            self.project_id,
-            self.service_id)
+        delete_provider = delete_service_tasks.DeleteProviderServicesTask()
+        provider_details = json.dumps(
+            dict([(k, v.to_dict()) for k, v
+                  in self.provider_details.items()]))
+        responders = delete_provider.execute(provider_details)
+        delete_dns = delete_service_tasks.DeleteServiceDNSMappingTask()
+        dns_responders = delete_dns.execute(provider_details, 0)
+
+        gather_provider = delete_service_tasks.GatherProviderDetailsTask()
+        changed_provider_dict = gather_provider.execute(responders,
+                                                        dns_responders,
+                                                        provider_details)
+        update_provider = common.UpdateProviderDetailIfNotEmptyTask()
+        update_provider.execute(changed_provider_dict, self.project_id,
+                                self.service_id)
+
+        delete_service = delete_service_tasks.DeleteStorageServiceTask()
+        delete_service.execute(self.project_id, self.service_id)
 
     def mock_create_service(self, provider_details_json):
         @mock.patch('poppy.bootstrap.Bootstrap')
         def bootstrap_mock_create(mock_bootstrap):
             mock_bootstrap.return_value = self.bootstrap_obj
-            res = create_service.service_create_task_func(
-                providers_list_json=json.dumps(provider_details_json),
-                project_id=self.project_id,
-                service_id=self.service_id,
-                )
-            self.assertIsNone(res)
+
+            create_provider = create_service_tasks.CreateProviderServicesTask()
+            responders = create_provider.execute(
+                json.dumps(provider_details_json),
+                self.project_id,
+                self.service_id)
+            create_dns = create_service_tasks.CreateServiceDNSMappingTask()
+            dns_responder = create_dns.execute(responders, 0)
+            gather_provider = create_service_tasks.GatherProviderDetailsTask()
+            provider_details_dict = \
+                gather_provider.execute(responders, dns_responder)
+            update_provider_details = common.UpdateProviderDetailTask()
+            update_provider_details.execute(provider_details_dict,
+                                            self.project_id, self.service_id)
 
         bootstrap_mock_create()
 
