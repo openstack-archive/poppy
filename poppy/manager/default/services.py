@@ -16,6 +16,7 @@
 import json
 
 import jsonpatch
+from oslo.config import cfg
 
 from poppy.common import errors
 from poppy.distributed_task.taskflow.flow import create_service
@@ -30,6 +31,15 @@ from poppy.transport.validators.schemas import service as service_schema
 
 LOG = log.getLogger(__name__)
 
+DNS_OPTIONS = [
+    cfg.IntOpt(
+        'retries',
+        default=5,
+        help='Total number of Retries after Exponentially Backing Off'),
+]
+
+DNS_GROUP = 'drivers:dns'
+
 
 class DefaultServicesController(base.ServicesController):
 
@@ -43,6 +53,14 @@ class DefaultServicesController(base.ServicesController):
         self.dns_controller = self._driver.dns.services_controller
         self.distributed_task_controller = (
             self._driver.distributed_task.services_controller)
+
+        self.driver.conf.register_opts(DNS_OPTIONS,
+                                       group=DNS_GROUP)
+        self.dns_conf = self.driver.conf[DNS_GROUP]
+        self.default_sleep_time = [0]
+        self.backoff = [(2**i) * 60 for i in range(0, self.dns_conf.retries)]
+
+        self.time_seconds = self.default_sleep_time + self.backoff
 
     def _get_provider_details(self, project_id, service_id):
         try:
@@ -99,7 +117,8 @@ class DefaultServicesController(base.ServicesController):
         kwargs = {'providers_list_json': json.dumps(providers),
                   'project_id': project_id,
                   'service_id': service_id,
-                  'service_obj_json': json.dumps(service_obj.to_dict())
+                  'service_obj_json': json.dumps(service_obj.to_dict()),
+                  'time_seconds': self.time_seconds
                   }
         self.distributed_task_controller.submit_task(
             create_service.create_service, **kwargs)
@@ -163,7 +182,8 @@ class DefaultServicesController(base.ServicesController):
             'project_id': project_id,
             'service_id': service_id,
             'service_old': json.dumps(service_old.to_dict()),
-            'service_obj': json.dumps(service_new.to_dict())
+            'service_obj': json.dumps(service_new.to_dict()),
+            'time_seconds': self.time_seconds
         }
 
         self.distributed_task_controller.submit_task(
@@ -194,7 +214,8 @@ class DefaultServicesController(base.ServicesController):
             "provider_details": json.dumps(
                 dict([(k, v.to_dict()) for k, v in provider_details.items()])),
             "project_id": project_id,
-            "service_id": service_id
+            "service_id": service_id,
+            'time_seconds': self.time_seconds
         }
 
         self.distributed_task_controller.submit_task(

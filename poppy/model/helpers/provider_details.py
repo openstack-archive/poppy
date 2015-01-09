@@ -101,6 +101,7 @@ class ProviderDetail(common.DictSerializableModel):
     def to_dict(self):
         result = collections.OrderedDict()
         result["provider_service_id"] = self.provider_service_id
+        result["id"] = self.provider_service_id
         result["access_urls"] = self.access_urls
         result["status"] = self.status
         result["name"] = self.name
