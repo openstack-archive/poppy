@@ -19,13 +19,18 @@ import os
 import sys
 
 from oslo.config import cfg
+from taskflow.patterns import graph_flow
 from taskflow.patterns import linear_flow
+from taskflow import retry
 from taskflow import task
 
 from poppy import bootstrap
 from poppy.transport.pecan.models.request import (
     provider_details as req_provider_details
 )
+
+from poppy.distributed_task.taskflow.task import common
+from poppy.distributed_task.taskflow.task import delete_service_tasks
 
 
 logging.basicConfig(level=logging.ERROR,
@@ -118,7 +123,16 @@ class DeleteServiceTask(task.Task):
 
 
 def delete_service():
-    flow = linear_flow.Flow('Deleting poppy-service').add(
-        DeleteServiceTask(),
+    flow = graph_flow.Flow('Deleting poppy-service').add(
+        delete_service_tasks.DeleteProviderServicesTask(),
+        linear_flow.Flow('Delete Service DNS Mapping flow',
+                         retry=retry.Times(attempts=5)).add(
+            delete_service_tasks.DeleteServiceDNSMappingTask()),
+        delete_service_tasks.GatherProviderDetailsTask(
+            rebind=['responders', 'dns_responder']),
+        linear_flow.Flow('Delete service storage operation').add(
+            common.UpdateProviderDetailIfNotEmptyTask(
+                rebind=['provider_details_dict']),
+            delete_service_tasks.DeleteStorageServiceTask())
     )
     return flow
