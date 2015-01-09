@@ -59,7 +59,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                             'https']
                                 }}},
                         'required': True,
-                        'minItems': 1},
+                        'minItems': 1,
+                        'maxItems': 10},
                     'origins': {
                         'type': 'array',
                         # the first origin does not have to
@@ -111,6 +112,7 @@ class ServiceSchema(schema_base.SchemaBase):
                         }],
                         'required': True,
                         'minItems': 1,
+                        'maxItems': 10,
                         # the 2nd and successive items must have
                         # 'rules' field which has at least one rule
                         "additionalItems": {
