@@ -98,8 +98,6 @@ class TestServices(base.TestCase):
         )
         self.controller.create(service_obj)
         self.controller.policy_api_client.put.assert_called_once()
-        # make sure all the caching rules are processed
-        self.assertTrue(service_obj.caching == [])
 
     def test_delete_with_exception(self):
         provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
