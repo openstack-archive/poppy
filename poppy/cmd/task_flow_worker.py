@@ -13,19 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-import sys
-
 from oslo.config import cfg
 
 from poppy import bootstrap
 
-logging.basicConfig(level=logging.ERROR,
-                    format='%(levelname)s: %(message)s',
-                    stream=sys.stdout)
+from poppy.openstack.common import log
 
-LOG = logging.getLogger('taskflow')
-LOG.setLevel(logging.DEBUG)
+LOG = log.getLogger(__name__)
 
 
 if __name__ == "__main__":
