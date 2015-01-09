@@ -316,5 +316,53 @@
                                      "request_url" : "/index.htm"}]}],
         "restrictions_list": [{"name":"default",
                                 "rules": [{}]}]
+    },
+    "origin_invalid_port": {
+        "service_name": "origin_invalid_port",
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "not an origin", "port": 8080, "rules":[{"name": "name", "request_url": "www.somewebsite.com"}]}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
+    },
+    "origin_null_port": {
+        "service_name": "origin_null_port",
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "not an origin", "port": null, "rules":[{"name": "name", "request_url": "www.somewebsite.com"}]}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
+    },
+    "origin_negative_port": {
+        "service_name": "origin_negative_port",
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "not an origin", "port": -80, "rules":[{"name": "name", "request_url": "www.somewebsite.com"}]}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
+    },
+    "origin_string_port": {
+        "service_name": "origin_string_port",
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "not an origin", "port": "80", "rules":[{"name": "name", "request_url": "www.somewebsite.com"}]}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     }
 }

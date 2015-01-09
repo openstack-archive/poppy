@@ -78,5 +78,61 @@
         {"op": "replace",
          "path": "/flavor_id",
          "value": "nonexistant"}
+    ],
+    "add_origin_with_empty_rule_name": [
+        {"op": "add",
+            "path": "/origins/1",
+            "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                "rules": [{"name" : "", "request_url" : "/origin.html"}]}
+        }
+    ],
+    "add_origin_with_empty_request_url": [
+        {"op": "add",
+            "path": "/origins/1",
+            "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                "rules": [{"name" : "origin", "request_url" : ""}]}
+        }
+    ],
+    "add_caching_with_empty_name": [
+        {"op": "add",
+         "path": "/caching/-",
+         "value": {"name": "", "ttl": 111,
+                   "rules": [{"name" : "index","request_url" : "/empty_name.htm"}]}}
+    ],
+    "add_caching_with_empty_rule_name": [
+        {"op": "add",
+         "path": "/caching/-",
+         "value": {"name": "cache_name", "ttl": 111,
+                "rules": [{"name" : "","request_url" : "/empty_rule_name.htm"}]}}
+    ],
+    "add_caching_with_empty_request_url": [
+        {"op": "add",
+            "path": "/caching/-",
+            "value": {"name": "cache_name", "ttl": 111,
+                "rules": [{"name" : "index","request_url" : ""}]}}
+    ],
+    "add_restrictions_with_empty_name": [
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "",
+                    "rules": [{"name": "rule1", "referrer": "thesite"}]
+                   }
+         }
+    ],
+    "add_restrictions_with_empty_rule_name": [
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted",
+                    "rules": [{"name": "", "referrer": "thesite"}]
+                   }
+         }
+    ],
+    "add_restrictions_with_less_than_minimum_length_referrer": [
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted",
+                    "rules": [{"name": "rule1", "referrer": "ab"}]
+                   }
+         }
     ]
 }

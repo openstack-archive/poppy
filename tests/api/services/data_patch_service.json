@@ -46,6 +46,20 @@
                    "rules": [{"name" : "origin", "request_url" : "/origin.htm"}]}
         }
     ],
+    "add_origin_with_minimum_length_rule_name": [
+        {"op": "add",
+            "path": "/origins/1",
+            "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                "rules": [{"name" : "o", "request_url" : "/origin.html"}]}
+        }
+    ],
+    "add_origin_with_minimum_length_request_url": [
+        {"op": "add",
+            "path": "/origins/1",
+            "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                "rules": [{"name" : "origin", "request_url" : "/"}]}
+        }
+    ],
    "add_multiple_origins": [
         {"op": "add",
          "path": "/origins/1",
@@ -72,6 +86,24 @@
          "path": "/caching/-",
          "value": {"name": "cache_name", "ttl": 111,
                    "rules": [{"name" : "index","request_url" : "/cats.jpg"}]}}
+    ],
+    "add_caching_with_minimum_length_name": [
+        {"op": "add",
+         "path": "/caching/-",
+         "value": {"name": "c", "ttl": 111,
+                   "rules": [{"name" : "index","request_url" : "/minimum_length_name.htm"}]}}
+    ],
+    "add_caching_with_minimum_length_rule_name": [
+        {"op": "add",
+         "path": "/caching/-",
+         "value": {"name": "cache_name", "ttl": 111,
+                "rules": [{"name" : "i","request_url" : "/minimum_length_rule_name.htm"}]}}
+    ],
+    "add_caching_with_minimum_length_request_url": [
+        {"op": "add",
+            "path": "/caching/-",
+            "value": {"name": "cache_name", "ttl": 111,
+                "rules": [{"name" : "index","request_url" : "/"}]}}
     ],
    "replace_caching": [
         {"op": "replace",
@@ -102,8 +134,44 @@
                     "rules": [{"name": "rule1", "referrer": "thesite"}]
                     }}
     ],
+   "replace_restrictions":[
+        {"op": "add",
+         "path": "/restrictions/-",
+         "value": {"name": "restricted",
+                    "rules": [{"name": "rule1", "referrer": "thesite"}]
+                    }},
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "new_restricted",
+                    "rules": [{"name": "rule1", "referrer": "thesite"}]
+                    }}
+   ],
    "remove_restrictions": [
         {"op": "remove",
          "path": "/restrictions/0"}
+    ],
+    "add_restrictions_with_minimum_length_name": [
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "r",
+                    "rules": [{"name": "rule1", "referrer": "thesite"}]
+                   }
+         }
+    ],
+    "add_restrictions_with_minimum_length_rule_name": [
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted",
+                    "rules": [{"name": "r", "referrer": "thesite"}]
+                   }
+         }
+    ],
+    "add_restrictions_with_minimum_length_referrer": [
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted",
+                    "rules": [{"name": "rule1", "referrer": "abc"}]
+                   }
+         }
     ]
 }

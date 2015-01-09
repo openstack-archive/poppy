@@ -96,13 +96,13 @@ class ServiceSchema(schema_base.SchemaBase):
                                             'name': {
                                                 'type': 'string',
                                                 'required': True,
-                                                'minLength': 3,
+                                                'minLength': 1,
                                                 'maxLength': 256
                                             },
                                             'request_url': {
                                                 'type': 'string',
                                                 'required': True,
-                                                'minLength': 3,
+                                                'minLength': 1,
                                                 'maxLength': 1024
                                             }
                                         }
@@ -145,13 +145,13 @@ class ServiceSchema(schema_base.SchemaBase):
                                             'name': {
                                                 'type': 'string',
                                                 'required': True,
-                                                'minLength': 3,
+                                                'minLength': 1,
                                                 'maxLength': 256,
                                             },
                                             'request_url': {
                                                 'type': 'string',
                                                 'required': True,
-                                                'minLength': 3,
+                                                'minLength': 1,
                                                 'maxLength': 1024,
                                             }
                                         }
@@ -172,7 +172,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                 'name': {
                                     'type': 'string',
                                     'required': True,
-                                    'minLength': 3,
+                                    'minLength': 1,
                                     'maxLength': 256},
                                 'ttl': {
                                     'type': 'integer',
@@ -187,12 +187,12 @@ class ServiceSchema(schema_base.SchemaBase):
                                             'name': {
                                                 'type': 'string',
                                                 'required': True,
-                                                'minLength': 3,
+                                                'minLength': 1,
                                                 'maxLength': 256},
                                             'request_url': {
                                                 'type': 'string',
                                                 'required': True,
-                                                'minLength': 3,
+                                                'minLength': 1,
                                                 'maxLength': 1024}}},
                                 }},
                         }],
@@ -207,7 +207,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                         re.IGNORECASE
                                     ),
                                     'required': True,
-                                    'minLength': 3,
+                                    'minLength': 1,
                                     'maxLength': 256},
                                 'ttl': {
                                     'type': 'integer',
@@ -223,12 +223,12 @@ class ServiceSchema(schema_base.SchemaBase):
                                             'name': {
                                                 'type': 'string',
                                                 'required': True,
-                                                'minLength': 3,
+                                                'minLength': 1,
                                                 'maxLength': 256},
                                             'request_url': {
                                                 'type': 'string',
                                                 'required': True,
-                                                'minLength': 3,
+                                                'minLength': 1,
                                                 'maxLength': 1024}}},
                                 }},
                         },
@@ -242,7 +242,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                 'name': {
                                     'type': 'string',
                                     'required': True,
-                                    'minLength': 3,
+                                    'minLength': 1,
                                     'maxLength': 256},
                                 'rules': {
                                     'type': 'array',
@@ -253,7 +253,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                             'name': {
                                                 'type': 'string',
                                                 'required': True,
-                                                'minLength': 3,
+                                                'minLength': 1,
                                                 'maxLength': 256},
                                             'referrer': {
                                                 'type': 'string',
