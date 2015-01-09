@@ -1,4 +1,4 @@
-"""MongoDB Storage Driver for CDN"""
+"""Cassandra Storage Driver for CDN"""
 
 from poppy.storage.cassandra import driver
 

@@ -57,7 +57,7 @@ installed and running.
 
     $ cd
     $ mkdir .poppy
-    $ git clone https://github.com/rackerlabs/cdn.git
+    $ git clone https://github.com/stackforge/poppy.git
 
 2. Copy the Poppy config files to the directory ``~/.poppy``::
 
