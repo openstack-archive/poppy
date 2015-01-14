@@ -109,6 +109,10 @@ class TestCreateService(providers.TestProviderBase):
 
         service_name = test_data['service_name']
         domain_list = test_data['domain_list']
+        for item in domain_list:
+            if len(item['domain']) > 2:
+                item['domain'] = str(uuid.uuid1()) + item['domain']
+
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         restrictions_list = test_data['restrictions_list']
