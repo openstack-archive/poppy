@@ -47,6 +47,8 @@ CASSANDRA_OPTIONS = [
     cfg.StrOpt('password', default='', help='Cassandra password'),
     cfg.StrOpt('load_balance_strategy', default='RoundRobinPolicy',
                help='Load balancing strategy for connecting to cluster nodes'),
+    cfg.StrOpt('consistency_level', default='ONE',
+               help='Consistency level of your cassandra query'),
     cfg.StrOpt('keyspace', default='poppy',
                help='Keyspace for all queries made in session'),
     cfg.DictOpt(
@@ -138,6 +140,9 @@ class CassandraStorageDriver(base.Driver):
         conf.register_opts(CASSANDRA_OPTIONS, group=CASSANDRA_GROUP)
         self.cassandra_conf = conf[CASSANDRA_GROUP]
         self.datacenter = conf.datacenter
+        self.consistency_level = getattr(
+            cassandra.ConsistencyLevel,
+            conf[CASSANDRA_GROUP].consistency_level)
         self.session = None
         self.archive_on_delete = self.cassandra_conf.archive_on_delete
         self.lock = multiprocessing.Lock()

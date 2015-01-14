@@ -119,10 +119,10 @@ class CassandraStorageServiceTests(base.TestCase):
     @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_list_services(self, value, mock_session, mock_execute):
         # mock the response from cassandra
+        mock_execute.prepare.return_value = mock.Mock()
         mock_execute.execute.return_value = value
 
-        sc = services.ServicesController(None)
-        actual_response = sc.list(self.project_id, None, None)
+        actual_response = self.sc.list(self.project_id, None, None)
 
         # TODO(amitgandhinz): assert the response
         # matches the expectation (using jsonschema)
@@ -206,11 +206,6 @@ class CassandraStorageServiceTests(base.TestCase):
         # mock the response from cassandra
         mock_execute.execute.return_value = None
 
-        self.sc.update_provider_details(
-            self.project_id,
-            self.service_id,
-            provider_details_dict)
-
         # this is for update_provider_details unittest code coverage
         arg_provider_details_dict = {}
         for provider_name in provider_details_dict:
@@ -229,14 +224,25 @@ class CassandraStorageServiceTests(base.TestCase):
                 provider_details_dict[provider_name].error_message)
             arg_provider_details_dict[provider_name] = json.dumps(
                 the_provider_detail_dict)
-        args = {
+        call_args = {
             'project_id': self.project_id,
             'service_id': self.service_id,
             'provider_details': arg_provider_details_dict
         }
 
-        mock_execute.execute.assert_called_once_with(
-            services.CQL_UPDATE_PROVIDER_DETAILS, args)
+        # This is to verify mock has been called with the correct arguments
+        def assert_mock_execute_args(*args):
+            self.assertEqual(args[0].query_string,
+                             services.CQL_UPDATE_PROVIDER_DETAILS)
+            self.assertEqual(args[1], call_args)
+        mock_execute.execute.side_effect = assert_mock_execute_args
+
+        self.sc.update_provider_details(
+            self.project_id,
+            self.service_id,
+            provider_details_dict)
+
+        mock_execute.execute.assert_called_once()
 
     @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_session(self, mock_service_database):

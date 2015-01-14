@@ -231,7 +231,10 @@ class ServicesController(base.ServicesController):
             'limit': limit
         }
 
-        results = self.session.execute(CQL_LIST_SERVICES, args)
+        stmt = query.SimpleStatement(
+            CQL_LIST_SERVICES,
+            consistency_level=self._driver.consistency_level)
+        results = self.session.execute(stmt, args)
         services = [self.format_result(r) for r in results]
 
         return services
@@ -250,7 +253,10 @@ class ServicesController(base.ServicesController):
             'project_id': project_id,
             'service_id': uuid.UUID(str(service_id))
         }
-        results = self.session.execute(CQL_GET_SERVICE, args)
+        stmt = query.SimpleStatement(
+            CQL_GET_SERVICE,
+            consistency_level=self._driver.consistency_level)
+        results = self.session.execute(stmt, args)
 
         if len(results) != 1:
             raise ValueError('No service found: %s'
@@ -278,7 +284,10 @@ class ServicesController(base.ServicesController):
             args = {
                 'domain_name': domain_name.lower()
             }
-            results = self.session.execute(CQL_VERIFY_DOMAIN, args)
+            stmt = query.SimpleStatement(
+                CQL_VERIFY_DOMAIN,
+                consistency_level=self._driver.consistency_level)
+            results = self.session.execute(stmt, args)
 
             if results:
                 for r in results:
@@ -339,7 +348,8 @@ class ServicesController(base.ServicesController):
 
         LOG.debug("Creating New Service - {0} ({1})".format(service_id,
                                                             service_name))
-        batch = query.BatchStatement()
+        batch = query.BatchStatement(
+            consistency_level=self._driver.consistency_level)
         batch.add(query.SimpleStatement(CQL_CREATE_SERVICE), service_args)
 
         for d in service_obj.domains:
@@ -385,7 +395,10 @@ class ServicesController(base.ServicesController):
             'provider_details': {}
         }
 
-        self.session.execute(CQL_UPDATE_SERVICE, args)
+        stmt = query.SimpleStatement(
+            CQL_UPDATE_SERVICE,
+            consistency_level=self._driver.consistency_level)
+        self.session.execute(stmt, args)
 
     def delete(self, project_id, service_id):
         """delete.
@@ -422,14 +435,20 @@ class ServicesController(base.ServicesController):
                 }
 
                 # archive and delete the service
-                self.session.execute(CQL_ARCHIVE_SERVICE, archive_args)
+                stmt = query.SimpleStatement(
+                    CQL_ARCHIVE_SERVICE,
+                    consistency_level=self._driver.consistency_level)
+                self.session.execute(stmt, archive_args)
             else:
                 delete_args = {
                     'project_id': result.get('project_id'),
                     'service_id': result.get('service_id'),
                     'domains_list': domains_list
                 }
-                self.session.execute(CQL_DELETE_SERVICE, delete_args)
+                stmt = query.SimpleStatement(
+                    CQL_DELETE_SERVICE,
+                    consistency_level=self._driver.consistency_level)
+                self.session.execute(stmt, delete_args)
 
     def get_provider_details(self, project_id, service_id):
         """get_provider_details.
@@ -448,7 +467,10 @@ class ServicesController(base.ServicesController):
         # Needs to verify after cassandra unittest framework has been added in
         # if a list, the return the first item of a list. if it is a dictionary
         # returns the dictionary
-        exec_results = self.session.execute(CQL_GET_PROVIDER_DETAILS, args)
+        stmt = query.SimpleStatement(
+            CQL_GET_PROVIDER_DETAILS,
+            consistency_level=self._driver.consistency_level)
+        exec_results = self.session.execute(stmt, args)
 
         provider_details_result = exec_results[0]['provider_details'] or {}
         results = {}
@@ -504,7 +526,10 @@ class ServicesController(base.ServicesController):
         # Needs to verify after cassandra unittest framework has been added in
         # if a list, the return the first item of a list. if it is a dictionary
         # returns the dictionary
-        self.session.execute(CQL_UPDATE_PROVIDER_DETAILS, args)
+        stmt = query.SimpleStatement(
+            CQL_UPDATE_PROVIDER_DETAILS,
+            consistency_level=self._driver.consistency_level)
+        self.session.execute(stmt, args)
 
     @staticmethod
     def format_result(result):

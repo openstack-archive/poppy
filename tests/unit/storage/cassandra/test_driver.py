@@ -41,6 +41,8 @@ CASSANDRA_OPTIONS = [
     cfg.StrOpt('password', default='', help='Cassandra password'),
     cfg.StrOpt('load_balance_strategy', default='RoundRobinPolicy',
                help='Load balancing strategy for connecting to cluster nodes'),
+    cfg.StrOpt('consistency_level', default='ONE',
+               help='Consistency level of your cassandra query'),
     cfg.DictOpt(
         'replication_strategy',
         default={
@@ -141,6 +143,10 @@ class CassandraStorageDriverTests(base.TestCase):
             session = driver._connection(cfg, "ORD")
 
             self.assertEqual(mock_session, session)
+
+    def test_consisltency_level(self):
+        self.assertEqual(self.cassandra_driver.consistency_level,
+                         cassandra.ConsistencyLevel.ONE)
 
     def test_storage_name(self):
         self.assertEqual('Cassandra', self.cassandra_driver.storage_name)
