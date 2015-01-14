@@ -355,7 +355,8 @@ class TestServiceActions(base.TestBase):
                 u"ttl": 1200,
                 u"rules": [{
                     u"name": u"index",
-                    u"request_url": u"/index.htm"
+                    u"request_url": u"/index.htm",
+                    u"http_method": u"GET"
                 }]
             }
         ]
