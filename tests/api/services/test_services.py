@@ -24,12 +24,11 @@ import jsonpatch
 from nose.plugins import attrib
 
 from tests.api import base
-from tests.api import providers
 from tests.api.utils.schema import services
 
 
 @ddt.ddt
-class TestCreateService(providers.TestProviderBase):
+class TestCreateService(base.TestBase):
 
     """Tests for Create Service."""
 
@@ -77,31 +76,6 @@ class TestCreateService(providers.TestProviderBase):
 
         # TODO(malini): uncomment below after caching list is implemented.
         # self.assertEqual(body['caching_list'], caching_list)
-
-        # Verify the service is updated at all Providers for the flavor
-        if self.test_config.provider_validation:
-            service_details = (
-                self.getServiceFromFlavor(flavor_id, self.service_name))
-            provider_list = self.config.flavor[flavor_id]
-
-            # Verify that the service stored in each provider (that is part of
-            # the flavor) is what Poppy sent them.
-            for provider in provider_list:
-                self.assertEqual(
-                    sorted(service_details[provider]['domain_list']),
-                    sorted(domain_list),
-                    msg='Domain Lists Not Correct for {0} service name {1}'.
-                        format(provider, self.service_name))
-                self.assertEqual(
-                    sorted(service_details[provider]['origin_list']),
-                    sorted(origin_list),
-                    msg='Origin List Not Correct for {0} service name {1}'.
-                        format(provider, self.service_name))
-                self.assertEqual(
-                    sorted(service_details[provider]['caching_list']),
-                    sorted(caching_list),
-                    msg='Caching List Not Correct for {0} service name {1}'.
-                        format(provider, self.service_name))
 
     @attrib.attr('smoke')
     @ddt.file_data('data_create_service_negative.json')

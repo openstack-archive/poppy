@@ -38,11 +38,6 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
     SECTION_NAME = 'test_configuration'
 
     @property
-    def provider_validation(self):
-        """Boolean value indicating if tests verify provider side details."""
-        return self.get_boolean('provider_validation')
-
-    @property
     def status_check_retry_interval(self):
         """Int value to set retry intervals for status check."""
         return int(self.get('status_check_retry_interval'))
@@ -101,23 +96,3 @@ class AuthConfig(data_interfaces.ConfigSectionInterface):
     def tenant_id(self):
         """The user's tenant_id, if applicable."""
         return self.get('tenant_id')
-
-
-class FastlyConfig(data_interfaces.ConfigSectionInterface):
-    """Defines the fastly config values."""
-    SECTION_NAME = 'fastly'
-
-    @property
-    def api_key(self):
-        """Fastly API Key."""
-        return self.get('api_key')
-
-    @property
-    def email(self):
-        """Email id associated with Fastly account."""
-        return self.get('email')
-
-    @property
-    def password(self):
-        """Fastly password."""
-        return self.get('password')
