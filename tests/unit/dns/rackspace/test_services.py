@@ -18,7 +18,7 @@ import uuid
 import ddt
 import mock
 from oslo.config import cfg
-import six
+import pyrax.exceptions as exc
 
 from poppy.dns.rackspace import driver
 from poppy.model.helpers import domain
@@ -32,10 +32,10 @@ RACKSPACE_OPTIONS = [
                help='Keystone API Key'),
     cfg.BoolOpt('sharding_enabled', default=True,
                 help='Enable Sharding?'),
-    cfg.IntOpt('num_shards', default=10, help='Number of Shards to use'),
+    cfg.IntOpt('num_shards', default=500, help='Number of Shards to use'),
     cfg.StrOpt('shard_prefix', default='cdn',
                help='The shard prefix to use'),
-    cfg.StrOpt('url', default='',
+    cfg.StrOpt('url', default='rackcdn.com',
                help='The url for customers to CNAME to'),
     cfg.StrOpt('email', help='The email to be provided to Rackspace DNS for'
                'creating subdomains'),
@@ -54,37 +54,400 @@ class TestServicesCreate(base.TestCase):
     def setUp(self, mock_set_credentials):
         super(TestServicesCreate, self).setUp()
         provider = driver.DNSProvider(self.conf)
+        self.client = mock.Mock()
         self.controller = provider.services_controller
+        self.controller.client = self.client
 
-    def test_create_with_provider_failure(self):
-        if six.PY2:
-            responders = [{
-                'Fastly':
-                {
-                    'error_detail': 'Error in create',
-                    'error': 'failed to create service'
-                }
+    def test_create_with_no_links(self):
+        responders = [{
+            'Akamai': {
+                'id': u'4PRhL3lHlZhrXr1mJUt24M',
+                'links': []
+            },
+            'Fastly': {
+                'id': u'6HGJjRhdsDjDSkfGSjdsKD',
+                'links': []
+            }
+        }]
+
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        self.client.find = mock.Mock(return_value=subdomain)
+        dns_details = self.controller.create(responders)
+
+        for responder in responders:
+            for provider_name in responder:
+                self.assertEqual([], dns_details[provider_name]['access_urls'])
+
+    def test_create_with_provider_error(self):
+
+        responders = [{
+            'Akamai': {
+                'error': 'Create service failed with Akamai',
+                'error_detail': 'Error details'
+                },
+            'Fastly': {
+                'id': u'4PRhL3lHlZhrXr1mJUt24M',
+                'links': [
+                    {
+                        'domain': u'blog.mocksite.com',
+                        'href': u'blog.mocksite.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    },
+                    {
+                        'domain': u'test.mocksite.com',
+                        'href': u'test.mocksite.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    }
+                ]}
             }]
-            self.controller.create(responders)
 
-    def test_create(self):
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        self.client.find = mock.Mock(return_value=subdomain)
+        dns_details = self.controller.create(responders)
+
+        for responder in responders:
+            for provider_name in responder:
+                self.assertIsNotNone(dns_details[provider_name]['error'])
+                self.assertIsNotNone(
+                    dns_details[provider_name]['error_detail'])
+
+    def test_create_with_subdomain_not_found_exception(self):
+        domain_names = [u'blog.mocksite.com', u'test.mocksite.com']
         responders = [{
             'Fastly': {
                 'id': u'4PRhL3lHlZhrXr1mJUt24M',
                 'links': [
                     {
-                        'domain': u'blog.mocksite4.com',
-                        'href': u'blog.mocksite4.com.global.prod.fastly.net',
+                        'domain': u'blog.mocksite.com',
+                        'href': u'blog.mocksite.com.global.prod.fastly.net',
                         'rel': 'access_url'
                     },
                     {
-                        'domain': u'test.mocksite4.com',
-                        'href': u'test.mocksite4.com.global.prod.fastly.net',
+                        'domain': u'test.mocksite.com',
+                        'href': u'test.mocksite.com.global.prod.fastly.net',
                         'rel': 'access_url'
                     }
                 ]}
-        }]
-        self.controller.create(responders)
+            }]
+
+        self.client.find = mock.Mock(
+            side_effect=exc.NotFound('Subdomain not found'))
+        dns_details = self.controller.create(responders)
+
+        access_urls_map = {}
+        for provider_name in dns_details:
+            access_urls_map[provider_name] = {}
+            access_urls_list = dns_details[provider_name]['access_urls']
+            for access_urls in access_urls_list:
+                access_urls_map[provider_name][access_urls['domain']] = (
+                    access_urls['operator_url'])
+
+        for responder in responders:
+            for provider_name in responder:
+                for domain_name in domain_names:
+                    self.assertIsNotNone(
+                        access_urls_map[provider_name][domain_name])
+
+    def test_create_with_generic_exception(self):
+        responders = [{
+            'Fastly': {
+                'id': u'4PRhL3lHlZhrXr1mJUt24M',
+                'links': [
+                    {
+                        'domain': u'blog.mocksite.com',
+                        'href': u'blog.mocksite.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    },
+                    {
+                        'domain': u'test.mocksite.com',
+                        'href': u'test.mocksite.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    }
+                ]}
+            }]
+
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock(
+            side_effect=exc.NotFound('Subdomain not found'))
+        self.client.find = mock.Mock(return_value=subdomain)
+        dns_details = self.controller.create(responders)
+
+        for responder in responders:
+            for provider_name in responder:
+                self.assertIsNotNone(dns_details[provider_name]['error'])
+                self.assertIsNotNone(
+                    dns_details[provider_name]['error_detail'])
+
+    def test_create(self):
+        domain_names = [u'blog.mocksite.com', u'test.mocksite.com']
+        responders = [{
+            'Fastly': {
+                'id': u'4PRhL3lHlZhrXr1mJUt24M',
+                'links': [
+                    {
+                        'domain': u'blog.mocksite.com',
+                        'href': u'blog.mocksite.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    },
+                    {
+                        'domain': u'test.mocksite.com',
+                        'href': u'test.mocksite.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    }
+                ]}
+            }]
+
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        self.client.find = mock.Mock(return_value=subdomain)
+        dns_details = self.controller.create(responders)
+
+        access_urls_map = {}
+        for provider_name in dns_details:
+            access_urls_map[provider_name] = {}
+            access_urls_list = dns_details[provider_name]['access_urls']
+            for access_urls in access_urls_list:
+                access_urls_map[provider_name][access_urls['domain']] = (
+                    access_urls['operator_url'])
+
+        for responder in responders:
+            for provider_name in responder:
+                for domain_name in domain_names:
+                    self.assertIsNotNone(
+                        access_urls_map[provider_name][domain_name])
+
+
+@ddt.ddt
+class TestServicesDelete(base.TestCase):
+
+    @mock.patch('pyrax.set_credentials')
+    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
+    def setUp(self, mock_set_credentials):
+        super(TestServicesDelete, self).setUp()
+        provider = driver.DNSProvider(self.conf)
+        self.client = mock.Mock()
+        self.controller = provider.services_controller
+        self.controller.client = self.client
+
+    def test_delete_with_exception_subdomain_not_found(self):
+        akamai_access_urls = [
+            {
+                u'provider_url': u'altcdn.com.v2.mdc.edgesuite.net',
+                u'domain': u'mocksite.com',
+                u'operator_url': u'mocksite.com.cdn80.myaltcdn.com'
+            }
+        ]
+
+        fastly_access_urls = [
+            {
+                u'provider_url': u'mocksite.com.global.fastly.net',
+                u'domain': u'mocksite.com',
+                u'operator_url': u'mocksite.cdn80.myaltcdn.com'
+            }
+        ]
+
+        akamai_details = mock.Mock()
+        akamai_details.access_urls = akamai_access_urls
+        fastly_details = mock.Mock()
+        fastly_details.access_urls = fastly_access_urls
+        provider_details = {
+            'Akamai': akamai_details,
+            'Fastly': fastly_details
+        }
+
+        self.client.find = mock.Mock(
+            side_effect=exc.NotFound('Subdomain not found'))
+
+        dns_responder = self.controller.delete(provider_details)
+        for provider_name in provider_details:
+            self.assertIsNotNone(dns_responder[provider_name]['error'])
+            self.assertIsNotNone(dns_responder[provider_name]['error_detail'])
+
+    def test_delete_with_generic_exception(self):
+        akamai_access_urls = [
+            {
+                u'provider_url': u'altcdn.com.v2.mdc.edgesuite.net',
+                u'domain': u'mocksite.com',
+                u'operator_url': u'mocksite.com.cdn80.myaltcdn.com'
+            }
+        ]
+
+        fastly_access_urls = [
+            {
+                u'provider_url': u'mocksite.com.global.fastly.net',
+                u'domain': u'mocksite.com',
+                u'operator_url': u'mocksite.cdn80.myaltcdn.com'
+            }
+        ]
+
+        akamai_details = mock.Mock()
+        akamai_details.access_urls = akamai_access_urls
+        fastly_details = mock.Mock()
+        fastly_details.access_urls = fastly_access_urls
+        provider_details = {
+            'Akamai': akamai_details,
+            'Fastly': fastly_details
+        }
+
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        self.client.find = mock.Mock(return_value=subdomain)
+        self.client.search_records = mock.Mock(
+            side_effect=Exception('Generic exception'))
+
+        dns_responder = self.controller.delete(provider_details)
+        for provider_name in provider_details:
+            self.assertIsNotNone(dns_responder[provider_name]['error'])
+            self.assertIsNotNone(dns_responder[provider_name]['error_detail'])
+
+    def test_delete_no_records_found(self):
+        akamai_access_urls = [
+            {
+                u'provider_url': u'altcdn.com.v2.mdc.edgesuite.net',
+                u'domain': u'mocksite.com',
+                u'operator_url': u'mocksite.com.cdn80.myaltcdn.com'
+            }
+        ]
+
+        fastly_access_urls = [
+            {
+                u'provider_url': u'mocksite.com.global.fastly.net',
+                u'domain': u'mocksite.com',
+                u'operator_url': u'mocksite.cdn80.myaltcdn.com'
+            }
+        ]
+
+        akamai_details = mock.Mock()
+        akamai_details.access_urls = akamai_access_urls
+        fastly_details = mock.Mock()
+        fastly_details.access_urls = fastly_access_urls
+        provider_details = {
+            'Akamai': akamai_details,
+            'Fastly': fastly_details
+        }
+
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        self.client.find = mock.Mock(return_value=subdomain)
+        self.client.search_records = mock.Mock(return_value=[])
+
+        dns_responder = self.controller.delete(provider_details)
+        for provider_name in provider_details:
+            self.assertEqual({}, dns_responder[provider_name])
+
+    def test_delete_with_more_than_one_record_found(self):
+        akamai_access_urls = [
+            {
+                u'provider_url': u'altcdn.com.v2.mdc.edgesuite.net',
+                u'domain': u'mocksite.com',
+                u'operator_url': u'mocksite.com.cdn80.myaltcdn.com'
+            }
+        ]
+
+        fastly_access_urls = [
+            {
+                u'provider_url': u'mocksite.com.global.fastly.net',
+                u'domain': u'mocksite.com',
+                u'operator_url': u'mocksite.cdn80.myaltcdn.com'
+            }
+        ]
+
+        akamai_details = mock.Mock()
+        akamai_details.access_urls = akamai_access_urls
+        fastly_details = mock.Mock()
+        fastly_details.access_urls = fastly_access_urls
+        provider_details = {
+            'Akamai': akamai_details,
+            'Fastly': fastly_details
+        }
+
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        self.client.find = mock.Mock(return_value=subdomain)
+        records = [mock.Mock(), mock.Mock()]
+        self.client.search_records = mock.Mock(return_value=records)
+
+        dns_responder = self.controller.delete(provider_details)
+        for provider_name in provider_details:
+            self.assertIsNotNone(dns_responder[provider_name]['error'])
+            self.assertIsNotNone(dns_responder[provider_name]['error_detail'])
+
+    def test_delete_with_delete_exception(self):
+        akamai_access_urls = [
+            {
+                u'provider_url': u'altcdn.com.v2.mdc.edgesuite.net',
+                u'domain': u'mocksite.com',
+                u'operator_url': u'mocksite.com.cdn80.myaltcdn.com'
+            }
+        ]
+
+        fastly_access_urls = [
+            {
+                u'provider_url': u'mocksite.com.global.fastly.net',
+                u'domain': u'mocksite.com',
+                u'operator_url': u'mocksite.cdn80.myaltcdn.com'
+            }
+        ]
+
+        akamai_details = mock.Mock()
+        akamai_details.access_urls = akamai_access_urls
+        fastly_details = mock.Mock()
+        fastly_details.access_urls = fastly_access_urls
+        provider_details = {
+            'Akamai': akamai_details,
+            'Fastly': fastly_details
+        }
+
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        self.client.find = mock.Mock(return_value=subdomain)
+        record = mock.Mock()
+        record.delete = mock.Mock(
+            side_effect=exc.NotFound('Generic exception'))
+        self.client.search_records = mock.Mock(return_value=[record])
+
+        dns_responder = self.controller.delete(provider_details)
+        for provider_name in provider_details:
+            self.assertIsNotNone(dns_responder[provider_name]['error'])
+            self.assertIsNotNone(dns_responder[provider_name]['error_detail'])
+
+    def test_delete(self):
+        akamai_access_urls = [
+            {
+                u'provider_url': u'altcdn.com.v2.mdc.edgesuite.net',
+                u'domain': u'mocksite.com',
+                u'operator_url': u'mocksite.com.cdn80.myaltcdn.com'
+            }
+        ]
+
+        fastly_access_urls = [
+            {
+                u'provider_url': u'mocksite.com.global.fastly.net',
+                u'domain': u'mocksite.com',
+                u'operator_url': u'mocksite.cdn80.myaltcdn.com'
+            }
+        ]
+
+        akamai_details = mock.Mock()
+        akamai_details.access_urls = akamai_access_urls
+        fastly_details = mock.Mock()
+        fastly_details.access_urls = fastly_access_urls
+        provider_details = {
+            'Akamai': akamai_details,
+            'Fastly': fastly_details
+        }
+
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        self.client.find = mock.Mock(return_value=subdomain)
+        record = mock.Mock()
+        self.client.search_records = mock.Mock(return_value=[record])
+
+        dns_responder = self.controller.delete(provider_details)
+        for provider_name in provider_details:
+            self.assertEqual({}, dns_responder[provider_name])
 
 
 @ddt.ddt
