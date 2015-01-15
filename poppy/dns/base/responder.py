@@ -31,9 +31,13 @@ class Responder(object):
 
         error_details = {}
         for provider in providers:
+            try:
+                error_detail = traceback.format_exc()
+            except AttributeError:
+                error_detail = msg
             error_details[provider] = {
                 'error': msg,
-                'error_detail': traceback.format_exc()
+                'error_detail': error_detail
             }
 
         return error_details
