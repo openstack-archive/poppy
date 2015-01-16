@@ -5,9 +5,10 @@ mimic:
 poppy:
     build: ../../.
     ports:
-        - "80:8081"
+        - "8888:8081"
     volumes:
         - ../../:/home/poppy
+        - /etc/localtime:/etc/localtime:ro
     command:
         - /root/start_poppy.sh
     links:
