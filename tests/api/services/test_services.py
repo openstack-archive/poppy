@@ -469,11 +469,18 @@ class TestServicePatch(base.TestBase):
                               "rules": [{"name": "index",
                                          "request_url": "/index.htm"}]}]
 
-        resp = self.client.create_service(service_name=self.service_name,
-                                          domain_list=self.domain_list,
-                                          origin_list=self.origin_list,
-                                          caching_list=self.caching_list,
-                                          flavor_id=self.flavor_id)
+        self.restrictions_list = [
+            {"name": "website only",
+             "rules": [{"name": "mywebsite.com",
+                        "http_host": "www.mywebsite.com"}]}]
+
+        resp = self.client.create_service(
+            service_name=self.service_name,
+            domain_list=self.domain_list,
+            origin_list=self.origin_list,
+            caching_list=self.caching_list,
+            restrictions_list=self.restrictions_list,
+            flavor_id=self.flavor_id)
 
         self.service_url = resp.headers["location"]
 
@@ -482,7 +489,7 @@ class TestServicePatch(base.TestBase):
             "domains": self.domain_list,
             "origins": self.origin_list,
             "caching": self.caching_list,
-            "restrictions": [],
+            "restrictions": self.restrictions_list,
             "flavor_id": self.flavor_id}
 
         self.client.wait_for_service_status(
@@ -559,7 +566,7 @@ class TestServicePatch(base.TestBase):
                 item[u'rules'] = []
         self.assertEqual(sorted(self.origin_list), sorted(body['origins']))
         # TODO(malini): Uncomment below after caching is implemented.
-        # self.assertEqual(sorted(self.caching_list), sorted(body['caching']))
+        self.assertEqual(sorted(self.caching_list), sorted(body['caching']))
 
     def tearDown(self):
         self.client.delete_service(location=self.service_url)

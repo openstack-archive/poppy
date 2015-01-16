@@ -43,10 +43,6 @@
          "path": "/caching/-",
          "value": {"name": "cache_name", "ttl": 111}}
     ],
-   "remove_caching": [
-        {"op": "remove",
-         "path": "/caching/0"}
-    ],
    "replace_domain_invalid_protocol": [
         {"op": "replace",
          "path": "/domains/0",
