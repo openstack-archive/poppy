@@ -243,5 +243,20 @@ class TestServices(base.TestCase):
             status_code=201,
             text="purge request post complete"
         )
-        resp = controller.purge(provider_service_id, '/img/abc.jpeg')
+        purge_url = '/img/abc.jpeg'
+        actual_purge_url = ("https://" +
+                            json.loads(provider_service_id)[0]['policy_name']
+                            + purge_url)
+        data = {
+            'objects': [
+                actual_purge_url
+            ]
+        }
+        resp = controller.purge(provider_service_id, purge_url)
+        controller.ccu_api_client.post.assert_called_once_with(
+            controller.ccu_api_base_url,
+            data=json.dumps(data),
+            headers=(
+                controller.request_header
+            ))
         self.assertIn('id', resp[self.driver.provider_name])
