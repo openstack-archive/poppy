@@ -564,33 +564,25 @@ class ServicesController(base.ServicesController):
         domains = [domain.Domain(d['domain'], d.get('protocol', 'http'))
                    for d in domains]
 
-        restriction_objects = []
-        for r in restrictions:
-            restriction_object = restriction.Restriction(r.get('name'))
-            restriction_object.rules = []
-            for r_rule in r['rules']:
-                rule_object = rule.Rule(r_rule.get('name'))
-                del r_rule['name']
-                rule_object.from_dict(r_rule)
-                restriction_object.rules.append(rule_object)
-            restriction_objects.append(restriction_object)
+        restrictions = [restriction.Restriction(
+            r.get('name'),
+            [rule.Rule(r_rule.get('name'),
+                       referrer=r_rule.get('referrer'))
+             for r_rule in r['rules']])
+            for r in restrictions]
 
-        caching_objects = []
-        for caching_rule in caching_rules:
-            caching_object = cachingrule.CachingRule(caching_rule.get('name'),
-                                                     caching_rule.get('ttl'))
-            caching_object.rules = []
-            for cr_rule in caching_rule['rules']:
-                rule_object = rule.Rule(cr_rule.get('name'))
-                del cr_rule['name']
-                rule_object.from_dict(cr_rule)
-                caching_object.rules.append(rule_object)
-            caching_objects.append(caching_object)
+        caching_rules = [cachingrule.CachingRule(
+            caching_rule.get('name'),
+            caching_rule.get('ttl'),
+            [rule.Rule(rule_i.get('name'),
+                       request_url=rule_i.get('request_url'))
+             for rule_i in caching_rule['rules']])
+            for caching_rule in caching_rules]
 
         # create the service object
         s = service.Service(service_id, name, domains, origins, flavor_id,
-                            caching=caching_objects,
-                            restrictions=restriction_objects)
+                            caching=caching_rules,
+                            restrictions=restrictions)
 
         # format the provider details
         provider_detail_results = result.get('provider_details') or {}
