@@ -43,6 +43,9 @@ CASSANDRA_OPTIONS = [
                help='Load balancing strategy for connecting to cluster nodes'),
     cfg.StrOpt('consistency_level', default='ONE',
                help='Consistency level of your cassandra query'),
+    cfg.IntOpt('max_schema_agreement_wait', default=10,
+               help='The maximum duration (in seconds) that the driver will'
+               ' wait for schema agreement across the cluster.'),
     cfg.DictOpt(
         'replication_strategy',
         default={

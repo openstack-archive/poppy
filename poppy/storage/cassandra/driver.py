@@ -49,6 +49,9 @@ CASSANDRA_OPTIONS = [
                help='Load balancing strategy for connecting to cluster nodes'),
     cfg.StrOpt('consistency_level', default='ONE',
                help='Consistency level of your cassandra query'),
+    cfg.IntOpt('max_schema_agreement_wait', default=10,
+               help='The maximum duration (in seconds) that the driver will'
+               ' wait for schema agreement across the cluster.'),
     cfg.StrOpt('keyspace', default='poppy',
                help='Keyspace for all queries made in session'),
     cfg.DictOpt(
@@ -97,7 +100,8 @@ def _connection(conf, datacenter, keyspace=None):
         auth_provider=auth_provider,
         load_balancing_policy=load_balancing_policy,
         port=conf.port,
-        ssl_options=ssl_options
+        ssl_options=ssl_options,
+        max_schema_agreement_wait=conf.max_schema_agreement_wait
     )
 
     session = cluster_connection.connect()
