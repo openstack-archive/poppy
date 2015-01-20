@@ -410,9 +410,11 @@ class ServiceController(base.ServiceBase):
                     elif policy['protocol'] == 'https':
                         url_scheme = 'https://'
 
-                    actual_purge_url = '.'.join([url_scheme,
-                                                 policy['policy_name'],
-                                                 purge_url])
+                    # purge_url has to be a full path with a starting slash,
+                    # e.g: /cdntest.html
+                    actual_purge_url = ''.join([url_scheme,
+                                                policy['policy_name'],
+                                                purge_url])
                     data = {
                         'objects': [
                             actual_purge_url
