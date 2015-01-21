@@ -13,15 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import collections
 import functools
 import json
 import uuid
 
-try:
-    import falcon
-except ImportError:
-    from poppy.transport.validators import fake_falcon as falcon
 import jsonschema
 import pecan
 
@@ -35,50 +30,6 @@ def req_accepts_json_pecan(request, desired_content_type='application/json'):
     # request.accept('application/json')
     if not request.accept(desired_content_type):
         raise exceptions.ValidationFailed('Invalid Accept Header')
-
-
-def require_accepts_json_falcon(req, resp, params=None):
-    """Raises an exception if the request does not accept JSON
-
-    Meant to be used as a `before` hook.
-
-    :param req: request sent
-    :type req: falcon.request.Request
-    :param resp: response object to return
-    :type resp: falcon.response.Response
-    :param params: additional parameters passed to responders
-    :type params: dict
-    :rtype: None
-    :raises: falcon.HTTPNotAcceptable
-    """
-    if not req.client_accepts('application/json'):
-        raise falcon.HTTPNotAcceptable(
-            u"""
-            Endpoint only serves `application/json`; specify client-side"""
-            'media type support with the "Accept" header.',
-            href=u'http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html',
-            href_text=u'14.1 Accept, Hypertext Transfer Protocol -- HTTP/1.1')
-
-
-class DummyResponse(object):
-    pass
-
-
-def custom_abort_falcon(error_info=None):
-    """Error_handler for with_schema
-
-    Meant to be used with falcon transport.
-
-    param errors: a list of validation exceptions
-    """
-    ret = DummyResponse()
-    ret.code = 400
-    if not isinstance(error_info, collections.Iterable):
-        error_info = [error_info]
-    details = dict(errors=[{'message': str(getattr(error, "message", error))}
-                           for error in error_info])
-    ret.message = json.dumps(details)
-    return ret
 
 
 def custom_abort_pecan(errors_info):
@@ -96,32 +47,6 @@ def custom_abort_pecan(errors_info):
         detail=details,
         headers={
             'Content-Type': "application/json"})
-
-
-def with_schema_falcon(request, schema=None):
-    """Use to decorate a falcon style controller route
-
-    :param request: A falcon request
-    :param schema: a Json schema to validate against
-    """
-    validation_failed = False
-    v_error = None
-    if schema is not None:
-        errors_list = []
-        try:
-            data = json.loads(request.body)
-            errors_list = list(
-                jsonschema.Draft3Validator(schema).iter_errors(data))
-        except ValueError:
-            validation_failed = True
-            v_error = ["Invalid JSON body in request"]
-
-        if len(errors_list) > 0:
-            validation_failed = True
-            v_error = errors_list
-
-    if validation_failed:
-        raise exceptions.ValidationFailed(repr(v_error))
 
 
 def with_schema_pecan(request, schema=None, handler=custom_abort_pecan,
@@ -165,17 +90,40 @@ def with_schema_pecan(request, schema=None, handler=custom_abort_pecan,
     return decorator
 
 
-def json_matches_schema_inner(request, schema=None):
-    errors_list = []
+def json_matches_service_schema(input_schema):
+    return functools.partial(
+        json_matches_service_schema_inner,
+        schema=input_schema)
 
+
+def json_matches_service_schema_inner(request, schema=None):
     try:
         data = json.loads(request.body.decode('utf-8'))
     except ValueError:
         raise exceptions.ValidationFailed('Invalid JSON string')
 
+    is_valid_service_configuration(data, schema)
+
+
+def json_matches_flavor_schema(input_schema):
+    return functools.partial(
+        json_matches_flavor_schema_inner,
+        schema=input_schema)
+
+
+def json_matches_flavor_schema_inner(request, schema=None):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except ValueError:
+        raise exceptions.ValidationFailed('Invalid JSON string')
+
+    is_valid_flavor_configuration(data, schema)
+
+
+def is_valid_service_configuration(service, schema):
     if schema is not None:
         errors_list = list(
-            jsonschema.Draft3Validator(schema).iter_errors(data))
+            jsonschema.Draft3Validator(schema).iter_errors(service))
 
     if len(errors_list) > 0:
         details = dict(errors=[{
@@ -185,14 +133,36 @@ def json_matches_schema_inner(request, schema=None):
             ])}
             for error in errors_list])
         raise exceptions.ValidationFailed(json.dumps(details))
-    else:
-        return
 
 
-def json_matches_schema(input_schema):
-    return functools.partial(
-        json_matches_schema_inner,
-        schema=input_schema)
+    # Schema structure is valid.  Check the functional rules.
+    
+    # 1. origin rules must be unique
+    if 'origins' in service:
+        origin_rules = []
+        for origin in service['origins']:
+            if 'rules' in origin:
+                for rule in origin['rules']:
+                    request_url = rule['request_url']
+                    if request_url in origin_rules:
+                        raise exceptions.ValidationFailed('Origins - the request_url must be unique')
+                    else:
+                        origin_rules.append(request_url)
+
+    # 2. caching rules must be unique
+    if 'caching' in service:
+        caching_rules = []
+        for caching in service['caching']:
+            if 'rules' in caching:
+                for rule in caching['rules']:
+                    request_url = rule['request_url']
+                    if request_url in caching_rules:
+                        raise exceptions.ValidationFailed('Caching Rules - the request_url must be unique')
+                    else:
+                        caching_rules.append(request_url)
+
+
+    return
 
 
 @decorators.validation_function
@@ -203,6 +173,23 @@ def is_valid_service_id(service_id):
         raise exceptions.ValidationFailed('Invalid service id')
 
 
+def is_valid_flavor_configuration(flavor, schema):
+    if schema is not None:
+        errors_list = list(
+            jsonschema.Draft3Validator(schema).iter_errors(flavor))
+
+    if len(errors_list) > 0:
+        details = dict(errors=[{
+            'message': '-'.join([
+                "[%s]" % "][".join(repr(p) for p in error.path),
+                str(getattr(error, "message", error))
+            ])}
+            for error in errors_list])
+        raise exceptions.ValidationFailed(json.dumps(details))
+
+    return
+
+
 @decorators.validation_function
 def is_valid_flavor_id(flavor_id):
     pass
@@ -211,3 +198,7 @@ def is_valid_flavor_id(flavor_id):
 def abort_with_message(error_info):
     pecan.abort(400, detail=getattr(error_info, "message", ""),
                 headers={'Content-Type': "application/json"})
+
+
+class DummyResponse(object):
+    pass

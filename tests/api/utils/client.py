@@ -210,7 +210,9 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
         return self.request('DELETE', url)
 
-    def wait_for_service_status(self, location, status, retry_interval=2,
+    def wait_for_service_status(self, location, status,
+                                abort_on_status=None,
+                                retry_interval=2,
                                 retry_timeout=30):
         """Waits for a service to reach a given status."""
         current_status = ''
@@ -223,6 +225,11 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
             current_status = body['status']
             if (current_status == status):
                 return
+
+            if abort_on_status is not None:
+                if current_status == abort_on_status:
+                    return
+
             current_time = int(time.time())
             if current_time > stop_time:
                 return

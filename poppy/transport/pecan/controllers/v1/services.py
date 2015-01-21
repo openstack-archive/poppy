@@ -155,7 +155,7 @@ class ServicesController(base.Controller, hooks.HookController):
     @pecan.expose('json')
     @decorators.validate(
         request=rule.Rule(
-            helpers.json_matches_schema(
+            helpers.json_matches_service_schema(
                 service.ServiceSchema.get_schema("service", "POST")),
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
@@ -198,7 +198,7 @@ class ServicesController(base.Controller, hooks.HookController):
             helpers.is_valid_service_id(),
             helpers.abort_with_message),
         request=rule.Rule(
-            helpers.json_matches_schema(
+            helpers.json_matches_service_schema(
                 service.ServiceSchema.get_schema("service", "PATCH")),
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
@@ -220,7 +220,7 @@ class ServicesController(base.Controller, hooks.HookController):
             pecan.abort(400, detail=str(e))
         except errors.ServiceNotFound as e:
             pecan.abort(404, detail=str(e))
-        except errors.ServiceStatusNotDeployed as e:
+        except errors.ServiceStatusNeitherDeployedNorFailed as e:
             pecan.abort(400, detail=str(e))
         except Exception as e:
             pecan.abort(400, detail=str(e))
