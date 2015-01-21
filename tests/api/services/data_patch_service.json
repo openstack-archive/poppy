@@ -55,7 +55,7 @@
         {"op": "add",
          "path": "/origins/2",
          "value": {"origin": "4.2.5.4", "port": 80, "ssl": false,
-                   "rules": [{"name" : "origin", "request_url" : "/origin.htm"}]}
+                   "rules": [{"name" : "origin", "request_url" : "/origin2.htm"}]}
         }
     ],
    "add_and_remove_origin": [

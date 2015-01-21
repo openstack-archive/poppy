@@ -33,6 +33,8 @@ class TestCreateFlavors(base.TestBase):
 
     @ddt.file_data('data_create_flavor.json')
     def test_create_flavor(self, test_data):
+        if self.test_config.generate_flavors is False:
+            self.skipTest('Flavor Generation is currently disabled in configuration')
 
         provider_list = test_data['provider_list']
         limits = test_data['limits']
@@ -61,6 +63,9 @@ class TestCreateFlavors(base.TestBase):
 
     @ddt.file_data('data_create_flavor_negative.json')
     def test_create_flavor_negative_tests(self, test_data):
+        if self.test_config.generate_flavors is False:
+            self.skipTest('Flavor Generation is currently disabled in configuration')
+
         if 'skip_test' in test_data:
             self.skipTest('Not Implemented - bp# post-flavors-error-handling')
 
@@ -78,6 +83,8 @@ class TestCreateFlavors(base.TestBase):
         self.assertEqual(resp.status_code, 400)
 
     def test_delete_flavor(self):
+        if self.test_config.generate_flavors is False:
+            self.skipTest('Flavor Generation is currently disabled in configuration')
 
         resp = self.client.delete_flavor(flavor_id=self.flavor_id)
         self.assertEqual(resp.status_code, 204)
@@ -86,7 +93,8 @@ class TestCreateFlavors(base.TestBase):
         self.assertEqual(resp.status_code, 404)
 
     def tearDown(self):
-        self.client.delete_flavor(flavor_id=self.flavor_id)
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
         super(TestCreateFlavors, self).tearDown()
 
 
