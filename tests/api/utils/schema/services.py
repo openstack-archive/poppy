@@ -104,7 +104,7 @@ list_services_link = {
         'href': {'type': 'string',
                  'pattern':
                  '(https?)(:/{1,3})([a-z0-9\.\-:]{1,400})'
-                 '(/v1\.0/([a-z0-9]{1,400})/services'
+                 '(/v1\.0/([a-z0-9]{1,400}/)?services'
                  '\?marker=)(' + uuid4 + ')'
                  '(&limit=)([1-9]|1[0-9])'}},
         'required': ['rel', 'href'],

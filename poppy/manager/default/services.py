@@ -24,14 +24,13 @@ except ImportError:
     use_uwsgi = False
 
 import jsonpatch
-import jsonschema
 
 from poppy.common import errors
 from poppy.manager import base
 from poppy.model import service
 from poppy.openstack.common import log
+from poppy.transport.validators import helpers as validators
 from poppy.transport.validators.schemas import service as service_schema
-from poppy.transport.validators.stoplight import exceptions
 
 LOG = log.getLogger(__name__)
 
@@ -149,21 +148,10 @@ class DefaultServicesController(base.ServicesController):
             service_old_json, service_updates)
 
         # validate the updates
-        patch_schema = service_schema.ServiceSchema.get_schema("service",
-                                                               "POST")
-        errors_list = list(
-            jsonschema.Draft3Validator(patch_schema).iter_errors(
-                service_new_json))
+        schema = service_schema.ServiceSchema.get_schema("service", "POST")
+        validators.is_valid_service_configuration(service_new_json, schema)
 
-        if len(errors_list) > 0:
-            details = dict(errors=[{
-                'message': '-'.join([
-                    "[%s]" % "][".join(repr(p) for p in error.path),
-                    str(getattr(error, "message", error))
-                ])}
-                for error in errors_list])
-            raise exceptions.ValidationFailed(json.dumps(details))
-
+        # must be valid, carry on
         service_new_json['service_id'] = service_old.service_id
         service_new = service.Service.init_from_dict(service_new_json)
 
