@@ -17,6 +17,7 @@
 
 import cgi
 import time
+import urlparse
 import uuid
 
 import ddt
@@ -276,14 +277,26 @@ class TestListServices(base.TestBase):
         self.assertEqual(len(body['services']), limit)
         self.assertSchema(body, services.list_services)
 
-    def test_list_services_multiple_page(self):
-        self.service_list = [self._create_test_service() for _ in range(15)]
-        resp = self.client.list_services()
+    @ddt.data(3)
+    def test_list_services_multiple_page(self, num):
+        self.service_list = [self._create_test_service() for _ in range(num)]
+        url_param = {'limit': 2}
+        resp = self.client.list_services(param=url_param)
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
-        # TODO(malini): remove hard coded value with configurable value
-        self.assertEqual(len(body['services']), 10)
+        self.assertEqual(len(body['services']), 2)
+        self.assertSchema(body, services.list_services)
+
+        # get second page
+        next_page_uri = urlparse.urlparse(body['links'][0]['href'])
+        marker = urlparse.parse_qs(next_page_uri.query)['marker'][0]
+        url_param = {'marker': marker}
+        resp = self.client.list_services(param=url_param)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertEqual(len(body['services']), 1)
         self.assertSchema(body, services.list_services)
 
     @attrib.attr('smoke')
