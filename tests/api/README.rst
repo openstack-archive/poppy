@@ -38,12 +38,22 @@ The API tests require cassandra running in your local machine, in order to
 run via tox. It is assumed you already have the Cassandra instance up &
 running locally. You can make the API tests part of tox, by overriding the
 default positional argument in tox.ini::
-    example : tox -- --exclude=None
+    
+    tox -- --exclude=None
 
 Alternatively,  you can run tox with docker containers running Cassandra::
 
-    This will require docker (or boot2docker for MacOSX) to already be installed on the system.
-    Dont forget to update your ~/.poppy/tests.conf to point to your docker ip.
+This will require docker (or boot2docker for MacOSX) to already be installed on the system.
+It will use the fig_local.yaml file to mount your local folder, as described in the Docker folder.
+Also, dont forget to update your ~/.poppy/tests.conf to point to your docker ip address.
 
-    example : tox -e apidocker
+
+Example 1: Run all API tests::
+
+    tox -e apidocker api
+
+Example 2: Run a particular test function::
+    
+    tox -e apidocker api/services/test_services.py:TestCreateService -- -m test_create_service_positive
+
 
