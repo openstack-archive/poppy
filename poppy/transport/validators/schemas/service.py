@@ -258,24 +258,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                             'referrer': {
                                                 'type': 'string',
                                                 'minLength': 3,
-                                                'maxLength': 1024},
-                                            'request_url': {
-                                                'type': 'string',
-                                                'minLength': 3,
-                                                'maxLength': 1024},
-                                            'http_host': {
-                                                'type': 'string',
-                                                'minLength': 3,
-                                                'maxLength': 256},
-                                            'client_ip': {
-                                                'type': 'string'},
-                                            'http_method': {
-                                                'type': 'string',
-                                                'enum': [
-                                                    'GET',
-                                                    'PUT',
-                                                    'POST',
-                                                    'PATCH']}}},
+                                                'maxLength': 1024}
+                                        }},
                                 }},
                         },
                     },
