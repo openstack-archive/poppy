@@ -45,6 +45,7 @@ write_file
 
 /Dockerfile
 /docker/fig/fig_local.yml
+/.idea
 
 # patch files
 *.patch
