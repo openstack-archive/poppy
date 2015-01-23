@@ -13,23 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
 import logging
 import os
 import sys
 
 from oslo.config import cfg
+from taskflow.patterns import linear_flow
+from taskflow import task
 
 from poppy import bootstrap
-from poppy.openstack.common import log
 
-LOG = log.getLogger(__file__)
+
+logging.basicConfig(level=logging.ERROR,
+                    format='%(levelname)s: %(message)s',
+                    stream=sys.stdout)
+
+LOG = logging.getLogger('Poppy Service Tasks')
+LOG.setLevel(logging.DEBUG)
+
+
 conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
 
 
-def service_delete_worker(project_id, service_id):
-    LOG.logger.setLevel(logging.INFO)
+def service_delete_task_func(provider_details,
+                             project_id, service_id):
+
     bootstrap_obj = bootstrap.Bootstrap(conf)
     service_controller = bootstrap_obj.manager.services_controller
     storage_controller = service_controller.storage_controller
@@ -98,16 +107,18 @@ def service_delete_worker(project_id, service_id):
              str(os.getpid()))
 
 
-if __name__ == '__main__':
-    bootstrap_obj = bootstrap.Bootstrap(conf)
+class DeleteServiceTask(task.Task):
+    default_provides = "service_deleted"
 
-    parser = argparse.ArgumentParser(description='Delete service async worker'
-                                     ' script arg parser')
+    def execute(self, provider_details, project_id, service_id):
+        LOG.info('Start executing delete service task...')
+        service_delete_task_func(provider_details,
+                                 project_id, service_id)
+        return True
 
-    parser.add_argument('project_id', action="store")
-    parser.add_argument('service_id', action="store")
 
-    result = parser.parse_args()
-    project_id = result.project_id
-    service_id = result.service_id
-    service_delete_worker(project_id, service_id)
+def delete_service():
+    flow = linear_flow.Flow('Deleting poppy-service').add(
+        DeleteServiceTask(),
+    )
+    return flow
