@@ -27,6 +27,7 @@ import jsonpatch
 import jsonschema
 
 from poppy.common import errors
+from poppy.distributed_task.taskflow.flow import create_service
 from poppy.manager import base
 from poppy.model import service
 from poppy.openstack.common import log
@@ -46,6 +47,8 @@ class DefaultServicesController(base.ServicesController):
         self.storage_controller = self._driver.storage.services_controller
         self.flavor_controller = self._driver.storage.flavors_controller
         self.dns_controller = self._driver.dns.services_controller
+        self.distributed_task_controller = (
+            self._driver.distributed_task.services_controller)
 
     def _get_provider_details(self, project_id, service_id):
         try:
@@ -99,25 +102,29 @@ class DefaultServicesController(base.ServicesController):
         except ValueError as e:
             raise e
 
-        proxy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  'service_async_workers',
-                                  'sub_process_proxy.py')
-        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   'service_async_workers',
-                                   'create_service_worker.py')
-        if use_uwsgi:
-            executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
-        else:
-            executable = sys.executable
-        cmd_list = [executable,
-                    proxy_path,
-                    script_path,
-                    json.dumps(providers),
-                    project_id, service_id,
-                    json.dumps(service_obj.to_dict())]
-        LOG.info('Starting create service subprocess: %s' % cmd_list)
-        p = subprocess.Popen(cmd_list, env=os.environ.copy())
-        p.communicate()
+        #proxy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        #                          'service_async_workers',
+        #                          'sub_process_proxy.py')
+        #script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        #                           'service_async_workers',
+        #                           'create_service_worker.py')
+        #if use_uwsgi:
+        #    executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
+        #else:
+        #    executable = sys.executable
+        #cmd_list = [executable,
+        #            proxy_path,
+        #            script_path,
+        kwargs = {'providers_list_json': json.dumps(providers),
+                  'project_id': project_id,
+                  'service_id': service_id,
+                  'service_obj_json': json.dumps(service_obj.to_dict())
+                  }
+        self.distributed_task_controller.submit_task(
+            create_service.create_service, **kwargs)
+        #LOG.info('Starting create service subprocess: %s' % cmd_list)
+        #p = subprocess.Popen(cmd_list, env=os.environ.copy())
+        #p.communicate()
 
         return
 
