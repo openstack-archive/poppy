@@ -15,6 +15,7 @@
 
 import os
 
+import mock
 from oslo.config import cfg
 import webtest
 
@@ -33,7 +34,17 @@ class BaseFunctionalTest(base.TestCase):
                                 ))))
         conf_path = os.path.join(tests_path, 'etc', 'default_functional.conf')
         cfg.CONF(args=[], default_config_files=[conf_path])
-        poppy_wsgi = bootstrap.Bootstrap(cfg.CONF).transport.app
+        b_obj = bootstrap.Bootstrap(cfg.CONF)
+        # mock the persistence part for taskflow distributed_task
+        mock_persistence = mock.Mock()
+        mock_persistence.__enter__ = mock.Mock()
+        mock_persistence.__exit__ = mock.Mock()
+        b_obj.distributed_task.persistence = mock.Mock()
+        b_obj.distributed_task.persistence.return_value = mock_persistence
+        b_obj.distributed_task.job_board = mock.Mock()
+        b_obj.distributed_task.job_board.return_value = (
+            mock_persistence.copy())
+        poppy_wsgi = b_obj.transport.app
 
         self.app = webtest.app.TestApp(poppy_wsgi)
 
