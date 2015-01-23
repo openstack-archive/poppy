@@ -167,6 +167,8 @@ class ServicesController(base.Controller, hooks.HookController):
         try:
             services_controller.create(self.project_id, service_obj)
         except LookupError as e:  # error handler for no flavor
+            import traceback
+            traceback.print_exc()
             pecan.abort(400, detail=str(e))
         except ValueError as e:  # error handler for existing service name
             pecan.abort(400, detail=str(e))

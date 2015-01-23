@@ -14,18 +14,14 @@
 # limitations under the License.
 
 import json
-import os
-import subprocess
-import sys
-try:
-    import uwsgi
-    use_uwsgi = True
-except ImportError:
-    use_uwsgi = False
 
 import jsonpatch
 
 from poppy.common import errors
+from poppy.distributed_task.taskflow.flow import create_service
+from poppy.distributed_task.taskflow.flow import delete_service
+from poppy.distributed_task.taskflow.flow import purge_service
+from poppy.distributed_task.taskflow.flow import update_service
 from poppy.manager import base
 from poppy.model import service
 from poppy.openstack.common import log
@@ -45,6 +41,8 @@ class DefaultServicesController(base.ServicesController):
         self.storage_controller = self._driver.storage.services_controller
         self.flavor_controller = self._driver.storage.flavors_controller
         self.dns_controller = self._driver.dns.services_controller
+        self.distributed_task_controller = (
+            self._driver.distributed_task.services_controller)
 
     def _get_provider_details(self, project_id, service_id):
         try:
@@ -98,25 +96,13 @@ class DefaultServicesController(base.ServicesController):
         except ValueError as e:
             raise e
 
-        proxy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  'service_async_workers',
-                                  'sub_process_proxy.py')
-        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   'service_async_workers',
-                                   'create_service_worker.py')
-        if use_uwsgi:
-            executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
-        else:
-            executable = sys.executable
-        cmd_list = [executable,
-                    proxy_path,
-                    script_path,
-                    json.dumps(providers),
-                    project_id, service_id,
-                    json.dumps(service_obj.to_dict())]
-        LOG.info('Starting create service subprocess: %s' % cmd_list)
-        p = subprocess.Popen(cmd_list, env=os.environ.copy())
-        p.communicate()
+        kwargs = {'providers_list_json': json.dumps(providers),
+                  'project_id': project_id,
+                  'service_id': service_id,
+                  'service_obj_json': json.dumps(service_obj.to_dict())
+                  }
+        self.distributed_task_controller.submit_task(
+            create_service.create_service, **kwargs)
 
         return
 
@@ -173,25 +159,15 @@ class DefaultServicesController(base.ServicesController):
             service_id,
             provider_details)
 
-        proxy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  'service_async_workers',
-                                  'sub_process_proxy.py')
-        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   'service_async_workers',
-                                   'update_service_worker.py')
-        if use_uwsgi:
-            executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
-        else:
-            executable = sys.executable
-        cmd_list = [executable,
-                    proxy_path,
-                    script_path,
-                    project_id, service_id,
-                    json.dumps(service_old.to_dict()),
-                    json.dumps(service_new.to_dict())]
-        LOG.info('Starting update service subprocess: %s' % cmd_list)
-        p = subprocess.Popen(cmd_list, env=os.environ.copy())
-        p.communicate()
+        kwargs = {
+            'project_id': project_id,
+            'service_id': service_id,
+            'service_old': json.dumps(service_old.to_dict()),
+            'service_obj': json.dumps(service_new.to_dict())
+        }
+
+        self.distributed_task_controller.submit_task(
+            update_service.update_service, **kwargs)
 
         return
 
@@ -215,25 +191,15 @@ class DefaultServicesController(base.ServicesController):
             service_id,
             provider_details)
 
-        proxy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  'service_async_workers',
-                                  'sub_process_proxy.py')
-        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   'service_async_workers',
-                                   'delete_service_worker.py')
-        if use_uwsgi:
-            executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
-        else:
-            executable = sys.executable
-        cmd_list = [executable,
-                    proxy_path,
-                    script_path,
-                    json.dumps(dict([(k, v.to_dict())
-                                     for k, v in provider_details.items()])),
-                    project_id, service_id]
-        LOG.info('Starting delete service subprocess: %s' % cmd_list)
-        p = subprocess.Popen(cmd_list, env=os.environ.copy())
-        p.communicate()
+        kwargs = {
+            "provider_details": json.dumps(
+                dict([(k, v.to_dict()) for k, v in provider_details.items()])),
+            "project_id": project_id,
+            "service_id": service_id
+        }
+
+        self.distributed_task_controller.submit_task(
+            delete_service.delete_service, **kwargs)
 
         return
 
@@ -242,26 +208,15 @@ class DefaultServicesController(base.ServicesController):
         provider_details = self._get_provider_details(project_id, service_id)
 
         # possible validation of purge url here...
-        proxy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  'service_async_workers',
-                                  'sub_process_proxy.py')
-        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   'service_async_workers',
-                                   'purge_service_worker.py')
-        if use_uwsgi:
-            executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
-        else:
-            executable = sys.executable
-        cmd_list = [executable,
-                    proxy_path,
-                    script_path,
-                    json.dumps(dict([(k, v.to_dict())
-                                     for k, v in provider_details.items()])),
-                    project_id, service_id,
-                    str(purge_url)]
+        kwargs = {
+            'provider_details': json.dumps(
+                dict([(k, v.to_dict()) for k, v in provider_details.items()])),
+            'project_id': project_id,
+            'service_id': service_id,
+            'purge_url': str(purge_url)
+        }
 
-        LOG.info('Starting purge service subprocess: %s' % cmd_list)
-        p = subprocess.Popen(cmd_list, env=os.environ.copy())
-        p.communicate()
+        self.distributed_task_controller.submit_task(
+            purge_service.purge_service, **kwargs)
 
         return
