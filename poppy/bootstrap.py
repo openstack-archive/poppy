@@ -53,6 +53,8 @@ _DRIVER_OPTIONS = [
                 help='Provider driver(s) to use'),
     cfg.StrOpt('dns', default='default',
                help='DNS driver to use'),
+    cfg.StrOpt('distributed_task', default='taskflow',
+               help='distributed_task driver to use'),
 ]
 
 _DRIVER_GROUP = 'drivers'
@@ -153,7 +155,8 @@ class Bootstrap(object):
         manager_type = 'poppy.manager'
         manager_name = self.driver_conf.manager
 
-        args = [self.conf, self.storage, self.provider, self.dns]
+        args = [self.conf, self.storage, self.provider, self.dns,
+                self.distributed_task]
 
         try:
             mgr = driver.DriverManager(namespace=manager_type,
@@ -183,6 +186,32 @@ class Bootstrap(object):
         try:
             mgr = driver.DriverManager(namespace=transport_type,
                                        name=transport_name,
+                                       invoke_on_load=True,
+                                       invoke_args=args)
+            return mgr.driver
+        except RuntimeError as exc:
+            LOG.exception(exc)
+
+    @decorators.lazy_property(write=False)
+    def distributed_task(self):
+        """distributed task driver.
+
+        :returns distributed task driver
+        """
+        LOG.debug("loading distributed task")
+
+        # create the driver manager to load the appropriate drivers
+        distributed_task_type = 'poppy.distributed_task'
+        distributed_task_name = self.driver_conf.distributed_task
+
+        args = [self.conf]
+
+        LOG.debug((u'Loading distributed_task driver: %s'),
+                  distributed_task_name)
+
+        try:
+            mgr = driver.DriverManager(namespace=distributed_task_type,
+                                       name=distributed_task_name,
                                        invoke_on_load=True,
                                        invoke_args=args)
             return mgr.driver

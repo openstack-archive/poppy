@@ -13,26 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""WSGI callable for WSGI containers
+import abc
 
-This app should be used by external WSGI
-containers. For example:
-
-    $ gunicorn poppy.transport.app:app
-
-NOTE: As for external containers, it is necessary
-to put config files in the standard paths. There's
-no common way to specify / pass configuration files
-to the WSGI app when it is called from other apps.
-"""
-
-from oslo.config import cfg
-
-from poppy import bootstrap
+import six
 
 
-conf = cfg.CONF
-conf(project='poppy', prog='poppy', args=[])
+@six.add_metaclass(abc.ABCMeta)
+class DistributedTaskDriverBase(object):
+    """Interface definition for distributed task queue driver.
 
+    :param conf: Configuration containing options for this driver.
+    :type conf: `oslo.config.ConfigOpts`
+    """
+    def __init__(self, conf):
+        self._conf = conf
 
-app = bootstrap.Bootstrap(conf).transport.app
+    @property
+    def conf(self):
+        """conf
+
+        :returns conf
+        """
+        return self._conf

@@ -43,8 +43,8 @@ class TestBase(fixtures.BaseTestFixture):
                 cls.auth_config.user_name,
                 cls.auth_config.api_key)
         else:
-            auth_token = 'dummy'
-            project_id = 'dummy'
+            auth_token = str(uuid.uuid4())
+            project_id = str(uuid.uuid4())
 
         cls.test_config = config.TestConfig()
 

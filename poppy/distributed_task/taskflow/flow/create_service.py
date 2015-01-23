@@ -13,26 +13,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
 import json
 import logging
-import os
 import sys
 
 from oslo.config import cfg
+from taskflow.patterns import linear_flow
+from taskflow import task
 
 from poppy import bootstrap
 from poppy.model.helpers import provider_details
-from poppy.openstack.common import log
 
 
-LOG = log.getLogger(__file__)
+logging.basicConfig(level=logging.ERROR,
+                    format='%(levelname)s: %(message)s',
+                    stream=sys.stdout)
+
+LOG = logging.getLogger('Poppy Service Tasks')
+LOG.setLevel(logging.DEBUG)
+
+
 conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
 
 
-def service_create_worker(providers_list_json, project_id, service_id):
-    LOG.logger.setLevel(logging.INFO)
+def service_create_task_func(providers_list_json,
+                             project_id, service_id):
+
     bootstrap_obj = bootstrap.Bootstrap(conf)
     service_controller = bootstrap_obj.manager.services_controller
     storage_controller = service_controller.storage_controller
@@ -41,16 +48,17 @@ def service_create_worker(providers_list_json, project_id, service_id):
     try:
         service_obj = storage_controller.get(project_id, service_id)
     except ValueError:
-        LOG.info('Creating service {0} from Poppy failed. '
-                 'No such service exists'.format(service_id))
-        sys.exit(0)
+        msg = 'Creating service {0} from Poppy failed. ' \
+              'No such service exists'.format(service_id)
+        LOG.info(msg)
+        raise Exception(msg)
 
     responders = []
     # try to create all service from each provider
     for provider in providers_list:
         LOG.info('Starting to create service from %s' % provider)
         responder = service_controller.provider_wrapper.create(
-            service_controller._driver.providers[provider],
+            service_controller._driver.providers[provider.lower()],
             service_obj)
         responders.append(responder)
         LOG.info('Create service from %s complete...' % provider)
@@ -97,23 +105,24 @@ def service_create_worker(providers_list_json, project_id, service_id):
     storage_controller.update(project_id, service_id, service_obj)
 
     storage_controller._driver.close_connection()
-    LOG.info('Create service worker process %s complete...' %
-             str(os.getpid()))
+
+    LOG.info('Create service worker task complete...')
 
 
-if __name__ == '__main__':
-    bootstrap_obj = bootstrap.Bootstrap(conf)
+class CreateServiceTask(task.Task):
+    default_provides = "service_created"
 
-    parser = argparse.ArgumentParser(description='Create service async worker'
-                                     ' script arg parser')
+    def execute(self, providers_list_json,
+                project_id, service_id):
+        LOG.info('Start executing create service task...')
+        service_create_task_func(
+            providers_list_json,
+            project_id, service_id)
+        return True
 
-    parser.add_argument('providers_list_json', action="store")
-    parser.add_argument('project_id', action="store")
-    parser.add_argument('service_id', action="store")
 
-    result = parser.parse_args()
-    providers_list_json = result.providers_list_json
-    project_id = result.project_id
-    service_id = result.service_id
-    LOG.logger.setLevel(logging.INFO)
-    service_create_worker(providers_list_json, project_id, service_id)
+def create_service():
+    flow = linear_flow.Flow('Creating poppy-service').add(
+        CreateServiceTask(),
+    )
+    return flow

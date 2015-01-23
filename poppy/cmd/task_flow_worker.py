@@ -13,26 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""WSGI callable for WSGI containers
-
-This app should be used by external WSGI
-containers. For example:
-
-    $ gunicorn poppy.transport.app:app
-
-NOTE: As for external containers, it is necessary
-to put config files in the standard paths. There's
-no common way to specify / pass configuration files
-to the WSGI app when it is called from other apps.
-"""
-
 from oslo.config import cfg
 
 from poppy import bootstrap
+from poppy.openstack.common import log
 
 
-conf = cfg.CONF
-conf(project='poppy', prog='poppy', args=[])
+LOG = log.getLogger(__name__)
 
 
-app = bootstrap.Bootstrap(conf).transport.app
+def run():
+    conf = cfg.CONF
+    conf(project='poppy', prog='poppy', args=[])
+
+    b = bootstrap.Bootstrap(conf)
+    b.distributed_task.services_controller.run_task_worker()

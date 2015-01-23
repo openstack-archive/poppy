@@ -13,26 +13,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
 import json
 import logging
 import os
+import sys
 
 from oslo.config import cfg
+from taskflow.patterns import linear_flow
+from taskflow import task
 
 from poppy import bootstrap
 from poppy.model.helpers import provider_details
-from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import service
 
-LOG = log.getLogger(__file__)
+
+logging.basicConfig(level=logging.ERROR,
+                    format='%(levelname)s: %(message)s',
+                    stream=sys.stdout)
+
+LOG = logging.getLogger('Poppy Service Tasks')
+LOG.setLevel(logging.DEBUG)
+
+
 conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
 
 
-def update_worker(project_id, service_id,
-                  service_old, service_obj):
-    LOG.logger.setLevel(logging.INFO)
+def service_update_task_func(project_id, service_id,
+                             service_old, service_obj):
     bootstrap_obj = bootstrap.Bootstrap(conf)
     service_controller = bootstrap_obj.manager.services_controller
 
@@ -118,20 +126,19 @@ def update_worker(project_id, service_id,
              str(os.getpid()))
 
 
-if __name__ == '__main__':
-    bootstrap_obj = bootstrap.Bootstrap(conf)
+class UpdateServiceTask(task.Task):
+    default_provides = "service_updated"
 
-    parser = argparse.ArgumentParser(description='Delete service async worker'
-                                     ' script arg parser')
+    def execute(self, project_id, service_id, service_old, service_obj):
+        LOG.info('Start executing update service task...')
+        service_update_task_func(
+            project_id, service_id,
+            service_old, service_obj)
+        return True
 
-    parser.add_argument('project_id', action="store")
-    parser.add_argument('service_id', action="store")
-    parser.add_argument('service_old', action="store")
-    parser.add_argument('service_obj', action="store")
 
-    result = parser.parse_args()
-    project_id = result.project_id
-    service_id = result.service_id
-    service_old = result.service_old
-    service_obj = result.service_obj
-    update_worker(project_id, service_id, service_old, service_obj)
+def update_service():
+    flow = linear_flow.Flow('Updating poppy-service').add(
+        UpdateServiceTask(),
+    )
+    return flow
