@@ -19,7 +19,7 @@ server = {
 }
 
 app = {
-    'root': 'tests.functional.transport.pecan.mock.MockPecanEndpoint',
+    'root': 'tests.functional.transport.pecan.mock_ep.MockPecanEndpoint',
     'modules': ['tests.functional.transport.pecan.pecan_app'],
     'debug': True,
     'errors': {

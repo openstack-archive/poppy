@@ -100,12 +100,23 @@ installed and running.
     
     $ pip install -e .
 
+8. Install and start zookeeper driver::
 
-8. Start the Poppy server::
+    http://zookeeper.apache.org/doc/trunk/zookeeperStarted.html
+	
+	or more easily use a zookeeper docker:
+	
+	https://registry.hub.docker.com/u/jplock/zookeeper/
+
+9. Start poppy task flow worker::
+
+    $ python poppy/cmd/task_flow_worker.py
+
+10. Start the Poppy server::
 
     $ poppy-server
 
-9. Test out that Poppy is working by requesting the home doc (with a sample project ID)::
+11. Test out that Poppy is working by requesting the home doc (with a sample project ID)::
 
     $ curl -i -X GET http://0.0.0.0:8888/v1.0/123
 
