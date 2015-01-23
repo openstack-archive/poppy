@@ -13,30 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import subprocess
-import sys
-try:
-    import uwsgi
-    use_uwsgi = True
-except ImportError:
-    use_uwsgi = False
+import abc
 
-from poppy.openstack.common import log
+import six
 
-LOG = log.getLogger(__name__)
-
-if use_uwsgi:
-    executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
-else:
-    executable = sys.executable
+from poppy.distributed_task.base import controller
 
 
-def main(*args):
-    cmd_list = [executable] + list(args[1:])
-    LOG.info("Starting subprocess %s")
-    subprocess.Popen(cmd_list, stdout=sys.stdout, env=os.environ.copy())
-    sys.exit()
+@six.add_metaclass(abc.ABCMeta)
+class ServicesControllerBase(controller.DistributedTaskControllerBase):
 
-if __name__ == '__main__':
-    main(*sys.argv)
+    """Services Controller Base class."""
+
+    def __init__(self, driver):
+        super(ServicesControllerBase, self).__init__(driver)
+
+    def submit_task(self):
+        """submit a task .
+
+        :raises NotImplementedError
+        """
+        raise NotImplementedError

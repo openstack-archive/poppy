@@ -13,27 +13,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
 import json
 import logging
 import os
+import sys
 
 from oslo.config import cfg
+from taskflow.patterns import linear_flow
+from taskflow import task
 
 from poppy import bootstrap
-from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import (
     provider_details as req_provider_details
 )
 
-LOG = log.getLogger(__file__)
+logging.basicConfig(level=logging.ERROR,
+                    format='%(levelname)s: %(message)s',
+                    stream=sys.stdout)
+
+LOG = logging.getLogger('Poppy Service Tasks')
+LOG.setLevel(logging.DEBUG)
+
+
 conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
 
 
-def service_purge_worker(provider_details,
-                         project_id, service_id, purge_url):
-    LOG.logger.setLevel(logging.INFO)
+def service_purge_task_func(provider_details,
+                            project_id, service_id, purge_url):
     bootstrap_obj = bootstrap.Bootstrap(conf)
     service_controller = bootstrap_obj.manager.services_controller
     provider_details = json.loads(provider_details)
@@ -96,20 +103,18 @@ def service_purge_worker(provider_details,
              str(os.getpid()))
 
 
-if __name__ == '__main__':
-    bootstrap_obj = bootstrap.Bootstrap(conf)
+class PurgeServiceTask(task.Task):
+    default_provides = "service_purged"
 
-    parser = argparse.ArgumentParser(description='Delete service async worker'
-                                     ' script arg parser')
+    def execute(self, provider_details, project_id, service_id, purge_url):
+        LOG.info('Start executing purge service task...')
+        service_purge_task_func(
+            provider_details, project_id, service_id, purge_url)
+        return True
 
-    parser.add_argument('provider_details', action="store")
-    parser.add_argument('project_id', action="store")
-    parser.add_argument('service_id', action="store")
-    parser.add_argument('purge_url', action="store")
 
-    result = parser.parse_args()
-    provider_details = result.provider_details
-    project_id = result.project_id
-    service_id = result.service_id
-    purge_url = result.purge_url
-    service_purge_worker(provider_details, project_id, service_id, purge_url)
+def purge_service():
+    flow = linear_flow.Flow('Purge poppy-service').add(
+        PurgeServiceTask(),
+    )
+    return flow
