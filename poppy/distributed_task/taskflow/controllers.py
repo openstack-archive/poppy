@@ -13,26 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""WSGI callable for WSGI containers
 
-This app should be used by external WSGI
-containers. For example:
+"""Exports TaskFlow distributed task controllers.
 
-    $ gunicorn poppy.transport.app:app
-
-NOTE: As for external containers, it is necessary
-to put config files in the standard paths. There's
-no common way to specify / pass configuration files
-to the WSGI app when it is called from other apps.
+Field Mappings:
+    In order to reduce the disk / memory space used,
+    fields name will be, most of the time, the first
+    letter of their long name. Fields mapping will be
+    updated and documented in each controller class.
 """
 
-from oslo.config import cfg
+from poppy.distributed_task.taskflow import services
 
-from poppy import bootstrap
-
-
-conf = cfg.CONF
-conf(project='poppy', prog='poppy', args=[])
-
-
-app = bootstrap.Bootstrap(conf).transport.app
+ServicesController = services.ServicesController
