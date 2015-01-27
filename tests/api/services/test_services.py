@@ -17,6 +17,7 @@
 
 import cgi
 import time
+import urlparse
 import uuid
 
 import ddt
@@ -276,14 +277,26 @@ class TestListServices(base.TestBase):
         self.assertEqual(len(body['services']), limit)
         self.assertSchema(body, services.list_services)
 
-    def test_list_services_multiple_page(self):
-        self.service_list = [self._create_test_service() for _ in range(15)]
-        resp = self.client.list_services()
+    @ddt.data(3)
+    def test_list_services_multiple_page(self, num):
+        self.service_list = [self._create_test_service() for _ in range(num)]
+        url_param = {'limit': num - 1}
+        resp = self.client.list_services(param=url_param)
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
-        # TODO(malini): remove hard coded value with configurable value
-        self.assertEqual(len(body['services']), 10)
+        self.assertEqual(len(body['services']), num - 1)
+        self.assertSchema(body, services.list_services)
+
+        # get second page
+        next_page_uri = urlparse.urlparse(body['links'][0]['href'])
+        marker = urlparse.parse_qs(next_page_uri.query)['marker'][0]
+        url_param = {'marker': marker}
+        resp = self.client.list_services(param=url_param)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertEqual(len(body['services']), 1)
         self.assertSchema(body, services.list_services)
 
     @attrib.attr('smoke')
@@ -409,7 +422,8 @@ class TestServiceActions(base.TestBase):
         # TODO(malini): Add test to verify that a failed service can be
         # deleted.
         # Placeholder till we figure out how to create provider side failure.
-        pass
+        self.skipTest(
+            'Until we figure out how to create provider side failure.')
 
     def test_get_service(self):
         resp = self.client.get_service(location=self.service_url)
@@ -437,7 +451,8 @@ class TestServiceActions(base.TestBase):
         # TODO(malini): Add test to verify that failed service will return
         # status 'failed' on get_service with error message from the provider.
         # Placeholder till we figure out how to create provider side failure.
-        pass
+        self.skipTest(
+            'Until we figure out how to create provider side failure.')
 
     def tearDown(self):
         self.client.delete_service(location=self.service_url)
@@ -471,7 +486,7 @@ class TestServicePatch(base.TestBase):
         self.restrictions_list = [
             {"name": "website only",
              "rules": [{"name": "mywebsite.com",
-                        "http_host": "www.mywebsite.com"}]}]
+                        "referrer": "www.mywebsite.com"}]}]
 
         resp = self.client.create_service(
             service_name=self.service_name,
@@ -483,7 +498,7 @@ class TestServicePatch(base.TestBase):
 
         self.service_url = resp.headers["location"]
 
-        self.expected_service_details = {
+        self.original_service_details = {
             "name": self.service_name,
             "domains": self.domain_list,
             "origins": self.origin_list,
@@ -494,8 +509,14 @@ class TestServicePatch(base.TestBase):
         self.client.wait_for_service_status(
             location=self.service_url,
             status='deployed',
+            abort_on_status='failed',
             retry_interval=self.test_config.status_check_retry_interval,
             retry_timeout=self.test_config.status_check_retry_timeout)
+
+        resp = self.client.get_service(location=self.service_url)
+        body = resp.json()
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(body['status'], 'deployed')
 
     def _assert_service_details(self, actual_response, expected_response):
         self.assertEqual(actual_response['name'],
@@ -512,7 +533,6 @@ class TestServicePatch(base.TestBase):
                          expected_response['flavor_id'])
 
     @ddt.file_data('data_patch_service.json')
-    # @ddt.file_data('data_patch_subset.json')
     def test_patch_service(self, test_data):
 
         for item in test_data:
@@ -523,23 +543,22 @@ class TestServicePatch(base.TestBase):
                     item['value']['domain'] = str(uuid.uuid1()) + '.com'
 
         patch = jsonpatch.JsonPatch(test_data)
-        expected_service_details = patch.apply(self.expected_service_details)
+        expected_service_details = patch.apply(self.original_service_details)
 
         resp = self.client.patch_service(location=self.service_url,
                                          request_body=test_data)
         self.assertEqual(resp.status_code, 202)
 
-        resp = self.client.get_service(location=self.service_url)
-        self.assertEqual(resp.status_code, 200)
-
         self.client.wait_for_service_status(
             location=self.service_url,
             status='deployed',
+            abort_on_status='failed',
             retry_interval=self.test_config.status_check_retry_interval,
             retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         body = resp.json()
+        self.assertEqual(body['status'], 'deployed')
 
         self._assert_service_details(body, expected_service_details)
 
@@ -550,22 +569,14 @@ class TestServicePatch(base.TestBase):
                                          request_body=test_data)
         self.assertEqual(resp.status_code, 400)
 
+        # nothing should have changed.
         resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
         self.assertEqual(body['status'], 'deployed')
-        for item in self.domain_list:
-            if 'protocol' not in item:
-                item['protocol'] = 'http'
-        self.assertEqual(sorted(self.domain_list), sorted(body['domains']))
 
-        for item in self.origin_list:
-            if 'rules' not in item:
-                item[u'rules'] = []
-        self.assertEqual(sorted(self.origin_list), sorted(body['origins']))
-        # TODO(malini): Uncomment below after caching is implemented.
-        self.assertEqual(sorted(self.caching_list), sorted(body['caching']))
+        self._assert_service_details(body, self.original_service_details)
 
     def tearDown(self):
         self.client.delete_service(location=self.service_url)

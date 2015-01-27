@@ -73,7 +73,7 @@ class FlavorsController(base.Controller, hooks.HookController):
     @pecan.expose('json')
     @decorators.validate(
         request=rule.Rule(
-            helpers.json_matches_schema(
+            helpers.json_matches_flavor_schema(
                 schema.FlavorSchema.get_schema("flavor", "POST")),
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))

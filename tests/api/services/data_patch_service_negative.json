@@ -4,6 +4,18 @@
          "path": "/origins/-",
          "value": {"origin": "1.2.3.4", "port": 80}}
     ],
+    "add_duplicate_origin_rule": [
+        {"op": "add",
+         "path": "/origins/1",
+         "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                   "rules": [{"name" : "origin", "request_url" : "/origin.htm"}]}
+        },
+        {"op": "add",
+         "path": "/origins/2",
+         "value": {"origin": "4.2.5.4", "port": 80, "ssl": false,
+                   "rules": [{"name" : "origin", "request_url" : "/origin.htm"}]}
+        }
+    ],
     "empty_list": [],
     "empty_dict":[{}],
     "remove_name": [
@@ -57,5 +69,14 @@
         {"op": "replace",
          "path": "/domains/0",
          "value": {}}
+    ],
+    "remove_flavor": [
+        {"op": "remove",
+         "path": "/flavor_id"}
+    ],
+    "replace_flavor_nonexistant": [
+        {"op": "replace",
+         "path": "/flavor_id",
+         "value": "nonexistant"}
     ]
 }
