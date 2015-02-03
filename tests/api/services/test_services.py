@@ -291,7 +291,7 @@ class TestListServices(base.TestBase):
         # get second page
         next_page_uri = urlparse.urlparse(body['links'][0]['href'])
         marker = urlparse.parse_qs(next_page_uri.query)['marker'][0]
-        url_param = {'marker': marker}
+        url_param = {'marker': marker, 'limit': 1}
         resp = self.client.list_services(param=url_param)
         self.assertEqual(resp.status_code, 200)
 
