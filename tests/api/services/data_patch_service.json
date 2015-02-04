@@ -134,6 +134,18 @@
                     "rules": [{"name": "rule1", "referrer": "thesite"}]
                     }}
     ],
+   "replace_restrictions":[
+        {"op": "add",
+         "path": "/restrictions/-",
+         "value": {"name": "restricted",
+                    "rules": [{"name": "rule1", "referrer": "thesite"}]
+                    }},
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "new_restricted",
+                    "rules": [{"name": "rule1", "referrer": "thesite"}]
+                    }}
+   ],
    "remove_restrictions": [
         {"op": "remove",
          "path": "/restrictions/0"}
