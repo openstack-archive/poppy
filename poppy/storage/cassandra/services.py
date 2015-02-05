@@ -301,8 +301,6 @@ class ServicesController(base.ServicesController):
                 return False
         except ValueError:
             return False
-        else:
-            return False
 
     def create(self, project_id, service_obj):
         """create.
