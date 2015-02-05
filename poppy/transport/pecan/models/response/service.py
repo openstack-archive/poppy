@@ -29,7 +29,7 @@ from poppy.transport.pecan.models.response import restriction
 
 class Model(collections.OrderedDict):
 
-    'Service Response Model.'
+    """Service Response Model."""
 
     def __init__(self, service_obj, controller):
         super(Model, self).__init__()
