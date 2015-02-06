@@ -98,8 +98,7 @@ class TestServices(base.TestCase):
     @ddt.file_data('data_service.json')
     def test_update(self, service_json):
         service_obj = service.load_from_json(service_json)
-        service_old = service_obj
-        resp = self.controller.update(self.provider_service_id, service_old,
+        resp = self.controller.update(self.provider_service_id,
                                       service_obj)
         self.assertIn('id', resp[self.driver.provider_name])
 

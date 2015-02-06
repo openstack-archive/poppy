@@ -156,8 +156,7 @@ class TestServices(base.TestCase):
         controller = services.ServiceController(new_driver)
         # test create, everything goes through successfully
         service_obj = service.load_from_json(service_json)
-        service_old = service_obj
-        resp = controller.update(self.provider_service_id, service_old,
+        resp = controller.update(self.provider_service_id,
                                  service_obj)
         self.assertIn('id', resp[new_driver.provider_name])
 
@@ -179,7 +178,6 @@ class TestServices(base.TestCase):
             RuntimeError('Updating service mysteriously failed.')})
         resp = controller_with_update_exception.update(
             self.provider_service_id,
-            service_json,
             service_json)
         self.assertIn('error', resp[driver.provider_name])
 
@@ -191,7 +189,6 @@ class TestServices(base.TestCase):
         service_obj = service.load_from_json(service_json)
         resp = controller_with_update_exception.update(
             self.provider_service_id,
-            service_obj,
             service_obj)
         self.assertIn('error', resp[driver.provider_name])
 
