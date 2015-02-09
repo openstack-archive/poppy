@@ -211,6 +211,24 @@ class TestServices(base.TestCase):
             provider_service_id, service_obj, service_obj)
         self.assertIn('id', resp[self.driver.provider_name])
 
+    @ddt.file_data('data_upsert_service.json')
+    def test_upsert(self, service_json):
+        provider_service_id = json.dumps([{'policy_name': "densely.sage.com",
+                                           'protocol': 'http'}])
+        controller = services.ServiceController(self.driver)
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=404,
+            text='Service not found'
+        )
+        controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
+        service_obj = service.load_from_json(service_json)
+        resp = controller.update(
+            provider_service_id, service_obj, service_obj)
+        self.assertIn('id', resp[self.driver.provider_name])
+
     def test_purge_all(self):
         provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
                                            'protocol': 'http'}])
