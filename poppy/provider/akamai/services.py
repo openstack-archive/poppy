@@ -160,7 +160,13 @@ class ServiceController(base.ServiceBase):
                         configuration_number=configuration_number,
                         policy_name=policies[0]['policy_name']),
                     headers=self.request_header)
-                if resp.status_code != 200:
+                # if the policy is not found with provider, create it
+                if resp.status_code == 404:
+                    print('akamai response code: %s' % resp.status_code)
+                    print('upserting service with akamai: %s' %
+                          service_obj.service_id)
+                    return self.create(service_obj)
+                elif resp.status_code != 200:
                     raise RuntimeError(resp.text)
             except Exception as e:
                 return self.responder.failed(str(e))
