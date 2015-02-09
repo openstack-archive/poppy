@@ -145,6 +145,23 @@ class ServiceController(base.ServiceBase):
             except Exception as e:
                 return self.responder.failed(str(e))
 
+        # upsert operation
+        try:
+            configuration_number = self._get_configuration_number(
+                util.dict2obj(policies[0]))
+            resp = self.policy_api_client.get(
+                self.policy_api_base_url.format(
+                    configuration_number=configuration_number,
+                    policy_name=policies[0]['policy_name']),
+                headers=self.request_header)
+            # if the policy is not found with provider, create it
+            if resp.status_code == 404:
+                print('service akamai response code: %s' % resp.status_code)
+                print('upserting service with akamai: %s' % service_obj.service_id)
+                return self.create(service_obj)
+        except Exception as e:
+            return self.responder.failed(str(e))
+
         ids = []
         links = []
         if len(service_obj.domains) > 0:
