@@ -15,6 +15,7 @@
 
 import random
 
+import ddt
 import mock
 from oslo.config import cfg
 
@@ -33,7 +34,7 @@ AKAMAI_OPTIONS = [
         'policy_api_access_token', default='aaa',
         help='Akamai access token for policy API'),
     cfg.StrOpt(
-        'policy_api_base_url', default='/abc/',
+        'policy_api_base_url', default='http://abc/',
         help='Akamai policy API base URL'),
     # credentials && base URL for CCU API
     # for purging
@@ -67,6 +68,17 @@ AKAMAI_OPTIONS = [
 ]
 
 
+class Response(object):
+
+    def __init__(self, resp_status):
+        self.resp_status = resp_status
+
+    @property
+    def ok(self):
+        return self.resp_status
+
+
+@ddt.ddt
 class TestDriver(base.TestCase):
 
     def setUp(self):
@@ -98,10 +110,16 @@ class TestDriver(base.TestCase):
         )
         self.assertEqual('Akamai', provider.provider_name)
 
+    @ddt.data((200, 'Put Successful', True), (500, 'Put Failed', False))
     @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
-    def test_is_alive(self):
+    def test_is_alive(self, details):
+        status_code, text, health_status = details
         provider = driver.CDNProvider(self.conf)
-        self.assertEqual(True, provider.is_alive())
+        mock_api_client = provider.service_controller.driver.policy_api_client
+        resp = Response(health_status)
+        with mock.patch.object(mock_api_client, 'put',
+                               return_value=resp):
+            self.assertEqual(health_status, provider.is_alive())
 
     @mock.patch('akamai.edgegrid.EdgeGridAuth')
     @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
