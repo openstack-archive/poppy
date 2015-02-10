@@ -15,6 +15,7 @@
 
 import random
 
+import ddt
 import mock
 from oslo.config import cfg
 
@@ -33,7 +34,7 @@ AKAMAI_OPTIONS = [
         'policy_api_access_token', default='aaa',
         help='Akamai access token for policy API'),
     cfg.StrOpt(
-        'policy_api_base_url', default='/abc/',
+        'policy_api_base_url', default='http://abc/',
         help='Akamai policy API base URL'),
     # credentials && base URL for CCU API
     # for purging
@@ -64,9 +65,32 @@ AKAMAI_OPTIONS = [
         'akamai_https_config_number',
         default=str(random.randint(10000, 99999)),
         help='Akamai configuration number for https policies'),
+    # Akamai health specific configurations
+    cfg.StrOpt(
+        'akamai_health_name', default='akamai_health_check',
+        help='Akamai name for service'),
+    cfg.StrOpt(
+        'akamai_health_domain', default='akamaistatus.com',
+        help='domain url for akamai service'),
+    cfg.StrOpt(
+        'akamai_health_origin', default='healthcheck.org',
+        help='origin url for akamai service'),
+    cfg.StrOpt(
+        'akamai_health_protocol', default='http',
+        help='protocol type of akamai health service'),
+    cfg.BoolOpt(
+        'akamai_health_ssl_enabled', default=False,
+        help='ssl for akamai health service'),
+    cfg.IntOpt(
+        'akamai_health_port', default=80,
+        help='origin url for akamai health service'),
+    cfg.StrOpt(
+        'akamai_health_flavor', default='standard',
+        help='flavor for akamai health service'),
 ]
 
 
+@ddt.ddt
 class TestDriver(base.TestCase):
 
     def setUp(self):
@@ -98,10 +122,16 @@ class TestDriver(base.TestCase):
         )
         self.assertEqual('Akamai', provider.provider_name)
 
+    @ddt.data((200, 'Put Successful', True), (500, 'Put Failed', False))
     @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
-    def test_is_alive(self):
+    def test_is_alive(self, details):
+        status_code, text, health_status = details
         provider = driver.CDNProvider(self.conf)
-        self.assertEqual(True, provider.is_alive())
+        mock_api_client = provider.service_controller.driver.policy_api_client
+        with mock.patch.object(mock_api_client, 'put',
+                               return_value=mock.Mock(status_code=status_code,
+                                                      text=text)):
+            self.assertEqual(health_status, provider.is_alive())
 
     @mock.patch('akamai.edgegrid.EdgeGridAuth')
     @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)

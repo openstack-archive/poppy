@@ -21,6 +21,7 @@ import requests
 
 from poppy.provider.akamai import controllers
 from poppy.provider import base
+from poppy.transport.pecan.models.request import service as req_service_model
 
 AKAMAI_OPTIONS = [
     # credentials && base URL for policy API
@@ -58,13 +59,36 @@ AKAMAI_OPTIONS = [
         'akamai_https_access_url_suffix',
         help='Akamai domain ssl access url suffix'),
 
-    # Akama client specific configuration numbers
+    # Akamai client specific configuration numbers
     cfg.StrOpt(
         'akamai_http_config_number',
         help='Akamai configuration number for http policies'),
     cfg.StrOpt(
         'akamai_https_config_number',
         help='Akamai configuration number for https policies'),
+
+    # Akamai health specific configurations
+    cfg.StrOpt(
+        'akamai_health_name',
+        help='Akamai name for health service'),
+    cfg.StrOpt(
+        'akamai_health_domain',
+        help='domain url for akamai health service'),
+    cfg.StrOpt(
+        'akamai_health_origin',
+        help='origin url for akamai health service'),
+    cfg.StrOpt(
+        'akamai_health_protocol',
+        help='protocol type of akamai health service'),
+    cfg.BoolOpt(
+        'akamai_health_ssl_enabled',
+        help='ssl for akamai health service'),
+    cfg.IntOpt(
+        'akamai_health_port',
+        help='origin url for akamai health service'),
+    cfg.StrOpt(
+        'akamai_health_flavor',
+        help='flavor for akamai health service'),
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
@@ -111,7 +135,34 @@ class CDNProvider(base.Driver):
         )
 
     def is_alive(self):
-        return True
+
+        service_json_dict = {
+            'name': self.akamai_conf.akamai_health_name,
+            'domains': [
+                {
+                    'domain': self.akamai_conf.akamai_health_domain,
+                    'protocol': self.akamai_conf.akamai_health_protocol
+                }
+            ],
+            'origins': [
+                {
+                    'origin': self.akamai_conf.akamai_health_origin,
+                    'ssl': self.akamai_conf.akamai_health_ssl_enabled,
+                    'port': self.akamai_conf.akamai_health_port
+
+                }
+                ],
+            'flavor_id': self.akamai_conf.akamai_health_flavor
+        }
+
+        service_obj = req_service_model.load_from_json(service_json_dict)
+        responder = self.service_controller.create(service_obj)
+        try:
+            responder[self.provider_name]['error']
+        except KeyError:
+            return True
+        else:
+            return False
 
     @property
     def provider_name(self):
