@@ -129,7 +129,6 @@ class ServiceController(base.ServiceBase):
         pass
 
     def update(self, provider_service_id,
-               service_old,
                service_obj):
         # depending on domains field presented or not, do PUT/POST
         # and depending on origins field presented or not, set behavior on

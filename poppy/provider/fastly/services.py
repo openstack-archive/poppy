@@ -157,7 +157,6 @@ class ServiceController(base.ServiceBase):
 
     def update(self,
                provider_service_id,
-               service_old,
                service_obj):
         try:
             service = self.client.get_service_details(provider_service_id)
