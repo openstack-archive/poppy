@@ -1,0 +1,18 @@
+{
+    "service_multiple_origins": {
+        "name" : "mysite.com",
+        "domains": [
+            {"domain": "parsely.sage.com"},
+            {"domain": "densely.sage.com"},
+            {"domain": "rosemary.thyme.net"}
+        ],
+        "origins": [
+            {"origin": "mockdomain-text.com", "ssl": false, "port": 80,
+             "rules": [{"name": "global", "request_url": "/*"},
+                       {"name": "text", "request_url": "/text"}]},
+            {"origin": "mockdomain-image.com",
+             "rules": [{"name": "img", "request_url": "/img"}] }
+        ],
+        "flavor_id" : "standard"
+    }
+}
