@@ -205,10 +205,6 @@ class ServicesController(base.Controller, hooks.HookController):
     def patch_one(self, service_id):
         service_updates = json.loads(pecan.request.body.decode('utf-8'))
 
-        # if service_updates is empty, abort
-        if not service_updates:
-            pecan.abort(400, detail='No details provided to update')
-
         services_controller = self._driver.manager.services_controller
 
         try:
