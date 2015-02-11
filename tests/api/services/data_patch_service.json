@@ -17,6 +17,14 @@
          "path": "/domains/-",
          "value": {"domain": "replaceme.com", "protocol": "http"}}
     ],
+    "add_same_domains_with_different_ssl": [
+        {"op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com", "protocol": "http"}},
+        {"op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com", "protocol": "https"}}
+    ],
    "add_and_remove_domains": [
         {"op": "add",
          "path": "/domains/-",
@@ -69,6 +77,18 @@
         {"op": "add",
          "path": "/origins/2",
          "value": {"origin": "4.2.5.4", "port": 80, "ssl": false,
+                   "rules": [{"name" : "origin", "request_url" : "/origin2.htm"}]}
+        }
+    ],
+    "add_same_origins_with_different_ssl": [
+        {"op": "add",
+         "path": "/origins/1",
+         "value": {"origin": "1.2.3.4", "port": 443, "ssl": true,
+                   "rules": [{"name" : "origin", "request_url" : "/origin.htm"}]}
+        },
+        {"op": "add",
+         "path": "/origins/2",
+         "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
                    "rules": [{"name" : "origin", "request_url" : "/origin2.htm"}]}
         }
     ],
