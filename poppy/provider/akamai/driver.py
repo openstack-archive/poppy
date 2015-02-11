@@ -15,6 +15,8 @@
 
 """Akamai CDN Provider implementation."""
 
+import json
+
 from akamai import edgegrid
 from oslo.config import cfg
 import requests
@@ -58,7 +60,7 @@ AKAMAI_OPTIONS = [
         'akamai_https_access_url_suffix',
         help='Akamai domain ssl access url suffix'),
 
-    # Akama client specific configuration numbers
+    # Akamai client specific configuration numbers
     cfg.StrOpt(
         'akamai_http_config_number',
         help='Akamai configuration number for http policies'),
@@ -111,7 +113,23 @@ class CDNProvider(base.Driver):
         )
 
     def is_alive(self):
-        return True
+
+        request_headers = {
+            'Content-type': 'application/json',
+            'Accept': 'text/plain'
+        }
+
+        resp = self.policy_api_client.put(
+            self.akamai_policy_api_base_url.format(
+                configuration_number=self.http_conf_number,
+                policy_name='healthcheck'),
+            data=json.dumps({'rules': []}),
+            headers=request_headers)
+
+        if resp.ok:
+            return True
+        else:
+            return False
 
     @property
     def provider_name(self):
