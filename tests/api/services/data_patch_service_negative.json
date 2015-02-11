@@ -16,7 +16,6 @@
                    "rules": [{"name" : "origin", "request_url" : "/origin.htm"}]}
         }
     ],
-    "empty_list": [],
     "empty_dict":[{}],
     "remove_name": [
         {"op": "remove",
