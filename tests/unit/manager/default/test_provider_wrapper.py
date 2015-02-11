@@ -38,7 +38,7 @@ class TestProviderWrapper(base.TestCase):
         mock_ext = mock.Mock(provider_name="no_existent_provider")
         self.assertRaises(errors.BadProviderDetail,
                           self.provider_wrapper_obj.update,
-                          mock_ext, self.fake_provider_details, {}, {})
+                          mock_ext, self.fake_provider_details, {})
 
     def test_update(self):
         mock_obj = mock.Mock(provider_name='Fastly')
@@ -46,9 +46,9 @@ class TestProviderWrapper(base.TestCase):
         fastly_provider_detail = self.fake_provider_details['Fastly']
         self.provider_wrapper_obj.update(mock_ext,
                                          self.fake_provider_details,
-                                         {}, {})
+                                         {})
         mock_ext.obj.service_controller.update.assert_called_once_with(
-            fastly_provider_detail.provider_service_id, {}, {})
+            fastly_provider_detail.provider_service_id, {})
 
     def test_delete_with_keyerror(self):
         mock_ext = mock.Mock(obj=mock.Mock(
