@@ -51,7 +51,7 @@ def update_worker(project_id, service_id,
         LOG.info(u'Starting to update service from {0}'.format(provider))
         responder = service_controller.provider_wrapper.update(
             service_controller._driver.providers[provider.lower()],
-            service_old.provider_details, service_old, service_obj)
+            service_old.provider_details, service_obj)
         responders.append(responder)
         LOG.info(u'Updating service from {0} complete'.format(provider))
 
