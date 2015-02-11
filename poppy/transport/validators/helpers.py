@@ -136,10 +136,18 @@ def is_valid_service_configuration(service, schema):
 
     # Schema structure is valid.  Check the functional rules.
 
-    # 1. origin rules must be unique
+    # 1. origins and origin rules must be unique
     if 'origins' in service:
         origin_rules = []
+        origins = []
         for origin in service['origins']:
+            origin_value = origin['origin']
+            if origin_value in origins:
+                raise exceptions.ValidationFailed(
+                    'Origins must be unique')
+            else:
+                origins.append(origin_value)
+
             if 'rules' in origin:
                 for rule in origin['rules']:
                     request_url = rule['request_url']
@@ -161,6 +169,17 @@ def is_valid_service_configuration(service, schema):
                             'Caching Rules - the request_url must be unique')
                     else:
                         caching_rules.append(request_url)
+
+    # 3. domains must be unique
+    if 'domains' in service:
+        domains = []
+        for domain in service['domains']:
+            domain_value = "{0}".format(domain['domain'])
+            if domain_value in domains:
+                raise exceptions.ValidationFailed(
+                    'Domains must be unique')
+            else:
+                domains.append(domain_value)
 
     return
 

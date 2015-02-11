@@ -16,6 +16,18 @@
                    "rules": [{"name" : "origin", "request_url" : "/origin.htm"}]}
         }
     ],
+    "add_duplicate_origin": [
+        {"op": "add",
+         "path": "/origins/1",
+         "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                   "rules": [{"name" : "origin1", "request_url" : "/origin1.htm"}]}
+        },
+        {"op": "add",
+         "path": "/origins/2",
+         "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                   "rules": [{"name" : "origin2", "request_url" : "/origin2.htm"}]}
+        }
+    ],
     "empty_list": [],
     "empty_dict":[{}],
     "remove_name": [
@@ -44,6 +56,14 @@
    "remove_domain": [
         {"op": "remove",
          "path": "/domains/0"}
+    ],
+    "add_duplicate_domain": [
+        {"op": "add",
+         "path": "/domains/0",
+        "value": {"domain": "www.domain.com", "protocol": "http"}},
+        {"op": "add",
+         "path": "/domains/0",
+        "value": {"domain": "www.domain.com", "protocol": "http"}}
     ],
    "replace_empty_origin": [
         {"op": "replace",
