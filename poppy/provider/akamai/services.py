@@ -465,21 +465,37 @@ class ServiceController(base.ServiceBase):
                 'cacheKeyValue': '-'
             }
         }
+
+        wildcards = []
+        urlpaths = []
+
         # this is the global 'url-wildcard' rule
         if origin.rules == []:
-            match_rule = {
-                'name': 'url-wildcard',
-                'value': '/*'
-            }
-            rule_dict_template['matches'].append(match_rule)
+            wildcards.append("/*")
         else:
             for rule in origin.rules:
-                match_rule = {
-                    'name': 'url-path',
-                    'value': rule.request_url
-                }
-                rule_dict_template['matches'].append(
-                    match_rule)
+                if "*" in rule.request_url:
+                    wildcards.append(rule.request_url)
+                else:
+                    urlpaths.append(rule.request_url)
+
+        if len(wildcards) > 0:
+            match_rule = {
+                'name': 'url-wildcard',
+                'value': " ".join(wildcards)
+            }
+
+            rule_dict_template['matches'].append(
+                match_rule)
+
+        if len(urlpaths) > 0:
+            match_rule = {
+                'name': 'url-path',
+                'value': " ".join(urlpaths)
+            }
+
+            rule_dict_template['matches'].append(
+                match_rule)
 
         if origin.ssl:
             rule_dict_template['matches'].append({

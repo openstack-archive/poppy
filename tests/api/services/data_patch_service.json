@@ -72,6 +72,16 @@
                    "rules": [{"name" : "origin", "request_url" : "/origin2.htm"}]}
         }
     ],
+    "add_multiple_origins_rules": [
+        {"op": "add",
+         "path": "/origins/0/rules/-",
+         "value": {"name": "Origin Rule 1", "request_url": "/cats"}
+        },
+        {"op": "add",
+         "path": "/origins/0/rules/-",
+         "value": {"name": "Origin Rule 2", "request_url": "/dogs"}
+        }
+    ],
    "add_and_remove_origin": [
         {"op": "add",
          "path": "/origins/-",
