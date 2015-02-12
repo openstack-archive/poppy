@@ -13,6 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+try:
+    import ordereddict as collections
+except ImportError:        # pragma: no cover
+    import collections     # pragma: no cover
+
 from poppy.model import common
 
 VALID_STATUSES = [
@@ -93,6 +98,17 @@ class ProviderDetail(common.DictSerializableModel):
     @error_message.setter
     def error_message(self, value):
         self._error_message = value
+
+    def to_dict(self):
+        result = collections.OrderedDict()
+        result["id"] = self.provider_service_id
+        result["access_urls"] = self.access_urls
+        result["status"] = self.status
+        result["name"] = self.name
+        result["error_info"] = self.error_info
+        result["error_message"] = self.error_message
+
+        return result
 
     @classmethod
     def init_from_dict(cls, dict_obj):
