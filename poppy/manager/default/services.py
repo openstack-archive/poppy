@@ -162,6 +162,10 @@ class DefaultServicesController(base.ServicesController):
         service_new_json['service_id'] = service_old.service_id
         service_new = service.Service.init_from_dict(service_new_json)
 
+        # must be valid, carry on
+        service_new_json['service_id'] = service_old.service_id
+        service_new = service.Service.init_from_dict(service_new_json)
+
         # get provider details for this service
         provider_details = self._get_provider_details(project_id, service_id)
 
@@ -202,18 +206,16 @@ class DefaultServicesController(base.ServicesController):
         :param service_id
         :raises LookupError
         """
-        provider_details = self._get_provider_details(project_id, service_id)
+        service_obj = self.storage_controller.get(project_id, service_id)
 
         # change each provider detail's status to delete_in_progress
         # TODO(tonytan4ever): what if this provider is in 'failed' status?
         # Maybe raising a 400 error here ?
-        for provider in provider_details:
-            provider_details[provider].status = "delete_in_progress"
+        for provider in service_obj.provider_details:
+            service_obj.provider_details[provider].status = (
+                'delete_in_progress')
 
-        self.storage_controller.update_provider_details(
-            project_id,
-            service_id,
-            provider_details)
+        self.storage_controller.update(project_id, service_id, service_obj)
 
         proxy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                   'service_async_workers',
@@ -228,8 +230,6 @@ class DefaultServicesController(base.ServicesController):
         cmd_list = [executable,
                     proxy_path,
                     script_path,
-                    json.dumps(dict([(k, v.to_dict())
-                                     for k, v in provider_details.items()])),
                     project_id, service_id]
         LOG.info('Starting delete service subprocess: %s' % cmd_list)
         p = subprocess.Popen(cmd_list, env=os.environ.copy())
