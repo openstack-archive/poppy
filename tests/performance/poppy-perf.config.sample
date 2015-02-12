@@ -1,0 +1,21 @@
+[env]
+host = "http://0.0.0.0:8888/v1.0"
+min_wait = 1000
+max_wait = 1000
+project_id = None
+token = None
+project_id_in_url = False
+flavor = cdn
+
+[test]
+create_service = 5
+update_service_domain = 0
+update_service_rule = 5
+update_service_origin = 0
+delete_service = 5
+delete_asset = 50
+delete_all_assets = 50
+list_services = 100
+get_service = 50
+list_flavors = 20
+get_flavors = 20
