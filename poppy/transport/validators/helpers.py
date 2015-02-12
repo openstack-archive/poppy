@@ -142,7 +142,8 @@ def is_valid_service_configuration(service, schema):
         origins = []
         for origin in service['origins']:
             origin_ssl = 'https' if origin.get('ssl') else 'http'
-            origin_value = "{0}://{1}".format(origin_ssl, origin.get('origin'))
+            origin_value = u"{0}://{1}".format(origin_ssl,
+                                               origin.get('origin'))
             if origin_value in origins:
                 raise exceptions.ValidationFailed(
                     'Origins must be unique')
@@ -175,7 +176,7 @@ def is_valid_service_configuration(service, schema):
     if 'domains' in service:
         domains = []
         for domain in service['domains']:
-            domain_value = "{0}://{1}".format(
+            domain_value = u"{0}://{1}".format(
                 domain.get('protocol', 'http'), domain.get('domain'))
             if domain_value in domains:
                 raise exceptions.ValidationFailed(
