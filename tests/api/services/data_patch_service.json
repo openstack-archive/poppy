@@ -203,6 +203,5 @@
                     "rules": [{"name": "rule1", "referrer": "abc"}]
                    }
          }
-    ],
-    "empty_list": []
+    ]
 }
