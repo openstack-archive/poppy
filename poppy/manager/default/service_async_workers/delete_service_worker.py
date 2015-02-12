@@ -31,19 +31,19 @@ conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
 
 
-def service_delete_worker(provider_details,
-                          project_id, service_id):
+def service_delete_worker(project_id, service_id):
     LOG.logger.setLevel(logging.INFO)
     bootstrap_obj = bootstrap.Bootstrap(conf)
     service_controller = bootstrap_obj.manager.services_controller
-    provider_details = json.loads(provider_details)
+    storage_controller = service_controller.storage_controller
+    storage_controller._driver.connect()
+    service_obj = storage_controller.get(project_id, service_id)
+    provider_details = service_obj.provider_details
 
     responders = []
     # try to delete all service from each provider presented
     # in provider_details
     for provider in provider_details:
-        provider_details[provider] = (
-            req_provider_details.load_from_json(provider_details[provider]))
         LOG.info('Starting to delete service from %s' % provider)
         responder = service_controller.provider_wrapper.delete(
             service_controller._driver.providers[provider.lower()],
@@ -75,7 +75,7 @@ def service_delete_worker(provider_details,
             # delete service successful, remove this provider detail record
             del provider_details[provider_name]
 
-        service_controller.storage_controller._driver.connect()
+        # service_controller.storage_controller._driver.connect()
 
     if provider_details != {}:
         # Store failed provider details with error infomation for further
@@ -83,10 +83,7 @@ def service_delete_worker(provider_details,
         LOG.info('Delete failed for one or more providers'
                  'Updating poppy service provider details for %s' %
                  service_id)
-        service_controller.storage_controller.update_provider_details(
-            project_id,
-            service_id,
-            provider_details)
+        storage_controller.update(project_id, service_id, service_obj)
 
     # always delete from Poppy.  Provider Details will contain
     # any provider issues that may have occurred.
@@ -105,12 +102,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Delete service async worker'
                                      ' script arg parser')
 
-    parser.add_argument('provider_details', action="store")
     parser.add_argument('project_id', action="store")
     parser.add_argument('service_id', action="store")
 
     result = parser.parse_args()
-    provider_details = result.provider_details
     project_id = result.project_id
     service_id = result.service_id
-    service_delete_worker(provider_details, project_id, service_id)
+    service_delete_worker(project_id, service_id)
