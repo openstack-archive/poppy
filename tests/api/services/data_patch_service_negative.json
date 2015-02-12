@@ -28,7 +28,6 @@
                    "rules": [{"name" : "origin2", "request_url" : "/origin2.htm"}]}
         }
     ],
-    "empty_list": [],
     "empty_dict":[{}],
     "remove_name": [
         {"op": "remove",
