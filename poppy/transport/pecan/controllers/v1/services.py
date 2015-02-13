@@ -164,12 +164,19 @@ class ServicesController(base.Controller, hooks.HookController):
         service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
         service_obj = req_service_model.load_from_json(service_json_dict)
         service_id = service_obj.service_id
+
+        # revalidate the service object as defaults may have been assigned.
+        schema = service.ServiceSchema.get_schema("service", "POST")
+        service_json = json.loads(json.dumps(service_obj.to_dict()))
+
         try:
+            helpers.is_valid_service_configuration(service_json, schema)
             services_controller.create(self.project_id, service_obj)
         except LookupError as e:  # error handler for no flavor
             pecan.abort(400, detail=str(e))
         except ValueError as e:  # error handler for existing service name
             pecan.abort(400, detail=str(e))
+
         service_url = str(
             uri.encode(u'{0}/v1.0/services/{1}'.format(
                 pecan.request.host_url,

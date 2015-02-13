@@ -195,8 +195,8 @@ class TestCreateService(providers.TestProviderBase):
         if len(caching_list) > 0:
             # validate caching name
             self.assertEqual(
-                body['caching'][1]['name'],
-                cgi.escape(caching_list[1]['name'])
+                body['caching'][0]['name'],
+                cgi.escape(caching_list[0]['name'])
             )
 
             if len(caching_list) > 1:
