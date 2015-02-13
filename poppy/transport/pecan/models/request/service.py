@@ -32,13 +32,31 @@ def load_from_json(json_data):
     restrictions = json_data.get("restrictions", [])
     pd = json_data.get("provider_details", {})
 
-    # load caching rules json string from input
+    # load from input
     origins = [origin.load_from_json(o) for o in origins]
     domains = [domain.load_from_json(d) for d in domains]
     restrictions = [restriction.load_from_json(r) for r in restrictions]
 
     # convert caching rule json string list into object list
     caching = json_data.get("caching", [])
+    default_rules = [c for c in caching
+                     for r in c['rules']
+                     if r['request_url'] == '/*']
+    if len(default_rules) == 0:
+        # add a default ttl if none provided.
+        default_ttl = {
+            "name": "default",
+            "ttl": 86400,
+            "rules": [
+                    {
+                        "name": "default",
+                        "request_url": "/*"
+                    }
+            ]
+        }
+
+        caching.insert(0, default_ttl)
+
     caching = [cachingrule.load_from_json(c) for c in caching]
 
     r = service.Service(service_id,

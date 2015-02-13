@@ -251,47 +251,12 @@ class ServiceSchema(schema_base.SchemaBase):
                     'caching': {
                         'type': 'array',
                         'required': False,
-                        'items': [{
+                        "items": {
                             'type': 'object',
                             'required': False,
                             'properties': {
                                 'name': {
                                     'type': 'string',
-                                    'required': True,
-                                    'minLength': 1,
-                                    'maxLength': 256},
-                                'ttl': {
-                                    'type': 'integer',
-                                    'required': True,
-                                    "minimum": 0},
-                                'rules': {
-                                    'type': 'array',
-                                    'required': False,
-                                    'items': {
-                                        'type': 'object',
-                                        'properties': {
-                                            'name': {
-                                                'type': 'string',
-                                                'required': True,
-                                                'minLength': 1,
-                                                'maxLength': 256},
-                                            'request_url': {
-                                                'type': 'string',
-                                                'required': True,
-                                                'minLength': 1,
-                                                'maxLength': 1024}}},
-                                }},
-                        }],
-                        "additionalItems": {
-                            'type': 'object',
-                            'required': False,
-                            'properties': {
-                                'name': {
-                                    'type': 'string',
-                                    'pattern': re.compile(
-                                        '^(?!default$).*',
-                                        re.IGNORECASE
-                                    ),
                                     'required': True,
                                     'minLength': 1,
                                     'maxLength': 256},

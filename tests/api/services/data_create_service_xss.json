@@ -5,11 +5,7 @@
         "origin_list": [{"origin": "mywebsite1.com",
                          "port": 443,
                          "ssl": false}],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "home",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+        "caching_list": []
     },
     "domain_injection": {
         "name": "bad_domain",
@@ -30,11 +26,7 @@
         "origin_list": [{"origin": "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
                          "port": 443,
                          "ssl": false}],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "home",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+        "caching_list": []
     },
     "caching_name_injection": {
         "name": "bad_caching_name",
@@ -42,8 +34,7 @@
         "origin_list": [{"origin": "mywebsite1.com",
                          "port": 443,
                          "ssl": false}],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
+        "caching_list": [{"name": "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}]
@@ -54,8 +45,7 @@
         "origin_list": [{"origin": "mywebsite1.com",
                          "port": 443,
                          "ssl": false}],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "images",
+        "caching_list": [{"name": "images",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>"}]}]
@@ -66,8 +56,7 @@
         "origin_list": [{"origin": "mywebsite1.com",
                          "port": 443,
                          "ssl": false}],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "images",
+        "caching_list": [{"name": "images",
                           "ttl": 1200,
                           "rules": [{"name" : "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
                                      "request_url" : "/images"}]}]
