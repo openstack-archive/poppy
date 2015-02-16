@@ -21,11 +21,14 @@ To run the tests
     export CAFE_ROOT_LOG_PATH=~/.poppy/logs
     export CAFE_TEST_LOG_PATH=~/.poppy/logs
 
-3. Copy the api.conf file to the path set by CAFE_CONFIG_FILE_PATH::
+3. The API tests require a running database (eg cassandra), in order to
+run via tox.
+
+4. Copy the api.conf file to the path set by CAFE_CONFIG_FILE_PATH::
 
     cp tests/etc/api.conf ~/.poppy/tests.conf
 
-4. Once you are ready to run the tests::
+5. Once you are ready to run the tests::
 
     cd tests/api
     nosetests
@@ -34,26 +37,18 @@ To run the tests
 Tox Support
 -----------
 
-The API tests require cassandra running in your local machine, in order to
-run via tox. It is assumed you already have the Cassandra instance up &
-running locally. You can make the API tests part of tox, by overriding the
-default positional argument in tox.ini::
-    
-    tox -- --exclude=None
+You can run tox using a docker container hosting Cassandra::
 
-Alternatively,  you can run tox with docker containers running Cassandra::
+Note - This will require docker (or boot2docker for MacOSX) to already be installed on the system.
 
-This will require docker (or boot2docker for MacOSX) to already be installed on the system.
-It will use the fig_local.yaml file to mount your local folder, as described in the Docker folder.
-Also, dont forget to update your ~/.poppy/tests.conf to point to your docker ip address.
+1. Update your `~/.poppy/tests.conf` to point to your docker cassandra container ip address.
 
+Example 1: Run all API tests against a docker hosted cassandra instance::
 
-Example 1: Run all API tests::
+    tox -e api
 
-    tox -e apidocker api
+Example 2: Run a particular API test function::
 
-Example 2: Run a particular test function::
-    
-    tox -e apidocker api/services/test_services.py:TestCreateService -- -m test_create_service_positive
+    tox -e api api/services/test_services.py:TestCreateService -- -m test_create_service_positive
 
 
