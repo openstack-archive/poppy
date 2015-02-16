@@ -36,6 +36,7 @@ class ProviderDetail(common.DictSerializableModel):
                  status=u"deploy_in_progress", name=None, error_info=None,
                  error_message=None):
         self._provider_service_id = provider_service_id
+        self._id = provider_service_id
         self._access_urls = access_urls
         self._status = status
         self._name = name
@@ -100,7 +101,7 @@ class ProviderDetail(common.DictSerializableModel):
 
     def to_dict(self):
         result = collections.OrderedDict()
-        result["provider_service_id"] = self.provider_service_id
+        result["id"] = self.provider_service_id
         result["access_urls"] = self.access_urls
         result["status"] = self.status
         result["name"] = self.name
