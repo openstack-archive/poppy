@@ -23,6 +23,17 @@ from poppy.openstack.common import log
 
 LOG = log.getLogger(__name__)
 
+_CLI_OPTIONS = (
+    cfg.BoolOpt('daemon', default=False,
+                help='Run Poppy server in the background.'),
+)
+
+# NOTE (Obulpathi): Register daemon command line option for
+# poppy-server
+CONF = cfg.CONF
+CONF.register_cli_opts(_CLI_OPTIONS)
+
+
 _DEFAULT_OPTIONS = [
     cfg.StrOpt('datacenter', default='',
                help='Host datacenter of the API'),
