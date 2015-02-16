@@ -380,6 +380,10 @@ class ServicesController(base.ServicesController):
         restrictions = [json.dumps(r.to_dict())
                         for r in service_obj.restrictions]
 
+        pds = {provider:
+               json.dumps(service_obj.provider_details[provider].to_dict())
+               for provider in service_obj.provider_details}
+
         # updates an existing service
         args = {
             'project_id': project_id,
@@ -390,7 +394,7 @@ class ServicesController(base.ServicesController):
             'origins': origins,
             'caching_rules': caching_rules,
             'restrictions': restrictions,
-            'provider_details': {}
+            'provider_details': pds
         }
 
         stmt = query.SimpleStatement(

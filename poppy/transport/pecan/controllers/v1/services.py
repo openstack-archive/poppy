@@ -185,9 +185,12 @@ class ServicesController(base.Controller, hooks.HookController):
     )
     def delete(self, service_id):
         services_controller = self._driver.manager.services_controller
+
         try:
             services_controller.delete(self.project_id, service_id)
         except LookupError as e:
+            pecan.abort(404, detail=str(e))
+        except ValueError as e:
             pecan.abort(404, detail=str(e))
 
         return pecan.Response(None, 202)

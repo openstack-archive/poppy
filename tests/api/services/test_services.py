@@ -425,6 +425,21 @@ class TestServiceActions(base.TestBase):
         self.skipTest(
             'Until we figure out how to create provider side failure.')
 
+    def test_delete_service_race_condition(self):
+        resp1 = self.client.delete_service(location=self.service_url)
+        resp2 = self.client.delete_service(location=self.service_url)
+        self.assertEqual(resp1.status_code, 202)
+        self.assertEqual(resp2.status_code, 202)
+
+        time.sleep(10)
+        exception = False
+        try:
+            self.client.get_service(location=self.service_url)
+        except Exception:
+            exception = True
+
+        self.assertFalse(exception)
+
     def test_get_service(self):
         resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 200)
