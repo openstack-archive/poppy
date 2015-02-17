@@ -62,6 +62,7 @@ def update_worker(project_id, service_id,
     # gather links and status for service from providers
     error_flag = False
     provider_details_dict = {}
+
     for responder in responders:
         for provider_name in responder:
             if 'error' in responder[provider_name]:
@@ -83,6 +84,7 @@ def update_worker(project_id, service_id,
                         error_message=error_msg))
             else:
                 access_urls = dns_responder[provider_name]['access_urls']
+
                 provider_details_dict[provider_name] = (
                     provider_details.ProviderDetail(
                         provider_service_id=responder[provider_name]['id'],
@@ -94,10 +96,6 @@ def update_worker(project_id, service_id,
                     provider_details_dict[provider_name].status = (
                         'deployed')
 
-    # update the service object
-    service_controller.storage_controller.update(project_id, service_id,
-                                                 service_obj)
-
     if error_flag:
         # update the old provider details with errors
         for provider_name in provider_details_dict:
@@ -106,16 +104,14 @@ def update_worker(project_id, service_id,
             old_provider_details[provider_name].error_info = error_info
             old_provider_details[provider_name].error_message = error_message
             old_provider_details[provider_name].status = 'failed'
-        service_controller.storage_controller.update_provider_details(
-            project_id,
-            service_id,
-            old_provider_details)
+        service_obj.provider_details = old_provider_details
     else:
         # update the provider details
-        service_controller.storage_controller.update_provider_details(
-            project_id,
-            service_id,
-            provider_details_dict)
+        service_obj.provider_details = provider_details_dict
+
+    # update the service object
+    service_controller.storage_controller.update(project_id, service_id,
+                                                 service_obj)
 
     service_controller.storage_controller._driver.close_connection()
     LOG.info('Update service worker process %s complete...' %

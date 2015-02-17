@@ -112,8 +112,7 @@ class DefaultServicesController(base.ServicesController):
                     proxy_path,
                     script_path,
                     json.dumps(providers),
-                    project_id, service_id,
-                    json.dumps(service_obj.to_dict())]
+                    project_id, service_id]
         LOG.info('Starting create service subprocess: %s' % cmd_list)
         p = subprocess.Popen(cmd_list, env=os.environ.copy())
         p.communicate()
@@ -162,16 +161,11 @@ class DefaultServicesController(base.ServicesController):
         service_new_json['service_id'] = service_old.service_id
         service_new = service.Service.init_from_dict(service_new_json)
 
-        # get provider details for this service
-        provider_details = self._get_provider_details(project_id, service_id)
-
         # set status in provider details to u'update_in_progress'
+        provider_details = service_old.provider_details
         for provider in provider_details:
             provider_details[provider].status = u'update_in_progress'
-        self.storage_controller.update_provider_details(
-            project_id,
-            service_id,
-            provider_details)
+        self.storage_controller.update(project_id, service_id, service_old)
 
         proxy_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                   'service_async_workers',

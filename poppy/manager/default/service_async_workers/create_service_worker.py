@@ -17,13 +17,13 @@ import argparse
 import json
 import logging
 import os
+import sys
 
 from oslo.config import cfg
 
 from poppy import bootstrap
 from poppy.model.helpers import provider_details
 from poppy.openstack.common import log
-from poppy.transport.pecan.models.request import service
 
 
 LOG = log.getLogger(__file__)
@@ -31,14 +31,19 @@ conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
 
 
-def service_create_worker(providers_list_json,
-                          project_id, service_id, service_obj_json):
+def service_create_worker(providers_list_json, project_id, service_id):
     LOG.logger.setLevel(logging.INFO)
     bootstrap_obj = bootstrap.Bootstrap(conf)
     service_controller = bootstrap_obj.manager.services_controller
+    storage_controller = service_controller.storage_controller
 
     providers_list = json.loads(providers_list_json)
-    service_obj = service.load_from_json(json.loads(service_obj_json))
+    try:
+        service_obj = storage_controller.get(project_id, service_id)
+    except ValueError:
+        LOG.info('Creating service {0} from Poppy failed. '
+                 'No such service exists'.format(service_id))
+        sys.exit(0)
 
     responders = []
     # try to create all service from each provider
@@ -88,12 +93,10 @@ def service_create_worker(providers_list_json,
                 else:
                     provider_details_dict[provider_name].status = 'deployed'
 
-    service_controller.storage_controller.update_provider_details(
-        project_id,
-        service_id,
-        provider_details_dict)
+    service_obj.provider_details = provider_details_dict
+    storage_controller.update(project_id, service_id, service_obj)
 
-    service_controller.storage_controller._driver.close_connection()
+    storage_controller._driver.close_connection()
     LOG.info('Create service worker process %s complete...' %
              str(os.getpid()))
 
@@ -107,13 +110,10 @@ if __name__ == '__main__':
     parser.add_argument('providers_list_json', action="store")
     parser.add_argument('project_id', action="store")
     parser.add_argument('service_id', action="store")
-    parser.add_argument('service_obj_json', action="store")
 
     result = parser.parse_args()
     providers_list_json = result.providers_list_json
     project_id = result.project_id
     service_id = result.service_id
-    service_obj_json = result.service_obj_json
     LOG.logger.setLevel(logging.INFO)
-    service_create_worker(providers_list_json, project_id,
-                          service_id, service_obj_json)
+    service_create_worker(providers_list_json, project_id, service_id)

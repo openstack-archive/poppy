@@ -19,7 +19,7 @@ from poppy.model.helpers import provider_details
 def load_from_json(json_data):
     access_urls = json_data.get("access_urls")
     error_info = json_data.get("error_info", )
-    provider_service_id = json_data.get("provider_service_id")
+    provider_service_id = json_data.get("id")
     status = json_data.get("status")
     return provider_details.ProviderDetail(
         provider_service_id=provider_service_id,
