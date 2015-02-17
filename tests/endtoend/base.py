@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import BeautifulSoup
+from bs4 import BeautifulSoup
 from cafe.drivers.unittest import fixtures
 import requests
 
