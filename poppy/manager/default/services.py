@@ -112,8 +112,7 @@ class DefaultServicesController(base.ServicesController):
                     proxy_path,
                     script_path,
                     json.dumps(providers),
-                    project_id, service_id,
-                    json.dumps(service_obj.to_dict())]
+                    project_id, service_id]
         LOG.info('Starting create service subprocess: %s' % cmd_list)
         p = subprocess.Popen(cmd_list, env=os.environ.copy())
         p.communicate()
