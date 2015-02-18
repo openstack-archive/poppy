@@ -17,16 +17,51 @@ from poppy.manager import base
 
 JSON_HOME = {
     "resources": {
-        "rel/poppy": {
-            "href-template": "services{?marker,limit}",
+        "rel/services": {
+            "href-template": "/services{?marker,limit}",
             "href-vars": {
                 "marker": "param/marker",
                 "limit": "param/limit"
             },
             "hints": {
                 "allow": [
-                    "GET"
+                    "GET", "POST"
                 ],
+                "formats": {
+                    "application/json": {}
+                }
+            }
+        },
+        "rel/flavors": {
+            "href-template": "/flavors/{flavor_id}",
+            "href-vars": {
+                "marker": "param/flavor_id"
+            },
+            "hints": {
+                "allow": [
+                    "GET", "POST"
+                ],
+                "formats": {
+                    "application/json": {}
+                }
+            }
+        },
+        "rel/health": {
+            "href-template": "/health/{subsystem}",
+            "href-vars": {
+                "marker": "param/subsystem"
+            },
+            "hints": {
+                "allow": ["GET"],
+                "formats": {
+                    "application/json": {}
+                }
+            }
+        },
+        "rel/ping": {
+            "href-template": "/ping",
+            "hints": {
+                "allow": ["GET"],
                 "formats": {
                     "application/json": {}
                 }
