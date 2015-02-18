@@ -12,19 +12,54 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 
 from oslo.config import cfg
 
 from poppy import bootstrap
 from poppy.openstack.common import log
+from poppy.common import cli
 
 
 LOG = log.getLogger(__name__)
 
 
+@cli.runnable
 def run():
     conf = cfg.CONF
-    conf(project='poppy', prog='poppy', args=[])
+    conf(project='poppy', prog='poppy')
 
     b = bootstrap.Bootstrap(conf)
+
+    # The following code is to daemonize poppy-server to avoid
+    # an issue with wsgiref writing to stdout/stderr when we don't
+    # want it to.  This is specifically needed to allow poppy to
+    # run under devstack, but it may also be useful for other scenarios.
+    # Open /dev/zero and /dev/null for redirection.
+    # Daemonizing poppy-server is needed *just* when running under devstack
+    # and when poppy is invoked with `daemon` command line option.
+    if conf.daemon:
+        zerofd = os.open('/dev/zero', os.O_RDONLY)
+        nullfd = os.open('/dev/null', os.O_WRONLY)
+
+        # Close the stdthings and reassociate them with a non terminal
+        os.dup2(zerofd, 0)
+        os.dup2(nullfd, 1)
+        os.dup2(nullfd, 2)
+
+        # Detach process context, this requires 2 forks.
+        try:
+            pid = os.fork()
+            if pid > 0:
+                os._exit(0)
+        except OSError:
+            os._exit(1)
+
+        try:
+            pid = os.fork()
+            if pid > 0:
+                os._exit(0)
+        except OSError:
+            os._exit(2)
+
     b.distributed_task.services_controller.run_task_worker()
