@@ -1,16 +1,7 @@
 cassandra:
     build: ../cassandra/.
+    ports:
+     - "9160:9160"
+     - "9042:9042"
 mimic:
     build: ../mimic/.
-poppy:
-    build: ../../.
-    ports:
-        - "8888:8081"
-    volumes:
-        - ../../:/home/poppy
-        - /etc/localtime:/etc/localtime:ro
-    command:
-        - /root/start_poppy.sh
-    links:
-        - cassandra
-        - mimic
