@@ -28,7 +28,7 @@ from poppy.transport.pecan.models.request import (
 LOG = log.getLogger(__name__)
 
 conf = cfg.CONF
-conf(project='poppy', prog='poppy', args=[])
+conf(project='poppy', prog='poppy')
 
 
 class DeleteProviderServicesTask(task.Task):
@@ -67,7 +67,7 @@ class DeleteServiceDNSMappingTask(task.Task):
         for provider in provider_details:
             provider_details[provider] = (
                 req_provider_details.load_from_json(provider_details[provider])
-                )
+            )
 
         # delete associated cname records from DNS
         dns_responder = service_controller.dns_controller.delete(
@@ -92,7 +92,7 @@ class GatherProviderDetailsTask(task.Task):
         for provider in provider_details:
             provider_details[provider] = (
                 req_provider_details.load_from_json(provider_details[provider])
-                )
+            )
 
         for responder in responders:
             provider_name = list(responder.items())[0][0]

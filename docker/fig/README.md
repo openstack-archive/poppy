@@ -55,28 +55,15 @@ Building and Running the Poppy API Server w/Mimic (fig_mimic.yml)
 
 From this folder, run:
 
-    $ ./docker/fig/dev_mimic -f docker/fig/fig_local.yml up -d
+    $ fig -f docker/fig/fig_mimic.yml up -d
 
-This will bring up a poppy server with your local poppy repository mounted as a volume
-and will run it with any local changes. Cassandra and Mimic will also be started and
-wired together.
+This will set up a Cassandra Storage and Zookeeper Instance, using Mimic to mock the providers. 
 
-If you are running docker locally, you can then access the API at:
-
-    $ curl http://<docker_ip>/v1.0/
-
-If local changes are made, simply restart the services to run them:
-
-    $ ./docker/fig/dev_mimic restart
+Then just run `poppy-server` and `poppy-worker` locally and it will connect to the docker components.
 
 You can run the API tests against the poppy container according to the
 [API testing](https://github.com/stackforge/poppy/blob/master/tests/api/README.rst)
 documentation.
-
-Note that `dev_mimic` is a wrapper around [`fig`](http://www.fig.sh/cli.html) so
-any sub-commands that work with the fig CLI will work with `dev_mimic` as well.
-
-Note that `dev_mimic` does not run a repose container.
 
 
 Testing
@@ -84,4 +71,4 @@ Testing
 
 Access the running poppy api instance home document::
 
-    $ curl <docker_ip>/v1.0/
+    $ curl localhost/v1.0/

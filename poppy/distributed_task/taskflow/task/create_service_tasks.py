@@ -26,7 +26,7 @@ from poppy.openstack.common import log
 
 LOG = log.getLogger(__name__)
 conf = cfg.CONF
-conf(project='poppy', prog='poppy', args=[])
+conf(project='poppy', prog='poppy')
 
 
 class CreateProviderServicesTask(task.Task):
