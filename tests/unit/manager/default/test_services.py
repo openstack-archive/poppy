@@ -21,7 +21,6 @@ import mock
 from oslo.config import cfg
 
 from poppy.manager.default import driver
-from poppy.manager.default.service_async_workers import create_service_worker
 from poppy.manager.default.service_async_workers import purge_service_worker
 from poppy.manager.default import services
 from poppy.model import flavor
@@ -172,8 +171,6 @@ class DefaultManagerServiceTests(base.TestCase):
 
     @ddt.file_data('data_provider_details.json')
     def test_create_service_worker(self, provider_details_json):
-        service_obj = service.load_from_json(self.service_json)
-
         self.provider_details = {}
         for provider_name in provider_details_json:
             provider_detail_dict = json.loads(
@@ -240,14 +237,9 @@ class DefaultManagerServiceTests(base.TestCase):
                     )
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
-        providers_list = ['mock', 'cloudfront', 'fastly']
-        # worker process returns None
-        res = create_service_worker.service_create_worker(
-            json.dumps(providers_list),
-            self.project_id,
-            self.service_id,
-            json.dumps(service_obj.to_dict()))
-        self.assertTrue(res is None)
+
+        # ensure the manager calls the storage driver with the appropriate data
+        self.sc.storage_controller.create.assert_called_once()
 
     @ddt.file_data('service_update.json')
     def test_update(self, update_json):
