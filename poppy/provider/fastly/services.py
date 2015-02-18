@@ -32,13 +32,13 @@ class ServiceController(base.ServiceBase):
 
         self.driver = driver
 
-    def _create_new_service_version(self, service, service_obj):
+    def _create_new_service_version(self, service_id, service, service_obj):
         # Create a new version of the service.
-        service_version = self.client.create_version(service.id)
+        service_version = self.client.create_version(service_id)
 
         # Create the domain for this service
         for domain in service_obj.domains:
-            domain = self.client.create_domain(service.id,
+            domain = self.client.create_domain(service_id,
                                                service_version.number,
                                                domain.domain)
 
@@ -46,7 +46,7 @@ class ServiceController(base.ServiceBase):
         # For right now we fail the who create process.
         # But do we want to fail the whole service create ? probably not.
         # we need to carefully divise our try_catch here.
-        domain_checks = self.client.check_domains(service.id,
+        domain_checks = self.client.check_domains(service_id,
                                                   service_version.number)
         links = [{"href": '.'.join([domain_check.domain.name,
                                     "global.prod.fastly.net"]),
@@ -56,7 +56,7 @@ class ServiceController(base.ServiceBase):
 
         for origin in service_obj.origins:
             # Create the origins for this domain
-            self.client.create_backend(service.id,
+            self.client.create_backend(service_id,
                                        service_version.number,
                                        origin.origin.replace(":", "-"),
                                        origin.origin,
@@ -82,7 +82,7 @@ class ServiceController(base.ServiceBase):
                               % host_pattern_statement)
             # create a fastly condition for referer restriction
             request_condition = self.client.create_condition(
-                service.id,
+                service_id,
                 service_version.number,
                 'Referrer Restriction Matching Rules',
                 fastly.FastlyConditionType.REQUEST,
@@ -93,7 +93,7 @@ class ServiceController(base.ServiceBase):
             # any request that does not from a list of permitted
             # domains will be locked (getting a 403)
             self.client.create_response_object(
-                service.id,
+                service_id,
                 service_version.number,
                 'Referrer Restriction response rule(s)',
                 status='403',
@@ -104,7 +104,7 @@ class ServiceController(base.ServiceBase):
         # Fastly cachine rule implementation
         for caching_rule in service_obj.caching:
             if caching_rule.name.lower() == 'default':
-                self.client.update_settings(service.id,
+                self.client.update_settings(service_id,
                                             service_version.number,
                                             {'general.default_ttl':
                                              caching_rule.ttl
@@ -117,7 +117,7 @@ class ServiceController(base.ServiceBase):
                      for rule in caching_rule.rules])
                 # create a fastly condition for referer restriction
                 cachingrule_request_condition = self.client.create_condition(
-                    service.id,
+                    service_id,
                     service_version.number,
                     'CachingRules condition for %s' % caching_rule.name,
                     fastly.FastlyConditionType.CACHE,
@@ -126,7 +126,7 @@ class ServiceController(base.ServiceBase):
                 )
                 # create caching settings
                 self.client.create_cache_settings(
-                    service.id,
+                    service_id,
                     service_version.number,
                     caching_rule.name,
                     None,  # action field
@@ -136,10 +136,10 @@ class ServiceController(base.ServiceBase):
                 )
 
         # activate latest version of this fastly service
-        service_versions = self.client.list_versions(service.id)
+        service_versions = self.client.list_versions(service_id)
         latest_version_number = max([version.number
                                      for version in service_versions])
-        self.client.activate_version(service.id, latest_version_number)
+        self.client.activate_version(service_id, latest_version_number)
 
         return links
 
@@ -148,7 +148,9 @@ class ServiceController(base.ServiceBase):
             # Create a new service
             service = self.client.create_service(self.current_customer.id,
                                                  service_obj.name)
-            links = self._create_new_service_version(service, service_obj)
+            links = self._create_new_service_version(service.id,
+                                                     service,
+                                                     service_obj)
             return self.responder.created(service.id, links)
         except fastly.FastlyError as e:
             return self.responder.failed(str(e))
@@ -160,8 +162,11 @@ class ServiceController(base.ServiceBase):
                service_obj):
         try:
             service = self.client.get_service_details(provider_service_id)
-            links = self._create_new_service_version(service, service_obj)
-            return self.responder.updated(service.id, links)
+            links = self._create_new_service_version(
+                provider_service_id,
+                service,
+                service_obj)
+            return self.responder.updated(provider_service_id, links)
         except fastly.FastlyError as e:
             return self.responder.failed(str(e))
         except Exception as e:

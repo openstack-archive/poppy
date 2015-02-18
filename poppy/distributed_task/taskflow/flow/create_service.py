@@ -27,7 +27,7 @@ LOG = log.getLogger(__name__)
 
 
 conf = cfg.CONF
-conf(project='poppy', prog='poppy', args=[])
+conf(project='poppy', prog='poppy')
 
 
 def create_service():
