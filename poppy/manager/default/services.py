@@ -58,7 +58,7 @@ class DefaultServicesController(base.ServicesController):
                                        group=DNS_GROUP)
         self.dns_conf = self.driver.conf[DNS_GROUP]
         self.default_sleep_time = [0]
-        self.backoff = [(2**i) * 60 for i in range(0, self.dns_conf.retries)]
+        self.backoff = [(2**i) * 20 for i in range(0, self.dns_conf.retries)]
 
         self.time_seconds = self.default_sleep_time + self.backoff
 
