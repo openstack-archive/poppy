@@ -74,13 +74,16 @@ class DeleteServiceDNSMappingTask(task.Task):
             provider_details)
         for provider_name in dns_responder:
             if 'error' in dns_responder[provider_name].keys():
-                LOG.info('Deleting DNS for {0} failed!'.format(provider_name))
-                raise Exception('DNS Deletion Failed')
+                if 'DNS Exception'\
+                        in dns_responder[provider_name]['error_detail']:
+                    msg = 'Deleting DNS for {0} failed!'.format(provider_name)
+                    LOG.info(msg)
+                    raise Exception(msg)
 
         return dns_responder
 
     def revert(self, provider_details, retry_sleep_time, **kwargs):
-        LOG.info('Sleeping for {0} minutes and '
+        LOG.info('Sleeping for {0} seconds and '
                  'retrying'.format(retry_sleep_time))
 
 

@@ -65,17 +65,30 @@ class UpdateServiceDNSMappingTask(task.Task):
         bootstrap_obj = bootstrap.Bootstrap(conf)
         service_controller = bootstrap_obj.manager.services_controller
         dns = service_controller.dns_controller
+        service_obj_json = json.loads(service_obj)
+        service_obj = service.load_from_json(service_obj_json)
+        service_old_json = json.loads(service_old)
+        service_old = service.load_from_json(service_old_json)
         dns_responder = dns.update(service_old, service_obj, responders)
 
         for provider_name in dns_responder:
-            if 'error' in dns_responder[provider_name].keys():
-                LOG.info('Updating DNS for {0} failed!'.format(provider_name))
-                raise Exception('DNS Update Failed')
+            try:
+                if 'error' in dns_responder[provider_name].keys():
+                    if 'DNS Exception'\
+                            in dns_responder[provider_name]['error_detail']:
+                        msg = 'Update DNS for {0}' \
+                              'failed!'.format(provider_name)
+                        LOG.info(msg)
+                        raise Exception(msg)
+            except KeyError:
+                # NOTE(TheSriram): This means the provider updates failed, and
+                # just access_urls were returned
+                pass
 
         return dns_responder
 
     def revert(self, responders, retry_sleep_time, **kwargs):
-        LOG.info('Sleeping for {0} minutes and '
+        LOG.info('Sleeping for {0} seconds and '
                  'retrying'.format(retry_sleep_time))
 
 
