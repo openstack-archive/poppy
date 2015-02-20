@@ -74,13 +74,16 @@ class DeleteServiceDNSMappingTask(task.Task):
             provider_details)
         for provider_name in dns_responder:
             if 'error' in dns_responder[provider_name].keys():
-                LOG.info('Deleting DNS for {0} failed!'.format(provider_name))
-                raise Exception('DNS Deletion Failed')
+                if 'Rackspace DNS Exception'\
+                        in dns_responder[provider_name]['error_detail']:
+                    msg = 'Deleting DNS for {0} failed!'.format(provider_name)
+                    LOG.info(msg)
+                    raise Exception(msg)
 
         return dns_responder
 
     def revert(self, provider_details, retry_sleep_time, **kwargs):
-        LOG.info('Sleeping for {0} minutes and '
+        LOG.info('Sleeping for {0} seconds and '
                  'retrying'.format(retry_sleep_time))
 
 
@@ -124,3 +127,4 @@ class DeleteStorageServiceTask(task.Task):
         bootstrap_obj = bootstrap.Bootstrap(conf)
         service_controller = bootstrap_obj.manager.services_controller
         service_controller.storage_controller.delete(project_id, service_id)
+

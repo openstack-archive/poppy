@@ -191,8 +191,9 @@ class ServicesController(base.ServicesBase):
                     error_msg = (error_msg + 'Can not access subdomain . '
                                  'Exception: {0}'.format(e))
                 except Exception as e:
-                    LOG.error('Exception: {0}'.format(e))
-                    error_msg = error_msg + 'Exception: {0}'.format(e)
+                    LOG.error('Rackspace DNS Exception: {0}'.format(e))
+                    error_msg = error_msg + 'Rackspace DNS ' \
+                                            'Exception: {0}'.format(e)
             # format the error message for this provider
             if not error_msg:
                 dns_details[provider_name] = self.responder.deleted({})
@@ -401,3 +402,4 @@ class ServicesController(base.ServicesBase):
                 dns_details[provider_name] = {'access_urls': access_urls}
 
         return self.responder.updated(dns_details)
+
