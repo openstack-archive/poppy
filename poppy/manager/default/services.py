@@ -106,6 +106,13 @@ class DefaultServicesController(base.ServicesController):
         providers = [p.provider_id for p in flavor.providers]
         service_id = service_obj.service_id
 
+        # deal with shared ssl domains
+        for domain in service_obj.domains:
+            if domain.protocol == 'https' and domain.certificate == 'shared':
+                domain.domain = self._generate_shared_ssl_domain(
+                    domain.domain
+                )
+
         try:
             self.storage_controller.create(
                 project_id,
@@ -236,3 +243,8 @@ class DefaultServicesController(base.ServicesController):
             purge_service.purge_service, **kwargs)
 
         return
+
+    def _generate_shared_ssl_domain(self, domain_name):
+        shared_ssl_domain_suffix = (
+            self.dns_controller.generate_shared_ssl_domain_suffix())
+        return '.'.join([domain_name, shared_ssl_domain_suffix])

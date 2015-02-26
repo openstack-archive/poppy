@@ -93,6 +93,33 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'minLength': 3,
                                         'maxLength': 253,
                                         'pattern': re.compile(
+                                            '^[^\.]+$',
+                                            re.UNICODE
+                                        )
+                                    },
+                                    'protocol': {
+                                        'required': True,
+                                        'type': 'string',
+                                        'enum': [
+                                                'https', ]
+                                    },
+                                    'certificate': {
+                                        'required': True,
+                                        'type': 'string',
+                                        'enum': [
+                                                'shared']
+                                    },
+                                },
+                                "additionalProperties": False
+                            }, {
+                                'type': 'object',
+                                'properties': {
+                                    'domain': {
+                                        'type': 'string',
+                                        'required': True,
+                                        'minLength': 3,
+                                        'maxLength': 253,
+                                        'pattern': re.compile(
                                             '^(([^:/?#]+):)?'
                                             '(//([^/?#]*))?'
                                             '([^?#]*)(\?([^#]*))?'
