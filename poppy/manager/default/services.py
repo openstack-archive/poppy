@@ -236,3 +236,8 @@ class DefaultServicesController(base.ServicesController):
             purge_service.purge_service, **kwargs)
 
         return
+
+    def _generate_shared_ssl_domain(self, domain_name):
+        shared_ssl_domain_suffix = (
+            self.dns_controller.generate_shared_ssl_domain_suffix())
+        return '.'.join([domain_name, shared_ssl_domain_suffix])

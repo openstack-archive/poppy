@@ -113,6 +113,29 @@ class ServicesController(base.ServicesBase):
             return error_msg
         return
 
+    def _generate_sharded_domain_name(self, shard_prefix, num_shards, suffix):
+        """Generate a sharded domain name based on the scheme:
+
+        '{shard_prefix}{a random shard_id}.{suffix}'
+
+        :return A string of sharded domain name
+        """
+        # randomly select a shard
+        shard_id = random.randint(1, num_shards)
+        return '{0}{1}.{2}'.format(shard_prefix, shard_id, suffix)
+
+    def generate_shared_ssl_domain_suffix(self):
+        """Rackespace DNS secheme to generate a shared ssl domain suffix,
+
+        to be used with manager for shared ssl feature
+
+        :return A string of shared ssl domain name
+        """
+        return self._generate_sharded_domain_name(
+            self._driver.rackdns_conf.shared_ssl_shard_prefix,
+            self._driver.rackdns_conf.shared_ssl_num_shards,
+            self._driver.rackdns_conf.shared_ssl_domain_suffix)
+
     def create(self, responders):
         """Create CNAME record for a service.
 
