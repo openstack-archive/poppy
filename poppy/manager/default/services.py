@@ -123,6 +123,13 @@ class DefaultServicesController(base.ServicesController):
         providers = [p.provider_id for p in flavor.providers]
         service_id = service_obj.service_id
 
+        # deal with shared ssl domains
+        for domain in service_obj.domains:
+            if domain.protocol == 'https' and domain.certificate == 'shared':
+                domain.domain = self._generate_shared_ssl_domain(
+                    domain.domain
+                )
+
         try:
             self.storage_controller.create(
                 project_id,
@@ -161,6 +168,14 @@ class DefaultServicesController(base.ServicesController):
             raise errors.ServiceStatusNeitherDeployedNorFailed(
                 u'Service {0} neither deployed nor failed'.format(service_id))
 
+        # Fixing the operator_url domain for ssl
+        existing_shared_domains = {}
+        for domain in service_old.domains:
+            if domain.protocol == 'https' and domain.certificate == 'shared':
+                customer_domain = domain.domain.split('.')[0]
+                existing_shared_domains[customer_domain] = domain.domain
+                domain.domain = customer_domain
+
         service_old_json = json.loads(json.dumps(service_old.to_dict()))
 
         # remove fields that cannot be part of PATCH
@@ -184,6 +199,18 @@ class DefaultServicesController(base.ServicesController):
         # must be valid, carry on
         service_new_json['service_id'] = service_old.service_id
         service_new = service.Service.init_from_dict(service_new_json)
+
+        # fixing the old and new shared ssl domains in service_new
+        for domain in service_new.domains:
+            if domain.protocol == 'https' and domain.certificate == 'shared':
+                customer_domain = domain.domain.split('.')[0]
+                # if this domain is from service_old
+                if customer_domain in existing_shared_domains:
+                    domain.domain = existing_shared_domains[customer_domain]
+                else:
+                    domain.domain = self._generate_shared_ssl_domain(
+                        domain.domain
+                    )
 
         # set status in provider details to u'update_in_progress'
         provider_details = service_old.provider_details
@@ -253,3 +280,8 @@ class DefaultServicesController(base.ServicesController):
             purge_service.purge_service, **kwargs)
 
         return
+
+    def _generate_shared_ssl_domain(self, domain_name):
+        shared_ssl_domain_suffix = (
+            self.dns_controller.generate_shared_ssl_domain_suffix())
+        return '.'.join([domain_name, shared_ssl_domain_suffix])
