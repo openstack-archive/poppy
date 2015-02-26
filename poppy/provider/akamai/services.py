@@ -108,7 +108,8 @@ class ServiceController(base.ServiceBase):
                     raise RuntimeError(resp.text)
 
                 dp_obj = {'policy_name': dp,
-                          'protocol': classified_domain.protocol}
+                          'protocol': classified_domain.protocol,
+                          'certificate': classified_domain.certificate}
                 ids.append(dp_obj)
                 # TODO(tonytan4ever): leave empty links for now
                 # may need to work with dns integration
@@ -118,7 +119,8 @@ class ServiceController(base.ServiceBase):
                     classified_domain, dp)
                 links.append({'href': provider_access_url,
                               'rel': 'access_url',
-                              'domain': classified_domain.domain
+                              'domain': classified_domain.domain,
+                              'certificate': classified_domain.certificate
                               })
         except Exception:
             return self.responder.failed("failed to create service")
@@ -236,7 +238,8 @@ class ServiceController(base.ServiceBase):
                             data=json.dumps(policy_content),
                             headers=self.request_header)
                         dp_obj = {'policy_name': dp,
-                                  'protocol': classified_domain.protocol}
+                                  'protocol': classified_domain.protocol,
+                                  'certificate': classified_domain.certificate}
                         policies.remove(dp_obj)
                     else:
                         LOG.info('Start to create new policy %s' % dp)
@@ -262,7 +265,8 @@ class ServiceController(base.ServiceBase):
                         classified_domain, dp)
                     links.append({'href': provider_access_url,
                                   'rel': 'access_url',
-                                  'domain': dp
+                                  'domain': dp,
+                                  'certificate': classified_domain.certificate
                                   })
             except Exception:
                 return self.responder.failed("failed to update service")
@@ -352,7 +356,8 @@ class ServiceController(base.ServiceBase):
                     util.dict2obj(policy), policy['policy_name'])
                 links.append({'href': provider_access_url,
                               'rel': 'access_url',
-                              'domain': policy['policy_name']
+                              'domain': policy['policy_name'],
+                              'certificate': policy['certificate']
                               })
             ids = policies
         return self.responder.updated(json.dumps(ids), links)
