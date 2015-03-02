@@ -206,5 +206,15 @@
                    }
          }
     ],
+   "add_ssl_domain_origin": [
+        {
+         "op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com", "protocol": "https",
+                   "certificate": "shared"}},
+        {"op": "replace",
+         "path": "/origins/-",
+         "value": {"origin": "1.1.1.1", "port": "443", "ssl": true}}
+    ],
     "empty_list": []
 }
