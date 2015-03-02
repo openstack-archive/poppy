@@ -21,6 +21,7 @@ except ImportError:        # pragma: no cover
 from poppy.model import common
 
 VALID_STATUSES = [
+    u'create_in_progress',
     u'deploy_in_progress',
     u'deployed',
     u'update_in_progress',

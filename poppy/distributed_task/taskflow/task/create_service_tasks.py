@@ -52,7 +52,8 @@ class CreateProviderServicesTask(task.Task):
             LOG.info('Starting to create service from {0}'.format(provider))
             responder = service_controller.provider_wrapper.create(
                 service_controller._driver.providers[provider],
-                service_obj)
+                service_obj,
+                project_id)
             responders.append(responder)
             LOG.info('Create service from {0} complete...'.format(provider))
 

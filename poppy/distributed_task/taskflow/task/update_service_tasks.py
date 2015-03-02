@@ -35,7 +35,7 @@ conf(project='poppy', prog='poppy', args=[])
 class UpdateProviderServicesTask(task.Task):
     default_provides = "responders"
 
-    def execute(self, service_old, service_obj):
+    def execute(self, service_old, service_obj, project_id):
         service_controller = memoized_controllers.task_controllers('poppy')
 
         service_old_json = json.loads(service_old)
@@ -50,7 +50,7 @@ class UpdateProviderServicesTask(task.Task):
             LOG.info(u'Starting to update service from {0}'.format(provider))
             responder = service_controller.provider_wrapper.update(
                 service_controller._driver.providers[provider.lower()],
-                service_old.provider_details, service_obj)
+                service_old.provider_details, service_obj, project_id)
             responders.append(responder)
             LOG.info(u'Updating service from {0} complete'.format(provider))
 
@@ -116,7 +116,6 @@ class GatherProviderDetailsTask(task.Task):
 
     def execute(self, responders, dns_responder, log_responders, project_id,
                 service_id, service_obj):
-
         service_controller, self.storage_controller = \
             memoized_controllers.task_controllers('poppy', 'storage')
         service_obj_json = json.loads(service_obj)
@@ -191,7 +190,6 @@ class UpdateProviderDetailsTask_Errors(task.Task):
 
     def execute(self, provider_details_dict_error_tuple, project_id,
                 service_id, service_old, service_obj):
-
         (provider_details_dict, error_flag) = provider_details_dict_error_tuple
         service_controller, self.storage_controller = \
             memoized_controllers.task_controllers('poppy', 'storage')
@@ -224,7 +222,25 @@ class UpdateProviderDetailsTask_Errors(task.Task):
             service_obj.provider_details = provider_details_dict
 
         # update the service object
+
         self.storage_controller.update(project_id, service_id, service_obj)
+
+        self.storage_controller._driver.close_connection()
+        # If there's new SAN domain or domain's certificate type has changed
+        # we need to enque the service id to trigger background SAN Cert jobs
+        # Only at this time we could enqueue because the only after the
+        # service has been successfully patched, the service object has the new
+        # domain information in it
+        # old_domains = set([(domain.domain, domain.certificate) for domain
+        #                   in service_old.domains
+        #                   if domain.certificate is not None])
+        # new_domains = set([(domain.domain, domain.certificate) for domain
+        #                   in service_obj.domains
+        #                   if domain.certificate is not None])
+        #
+        # added_domains = new_domains.difference(old_domains)
+        # removed_domains = old_domains.difference(new_domains)
+
         LOG.info('Update provider detail service worker process complete...')
 
     def revert(self, *args, **kwargs):

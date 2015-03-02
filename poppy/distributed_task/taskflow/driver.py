@@ -13,17 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
 from oslo.config import cfg
 from taskflow.jobs import backends as job_backends
 from taskflow.persistence import backends as persistence_backends
 
 from poppy.distributed_task import base
 from poppy.distributed_task.taskflow import controllers
+from poppy.openstack.common import log
 
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger(__name__)
 
 TASKFLOW_OPTIONS = [
     cfg.StrOpt('jobboard_backend_type', default='zookeeper',
@@ -33,11 +32,11 @@ TASKFLOW_OPTIONS = [
     cfg.ListOpt('jobboard_backend_host', default=['localhost'],
                 help='default jobboard backend server host'),
     cfg.IntOpt('jobboard_backend_port', default=2181, help='default'
-               ' jobboard backend server port (e.g: ampq)'),
+               ' jobboard backend server port (e.g: 2181)'),
     cfg.ListOpt('persistent_backend_host', default=['localhost'],
                 help='default persistent backend server host'),
     cfg.IntOpt('persistent_backend_port', default=2181, help='default'
-               ' default persistent backend server port (e.g: ampq)'),
+               ' default persistent backend server port (e.g: 2181)'),
 ]
 
 TASKFLOW_GROUP = 'drivers:distributed_task:taskflow'
