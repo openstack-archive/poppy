@@ -40,6 +40,7 @@ class TestServices(base.TestCase):
         self.driver = mock_driver()
         self.driver.akamai_https_access_url_suffix = str(uuid.uuid1())
         self.controller = services.ServiceController(self.driver)
+        self.project_id = str(uuid.uuid1())
 
     @ddt.file_data('domains_list.json')
     def test_classify_domains(self, domains_list):
@@ -56,7 +57,7 @@ class TestServices(base.TestCase):
 
         self.controller.policy_api_client.put.side_effect = (
             RuntimeError('Creating service failed.'))
-        resp = self.controller.create(service_obj)
+        resp = self.controller.create(service_obj, self.project_id)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_service.json')
@@ -68,7 +69,7 @@ class TestServices(base.TestCase):
             status_code=400,
             text='Some create service error happened'
         )
-        resp = self.controller.create(service_obj)
+        resp = self.controller.create(service_obj, self.project_id)
 
         self.assertIn('error', resp[self.driver.provider_name])
 
@@ -79,7 +80,8 @@ class TestServices(base.TestCase):
             status_code=200,
             text='Put successful'
         )
-        provider_responses = self.controller.create(service_obj)
+        provider_responses = self.controller.create(service_obj,
+                                                    self.project_id)
         for provider_name in provider_responses:
             provider_response = provider_responses[provider_name]
             num_of_domains = len(service_obj.domains)
@@ -96,7 +98,7 @@ class TestServices(base.TestCase):
             status_code=200,
             text='Put successful'
         )
-        self.controller.create(service_obj)
+        self.controller.create(service_obj, self.project_id)
         self.controller.policy_api_client.put.assert_called_once()
 
     def test_delete_with_exception(self):
@@ -158,7 +160,7 @@ class TestServices(base.TestCase):
         )
         service_obj = service.load_from_json(service_json)
         resp = controller.update(
-            provider_service_id, service_obj)
+            provider_service_id, service_obj, self.project_id)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_update_service.json')
@@ -167,7 +169,7 @@ class TestServices(base.TestCase):
         provider_service_id = None
         service_obj = service.load_from_json(service_json)
         resp = self.controller.update(
-            provider_service_id, service_obj)
+            provider_service_id, service_obj, self.project_id)
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_update_service.json')
@@ -190,7 +192,7 @@ class TestServices(base.TestCase):
         )
         service_obj = service.load_from_json(service_json)
         resp = controller.update(
-            provider_service_id, service_obj)
+            provider_service_id, service_obj, self.project_id)
         self.assertIn('id', resp[self.driver.provider_name])
 
     @ddt.file_data('data_update_service.json')
@@ -213,7 +215,7 @@ class TestServices(base.TestCase):
         )
         service_obj = service.load_from_json(service_json)
         resp = controller.update(
-            provider_service_id, service_obj)
+            provider_service_id, service_obj, self.project_id)
         self.assertIn('id', resp[self.driver.provider_name])
 
     @ddt.file_data('data_upsert_service.json')
@@ -232,7 +234,7 @@ class TestServices(base.TestCase):
         )
         service_obj = service.load_from_json(service_json)
         resp = controller.update(
-            provider_service_id, service_obj)
+            provider_service_id, service_obj, self.project_id)
         self.assertIn('id', resp[self.driver.provider_name])
 
     def test_purge_all(self):

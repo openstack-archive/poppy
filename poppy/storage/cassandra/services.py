@@ -588,7 +588,8 @@ class ServicesController(base.ServicesController):
                         'rules', [])]) for o in origins]
 
         domains = [domain.Domain(d['domain'], d.get('protocol', 'http'),
-                                 d.get('certificate', None))
+                                 d.get('certificate', None),
+                                 d.get('domain_info', None))
                    for d in domains]
 
         restrictions = [restriction.Restriction(

@@ -112,9 +112,101 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'required': True,
                                         'type': 'string',
                                         'enum': [
-                                                'san',
+                                                'san']
+                                    },
+                                },
+                                "additionalProperties": False
+                            }, {
+                                'type': 'object',
+                                'properties': {
+                                    'domain': {
+                                        'type': 'string',
+                                        'required': True,
+                                        'minLength': 3,
+                                        'maxLength': 253
+                                    },
+                                    'protocol': {
+                                        'required': True,
+                                        'type': 'string',
+                                        'enum': [
+                                                'https']
+                                    },
+                                    'certificate': {
+                                        'required': True,
+                                        'type': 'string',
+                                        'enum': [
                                                 'custom']
                                     },
+                                    'domain_info': {
+                                        'required': True,
+                                        'type': 'object',
+                                        'properties': {
+                                            'registra-country': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'registra-state': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'registra-city': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'registra-orgainzation': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'registra-industry': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'organization-name': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'organization-address': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'organization-city': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'organization-region': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'organization-postal-code': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'organization-country': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'organization-phone': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'admin-contact-first-name': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'admin-contact-last-name': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'admin-contact-phone': {
+                                                'required': True,
+                                                'type': 'string'
+                                            },
+                                            'admin-contact-email': {
+                                                'required': True,
+                                                'type': 'string'
+                                            }
+                                        }
+                                    }
                                 },
                                 "additionalProperties": False
                             }]
