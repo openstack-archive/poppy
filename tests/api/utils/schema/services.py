@@ -17,8 +17,21 @@
 domain = {
     'type': 'object',
     'properties': {
-        'domain': {'type': 'string', 'format': 'uri'}},
-    'required': ['domain']
+        'domain': {'type': 'string', 'format': 'uri'},
+        'protocol': {'type': 'string', 'enum': ['http']}},
+    'required': ['domain'],
+    'additionalProperties': False
+}
+
+domain_https = {
+    'type': 'object',
+    'properties': {
+        'domain': {'type': 'string', 'format': 'uri'},
+        'protocol': {'type': 'string', 'enum': ['https']},
+        'certificate':
+            {'type': 'string', 'enum': ['shared', 'san', 'custom']}},
+    'required': ['domain', 'protocol', 'certificate'],
+    'additionalProperties': False
 }
 
 origin = {
@@ -32,7 +45,7 @@ origin = {
         'ssl': {'type': 'boolean'},
         'rules': {'type': 'array'}},
     'required': ['origin', 'port', 'ssl'],
-    'additionalProperties': False,
+    'additionalProperties': False
 }
 
 cache = {'type': 'object',
@@ -70,7 +83,7 @@ get_service = {
         'id': service_id,
         'name': service_name,
         'domains': {'type': 'array',
-                    'items': domain,
+                    'items': {'anyOf': [domain, domain_https]},
                     'minItems': 1
                     },
         'origins': {'type': 'array',
