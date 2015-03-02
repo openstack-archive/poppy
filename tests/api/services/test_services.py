@@ -40,6 +40,7 @@ class TestCreateService(providers.TestProviderBase):
         self.service_name = str(uuid.uuid1())
         self.flavor_id = self.test_flavor
 
+
     @attrib.attr('smoke')
     @ddt.file_data('data_create_service.json')
     def test_create_service_positive(self, test_data):
@@ -112,6 +113,35 @@ class TestCreateService(providers.TestProviderBase):
                         format(provider, self.service_name))
 
     @attrib.attr('smoke')
+    @ddt.file_data('data_create_service_ssl_domain.json')
+    def test_create_service_ssl_domain_positive(self, test_data):
+        if self.test_config.run_ssl_tests is False:
+            self.skipTest(
+                'SSL tests are currently disabled in configuration')
+
+        domain_list = test_data['domain_list']
+        for item in domain_list:
+            item['domain'] = str(uuid.uuid1()) + '.com'
+        origin_list = test_data['origin_list']
+        caching_list = test_data['caching_list']
+        flavor_id = self.flavor_id
+
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=domain_list,
+                                          origin_list=origin_list,
+                                          caching_list=caching_list,
+                                          flavor_id=flavor_id)
+        self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.text, '')
+        self.service_url = resp.headers['location']
+
+        resp = self.client.get_service(location=self.service_url)
+        self.assertEqual(resp.status_code, 200)
+
+        status = resp.json()['status']
+        self.assertEqual(status, 'create_in_progress')
+
+    @attrib.attr('smoke')
     @ddt.file_data('data_create_service_negative.json')
     def test_create_service_negative(self, test_data):
 
@@ -139,15 +169,6 @@ class TestCreateService(providers.TestProviderBase):
             self.service_url = resp.headers['location']
 
         self.assertEqual(resp.status_code, 400)
-
-    def tearDown(self):
-        if self.service_url != '':
-            self.client.delete_service(location=self.service_url)
-
-        if self.test_config.generate_flavors:
-            self.client.delete_flavor(flavor_id=self.flavor_id)
-
-        super(TestCreateService, self).tearDown()
 
     @ddt.file_data("data_create_service_xss.json")
     def test_create_service_with_xss_injection(self, test_data):
@@ -220,6 +241,15 @@ class TestCreateService(providers.TestProviderBase):
                         body['caching'][1]['rules'][0]['request_url'],
                         cgi.escape(caching_list[1]['rules'][0]['request_url'])
                     )
+
+    def tearDown(self):
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
+
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
+
+        super(TestCreateService, self).tearDown()
 
 
 @ddt.ddt
@@ -495,6 +525,11 @@ class TestServicePatch(base.TestBase):
 
         domain = str(uuid.uuid1()) + '.com'
         self.domain_list = [{"domain": domain, "protocol": "http"}]
+
+        ssl_domain_name = self.generate_random_string("prefix=ssl") + '.com'
+        ssl_domain = {"domain": ssl_domain_name, 'protocol': 'https',
+                      'certificate': 'san'}
+        self.domain_list.append(ssl_domain)
 
         origin = str(uuid.uuid1()) + '.com'
         self.origin_list = [{"origin": origin,
