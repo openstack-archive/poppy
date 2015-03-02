@@ -66,7 +66,18 @@ AKAMAI_OPTIONS = [
         help='Akamai configuration number for http policies'),
     cfg.StrOpt(
         'akamai_https_config_number',
-        help='Akamai configuration number for https policies'),
+        help='Akamai configuration number for https policies'
+    ),
+    # related info for SPS && PAPI APIs
+    cfg.StrOpt(
+        'contract_id',
+        help='Operator contractID'),
+    cfg.StrOpt(
+        'group_id',
+        help='Operator groupID'),
+    cfg.StrOpt(
+        'property_id',
+        help='Operator propertyID')
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
@@ -88,6 +99,22 @@ class CDNProvider(base.Driver):
         self.akamai_ccu_api_base_url = ''.join([
             str(self.akamai_conf.ccu_api_base_url),
             'ccu/v2/queues/default'
+        ])
+        self.akamai_sps_api_base_url = ''.join([
+            str(self.akamai_conf.policy_api_base_url),
+            'config-secure-provisioning-service/v1'
+            '/sps-requests/{spsId}?contractId=%s&groupId=%s' % (
+                self.akamai_conf.contract_id,
+                self.akamai_conf.group_id
+            )
+        ])
+        self.akamai_papi_api_base_url = ''.join([
+            str(self.akamai_conf.policy_api_base_url),
+            'papi/v0/{middle_part}/'
+            '?contractId=%s&groupId=%s' % (
+                self.akamai_conf.contract_id,
+                self.akamai_conf.group_id
+            )
         ])
 
         self.http_conf_number = self.akamai_conf.akamai_http_config_number
@@ -111,6 +138,9 @@ class CDNProvider(base.Driver):
             client_secret=self.akamai_conf.ccu_api_client_secret,
             access_token=self.akamai_conf.ccu_api_access_token
         )
+
+        self.akamai_sps_api_client = self.akamai_policy_api_client
+        self.akamai_papi_api_client = self.akamai_policy_api_client
 
     def is_alive(self):
 
@@ -142,6 +172,14 @@ class CDNProvider(base.Driver):
     @property
     def ccu_api_client(self):
         return self.akamai_ccu_api_client
+
+    @property
+    def sps_api_client(self):
+        return self.akamai_sps_api_client
+
+    @property
+    def papi_api_client(self):
+        return self.akamai_papi_api_client
 
     @property
     def service_controller(self):
