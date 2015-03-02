@@ -166,5 +166,12 @@
         {"op": "replace",
          "path": "/log_delivery/enabled",
          "value": "not a boolean"}
+    ],
+   "add_ssl_domain": [
+        {
+         "op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com", "protocol": "https",
+                   "certificate": "shared"}}
     ]
 }
