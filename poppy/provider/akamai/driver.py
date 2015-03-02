@@ -18,9 +18,12 @@
 import json
 
 from akamai import edgegrid
+from kazoo import client
+from kazoo.recipe import queue
 from oslo.config import cfg
 import requests
 
+from poppy.common import decorators
 from poppy.provider.akamai import controllers
 from poppy.provider import base
 
@@ -65,19 +68,56 @@ AKAMAI_OPTIONS = [
         'akamai_http_config_number',
         help='Akamai configuration number for http policies'),
     cfg.StrOpt(
-        'akamai_https_config_number',
-        help='Akamai configuration number for https policies'
+        'akamai_https_shared_config_number',
+        help='Akamai configuration number for shared wildcard https policies'
+    ),
+    cfg.ListOpt(
+        'akamai_https_san_config_numbers',
+        help='A list of Akamai configuration number for '
+             'SAN cert https policies'
+    ),
+    cfg.ListOpt(
+        'akamai_https_custom_config_numbers',
+        help='A list of Akamai configuration number for '
+             'Custom cert https policies'
     ),
 
     # SANCERT related configs
-    cfg.ListOpt('san_cert_cnames',
-                help='A list of san certs cnamehost names'),
     cfg.IntOpt('san_cert_hostname_limit', default=80,
                help='default limit on how many hostnames can'
                ' be held by a SAN cert'),
+    # related info for SPS && PAPI APIs
+    cfg.StrOpt(
+        'contract_id',
+        help='Operator contractID'),
+    cfg.StrOpt(
+        'group_id',
+        help='Operator groupID'),
+    cfg.StrOpt(
+        'property_id',
+        help='Operator propertyID'),
+    # queue backend configs for long running tasks
+    cfg.StrOpt(
+        'queue_backend_type',
+        help='SAN Cert Queueing backend'),
+    cfg.ListOpt('queue_backend_host', default=['localhost'],
+                help='default queue backend server hosts'),
+    cfg.IntOpt('queue_backend_port', default=2181, help='default'
+               ' default queue backend server port (e.g: 2181)'),
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
+
+
+def connect_to_zookeeper(conf):
+    """Connect to a zookeeper cluster"""
+    queue_backend_hosts = ','.join(['%s:%s' % (
+        host, conf.queue_backend_port)
+        for host in
+        conf.queue_backend_host])
+    zk_client = client.KazooClient(queue_backend_hosts)
+    zk_client.start()
+    return zk_client
 
 
 class CDNProvider(base.Driver):
@@ -97,9 +137,31 @@ class CDNProvider(base.Driver):
             str(self.akamai_conf.ccu_api_base_url),
             'ccu/v2/queues/default'
         ])
+        self.akamai_sps_api_base_url = ''.join([
+            str(self.akamai_conf.policy_api_base_url),
+            'config-secure-provisioning-service/v1'
+            '/sps-requests/{spsId}?contractId=%s&groupId=%s' % (
+                self.akamai_conf.contract_id,
+                self.akamai_conf.group_id
+            )
+        ])
+        self.akamai_papi_api_base_url = ''.join([
+            str(self.akamai_conf.policy_api_base_url),
+            'papi/v0/{middle_part}/'
+            '?contractId=ctr_%s&groupId=grp_%s' % (
+                self.akamai_conf.contract_id,
+                self.akamai_conf.group_id
+            )
+        ])
 
         self.http_conf_number = self.akamai_conf.akamai_http_config_number
-        self.https_conf_number = self.akamai_conf.akamai_https_config_number
+
+        self.https_shared_conf_number = (
+            self.akamai_conf.akamai_https_shared_config_number)
+        self.https_san_conf_number = (
+            self.akamai_conf.akamai_https_san_config_numbers[-1])
+        self.https_custom_conf_number = (
+            self.akamai_conf.akamai_https_custom_config_numbers[-1])
 
         self.akamai_access_url_link = self.akamai_conf.akamai_access_url_link
         self.akamai_https_access_url_suffix = (
@@ -120,8 +182,20 @@ class CDNProvider(base.Driver):
             access_token=self.akamai_conf.ccu_api_access_token
         )
 
-        self.san_cert_cnames = self.akamai_conf.san_cert_cnames
         self.san_cert_hostname_limit = self.akamai_conf.san_cert_hostname_limit
+        self.akamai_sps_api_client = self.akamai_policy_api_client
+        self.akamai_papi_api_client = self.akamai_policy_api_client
+
+        # Different queues for long running tasks
+        self.san_cert_add_job_backend = queue.LockingQueue(
+            self.zk_client,
+            '/san_cert_add')
+        self.papi_job_update_job_backend = queue.LockingQueue(
+            self.zk_client,
+            '/papi_jobs')
+        self.status_checking_job_backend = queue.LockingQueue(
+            self.zk_client,
+            '/status_checking')
 
     def is_alive(self):
 
@@ -145,6 +219,10 @@ class CDNProvider(base.Driver):
     @property
     def provider_name(self):
         return "Akamai"
+
+    @decorators.lazy_property(write=False)
+    def zk_client(self):
+        return connect_to_zookeeper(self.akamai_conf)
 
     @property
     def policy_api_client(self):

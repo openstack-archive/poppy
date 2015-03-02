@@ -29,7 +29,8 @@ from poppy.model import common
 class Domain(common.DictSerializableModel):
 
     def __init__(self, domain, protocol='http',
-                 certificate=None):
+                 certificate=None,
+                 domain_info=None):
         self._domain = domain.lower()
 
         if (protocol in AVAILABLE_PROTOCOLS):
@@ -52,6 +53,9 @@ class Domain(common.DictSerializableModel):
                         certificate,
                         CERTIFICATE_OPTIONS)
                 )
+
+            if self._certificate == 'custom':
+                self._domain_info = domain_info
 
     @property
     def domain(self):
@@ -90,6 +94,22 @@ class Domain(common.DictSerializableModel):
         self._certificate = value
 
     @property
+    def domain_info(self):
+        """certificate option.
+
+        :returns certificate
+        """
+        return self._domain_info
+
+    @domain_info.setter
+    def domain_info(self, value):
+        """certificate option.
+
+        :returns certificate
+        """
+        self._domain_info = value
+
+    @property
     def protocol(self):
         return self._protocol
 
@@ -119,4 +139,6 @@ class Domain(common.DictSerializableModel):
         o.protocol = dict_obj.get("protocol", "http")
         if o.protocol == 'https':
             o.certificate = dict_obj.get("certificate", None)
+            if o.certificate == 'custom':
+                o.domain_info = dict_obj.get('domain_info')
         return o
