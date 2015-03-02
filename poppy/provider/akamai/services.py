@@ -35,12 +35,22 @@ class ServiceController(base.ServiceBase):
     def ccu_api_client(self):
         return self.driver.ccu_api_client
 
+    @property
+    def sps_api_client(self):
+        return self.driver.akamai_sps_api_client
+
+    @property
+    def papi_api_client(self):
+        return self.driver.akamai_papi_api_client
+
     def __init__(self, driver):
         super(ServiceController, self).__init__(driver)
 
         self.driver = driver
         self.policy_api_base_url = self.driver.akamai_policy_api_base_url
         self.ccu_api_base_url = self.driver.akamai_ccu_api_base_url
+        self.sps_api_base_url = self.driver.akamai_sps_api_base_url
+        self.papi_api_base_url = self.driver.akamai_papi_api_base_url
         self.request_header = {'Content-type': 'application/json',
                                'Accept': 'text/plain'}
 
