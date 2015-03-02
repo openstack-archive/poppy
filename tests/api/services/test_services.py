@@ -112,6 +112,46 @@ class TestCreateService(providers.TestProviderBase):
                         format(provider, self.service_name))
 
     @attrib.attr('smoke')
+    @ddt.file_data('data_create_service_ssl_domain.json')
+    def test_create_service_ssl_domain_positive(self, test_data):
+        if self.test_config.run_ssl_tests is False:
+            self.skipTest(
+                'SSL tests are currently disabled in configuration')
+
+        domain_list = test_data['domain_list']
+        for item in domain_list:
+            item['domain'] = str(uuid.uuid1())
+        origin_list = test_data['origin_list']
+        caching_list = test_data['caching_list']
+        flavor_id = self.flavor_id
+
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=domain_list,
+                                          origin_list=origin_list,
+                                          caching_list=caching_list,
+                                          flavor_id=flavor_id)
+        self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.text, '')
+        self.service_url = resp.headers['location']
+
+        resp = self.client.get_service(location=self.service_url)
+        self.assertEqual(resp.status_code, 200)
+
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        resp = self.client.get_service(location=self.service_url)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        status = body['status']
+        self.assertEqual(status, 'deployed')
+
+    @attrib.attr('smoke')
     @ddt.file_data('data_create_service_negative.json')
     def test_create_service_negative(self, test_data):
 
@@ -139,15 +179,6 @@ class TestCreateService(providers.TestProviderBase):
             self.service_url = resp.headers['location']
 
         self.assertEqual(resp.status_code, 400)
-
-    def tearDown(self):
-        if self.service_url != '':
-            self.client.delete_service(location=self.service_url)
-
-        if self.test_config.generate_flavors:
-            self.client.delete_flavor(flavor_id=self.flavor_id)
-
-        super(TestCreateService, self).tearDown()
 
     @ddt.file_data("data_create_service_xss.json")
     def test_create_service_with_xss_injection(self, test_data):
@@ -220,6 +251,15 @@ class TestCreateService(providers.TestProviderBase):
                         body['caching'][1]['rules'][0]['request_url'],
                         cgi.escape(caching_list[1]['rules'][0]['request_url'])
                     )
+
+    def tearDown(self):
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
+
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
+
+        super(TestCreateService, self).tearDown()
 
 
 @ddt.ddt
@@ -557,6 +597,14 @@ class TestServicePatch(base.TestBase):
         self.assertEqual(actual_response['flavor_id'],
                          expected_response['flavor_id'])
 
+    def _replace_domain(self, domain):
+        if ('protocol' in domain):
+            if domain['protocol'] == 'https':
+                if (domain['certificate'] == u'shared'):
+                    return str(uuid.uuid1())
+
+        return str(uuid.uuid1()) + '.com'
+
     @ddt.file_data('data_patch_service.json')
     def test_patch_service(self, test_data):
 
@@ -566,9 +614,13 @@ class TestServicePatch(base.TestBase):
 
             if ('domain' in item['path']) and ('value' in item):
                 if isinstance(item['value'], (list)):
-                    item['value'][0]['domain'] = str(uuid.uuid1()) + '.com'
+                    # item['value'][0]['domain'] = str(uuid.uuid1()) + '.com'
+                    item['value'][0]['domain'] = self._replace_domain(
+                        domain=item['value'][0])
                 else:
-                    item['value']['domain'] = str(uuid.uuid1()) + '.com'
+                    item['value']['domain'] = self._replace_domain(
+                        domain=item['value'])
+                    # item['value']['domain'] = str(uuid.uuid1()) + '.com'
 
         patch = jsonpatch.JsonPatch(test_data)
         expected_service_details = patch.apply(self.original_service_details)

@@ -161,5 +161,12 @@
                     "rules": [{"name": "rule1", "referrer": "ab"}]
                    }
          }
+    ],
+   "add_ssl_domain": [
+        {
+         "op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "replaceme.com", "protocol": "https",
+                   "certificate": "shared"}}
     ]
 }
