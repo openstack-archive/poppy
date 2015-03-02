@@ -1,0 +1,60 @@
+{
+    "domain_san_ssl": {
+        "name": "domain_san_ssl",
+        "domain_list": [{"domain": "sansslwebsite.com",
+                         "protocol": "https",
+                         "certificate": "san"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": true}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+         "restrictions_list": [
+                        {"name": "test",
+                        "rules": [{"name": "only me",
+                        "referrer": "www.mywebsite.com"}]}
+        ]
+    },
+    "domain_custom_ssl": {
+        "name": "domain_san_ssl",
+        "domain_list": [{"domain": "customsslwebsite.com",
+                         "protocol": "https",
+                         "certificate": "custom"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": true}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+         "restrictions_list": [
+                        {"name": "test",
+                        "rules": [{"name": "only me",
+                        "referrer": "www.mywebsite.com"}]}
+        ]
+    },
+    "domain_shared_ssl": {
+        "name": "domain_shared_ssl",
+        "domain_list": [{"domain": "sharedsslwebsite",
+                         "protocol": "https",
+                         "certificate": "shared"}
+                        ],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": true}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+         "restrictions_list": [
+                        {"name": "test",
+                        "rules": [{"name": "only me",
+                        "referrer": "www.mywebsite.com"}]}
+        ]
+    }
+}

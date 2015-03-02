@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import random
+import string
 import uuid
 
 from cafe.drivers.unittest import fixtures
@@ -73,6 +75,14 @@ class TestBase(fixtures.BaseTestFixture):
                 alt_project_id,
                 serialize_format='json',
                 deserialize_format='json')
+
+    def generate_random_string(self, prefix='API-Tests', length=12):
+        """Generates a random string of given prefix & length"""
+        random_string = ''.join(random.choice(
+            string.ascii_uppercase + string.ascii_uppercase + string.digits)
+            for _ in range(length))
+        random_string = prefix + random_string
+        return random_string
 
     def assertSchema(self, response_json, expected_schema):
         """Verify response schema aligns with the expected schema."""
