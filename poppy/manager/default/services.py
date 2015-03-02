@@ -176,6 +176,7 @@ class DefaultServicesController(base.ServicesController):
             raise e
 
         providers = [p.provider_id for p in flavor.providers]
+
         kwargs = {
             'providers_list_json': json.dumps(providers),
             'project_id': project_id,

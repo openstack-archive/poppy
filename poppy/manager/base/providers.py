@@ -19,7 +19,7 @@ from poppy.common import errors
 class ProviderWrapper(object):
     """"ProviderWrapper class."""
 
-    def create(self, ext, service_obj):
+    def create(self, ext, service_obj, project_id):
         """Create a provider
 
         :param ext
@@ -27,9 +27,9 @@ class ProviderWrapper(object):
         :returns: ext.obj.service_controller.create(service_obj)
         """
 
-        return ext.obj.service_controller.create(service_obj)
+        return ext.obj.service_controller.create(service_obj, project_id)
 
-    def update(self, ext, provider_details, service_obj):
+    def update(self, ext, provider_details, service_obj, project_id):
         """Update a provider
 
         :param ext
@@ -47,7 +47,7 @@ class ProviderWrapper(object):
                 "Perhaps service has not been created")
         provider_service_id = provider_detail.provider_service_id
         return ext.obj.service_controller.update(
-            provider_service_id, service_obj)
+            provider_service_id, service_obj, project_id)
 
     def delete(self, ext, provider_details):
         try:

@@ -45,7 +45,7 @@ class TestDomain(base.TestCase):
         mydomain.domain = changed_domain_name
         self.assertEqual(mydomain.domain, changed_domain_name.lower())
         try:
-            mydomain.certificate = 'SAN'
+            mydomain.certificate = 'san'
         except ValueError:
             self.assertTrue(True)
 

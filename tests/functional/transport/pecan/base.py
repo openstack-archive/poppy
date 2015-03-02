@@ -36,6 +36,11 @@ class BaseFunctionalTest(base.TestCase):
         cfg.CONF(args=[], default_config_files=[conf_path])
         b_obj = bootstrap.Bootstrap(cfg.CONF)
         # mock the persistence part for taskflow distributed_task
+        zookeeper_client_patcher = mock.patch(
+            'kazoo.client.KazooClient'
+        )
+        zookeeper_client_patcher.start()
+        self.addCleanup(zookeeper_client_patcher.stop)
         mock_persistence = mock.Mock()
         mock_persistence.__enter__ = mock.Mock()
         mock_persistence.__exit__ = mock.Mock()
