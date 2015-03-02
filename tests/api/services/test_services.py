@@ -489,6 +489,11 @@ class TestServicePatch(base.TestBase):
         domain = str(uuid.uuid1()) + '.com'
         self.domain_list = [{"domain": domain, "protocol": "http"}]
 
+        ssl_domain_name = self.generate_random_string("prefix=ssl") + '.com'
+        ssl_domain = {"domain": ssl_domain_name, 'protocol': 'https',
+                      'certificate': 'san'}
+        self.domain_list.append(ssl_domain)
+
         origin = str(uuid.uuid1()) + '.com'
         self.origin_list = [{"origin": origin,
                              "port": 80, "ssl": False, "rules": []}]
