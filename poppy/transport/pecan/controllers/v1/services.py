@@ -170,6 +170,8 @@ class ServicesController(base.Controller, hooks.HookController):
             pecan.abort(400, detail=str(e))
         except ValueError as e:  # error handler for existing service name
             pecan.abort(400, detail=str(e))
+        except RuntimeError as e:  # error handler for custom cert fail
+            pecan.abort(400, detail=str(e))
         service_url = str(
             uri.encode(u'{0}/v1.0/services/{1}'.format(
                 pecan.request.host_url,

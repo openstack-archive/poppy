@@ -332,6 +332,8 @@ class ServicesController(base.ServicesController):
             'provider_details': {}
         }
 
+        print service_args
+
         LOG.debug("Creating New Service - {0} ({1})".format(service_id,
                                                             service_name))
         batch = query.BatchStatement(
@@ -588,7 +590,8 @@ class ServicesController(base.ServicesController):
                         'rules', [])]) for o in origins]
 
         domains = [domain.Domain(d['domain'], d.get('protocol', 'http'),
-                                 d.get('certificate', None))
+                                 d.get('certificate', None),
+                                 d.get('domain_info', None))
                    for d in domains]
 
         restrictions = [restriction.Restriction(

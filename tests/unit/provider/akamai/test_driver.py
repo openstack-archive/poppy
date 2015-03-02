@@ -64,7 +64,8 @@ AKAMAI_OPTIONS = [
     cfg.StrOpt(
         'akamai_https_shared_config_number',
         default=str(random.randint(10000, 99999)),
-        help='Akamai configuration number for shared wildcard https policies'),
+        help='Akamai configuration number for shared wildcard https policies'
+    ),
     cfg.ListOpt(
         'akamai_https_san_config_numbers',
         default=[str(random.randint(10000, 99999))],
@@ -77,13 +78,29 @@ AKAMAI_OPTIONS = [
         help='A list of Akamai configuration number for '
              'Custom cert https policies'
     ),
-
     # SANCERT related configs
-    cfg.ListOpt('san_cert_cnames', default='secure.san.test.com',
-                help='A list of san certs cnamehost names'),
     cfg.IntOpt('san_cert_hostname_limit', default=80,
                help='default limit on how many hostnames can'
                ' be held by a SAN cert'),
+    # related info for SPS && PAPI APIs
+    cfg.StrOpt(
+        'contract_id',
+        help='Operator contractID'),
+    cfg.StrOpt(
+        'group_id',
+        help='Operator groupID'),
+    cfg.StrOpt(
+        'property_id',
+        help='Operator propertyID'),
+
+    # queue backend configs for long running tasks
+    cfg.StrOpt(
+        'queue_backend_type',
+        help='SAN Cert Queueing backend'),
+    cfg.ListOpt('queue_backend_host', default=['localhost'],
+                help='default queue backend server hosts'),
+    cfg.IntOpt('queue_backend_port', default=2181, help='default'
+               ' default queue backend server port (e.g: 2181)'),
 ]
 
 

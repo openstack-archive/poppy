@@ -223,7 +223,8 @@ class DefaultManagerServiceTests(base.TestCase):
             service_updates_json = json.dumps(service_updates)
             responders = update_provider.execute(
                 service_old,
-                service_updates_json
+                service_updates_json,
+                self.project_id
             )
             update_dns = update_service_tasks.UpdateServiceDNSMappingTask()
 

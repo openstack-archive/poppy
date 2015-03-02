@@ -37,20 +37,116 @@ class ServiceController(base.ServiceBase):
     def ccu_api_client(self):
         return self.driver.ccu_api_client
 
+    @property
+    def sps_api_client(self):
+        return self.driver.akamai_sps_api_client
+
+    @property
+    def papi_api_client(self):
+        return self.driver.akamai_papi_api_client
+
     def __init__(self, driver):
         super(ServiceController, self).__init__(driver)
 
         self.driver = driver
         self.policy_api_base_url = self.driver.akamai_policy_api_base_url
         self.ccu_api_base_url = self.driver.akamai_ccu_api_base_url
+        self.sps_api_base_url = self.driver.akamai_sps_api_base_url
+        self.papi_api_base_url = self.driver.akamai_papi_api_base_url
         self.request_header = {'Content-type': 'application/json',
                                'Accept': 'text/plain'}
 
-        self.san_cert_cnames = self.driver.akamai_conf.san_cert_cnames
         self.san_cert_hostname_limit = (
             self.driver.akamai_conf.san_cert_hostname_limit)
+        # For queue backends
+        self.san_cert_add_job_backend = (
+            self.driver.san_cert_add_job_backend)
+        self.papi_job_update_job_backend = (
+            self.driver.papi_job_update_job_backend)
+        self.status_checking_job_backend = (
+            self.driver.status_checking_job_backend)
 
-    def create(self, service_obj):
+    def create_custom_single_cert(self, domain):
+        s_data = self._get_custom_cert_data(domain)
+
+        resp = self.sps_api_client.post(
+            self.driver.akamai_sps_api_base_url.format(spsId=""),
+            data=s_data
+        )
+        if resp.status_code != 202:
+            raise RuntimeError('SPS Request failed.'
+                               'Exception: %s' % resp.text)
+
+        resp_data = json.loads(resp.text)
+        spsId = resp_data['spsId']
+        jobID = resp_data['Results']['data'][0]['results']['jobID']
+        return spsId, jobID
+
+    def _get_custom_cert_data(self, domain):
+        """"""
+        custom_cert_data_template = {
+            'cnameHostname': domain.domain,
+            'issuer': 'cybertrust',
+            'createType': 'single',
+            'csr.cn': domain.domain,
+            'csr.c': ' '.join(domain.domain_info.get(
+                'registra-country', 'None').split()).replace(' ', '+'),
+            'csr.st': ' '.join(domain.domain_info.get(
+                'registra-state', 'None').split()).replace(' ', '+'),
+            'csr.l': ' '.join(domain.domain_info.get(
+                'registra-city', 'None').split()).replace(' ', '+'),
+            'csr.o': ' '.join(domain.domain_info.get(
+                'registra-orgainzation', 'None').split()).replace(' ', '+'),
+            'csr.ou': ' '.join(domain.domain_info.get(
+                'registra-industry', 'None').split()).replace(' ', '+'),
+            'organization-information.organization-name':
+                ' '.join(domain.domain_info.get(
+                    'organization-name', 'None').split()).replace(' ', '+'),
+            'organization-information.address-line-one':
+                ' '.join(domain.domain_info.get(
+                    'organization-address', 'None').split()).replace(' ', '+'),
+            'organization-information.city':
+                ' '.join(domain.domain_info.get(
+                    'organization-city', 'None').split()).replace(' ', '+'),
+            'organization-information.region':
+                ' '.join(domain.domain_info.get(
+                    'organization-region', 'None').split()).replace(' ', '+'),
+            'organization-information.postal-code':
+                ' '.join(domain.domain_info.get(
+                    'organization-postal-code', 'None').split()).replace(' ',
+                                                                         '+'),
+            'organization-information.country':
+                ' '.join(domain.domain_info.get(
+                    'organization-country', 'None').split()).replace(' ', '+'),
+            'organization-information.phone': ' '.join(domain.domain_info.get(
+                'organization-phone', 'None').split()).replace(' ', '+'),
+            'admin-contact.first-name': ' '.join(domain.domain_info.get(
+                'admin-contact-first-name', 'None').split()).replace(' ', '+'),
+            'admin-contact.last-name': ' '.join(domain.domain_info.get(
+                'admin-contact-last-name', 'None').split()).replace(' ', '+'),
+            'admin-contact.phone': ' '.join(domain.domain_info.get(
+                'admin-contact-phone', 'None').split()).replace(' ', '+'),
+            # needs to url encode the email id
+            # example:zali%40akamai.com
+            'admin-contact.email':
+                ' '.join(domain.domain_info.get(
+                    'admin-contact-email',
+                    'None').split()).replace(' ', '+').replace('@', '%40'),
+            'technical-contact.first-name': 'Rachita',
+            'technical-contact.last-name': 'Ahanthem',
+            'technical-contact.phone': '16174755662',
+            'technical-contact.email': 'rahanthe%40akamai.com',
+            'ipVersion': 'ipv4',
+            ##################
+            # 'product' : 'alta',
+            'slot-deployment.klass': 'esslType'
+        }
+
+        s_data = '&'.join(['%s=%s' % (k, v) for (k, v) in
+                           custom_cert_data_template.items()])
+        return s_data
+
+    def create(self, service_obj, project_id):
         try:
             post_data = {
                 'rules': []
@@ -81,6 +177,32 @@ class ServiceController(base.ServiceBase):
             ids = []
             links = []
             for classified_domain in classified_domains:
+
+                if classified_domain.certificate == 'custom':
+                    try:
+                        spsId, jobID = self.create_custom_single_cert(
+                            classified_domain)
+                    except RuntimeError as e:
+                        raise e
+                    message = {
+                        'certType': 'custom',
+                        'spsId': spsId,
+                        'jobID': jobID,
+                        'cnameHostname': classified_domain.domain,
+                        # This is for updating poppy service
+                        'services_list_info': (
+                            {'SPSStatusCheck': spsId},
+                            [((project_id,
+                              service_obj.service_id),
+                             classified_domain.domain)])
+                    }
+
+                    self.enqueue_status_check_queue(
+                        {'SPSStatusCheck': spsId},
+                        [json.dumps([
+                            'secureEdgeHost',
+                            message])])
+
                 # assign the content realm to be the digital property field
                 # of each group
                 dp = self._process_new_domain(classified_domain,
@@ -128,13 +250,23 @@ class ServiceController(base.ServiceBase):
             return self.responder.failed(
                 "failed to create service - %s" % str(e))
         else:
-            return self.responder.created(json.dumps(ids), links)
+            # Need to find a way to let service stay at create_in_progress
+            # state
+            extra = {}
+            san_or_custom_domains = filter(
+                lambda domain: (domain.get('certificate', None)
+                                in ['san', 'custom']), ids)
+            if len(list(san_or_custom_domains)) > 0:
+                extra.update({
+                    'status': 'create_in_progress'
+                })
+            return self.responder.created(json.dumps(ids), links, **extra)
 
     def get(self, service_name):
         pass
 
     def update(self, provider_service_id,
-               service_obj):
+               service_obj, project_id):
 
         try:
             # depending on domains field presented or not, do PUT/POST
@@ -171,7 +303,7 @@ class ServiceController(base.ServiceBase):
                         LOG.info('akamai response code: %s' % resp.status_code)
                         LOG.info('upserting service with'
                                  'akamai: %s' % service_obj.service_id)
-                        return self.create(service_obj)
+                        return self.create(service_obj, project_id)
                     elif resp.status_code != 200:
                         raise RuntimeError(resp.text)
                 except Exception as e:
@@ -201,6 +333,32 @@ class ServiceController(base.ServiceBase):
 
                 try:
                     for classified_domain in classified_domains:
+
+                        if classified_domain.certificate == 'custom':
+                            try:
+                                spsId, jobID = self.create_custom_single_cert(
+                                    classified_domain)
+                            except RuntimeError as e:
+                                raise e
+                            message = {
+                                'certType': 'custom',
+                                'spsId': spsId,
+                                'jobID': jobID,
+                                'cnameHostname': classified_domain.domain,
+                                # This is for updating poppy service
+                                'services_list_info': (
+                                    {'SPSStatusCheck': spsId},
+                                    [((project_id,
+                                      service_obj.service_id),
+                                     classified_domain.domain)])
+                            }
+
+                            self.enqueue_status_check_queue(
+                                {'SPSStatusCheck': spsId},
+                                [json.dumps([
+                                    'secureEdgeHost',
+                                    message])])
+
                         # assign the content realm to be the
                         # digital property field of each group
                         dp = self._process_new_domain(classified_domain,
@@ -362,6 +520,16 @@ class ServiceController(base.ServiceBase):
                                   'certificate': policy['certificate']
                                   })
                 ids = policies
+            # Need to find a way to let service stay at create_in_progress
+            # state
+            extra = {}
+            san_or_custom_domains = filter(
+                lambda domain: (domain.get('certificate', None)
+                                in ['san', 'custom']), ids)
+            if len(list(san_or_custom_domains)) > 0:
+                extra.update({
+                    'status': 'update_in_progress'
+                })
             return self.responder.updated(json.dumps(ids), links)
 
         except Exception as e:
@@ -382,6 +550,16 @@ class ServiceController(base.ServiceBase):
                                    provider_service_id)
             except Exception as e:
                 return self.responder.failed(str(e))
+
+        # try to delete the hostname from the akamai configuration
+        for policy in policies:
+            hosts_message = ['remove', {
+                'cnameFrom': policy['policy_name']
+            }]
+            if policy['certificate'] == 'custom':
+                self.enqueue_papi_update_job('hosts',
+                                             json.dumps(hosts_message))
+
         try:
             for policy in policies:
                 LOG.info('Starting to delete policy %s' % policy)
@@ -688,3 +866,89 @@ class ServiceController(base.ServiceBase):
                 minimum_number_hosts = n
 
         return self.san_cert_cnames[find_idx]
+
+    def enqueue_add_san_cert_service(self, project_id,
+                                     service_id, domain_name):
+        self.san_cert_add_job_backend.put(str.encode(json.dumps(['add', (
+            project_id, service_id), domain_name])))
+
+    def enqueue_remove_san_cert_service(self, project_id, service_id):
+        # We don't queu it up yet because currently there is no way
+        # to remove a host from a san cert. Maybe we should just save
+        # those hostnames to be deleted inside of a file
+        self.san_cert_add_job_backend.put(str.encode(
+            json.dumps(['remove', (project_id, service_id)])))
+
+    def dequeue_all_add_san_cert_service(self):
+        result = []
+        for i in range(0, len(self.san_cert_add_job_backend)):
+            i
+            result.append(self.san_cert_add_job_backend.get())
+            self.san_cert_add_job_backend.consume()
+        return result
+
+    def requeue_mod_san_cert_services(self, all_services):
+        # ignore removed_service for right now
+        self.san_cert_add_job_backend.put_all(all_services)
+
+    def enqueue_papi_update_job(self, j_type, message, services_list_info=[]):
+        valid_j_type = ['rule', 'hosts', 'hosts-remove',
+                        'secureEdgeHost', 'origin-ssl-cert']
+        if j_type not in valid_j_type:
+            raise ValueError(
+                u'PAPI Job type {0} not in valid options: {1}'.format(
+                    j_type,
+                    valid_j_type))
+        else:
+            message_dict = {
+                'j_type': j_type,
+                'message': message}
+            # Optionally pass in a services list, to enqueue in status list
+            if services_list_info != []:
+                message_dict.update({
+                    'services_list_info': services_list_info
+                })
+            self.papi_job_update_job_backend.put(json.dumps(message_dict))
+
+    def dequeue_all_papi_jobs(self):
+        result = []
+        for i in range(0, len(self.papi_job_update_job_backend)):
+            i
+            result.append(self.papi_job_update_job_backend.get())
+            self.papi_job_update_job_backend.consume()
+        return result
+
+    def requeue_papi_update_jobs(self, papi_job_list):
+        self.papi_job_update_job_backend.put_all(papi_job_list)
+
+    def enqueue_status_check_queue(self, status_check_info, services_list):
+        """Enqueue a status check list job.
+
+        :param status_check_info: a dictionary of what status to check. Now
+            it supports either 'SPSStatusCheck' as a key with value of and
+            spsId or 'PropertyActivation' with value to be a activation id
+        :param services_list: A list of service to check those statues on
+        """
+        valid_check_subject = ['SPSStatusCheck', 'PropertyActivation']
+        for key in status_check_info:
+            if key not in valid_check_subject:
+                raise ValueError(
+                    u'Invalid status check subject {0}'
+                    ' not in valid options: {1}'.format(
+                        key,
+                        valid_check_subject))
+        self.status_checking_job_backend.put(str.encode(json.dumps(
+            (status_check_info,
+             services_list))))
+
+    def dequeue_status_check_queue(self):
+        if self.len_status_check_queue() == 0:
+            return None, None
+        status_check_info, services_list = json.loads((
+            self.status_checking_job_backend.get()))
+        self.status_checking_job_backend.consume()
+        return status_check_info, services_list
+
+    def len_status_check_queue(self):
+        """Return the length of status_check_queue"""
+        return len(self.status_checking_job_backend)
