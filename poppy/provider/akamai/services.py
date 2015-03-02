@@ -41,6 +41,7 @@ class ServiceController(base.ServiceBase):
         self.driver = driver
         self.policy_api_base_url = self.driver.akamai_policy_api_base_url
         self.ccu_api_base_url = self.driver.akamai_ccu_api_base_url
+        self.sps_api_base_url = self.driver.akamai_sps_api_base_url
         self.request_header = {'Content-type': 'application/json',
                                'Accept': 'text/plain'}
 

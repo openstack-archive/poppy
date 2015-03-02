@@ -25,13 +25,13 @@ from tests.unit import base
 AKAMAI_OPTIONS = [
     # credentials && base URL for policy API
     cfg.StrOpt(
-        'policy_api_client_token', default='ccc',
+        'policy_api_client_token',
         help='Akamai client token for policy API'),
     cfg.StrOpt(
-        'policy_api_client_secret', default='sss',
+        'policy_api_client_secret',
         help='Akamai client secret for policy API'),
     cfg.StrOpt(
-        'policy_api_access_token', default='aaa',
+        'policy_api_access_token',
         help='Akamai access token for policy API'),
     cfg.StrOpt(
         'policy_api_base_url', default='http://abc/',
@@ -39,13 +39,13 @@ AKAMAI_OPTIONS = [
     # credentials && base URL for CCU API
     # for purging
     cfg.StrOpt(
-        'ccu_api_client_token', default='ccc',
+        'ccu_api_client_token',
         help='Akamai client token for CCU API'),
     cfg.StrOpt(
-        'ccu_api_client_secret', default='sss',
+        'ccu_api_client_secret',
         help='Akamai client secret for CCU API'),
     cfg.StrOpt(
-        'ccu_api_access_token', default='aaa',
+        'ccu_api_access_token',
         help='Akamai access token for CCU API'),
     cfg.StrOpt(
         'ccu_api_base_url', default='/abc/',
@@ -65,6 +65,25 @@ AKAMAI_OPTIONS = [
         'akamai_https_config_number',
         default=str(random.randint(10000, 99999)),
         help='Akamai configuration number for https policies'),
+    # credentials && base URL for SPS API
+    cfg.StrOpt(
+        'sps_api_client_token',
+        help='Akamai client token for SPS API'),
+    cfg.StrOpt(
+        'sps_api_client_secret',
+        help='Akamai client secret for SPS API'),
+    cfg.StrOpt(
+        'sps_api_access_token',
+        help='Akamai access token for SPS API'),
+    cfg.StrOpt(
+        'sps_api_base_url',
+        help='Akamai SPS Purge API base URL'),
+    cfg.StrOpt(
+        'sps_api_contract_id',
+        help='SPS API contractID'),
+    cfg.StrOpt(
+        'sps_api_group_id',
+        help='SPS API groupID'),
 ]
 
 
@@ -108,6 +127,16 @@ class TestDriver(base.TestCase):
             access_token=(
                 akamai_conf.ccu_api_access_token)
         )
+
+        mock_connect.assert_called_with(
+            client_token=(
+                akamai_conf.sps_api_client_token),
+            client_secret=(
+                akamai_conf.sps_api_client_secret),
+            access_token=(
+                akamai_conf.sps_api_access_token)
+        )
+
         self.assertEqual('Akamai', provider.provider_name)
 
     @ddt.data((200, 'Put Successful', True), (500, 'Put Failed', False))

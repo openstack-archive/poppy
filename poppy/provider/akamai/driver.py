@@ -66,7 +66,27 @@ AKAMAI_OPTIONS = [
         help='Akamai configuration number for http policies'),
     cfg.StrOpt(
         'akamai_https_config_number',
-        help='Akamai configuration number for https policies'),
+        help='Akamai configuration number for https policies'
+    ),
+    # credentials && base URL for SPS API
+    cfg.StrOpt(
+        'sps_api_client_token',
+        help='Akamai client token for SPS API'),
+    cfg.StrOpt(
+        'sps_api_client_secret',
+        help='Akamai client secret for SPS API'),
+    cfg.StrOpt(
+        'sps_api_access_token',
+        help='Akamai access token for SPS API'),
+    cfg.StrOpt(
+        'sps_api_base_url',
+        help='Akamai SPS Purge API base URL'),
+    cfg.StrOpt(
+        'sps_api_contract_id',
+        help='SPS API contractID'),
+    cfg.StrOpt(
+        'sps_api_group_id',
+        help='SPS API groupID'),
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
@@ -89,6 +109,14 @@ class CDNProvider(base.Driver):
             str(self.akamai_conf.ccu_api_base_url),
             'ccu/v2/queues/default'
         ])
+        self.akamai_sps_api_base_url = ''.join([
+            str(self.akamai_conf.sps_api_base_url),
+            'config-secure-provisioning-service/v1'
+            '/sps-requests/?contractId=%s&groupId=%s' % (
+                self.akamai_conf.sps_api_contract_id,
+                self.akamai_conf.sps_api_group_id
+            )
+        ])
 
         self.http_conf_number = self.akamai_conf.akamai_http_config_number
         self.https_conf_number = self.akamai_conf.akamai_https_config_number
@@ -110,6 +138,13 @@ class CDNProvider(base.Driver):
             client_token=self.akamai_conf.ccu_api_client_token,
             client_secret=self.akamai_conf.ccu_api_client_secret,
             access_token=self.akamai_conf.ccu_api_access_token
+        )
+
+        self.akamai_sps_api_client = requests.Session()
+        self.akamai_sps_api_client.auth = edgegrid.EdgeGridAuth(
+            client_token=self.akamai_conf.sps_api_client_token,
+            client_secret=self.akamai_conf.sps_api_client_secret,
+            access_token=self.akamai_conf.sps_api_access_token
         )
 
     def is_alive(self):
