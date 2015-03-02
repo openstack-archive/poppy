@@ -72,6 +72,11 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         """Flag to indicate if project_id should be present in the url."""
         return self.get_boolean('project_id_in_url')
 
+    @property
+    def run_ssl_tests(self):
+        """Flag to indicate if positive tests for SSL cert should run."""
+        return self.get_boolean('run_ssl_tests')
+
 
 class AuthConfig(data_interfaces.ConfigSectionInterface):
     """Defines the auth config values."""
