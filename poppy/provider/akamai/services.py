@@ -92,6 +92,10 @@ class ServiceController(base.ServiceBase):
                 # of each group
                 dp = self._process_new_domain(classified_domain,
                                               post_data['rules'])
+                ####
+                # Create SANs or Custom cert here
+                ####
+
                 # TODO(tonytan4ever): also classify domains based on their
                 # protocols. http and https domains needs to be created
                 # with separate base urls.
@@ -220,6 +224,9 @@ class ServiceController(base.ServiceBase):
 
                     # Only if a same domain with a same protocol
                     # do we need to update a existing policy
+
+                    # Certs change ?
+
                     if dp in policy_names and (
                             policies[policy_names.index(dp)]['protocol'] == (
                             classified_domain.protocol)):
@@ -241,6 +248,11 @@ class ServiceController(base.ServiceBase):
                         policies.remove(dp_obj)
                     else:
                         LOG.info('Start to create new policy %s' % dp)
+
+                        ####
+                        # Create SANs or Custom cert here
+                        ####
+
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
                                 configuration_number=(
