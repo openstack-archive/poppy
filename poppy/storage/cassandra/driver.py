@@ -15,7 +15,9 @@
 
 """Cassandra storage driver implementation."""
 
+from distutils import sysconfig
 import multiprocessing
+import os
 import ssl
 
 import cassandra
@@ -64,7 +66,8 @@ CASSANDRA_OPTIONS = [
     ),
     cfg.StrOpt(
         'migrations_path',
-        default='./poppy/storage/cassandra/migrations',
+        default=os.path.join(sysconfig.get_python_lib(),
+                             'poppy/storage/cassandra/migrations'),
         help='Path to directory containing CQL migration scripts',
     ),
     cfg.BoolOpt('archive_on_delete', default=True,
