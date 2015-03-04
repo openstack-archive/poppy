@@ -228,6 +228,9 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
             if abort_on_status is not None:
                 if current_status == abort_on_status:
+                    # this is for debugging purpose,
+                    # will be removed later, so simply use print
+                    print(body.get('errors', []))
                     return
 
             current_time = int(time.time())
