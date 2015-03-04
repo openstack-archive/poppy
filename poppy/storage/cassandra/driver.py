@@ -118,8 +118,6 @@ def _connection(conf, datacenter, keyspace=None):
     except cassandra.InvalidRequest:
         _create_keyspace(session, keyspace, conf.replication_strategy)
 
-    _run_migrations(conf.migrations_path, session)
-
     session.row_factory = query.dict_factory
 
     return session
@@ -144,8 +142,13 @@ def _create_keyspace(session, keyspace, replication_strategy):
 def _run_migrations(migrations_path, session):
     LOG.debug('Running schema migration(s)')
 
+    session.row_factory = query.named_tuple_factory
+
     schema_migrator = migrator.Migrator(migrations_path, session)
     schema_migrator.run_migrations()
+
+    # restor the row_factory back to dict_factory
+    session.row_factory = query.dict_factory
 
 
 class CassandraStorageDriver(base.Driver):
@@ -162,6 +165,9 @@ class CassandraStorageDriver(base.Driver):
         self.session = None
         self.archive_on_delete = self.cassandra_conf.archive_on_delete
         self.lock = multiprocessing.Lock()
+        # Run cassandra schema migration upon start of the poppy-server
+        _run_migrations(self.cassandra_conf.migrations_path,
+                        self.database)
 
     def change_namespace(self, namespace):
         """change_namespace.
