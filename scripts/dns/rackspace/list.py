@@ -16,8 +16,8 @@
 import ConfigParser
 import os
 import re
-import time
 
+import time
 import pyrax
 
 
@@ -41,11 +41,14 @@ pyrax.set_setting("identity_type", "rackspace")
 pyrax.set_credentials(username, api_key)
 dns = pyrax.cloud_dns
 
+num_domains = 0
 for domain in dns.get_domain_iterator():
     if domain.name.startswith('cdn') and domain.name.endswith('.altcdn.com'):
-        print('Deleting {0}'.format(domain.name))
-        try:
-            dns.delete(domain)
-        except pyrax.exceptions.NotFound:
-            pass
+        num_domains = num_domains + 1
+
+        recs = domain.list_records()
+        print("{0}: {1}".format(domain.name, len(recs)))
+
     time.sleep(2)
+
+print("Total Number of Domains: {0}".format(num_domains))
