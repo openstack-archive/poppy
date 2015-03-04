@@ -52,13 +52,21 @@ class CassandraStorageServiceTests(base.TestCase):
                 help='datacenter where the C* cluster hosted'))
         conf.register_opts(driver.CASSANDRA_OPTIONS,
                            group=driver.CASSANDRA_GROUP)
-        cassandra_driver = driver.CassandraStorageDriver(conf)
+
+        # we are running C* migration upon initialization of driver now
+        cassandra_cluster_patcher = mock.patch(
+            'cassandra.cluster.Cluster'
+        )
+        self.cassandra_cluster_mock = cassandra_cluster_patcher.start()
+        self.addCleanup(cassandra_cluster_patcher.stop)
 
         migrations_patcher = mock.patch(
             'cdeploy.migrator.Migrator'
         )
         migrations_patcher.start()
         self.addCleanup(migrations_patcher.stop)
+
+        cassandra_driver = driver.CassandraStorageDriver(conf)
 
         # stubbed cassandra driver
         self.sc = services.ServicesController(cassandra_driver)
