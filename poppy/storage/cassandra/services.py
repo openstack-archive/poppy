@@ -97,6 +97,11 @@ CQL_CLAIM_DOMAIN = '''
         %(service_id)s)
 '''
 
+CQL_RELINQUISH_DOMAIN = '''
+    DELETE FROM domain_names
+    WHERE domain_name IN %(domain_list)s
+'''
+
 CQL_ARCHIVE_SERVICE = '''
     BEGIN BATCH
         INSERT INTO archives (project_id,
@@ -360,7 +365,7 @@ class ServicesController(base.ServicesController):
 
         self.session.execute(batch)
 
-    def update(self, project_id, service_id, service_obj):
+    def update(self, project_id, service_id, service_old, service_obj):
 
         # check if the service domain names already exist
         for d in service_obj.domains:
@@ -401,6 +406,51 @@ class ServicesController(base.ServicesController):
             CQL_UPDATE_SERVICE,
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
+
+        # prepare domains list
+        old_domains = {}
+        for d in service_old.domains:
+            old_domains[d.domain] = {
+                'domain_name': d.domain,
+                'project_id': project_id,
+                'service_id': service_id
+            }
+
+        new_domains = {}
+        for d in service_obj.domains:
+            new_domains[d.domain] = {
+                'domain_name': d.domain,
+                'project_id': project_id,
+                'service_id': service_id
+            }
+
+        # added domains
+        added_domains = {}
+        for d in new_domains:
+            if d not in old_domains:
+                added_domains[d] = new_domains[d]
+
+        # removed domains
+        removed_domains = {}
+        for d in old_domains:
+            if d not in new_domains:
+                removed_domains[d] = old_domains[d]
+
+        batch = query.BatchStatement(
+            consistency_level=self._driver.consistency_level)
+
+        # claim added domains
+        for d in added_domains:
+            domain_args = added_domains[d]
+            batch.add(query.SimpleStatement(CQL_CLAIM_DOMAIN), domain_args)
+
+        # relinquish removed domains
+        for d in removed_domains:
+            domain_args = removed_domains[d]
+            batch.add(query.SimpleStatement(CQL_RELINQUISH_DOMAIN),
+                      domain_args)
+
+        self.session.execute(batch)
 
     def delete(self, project_id, service_id):
         """delete.

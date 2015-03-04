@@ -156,6 +156,7 @@ class CassandraStorageServiceTests(base.TestCase):
         service_obj = req_service.load_from_json(service_json)
         actual_response = self.sc.update(self.project_id,
                                          self.service_id,
+                                         service_obj,
                                          service_obj)
 
         # Expect the response to be None as there are no providers passed
@@ -179,6 +180,7 @@ class CassandraStorageServiceTests(base.TestCase):
                           self.sc.update,
                           self.project_id,
                           self.service_id,
+                          service_obj,
                           service_obj)
 
     @ddt.file_data('data_provider_details.json')

@@ -96,7 +96,7 @@ class GatherProviderDetailsTask(task.Task):
     default_provides = "provider_details_dict_errors_tuple"
 
     def execute(self, responders, dns_responder, project_id,
-                service_id, service_obj):
+                service_id, service_old, service_obj):
 
         bootstrap_obj = bootstrap.Bootstrap(conf)
         service_controller = bootstrap_obj.manager.services_controller
@@ -144,7 +144,7 @@ class GatherProviderDetailsTask(task.Task):
                 provider_details_dict[provider_name].to_dict())
 
         service_controller.storage_controller.update(project_id, service_id,
-                                                     service_obj)
+                                                     service_old, service_obj)
 
         provider_details_dict_error_tuple = (provider_details_dict, error_flag)
 
