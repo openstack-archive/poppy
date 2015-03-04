@@ -97,6 +97,11 @@ CQL_CLAIM_DOMAIN = '''
         %(service_id)s)
 '''
 
+CQL_RELINQUISH_DOMAINS = '''
+    DELETE FROM domain_names
+    WHERE domain_name IN %(domain_list)s
+'''
+
 CQL_ARCHIVE_SERVICE = '''
     BEGIN BATCH
         INSERT INTO archives (project_id,
@@ -384,6 +389,14 @@ class ServicesController(base.ServicesController):
                json.dumps(service_obj.provider_details[provider].to_dict())
                for provider in service_obj.provider_details}
 
+        # fetch current domains
+        args = {
+            'project_id': project_id,
+            'service_id': uuid.UUID(str(service_id)),
+        }
+        results = self.session.execute(CQL_GET_SERVICE, args)
+        result = results[0]
+
         # updates an existing service
         args = {
             'project_id': project_id,
@@ -401,6 +414,30 @@ class ServicesController(base.ServicesController):
             CQL_UPDATE_SERVICE,
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
+
+        # relinquish old domains
+        stmt = query.SimpleStatement(
+            CQL_RELINQUISH_DOMAINS,
+            consistency_level=self._driver.consistency_level)
+        domain_list = [json.loads(d).get('domain')
+                        for d in result.get('domains')]
+        args = {
+            'domain_list': query.ValueSequence(domain_list)
+        }
+        self.session.execute(stmt, args)
+
+        # claim new domains
+        batch_claim = query.BatchStatement(
+            consistency_level=self._driver.consistency_level)
+        for d in service_obj.domains:
+            domain_args = {
+                'domain_name': d.domain,
+                'project_id': project_id,
+                'service_id': service_id
+            }
+            batch_claim.add(query.SimpleStatement(CQL_CLAIM_DOMAIN),
+                            domain_args)
+        self.session.execute(batch_claim)
 
     def delete(self, project_id, service_id):
         """delete.
