@@ -78,13 +78,21 @@ class CassandraStorageDriverTests(base.TestCase):
                 help='datacenter where the C* cluster hosted'))
         conf.register_opts(CASSANDRA_OPTIONS,
                            group=driver.CASSANDRA_GROUP)
-        self.cassandra_driver = driver.CassandraStorageDriver(conf)
+
+        # we are running C* migration upon initialization of driver now
+        cassandra_cluster_patcher = mock.patch(
+            'cassandra.cluster.Cluster'
+        )
+        self.cassandra_cluster_mock = cassandra_cluster_patcher.start()
+        self.addCleanup(cassandra_cluster_patcher.stop)
 
         migrations_patcher = mock.patch(
             'cdeploy.migrator.Migrator'
         )
         migrations_patcher.start()
         self.addCleanup(migrations_patcher.stop)
+
+        self.cassandra_driver = driver.CassandraStorageDriver(conf)
 
     def test_storage_driver(self):
         # assert that the configs are set up based on what was passed in
@@ -227,10 +235,9 @@ class CassandraStorageDriverTests(base.TestCase):
         self.assertTrue(self.cassandra_driver.database is None)
         self.assertFalse(self.cassandra_driver.is_alive())
 
-    @mock.patch.object(cassandra.cluster.Cluster, 'connect')
-    def test_connection(self, mock_cluster):
+    def test_connection(self):
         self.cassandra_driver.connection()
-        mock_cluster.assert_called_with()
+        self.cassandra_cluster_mock.assert_called_once()
 
     def test_connect(self):
         self.cassandra_driver.session = None
@@ -265,7 +272,6 @@ class CassandraStorageDriverTests(base.TestCase):
             isinstance(sc, flavors.FlavorsController),
             True)
 
-    @mock.patch.object(cassandra.cluster.Cluster, 'connect')
-    def test_database(self, mock_cluster):
+    def test_database(self):
         self.cassandra_driver.database
-        mock_cluster.assert_called_with()
+        self.cassandra_cluster_mock.assert_called_once()
