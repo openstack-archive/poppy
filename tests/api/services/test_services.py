@@ -593,6 +593,77 @@ class TestServicePatch(base.TestBase):
 
         self._assert_service_details(body, self.original_service_details)
 
+    def test_patch_service_claim_relinquish_domain(self):
+        newdomain = str(uuid.uuid4()) + ".com"
+        add_domain = (
+            [{
+                "op": "add",
+                "path": "/domains/-",
+                "value": {"domain": newdomain, "protocol": "http"}
+            }])
+        remove_domain = (
+            [{
+                "op": "remove",
+                "path": "/domains/1"
+            }])
+
+        # add new domain
+        resp = self.client.patch_service(location=self.service_url,
+                                         request_body=add_domain)
+        self.assertEqual(resp.status_code, 202)
+
+        # wait for the domain to be added
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        # make sure the new domain is added
+        resp = self.client.get_service(location=self.service_url)
+        body = resp.json()
+        self.assertEqual(body['status'], 'deployed')
+        self.assertEqual(body['domains'][-1]['domain'], newdomain)
+
+        # remove the new domain
+        resp = self.client.patch_service(location=self.service_url,
+                                         request_body=remove_domain)
+        self.assertEqual(resp.status_code, 202)
+
+        # wait for the domain to be removed
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+        # make sure the new domain is removed
+        resp = self.client.get_service(location=self.service_url)
+        body = resp.json()
+        self.assertEqual(body['status'], 'deployed')
+        for domain in body['domains']:
+            self.assertNotEqual(domain['domain'], newdomain)
+
+        # add new domain, again
+        resp = self.client.patch_service(location=self.service_url,
+                                         request_body=add_domain)
+        self.assertEqual(resp.status_code, 202)
+
+        # wait for the domain to be added
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        # make sure the new domain is added
+        resp = self.client.get_service(location=self.service_url)
+        body = resp.json()
+        self.assertEqual(body['status'], 'deployed')
+        self.assertEqual(body['domains'][-1]['domain'], newdomain)
+
     def tearDown(self):
         self.client.delete_service(location=self.service_url)
         if self.test_config.generate_flavors:
