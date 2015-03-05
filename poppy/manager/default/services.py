@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import json
+import random
 
 import jsonpatch
 from oslo.config import cfg
@@ -36,6 +37,14 @@ DNS_OPTIONS = [
         'retries',
         default=5,
         help='Total number of Retries after Exponentially Backing Off'),
+    cfg.IntOpt(
+        'min_backoff_range',
+        default=20,
+        help='Minimum Number of seconds to sleep between retries'),
+    cfg.IntOpt(
+        'max_backoff_range',
+        default=30,
+        help='Maximum Number of seconds to sleep between retries'),
 ]
 
 DNS_GROUP = 'drivers:dns'
@@ -58,9 +67,17 @@ class DefaultServicesController(base.ServicesController):
                                        group=DNS_GROUP)
         self.dns_conf = self.driver.conf[DNS_GROUP]
         self.default_sleep_time = [0]
-        self.backoff = [(2**i) * 20 for i in range(0, self.dns_conf.retries)]
 
-        self.time_seconds = self.default_sleep_time + self.backoff
+    def determine_sleep_times(self):
+
+        default_sleep_time = [0]
+        determined_sleep_time = random.randrange(self.dns_conf.min_backoff_range,
+                                                 self.dns_conf.max_backoff_range)
+
+        backoff = [(2**i) * determined_sleep_time
+                        for i in range(0, self.dns_conf.retries)]
+
+        return default_sleep_time + backoff
 
     def _get_provider_details(self, project_id, service_id):
         try:
@@ -118,7 +135,7 @@ class DefaultServicesController(base.ServicesController):
             'providers_list_json': json.dumps(providers),
             'project_id': project_id,
             'service_id': service_id,
-            'time_seconds': self.time_seconds
+            'time_seconds': self.determine_sleep_times()
         }
 
         self.distributed_task_controller.submit_task(
@@ -179,7 +196,7 @@ class DefaultServicesController(base.ServicesController):
             'service_id': service_id,
             'service_old': json.dumps(service_old.to_dict()),
             'service_obj': json.dumps(service_new.to_dict()),
-            'time_seconds': self.time_seconds
+            'time_seconds': self.determine_sleep_times()
         }
 
         self.distributed_task_controller.submit_task(
@@ -211,7 +228,7 @@ class DefaultServicesController(base.ServicesController):
                 dict([(k, v.to_dict()) for k, v in provider_details.items()])),
             "project_id": project_id,
             "service_id": service_id,
-            'time_seconds': self.time_seconds
+            'time_seconds': self.determine_sleep_times()
         }
 
         self.distributed_task_controller.submit_task(
