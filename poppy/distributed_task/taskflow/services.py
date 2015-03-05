@@ -79,6 +79,6 @@ class ServicesController(base.ServicesController):
 
                 conductor = single_threaded.SingleThreadedConductor(
                     "Poppy service worker conductor", board, persistence,
-                    engine='parallel')
+                    engine='serial')
 
                 conductor.run()
