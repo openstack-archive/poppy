@@ -15,19 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
-import string
-
 from tests.endtoend import base
 
 
 class TestWebsiteCDN(base.TestBase):
 
     """Tests for CDN enabling a website."""
-
-    def _random_string(self, length=12):
-        return ''.join([random.choice(string.ascii_letters)
-                        for _ in range(length)])
 
     def setUp(self):
         super(TestWebsiteCDN, self).setUp()
@@ -84,6 +77,8 @@ class TestWebsiteCDN(base.TestBase):
 
         origin_url = 'http://' + self.origin
         cdn_enabled_url = 'http://' + self.test_domain
+
+        self.wait_for_dns_propagation(cdn_enabled_url)
         self.assertSameContent(origin_url=origin_url,
                                cdn_url=cdn_enabled_url)
 
@@ -106,3 +101,83 @@ class TestWebsiteCDN(base.TestBase):
         # self.poppy_client.delete_service(service_name=self.service_name)
         # self.dns_client.delete_record(self.rec)
         super(TestWebsiteCDN, self).tearDown()
+
+
+class TestSharedSSLCDN(base.TestBase):
+
+    """Tests for CDN enabling a website with shared SSL."""
+
+    def setUp(self):
+        super(TestSharedSSLCDN, self).setUp()
+
+        self.stack_name = self._random_string()
+
+        self.test_domain = 'TestCDN-SharedSSL' + self._random_string()
+
+        # Deploys a test website to a cloud server
+        self.heat_client.create_stack(yaml_path=self.heat_config.yaml_path,
+                                      stack_name=self.stack_name,
+                                      domain_name=self.dns_config.test_domain)
+        print('Stack Name', self.stack_name)
+        print('Domain Name', self.test_domain)
+
+        self.heat_client.wait_for_stack_status(stack_name=self.stack_name)
+        self.origin = self.heat_client.get_server_ip(
+            stack_name=self.stack_name)
+
+        self.rec = self.dns_client.add_a_rec(
+            ip=self.origin)
+        print('Origin', self.origin)
+
+    def test_enable_cdn(self):
+
+        # Create a Poppy Service for the test website
+        domain_list = [{"domain": self.test_domain, "protocol": "https",
+                        "certificate": "shared"}]
+        origin_list = [{"origin": self.origin,
+                        "port": 80,
+                        "ssl": False}]
+        caching_list = []
+        self.service_name = 'testService-' + self._random_string()
+
+        resp = self.poppy_client.create_service(
+            service_name=self.service_name,
+            domain_list=domain_list,
+            origin_list=origin_list,
+            caching_list=caching_list,
+            flavor_id=self.poppy_config.flavor)
+
+        self.assertEqual(resp.status_code, 202)
+        service_location = resp.headers['location']
+        self.poppy_client.wait_for_service_status(
+            location=service_location,
+            status='DEPLOYED')
+
+        resp = self.poppy_client.get_service(location=service_location)
+        links = resp.json()['links']
+        origin_url = 'http://' + self.origin
+        access_url = [link['href'] for link in links if
+                      link['rel'] == 'access_url']
+        cdn_url = 'https://' + access_url[0]
+        self.assertSameContent(origin_url=origin_url,
+                               cdn_url=cdn_url)
+
+        # Benchmark page load metrics for the CDN enabled website
+        wpt_test_results = {}
+        for location in self.wpt_config.test_locations:
+            wpt_test_url = self.wpt_client.start_test(access_url=access_url,
+                                                      test_location=location,
+                                                      runs=2)
+            wpt_test_results[location] = wpt_test_url
+            '''self.wpt_client.wait_for_test_status(status='COMPLETE',
+                                                 test_url=wpt_test_url)
+            wpt_test_results[location] = self.wpt_client.get_test_details(
+                test_url=wpt_test_url)
+            '''
+        print(wpt_test_results)
+
+    def tearDown(self):
+        # self.heat_client.delete_stack(stack_name=self.stack_name)
+        # self.poppy_client.delete_service(service_name=self.service_name)
+        # self.dns_client.delete_record(self.rec)
+        super(TestSharedSSLCDN, self).tearDown()
