@@ -23,7 +23,7 @@ from poppy.model import common
 class Domain(common.DictSerializableModel):
 
     def __init__(self, domain, protocol='http'):
-        self._domain = domain
+        self._domain = domain.lower()
 
         if (protocol in AVAILABLE_PROTOCOLS):
             self._protocol = protocol
@@ -46,7 +46,7 @@ class Domain(common.DictSerializableModel):
     @domain.setter
     def domain(self, value):
         """domain setter."""
-        self._domain = value
+        self._domain = value.lower()
 
     @property
     def protocol(self):
@@ -74,6 +74,6 @@ class Domain(common.DictSerializableModel):
         :returns o
         """
         o = cls("")
-        o.domain = dict_obj.get("domain", "")
+        o.domain = dict_obj.get("domain").lower()
         o.protocol = dict_obj.get("protocol", "http")
         return o
