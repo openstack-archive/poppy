@@ -1,5 +1,6 @@
 coverage
 ddt
+dnspython
 fixtures
 hacking
 mock
