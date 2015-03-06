@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import random
+import string
+
 from bs4 import BeautifulSoup
 from cafe.drivers.unittest import fixtures
 import requests
@@ -84,6 +87,10 @@ class TestBase(fixtures.BaseTestFixture):
         content = BeautifulSoup(response.text)
         return content.findAll()
 
+    def _random_string(self, length=12):
+        return ''.join([random.choice(string.ascii_letters)
+                        for _ in range(length)])
+
     def assertSameContent(self, origin_url, cdn_url):
         """Asserts that the origin & access_url serve the same content
 
@@ -94,6 +101,25 @@ class TestBase(fixtures.BaseTestFixture):
         origin_content = self.get_content(url=origin_url)
         cdn_content = self.get_content(url=cdn_url)
         self.assertEqual(origin_content, cdn_content)
+
+    def run_webpagetest(self, url, locations):
+        """Runs webpagetest
+
+        :param url: URL to gather metrics on
+        :param location: locations to run the test on
+        :returns: test_result_location
+        """
+        wpt_test_results = {}
+        for location in locations:
+            wpt_test_url = self.wpt_client.start_test(access_url=url,
+                                                      test_location=location,
+                                                      runs=2)
+            wpt_test_results[location] = wpt_test_url
+            self.wpt_client.wait_for_test_status(status='COMPLETE',
+                                                 test_url=wpt_test_url)
+            wpt_test_results[location] = self.wpt_client.get_test_details(
+                test_url=wpt_test_url)
+        return wpt_test_results
 
     @classmethod
     def tearDownClass(cls):
