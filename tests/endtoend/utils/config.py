@@ -56,6 +56,16 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         return self.get('wordpress_origin')
 
     @property
+    def ssl_origin(self):
+        """IP address for ssl origin."""
+        return self.get('ssl_origin')
+
+    @property
+    def run_ssl_tests(self):
+        """Flag to indicate if ssl tests should be run."""
+        return self.get_boolean('run_ssl_tests')
+
+    @property
     def webpagetest_enabled(self):
         """Flag to indicate if webpagetest tests should be run."""
         return self.get_boolean('webpagetest_enabled')
