@@ -1,6 +1,6 @@
 # coding= utf-8
 
-# Copyright (c) 2014 Rackspace, Inc.
+# Copyright (c) 2015 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
-import string
-
 from tests.endtoend import base
 
 
@@ -25,19 +22,16 @@ class TestWebsiteCDN(base.TestBase):
 
     """Tests for CDN enabling a website."""
 
-    def _random_string(self, length=12):
-        return ''.join([random.choice(string.ascii_letters)
-                        for _ in range(length)])
-
     def setUp(self):
         super(TestWebsiteCDN, self).setUp()
 
-        sub_domain = 'TestCDN-' + self._random_string()
+        sub_domain = base.random_string(prefix='TestCDN-')
         self.test_domain = sub_domain + '.' + self.dns_config.test_domain
 
         print('Domain Name', self.test_domain)
 
         self.origin = self.test_config.wordpress_origin
+        self.cname_rec = []
 
     def test_enable_cdn(self):
 
@@ -47,47 +41,38 @@ class TestWebsiteCDN(base.TestBase):
                         "port": 80,
                         "ssl": False}]
         caching_list = []
-        self.service_name = 'testService-' + self._random_string()
+        self.service_name = base.random_string(prefix='testService-')
 
-        resp = self.poppy_client.create_service(
+        resp = self.setup_service(
             service_name=self.service_name,
             domain_list=domain_list,
             origin_list=origin_list,
             caching_list=caching_list,
             flavor_id=self.poppy_config.flavor)
 
-        self.assertEqual(resp.status_code, 202)
-
         self.service_location = resp.headers['location']
-        self.poppy_client.wait_for_service_status(
-            location=self.service_location,
-            status='DEPLOYED',
-            abort_on_status='FAILED',
-            retry_interval=self.poppy_config.status_check_retry_interval,
-            retry_timeout=self.poppy_config.status_check_retry_timeout)
 
         resp = self.poppy_client.get_service(location=self.service_location)
         links = resp.json()['links']
         access_url = [link['href'] for link in links if
                       link['rel'] == 'access_url']
-        self.cname_rec = self.dns_client.add_cname_rec(
-            name=self.test_domain, data=access_url[0])
+
+        rec = self.setup_cname(name=self.test_domain, cname=access_url[0])
+        self.cname_rec.append(rec)
 
         origin_url = 'http://' + self.origin
         cdn_enabled_url = 'http://' + self.test_domain
 
-        self.dns_client.wait_cname_propagation(
-            target=self.test_domain,
-            retry_interval=self.dns_config.retry_interval)
         self.assertSameContent(origin_url=origin_url,
                                cdn_url=cdn_enabled_url)
 
-        self._test_webpage(cdn_url=cdn_enabled_url)
+        if self.test_config.webpagetest_enabled:
+            self.run_webpagetest(url=cdn_enabled_url)
 
     def test_multiple_domains(self):
 
         # Create another domain in addition to the one created in setUp
-        sub_domain2 = 'TestCDN-' + self._random_string()
+        sub_domain2 = base.random_string(prefix='TestCDN-')
         self.test_domain2 = sub_domain2 + '.' + self.dns_config.test_domain
 
         print('Additional Domain Name', self.test_domain2)
@@ -99,48 +84,32 @@ class TestWebsiteCDN(base.TestBase):
                         "port": 80,
                         "ssl": False}]
         caching_list = []
-        self.service_name = 'testService-' + self._random_string()
+        self.service_name = base.random_string(prefix='testService-')
 
-        resp = self.poppy_client.create_service(
+        resp = self.setup_service(
             service_name=self.service_name,
             domain_list=domain_list,
             origin_list=origin_list,
             caching_list=caching_list,
             flavor_id=self.poppy_config.flavor)
 
-        self.assertEqual(resp.status_code, 202)
         self.service_location = resp.headers['location']
-        self.poppy_client.wait_for_service_status(
-            location=self.service_location,
-            status='DEPLOYED',
-            abort_on_status='FAILED',
-            retry_interval=self.poppy_config.status_check_retry_interval,
-            retry_timeout=self.poppy_config.status_check_retry_timeout)
 
         resp = self.poppy_client.get_service(location=self.service_location)
         links = resp.json()['links']
         access_url = [link['href'] for link in links if
                       link['rel'] == 'access_url']
 
-        # Add a cname to the first domain
-        self.cname_rec = self.dns_client.add_cname_rec(
-            name=self.test_domain, data=access_url[0])
+        # Adds cname records corresponding to the test domains
+        rec = self.setup_cname(name=self.test_domain, cname=access_url[0])
+        self.cname_rec.append(rec)
 
-        # Add a cname to the second domain
-        self.cname_rec = self.dns_client.add_cname_rec(
-            name=self.test_domain2, data=access_url[0])
+        rec = self.setup_cname(name=self.test_domain2, cname=access_url[0])
+        self.cname_rec.append(rec)
 
         origin_url = 'http://' + self.origin
         cdn_enabled_url1 = 'http://' + self.test_domain
         cdn_enabled_url2 = 'http://' + self.test_domain2
-
-        self.dns_client.wait_cname_propagation(
-            target=self.test_domain,
-            retry_interval=self.dns_config.retry_interval)
-
-        self.dns_client.wait_cname_propagation(
-            target=self.test_domain2,
-            retry_interval=self.dns_config.retry_interval)
 
         self.assertSameContent(origin_url=origin_url,
                                cdn_url=cdn_enabled_url1)
@@ -148,27 +117,14 @@ class TestWebsiteCDN(base.TestBase):
         self.assertSameContent(origin_url=origin_url,
                                cdn_url=cdn_enabled_url2)
 
-        self._test_webpage(cdn_url=cdn_enabled_url1)
-
-        self._test_webpage(cdn_url=cdn_enabled_url2)
-
-    def _test_webpage(self, cdn_url):
-
-        # Benchmark page load metrics for the CDN enabled website
         if self.test_config.webpagetest_enabled:
-            wpt_test_results = {}
-            for location in self.wpt_config.test_locations:
-                wpt_test_url = self.wpt_client.start_test(
-                    test_url=cdn_url, test_location=location, runs=2)
-                wpt_test_results[location] = wpt_test_url
-                self.wpt_client.wait_for_test_status(
-                    status='COMPLETE', test_url=wpt_test_url)
-                wpt_test_results[location] = self.wpt_client.get_test_details(
-                    test_url=wpt_test_url)
-
-            print('Webpage Tests Results', wpt_test_url)
+            wpt_result_1 = self.run_webpagetest(url=cdn_enabled_url1)
+            wpt_result_2 = self.run_webpagetest(url=cdn_enabled_url2)
+            print(wpt_result_1)
+            print(wpt_result_2)
 
     def tearDown(self):
         self.poppy_client.delete_service(location=self.service_location)
-        # self.dns_client.delete_record(self.cname_rec)
+        for record in self.cname_rec:
+            self.dns_client.delete_record(record)
         super(TestWebsiteCDN, self).tearDown()

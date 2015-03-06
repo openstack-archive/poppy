@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import random
+
 from bs4 import BeautifulSoup
 from cafe.drivers.unittest import fixtures
-import random
 import requests
 
 from tests.api.utils import client
@@ -102,11 +103,12 @@ class TestBase(fixtures.BaseTestFixture):
 
     def setup_cname(self, name, cname):
         """Create a CNAME record and wait for propagation."""
-        self.cname_rec = self.dns_client.add_cname_rec(name=name, data=cname)
+        cname_rec = self.dns_client.add_cname_rec(name=name, data=cname)
 
         self.dns_client.wait_cname_propagation(
             target=name,
             retry_interval=self.dns_config.retry_interval)
+        return cname_rec
 
     def setup_service(self, service_name, domain_list, origin_list,
                       caching_list, flavor_id):
@@ -127,6 +129,24 @@ class TestBase(fixtures.BaseTestFixture):
             retry_timeout=self.poppy_config.status_check_retry_timeout)
 
         return resp
+
+    def run_webpagetest(self, url):
+        """Runs webpagetest
+
+        :param url: URL to gather metrics on
+        :returns: test_result_location
+        """
+        wpt_test_results = {}
+        for location in self.wpt_config.test_locations:
+            wpt_test_url = self.wpt_client.start_test(test_url=url,
+                                                      test_location=location,
+                                                      runs=2)
+            wpt_test_results[location] = wpt_test_url
+            self.wpt_client.wait_for_test_status(status='COMPLETE',
+                                                 test_url=wpt_test_url)
+            wpt_test_results[location] = self.wpt_client.get_test_details(
+                test_url=wpt_test_url)
+        return wpt_test_results
 
     @classmethod
     def tearDownClass(cls):
