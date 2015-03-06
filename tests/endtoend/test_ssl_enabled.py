@@ -18,27 +18,26 @@
 from tests.endtoend import base
 
 
-class TestWebsiteCDN(base.TestBase):
+class TestSSLCDN(base.TestBase):
 
-    """Tests for CDN enabling a website."""
+    """Tests for CDN enabling with SSL on."""
 
     def setUp(self):
-        super(TestWebsiteCDN, self).setUp()
+        super(TestSSLCDN, self).setUp()
 
-        sub_domain = 'TestCDN-' + self._random_string()
-        self.test_domain = sub_domain + '.' + self.dns_config.test_domain
+        if self.test_config.run_ssl_tests is False:
+            self.skipTest('SSL tests are currently disabled in configuration')
 
-        print('Domain Name', self.test_domain)
+        self.stack_name = self._random_string()
+        self.test_domain = 'TestCDN-SSL' + self._random_string()
+        self.origin = self.test_config.ssl_origin
 
-        self.origin = self.test_config.wordpress_origin
-
-    def test_enable_cdn(self):
+    def test_shared_ssl_enable_cdn(self):
 
         # Create a Poppy Service for the test website
-        domain_list = [{"domain": self.test_domain}]
-        origin_list = [{"origin": self.origin,
-                        "port": 80,
-                        "ssl": False}]
+        domain_list = [{"domain": self.test_domain, "protocol": "https",
+                        "certificate": "shared"}]
+        origin_list = [{"origin": self.origin, "port": 443, "ssl": True}]
         caching_list = []
         self.service_name = 'testService-' + self._random_string()
 
@@ -50,7 +49,6 @@ class TestWebsiteCDN(base.TestBase):
             flavor_id=self.poppy_config.flavor)
 
         self.assertEqual(resp.status_code, 202)
-
         self.service_location = resp.headers['location']
         self.poppy_client.wait_for_service_status(
             location=self.service_location,
@@ -61,37 +59,20 @@ class TestWebsiteCDN(base.TestBase):
 
         resp = self.poppy_client.get_service(location=self.service_location)
         links = resp.json()['links']
+        origin_url = 'http://' + self.origin
         access_url = [link['href'] for link in links if
                       link['rel'] == 'access_url']
-        self.cname_rec = self.dns_client.add_cname_rec(
-            name=self.test_domain, data=access_url[0])
-
-        origin_url = 'http://' + self.origin
-        cdn_enabled_url = 'http://' + self.test_domain
-
-        self.dns_client.wait_cname_propagation(
-            target=self.test_domain,
-            retry_interval=self.dns_config.retry_interval)
+        cdn_url = 'https://' + access_url[0]
 
         self.assertSameContent(origin_url=origin_url,
-                               cdn_url=cdn_enabled_url)
+                               cdn_url=cdn_url)
 
         # Benchmark page load metrics for the CDN enabled website
         if self.test_config.webpagetest_enabled:
-            wpt_test_results = {}
-            for location in self.wpt_config.test_locations:
-                wpt_test_url = self.wpt_client.start_test(
-                    test_url=cdn_enabled_url, test_location=location, runs=2)
-                wpt_test_results[location] = wpt_test_url
-                self.wpt_client.wait_for_test_status(
-                    status='COMPLETE', test_url=wpt_test_url)
-                wpt_test_results[location] = self.wpt_client.get_test_details(
-                    test_url=wpt_test_url)
-
-            print('Webpage Tests Results', wpt_test_url)
+            wpt_test_results = self.run_webpagetest(
+                url=access_url, locations=self.wpt_config.test_locations)
+            print(wpt_test_results)
 
     def tearDown(self):
         self.poppy_client.delete_service(location=self.service_location)
-        for record in self.cname_rec:
-            self.dns_client.delete_record(record)
-        super(TestWebsiteCDN, self).tearDown()
+        super(TestSSLCDN, self).tearDown()
