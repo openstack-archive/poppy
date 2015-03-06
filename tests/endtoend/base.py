@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import random
+import string
+
 from bs4 import BeautifulSoup
 from cafe.drivers.unittest import fixtures
 import requests
@@ -84,6 +87,10 @@ class TestBase(fixtures.BaseTestFixture):
         response = requests.get(url)
         content = BeautifulSoup(response.text)
         return content.findAll()
+
+    def _random_string(self, length=12):
+        return ''.join([random.choice(string.ascii_letters)
+                        for _ in range(length)])
 
     def assertSameContent(self, origin_url, cdn_url):
         """Asserts that the origin & access_url serve the same content

@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import dns.resolver
 import pyrax
 
 
@@ -80,3 +81,18 @@ class RackspaceDNSClient(object):
         """
         recs = self.domain.delete_record(record)
         return recs
+
+    def wait_for_dns_propagation(self, target, timeout=9000):
+        """Waits for DNS change to take effect
+
+        :param url: domain waiting for DNS change
+        :param timeout:
+        """
+        return "Not Implemeted"
+        try:
+            answers = dns.resolver.query(target, 'CNAME')
+            for rdata in answers:
+                print(answers.qname, ' IN CNAME', rdata.target)
+                self.dig_cname(rdata.target)
+        except Exception:
+            pass
