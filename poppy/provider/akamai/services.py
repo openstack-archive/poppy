@@ -97,6 +97,7 @@ class ServiceController(base.ServiceBase):
             ids = []
             links = []
             for classified_domain in classified_domains:
+
                 # assign the content realm to be the digital property field
                 # of each group
                 dp = self._process_new_domain(classified_domain,
@@ -118,7 +119,14 @@ class ServiceController(base.ServiceBase):
                     raise RuntimeError(resp.text)
 
                 dp_obj = {'policy_name': dp,
-                          'protocol': classified_domain.protocol}
+                          'protocol': classified_domain.protocol,
+                          }
+                if classified_domain.certificate == 'san':
+                    dp_obj.update({
+                        # Update policy information according to cert type
+                        'certificate': classified_domain.certificate,
+                        'status': 'start-modifying-san-cert'
+                    })
                 ids.append(dp_obj)
                 # TODO(tonytan4ever): leave empty links for now
                 # may need to work with dns integration
@@ -133,7 +141,16 @@ class ServiceController(base.ServiceBase):
         except Exception:
             return self.responder.failed("failed to create service")
         else:
-            return self.responder.created(json.dumps(ids), links)
+            # Need to find a way to let service stay at create_in_progress
+            # state
+            extra = {}
+            san_or_custom_domains = filter(
+                lambda domain: (domain.get('certificate', None) == 'san'), ids)
+            if len(san_or_custom_domains) > 0:
+                extra.update({
+                    'status': 'create_in_progress'
+                })
+            return self.responder.created(json.dumps(ids), links, **extra)
 
     def get(self, service_name):
         pass
@@ -248,6 +265,8 @@ class ServiceController(base.ServiceBase):
                         dp_obj = {'policy_name': dp,
                                   'protocol': classified_domain.protocol}
                         policies.remove(dp_obj)
+                    # if the certificate type changes, what should we do ?
+                    # perhaps should switch to different certificate type ?
                     else:
                         LOG.info('Start to create new policy %s' % dp)
                         resp = self.policy_api_client.put(
@@ -263,6 +282,12 @@ class ServiceController(base.ServiceBase):
                         raise RuntimeError(resp.text)
                     dp_obj = {'policy_name': dp,
                               'protocol': classified_domain.protocol}
+                    if classified_domain.certificate == 'san':
+                        dp_obj.update({
+                            # Update policy information according to cert type
+                            'certificate': classified_domain.certificate,
+                            'status': 'start-modifying-san-cert'
+                        })
                     ids.append(dp_obj)
                     # TODO(tonytan4ever): leave empty links for now
                     # may need to work with dns integration
@@ -365,6 +390,15 @@ class ServiceController(base.ServiceBase):
                               'domain': policy['policy_name']
                               })
             ids = policies
+        # Need to find a way to let service stay at create_in_progress
+        # state
+        extra = {}
+        san_or_custom_domains = filter(
+            lambda domain: (domain.get('certificate', None) == 'san'), ids)
+        if len(san_or_custom_domains) > 0:
+            extra.update({
+                'status': 'update_in_progress'
+            })
         return self.responder.updated(json.dumps(ids), links)
 
     def delete(self, provider_service_id):
@@ -529,6 +563,33 @@ class ServiceController(base.ServiceBase):
                 if 'params' in behavior:
                     behavior['params']['digitalProperty'] = dp
         return dp
+
+    def _pick_san_cert(self):
+        # use the first one first
+        # later will implement switching san cert based
+        # on the status of this san cert and number of domains
+        # added
+        san_cert_list = json.load(file('SAN_certs.data'))
+        return san_cert_list[0]
+
+    def _process_san_cert_domain(self, san_cert_domain):
+        # pick up a existing san cert
+        san_cert = self._pick_san_cert()
+
+        data = {
+            'cnameHostname': san_cert['cnameHostname'],
+            'jobId': san_cert['jobId'],
+            'issuer': san_cert['issuer'],
+            'createType': 'modSan',
+            'add.sans': san_cert_domain.domain,
+            'ipVersion': san_cert['ipVersion'],
+            'slot-deployment.klass': san_cert['slot-deployment.klass'],
+        }
+        resp = self.policy_api_client.post(
+            self.sps_api_base_url.formate(spsId=""),
+            data=data)
+        if resp != 200:
+            raise RuntimeError('Modifying San Cert failed..')
 
     def _process_referrer_restriction(self, referrer_whitelist_value, rule):
         rule['behaviors'].append({
