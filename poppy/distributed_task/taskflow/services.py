@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 
 from oslo.utils import uuidutils
 from taskflow.conductors import single_threaded
@@ -33,6 +34,12 @@ class ServicesController(base.ServicesController):
 
         self.driver = driver
         self.jobboard_backend_conf = self.driver.jobboard_backend_conf
+        self.san_cert_add_job_backend = (
+            self.driver.san_cert_add_job_backend)
+        self.papi_job_update_job_backend = (
+            self.driver.papi_job_update_job_backend)
+        self.status_checking_job_backend = (
+            self.driver.status_checking_job_backend)
 
     @property
     def persistence(self):
@@ -82,3 +89,96 @@ class ServicesController(base.ServicesController):
                     engine='serial')
 
                 conductor.run()
+
+    def enqueue_add_san_cert_service(self, project_id, service_id):
+        self.san_cert_add_job_backend.put(str.encode(json.dumps((
+            project_id, service_id))))
+
+    def enqueue_remove_san_cert_service(self, project_id, service_id):
+        # We don't queu it up yet because currently there is no way
+        # to remove a host from a san cert. Maybe we should just save
+        # those hostnames to be deleted inside of a file
+        # self.san_cert_remove_job_backend.put(str.encode(json.dumps((
+        #     project_id, service_id))))
+        pass
+
+    def dequeue_all_add_san_cert_service(self):
+        result = []
+        for i in range(0, len(self.san_cert_add_job_backend)):
+            i
+            result.append(self.san_cert_add_job_backend.get())
+            self.san_cert_add_job_backend.consume()
+        return result
+
+    def dequeue_all_remove_san_cert_service(self):
+        # result = []
+        # for i in range(0, len(self.san_cert_remove_job_backend)):
+        #     i
+        #     result.append(self.san_cert_remove_job_backend.get())
+        #     self.san_cert_remove_job_backend.consume()
+        # return result
+        pass
+
+    def requeue_mod_san_cert_services(self, added_services, removed_services):
+        # ignore removed_service for right now
+        self.san_cert_add_job_backend.put_all(added_services)
+
+    def enqueue_papi_update_job(self, j_type, message, services_list_info=[]):
+        valid_j_type = ['rule', 'hosts', 'hosts-remove',
+                        'secureEdgeHost', 'origin-ssl-cert']
+        if j_type not in valid_j_type:
+            raise ValueError(
+                u'PAPI Job type {0} not in valid options: {1}'.format(
+                    j_type,
+                    valid_j_type))
+        else:
+            message_dict = {
+                'j_type': j_type,
+                'message': message}
+            # Optionally pass in a services list, to enqueue in status list
+            if services_list_info != []:
+                message_dict.update({
+                    'services_list_info': services_list_info
+                })
+            self.papi_job_update_job_backend.put(json.dumps(message_dict))
+
+    def dequeue_all_papi_jobs(self):
+        result = []
+        for i in range(0, len(self.papi_job_update_job_backend)):
+            i
+            result.append(self.papi_job_update_job_backend.get())
+            self.papi_job_update_job_backend.consume()
+        return result
+
+    def requeue_papi_update_jobs(self, papi_job_list):
+        self.papi_job_update_job_backend.put_all(papi_job_list)
+
+    def enqueue_status_check_queue(self, status_check_info, services_list):
+        """Enqueue a status check list job.
+
+        :param status_check_info: a dictionary of what status to check. Now
+            it supports either 'SPSStatusCheck' as a key with value of and
+            spsId or 'PropertyActivation' with value to be a activation id
+        :param services_list: A list of service to check those statues on
+        """
+        valid_check_subject = ['SPSStatusCheck', 'PropertyActivation']
+        for key in status_check_info:
+            if key not in valid_check_subject:
+                raise ValueError(
+                    u'Invalid status check subject {0}'
+                    ' not in valid options: {1}'.format(
+                        key,
+                        valid_check_subject))
+        self.status_checking_job_backend.put(str.encode(json.dumps(
+            (status_check_info,
+             services_list))))
+
+    def dequeue_status_check_queue(self):
+        status_check_info, services_list = json.loads((
+            self.status_checking_job_backend.get()))
+        self.status_checking_job_backend.consume()
+        return status_check_info, services_list
+
+    def len_status_check_queue(self):
+        """Return the length of status_check_queue"""
+        return len(self.status_checking_job_backend)

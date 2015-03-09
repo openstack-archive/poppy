@@ -30,6 +30,7 @@ pip-log.txt
 nosetests.xml
 tests/cover
 tests/logs
+tests/unit/distributed_task/taskflow/flow/test_SAN_certs.data
 
 # Translations
 *.mo
