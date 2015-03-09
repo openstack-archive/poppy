@@ -55,6 +55,12 @@ class ServiceController(base.ServiceBase):
         self.request_header = {'Content-type': 'application/json',
                                'Accept': 'text/plain'}
 
+    def _enqueue_san_cert_service(self, service_id):
+        pass
+
+    def _dequeue_san_cert_service(self):
+        pass
+
     def create(self, service_obj):
         try:
             post_data = {
@@ -100,6 +106,7 @@ class ServiceController(base.ServiceBase):
             ids = []
             links = []
             for classified_domain in classified_domains:
+
                 # assign the content realm to be the digital property field
                 # of each group
                 dp = self._process_new_domain(classified_domain,
@@ -123,7 +130,13 @@ class ServiceController(base.ServiceBase):
                     raise RuntimeError(resp.text)
 
                 dp_obj = {'policy_name': dp,
-                          'protocol': classified_domain.protocol}
+                          'protocol': classified_domain.protocol,
+                          }
+                if classified_domain.certificate == 'san':
+                    dp_obj.update({
+                        # Update policy information according to cert type
+                        'certificate': classified_domain.certificate,
+                    })
                 ids.append(dp_obj)
                 # TODO(tonytan4ever): leave empty links for now
                 # may need to work with dns integration
@@ -141,7 +154,16 @@ class ServiceController(base.ServiceBase):
             return self.responder.failed(
                 "failed to create service - %s" % str(e))
         else:
-            return self.responder.created(json.dumps(ids), links)
+            # Need to find a way to let service stay at create_in_progress
+            # state
+            extra = {}
+            san_or_custom_domains = filter(
+                lambda domain: (domain.get('certificate', None) == 'san'), ids)
+            if len(list(san_or_custom_domains)) > 0:
+                extra.update({
+                    'status': 'create_in_progress'
+                })
+            return self.responder.created(json.dumps(ids), links, **extra)
 
     def get(self, service_name):
         pass
@@ -384,6 +406,15 @@ class ServiceController(base.ServiceBase):
                                   'domain': policy['policy_name']
                                   })
                 ids = policies
+            # Need to find a way to let service stay at create_in_progress
+            # state
+            extra = {}
+            san_or_custom_domains = filter(
+                lambda domain: (domain.get('certificate', None) == 'san'), ids)
+            if len(list(san_or_custom_domains)) > 0:
+                extra.update({
+                    'status': 'update_in_progress'
+                })
             return self.responder.updated(json.dumps(ids), links)
 
         except Exception as e:
@@ -629,6 +660,9 @@ class ServiceController(base.ServiceBase):
         if domain_obj.protocol == 'http':
             provider_access_url = self.driver.akamai_access_url_link
         elif domain_obj.protocol == 'https':
-            provider_access_url = '.'.join(
-                [dp, self.driver.akamai_https_access_url_suffix])
+            if domain_obj.certificate == 'san':
+                provider_access_url = 'generating.in.progress.com'
+            else:
+                provider_access_url = '.'.join(
+                    [dp, self.driver.akamai_https_access_url_suffix])
         return provider_access_url
