@@ -128,16 +128,18 @@ class Service(common.DictSerializableModel):
         # the poppy service will be in 'delete_in_progress' status
         for provider_name in self.provider_details:
             provider_detail = self.provider_details[provider_name]
+            print provider_detail.status
             if provider_detail.status == u'failed':
                 self._status = u'failed'
                 break
             elif provider_detail.status == u'delete_in_progress':
                 self._status = u'delete_in_progress'
                 break
+            elif provider_detail.status == u'create_in_progress':
+                self._status = u'create_in_progress'
+                break
             elif provider_detail.status == u'update_in_progress':
                 self._status = u'update_in_progress'
-            elif provider_detail.status == u'deploy_in_progress':
-                self._status = u'create_in_progress'
         else:
             is_not_updating = (self._status != u'update_in_progress')
             if is_not_updating and self.provider_details != {}:
