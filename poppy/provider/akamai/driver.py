@@ -77,7 +77,17 @@ AKAMAI_OPTIONS = [
         help='Operator groupID'),
     cfg.StrOpt(
         'property_id',
-        help='Operator propertyID')
+        help='Operator propertyID'),
+    # backend for long running taks
+    cfg.StrOpt(
+        'backend_type',
+        help='SAN Cert Queueing backend'),
+    cfg.StrOpt(
+        'backend_host',
+        help='SAN Cert Queueing backend host'),
+    cfg.StrOpt(
+        'backend_port',
+        help='SAN Cert Queueing backend port')
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'

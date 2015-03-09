@@ -1,0 +1,17 @@
+[{
+"spsId" : [1234, 6789],
+"jobId" : 45678,
+"cnameHostname": "secure.raxtest1.com",
+"issuer": "symantec",
+"ipVersion": "ipv4",
+"slot-deployment.klass": "esslType",
+"edgeHostnameId": "ehn_1126816"
+},{
+"spsId" : [3190, 4890],
+"jobId" : 67801,
+"cnameHostname": "secure.raxtest2.com",
+"issuer": "symantec",
+"ipVersion": "ipv4",
+"slot-deployment.klass": "esslType",
+"edgeHostnameId": "ehn_1146816"
+}]

@@ -15,6 +15,7 @@
 
 """Unittests for TaskFlow distributed_task driver implementation."""
 
+import mock
 from oslo.config import cfg
 
 from poppy.distributed_task.taskflow import driver
@@ -27,6 +28,12 @@ class TestDriver(base.TestCase):
         super(TestDriver, self).setUp()
 
         self.conf = cfg.ConfigOpts()
+
+        zookeeper_client_patcher = mock.patch(
+            'kazoo.client.KazooClient'
+        )
+        zookeeper_client_patcher.start()
+        self.addCleanup(zookeeper_client_patcher.stop)
         self.distributed_task_driver = (
             driver.TaskFlowDistributedTaskDriver(self.conf))
 

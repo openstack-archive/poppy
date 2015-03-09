@@ -19,7 +19,7 @@ AVAILABLE_PROTOCOLS = [
 
 CERTIFICATE_OPTIONS = [
     u'shared',
-    u'SAN',
+    u'san',
     u'custom']
 
 from poppy.model import common
