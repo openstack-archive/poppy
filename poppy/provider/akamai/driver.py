@@ -77,7 +77,17 @@ AKAMAI_OPTIONS = [
         help='Operator groupID'),
     cfg.StrOpt(
         'property_id',
-        help='Operator propertyID')
+        help='Operator propertyID'),
+    # backend for long running taks
+    cfg.StrOpt(
+        'backend_type',
+        help='SAN Cert Queueing backend'),
+    cfg.StrOpt(
+        'backend_host',
+        help='SAN Cert Queueing backend host'),
+    cfg.StrOpt(
+        'backend_port',
+        help='SAN Cert Queueing backend port')
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
@@ -111,7 +121,7 @@ class CDNProvider(base.Driver):
         self.akamai_papi_api_base_url = ''.join([
             str(self.akamai_conf.policy_api_base_url),
             'papi/v0/{middle_part}/'
-            '?contractId=%s&groupId=%s' % (
+            '?contractId=ctr_%s&groupId=grp_%s' % (
                 self.akamai_conf.contract_id,
                 self.akamai_conf.group_id
             )
