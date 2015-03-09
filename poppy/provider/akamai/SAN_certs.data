@@ -1,0 +1,15 @@
+[{
+"spsId" : [1234, 6789],
+"jobID" : 45678,
+"cnameHostname": "secure.raxtest1.com",
+"issuer": "symantec",
+"ipVersion": "ipv4",
+"slot-deployment.klass": "esslType"
+},{
+"spsId" : [3190, 4890],
+"jobID" : 67801,
+"cnameHostname": "secure.raxtest2.com",
+"issuer": "symantec",
+"ipVersion": "ipv4",
+"slot-deployment.klass": "esslType"
+}]
