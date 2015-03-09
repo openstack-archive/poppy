@@ -55,6 +55,86 @@ class ServiceController(base.ServiceBase):
         self.request_header = {'Content-type': 'application/json',
                                'Accept': 'text/plain'}
 
+    def create_custom_single_cert(self, domain):
+        s_data = self._get_custom_cert_data(domain)
+
+        resp = self.sps_api_client.post(
+            self.driver.akamai_sps_api_base_url.format(spsId=""),
+            data=s_data
+        )
+        if resp.status_code != 202:
+            raise RuntimeError('SPS Request failed.'
+                               'Exception: %s' % resp.text)
+
+        resp_data = json.loads(resp.text)
+        spsId = resp_data['spsId']
+        jobID = resp_data['Results']['data'][0]['results']['jobID']
+        return spsId, jobID
+
+    def _get_custom_cert_data(self, domain):
+        """"""
+        custom_cert_data_template = {
+            'cnameHostname': domain.domain,
+            'issuer': 'cybertrust',
+            'createType': 'single',
+            'csr.cn': domain.domain,
+            'csr.c': ' '.join(domain.domain_info.get(
+                'registra-country', 'None').split()).replace(' ', '+'),
+            'csr.st': ' '.join(domain.domain_info.get(
+                'registra-state', 'None').split()).replace(' ', '+'),
+            'csr.l': ' '.join(domain.domain_info.get(
+                'registra-city', 'None').split()).replace(' ', '+'),
+            'csr.o': ' '.join(domain.domain_info.get(
+                'registra-orgainzation', 'None').split()).replace(' ', '+'),
+            'csr.ou': ' '.join(domain.domain_info.get(
+                'registra-industry', 'None').split()).replace(' ', '+'),
+            'organization-information.organization-name':
+                ' '.join(domain.domain_info.get(
+                    'organization-name', 'None').split()).replace(' ', '+'),
+            'organization-information.address-line-one':
+                ' '.join(domain.domain_info.get(
+                    'organization-address', 'None').split()).replace(' ', '+'),
+            'organization-information.city':
+                ' '.join(domain.domain_info.get(
+                    'organization-city', 'None').split()).replace(' ', '+'),
+            'organization-information.region':
+                ' '.join(domain.domain_info.get(
+                    'organization-region', 'None').split()).replace(' ', '+'),
+            'organization-information.postal-code':
+                ' '.join(domain.domain_info.get(
+                    'organization-postal-code', 'None').split()).replace(' ',
+                                                                         '+'),
+            'organization-information.country':
+                ' '.join(domain.domain_info.get(
+                    'organization-country', 'None').split()).replace(' ', '+'),
+            'organization-information.phone': ' '.join(domain.domain_info.get(
+                'organization-phone', 'None').split()).replace(' ', '+'),
+            'admin-contact.first-name': ' '.join(domain.domain_info.get(
+                'admin-contat-first-name', 'None').split()).replace(' ', '+'),
+            'admin-contact.last-name': ' '.join(domain.domain_info.get(
+                'admin-contat-last-name', 'None').split()).replace(' ', '+'),
+            'admin-contact.phone': ' '.join(domain.domain_info.get(
+                'admin-contat-phone', 'None').split()).replace(' ', '+'),
+            # needs to url encode the email id
+            # example:zali%40akamai.com
+            'admin-contact.email':
+                ' '.join(domain.domain_info.get(
+                    'admin-contat-email',
+                    'None').split()).replace(' ', '+').replace('@', '%40'),
+            'technical-contact.first-name': 'Rachita',
+            'technical-contact.last-name': 'Ahanthem',
+            'technical-contact.phone': '16174755662',
+            'technical-contact.email': 'rahanthe%40akamai.com',
+            'ipVersion': 'ipv4',
+            ##################
+            # 'product' : 'alta',
+            'slot-deployment.klass': 'esslType'
+        }
+
+        s_data = '&'.join(['%s=%s' % (k, v) for (k, v) in
+                           custom_cert_data_template.items()])
+        return s_data
+
     def create(self, service_obj):
         try:
             post_data = {
@@ -86,6 +166,7 @@ class ServiceController(base.ServiceBase):
             ids = []
             links = []
             for classified_domain in classified_domains:
+
                 # assign the content realm to be the digital property field
                 # of each group
                 dp = self._process_new_domain(classified_domain,
@@ -129,7 +210,17 @@ class ServiceController(base.ServiceBase):
             return self.responder.failed(
                 "failed to create service - %s" % str(e))
         else:
-            return self.responder.created(json.dumps(ids), links)
+            # Need to find a way to let service stay at create_in_progress
+            # state
+            extra = {}
+            san_or_custom_domains = filter(
+                lambda domain: (domain.get('certificate', None)
+                                in ['san', 'custom']), ids)
+            if len(list(san_or_custom_domains)) > 0:
+                extra.update({
+                    'status': 'create_in_progress'
+                })
+            return self.responder.created(json.dumps(ids), links, **extra)
 
     def get(self, service_name):
         pass
@@ -351,6 +442,16 @@ class ServiceController(base.ServiceBase):
                                   'certificate': policy['certificate']
                                   })
                 ids = policies
+            # Need to find a way to let service stay at create_in_progress
+            # state
+            extra = {}
+            san_or_custom_domains = filter(
+                lambda domain: (domain.get('certificate', None)
+                                in ['san', 'custom']), ids)
+            if len(list(san_or_custom_domains)) > 0:
+                extra.update({
+                    'status': 'update_in_progress'
+                })
             return self.responder.updated(json.dumps(ids), links)
 
         except Exception as e:
@@ -650,7 +751,9 @@ class ServiceController(base.ServiceBase):
                 provider_access_url = '.'.join(
                     ['.'.join(dp.split('.')[1:]),
                      self.driver.akamai_https_access_url_suffix])
-            else:
+            if domain_obj.certificate == 'san':
+                provider_access_url = 'generating.in.progress.com'
+            elif domain_obj.certificate == 'custom':
                 provider_access_url = '.'.join(
                     [dp, self.driver.akamai_https_access_url_suffix])
         return provider_access_url
