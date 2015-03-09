@@ -130,6 +130,41 @@ class DefaultServicesController(base.ServicesController):
         except ValueError as e:
             raise e
 
+        # Add San Cert adding domains to the queue
+        for domain in service_obj.domains:
+            if 'akamai' in self._driver.providers.names():
+                sdc = self.distributed_task_controller
+                if domain.certificate == 'san':
+                    sdc = self.distributed_task_controller
+                    sdc.enqueue_add_san_cert_service(
+                        project_id, service_obj.service_id, domain.domain)
+                if domain.certificate == 'custom':
+                    akamai_driver = self._driver.providers['akamai'].obj
+                    sc = akamai_driver.service_controller
+                    try:
+                        spsId, jobID = sc.create_custom_single_cert(
+                            domain)
+                    except RuntimeError as e:
+                        raise e
+                    message = {
+                        'certType': 'custom',
+                        'spsId': spsId,
+                        'jobID': jobID,
+                        'cnameHostname': domain.domain,
+                        # This is for updating poppy service
+                        'services_list_info': (
+                            {'SPSStatusCheck': spsId},
+                            [((project_id,
+                              service_obj.service_id),
+                             domain.domain)])
+                    }
+
+                    sdc.enqueue_status_check_queue(
+                        {'SPSStatusCheck': spsId},
+                        [json.dumps([
+                            'secureEdgeHost',
+                            message])])
+
         kwargs = {
             'providers_list_json': json.dumps(providers),
             'project_id': project_id,
@@ -229,6 +264,12 @@ class DefaultServicesController(base.ServicesController):
                 u'delete_in_progress')
 
         self.storage_controller.update(project_id, service_id, service_obj)
+
+        for domain in service_obj.domains:
+            if domain.certificate == 'san':
+                sc = self.distributed_task_controller
+                sc.enqueue_remove_san_cert_service(
+                    project_id, service_obj.service_id)
 
         kwargs = {
             "provider_details": json.dumps(

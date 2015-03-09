@@ -30,6 +30,8 @@ pip-log.txt
 nosetests.xml
 tests/cover
 tests/logs
+poppy/provider/akamai/SAN_certs.data
+tests/unit/distributed_task/taskflow/flow/test_SAN_certs.data
 
 # Translations
 *.mo

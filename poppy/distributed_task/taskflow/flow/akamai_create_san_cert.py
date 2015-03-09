@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.model.helpers import domain
+from taskflow.patterns import linear_flow
+
+from poppy.distributed_task.taskflow.task import akamai_create_san_cert_tasks
 
 
-def load_from_json(json_data):
-    domain_name = json_data.get('domain')
-    protocol = json_data.get('protocol', 'http')
-    certification_option = json_data.get('certificate', None)
-    domain_info = json_data.get('domain-info', None)
-    return domain.Domain(domain_name, protocol, certification_option,
-                         domain_info)
+def create_flow():
+    flow = linear_flow.Flow('Create San Certificate workflow',
+                            akamai_create_san_cert_tasks.CreateSANCertTask()
+                            )
+    return flow

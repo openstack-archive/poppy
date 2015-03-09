@@ -15,10 +15,13 @@
 
 import logging
 
+from kazoo import client
+from kazoo.recipe import queue
 from oslo.config import cfg
 from taskflow.jobs import backends as job_backends
 from taskflow.persistence import backends as persistence_backends
 
+from poppy.common import decorators
 from poppy.distributed_task import base
 from poppy.distributed_task.taskflow import controllers
 
@@ -30,17 +33,34 @@ TASKFLOW_OPTIONS = [
                help='Default jobboard backend type'),
     cfg.StrOpt('persistent_backend_type', default='zookeeper',
                help='Default jobboard persistent backend type'),
+    cfg.StrOpt('san_cert_job_backend_type', default='zookeeper',
+               help='Default san cert job backend type'),
     cfg.ListOpt('jobboard_backend_host', default=['localhost'],
                 help='default jobboard backend server host'),
     cfg.IntOpt('jobboard_backend_port', default=2181, help='default'
-               ' jobboard backend server port (e.g: ampq)'),
+               ' jobboard backend server port (e.g: 2181)'),
     cfg.ListOpt('persistent_backend_host', default=['localhost'],
                 help='default persistent backend server host'),
     cfg.IntOpt('persistent_backend_port', default=2181, help='default'
-               ' default persistent backend server port (e.g: ampq)'),
+               ' default persistent backend server port (e.g: 2181)'),
+    cfg.ListOpt('san_cert_job_backend_host', default=['localhost'],
+                help='default san cert job backend server host'),
+    cfg.IntOpt('san_cert_job_backend_port', default=2181, help='default'
+               ' default san cert job backend server port (e.g: 2181)'),
 ]
 
 TASKFLOW_GROUP = 'drivers:distributed_task:taskflow'
+
+
+def connect_to_zookeeper(conf):
+    """Connect to a zookeeper cluster"""
+    san_cert_job_backend_hosts = ','.join(['%s:%s' % (
+        host, conf.san_cert_job_backend_port)
+        for host in
+        conf.san_cert_job_backend_host])
+    zk_client = client.KazooClient(san_cert_job_backend_hosts)
+    zk_client.start()
+    return zk_client
 
 
 class TaskFlowDistributedTaskDriver(base.Driver):
@@ -72,6 +92,16 @@ class TaskFlowDistributedTaskDriver(base.Driver):
             "hosts": persistence_backends_hosts,
         }
 
+        self.san_cert_add_job_backend = queue.LockingQueue(
+            self.zk_client,
+            '/san_cert_add')
+        self.papi_job_update_job_backend = queue.LockingQueue(
+            self.zk_client,
+            '/papi_jobs')
+        self.status_checking_job_backend = queue.LockingQueue(
+            self.zk_client,
+            '/status_checking')
+
     def is_alive(self):
         """Health check for TaskFlow worker."""
         return True
@@ -84,6 +114,10 @@ class TaskFlowDistributedTaskDriver(base.Driver):
         return job_backends.backend(
             'poppy_service_jobs',
             conf.copy(), persistence=persistence)
+
+    @decorators.lazy_property(write=False)
+    def zk_client(self):
+        return connect_to_zookeeper(self.distributed_task_conf)
 
     @property
     def vendor_name(self):
