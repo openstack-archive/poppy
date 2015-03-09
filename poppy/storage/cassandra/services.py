@@ -273,8 +273,8 @@ class ServicesController(base.ServicesController):
 
         return self.format_result(result)
 
-    def _exists_elsewhere(self, domain_name, service_id):
-        """_exists_elsewhere
+    def domain_exists_elsewhere(self, domain_name, service_id):
+        """domain_exists_elsewhere
 
         Check if a service with this domain name has already been created.
 
@@ -318,7 +318,7 @@ class ServicesController(base.ServicesController):
 
         # check if the service domain names already exist
         for d in service_obj.domains:
-            if self._exists_elsewhere(
+            if self.domain_exists_elsewhere(
                     d.domain,
                     service_obj.service_id) is True:
                 raise ValueError(
@@ -366,14 +366,12 @@ class ServicesController(base.ServicesController):
         self.session.execute(batch)
 
     def update(self, project_id, service_id, service_obj):
+        """update.
 
-        # check if the service domain names already exist
-        for d in service_obj.domains:
-            if self._exists_elsewhere(
-                    d.domain,
-                    service_id) is True:
-                raise ValueError(
-                    "Domain {0} has already been taken".format(d.domain))
+        :param project_id
+        :param service_id
+        :param service_obj
+        """
 
         service_name = service_obj.name
         domains = [json.dumps(d.to_dict())
