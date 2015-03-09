@@ -185,6 +185,14 @@ class DefaultServicesController(base.ServicesController):
         service_new_json['service_id'] = service_old.service_id
         service_new = service.Service.init_from_dict(service_new_json)
 
+        # check if the service domain names already exist
+        for d in service_new.domains:
+            if self.storage_controller.domain_exists_elsewhere(
+                    d.domain,
+                    service_id) is True:
+                raise ValueError(
+                    "Domain {0} has already been taken".format(d.domain))
+
         # set status in provider details to u'update_in_progress'
         provider_details = service_old.provider_details
         for provider in provider_details:
