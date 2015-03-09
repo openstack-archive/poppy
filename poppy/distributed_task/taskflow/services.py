@@ -33,6 +33,9 @@ class ServicesController(base.ServicesController):
 
         self.driver = driver
         self.jobboard_backend_conf = self.driver.jobboard_backend_conf
+        self.san_cert_add_job_backend = self.driver.san_cert_add_job_backend
+        self.san_cert_remove_job_backend = (
+            self.driver.san_cert_remove_job_backend)
 
     @property
     def persistence(self):
@@ -82,3 +85,15 @@ class ServicesController(base.ServicesController):
                     engine='serial')
 
                 conductor.run()
+
+    def enqueue_add_san_cert_service(self, service_id):
+        """Run a task flow worker (conductor).
+
+        """
+        self.san_cert_add_job_backend.put(str.encode(service_id))
+
+    def enqueue_remove_san_cert_service(self, service_id):
+        """Run a task flow worker (conductor).
+
+        """
+        self.san_cert_remove_job_backend.put(str.encode(service_id))
