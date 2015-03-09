@@ -16,11 +16,13 @@
 import copy
 import json
 import logging
+import requests
 import traceback
 
 from poppy.common import decorators
 from poppy.common import util
 from poppy.provider import base
+from poppy.provider.akamai import utils
 
 # to use log inside worker, we need to directly use logging
 LOG = logging.getLogger('Poppy Service Tasks')
@@ -54,6 +56,79 @@ class ServiceController(base.ServiceBase):
         self.papi_api_base_url = self.driver.akamai_papi_api_base_url
         self.request_header = {'Content-type': 'application/json',
                                'Accept': 'text/plain'}
+
+    def create_custom_single_cert(self, host_name):
+        s_data = self._get_custom_cert_data(host_name)
+
+        resp = self.sps_api_client.post(
+            self.driver.akamai_sps_api_base_url.format(spsId=""),
+            data=s_data
+        )
+        if resp.status_code != 202:
+            raise RuntimeError('SPS Request failed.'
+                               'Exception: %s' % resp.text)
+
+        resp_data = json.loads(resp.text)
+        spsId = resp_data['spsId']
+        jobID = resp_data['Results']['data'][0]['results']['jobID']
+        return spsId, jobID
+
+    def _get_custom_cert_data(self, host_name):
+        """"""
+        custom_cert_data_template = {
+            'cnameHostname': host_name,
+            'issuer': 'cybertrust',
+            'createType': 'single',
+            'csr.cn': '{{crs.cn}}',
+            'csr.c': host_name,
+            'csr.st': '{{csr.st}}',
+            'csr.l': '{{csr.l}}',
+            'csr.o': '{{csr.o}}',
+            'csr.ou': '{{csr.ou}}',
+            'organization-information.organization-name': '{{organization}}',
+            'organization-information.address-line-one':  '{{organization'
+            '-address-line-one}}',
+            'organization-information.city': '{{organization-city}}',
+            'organization-information.region': '{{organization-tx}}',
+            'organization-information.postal-code':
+                '{{organization-postal-code}}',
+            'organization-information.country': '{{organization-country}}',
+            'organization-information.phone': '{{organization-phone}}',
+            'admin-contact.first-name': '{{admin-first-name}}',
+            'admin-contact.last-name': '{{admin-last-name}}',
+            'admin-contact.phone': '{{admin-contact}}',
+            # needs to url encode the email id
+            # example:zali%40akamai.com
+            'admin-contact.email': '{{admin-contact-email}}',
+            'technical-contact.first-name': '{{technical-first-name}}',
+            'technical-contact.last-name': '{{technical-last-name}}',
+            'technical-contact.phone': '{{technical-contact-phone}}',
+            'technical-contact.email': '{{technical-contact-email}}',
+            'ipVersion': 'ipv4',
+            ##################
+            # 'product' : 'alta',
+            'slot-deployment.klass': 'esslType'
+        }
+
+        # Getting whois information from whois.com
+        try:
+            whois_resp = requests.get("http://www.whois.com/search.php?"
+                                      "query=%s"
+                                      % host_name)
+        except:
+            raise ValueError('Cannot get Whois information for %s') % (
+                host_name)
+        parser = utils.WhoisDotComHTMLParser()
+        parser.feed(whois_resp.text)
+        cert_info_dict = utils.parseRegistraData(parser.registra_data)
+
+        for key in custom_cert_data_template:
+            if custom_cert_data_template[key].startswith("{{"):
+                custom_cert_data_template[key] = cert_info_dict.get(key, None)
+
+        s_data = '&'.join(['%s=%s' % (k, v) for (k, v) in
+                           custom_cert_data_template.items()])
+        return s_data
 
     def create(self, service_obj):
         try:
@@ -100,6 +175,7 @@ class ServiceController(base.ServiceBase):
             ids = []
             links = []
             for classified_domain in classified_domains:
+
                 # assign the content realm to be the digital property field
                 # of each group
                 dp = self._process_new_domain(classified_domain,
@@ -123,7 +199,13 @@ class ServiceController(base.ServiceBase):
                     raise RuntimeError(resp.text)
 
                 dp_obj = {'policy_name': dp,
-                          'protocol': classified_domain.protocol}
+                          'protocol': classified_domain.protocol,
+                          }
+                if classified_domain.certificate in ['san', 'custom']:
+                    dp_obj.update({
+                        # Update policy information according to cert type
+                        'certificate': classified_domain.certificate,
+                    })
                 ids.append(dp_obj)
                 # TODO(tonytan4ever): leave empty links for now
                 # may need to work with dns integration
@@ -141,7 +223,17 @@ class ServiceController(base.ServiceBase):
             return self.responder.failed(
                 "failed to create service - %s" % str(e))
         else:
-            return self.responder.created(json.dumps(ids), links)
+            # Need to find a way to let service stay at create_in_progress
+            # state
+            extra = {}
+            san_or_custom_domains = filter(
+                lambda domain: (domain.get('certificate', None)
+                                in ['san', 'custom']), ids)
+            if len(list(san_or_custom_domains)) > 0:
+                extra.update({
+                    'status': 'create_in_progress'
+                })
+            return self.responder.created(json.dumps(ids), links, **extra)
 
     def get(self, service_name):
         pass
@@ -279,6 +371,12 @@ class ServiceController(base.ServiceBase):
                             raise RuntimeError(resp.text)
                         dp_obj = {'policy_name': dp,
                                   'protocol': classified_domain.protocol}
+                        if classified_domain.certificate in ['san', 'custom']:
+                            dp_obj.update({
+                                # Update policy information according to cert
+                                # type
+                                'certificate': classified_domain.certificate,
+                            })
                         ids.append(dp_obj)
                         # TODO(tonytan4ever): leave empty links for now
                         # may need to work with dns integration
@@ -384,6 +482,16 @@ class ServiceController(base.ServiceBase):
                                   'domain': policy['policy_name']
                                   })
                 ids = policies
+            # Need to find a way to let service stay at create_in_progress
+            # state
+            extra = {}
+            san_or_custom_domains = filter(
+                lambda domain: (domain.get('certificate', None)
+                                in ['san', 'custom']), ids)
+            if len(list(san_or_custom_domains)) > 0:
+                extra.update({
+                    'status': 'update_in_progress'
+                })
             return self.responder.updated(json.dumps(ids), links)
 
         except Exception as e:
@@ -629,6 +737,12 @@ class ServiceController(base.ServiceBase):
         if domain_obj.protocol == 'http':
             provider_access_url = self.driver.akamai_access_url_link
         elif domain_obj.protocol == 'https':
-            provider_access_url = '.'.join(
-                [dp, self.driver.akamai_https_access_url_suffix])
+            if domain_obj.certificate == 'san':
+                provider_access_url = 'generating.in.progress.com'
+            elif domain_obj.certificate == 'custom':
+                provider_access_url = '.'.join(
+                    [dp, self.driver.akamai_https_access_url_suffix])
+            else:
+                provider_access_url = '.'.join(
+                    [dp, self.driver.akamai_https_access_url_suffix])
         return provider_access_url
