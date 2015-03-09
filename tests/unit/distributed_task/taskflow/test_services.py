@@ -27,6 +27,10 @@ class TestServiceController(base.TestCase):
     def setUp(self):
         super(TestServiceController, self).setUp()
 
+        zookeeper_client_patcher = mock.patch(
+            'kazoo.client.KazooClient'
+        )
+        zookeeper_client_patcher.start()
         self.conf = cfg.ConfigOpts()
         self.distributed_task_driver = (
             driver.TaskFlowDistributedTaskDriver(self.conf))
@@ -55,3 +59,15 @@ class TestServiceController(base.TestCase):
         self.distributed_task_driver.services_controller.run_task_worker()
         self.distributed_task_driver.persistence.assert_called()
         self.distributed_task_driver.job_board.assert_called()
+
+    def enqueue_add_san_cert_service(self):
+        sc = self.distributed_task_driver.services_controller
+        sc.enqueue_add_san_cert_service()
+        driver = self.distributed_task_driver
+        driver.san_cert_add_job_backend.put.assert_called()
+
+    def enqueue_remove_san_cert_service(self):
+        sc = self.distributed_task_driver.services_controller
+        sc.enqueue_remove_san_cert_service()
+        driver = self.distributed_task_driver
+        driver.san_cert_add_job_backend.put.assert_called()
