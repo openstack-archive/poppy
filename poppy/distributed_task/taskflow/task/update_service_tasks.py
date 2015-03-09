@@ -192,4 +192,40 @@ class UpdateProviderDetailsTask_Errors(task.Task):
         service_controller.storage_controller.update(project_id, service_id,
                                                      service_obj)
         service_controller.storage_controller._driver.close_connection()
+
+        # If there's new SAN domain or domain's certificate type has changed
+        # we need to enque the service id to trigger background SAN Cert jobs
+        # Only at this time we could enqueue because the only after the
+        # service has been successfully patched, the service object has the new
+        # domain information in it
+        old_domains = set([(domain.domain, domain.certificate) for domain
+                           in service_old.domains
+                           if domain.certificate is not None])
+        new_domains = set([(domain.domain, domain.certificate) for domain
+                           in service_obj.domains
+                           if domain.certificate is not None])
+
+        added_domains = new_domains.difference(old_domains)
+        removed_domains = old_domains.difference(new_domains)
+
+        bm = bootstrap_obj.manager
+        for domain in added_domains:
+            if 'akamai' in self._driver.providers.names():
+                if domain[1] == 'san':
+                    # Add San Cert adding domains to the queue
+                    sc = bm.distributed_task.services_controller
+                    sc.enqueue_add_san_cert_service(
+                        project_id, service_obj.service_id)
+                if domain.certificate == 'custom':
+                    akamai_driver = bm._driver.providers['akamai'].obj
+                    akamai_driver.create_custom_single_cert(domain.domain)
+
+        for domain in removed_domains:
+            if 'akamai' in self._driver.providers.names():
+                if domain[1] == 'san':
+                    # Add San Cert adding domains to the queue
+                    sc = bm.distributed_task.services_controller
+                    sc.enqueue_remove_san_cert_service(
+                        project_id, service_obj.service_id)
+
         LOG.info('Update provider detail service worker process complete...')
