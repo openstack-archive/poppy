@@ -227,6 +227,7 @@ class ServiceController(base.ServiceBase):
             # state
             extra = {}
             san_or_custom_domains = filter(
+
                 lambda domain: (domain.get('certificate', None)
                                 in ['san', 'domain']), ids)
             if len(list(san_or_custom_domains)) > 0:
