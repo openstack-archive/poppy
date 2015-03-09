@@ -13,39 +13,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Unittests for TaskFlow distributed_task driver implementation."""
+"""Unittests for a specific TaskFlow flow: akamai_status_check"""
+
+import json
 
 import mock
 from oslo.config import cfg
 
-from poppy.distributed_task.taskflow import driver
+from poppy.distributed_task.taskflow.task import akamai_status_check_tasks
 from tests.unit import base
+from tests.unit.distributed_task.taskflow.flow import akamai_mocks
 
 
-class TestDriver(base.TestCase):
+class TestStatusCheck(base.TestCase):
 
     def setUp(self):
-        super(TestDriver, self).setUp()
-
-        self.conf = cfg.ConfigOpts()
-
+        super(TestStatusCheck, self).setUp()
         zookeeper_client_patcher = mock.patch(
             'kazoo.client.KazooClient'
         )
         zookeeper_client_patcher.start()
         self.addCleanup(zookeeper_client_patcher.stop)
-        self.distributed_task_driver = (
-            driver.TaskFlowDistributedTaskDriver(self.conf))
 
-    def test_init(self):
-        self.assertTrue(self.distributed_task_driver is not None)
+        bootstrap_patcher = mock.patch(
+            'poppy.bootstrap.Bootstrap',
+            new=akamai_mocks.MockBootStrap
+        )
+        bootstrap_patcher.start()
+        self.addCleanup(bootstrap_patcher.stop)
 
-    def test_vendor_name(self):
-        self.assertEqual('TaskFlow', self.distributed_task_driver.vendor_name)
+        self.status_check_task = (
+            akamai_status_check_tasks.StatusCheckAndUpdateTask())
 
-    def test_is_alive(self):
-        self.assertEqual(True, self.distributed_task_driver.is_alive())
-
-    def test_service_contoller(self):
-        self.assertTrue(self.distributed_task_driver.services_controller
-                        is not None)
+    def test_status_check_and_update_task(self):
+        self.status_check_task.execute()
+        storage_controller = self.status_check_task.storage_controller
+        storage_controller.update_provider_details.assert_called()
