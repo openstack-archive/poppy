@@ -25,11 +25,12 @@ class Model(collections.OrderedDict):
 
     def __init__(self, rule):
         super(Model, self).__init__()
+
         if getattr(rule, 'name', None) is not None:
             self['name'] = cgi.escape(rule.name)
         for attr_name in ['http_host', 'http_method',
                           'client_ip', 'request_url',
-                          'referrer']:
+                          'referrer', 'geography']:
             attr = getattr(rule, attr_name, None)
             if attr is not None:
                 self[attr_name] = cgi.escape(attr)

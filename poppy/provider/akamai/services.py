@@ -60,6 +60,10 @@ class ServiceController(base.ServiceBase):
         self._process_referrer_restrictions(service_obj.restrictions,
                                             post_data['rules'])
 
+        # geo restriction implementaiton for akamai
+        self._process_geo_restrictions(service_obj.restrictions,
+                                       post_data['rules'])
+
         # implementing caching-rules for akamai
         # we do not have to use copy here, since caching is only used once
         caching_rules = copy.deepcopy(service_obj.caching)
@@ -168,6 +172,10 @@ class ServiceController(base.ServiceBase):
             # referrer restriction implementaiton for akamai
             self._process_referrer_restrictions(service_obj.restrictions,
                                                 policy_content['rules'])
+
+            # geo restriction implementaiton for akamai
+            self._process_geo_restrictions(service_obj.restrictions,
+                                           policy_content['rules'])
 
             # implementing caching-rules for akamai
             # we need deep copy since caching rules will be used in late
@@ -291,6 +299,10 @@ class ServiceController(base.ServiceBase):
                 # referrer restriction implementaiton for akamai
                 self._process_referrer_restrictions(service_obj.restrictions,
                                                     policy_content['rules'])
+
+                # geo restriction implementaiton for akamai
+                self._process_geo_restrictions(service_obj.restrictions,
+                                               policy_content['rules'])
 
                 # implementing caching-rules for akamai
                 caching_rules = copy.deepcopy(service_obj.caching)
@@ -563,14 +575,14 @@ class ServiceController(base.ServiceBase):
     def _process_referrer_restrictions(self, restrictions, rules):
         # referrer restriction implementaiton for akamai
         # get a list of referrer restriction domains/hosts
-        referrer_restriction_whitelist_list = [rule.referrer
+        referrer_restriction_whitelist_list = [getattr(rule, 'referrer', None)
                                                for restriction in
                                                restrictions
                                                for rule in restriction.rules
                                                if (restriction.type ==
                                                    'whitelist')]
 
-        referrer_restriction_blacklist_list = [rule.referrer
+        referrer_restriction_blacklist_list = [getattr(rule, 'referrer', None)
                                                for restriction in
                                                restrictions
                                                for rule in restriction.rules
@@ -594,6 +606,56 @@ class ServiceController(base.ServiceBase):
             for rule in rules:
                 self._process_referrer_restriction(
                     referrer_blacklist_value, rule, 'blacklist')
+
+    def _process_geo_restriction(self, geo_values_list_value, rule, r_type):
+        if r_type == 'whitelist':
+            rule['behaviors'].append({
+                'name': 'geo-whitelist',
+                'type': 'country',
+                'value': geo_values_list_value
+            })
+        elif r_type == 'blacklist':
+            rule['behaviors'].append({
+                'name': 'geo-blacklist',
+                'type': 'country',
+                'value': geo_values_list_value
+            })
+        else:
+            raise RuntimeError('Unknown Restriction Type')
+
+    def _process_geo_restrictions(self, restrictions, rules):
+        # referrer restriction implementaiton for akamai
+        # get a list of geography restriction areas
+        geo_restriction_whitelist_list = [getattr(rule, 'geography', None)
+                                          for restriction in
+                                          restrictions
+                                          for rule in restriction.rules
+                                          if restriction.type == 'whitelist']
+
+        geo_restriction_blacklist_list = [getattr(rule, 'geography', None)
+                                          for restriction in
+                                          restrictions
+                                          for rule in restriction.rules
+                                          if (restriction.type ==
+                                              'blacklist')]
+
+        if any(geo_restriction_whitelist_list):
+            geo_whitelist_value = ' '.join(
+                ['%s' % geography
+                 for geography in geo_restriction_whitelist_list
+                 if geography is not None])
+            for rule in rules:
+                self._process_geo_restriction(
+                    geo_whitelist_value, rule, 'whitelist')
+
+        if any(geo_restriction_blacklist_list):
+            geo_blacklist_value = ' '.join(
+                ['%s' % geography
+                 for geography in geo_restriction_blacklist_list
+                 if geography is not None])
+            for rule in rules:
+                self._process_geo_restriction(
+                    geo_blacklist_value, rule, 'blacklist')
 
     def _get_configuration_number(self, domain_obj):
         # TODO(tonytan4ever): also classify domains based on their

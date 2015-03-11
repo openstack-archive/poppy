@@ -60,6 +60,7 @@
         "restrictions": [
             {
                 "name": "website only",
+                "type": "whitelist",
                 "rules": [
                     {
                         "name": "mocksite.com",
@@ -68,11 +69,16 @@
                 ]
             },
             {
-                "name": "graphic only",
+                "name": "graphic and US only",
+                "type": "whitelist",
                 "rules": [
                     {
                         "name": "mockgraphicsite.com",
                         "referrer": "www.mocksitegraphic.com"
+                    },
+                     {
+                        "name": "US geo restriction",
+                        "geography": "US"
                     }
                 ]
             }
