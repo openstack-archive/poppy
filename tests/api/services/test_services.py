@@ -500,6 +500,7 @@ class TestServicePatch(base.TestBase):
 
         self.restrictions_list = [
             {"name": "website only",
+             "type": "whitelist",
              "rules": [{"name": "mywebsite.com",
                         "referrer": "www.mywebsite.com"}]}]
 
