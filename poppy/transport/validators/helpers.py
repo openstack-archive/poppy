@@ -314,7 +314,7 @@ def is_valid_service_configuration(service, schema):
     ]
     if 'restrictions' in service:
         for restriction in service['restrictions']:
-            if restriction.get('type', 'whitelist') == 'blacklist':
+            if restriction.get('type', 'blacklist') == 'blacklist':
                 for rule in restriction['rules']:
                     entity = None
                     for key in rule:
@@ -322,6 +322,10 @@ def is_valid_service_configuration(service, schema):
                             entity = key
                         else:
                             continue
+                        if key in whitelist_restriction_entities:
+                            raise exceptions.ValidationFailed(
+                                'Cannot blacklist and whitelsit [%s]'
+                                ' at the same time' % key)
                     blacklist_restriction_entities.append(entity)
             elif restriction.get('type', 'whitelist') == 'whitelist':
                 for rule in restriction['rules']:
