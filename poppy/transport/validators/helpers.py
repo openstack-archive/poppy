@@ -304,6 +304,39 @@ def is_valid_service_configuration(service, schema):
                         raise exceptions.ValidationFailed(
                             u'HostHeaderValue {0} is not valid'.format(
                                 hostheadervalue))
+
+    # 11. Need to validate restriction correctness here
+    # Cannot allow one restriction type to have both
+    # "blacklist" and "whitelist" restriciton type
+    whitelist_restriction_entities = [
+    ]
+    blacklist_restriction_entities = [
+    ]
+    if 'restrictions' in service:
+        for restriction in service['restrictions']:
+            if restriction.get('type', 'whitelist') == 'blacklist':
+                for rule in restriction['rules']:
+                    entity = None
+                    for key in rule:
+                        if key != 'name':
+                            entity = key
+                        else:
+                            continue
+                    blacklist_restriction_entities.append(entity)
+            elif restriction.get('type', 'whitelist') == 'whitelist':
+                for rule in restriction['rules']:
+                    entity = None
+                    for key in rule:
+                        if key != 'name':
+                            entity = key
+                        else:
+                            continue
+                        if key in blacklist_restriction_entities:
+                            raise exceptions.ValidationFailed(
+                                'Cannot blacklist and whitelsit [%s]'
+                                ' at the same time' % key)
+                    whitelist_restriction_entities.append(entity)
+
     return
 
 
