@@ -48,12 +48,13 @@ class TestServiceModel(base.TestCase):
         self.mydomains.append(domain.Domain('wiki.cc', 'https'))
 
         # test a rule with referrer restriction
-        r1 = restriction.Restriction('referrer_site')
+        r1 = restriction.Restriction('referrer_site', 'whitelist')
         self.r1_rules = [rule.Rule('referrer_restriction_rule_1')]
         self.r1_rules[0].http_host = 'www.some_bad_site.com'
         r1.rules = self.r1_rules
         self.myrestrictions.append(r1)
-        self.myrestrictions.append(restriction.Restriction('client_ip'))
+        self.myrestrictions.append(restriction.Restriction('client_ip',
+                                                           'whitelist'))
 
         self.mycaching.append(cachingrule.CachingRule('images', 3600))
         self.mycaching.append(cachingrule.CachingRule('js', 7200))
