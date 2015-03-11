@@ -30,6 +30,7 @@ class TestRule(base.TestCase):
         client_ip = '192.168.1.1'
         http_method = 'POST'
         request_url = '/index.html'
+        geography = 'USA'
 
         myrule = rule.Rule(name)
 
@@ -53,3 +54,7 @@ class TestRule(base.TestCase):
         # request_url
         myrule.request_url = request_url
         self.assertEqual(myrule.request_url, request_url)
+
+        # geography
+        myrule.geography = geography
+        self.assertEqual(myrule.geography, geography)
