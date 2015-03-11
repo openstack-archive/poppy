@@ -21,6 +21,7 @@ import traceback
 from poppy.common import decorators
 from poppy.common import util
 from poppy.openstack.common import log
+from poppy.provider.akamai import geo_zone_code_mapping
 from poppy.provider import base
 
 LOG = log.getLogger(__name__)
@@ -557,7 +558,7 @@ class ServiceController(base.ServiceBase):
         # for each restriction rule
 
         # restriction entities include: referrer, geography, client_ip
-        restriction_entities = ['referrer', 'client_ip']
+        restriction_entities = ['referrer', 'geography', 'client_ip']
 
         class entityRequestUrlMappingList(dict):
             """A dictionary with a name attribute"""
@@ -618,6 +619,9 @@ class ServiceController(base.ServiceBase):
                         'value': behavior_value
                     }
 
+                    if entity == 'geography':
+                        behavior_dict['type'] = 'country'
+
                     # if we have a matches rule already
                     for rule in rules_list:
                         for match in rule['matches']:
@@ -665,7 +669,7 @@ class ServiceController(base.ServiceBase):
                         'type': 'natural',
                         'value': 'now',
                     })
-            # if there is no matches entry yet for this rule
+        # if there is no matches entry yet for this rule
         if not found_match:
             # create an akamai rule
             rule_dict_template = {
@@ -691,6 +695,8 @@ class ServiceController(base.ServiceBase):
             prefix = 'referer'
         elif entity == 'client_ip':
             prefix = 'ip'
+        elif entity == 'geography':
+            prefix = 'geo'
 
         if entity_restriction_access == 'whitelist':
             suffix = 'whitelist'
@@ -714,6 +720,20 @@ class ServiceController(base.ServiceBase):
                  for rule_entry
                  in rule_entries
                  ])
+        elif entity == 'geography':
+            # We ignore the country that Akamai doesn't support for right now
+            zones_list = []
+            for rule_entry in rule_entries:
+                if rule_entry.geography in (
+                        geo_zone_code_mapping.REGION_COUNTRY_MAPPING):
+                    zones_list.extend(
+                        geo_zone_code_mapping.REGION_COUNTRY_MAPPING[
+                            rule_entry.geography])
+                else:
+                    zones_list.append(rule_entry.geography)
+            return ' '.join(
+                ['%s' % geo_zone_code_mapping.COUNTRY_CODE_MAPPING.get(
+                    zone, '') for zone in zones_list])
 
     def _process_caching_rules(self, caching_rules, rules_list):
         # akamai requires all caching rules to start with '/'

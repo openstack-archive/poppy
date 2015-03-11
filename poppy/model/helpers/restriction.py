@@ -37,7 +37,6 @@ class Restriction(common.DictSerializableModel):
     @property
     def name(self):
         """name.
-
         :returns name
         """
         return self._name
@@ -49,7 +48,6 @@ class Restriction(common.DictSerializableModel):
     @property
     def access(self):
         """name.
-
         :returns name
         """
         return self._access
@@ -68,7 +66,6 @@ class Restriction(common.DictSerializableModel):
     @property
     def rules(self):
         """rules.
-
         :returns rules
         """
         return self._rules
@@ -80,9 +77,7 @@ class Restriction(common.DictSerializableModel):
     @classmethod
     def init_from_dict(cls, dict_obj):
         """Construct a model instance from a dictionary.
-
         This serves as a 2nd constructor
-
         :param dict_obj: dictionary object
         :returns o
         """
