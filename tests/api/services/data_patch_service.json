@@ -177,6 +177,7 @@
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
+                    "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images/*"}]
                     }}
     ],
@@ -184,11 +185,13 @@
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
+                    "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images2/*"}]
                     }},
         {"op": "replace",
          "path": "/restrictions/0",
           "value": {"name": "new_restricted",
+                    "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/*"}]
                     }}
    ],
@@ -200,6 +203,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "r",
+                    "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images/*"}]
                    }
          }
@@ -208,6 +212,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
+                    "type": "whitelist",
                     "rules": [{"name": "r", "referrer": "www.thesite.com", "request_url": "/images/*"}]
                    }
          }
@@ -216,6 +221,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
+                    "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "a.co", "request_url":"/images/*"}]
                    }
          }

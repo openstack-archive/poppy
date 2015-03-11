@@ -20,7 +20,6 @@ import urlparse
 import uuid
 
 import ddt
-import jsonpatch
 from nose.plugins import attrib
 
 from tests.api import base

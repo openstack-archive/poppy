@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.common import util
 from poppy.model import common
+from poppy.model.helpers import geo_zones
 
 
 class Rule(common.DictSerializableModel):
@@ -21,7 +23,7 @@ class Rule(common.DictSerializableModel):
 
     def __init__(self, name=None,
                  referrer=None, http_host=None, client_ip=None,
-                 http_method=None, request_url="/*"):
+                 geography=None, http_method=None, request_url="/*"):
         self._name = name
         self._request_url = request_url
 
@@ -33,6 +35,18 @@ class Rule(common.DictSerializableModel):
             self._client_ip = client_ip
         if http_method:
             self._http_method = http_method
+        if geography:
+            # Validate the geography should be in a list of supported
+            # countries
+            if geography is not None and \
+                geography not in geo_zones.GEO_COUNTRY_ZONES and \
+                    geography not in geo_zones.GEO_REGION_ZONES:
+                raise ValueError(util.help_escape(
+                                 'Country/Area %s is not supported in'
+                                 'geo zones' % geography))
+            self._geography = geography
+        if request_url:
+            self._request_url = request_url
 
     @property
     def name(self):
@@ -79,3 +93,19 @@ class Rule(common.DictSerializableModel):
     @request_url.setter
     def request_url(self, value):
         self._request_url = value
+
+    @property
+    def geography(self):
+        """http_host."""
+        return self._geography
+
+    @geography.setter
+    def geography(self, value):
+        if value is not None and \
+            value not in geo_zones.GEO_COUNTRY_ZONES and \
+                value not in geo_zones.GEO_REGION_ZONES:
+                raise ValueError(util.help_escape(
+                                 'Country/Area %s is not supported in'
+                                 'geo zones' % value))
+
+        self._geography = value

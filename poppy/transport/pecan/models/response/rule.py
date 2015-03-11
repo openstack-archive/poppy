@@ -29,7 +29,8 @@ class Model(collections.OrderedDict):
         self['name'] = util.help_escape(rule.name)
         self['request_url'] = util.help_escape(rule.request_url)
         for attr_name in ['http_host', 'http_method',
-                          'client_ip', 'referrer']:
+                          'client_ip', 'request_url',
+                          'referrer', 'geography']:
             attr = getattr(rule, attr_name, None)
             if attr is not None:
                 self[attr_name] = util.help_escape(attr)

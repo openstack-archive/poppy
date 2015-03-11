@@ -38,7 +38,9 @@
             }
         ],
          "restrictions_list": [
-                        {"name": "test",
+                        {
+                        "name": "test",
+                        "type": "whitelist",
                         "rules": [
                             {
                                 "name": "only me",
