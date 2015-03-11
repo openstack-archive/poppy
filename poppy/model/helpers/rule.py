@@ -19,7 +19,7 @@ from poppy.model import common
 class Rule(common.DictSerializableModel):
     """Rule."""
 
-    def __init__(self, name,
+    def __init__(self, name=None,
                  referrer=None, http_host=None, client_ip=None,
                  http_method=None, request_url="/*"):
         self._name = name
