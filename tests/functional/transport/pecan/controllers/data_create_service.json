@@ -26,7 +26,11 @@
                 "rules": [
                     {
                         "name": "mocksite.com",
-                        "http_host": "www.mocksite.com"
+                        "referrer": "www.mocksite.com"
+                    },
+                    {
+                        "name": "us-website-only",
+                        "geography": "US"
                     }
                 ]
             }
