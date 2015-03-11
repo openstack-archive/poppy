@@ -184,6 +184,8 @@ def is_valid_service_configuration(service, schema):
             else:
                 domains.append(domain_value)
 
+    # Need to validate restriction correctness here
+
     return
 
 

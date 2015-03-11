@@ -244,6 +244,12 @@ class ServiceSchema(schema_base.SchemaBase):
                                     'required': True,
                                     'minLength': 1,
                                     'maxLength': 256},
+                                'type': {
+                                    'type': 'string',
+                                    'required': True,
+                                    'enum': [
+                                        "whitelist",
+                                        "blacklist"]},
                                 'rules': {
                                     'type': 'array',
                                     'required': True,
@@ -252,7 +258,6 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'properties': {
                                             'name': {
                                                 'type': 'string',
-                                                'required': True,
                                                 'minLength': 1,
                                                 'maxLength': 256},
                                             'referrer': {

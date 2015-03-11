@@ -161,6 +161,7 @@
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
+         		   "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "thesite"}]
                     }}
     ],
@@ -168,11 +169,13 @@
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
+          		   "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "thesite"}]
                     }},
         {"op": "replace",
          "path": "/restrictions/0",
           "value": {"name": "new_restricted",
+          			"type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "thesite"}]
                     }}
    ],
@@ -184,6 +187,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "r",
+                    "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "thesite"}]
                    }
          }
@@ -192,6 +196,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
+                    "type": "whitelist",
                     "rules": [{"name": "r", "referrer": "thesite"}]
                    }
          }
@@ -200,6 +205,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
+          			"type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "abc"}]
                    }
          }
