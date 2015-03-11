@@ -611,6 +611,7 @@ class ServicesController(base.ServicesController):
 
         restrictions = [restriction.Restriction(
             r.get('name'),
+            r.get('type'),
             [rule.Rule(r_rule.get('name'),
                        referrer=r_rule.get('referrer'),
                        request_url=r_rule.get('request_url', "/*") or "/*")
