@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Rackspace, Inc.
+# Copyright (c) 2013 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,16 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.model.helpers import rule
+from poppy.model.helpers.geo_zones import GEO_ZONES
 
+COUNTRY_CODE_MAPPING = {
+    #
+    'USA': 'US',
 
-def load_from_json(json_data):
-    name = json_data.get('name', None)
-    res = rule.Rule(name)
-    res.referrer = json_data.get('referrer', None)
-    res.http_host = json_data.get('http_host', None)
-    res.http_method = json_data.get('http_method', None)
-    res.client_ip = json_data.get('client_ip', None)
-    res.request_url = json_data.get('request_url', None)
-    res.geography = json_data.get('geography', None)
-    return res
+    'Albania': 'AL'
+
+}
+
+# validate COUNTRY_CODE_MAPPING keys are in GEO_ZONES'
