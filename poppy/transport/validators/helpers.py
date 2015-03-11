@@ -223,21 +223,7 @@ def is_valid_service_configuration(service, schema):
             else:
                 domains.append(domain_value)
 
-    # 4. referrer restriction paths must be unique
-    if 'restrictions' in service:
-        restriction_paths = []
-        for restriction in service['restrictions']:
-            if 'rules' in restriction:
-                for rule in restriction['rules']:
-                    if 'referrer' in rule:
-                        request_url = rule.get('request_url', '/*')
-                        if request_url in restriction_paths:
-                            raise exceptions.ValidationFailed(
-                                'Referrer - the request_url must be unique')
-                        else:
-                            restriction_paths.append(request_url)
-
-    # 5. domains protocols must be of the same type, and domains protocols must
+    # 4. domains protocols must be of the same type, and domains protocols must
     # match the description (ssl/port) of the origin
     cdn_protocol = None
     if 'domains' in service:
@@ -255,7 +241,7 @@ def is_valid_service_configuration(service, schema):
         'https': 443
     }
 
-    # 6. origin port must match the domain's protocol
+    # 5. origin port must match the domain's protocol
     if 'origins' in service:
         for origin in service['origins']:
             origin_port = origin.get('port', 80)
@@ -263,14 +249,14 @@ def is_valid_service_configuration(service, schema):
                 raise exceptions.ValidationFailed(
                     'Domain port does not match origin port')
 
-    # 7. domains must be valid
+    # 6. domains must be valid
     if 'domains' in service:
         for domain in service['domains']:
             if not is_valid_domain(domain):
                 raise exceptions.ValidationFailed(
                     u'Domain {0} is not valid'.format(domain.get('domain')))
 
-    # 8. origins and domains cannot be the same
+    # 7. origins and domains cannot be the same
     if 'origins' in service and 'domains' in service:
         origins = set()
         for origin in service['origins']:
@@ -286,12 +272,51 @@ def is_valid_service_configuration(service, schema):
             raise exceptions.ValidationFailed(
                 u'Domains and origins cannot be same: {0}'.format(origin))
 
-    # 9. origins must be valid
+    # 8. origins must be valid
     if 'origins' in service:
         for origin in service['origins']:
             if not is_valid_origin(origin):
                 raise exceptions.ValidationFailed(
                     u'Origin {0} is not valid'.format(origin.get('origin')))
+
+    # 9. Need to validate restriction correctness here
+    # Cannot allow one restriction rule entity to have both
+    # "blacklist" and "whitelist" restriction type
+    whitelist_restriction_entities = [
+    ]
+    blacklist_restriction_entities = [
+    ]
+    if 'restrictions' in service:
+        for restriction in service['restrictions']:
+            if restriction.get('type', 'whitelist') == 'blacklist':
+                for rule in restriction['rules']:
+                    entity = None
+                    for key in rule:
+                        if key != 'name':
+                            entity = key
+                            # validate country code is valid
+                            # if key == 'geography':
+                            #    rule[key] is valide
+                        else:
+                            continue
+                    blacklist_restriction_entities.append(entity)
+            elif restriction.get('type', 'whitelist') == 'whitelist':
+                for rule in restriction['rules']:
+                    entity = None
+                    for key in rule:
+                        if key != 'name':
+                            entity = key
+                            # validate country code is valid
+                            # if key == 'geography':
+                            #    rule[key] is valide
+                        else:
+                            continue
+                        if key in blacklist_restriction_entities:
+                            raise exceptions.ValidationFailed(
+                                'Cannot blacklist and whitelsit [%s]'
+                                ' at the same time' % key)
+                    whitelist_restriction_entities.append(entity)
+
     return
 
 

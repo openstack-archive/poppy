@@ -26,7 +26,7 @@ class TestRestriction(base.TestCase):
     def test_restriction(self):
 
         name = 'restriction'
-        myrestriction = restriction.Restriction(name)
+        myrestriction = restriction.Restriction(name, 'whitelist')
 
         # test all properties
         # name
