@@ -92,6 +92,7 @@ class ServiceControllerTest(base.FunctionalTest):
             "restrictions": [
                 {
                     "name": "website only",
+                    "type": "whitelist",
                     "rules": [
                         {
                             "name": "mocksite.com",
@@ -456,6 +457,7 @@ class ServiceControllerTest1(base.FunctionalTest):
             "restrictions": [
                 {
                     "name": "website only",
+                    "type": "whitelist",
                     "rules": [
                         {
                             "name": "mocksite.com",

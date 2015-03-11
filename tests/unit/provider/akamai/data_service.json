@@ -150,5 +150,64 @@
             }
         ],
         "flavor_id" : "standard"
+    },
+    "referrer_restrictions_blacklist": {
+        "name" : "mysite.com",
+        "domains": [
+            {"domain": "parsely.sage.com"}
+        ],
+        "origins": [
+            {"origin": "mockdomain-text.com", "ssl": false, "port": 80,
+             "rules": [{"name": "global", "request_url": "/*"},
+                       {"name": "text", "request_url": "/text"}]}
+        ],
+        "restrictions": [
+            {
+                "name": "website only",
+                "rules": [
+                    {
+                        "name": "mocksite.com",
+                        "referrer": "www.mocksite.com www.mocksite2.com",
+                        "request_url": "/static/*"
+                    }
+                ]
+            },
+            {
+                "name": "no graphic",
+                "type": "blacklist",
+                "rules": [
+                    {
+                        "name": "mockgraphicsite.com",
+                        "referrer": "www.mocksitegraphic.com"
+                    }
+                ]
+            },
+            {
+                "name": "no logo",
+                "type": "blacklist",
+                "rules": [
+                    {
+                        "name": "mockgraphicsite.com",
+                        "referrer": "www.mocksitegraphic.com",
+                        "request_url": "/static/images/logo.png"
+                    }
+                ]
+            }
+        ],
+        "caching": [
+            {"name": "default", "ttl": 1200 },
+            {"name": "img-only",
+             "ttl": 1800,
+             "rules": [
+                { "name": "jpeg-rules",
+                  "request_url": "/*.jpeg"
+                },
+                { "name": "gif-rules",
+                  "request_url": "/*.gif"
+                }
+             ]
+            }
+        ],
+        "flavor_id" : "standard"
     }
 }
