@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.common import util
 from poppy.model import common
+from poppy.model.helpers import geo_zones
 
 
 class Rule(common.DictSerializableModel):
@@ -34,6 +36,14 @@ class Rule(common.DictSerializableModel):
         if http_method:
             self._http_method = http_method
         if geography:
+            # Validate the geography should be in a list of supported
+            # countries
+            if geography is not None and \
+                geography not in geo_zones.GEO_COUNTRY_ZONES and \
+                    geography not in geo_zones.GEO_REGION_ZONES:
+                raise ValueError(util.help_escape(
+                                 'Country/Area %s is not supported in'
+                                 'geo zones' % geography))
             self._geography = geography
         if request_url:
             self._request_url = request_url
@@ -91,4 +101,11 @@ class Rule(common.DictSerializableModel):
 
     @geography.setter
     def geography(self, value):
+        if value is not None and \
+            value not in geo_zones.GEO_COUNTRY_ZONES and \
+                value not in geo_zones.GEO_REGION_ZONES:
+                raise ValueError(util.help_escape(
+                                 'Country/Area %s is not supported in'
+                                 'geo zones' % value))
+
         self._geography = value
