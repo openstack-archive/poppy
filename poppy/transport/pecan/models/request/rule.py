@@ -17,7 +17,7 @@ from poppy.model.helpers import rule
 
 
 def load_from_json(json_data):
-    name = json_data.get('name')
+    name = json_data.get('name', None)
     res = rule.Rule(name)
     res.referrer = json_data.get('referrer', None)
     res.http_host = json_data.get('http_host', None)
