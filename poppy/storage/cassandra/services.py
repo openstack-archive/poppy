@@ -606,8 +606,9 @@ class ServicesController(base.ServicesController):
         restrictions = [restriction.Restriction(
             r.get('name'),
             r.get('type'),
-            [rule.Rule(r_rule.get('name'),
-                       referrer=r_rule.get('referrer'))
+            [rule.Rule(name=r_rule.get('name'),
+                       referrer=r_rule.get('referrer'),
+                       geography=r_rule.get('geography'))
              for r_rule in r['rules']])
             for r in restrictions]
 
