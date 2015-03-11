@@ -357,5 +357,44 @@
                          ,{"name": "myrestricted-ip-2",
                             "client_ip": "5.6.7.8",
                             "request_url": "/*"}]}}
+   ],
+   "replace_add_geo_restriction":[
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "website only",
+             "access": "whitelist",
+             "rules": [{"name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }, {"name": "myrestricted-geo",
+                            "geography": "USA",
+                            "request_url": "/*"}
+                       ]}}
+   ],
+   "replace_add_geo_restriction_multiple_country":[
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "website only",
+             "access": "whitelist",
+             "rules": [{"name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }, {"name": "myrestricted-geo",
+                            "geography": "USA",
+                            "request_url": "/*"
+                        }, {"name": "myrestricted-geo",
+                            "geography": "Mexico",
+                            "request_url": "/*"}
+                       ]}}
+   ],
+   "replace_add_blacklist_geo_restriction":[
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "website only",
+             "access": "blacklist",
+             "rules": [{"name": "myrestricted-geo",
+                            "geography": "USA",
+                            "request_url": "/*"}
+                       ]}}
    ]
 }
