@@ -204,6 +204,30 @@
          "value": {"domain": "replaceme.com", "protocol": "https",
                    "certificate": "shared"}}
     ],
+    "add_restrictions_with_invalid_country_region_code": [
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted-nonsense-country",
+                    "rules": [{"name": "rule1", "geography": "NOTACOUNTRY"}]
+                   }
+         }
+    ],
+    "add_restrictions_with_conflict_blacklist_geo": [
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted-nonsense-country",
+                    "access": "whitelist",
+                    "rules": [{"name": "rule1", "geography": "USA"}]
+                   }
+         },
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted-nonsense-country",
+                    "access": "blacklist",
+                    "rules": [{"name": "rule1", "geography": "Mexico"}]
+                   }
+         }
+    ],
     "add_restrictions_with_invalid_ip": [
          {"op": "add",
           "path": "/restrictions/-",
