@@ -24,4 +24,5 @@ def load_from_json(json_data):
     res.http_method = json_data.get('http_method', None)
     res.client_ip = json_data.get('client_ip', None)
     res.request_url = json_data.get('request_url', None)
+    res.geography = json_data.get('geography', None)
     return res
