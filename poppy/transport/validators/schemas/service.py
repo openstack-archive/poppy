@@ -432,17 +432,66 @@ class ServiceSchema(schema_base.SchemaBase):
                                     'type': 'array',
                                     'required': True,
                                     'items': {
-                                        'type': 'object',
-                                        'properties': {
-                                            'name': {
-                                                'type': 'string',
-                                                'minLength': 1,
-                                                'maxLength': 256},
-                                            'referrer': {
-                                                'type': 'string',
-                                                'minLength': 3,
-                                                'maxLength': 1024}
-                                        }},
+                                        'type': [
+                                            {
+                                                'type': 'object',
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string",
+                                                    },
+                                                    "referrer": {
+                                                        "type": "string",
+                                                        'required': True,
+                                                    },
+                                                    'request_url': {
+                                                        'type': 'string',
+                                                        'minLength': 2,
+                                                        'maxLength': 100
+                                                    }
+                                                },
+                                                "additionalProperties": False,
+                                            }, {
+                                                'type': 'object',
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string",
+                                                    },
+                                                    "geography": {
+                                                        "type": "string",
+                                                        'required': True,
+                                                    },
+                                                    'request_url': {
+                                                        'type': 'string',
+                                                        'minLength': 2,
+                                                        'maxLength': 100
+                                                    }
+                                                },
+                                                "additionalProperties": False
+                                            }, {
+                                                'type': 'object',
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string",
+                                                    },
+                                                    "client_ip": {
+                                                        "type": "string",
+                                                        'pattern': re.compile(
+                                                            "^\d{1,3}\.\d{1,3}"
+                                                            "\.\d{1,3}"
+                                                            "\.\d{1,3}$"
+                                                        ),
+                                                        'required': True,
+                                                    },
+                                                    'request_url': {
+                                                        'type': 'string',
+                                                        'minLength': 2,
+                                                        'maxLength': 100
+                                                    }
+                                                },
+                                                "additionalProperties": False
+                                            }
+                                        ]
+                                    }
                                 }},
                         },
                     },
