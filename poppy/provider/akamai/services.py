@@ -21,6 +21,7 @@ import traceback
 from poppy.common import decorators
 from poppy.common import util
 from poppy.openstack.common import log
+from poppy.provider.akamai import geo_zone_code_mapping
 from poppy.provider import base
 
 # to use log inside worker, we need to directly use logging
@@ -134,7 +135,6 @@ class ServiceController(base.ServiceBase):
 
     def update(self, provider_service_id,
                service_obj):
-
         try:
             # depending on domains field presented or not, do PUT/POST
             # and depending on origins field presented or not, set behavior on
@@ -526,28 +526,80 @@ class ServiceController(base.ServiceBase):
     def _process_restriction_rules(self, restriction_rules, rules_list):
         # restriction implementation for akamai
         # for each restriction rule
+
+        # restriction entities include: referrer, geography, client_ip
+        restriction_entities = ['referrer', 'geography', 'client_ip']
+
+        class entityRequestUrlMappingList(dict):
+            '''A dictionary with a name attribute'''
+            def __init__(self, name, orig_dict):
+                self.name = name
+                self.update(orig_dict)
+
+        # classify restriction/rules based on their white/black-list
+        white_list_entities = entityRequestUrlMappingList(
+            'whitelist',
+            {entity: {} for entity
+             in restriction_entities})
+        black_list_entities = entityRequestUrlMappingList(
+            'blacklist',
+            {entity: {} for entity
+             in restriction_entities})
+
         for restriction_rule in restriction_rules:
+            entity_rule_mapping = {}
+            if restriction_rule.type == 'whitelist':
+                entity_rule_mapping = white_list_entities
+            elif restriction_rule.type == 'blacklist':
+                entity_rule_mapping = black_list_entities
             for rule_entry in restriction_rule.rules:
-                if rule_entry.referrer is not None:
+                # classify rules based on their entities, then request_urls
+                if getattr(rule_entry, "referrer", None) is not None:
+                    if (rule_entry.request_url not in
+                            entity_rule_mapping['referrer']):
+                        entity_rule_mapping['referrer'][rule_entry.request_url]\
+                            = [rule_entry]
+                    else:
+                        entity_rule_mapping['referrer'][rule_entry.request_url]\
+                            .append(rule_entry)
+                elif getattr(rule_entry, "geography", None) is not None:
+                    if (rule_entry.request_url not in
+                            entity_rule_mapping['geography']):
+                        entity_rule_mapping['geography'][rule_entry.request_url]\
+                            = [rule_entry]
+                    else:
+                        entity_rule_mapping['geography'][rule_entry.request_url]\
+                            .append(rule_entry)
+
+        for entity_request_url_rule_mapping in [white_list_entities,
+                                                black_list_entities]:
+            for entity in entity_request_url_rule_mapping:
+                for request_url in entity_request_url_rule_mapping[entity]:
                     found_match = False
-                    referrer_whitelist_value = ' '.join(
-                        ['*%s*' % referrer
-                         for referrer
-                         in rule_entry.referrer.split(' ')
-                         ])
+                    # need to write up a function gets the value of behavior
+                    behavior_name = self._get_behavior_name(
+                        entity, entity_request_url_rule_mapping.name)
+
+                    behavior_value = self._get_behavior_value(
+                        entity,
+                        entity_request_url_rule_mapping[entity][request_url])
+
+                    behavior_dict = {
+                        'name': behavior_name,
+                        'value': behavior_value
+                    }
+                    if entity == 'geography':
+                        behavior_dict['type'] = 'country'
 
                     # if we have a matches rule already
                     for rule in rules_list:
                         for match in rule['matches']:
-                            if rule_entry.request_url == match['value']:
+                            if request_url == match['value']:
                                 # we found an existing matching rule.
-                                # add the cache behavior to it
+                                # add the whitelist/blacklist behavior to it
                                 found_match = True
 
-                                rule['behaviors'].append({
-                                    'name': 'referer-whitelist',
-                                    'value': referrer_whitelist_value
-                                })
+                                rule['behaviors'].append(behavior_dict)
 
                     # if there is no matches entry yet for this rule
                     if not found_match:
@@ -561,17 +613,59 @@ class ServiceController(base.ServiceBase):
                         if rule_entry.request_url is not None:
                             match_rule = {
                                 'name': 'url-wildcard',
-                                'value': rule_entry.request_url
+                                'value': request_url
                             }
 
                             rule_dict_template['matches'].append(match_rule)
-                            rule_dict_template['behaviors'].append({
-                                'name': 'referer-whitelist',
-                                'value': referrer_whitelist_value
-                            })
+                            rule_dict_template['behaviors'].append(
+                                behavior_dict)
                             rules_list.append(rule_dict_template)
-            # end loop - restriction_rule.rules
-        # end lop - restriction_rules
+                # end loop - request url
+            # end loop - entity
+
+    def _get_behavior_name(self, entity, entity_restriction_type):
+        prefix = suffix = None
+        if entity == 'referrer':
+            prefix = 'referer'
+        elif entity == 'geography':
+            prefix = 'geo'
+        elif entity == 'client_ip':
+            prefix = 'ip'
+
+        if entity_restriction_type == 'whitelist':
+            suffix = 'whitelist'
+        elif entity_restriction_type == 'blacklist':
+            suffix = 'blacklist'
+
+        return '-'.join([prefix, suffix])
+
+    def _get_behavior_value(self, entity, rule_entries):
+        if entity == 'referrer':
+            return ' '.join(
+                ['*%s*' % rule_entry.referrer
+                 for rule_entry
+                 in rule_entries
+                 ])
+        elif entity == 'client_ip':
+            return ' '.join(
+                ['%s' % rule_entry.client_ip
+                 for rule_entry
+                 in rule_entries
+                 ])
+        elif entity == 'geography':
+            # We ignore the country that Akamai doesn't support for right now
+            zones_list = []
+            for rule_entry in rule_entries:
+                if rule_entry.geography in (
+                        geo_zone_code_mapping.REGION_COUNTRY_MAPPING):
+                    zones_list.extend(
+                        geo_zone_code_mapping.REGION_COUNTRY_MAPPING[
+                            rule_entry.geography])
+                else:
+                    zones_list.append(rule_entry.geography)
+            return ' '.join(
+                ['%s' % geo_zone_code_mapping.COUNTRY_CODE_MAPPING.get(
+                    zone, '') for zone in zones_list])
 
     def _process_caching_rules(self, caching_rules, rules_list):
         # akamai requires all caching rules to start with '/'
