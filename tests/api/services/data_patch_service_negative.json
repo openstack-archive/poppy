@@ -203,5 +203,31 @@
          "path": "/domains/-",
          "value": {"domain": "replaceme.com", "protocol": "https",
                    "certificate": "shared"}}
+    ],
+    "add_restrictions_with_invalid_ip": [
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted-ip2",
+                    "rules": [{"name": "rule1", "client_ip": "13.4.5"}]
+                   }
+         }
+    ],
+    "add_restrictions_with_conflict_blacklist_referrer": [
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted-blacklist",
+                    "type": "blacklist",
+                    "rules": [{"name": "rule1", "referrer": "myblacklist.com"}]
+                   }
+         }
+    ],
+    "add_restrictions_with_conflict_blacklist": [
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted-blacklist",
+                    "type": "blacklist",
+                    "rules": [{"name": "rule1", "client_ip": "5.6.7.8"}]
+                   }
+         }
     ]
 }
