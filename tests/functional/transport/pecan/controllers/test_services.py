@@ -96,7 +96,7 @@ class ServiceControllerTest(base.FunctionalTest):
                     "rules": [
                         {
                             "name": "mocksite.com",
-                            "http_host": "www.mocksite.com"
+                            "referrer": "www.mocksite.com"
                         }
                     ]
                 }
@@ -461,7 +461,7 @@ class ServiceControllerTest1(base.FunctionalTest):
                     "rules": [
                         {
                             "name": "mocksite.com",
-                            "http_host": "www.mocksite.com"
+                            "referrer": "www.mocksite.com"
                         }
                     ]
                 }
