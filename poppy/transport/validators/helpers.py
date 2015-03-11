@@ -312,9 +312,10 @@ def is_valid_service_configuration(service, schema):
     }
     blacklist_restriction_entities = {
     }
+
     if 'restrictions' in service:
         for restriction in service['restrictions']:
-            if restriction.get('type', 'whitelist') == 'blacklist':
+            if restriction.get('type', 'blacklist') == 'blacklist':
                 for rule in restriction['rules']:
                     entity = None
                     request_url = '/*'
