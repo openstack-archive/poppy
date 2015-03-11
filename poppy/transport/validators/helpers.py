@@ -224,19 +224,7 @@ def is_valid_service_configuration(service, schema):
             else:
                 domains.append(domain_value)
 
-    # 4. referrer restriction paths must be unique
-    if 'restrictions' in service:
-        restriction_paths = []
-        for restriction in service['restrictions']:
-            if 'rules' in restriction:
-                for rule in restriction['rules']:
-                    if 'referrer' in rule:
-                        request_url = rule.get('request_url', '/*')
-                        if request_url in restriction_paths:
-                            raise exceptions.ValidationFailed(
-                                'Referrer - the request_url must be unique')
-                        else:
-                            restriction_paths.append(request_url)
+    # We allow multiple restrictions rules on the same path
 
     # 5. domains protocols must be of the same type, and domains protocols must
     # match the description (ssl/port) of the origin
@@ -312,9 +300,10 @@ def is_valid_service_configuration(service, schema):
     }
     blacklist_restriction_entities = {
     }
+
     if 'restrictions' in service:
         for restriction in service['restrictions']:
-            if restriction.get('type', 'whitelist') == 'blacklist':
+            if restriction.get('type', 'blacklist') == 'blacklist':
                 for rule in restriction['rules']:
                     entity = None
                     request_url = '/*'

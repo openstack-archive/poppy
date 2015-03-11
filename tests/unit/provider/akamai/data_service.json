@@ -61,6 +61,7 @@
         "restrictions": [
             {
                 "name": "website only",
+                "type": "whitelist",
                 "rules": [
                     {
                         "name": "mocksite.com",
@@ -69,11 +70,16 @@
                 ]
             },
             {
-                "name": "graphic only",
+                "name": "graphic and US only",
+                "type": "whitelist",
                 "rules": [
                     {
                         "name": "mockgraphicsite.com",
                         "referrer": "www.mocksitegraphic.com"
+                    },
+                     {
+                        "name": "US geo restriction",
+                        "geography": "USA"
                     }
                 ]
             }
@@ -190,6 +196,44 @@
                         "name": "mockgraphicsite.com",
                         "referrer": "www.mocksitegraphic.com",
                         "request_url": "/static/images/logo.png"
+                    }
+                ]
+            }
+        ],
+        "caching": [
+            {"name": "default", "ttl": 1200 },
+            {"name": "img-only",
+             "ttl": 1800,
+             "rules": [
+                { "name": "jpeg-rules",
+                  "request_url": "/*.jpeg"
+                },
+                { "name": "gif-rules",
+                  "request_url": "/*.gif"
+                }
+             ]
+            }
+        ],
+        "flavor_id" : "standard"
+    },
+    "ip_restrictions_whitelist": {
+        "name" : "mysite.com",
+        "domains": [
+            {"domain": "parsely.sage.com"}
+        ],
+        "origins": [
+            {"origin": "mockdomain-text.com", "ssl": false, "port": 80,
+             "rules": [{"name": "global", "request_url": "/*"},
+                       {"name": "text", "request_url": "/text"}]}
+        ],
+        "restrictions": [
+            {
+                "name": "only from ip 1234",
+                "type": "blacklist",
+                "rules": [
+                    {
+                        "name": "only ip",
+                        "client_ip": "1.2.3.4"
                     }
                 ]
             }
