@@ -198,6 +198,7 @@
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
+                    "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images/*"}]
                     }}
     ],
@@ -205,11 +206,13 @@
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
+                    "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images2/*"}]
                     }},
         {"op": "replace",
          "path": "/restrictions/0",
           "value": {"name": "new_restricted",
+                    "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/*"}]
                     }}
    ],
@@ -233,6 +236,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "r",
+                    "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images/*"}]
                    }
          }
@@ -276,6 +280,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
+                    "type": "whitelist",
                     "rules": [{"name": "r", "referrer": "www.thesite.com", "request_url": "/images/*"}]
                    }
          }
@@ -284,6 +289,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
+                    "type": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "a.co", "request_url":"/images/*"}]
                    }
          }
@@ -309,5 +315,47 @@
          "value": {"origin": "1.1.1.1", "port": 443, "ssl": true,
          "rules": [{"name" : "origin", "request_url" : "/origin2.htm"}], "hostheadertype": "custom", "hostheadervalue": "www.customweb.com"}}
     ],
-    "empty_list": []
+    "empty_list": [],
+    "replace_change_restricted_ip_to_another":[
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "website only",
+             "type": "whitelist",
+             "rules": [{"name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }, {"name": "myrestricted-ip",
+                            "client_ip": "5.6.7.8",
+                            "request_url": "/*"}
+                       ]}}
+   ],
+   "replace_remove_all_restrictions":[
+        {"op": "remove",
+         "path": "/restrictions/0"}
+   ],
+   "replace_remove_restricted_ip":[
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "website only",
+             "type": "whitelist",
+             "rules": [{"name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }]}}
+   ],
+   "replace_add_new_restricted_ip":[
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "website only",
+             "type": "whitelist",
+             "rules": [{"name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }, {"name": "myrestricted-ip",
+                            "client_ip": "1.2.3.4",
+                            "request_url": "/*"}
+                         ,{"name": "myrestricted-ip-2",
+                            "client_ip": "5.6.7.8",
+                            "request_url": "/*"}]}}
+   ]
 }

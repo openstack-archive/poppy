@@ -121,6 +121,7 @@
                                      "request_url" : "/index.htm"}]}],
          "restrictions_list": [
                         {"name": "test",
+                        "type": "whitelist",
                         "rules": [{"name": "only me",
                         "referrer": "www.mywebsite.com"}]}
         ]
@@ -459,6 +460,21 @@
                         "referrer": "www.mywebsite.com"}]}
         ]
     },
+    "restrictions_no_name": {
+        "service_name": "my_service_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 3600,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": [{
+                           "rules": [{"referrer": "www.abc.com"}]}]
+    },
     "restrictions_no_rules": {
         "service_name": "my_service_name",
         "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
@@ -472,8 +488,8 @@
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
         "restrictions_list": [{"name":"default"}]
-    },
-    "restrictions_rule_no_name": {
+    },   
+    "restrictions_invalid_ip_address": {
         "service_name": "my_service_name",
         "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
@@ -486,7 +502,25 @@
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
         "restrictions_list": [{"name":"default",
-                                "rules": [{}]}]
+        					  "rules": [{"client_ip": "1.2.3"}]}]
+    },
+    
+    "restrictions_black_and_whitelist_ip": {
+        "service_name": "my_service_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 3600,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+         "restrictions_list": [{"name":"default",
+        					  "rules": [{"client_ip": "1.2.3.4"}]},{
+        					  	"name":"default-blacklist", "type": "blacklist",
+        					  	"rules": [{"client_ip": "5.6.7.8"}]}]
     },
     "origin_invalid_port": {
         "service_name": "origin_invalid_port",
