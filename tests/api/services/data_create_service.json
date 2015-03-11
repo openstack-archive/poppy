@@ -13,6 +13,7 @@
                                      "request_url" : "/index.htm"}]}],
          "restrictions_list": [
                         {"name": "test",
+                        "type": "whitelist",
                         "rules": [{"name": "only me",
                         "referrer": "www.mywebsite.com"}]}
         ]
