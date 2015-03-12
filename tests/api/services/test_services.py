@@ -664,6 +664,50 @@ class TestServicePatch(base.TestBase):
         self.assertEqual(body['status'], 'deployed')
         self.assertEqual(body['domains'][-1]['domain'], newdomain)
 
+    def test_patch_service_add_duplicate_domain(self):
+        # create second service
+        service_name = str(uuid.uuid1())
+        duplicate_domain = str(uuid.uuid1()) + '.com'
+        domain_list = [{"domain": duplicate_domain, "protocol": "http"}]
+
+        origin = str(uuid.uuid1()) + '.com'
+        origin_list = [{"origin": origin,
+                        "port": 80, "ssl": False, "rules": []}]
+
+        resp = self.client.create_service(
+            service_name=service_name,
+            domain_list=domain_list,
+            origin_list=origin_list,
+            flavor_id=self.flavor_id)
+
+        service_url = resp.headers["location"]
+
+        # wait until the service is deployed
+        self.client.wait_for_service_status(
+            location=service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        resp = self.client.get_service(location=service_url)
+        body = resp.json()
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(body['status'], 'deployed')
+
+        # patch original service with the duplicate domain
+        add_duplicate_domain = (
+            [{
+                "op": "add",
+                "path": "/domains/-",
+                "value": {"domain": duplicate_domain, "protocol": "http"}
+            }])
+
+        # add the duplicate domain
+        resp = self.client.patch_service(location=self.service_url,
+                                         request_body=add_duplicate_domain)
+        self.assertEqual(resp.status_code, 400)
+
     def tearDown(self):
         self.client.delete_service(location=self.service_url)
         if self.test_config.generate_flavors:

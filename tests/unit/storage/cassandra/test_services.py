@@ -90,7 +90,7 @@ class CassandraStorageServiceTests(base.TestCase):
 
     @ddt.file_data('../data/data_create_service.json')
     @mock.patch.object(services.ServicesController,
-                       '_exists_elsewhere',
+                       'domain_exists_elsewhere',
                        return_value=False)
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
@@ -107,7 +107,7 @@ class CassandraStorageServiceTests(base.TestCase):
 
     @ddt.file_data('../data/data_create_service.json')
     @mock.patch.object(services.ServicesController,
-                       '_exists_elsewhere',
+                       'domain_exists_elsewhere',
                        return_value=True)
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
@@ -146,7 +146,7 @@ class CassandraStorageServiceTests(base.TestCase):
 
     @ddt.file_data('../data/data_update_service.json')
     @mock.patch.object(services.ServicesController,
-                       '_exists_elsewhere',
+                       'domain_exists_elsewhere',
                        return_value=False)
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
@@ -161,25 +161,6 @@ class CassandraStorageServiceTests(base.TestCase):
         # Expect the response to be None as there are no providers passed
         # into the driver to respond to this call
         self.assertEqual(actual_response, None)
-
-    @ddt.file_data('../data/data_update_service.json')
-    @mock.patch.object(services.ServicesController,
-                       '_exists_elsewhere',
-                       return_value=True)
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_update_service_duplicate_domain(self, service_json,
-                                             mock_check, mock_session,
-                                             mock_execute):
-        # mock the response from cassandra
-        service_obj = req_service.load_from_json(service_json)
-
-        # Expect the response to be a ValueError Exception
-        self.assertRaises(ValueError,
-                          self.sc.update,
-                          self.project_id,
-                          self.service_id,
-                          service_obj)
 
     @ddt.file_data('data_provider_details.json')
     @mock.patch.object(services.ServicesController, 'session')
