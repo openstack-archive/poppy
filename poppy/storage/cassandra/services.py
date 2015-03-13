@@ -168,30 +168,6 @@ CQL_CREATE_SERVICE = '''
 
 CQL_UPDATE_SERVICE = CQL_CREATE_SERVICE
 
-CQL_UPDATE_DOMAINS = '''
-    UPDATE services
-    SET domains = %(domains)s
-    WHERE project_id = %(project_id)s AND service_id = %(service_id)s
-'''
-
-CQL_UPDATE_ORIGINS = '''
-    UPDATE services
-    SET origins = %(origins)s
-    WHERE project_id = %(project_id)s AND service_id = %(service_id)s
-'''
-
-CQL_UPDATE_CACHING_RULES = '''
-    UPDATE services
-    SET caching_rules = %(caching_rules)s
-    WHERE project_id = %(project_id)s AND service_id = %(service_id)s
-'''
-
-CQL_UPDATE_RESTRICTIONS = '''
-    UPDATE services
-    SET restrictions = %(restrictions)s
-    WHERE project_id = %(project_id)s AND service_id = %(service_id)s
-'''
-
 CQL_GET_PROVIDER_DETAILS = '''
     SELECT provider_details
     FROM services
