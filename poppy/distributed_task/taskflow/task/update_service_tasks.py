@@ -147,6 +147,7 @@ class GatherProviderDetailsTask(task.Task):
                                                      service_obj)
 
         provider_details_dict_error_tuple = (provider_details_dict, error_flag)
+        service_controller.storage_controller._driver.close_connection()
 
         return provider_details_dict_error_tuple
 

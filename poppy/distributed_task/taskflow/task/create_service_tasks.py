@@ -56,6 +56,7 @@ class CreateProviderServicesTask(task.Task):
             responders.append(responder)
             LOG.info('Create service from {0} complete...'.format(provider))
 
+        storage_controller._driver.close_connection()
         return responders
 
 

@@ -127,3 +127,4 @@ class DeleteStorageServiceTask(task.Task):
         bootstrap_obj = bootstrap.Bootstrap(conf)
         service_controller = bootstrap_obj.manager.services_controller
         service_controller.storage_controller.delete(project_id, service_id)
+        service_controller.storage_controller._driver.close_connection()
