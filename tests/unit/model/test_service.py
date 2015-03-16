@@ -45,7 +45,7 @@ class TestServiceModel(base.TestCase):
         self.myorigins.append(origin.Origin('yoursite.io', port=80, ssl=True))
 
         self.mydomains.append(domain.Domain('oursite.org'))
-        self.mydomains.append(domain.Domain('wiki.cc', 'https'))
+        self.mydomains.append(domain.Domain('wiki.cc', 'https', 'shared'))
 
         # test a rule with referrer restriction
         r1 = restriction.Restriction('referrer_site')
