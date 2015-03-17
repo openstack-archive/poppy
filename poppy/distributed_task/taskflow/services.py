@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 
 from oslo.utils import uuidutils
 from taskflow.conductors import single_threaded
@@ -33,6 +34,9 @@ class ServicesController(base.ServicesController):
 
         self.driver = driver
         self.jobboard_backend_conf = self.driver.jobboard_backend_conf
+        self.san_cert_add_job_backend = self.driver.san_cert_add_job_backend
+        self.san_cert_remove_job_backend = (
+            self.driver.san_cert_remove_job_backend)
 
     @property
     def persistence(self):
@@ -82,3 +86,15 @@ class ServicesController(base.ServicesController):
                     engine='serial')
 
                 conductor.run()
+
+    def enqueue_add_san_cert_service(self, project_id, service_id):
+        self.san_cert_add_job_backend.put(str.encode(json.dumps((
+            project_id, service_id))))
+
+    def enqueue_remove_san_cert_service(self, project_id, service_id):
+        # We don't queu it up yet because currently there is no way
+        # to remove a host from a san cert. Maybe we should just save
+        # those hostnames to be deleted inside of a file
+        # self.san_cert_remove_job_backend.put(str.encode(json.dumps((
+        #     project_id, service_id))))
+        pass

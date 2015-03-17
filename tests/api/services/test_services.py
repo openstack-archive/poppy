@@ -226,7 +226,7 @@ class TestListServices(base.TestBase):
         self.domain_list = [{"domain": str(uuid.uuid1()) + '.com'}]
 
         self.origin_list = [{"origin": str(uuid.uuid1()) + '.com',
-                             "port": 443, "ssl": False}]
+                             "port": 80, "ssl": False}]
 
         self.caching_list = [{"name": "default", "ttl": 3600},
                              {"name": "home", "ttl": 1200,
@@ -352,7 +352,7 @@ class TestServiceActions(base.TestBase):
         self.origin_list = [
             {
                 u"origin": origin,
-                u"port": 443,
+                u"port": 80,
                 u"ssl": False,
                 u"rules": []
             }
@@ -551,6 +551,9 @@ class TestServicePatch(base.TestBase):
     def test_patch_service(self, test_data):
 
         for item in test_data:
+            if 'skip_test' in item:
+                self.skipTest('Not Implemented - bug# 1433807')
+
             if ('domain' in item['path']) and ('value' in item):
                 if isinstance(item['value'], (list)):
                     item['value'][0]['domain'] = str(uuid.uuid1()) + '.com'

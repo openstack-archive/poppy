@@ -131,6 +131,10 @@ class DefaultServicesController(base.ServicesController):
         except ValueError as e:
             raise e
 
+        # Add San Cert adding domains to the queue
+        self.distributed_task_controller.enqueue_add_san_cert_service(
+            project_id, service_obj.service_id)
+
         kwargs = {
             'providers_list_json': json.dumps(providers),
             'project_id': project_id,
@@ -230,6 +234,9 @@ class DefaultServicesController(base.ServicesController):
                 u'delete_in_progress')
 
         self.storage_controller.update(project_id, service_id, service_obj)
+
+        self.distributed_task_controller.enqueue_remove_san_cert_service(
+            project_id, service_obj.service_id)
 
         kwargs = {
             "provider_details": json.dumps(
