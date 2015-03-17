@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import string
+
 from poppy.model.helpers import origin
 from poppy.transport.pecan.models.request import rule
 
 
 def load_from_json(json_data):
     origin_name = json_data.get("origin")
+    origin_name = string.rstrip(origin_name, "/")
     port = json_data.get("port", 80)
     ssl = json_data.get("ssl", False)
     rules = json_data.get("rules", [])
