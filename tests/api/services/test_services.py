@@ -226,7 +226,7 @@ class TestListServices(base.TestBase):
         self.domain_list = [{"domain": str(uuid.uuid1()) + '.com'}]
 
         self.origin_list = [{"origin": str(uuid.uuid1()) + '.com',
-                             "port": 443, "ssl": False}]
+                             "port": 80, "ssl": False}]
 
         self.caching_list = [{"name": "default", "ttl": 3600},
                              {"name": "home", "ttl": 1200,
@@ -238,7 +238,6 @@ class TestListServices(base.TestBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
-
         self.service_url = resp.headers["location"]
         return self.service_url
 
@@ -352,7 +351,7 @@ class TestServiceActions(base.TestBase):
         self.origin_list = [
             {
                 u"origin": origin,
-                u"port": 443,
+                u"port": 80,
                 u"ssl": False,
                 u"rules": []
             }
