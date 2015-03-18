@@ -551,6 +551,9 @@ class TestServicePatch(base.TestBase):
     def test_patch_service(self, test_data):
 
         for item in test_data:
+            if 'skip_test' in item:
+                self.skipTest('Not Implemented - bug# 1433807')
+
             if ('domain' in item['path']) and ('value' in item):
                 if isinstance(item['value'], (list)):
                     item['value'][0]['domain'] = str(uuid.uuid1()) + '.com'
