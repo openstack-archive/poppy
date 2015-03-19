@@ -32,7 +32,7 @@ from poppy import bootstrap
 
 
 conf = cfg.CONF
-conf(project='poppy', prog='poppy', args=[])
+conf(project='poppy', prog='poppy')
 
 
 app = bootstrap.Bootstrap(conf).transport.app
