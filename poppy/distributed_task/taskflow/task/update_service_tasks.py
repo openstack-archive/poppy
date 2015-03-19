@@ -28,7 +28,7 @@ from poppy.transport.pecan.models.request import service
 LOG = log.getLogger(__name__)
 
 conf = cfg.CONF
-conf(project='poppy', prog='poppy', args=[])
+conf(project='poppy', prog='poppy')
 
 
 class UpdateProviderServicesTask(task.Task):

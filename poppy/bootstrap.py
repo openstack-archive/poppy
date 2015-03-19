@@ -25,7 +25,7 @@ LOG = log.getLogger(__name__)
 
 _CLI_OPTIONS = (
     cfg.BoolOpt('daemon', default=False,
-                help='Run Poppy server in the background.'),
+                help='Run Poppy server/worker in the background.'),
 )
 
 # NOTE (Obulpathi): Register daemon command line option for
