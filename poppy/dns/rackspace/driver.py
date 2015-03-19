@@ -39,6 +39,8 @@ RACKSPACE_OPTIONS = [
                'creating subdomains'),
     cfg.StrOpt('auth_endpoint', default='',
                help='Authentication end point for DNS'),
+    cfg.IntOpt('timeout', default=30, help='DNS response timeout'),
+    cfg.IntOpt('delay', default=1, help='DNS retry delay'),
 ]
 
 RACKSPACE_GROUP = 'drivers:dns:rackspace'
@@ -60,6 +62,8 @@ class DNSProvider(base.Driver):
         pyrax.set_credentials(self.rackdns_conf.username,
                               self.rackdns_conf.api_key)
         self.rackdns_client = pyrax.cloud_dns
+        self.rackdns_client.set_timeout(self.rackdns_conf.timeout)
+        self.rackdns_client.set_delay(self.rackdns_conf.delay)
 
     def is_alive(self):
         """is_alive.

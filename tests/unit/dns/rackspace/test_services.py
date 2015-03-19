@@ -41,6 +41,8 @@ RACKSPACE_OPTIONS = [
                'creating subdomains'),
     cfg.StrOpt('auth_endpoint', default='',
                help='Authentication end point for DNS'),
+    cfg.IntOpt('timeout', default=30, help='DNS response timeout'),
+    cfg.IntOpt('delay', default=1, help='DNS retry delay'),
 ]
 
 RACKSPACE_GROUP = 'drivers:dns:rackspace'
