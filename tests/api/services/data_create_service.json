@@ -38,5 +38,67 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}]
+    },
+    "multiple_origin_wildcard_caching": {
+        "name": "my_service_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
+        "origin_list": [{
+                         "origin": "mywebsite1.com",
+                         "port": 80,
+                         "ssl": false,
+                         "rules":[
+                              {
+                                "name": "default rule",
+                                "request_url": "/*"
+                              }
+                             ]
+                         },
+                         {
+                            "origin": "mywebsite2.com",
+                             "port": 80,
+                             "ssl": false,
+                             "rules":[
+                              {
+                                "name": "images rules",
+                                "request_url": "/images/*"
+                              }
+                             ]
+                        }
+                        ],
+        "caching_list": [{"name": "default",
+                          "ttl": 1200,
+                          "rules": [{"name" : "Rule 1",
+                                     "request_url" : "/*"}]}]
+    },
+    "multiple_origin_path_caching": {
+        "name": "my_service_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
+        "origin_list": [{
+                         "origin": "mywebsite1.com",
+                         "port": 80,
+                         "ssl": false,
+                         "rules":[
+                              {
+                                "name": "default rule",
+                                "request_url": "/*"
+                              }
+                             ]
+                         },
+                         {
+                            "origin": "mywebsite2.com",
+                             "port": 80,
+                             "ssl": false,
+                             "rules":[
+                              {
+                                "name": "images rules",
+                                "request_url": "/images/test.jpg"
+                              }
+                             ]
+                        }
+                        ],
+        "caching_list": [{"name": "default",
+                          "ttl": 1200,
+                          "rules": [{"name" : "Rule 1",
+                                     "request_url" : "/images/test.jpg"}]}]
     }
 }
