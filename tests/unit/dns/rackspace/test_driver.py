@@ -17,6 +17,7 @@
 
 import mock
 from oslo.config import cfg
+import pyrax
 
 from poppy.dns.rackspace import driver
 from tests.unit import base
@@ -37,6 +38,8 @@ RACKSPACE_OPTIONS = [
                'creating subdomains'),
     cfg.StrOpt('auth_endpoint', default='',
                help='Authentication end point for DNS'),
+    cfg.IntOpt('timeout', default=30, help='DNS response timeout'),
+    cfg.IntOpt('delay', default=1, help='DNS retry delay'),
 ]
 
 RACKSPACE_GROUP = 'drivers:dns:rackspace'
@@ -52,6 +55,7 @@ class TestDriver(base.TestCase):
     @mock.patch('pyrax.set_credentials')
     @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
     def test_init(self, mock_set_credentials):
+        pyrax.cloud_dns = mock.Mock()
         provider = driver.DNSProvider(self.conf)
         mock_set_credentials.assert_called_once_with(
             provider._conf['drivers:dns:rackspace'].username,
@@ -76,17 +80,21 @@ class TestDriver(base.TestCase):
 
     @mock.patch('pyrax.set_credentials')
     @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
-    def test_is_alive_wrong_credentials(self, mock_set_credentials):
+    def test_wrong_credentials(self, mock_set_credentials):
         """Negative test for checking the health of DNS."""
-        provider = driver.DNSProvider(self.conf)
-        self.assertFalse(provider.is_alive())
+        mock_set_credentials.side_effect = pyrax.exc.AuthenticationFailed(
+            "Incorrect/unauthorized credentials received")
+
+        self.assertRaises(pyrax.exc.AuthenticationFailed,
+                          driver.DNSProvider,
+                          self.conf)
 
     @mock.patch('pyrax.set_credentials')
     @mock.patch('pyrax.set_setting')
     @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
     def test_get_client(self, mock_set_credentials, mock_set_setting):
+        pyrax.cloud_dns = mock.Mock()
         provider = driver.DNSProvider(self.conf)
-        provider.rackdns_client = object()
         client = provider.client
         self.assertNotEqual(client, None)
 
