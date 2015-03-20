@@ -16,6 +16,7 @@
 import copy
 import json
 import logging
+import traceback
 
 from poppy.common import decorators
 from poppy.common import util
@@ -45,42 +46,44 @@ class ServiceController(base.ServiceBase):
                                'Accept': 'text/plain'}
 
     def create(self, service_obj):
-        post_data = {
-            'rules': []
-        }
-
-        # for now global level akamai only supports 1 origin match global
-        # * url. At this point we are guaranteed there is at least 1 origin
-        # in incoming service_obj
-        # form all origin rules for this service
-        for origin in service_obj.origins:
-            self._process_new_origin(origin, post_data['rules'])
-
-        # referrer restriction implementaiton for akamai
-        # get a list of referrer restriction domains/hosts
-        referrer_restriction_list = [rule.referrer
-                                     for restriction in
-                                     service_obj.restrictions
-                                     for rule in restriction.rules]
-
-        if any(referrer_restriction_list):
-            referrer_whitelist_value = ''.join(['*%s*' % referrer
-                                                for referrer
-                                                in referrer_restriction_list
-                                                if referrer is not None])
-            for rule in post_data['rules']:
-                self._process_referrer_restriction(referrer_whitelist_value,
-                                                   rule)
-
-        # implementing caching-rules for akamai
-        # we do not have to use copy here, since caching is only used once
-        caching_rules = copy.deepcopy(service_obj.caching)
-        # Traverse existing rules list to add caching rules necessarys
-        self._process_caching_rules(caching_rules, post_data['rules'])
-
-        classified_domains = self._classify_domains(service_obj.domains)
-
         try:
+            post_data = {
+                'rules': []
+            }
+
+            # for now global level akamai only supports 1 origin match global
+            # * url. At this point we are guaranteed there is at least 1 origin
+            # in incoming service_obj
+            # form all origin rules for this service
+            for origin in service_obj.origins:
+                self._process_new_origin(origin, post_data['rules'])
+
+            # referrer restriction implementaiton for akamai
+            # get a list of referrer restriction domains/hosts
+            referrer_restriction_list = [rule.referrer
+                                         for restriction in
+                                         service_obj.restrictions
+                                         for rule in restriction.rules]
+
+            if any(referrer_restriction_list):
+                referrer_whitelist_value = ''.join(
+                    ['*%s*' % referrer
+                     for referrer
+                     in referrer_restriction_list
+                     if referrer is not None])
+                for rule in post_data['rules']:
+                    self._process_referrer_restriction(
+                        referrer_whitelist_value,
+                        rule)
+
+            # implementing caching-rules for akamai
+            # we do not have to use copy here, since caching is only used once
+            caching_rules = copy.deepcopy(service_obj.caching)
+            # Traverse existing rules list to add caching rules necessarys
+            self._process_caching_rules(caching_rules, post_data['rules'])
+
+            classified_domains = self._classify_domains(service_obj.domains)
+
             # NOTE(tonytan4ever): for akamai it might be possible to have
             # multiple policies associated with one poppy service, so we use
             # a list to represent provide_detail id
@@ -94,6 +97,8 @@ class ServiceController(base.ServiceBase):
                 # TODO(tonytan4ever): also classify domains based on their
                 # protocols. http and https domains needs to be created
                 # with separate base urls.
+                LOG.info("Creating Akamai Policy: %s", json.dumps(post_data))
+
                 configuration_number = self._get_configuration_number(
                     classified_domain)
                 resp = self.policy_api_client.put(
@@ -120,8 +125,11 @@ class ServiceController(base.ServiceBase):
                               'rel': 'access_url',
                               'domain': classified_domain.domain
                               })
-        except Exception:
-            return self.responder.failed("failed to create service")
+        except Exception as e:
+            LOG.error('Creating policy failed: %s' % traceback.format_exc())
+
+            return self.responder.failed(
+                "failed to create service - %s" % str(e))
         else:
             return self.responder.created(json.dumps(ids), links)
 
@@ -130,187 +138,56 @@ class ServiceController(base.ServiceBase):
 
     def update(self, provider_service_id,
                service_obj):
-        # depending on domains field presented or not, do PUT/POST
-        # and depending on origins field presented or not, set behavior on
-        # the data or not
+
         try:
-            # get a list of policies
-            policies = json.loads(provider_service_id)
-        except Exception:
-            # raise a more meaningful error for debugging info
+            # depending on domains field presented or not, do PUT/POST
+            # and depending on origins field presented or not, set behavior on
+            # the data or not
             try:
-                raise RuntimeError('Mal-formed Akamai policy ids: %s' %
-                                   provider_service_id)
-            except Exception as e:
-                return self.responder.failed(str(e))
-
-        ids = []
-        links = []
-        if len(service_obj.domains) > 0:
-            # in this case we need to copy
-            # and tweak the content of one old policy
-            # and creates new policy for the new domains,
-            # old policies ought to be deleted.
-            try:
-                configuration_number = self._get_configuration_number(
-                    util.dict2obj(policies[0]))
-                resp = self.policy_api_client.get(
-                    self.policy_api_base_url.format(
-                        configuration_number=configuration_number,
-                        policy_name=policies[0]['policy_name']),
-                    headers=self.request_header)
-                # if the policy is not found with provider, create it
-                if resp.status_code == 404:
-                    LOG.info('akamai response code: %s' % resp.status_code)
-                    LOG.info('upserting service with'
-                             'akamai: %s' % service_obj.service_id)
-                    return self.create(service_obj)
-                elif resp.status_code != 200:
-                    raise RuntimeError(resp.text)
-            except Exception as e:
-                return self.responder.failed(str(e))
-            else:
-                policy_content = json.loads(resp.text)
-            # Update origin if necessary
-            if len(service_obj.origins) > 0:
-                policy_content['rules'] = []
-                for origin in service_obj.origins:
-                    self._process_new_origin(origin, policy_content['rules'])
-
-            # referrer restriction implementaiton for akamai
-            # get a list of referrer restriction domains/hosts
-            referrer_restriction_list = [rule.referrer
-                                         for restriction in
-                                         service_obj.restrictions
-                                         for rule in restriction.rules]
-
-            if any(referrer_restriction_list):
-                referrer_whitelist_value = ''.join(
-                    ['*%s*' % referrer
-                     for referrer in referrer_restriction_list
-                     if referrer is not None])
-                for rule in policy_content['rules']:
-                    self._process_referrer_restriction(
-                        referrer_whitelist_value, rule)
-
-            # implementing caching-rules for akamai
-            # we need deep copy since caching rules will be used in late
-            # upadate objects
-            caching_rules = copy.deepcopy(service_obj.caching)
-            # Traverse existing rules list to add caching rules necessarys
-            self._process_caching_rules(caching_rules, policy_content['rules'])
-
-            # Update domain if necessary ( by adjust digital property)
-            classified_domains = self._classify_domains(service_obj.domains)
-
-            try:
-                for classified_domain in classified_domains:
-                    # assign the content realm to be the digital property field
-                    # of each group
-                    dp = self._process_new_domain(classified_domain,
-                                                  policy_content['rules'])
-
-                    configuration_number = self._get_configuration_number(
-                        classified_domain)
-
-                    # verify the same policy
-                    policy_names = [policy['policy_name'] for policy
-                                    in policies]
-
-                    # Only if a same domain with a same protocol
-                    # do we need to update a existing policy
-                    if dp in policy_names and (
-                            policies[policy_names.index(dp)]['protocol'] == (
-                            classified_domain.protocol)):
-                        # in this case we should update existing policy
-                        # instead of create a new policy
-                        LOG.info('Start to update policy %s' % dp)
-                        # TODO(tonytan4ever): also classify domains based on
-                        # their protocols. http and https domains needs to be
-                        # created  with separate base urls.
-                        resp = self.policy_api_client.put(
-                            self.policy_api_base_url.format(
-                                configuration_number=(
-                                    self.driver.http_conf_number),
-                                policy_name=dp),
-                            data=json.dumps(policy_content),
-                            headers=self.request_header)
-                        dp_obj = {'policy_name': dp,
-                                  'protocol': classified_domain.protocol}
-                        policies.remove(dp_obj)
-                    else:
-                        LOG.info('Start to create new policy %s' % dp)
-                        resp = self.policy_api_client.put(
-                            self.policy_api_base_url.format(
-                                configuration_number=(
-                                    configuration_number),
-                                policy_name=dp),
-                            data=json.dumps(policy_content),
-                            headers=self.request_header)
-                    LOG.info('akamai response code: %s' % resp.status_code)
-                    LOG.info('akamai response text: %s' % resp.text)
-                    if resp.status_code != 200:
-                        raise RuntimeError(resp.text)
-                    dp_obj = {'policy_name': dp,
-                              'protocol': classified_domain.protocol}
-                    ids.append(dp_obj)
-                    # TODO(tonytan4ever): leave empty links for now
-                    # may need to work with dns integration
-                    LOG.info('Creating/Updating policy %s on domain %s '
-                             'complete' % (dp, classified_domain.domain))
-                    provider_access_url = self._get_provider_access_url(
-                        classified_domain, dp)
-                    links.append({'href': provider_access_url,
-                                  'rel': 'access_url',
-                                  'domain': dp
-                                  })
+                # get a list of policies
+                policies = json.loads(provider_service_id)
             except Exception:
-                return self.responder.failed("failed to update service")
+                # raise a more meaningful error for debugging info
+                try:
+                    raise RuntimeError('Mal-formed Akamai policy ids: %s' %
+                                       provider_service_id)
+                except Exception as e:
+                    return self.responder.failed(str(e))
 
-            try:
-                for policy in policies:
-                    configuration_number = self._get_configuration_number(
-                        util.dict2obj(policy))
-
-                    LOG.info('Starting to delete old policy %s' %
-                             policy['policy_name'])
-                    resp = self.policy_api_client.delete(
-                        self.policy_api_base_url.format(
-                            configuration_number=configuration_number,
-                            policy_name=policy['policy_name']))
-                    LOG.info('akamai response code: %s' % resp.status_code)
-                    LOG.info('akamai response text: %s' % resp.text)
-                    if resp.status_code != 200:
-                        raise RuntimeError(resp.text)
-                    LOG.info('Delete old policy %s complete' %
-                             policy['policy_name'])
-            except Exception:
-                return self.responder.failed("failed to update service")
-
-        else:
-            # in this case we only need to adjust the existing policies
-            for policy in policies:
+            ids = []
+            links = []
+            if len(service_obj.domains) > 0:
+                # in this case we need to copy
+                # and tweak the content of one old policy
+                # and creates new policy for the new domains,
+                # old policies ought to be deleted.
                 try:
                     configuration_number = self._get_configuration_number(
-                        util.dict2obj(policy))
-
+                        util.dict2obj(policies[0]))
                     resp = self.policy_api_client.get(
                         self.policy_api_base_url.format(
                             configuration_number=configuration_number,
-                            policy_name=policy['policy_name']),
+                            policy_name=policies[0]['policy_name']),
                         headers=self.request_header)
-                    if resp.status_code != 200:
+                    # if the policy is not found with provider, create it
+                    if resp.status_code == 404:
+                        LOG.info('akamai response code: %s' % resp.status_code)
+                        LOG.info('upserting service with'
+                                 'akamai: %s' % service_obj.service_id)
+                        return self.create(service_obj)
+                    elif resp.status_code != 200:
                         raise RuntimeError(resp.text)
                 except Exception as e:
                     return self.responder.failed(str(e))
                 else:
                     policy_content = json.loads(resp.text)
-
+                # Update origin if necessary
                 if len(service_obj.origins) > 0:
                     policy_content['rules'] = []
                     for origin in service_obj.origins:
-                        self._process_new_origin(origin,
-                                                 policy_content['rules'])
+                        self._process_new_origin(
+                            origin, policy_content['rules'])
+
                 # referrer restriction implementaiton for akamai
                 # get a list of referrer restriction domains/hosts
                 referrer_restriction_list = [rule.referrer
@@ -320,42 +197,190 @@ class ServiceController(base.ServiceBase):
 
                 if any(referrer_restriction_list):
                     referrer_whitelist_value = ''.join(
-                        ['*%s*' % referrer for referrer
-                         in referrer_restriction_list
+                        ['*%s*' % referrer
+                         for referrer in referrer_restriction_list
                          if referrer is not None])
                     for rule in policy_content['rules']:
                         self._process_referrer_restriction(
                             referrer_whitelist_value, rule)
 
                 # implementing caching-rules for akamai
+                # we need deep copy since caching rules will be used in late
+                # upadate objects
                 caching_rules = copy.deepcopy(service_obj.caching)
                 # Traverse existing rules list to add caching rules necessarys
-                self._process_caching_rules(caching_rules,
-                                            policy_content['rules'])
+                self._process_caching_rules(
+                    caching_rules, policy_content['rules'])
 
-                # post new policies back with Akamai Policy API
+                # Update domain if necessary ( by adjust digital property)
+                classified_domains = self._classify_domains(
+                    service_obj.domains)
+
                 try:
-                    LOG.info('Start to update policy %s ' % policy)
-                    resp = self.policy_api_client.put(
-                        self.policy_api_base_url.format(
-                            configuration_number=configuration_number,
-                            policy_name=policy['policy_name']),
-                        data=json.dumps(policy_content),
-                        headers=self.request_header)
-                    LOG.info('akamai response code: %s' % resp.status_code)
-                    LOG.info('akamai response text: %s' % resp.text)
-                    LOG.info('Update policy %s complete' %
-                             policy['policy_name'])
+                    for classified_domain in classified_domains:
+                        # assign the content realm to be the
+                        # digital property field of each group
+                        dp = self._process_new_domain(classified_domain,
+                                                      policy_content['rules'])
+
+                        configuration_number = self._get_configuration_number(
+                            classified_domain)
+
+                        # verify the same policy
+                        policy_names = [policy['policy_name'] for policy
+                                        in policies]
+
+                        # Only if a same domain with a same protocol
+                        # do we need to update a existing policy
+                        if dp in policy_names and (
+                            policies[policy_names.index(dp)]['protocol'] == (
+                                classified_domain.protocol)):
+                            # in this case we should update existing policy
+                            # instead of create a new policy
+                            LOG.info('Start to update policy %s' % dp)
+                            LOG.info("Updating Akamai Policy: %s",
+                                     json.dumps(policy_content))
+
+                            # TODO(tonytan4ever): also classify domains based
+                            # on their protocols. http and https domains needs
+                            # to be created  with separate base urls.
+                            resp = self.policy_api_client.put(
+                                self.policy_api_base_url.format(
+                                    configuration_number=(
+                                        self.driver.http_conf_number),
+                                    policy_name=dp),
+                                data=json.dumps(policy_content),
+                                headers=self.request_header)
+                            dp_obj = {'policy_name': dp,
+                                      'protocol': classified_domain.protocol}
+                            policies.remove(dp_obj)
+                        else:
+                            LOG.info('Start to create new policy %s' % dp)
+                            resp = self.policy_api_client.put(
+                                self.policy_api_base_url.format(
+                                    configuration_number=(
+                                        configuration_number),
+                                    policy_name=dp),
+                                data=json.dumps(policy_content),
+                                headers=self.request_header)
+                        LOG.info('akamai response code: %s' % resp.status_code)
+                        LOG.info('akamai response text: %s' % resp.text)
+                        if resp.status_code != 200:
+                            raise RuntimeError(resp.text)
+                        dp_obj = {'policy_name': dp,
+                                  'protocol': classified_domain.protocol}
+                        ids.append(dp_obj)
+                        # TODO(tonytan4ever): leave empty links for now
+                        # may need to work with dns integration
+                        LOG.info('Creating/Updating policy %s on domain %s '
+                                 'complete' % (dp, classified_domain.domain))
+                        provider_access_url = self._get_provider_access_url(
+                            classified_domain, dp)
+                        links.append({'href': provider_access_url,
+                                      'rel': 'access_url',
+                                      'domain': dp
+                                      })
                 except Exception:
                     return self.responder.failed("failed to update service")
-                provider_access_url = self._get_provider_access_url(
-                    util.dict2obj(policy), policy['policy_name'])
-                links.append({'href': provider_access_url,
-                              'rel': 'access_url',
-                              'domain': policy['policy_name']
-                              })
-            ids = policies
-        return self.responder.updated(json.dumps(ids), links)
+
+                try:
+                    for policy in policies:
+                        configuration_number = self._get_configuration_number(
+                            util.dict2obj(policy))
+
+                        LOG.info('Starting to delete old policy %s' %
+                                 policy['policy_name'])
+                        resp = self.policy_api_client.delete(
+                            self.policy_api_base_url.format(
+                                configuration_number=configuration_number,
+                                policy_name=policy['policy_name']))
+                        LOG.info('akamai response code: %s' % resp.status_code)
+                        LOG.info('akamai response text: %s' % resp.text)
+                        if resp.status_code != 200:
+                            raise RuntimeError(resp.text)
+                        LOG.info('Delete old policy %s complete' %
+                                 policy['policy_name'])
+                except Exception:
+                    return self.responder.failed("failed to update service")
+
+            else:
+                # in this case we only need to adjust the existing policies
+                for policy in policies:
+                    try:
+                        configuration_number = self._get_configuration_number(
+                            util.dict2obj(policy))
+
+                        resp = self.policy_api_client.get(
+                            self.policy_api_base_url.format(
+                                configuration_number=configuration_number,
+                                policy_name=policy['policy_name']),
+                            headers=self.request_header)
+                        if resp.status_code != 200:
+                            raise RuntimeError(resp.text)
+                    except Exception as e:
+                        return self.responder.failed(str(e))
+                    else:
+                        policy_content = json.loads(resp.text)
+
+                    if len(service_obj.origins) > 0:
+                        policy_content['rules'] = []
+                        for origin in service_obj.origins:
+                            self._process_new_origin(origin,
+                                                     policy_content['rules'])
+                    # referrer restriction implementaiton for akamai
+                    # get a list of referrer restriction domains/hosts
+                    referrer_restriction_list = [rule.referrer
+                                                 for restriction in
+                                                 service_obj.restrictions
+                                                 for rule in restriction.rules]
+
+                    if any(referrer_restriction_list):
+                        referrer_whitelist_value = ''.join(
+                            ['*%s*' % referrer for referrer
+                             in referrer_restriction_list
+                             if referrer is not None])
+                        for rule in policy_content['rules']:
+                            self._process_referrer_restriction(
+                                referrer_whitelist_value, rule)
+
+                    # implementing caching-rules for akamai
+                    caching_rules = copy.deepcopy(service_obj.caching)
+                    # Traverse existing rules list to add caching rules
+                    # necessarys
+                    self._process_caching_rules(caching_rules,
+                                                policy_content['rules'])
+
+                    # post new policies back with Akamai Policy API
+                    try:
+                        LOG.info('Start to update policy %s ' % policy)
+                        resp = self.policy_api_client.put(
+                            self.policy_api_base_url.format(
+                                configuration_number=configuration_number,
+                                policy_name=policy['policy_name']),
+                            data=json.dumps(policy_content),
+                            headers=self.request_header)
+                        LOG.info('akamai response code: %s' % resp.status_code)
+                        LOG.info('akamai response text: %s' % resp.text)
+                        LOG.info('Update policy %s complete' %
+                                 policy['policy_name'])
+                    except Exception:
+                        return self.responder.failed(
+                            "failed to update service")
+
+                    provider_access_url = self._get_provider_access_url(
+                        util.dict2obj(policy), policy['policy_name'])
+                    links.append({'href': provider_access_url,
+                                  'rel': 'access_url',
+                                  'domain': policy['policy_name']
+                                  })
+                ids = policies
+            return self.responder.updated(json.dumps(ids), links)
+
+        except Exception as e:
+            LOG.error('Updating policy failed: %s', traceback.format_exc())
+
+            return self.responder.failed(
+                "failed to update service - %s" % str(e))
 
     def delete(self, provider_service_id):
         # delete needs to provide a list of policy id/domains
@@ -527,64 +552,56 @@ class ServiceController(base.ServiceBase):
         })
 
     def _process_caching_rules(self, caching_rules, rules_list):
+        # for each caching rule
         for caching_rule in caching_rules:
-            if caching_rule.name.lower() == 'default':
+            for caching_rule_entry in caching_rule.rules:
+                found_match = False
+                # if we have a matches rule already
                 for rule in rules_list:
-                    # this branch could not be hit when there is no
-                    # 'default' origin rule
-                    matches_dict = rule['matches'][0]
-                    if (matches_dict['name'] == 'url-wildcard' or
-                        matches_dict['name'] == 'url-path') and (
-                       matches_dict['value'] == '/*'):
-                        rule['behaviors'].append({
-                            'name': 'caching',
-                            'type': 'fixed',
-                            # assuming the input number to caching rule
-                            # ttl is in second
-                            'value': '%ss' % caching_rule.ttl
-                        })
-                        caching_rules.remove(caching_rule)
-            else:
-                for rule in rules_list:
-                    matches_dict = rule['matches'][0]
-                    if matches_dict['name'] == 'url-wildcard':
-                        for r in caching_rule.rules:
-                            if r.request_url == matches_dict['value']:
-                                rule['behaviors'].append({
-                                    'name': 'caching',
-                                    'type': 'fixed',
-                                    # assuming the input number to caching rule
-                                    # ttl is in second
-                                    'value': '%ss' % caching_rule.ttl
-                                })
-                                caching_rule.rules.remove(r)
-                        if caching_rule.rules == []:
-                            # in this case all the rule for this caching
-                            # rule has been processed
-                            caching_rules.remove(caching_rule)
+                    for match in rule['matches']:
+                        if caching_rule_entry.request_url == match['value']:
+                            # we found an existing matching rule.
+                            # add the cache behavior to it
+                            found_match = True
+                            rule['behaviors'].append({
+                                'name': 'caching',
+                                'type': 'fixed',
+                                # assuming the input number to caching rule
+                                # ttl is in second
+                                'value': '%ss' % caching_rule.ttl
+                            })
 
-        # at this point, all the unprocessed rules are still left in caching
-        # rules list, wee need to add separate rule for that
-        for caching_rule in caching_rules:
-            rule_dict_template = {
-                'matches': [],
-                'behaviors': []
-            }
-            for rule in caching_rule.rules:
-                match_rule = {
-                    'name': 'url-wildcard',
-                    'value': rule.request_url
-                }
-                rule_dict_template['matches'].append(match_rule)
-            rule_dict_template['behaviors'].append({
-                'name': 'caching',
-                'type': 'fixed',
-                # assuming the input number to caching rule
-                # ttl is in second
-                'value': '%ss' % caching_rule.ttl
-            })
-            rules_list.append(rule_dict_template)
-            caching_rules.remove(caching_rule)
+                # if there is no matches entry yet for this rule
+                if not found_match:
+                    # create an akamai rule
+                    rule_dict_template = {
+                        'matches': [],
+                        'behaviors': []
+                    }
+
+                    # add the match and behavior to this new rule
+                    if "*" in caching_rule_entry.request_url:
+                        match_rule = {
+                            'name': 'url-wildcard',
+                            'value': caching_rule_entry.request_url
+                        }
+                    else:
+                        match_rule = {
+                            'name': 'url-path',
+                            'value': caching_rule_entry.request_url
+                        }
+
+                    rule_dict_template['matches'].append(match_rule)
+                    rule_dict_template['behaviors'].append({
+                        'name': 'caching',
+                        'type': 'fixed',
+                        # assuming the input number to caching rule
+                        # ttl is in second
+                        'value': '%ss' % caching_rule.ttl
+                    })
+                    rules_list.append(rule_dict_template)
+            # rof - caching_rule.rules
+        # rof - caching_rules
 
     def _get_configuration_number(self, domain_obj):
         # TODO(tonytan4ever): also classify domains based on their
