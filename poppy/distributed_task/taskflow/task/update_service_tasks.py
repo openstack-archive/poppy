@@ -61,7 +61,6 @@ class UpdateServiceDNSMappingTask(task.Task):
     default_provides = "dns_responder"
 
     def execute(self, responders, retry_sleep_time, service_old, service_obj):
-        time.sleep(retry_sleep_time)
         bootstrap_obj = bootstrap.Bootstrap(conf)
         service_controller = bootstrap_obj.manager.services_controller
         dns = service_controller.dns_controller
@@ -73,9 +72,9 @@ class UpdateServiceDNSMappingTask(task.Task):
 
         for provider_name in dns_responder:
             try:
-                if 'error' in dns_responder[provider_name].keys():
+                if 'error' in dns_responder[provider_name]:
                     if 'DNS Exception'\
-                            in dns_responder[provider_name]['error_detail']:
+                            in dns_responder[provider_name]['error']:
                         msg = 'Update DNS for {0}' \
                               'failed!'.format(provider_name)
                         LOG.info(msg)
@@ -90,6 +89,7 @@ class UpdateServiceDNSMappingTask(task.Task):
     def revert(self, responders, retry_sleep_time, **kwargs):
         LOG.info('Sleeping for {0} seconds and '
                  'retrying'.format(retry_sleep_time))
+        time.sleep(retry_sleep_time)
 
 
 class GatherProviderDetailsTask(task.Task):

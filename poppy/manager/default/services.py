@@ -69,7 +69,6 @@ class DefaultServicesController(base.ServicesController):
 
     def determine_sleep_times(self):
 
-        default_sleep_time = [0]
         determined_sleep_time = \
             random.randrange(self.dns_conf.min_backoff_range,
                              self.dns_conf.max_backoff_range)
@@ -77,7 +76,7 @@ class DefaultServicesController(base.ServicesController):
         backoff = [(2**i) * determined_sleep_time for i in
                    range(0, self.dns_conf.retries)]
 
-        return default_sleep_time + backoff
+        return backoff
 
     def _get_provider_details(self, project_id, service_id):
         try:

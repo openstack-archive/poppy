@@ -59,7 +59,6 @@ class DeleteServiceDNSMappingTask(task.Task):
     default_provides = "dns_responder"
 
     def execute(self, provider_details, retry_sleep_time):
-        time.sleep(retry_sleep_time)
         bootstrap_obj = bootstrap.Bootstrap(conf)
         service_controller = bootstrap_obj.manager.services_controller
 
@@ -73,9 +72,9 @@ class DeleteServiceDNSMappingTask(task.Task):
         dns_responder = service_controller.dns_controller.delete(
             provider_details)
         for provider_name in dns_responder:
-            if 'error' in dns_responder[provider_name].keys():
+            if 'error' in dns_responder[provider_name]:
                 if 'DNS Exception'\
-                        in dns_responder[provider_name]['error_detail']:
+                        in dns_responder[provider_name]['error']:
                     msg = 'Deleting DNS for {0} failed!'.format(provider_name)
                     LOG.info(msg)
                     raise Exception(msg)
@@ -85,6 +84,7 @@ class DeleteServiceDNSMappingTask(task.Task):
     def revert(self, provider_details, retry_sleep_time, **kwargs):
         LOG.info('Sleeping for {0} seconds and '
                  'retrying'.format(retry_sleep_time))
+        time.sleep(retry_sleep_time)
 
 
 class GatherProviderDetailsTask(task.Task):
