@@ -18,6 +18,7 @@ AVAILABLE_PROTOCOLS = [
     u'https']
 
 CERTIFICATE_OPTIONS = [
+    None,
     u'shared',
     u'SAN',
     u'custom']
