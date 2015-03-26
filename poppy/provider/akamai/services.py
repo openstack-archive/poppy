@@ -55,11 +55,62 @@ class ServiceController(base.ServiceBase):
         self.request_header = {'Content-type': 'application/json',
                                'Accept': 'text/plain'}
 
-    def _enqueue_san_cert_service(self, service_id):
-        pass
+    def create_custom_single_cert(self, host_name):
+        s_data = self._get_custom_cert_data(host_name)
 
-    def _dequeue_san_cert_service(self):
-        pass
+        resp = self.akamai_driver.akamai_sps_api_client.post(
+            self.akamai_driver.akamai_sps_api_base_url.format(spsId=""),
+            data=s_data
+        )
+        if resp.status_code != 202:
+            raise RuntimeError('SPS Request failed.'
+                               'Exception: %s' % resp.text)
+
+        resp_data = json.loads(resp.text)
+        spsId = resp_data['spsId']
+        jobID = resp_data['Results']['data'][0]['results']['jobID']
+        return spsId, jobID
+
+    def _get_custom_cert_data(self):
+        """"""
+        custom_cert_data_template = {
+            'cnameHostname': '{{hostname}}',
+            'issuer': 'cybertrust',
+            'createType': 'single',
+            'csr.cn': '{{crs.cn}}',
+            'csr.c': '{{csr.c}}',
+            'csr.st': '{{csr.st}}',
+            'csr.l': '{{csr.l}}',
+            'csr.o': '{{csr.o}}',
+            'csr.ou': '{{csr.ou}}',
+            'organization-information.organization-name': '{{organization}}',
+            'organization-information.address-line-one':  '{{organization'
+            '-address-line-one}}',
+            'organization-information.city': '{{organization-city}}',
+            'organization-information.region': '{{organization-tx}}',
+            'organization-information.postal-code':
+                '{{organization-postal-code}}',
+            'organization-information.country': '{{organization-country}}',
+            'organization-information.phone': '{{organization-phone}}',
+            'admin-contact.first-name': '{{admin-first-name}}',
+            'admin-contact.last-name': '{{admin-last-name}}',
+            'admin-contact.phone': '{{admin-contact}}',
+            # needs to url encode the email id
+            # example:zali%40akamai.com
+            'admin-contact.email': '{{admin-contact-email}}',
+            'technical-contact.first-name': '{{technical-first-name}}',
+            'technical-contact.last-name': '{{technical-last-name}}',
+            'technical-contact.phone': '{{technical-contact-phone}}',
+            'technical-contact.email': '{{technical-contact-email}}',
+            'ipVersion': 'ipv4',
+            ##################
+            # 'product' : 'alta',
+            'slot-deployment.klass': 'esslType'
+        }
+
+        s_data = '&'.join(['%s=%s' % (k, v) for (k, v) in
+                           custom_cert_data_template.items()])
+        return s_data
 
     def create(self, service_obj):
         try:
@@ -158,7 +209,8 @@ class ServiceController(base.ServiceBase):
             # state
             extra = {}
             san_or_custom_domains = filter(
-                lambda domain: (domain.get('certificate', None) == 'san'), ids)
+                lambda domain: (domain.get('certificate', None)
+                                in ['san', 'domain']), ids)
             if len(list(san_or_custom_domains)) > 0:
                 extra.update({
                     'status': 'create_in_progress'
@@ -410,7 +462,8 @@ class ServiceController(base.ServiceBase):
             # state
             extra = {}
             san_or_custom_domains = filter(
-                lambda domain: (domain.get('certificate', None) == 'san'), ids)
+                lambda domain: (domain.get('certificate', None)
+                                in ['san', 'domain']), ids)
             if len(list(san_or_custom_domains)) > 0:
                 extra.update({
                     'status': 'update_in_progress'

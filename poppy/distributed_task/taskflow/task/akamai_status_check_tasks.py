@@ -141,21 +141,28 @@ class StatusCheckAndUpdateTask(task.Task):
         if len(services_list) == 1 and (
                 services_list[0][0] == 'secureEdgeHost'):
             message = services_list[0][1]
-            san_cert_info = {
+            cert_info = {
                 "cnameHostname": message["cnameHostname"],
                 "jobID": message["jobID"],
                 "ipVersion": "ipv4",
                 "spsId": [message["spsId"]],
-                "issuer": "symantec",
+                "issuer": "cybertrust",
                 "slot-deployment.klass": "esslType"}
-            self._update_san_cert_file(san_cert_info)
+            if message['certType'] == 'san':
+                cert_info['issuer'] = 'symantec'
+                self._update_san_cert_file(cert_info)
             self.sc.enqueue_papi_update_job('secureEdgeHost',
                                             message)
             return
 
         # else update poppy services
         for project_id, service_id in services_list:
-            service_obj = self.storage_controller.get(project_id, service_id)
+            try:
+                service_obj = (
+                    self.storage_controller.get(project_id, service_id))
+            except ValueError:
+                # if service gets deleted we just ignore it
+                return
             provider_details = service_obj.provider_details
             # Just update Akamai's service detail to deployed
             provider_details.get('Akamai').status = u'deployed'

@@ -208,18 +208,24 @@ class UpdateProviderDetailsTask_Errors(task.Task):
         added_domains = new_domains.difference(old_domains)
         removed_domains = old_domains.difference(new_domains)
 
+        bm = bootstrap_obj.manager
         for domain in added_domains:
-            if domain[1] == 'san':
-                # Add San Cert adding domains to the queue
-                sc = bootstrap_obj.manager.distributed_task.services_controller
-                sc.enqueue_add_san_cert_service(
-                    project_id, service_obj.service_id)
+            if 'akamai' in self._driver.providers.names():
+                if domain[1] == 'san':
+                    # Add San Cert adding domains to the queue
+                    sc = bm.distributed_task.services_controller
+                    sc.enqueue_add_san_cert_service(
+                        project_id, service_obj.service_id)
+                if domain.certificate == 'custom':
+                    akamai_driver = bm._driver.providers['akamai'].obj
+                    akamai_driver.create_custom_single_cert(domain.domain)
 
         for domain in removed_domains:
-            if domain[1] == 'san':
-                # Add San Cert adding domains to the queue
-                sc = bootstrap_obj.manager.distributed_task.services_controller
-                sc.enqueue_remove_san_cert_service(
-                    project_id, service_obj.service_id)
+            if 'akamai' in self._driver.providers.names():
+                if domain[1] == 'san':
+                    # Add San Cert adding domains to the queue
+                    sc = bm.distributed_task.services_controller
+                    sc.enqueue_remove_san_cert_service(
+                        project_id, service_obj.service_id)
 
         LOG.info('Update provider detail service worker process complete...')

@@ -132,9 +132,27 @@ class DefaultServicesController(base.ServicesController):
 
         # Add San Cert adding domains to the queue
         for domain in service_obj.domains:
-            if domain.certificate == 'san':
-                self.distributed_task_controller.enqueue_add_san_cert_service(
-                    project_id, service_obj.service_id)
+            if 'akamai' in self._driver.providers.names():
+                sdc = self.distributed_task_controller
+                if domain.certificate == 'san':
+                    sdc = self.distributed_task_controller
+                    sdc.enqueue_add_san_cert_service(
+                        project_id, service_obj.service_id)
+                if domain.certificate == 'custom':
+                    akamai_driver = self._driver.providers['akamai'].obj
+                    spsId, jobID = akamai_driver.create_custom_single_cert(
+                        domain.domain)
+                    message = {
+                        'certType': 'custom',
+                        'spsId': spsId,
+                        'jobID': jobID,
+                        'cnameHostname': domain.domain
+                    }
+                    self.sc.enqueue_status_check_queue(
+                        {'SPSStatusCheck': spsId},
+                        [json.dumps([
+                            'secureEdgeHost',
+                            message])])
 
         kwargs = {
             'providers_list_json': json.dumps(providers),

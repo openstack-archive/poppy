@@ -103,6 +103,7 @@ class CreateSANCertTask(task.Task):
         jobID = resp_data['Results']['data'][0]['results']['jobID']
 
         message = {
+            'certType': 'san',
             'spsId': spsId,
             'jobID': jobID,
             'cnameHostname': cnameHostName
