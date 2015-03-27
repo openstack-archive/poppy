@@ -60,8 +60,8 @@ class ServiceController(base.ServiceBase):
     def create_custom_single_cert(self, host_name):
         s_data = self._get_custom_cert_data(host_name)
 
-        resp = self.akamai_driver.akamai_sps_api_client.post(
-            self.akamai_driver.akamai_sps_api_base_url.format(spsId=""),
+        resp = self.sps_api_client.post(
+            self.driver.akamai_sps_api_base_url.format(spsId=""),
             data=s_data
         )
         if resp.status_code != 202:

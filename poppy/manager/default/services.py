@@ -140,8 +140,12 @@ class DefaultServicesController(base.ServicesController):
                         project_id, service_obj.service_id)
                 if domain.certificate == 'custom':
                     akamai_driver = self._driver.providers['akamai'].obj
-                    spsId, jobID = akamai_driver.create_custom_single_cert(
-                        domain.domain)
+                    sc = akamai_driver.service_controller
+                    try:
+                        spsId, jobID = sc.create_custom_single_cert(
+                            domain.domain)
+                    except RuntimeError as e:
+                        raise e
                     message = {
                         'certType': 'custom',
                         'spsId': spsId,

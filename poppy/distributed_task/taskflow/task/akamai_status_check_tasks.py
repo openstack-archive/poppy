@@ -96,7 +96,6 @@ class StatusCheckAndUpdateTask(task.Task):
                         status = json.loads(resp.text)['status']
                         if status != 'SUCCESS':
                             activation_success = False
-                            break
                     if resp.status_code == 500:
                         # else check if the latest version has been in
                         # production or staging yet
@@ -117,6 +116,8 @@ class StatusCheckAndUpdateTask(task.Task):
                             if not latestVersion == production_version:
                                 activation_success = False
                                 break
+                            else:
+                                activation_success = True
             if (sps_success and activation_success):
                 # sps and activation both successful, now can change service
                 # status to deployed
