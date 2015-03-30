@@ -32,6 +32,7 @@ def cassandra_connection(env, config):
     if config.get(env, 'ssl_enabled'):
         ssl_options = {}
         ssl_options['ca_certs'] = config.get(env, 'ssl_ca_certs')
+        ssl_options['ssl_version'] = config.get(env, 'ssl_version')
         if ssl_options['ssl_version'] == 'TLSv1':
             ssl_options['ssl_version'] = ssl.PROTOCOL_TLSv1
         elif ssl_options['ssl_version'] == 'TLSv1.1':
@@ -50,7 +51,7 @@ def cassandra_connection(env, config):
         )
 
     cluster_connection = cluster.Cluster(
-        config.get(env, 'cluster'),
+        config.get(env, 'cluster').split(","),
         auth_provider=auth_provider,
         port=config.get(env, 'port'),
         ssl_options=ssl_options,
@@ -69,6 +70,10 @@ def delete(session):
         if result.service_name is None:
             services.append([result.project_id, result.service_id])
 
+    print("Deleting following services:\n")
+    print("Project Id\t Service Id \n")
+    for service in services:
+        print("{0}\t{1}".format(service[0], service[1]))
     for service in services:
         prepared_stmt = session.prepare(DELETE_NULLS)
         bound_stmt = prepared_stmt.bind(service)
