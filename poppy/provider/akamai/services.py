@@ -485,7 +485,7 @@ class ServiceController(base.ServiceBase):
                 # missing digitalProperty(domain) for now
                 'originDomain': '',
                 'hostHeaderType': 'digital_property',
-                'cacheKeyType': 'origin',
+                'cacheKeyType': 'digital_property',
                 'hostHeaderValue': '-',
                 'cacheKeyValue': '-'
             }
