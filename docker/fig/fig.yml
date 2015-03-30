@@ -33,7 +33,12 @@ poppy:
      AKAM_ACCESS_URL_LINK: value
     links:
      - cassandra
+     - zookeeper
 
+zookeeper:
+    image: jplock/zookeeper
+    ports:
+     - "2181:2181"
 
 cassandra:
     build: ../cassandra/.
