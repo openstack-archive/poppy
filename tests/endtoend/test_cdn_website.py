@@ -32,10 +32,13 @@ class TestWebsiteCDN(base.TestBase):
     def setUp(self):
         super(TestWebsiteCDN, self).setUp()
 
+        # Two domains are created for the multiple domain test
         sub_domain = 'TestCDN-' + self._random_string()
+        sub_domain2 = 'TestCDN-' + self._random_string()
         self.test_domain = sub_domain + '.' + self.dns_config.test_domain
+        self.test_domain2 = sub_domain2 + '.' + self.dns_config.test_domain
 
-        print('Domain Name', self.test_domain)
+        print('Domain Names', self.test_domain, self.test_domain2)
 
         self.origin = self.test_config.wordpress_origin
 
@@ -95,6 +98,64 @@ class TestWebsiteCDN(base.TestBase):
                     test_url=wpt_test_url)
 
             print('Webpage Tests Results', wpt_test_url)
+
+    def test_multiple_domains(self):
+
+        # Create a Poppy Service for the test website with two domains
+        domain_list = [{"domain": self.test_domain},
+                       {"domain": self.test_domain2}]
+        origin_list = [{"origin": self.origin,
+                        "port": 80,
+                        "ssl": False}]
+        caching_list = []
+        self.service_name = 'testService-' + self._random_string()
+
+        resp = self.poppy_client.create_service(
+            service_name=self.service_name,
+            domain_list=domain_list,
+            origin_list=origin_list,
+            caching_list=caching_list,
+            flavor_id=self.poppy_config.flavor)
+
+        self.assertEqual(resp.status_code, 202)
+        self.service_location = resp.headers['location']
+        self.poppy_client.wait_for_service_status(
+            location=self.service_location,
+            status='DEPLOYED',
+            abort_on_status='FAILED',
+            retry_interval=self.poppy_config.status_check_retry_interval,
+            retry_timeout=self.poppy_config.status_check_retry_timeout)
+
+        resp = self.poppy_client.get_service(location=self.service_location)
+        links = resp.json()['links']
+        access_url = [link['href'] for link in links if
+                      link['rel'] == 'access_url']
+
+        # Add a cname to the first domain
+        self.cname_rec = self.dns_client.add_cname_rec(
+            name=self.test_domain, data=access_url[0])
+
+        # Add a cname to the second domain
+        self.cname_rec = self.dns_client.add_cname_rec(
+            name=self.test_domain2, data=access_url[0])
+
+        origin_url = 'http://' + self.origin
+        cdn_enabled_url1 = 'http://' + self.test_domain
+        cdn_enabled_url2 = 'http://' + self.test_domain2
+
+        self.dns_client.wait_cname_propagation(
+            target=self.test_domain,
+            retry_interval=self.dns_config.retry_interval)
+
+        self.dns_client.wait_cname_propagation(
+            target=self.test_domain2,
+            retry_interval=self.dns_config.retry_interval)
+
+        self.assertSameContent(origin_url=origin_url,
+                               cdn_url=cdn_enabled_url1)
+
+        self.assertSameContent(origin_url=origin_url,
+                               cdn_url=cdn_enabled_url2)
 
     def tearDown(self):
         self.poppy_client.delete_service(location=self.service_location)
