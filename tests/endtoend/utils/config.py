@@ -134,3 +134,21 @@ class DNSConfig(data_interfaces.ConfigSectionInterface):
     def retry_interval(self):
         """Int value to set timeout for status check."""
         return int(self.get('retry_interval'))
+
+
+class MultipleOriginConfig(data_interfaces.ConfigSectionInterface):
+    """Configuration for testing multiple origins."""
+    SECTION_NAME = 'multiple_origin'
+
+    @property
+    def default_origin(self):
+        return self.get('default_origin')
+
+    @property
+    def images_origin(self):
+        return self.get('images_origin')
+
+    @property
+    def image_path(self):
+        """The uri at which the images_origin serves an image."""
+        return self.get('image_path')

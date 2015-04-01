@@ -15,6 +15,7 @@
 
 from bs4 import BeautifulSoup
 from cafe.drivers.unittest import fixtures
+import random
 import requests
 
 from tests.api.utils import client
@@ -22,6 +23,10 @@ from tests.endtoend.utils import config
 from tests.endtoend.utils import dnsclient
 from tests.endtoend.utils import heatclient
 from tests.endtoend.utils import wptclient
+
+
+def random_string(prefix, n=10):
+    return prefix + ''.join([random.choice('1234567890') for _ in xrange(n)])
 
 
 class TestBase(fixtures.BaseTestFixture):
@@ -94,6 +99,14 @@ class TestBase(fixtures.BaseTestFixture):
         origin_content = self.get_content(url=origin_url)
         cdn_content = self.get_content(url=cdn_url)
         self.assertEqual(origin_content, cdn_content)
+
+    def setup_cname(self, name, cname):
+        """Create a CNAME record and wait for propagation."""
+        self.cname_rec = self.dns_client.add_cname_rec(name=name, data=cname)
+
+        self.dns_client.wait_cname_propagation(
+            target=name,
+            retry_interval=self.dns_config.retry_interval)
 
     @classmethod
     def tearDownClass(cls):
