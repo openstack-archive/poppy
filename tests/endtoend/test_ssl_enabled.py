@@ -15,9 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import ddt
+
 from tests.endtoend import base
 
 
+@ddt.ddt
 class TestSSLCDN(base.TestBase):
 
     """Tests for CDN enabling with SSL on."""
@@ -32,7 +35,8 @@ class TestSSLCDN(base.TestBase):
         self.test_domain = 'TestCDN-SSL' + self._random_string()
         self.origin = self.test_config.ssl_origin
 
-    def test_shared_ssl_enable_cdn(self):
+    @ddt.data('shared', 'custom', 'san')
+    def test_enable_cdn_ssl(self, certificate):
 
         # Create a Poppy Service for the test website
         domain_list = [{"domain": self.test_domain, "protocol": "https",
@@ -62,10 +66,17 @@ class TestSSLCDN(base.TestBase):
         origin_url = 'http://' + self.origin
         access_url = [link['href'] for link in links if
                       link['rel'] == 'access_url']
-        cdn_url = 'https://' + access_url[0]
+
+        if certificate == 'shared':
+            cdn_enabled_url = 'https://' + access_url[0]
+        else:
+            cdn_enabled_url = 'https://' + self.test_domain
+            self.dns_client.wait_cname_propagation(
+                target=self.test_domain,
+                retry_interval=self.dns_config.retry_interval)
 
         self.assertSameContent(origin_url=origin_url,
-                               cdn_url=cdn_url)
+                               cdn_url=cdn_enabled_url)
 
         # Benchmark page load metrics for the CDN enabled website
         if self.test_config.webpagetest_enabled:
