@@ -55,7 +55,7 @@ class TestMultipleOrigin(base.TestBase):
             base.random_string('TestMultiOrigin'), self.dns_config.test_domain)
         self.service_name = base.random_string('MultiOriginService')
 
-    def test_multiple_origins(self):
+    def test_multiple_origin_default_first(self):
         domains = [{'domain': self.test_domain}]
         origins = [{
             "origin": self.default_origin,
@@ -75,21 +75,12 @@ class TestMultipleOrigin(base.TestBase):
             }]
         }]
 
-        resp = self.poppy_client.create_service(
+        self.setup_service(
             service_name=self.service_name,
             domain_list=domains,
             origin_list=origins,
             caching_list=[],
             flavor_id=self.poppy_config.flavor)
-
-        self.assertEqual(resp.status_code, 202)
-        self.service_location = resp.headers['location']
-        self.poppy_client.wait_for_service_status(
-            location=self.service_location,
-            status='DEPLOYED',
-            abort_on_status='FAILED',
-            retry_interval=self.poppy_config.status_check_retry_interval,
-            retry_timeout=self.poppy_config.status_check_retry_timeout)
 
         resp = self.poppy_client.get_service(location=self.service_location)
         links = resp.json()['links']
@@ -113,6 +104,53 @@ class TestMultipleOrigin(base.TestBase):
         msg = ("Expected {0} to load the image at {1} but got {2} status code"
                .format(cdn_url, origin_url, response.status_code))
         self.assertEqual(response.status_code, 200, msg)
+
+    def test_multiple_origin_default_last(self):
+        domains = [{'domain': self.test_domain}]
+        origins = [{
+            "origin": self.images_origin,
+            "port": 80,
+            "ssl": False,
+            "rules": [{
+                "name": "image",
+                "request_url": self.image_path,
+            }]
+        }, {
+            "origin": self.default_origin,
+            "port": 80,
+            "ssl": False,
+            "rules": [{
+                "name": "default",
+                "request_url": "/*",
+            }]
+        }]
+
+        self.setup_service(
+            service_name=self.service_name,
+            domain_list=domains,
+            origin_list=origins,
+            caching_list=[],
+            flavor_id=self.poppy_config.flavor)
+
+        resp = self.poppy_client.get_service(location=self.service_location)
+        links = resp.json()['links']
+        access_url = [link['href'] for link in links if
+                      link['rel'] == 'access_url']
+
+        self.setup_cname(self.test_domain, access_url[0])
+
+        # Everything should match the /* rule under the default origin,
+        # since it's the last rule in the list
+        self.assertSameContent(origin_url="http://" + self.default_origin,
+                               cdn_url="http://" + self.test_domain)
+
+        cdn_url = "http://{0}{1}".format(self.test_domain, self.image_path)
+        origin_url = "http://{0}{1}".format(self.images_origin,
+                                            self.image_path)
+        response = requests.get(cdn_url)
+        msg = ("Expected {0} to 404 on the image at {1} but got a {2} status"
+               .format(cdn_url, origin_url, response.status_code))
+        self.assertEqual(response.status_code, 404, msg)
 
     def tearDown(self):
         self.poppy_client.delete_service(location=self.service_location)

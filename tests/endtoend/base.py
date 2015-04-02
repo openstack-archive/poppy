@@ -108,6 +108,26 @@ class TestBase(fixtures.BaseTestFixture):
             target=name,
             retry_interval=self.dns_config.retry_interval)
 
+    def setup_service(self, service_name, domain_list, origin_list,
+                      caching_list, flavor_id):
+        resp = self.poppy_client.create_service(
+            service_name=service_name,
+            domain_list=domain_list,
+            origin_list=origin_list,
+            caching_list=[],
+            flavor_id=flavor_id)
+
+        self.assertEqual(resp.status_code, 202)
+        self.service_location = resp.headers['location']
+        self.poppy_client.wait_for_service_status(
+            location=self.service_location,
+            status='DEPLOYED',
+            abort_on_status='FAILED',
+            retry_interval=self.poppy_config.status_check_retry_interval,
+            retry_timeout=self.poppy_config.status_check_retry_timeout)
+
+        return resp
+
     @classmethod
     def tearDownClass(cls):
         """Deletes the added resources."""
