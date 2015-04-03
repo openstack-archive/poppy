@@ -29,6 +29,7 @@ def load_from_json(json_data):
     origins = json_data.get("origins", [])
     domains = json_data.get("domains", [])
     flavor_id = json_data.get("flavor_id")
+    log_delivery = json_data.get("log_delivery", False)
     restrictions = json_data.get("restrictions", [])
     pd = json_data.get("provider_details", {})
 
@@ -46,6 +47,7 @@ def load_from_json(json_data):
                         domains,
                         origins,
                         flavor_id,
+                        log_delivery,
                         caching,
                         restrictions)
 
