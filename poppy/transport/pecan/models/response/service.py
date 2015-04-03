@@ -25,6 +25,7 @@ from poppy.transport.pecan.models.response import domain
 from poppy.transport.pecan.models.response import link
 from poppy.transport.pecan.models.response import origin
 from poppy.transport.pecan.models.response import restriction
+from poppy.transport.pecan.models.response import log_delivery
 
 
 class Model(collections.OrderedDict):
@@ -43,6 +44,7 @@ class Model(collections.OrderedDict):
                            service_obj.caching]
         self["status"] = service_obj.status
         self["flavor_id"] = service_obj.flavor_id
+        self["log_delivery"] = log_delivery.Model(service_obj.log_delivery)
 
         self["errors"] = []
 

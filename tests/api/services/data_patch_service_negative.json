@@ -153,5 +153,10 @@
                     "rules": [{"name": "rule1", "referrer": "ab"}]
                    }
          }
+    ],
+    "log_delivery_non_boolean": [
+        {"op": "replace",
+         "path": "/log_delivery",
+         "value": "true"}
     ]
 }
