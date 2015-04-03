@@ -35,6 +35,7 @@ class TestServiceModel(base.TestCase):
         self.service_id = str(uuid.uuid4())
         self.service_name = uuid.uuid1()
         self.flavor_id = "strawberry"
+        self.log_delivery = False
 
         self.myorigins = []
         self.mydomains = []
@@ -62,7 +63,7 @@ class TestServiceModel(base.TestCase):
         myservice = service.Service(
             self.service_id,
             self.service_name, self.mydomains, self.myorigins, self.flavor_id,
-            self.mycaching, self.myrestrictions)
+            self.mycaching, self.myrestrictions, self.log_delivery)
 
         # test all properties
         # id

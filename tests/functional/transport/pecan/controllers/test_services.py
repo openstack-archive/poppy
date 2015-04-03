@@ -474,7 +474,6 @@ class ServiceControllerTest1(base.FunctionalTest):
         self.assertEqual(202, response.status_code)
         self.assertTrue('Location' in response.headers)
         self.service_url = urlparse.urlparse(response.headers["Location"]).path
-        # import pdb; pdb.set_trace()
         # print '#############################################################'
         # print self.service_url
         # print '#############################################################'
@@ -492,7 +491,6 @@ class ServiceControllerTest1(base.FunctionalTest):
 
     def test_update_with_good_input(self):
         self.skipTest('Skip failing test')
-        # import pdb; pdb.set_trace()
         # print '###################################'
         # print self.service_url
         response = self.app.get(
