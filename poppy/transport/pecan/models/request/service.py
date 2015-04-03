@@ -17,6 +17,7 @@ import uuid
 from poppy.model import service
 from poppy.transport.pecan.models.request import cachingrule
 from poppy.transport.pecan.models.request import domain
+from poppy.transport.pecan.models.request import log_delivery as ld
 from poppy.transport.pecan.models.request import origin
 from poppy.transport.pecan.models.request import provider_details
 from poppy.transport.pecan.models.request import restriction
@@ -31,11 +32,13 @@ def load_from_json(json_data):
     flavor_id = json_data.get("flavor_id")
     restrictions = json_data.get("restrictions", [])
     pd = json_data.get("provider_details", {})
+    log_delivery = json_data.get("log_delivery", {})
 
     # load caching rules json string from input
     origins = [origin.load_from_json(o) for o in origins]
     domains = [domain.load_from_json(d) for d in domains]
     restrictions = [restriction.load_from_json(r) for r in restrictions]
+    log_delivery = ld.load_from_json(log_delivery)
 
     # convert caching rule json string list into object list
     caching = json_data.get("caching", [])
@@ -47,7 +50,8 @@ def load_from_json(json_data):
                         origins,
                         flavor_id,
                         caching,
-                        restrictions)
+                        restrictions,
+                        log_delivery)
 
     r.provider_details = dict([(k, provider_details.load_from_json(v))
                                for k, v in pd.items()])
