@@ -40,6 +40,7 @@ class TestServiceModel(base.TestCase):
         self.mydomains = []
         self.myrestrictions = []
         self.mycaching = []
+        self.log_delivery = {"enabled": False}
 
         self.myorigins.append(origin.Origin('mysite.com'))
         self.myorigins.append(origin.Origin('yoursite.io', port=80, ssl=True))
@@ -62,7 +63,7 @@ class TestServiceModel(base.TestCase):
         myservice = service.Service(
             self.service_id,
             self.service_name, self.mydomains, self.myorigins, self.flavor_id,
-            self.mycaching, self.myrestrictions)
+            self.mycaching, self.myrestrictions, self.log_delivery)
 
         # test all properties
         # id

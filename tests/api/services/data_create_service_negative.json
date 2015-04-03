@@ -11,7 +11,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "too_short_name": {
         "service_name": "ab",
@@ -25,7 +28,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "too_short_domain": {
         "service_name": "abcdefg",
@@ -39,7 +45,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "too_long_name": {
         "service_name": "too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name",
@@ -53,7 +62,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "too_long_domain_name": {
         "service_name": "asdsad",
@@ -67,7 +79,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "empty_domain_list": {
         "service_name": "empty_domain_list",
@@ -80,7 +95,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "too_many_domains": {
         "service_name": "many_domain_list",
@@ -109,7 +127,10 @@
                         {"name": "test",
                         "rules": [{"name": "only me",
                         "referrer": "www.mywebsite.com"}]}
-        ]
+        ],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "empty_origin_list": {
         "service_name": "empty_origin_list",
@@ -121,7 +142,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "too_many_origins": {
         "service_name": "many_origin_list",
@@ -145,7 +169,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "duplicate_origin_rule": {
         "service_name": "many_origin_list",
@@ -160,7 +187,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "non_numeric_origin_port": {
         "service_name": "non_numeric_origin_port",
@@ -174,7 +204,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "non_boolean_origin_ssl": {
         "service_name": "non_boolean_origin_ssl",
@@ -188,7 +221,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "invalid_flavor": {
         "service_name": "invalid_flavor",
@@ -203,7 +239,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "caching_list_no_name": {
         "service_name": "caching_list_no_name",
@@ -213,7 +252,10 @@
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"ttl": 3600}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "caching_list_no_rule_name": {
         "service_name": "caching_list_no_rule_name",
@@ -226,7 +268,10 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "caching_list_no_rule_url": {
         "service_name": "caching_list_no_url",
@@ -240,7 +285,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index"
                                      }]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "caching_negative_ttl": {
         "service_name": "my_service_name",
@@ -254,7 +302,10 @@
                           "ttl": -1,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "caching_duplicate_rule": {
         "service_name": "my_service_name",
@@ -272,7 +323,10 @@
                           "ttl": 30,
                           "rules": [{"name" : "images",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "restrictions_empty_item": {
         "service_name": "my_service_name",
@@ -286,7 +340,10 @@
                           "ttl": 3600,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": [{}]
+        "restrictions_list": [{}],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "restrictions_no_rules": {
         "service_name": "my_service_name",
@@ -300,7 +357,10 @@
                           "ttl": 3600,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": [{"name":"default"}]
+        "restrictions_list": [{"name":"default"}],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "restrictions_rule_no_name": {
         "service_name": "my_service_name",
@@ -315,7 +375,10 @@
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
         "restrictions_list": [{"name":"default",
-                                "rules": [{}]}]
+                                "rules": [{}]}],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "origin_invalid_port": {
         "service_name": "origin_invalid_port",
@@ -327,7 +390,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "origin_null_port": {
         "service_name": "origin_null_port",
@@ -339,7 +405,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "origin_negative_port": {
         "service_name": "origin_negative_port",
@@ -351,7 +420,10 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "origin_string_port": {
         "service_name": "origin_string_port",
@@ -363,6 +435,26 @@
                           "ttl": 1200,
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
-        "restrictions_list": []
-    }
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
+    },
+    "log_delivery_non_boolean": {
+        "service_name": "log_delivery",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 80,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": [],
+        "log_delivery": {
+            "enabled": "true"
+        }
+     }
 }

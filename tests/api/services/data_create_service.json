@@ -20,7 +20,10 @@
                                 "request_url" : "/*"
                             }
                         ]}
-        ]
+        ],
+        "log_delivery": {
+            "enabled": false
+        }
     },
    "caching_empty": {
         "name": "caching_empty",
@@ -29,7 +32,10 @@
         "origin_list": [{"origin": "mywebsite1.com",
                          "port": 80,
                          "ssl": false}],
-        "caching_list": []
+        "caching_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "non_ASCII": {
         "name": "איבערזעצן",
@@ -42,7 +48,10 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+         "log_delivery": {
+             "enabled": false
+         }
     },
     "multiple_origin_wildcard_caching": {
         "name": "my_service_name",
@@ -73,7 +82,10 @@
         "caching_list": [{"name": "default",
                           "ttl": 1200,
                           "rules": [{"name" : "Rule 1",
-                                     "request_url" : "/*"}]}]
+                                     "request_url" : "/*"}]}],
+         "log_delivery": {
+             "enabled": false
+         }
     },
     "multiple_origin_path_caching": {
         "name": "my_service_name",
@@ -104,6 +116,41 @@
         "caching_list": [{"name": "default",
                           "ttl": 1200,
                           "rules": [{"name" : "Rule 1",
-                                     "request_url" : "/images/test.jpg"}]}]
-    }
+                                     "request_url" : "/images/test.jpg"}]}],
+         "log_delivery": {
+             "enabled": false
+         }
+    },
+    "log_delivery_enabled": {
+         "name": "log_delivery",
+         "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
+         "origin_list": [{"origin": "mywebsite1.com",
+                          "port": 80,
+                          "ssl": false}],
+          "caching_list": [{"name": "default", "ttl": 3600},
+                           {"name": "home",
+                            "ttl": 1200,
+                            "rules": [{"name" : "index",
+                                       "request_url" : "/index.htm"}]}],
+         "log_delivery": {
+             "enabled": true
+         }
+     },
+     "log_delivery_disabled": {
+          "name": "log_delivery",
+          "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                          {"domain": "blog.mywebsite.com", "protocol": "http"}],
+          "origin_list": [{"origin": "mywebsite1.com",
+                           "port": 80,
+                           "ssl": false}],
+           "caching_list": [{"name": "default", "ttl": 3600},
+                            {"name": "home",
+                             "ttl": 1200,
+                             "rules": [{"name" : "index",
+                                        "request_url" : "/index.htm"}]}],
+            "log_delivery": {
+                "enabled": false
+            }
+}
 }
