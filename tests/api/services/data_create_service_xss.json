@@ -9,7 +9,10 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+         "log_delivery": {
+             "enabled": false
+         }
     },
     "domain_injection": {
         "name": "bad_domain",
@@ -22,7 +25,10 @@
         "origin_list": [{"origin": "mywebsite1.com",
                          "port": 80,
                          "ssl": false}],
-        "caching_list": []
+        "caching_list": [],
+        "log_delivery": {
+            "enabled": false
+        }
     },
     "origin_injection": {
         "name": "bad_origin",
@@ -34,7 +40,10 @@
                          {"name": "home",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+         "log_delivery": {
+             "enabled": false
+         }
     },
     "caching_name_injection": {
         "name": "bad_caching_name",
@@ -46,7 +55,10 @@
                          {"name": "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+                                     "request_url" : "/index.htm"}]}],
+         "log_delivery": {
+             "enabled": false
+         }
     },
     "caching_rule_injection": {
         "name": "bad_caching_name",
@@ -58,7 +70,10 @@
                          {"name": "images",
                           "ttl": 1200,
                           "rules": [{"name" : "index",
-                                     "request_url" : "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>"}]}]
+                                     "request_url" : "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>"}]}],
+         "log_delivery": {
+             "enabled": false
+         }
     },
     "caching_rule_name_injection": {
         "name": "bad_caching_name",
@@ -70,6 +85,9 @@
                          {"name": "images",
                           "ttl": 1200,
                           "rules": [{"name" : "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
-                                     "request_url" : "/images"}]}]
+                                     "request_url" : "/images"}]}],
+         "log_delivery": {
+             "enabled": false
+         }
     }
 }

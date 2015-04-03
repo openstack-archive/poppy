@@ -22,7 +22,8 @@ class CreateService(base.AutoMarshallingModel):
     """Marshalling for Create Service requests."""
 
     def __init__(self, service_name=None, domain_list=None, origin_list=None,
-                 caching_list=None, restrictions_list=None, flavor_id=None):
+                 caching_list=None, restrictions_list=None, flavor_id=None,
+                 log_delivery=None):
         super(CreateService, self).__init__()
 
         self.service_name = service_name
@@ -31,6 +32,7 @@ class CreateService(base.AutoMarshallingModel):
         self.caching_list = caching_list or []
         self.restrictions_list = restrictions_list or []
         self.flavor_id = flavor_id
+        self.log_delivery = log_delivery
 
     def _obj_to_json(self):
         create_service_request = {"name": self.service_name,
@@ -38,7 +40,8 @@ class CreateService(base.AutoMarshallingModel):
                                   "origins": self.origin_list,
                                   "caching": self.caching_list,
                                   "restrictions": self.restrictions_list,
-                                  "flavor_id": self.flavor_id}
+                                  "flavor_id": self.flavor_id,
+                                  "log_delivery": self.log_delivery}
         return json.dumps(create_service_request)
 
 
