@@ -43,6 +43,7 @@ class Model(collections.OrderedDict):
                            service_obj.caching]
         self["status"] = service_obj.status
         self["flavor_id"] = service_obj.flavor_id
+        self["log_delivery"] = service_obj.log_delivery
 
         self["errors"] = []
 

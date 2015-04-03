@@ -55,6 +55,7 @@ CQL_LIST_SERVICES = '''
         service_name,
         domains,
         flavor_id,
+        log_delivery,
         origins,
         caching_rules,
         restrictions,
@@ -71,6 +72,7 @@ CQL_GET_SERVICE = '''
         service_id,
         service_name,
         flavor_id,
+        log_delivery,
         domains,
         origins,
         caching_rules,
@@ -149,6 +151,7 @@ CQL_CREATE_SERVICE = '''
         service_id,
         service_name,
         flavor_id,
+        log_delivery,
         domains,
         origins,
         caching_rules,
@@ -159,6 +162,7 @@ CQL_CREATE_SERVICE = '''
         %(service_id)s,
         %(service_name)s,
         %(flavor_id)s,
+        %(log_delivery)s,
         %(domains)s,
         %(origins)s,
         %(caching_rules)s,
@@ -318,6 +322,7 @@ class ServicesController(base.ServicesController):
             'service_id': uuid.UUID(service_id),
             'service_name': service_name,
             'flavor_id': service_obj.flavor_id,
+            'log_delivery': service_obj.log_delivery,
             'domains': domains,
             'origins': origins,
             'caching_rules': caching_rules,
@@ -377,6 +382,7 @@ class ServicesController(base.ServicesController):
             'service_id': uuid.UUID(str(service_id)),
             'service_name': service_name,
             'flavor_id': service_obj.flavor_id,
+            'log_delivery': service_obj.log_delivery,
             'domains': domains,
             'origins': origins,
             'caching_rules': caching_rules,
@@ -555,6 +561,7 @@ class ServicesController(base.ServicesController):
         name = result.get('service_name')
 
         flavor_id = result.get('flavor_id')
+        log_delivery = result.get('log_delivery', False) or False
         origins = [json.loads(o) for o in result.get('origins', []) or []]
         domains = [json.loads(d) for d in result.get('domains', []) or []]
         restrictions = [json.loads(r)
@@ -595,6 +602,7 @@ class ServicesController(base.ServicesController):
 
         # create the service object
         s = service.Service(service_id, name, domains, origins, flavor_id,
+                            log_delivery=log_delivery,
                             caching=caching_rules,
                             restrictions=restrictions)
 

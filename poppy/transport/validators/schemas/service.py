@@ -354,6 +354,10 @@ class ServiceSchema(schema_base.SchemaBase):
                         'required': True,
                         'minLength': 1,
                         'maxLength': 256
+                    },
+                    'log_delivery': {
+                        'type': 'boolean',
+                        'required': False
                     }
                 }},
             'PATCH': {
@@ -372,6 +376,7 @@ class ServiceSchema(schema_base.SchemaBase):
                         'enum': [
                             'service_name',
                             'flavor_id',
+                            'log_delivery',
                             'origins',
                             'domains',
                             'caching_rule',
@@ -381,7 +386,8 @@ class ServiceSchema(schema_base.SchemaBase):
                     'value': {
                         'oneOf': [
                             'string',
-                            'integer'
+                            'integer',
+                            'bool'
                         ]
                     }
                 }
