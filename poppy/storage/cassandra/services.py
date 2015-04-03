@@ -29,6 +29,7 @@ from poppy.model.helpers import origin
 from poppy.model.helpers import provider_details
 from poppy.model.helpers import restriction
 from poppy.model.helpers import rule
+from poppy.model import log_delivery as ld
 from poppy.model import service
 from poppy.openstack.common import log as logging
 from poppy.storage import base
@@ -58,7 +59,8 @@ CQL_LIST_SERVICES = '''
         origins,
         caching_rules,
         restrictions,
-        provider_details
+        provider_details,
+        log_delivery
     FROM services
     WHERE project_id = %(project_id)s
         AND service_id > %(marker)s
@@ -75,7 +77,8 @@ CQL_GET_SERVICE = '''
         origins,
         caching_rules,
         restrictions,
-        provider_details
+        provider_details,
+        log_delivery
     FROM services
     WHERE project_id = %(project_id)s AND service_id = %(service_id)s
 '''
@@ -153,7 +156,8 @@ CQL_CREATE_SERVICE = '''
         origins,
         caching_rules,
         restrictions,
-        provider_details
+        provider_details,
+        log_delivery
         )
     VALUES (%(project_id)s,
         %(service_id)s,
@@ -163,7 +167,8 @@ CQL_CREATE_SERVICE = '''
         %(origins)s,
         %(caching_rules)s,
         %(restrictions)s,
-        %(provider_details)s)
+        %(provider_details)s,
+        %(log_delivery)s)
 '''
 
 CQL_UPDATE_SERVICE = CQL_CREATE_SERVICE
@@ -311,6 +316,7 @@ class ServicesController(base.ServicesController):
                          for caching_rule in service_obj.caching]
         restrictions = [json.dumps(r.to_dict())
                         for r in service_obj.restrictions]
+        log_delivery = json.dumps(service_obj.log_delivery.to_dict())
 
         # create a new service
         service_args = {
@@ -322,6 +328,7 @@ class ServicesController(base.ServicesController):
             'origins': origins,
             'caching_rules': caching_rules,
             'restrictions': restrictions,
+            'log_delivery': log_delivery,
             'provider_details': {}
         }
 
@@ -363,6 +370,7 @@ class ServicesController(base.ServicesController):
                json.dumps(service_obj.provider_details[provider].to_dict())
                for provider in service_obj.provider_details}
 
+        log_delivery = json.dumps(service_obj.log_delivery.to_dict())
         # fetch current domains
         args = {
             'project_id': project_id,
@@ -381,7 +389,8 @@ class ServicesController(base.ServicesController):
             'origins': origins,
             'caching_rules': caching_rules,
             'restrictions': restrictions,
-            'provider_details': pds
+            'provider_details': pds,
+            'log_delivery': log_delivery
         }
 
         stmt = query.SimpleStatement(
@@ -561,6 +570,7 @@ class ServicesController(base.ServicesController):
                         for r in result.get('restrictions', []) or []]
         caching_rules = [json.loads(c) for c in result.get('caching_rules', [])
                          or []]
+        log_delivery = json.loads(result.get('log_delivery', '{}') or '{}')
 
         # create models for each item
         origins = [
@@ -593,10 +603,13 @@ class ServicesController(base.ServicesController):
              for rule_i in caching_rule['rules']])
             for caching_rule in caching_rules]
 
+        log_delivery = ld.LogDelivery(log_delivery.get('enabled', False))
+
         # create the service object
         s = service.Service(service_id, name, domains, origins, flavor_id,
                             caching=caching_rules,
-                            restrictions=restrictions)
+                            restrictions=restrictions,
+                            log_delivery=log_delivery)
 
         # format the provider details
         provider_detail_results = result.get('provider_details') or {}

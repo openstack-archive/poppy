@@ -364,5 +364,21 @@
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
         "restrictions_list": []
-    }
+    },
+    "log_delivery_non_boolean": {
+         "name": "log_delivery",
+         "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
+         "origin_list": [{"origin": "mywebsite1.com",
+                          "port": 80,
+                          "ssl": false}],
+          "caching_list": [{"name": "default", "ttl": 3600},
+                           {"name": "home",
+                            "ttl": 1200,
+                            "rules": [{"name" : "index",
+                                       "request_url" : "/index.htm"}]}],
+           "log_delivery": {
+               "enabled": "true"
+           }
+     }
 }

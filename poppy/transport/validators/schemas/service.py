@@ -354,6 +354,9 @@ class ServiceSchema(schema_base.SchemaBase):
                         'required': True,
                         'minLength': 1,
                         'maxLength': 256
+                    },
+                    'log_delivery': {
+                        'type': 'object'
                     }
                 }},
             'PATCH': {
@@ -375,7 +378,8 @@ class ServiceSchema(schema_base.SchemaBase):
                             'origins',
                             'domains',
                             'caching_rule',
-                            'restrictions'
+                            'restrictions',
+                            'log_delivery'
                         ]
                     },
                     'value': {

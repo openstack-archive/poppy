@@ -492,6 +492,7 @@ class TestServicePatch(base.TestBase):
         super(TestServicePatch, self).setUp()
         self.service_name = str(uuid.uuid1())
         self.flavor_id = self.test_flavor
+        self.log_delivery = {"enabled": False}
 
         domain = str(uuid.uuid1()) + '.com'
         self.domain_list = [{"domain": domain, "protocol": "http"}]
@@ -516,7 +517,8 @@ class TestServicePatch(base.TestBase):
             origin_list=self.origin_list,
             caching_list=self.caching_list,
             restrictions_list=self.restrictions_list,
-            flavor_id=self.flavor_id)
+            flavor_id=self.flavor_id,
+            log_delivery=self.log_delivery)
 
         self.service_url = resp.headers["location"]
 
@@ -526,7 +528,8 @@ class TestServicePatch(base.TestBase):
             "origins": self.origin_list,
             "caching": self.caching_list,
             "restrictions": self.restrictions_list,
-            "flavor_id": self.flavor_id}
+            "flavor_id": self.flavor_id,
+            "log_delivery": self.log_delivery}
 
         self.client.wait_for_service_status(
             location=self.service_url,
