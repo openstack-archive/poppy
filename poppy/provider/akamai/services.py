@@ -20,6 +20,7 @@ import traceback
 
 from poppy.common import decorators
 from poppy.common import util
+from poppy.provider.akamai import utils
 from poppy.provider import base
 
 # to use log inside worker, we need to directly use logging
@@ -54,6 +55,10 @@ class ServiceController(base.ServiceBase):
         self.papi_api_base_url = self.driver.akamai_papi_api_base_url
         self.request_header = {'Content-type': 'application/json',
                                'Accept': 'text/plain'}
+
+        self.san_cert_cnames = self.driver.akamai_conf.san_cert_cnames
+        self.san_cert_hostname_limit = (
+            self.driver.akamai_conf.san_cert_hostname_limit)
 
     def create(self, service_obj):
         try:
@@ -123,14 +128,19 @@ class ServiceController(base.ServiceBase):
                     raise RuntimeError(resp.text)
 
                 dp_obj = {'policy_name': dp,
-                          'protocol': classified_domain.protocol}
+                          'protocol': classified_domain.protocol,
+                          'certificate': classified_domain.certificate}
                 ids.append(dp_obj)
                 # TODO(tonytan4ever): leave empty links for now
                 # may need to work with dns integration
                 LOG.info('Creating policy %s on domain %s complete' %
                          (dp, classified_domain.domain))
+                # pick a san cert for this domain
+                edgeHostName = None
+                if classified_domain.certificate == 'san':
+                    edgeHostName = self._pick_san_edgename()
                 provider_access_url = self._get_provider_access_url(
-                    classified_domain, dp)
+                    classified_domain, dp, edgeHostName)
                 links.append({'href': provider_access_url,
                               'rel': 'access_url',
                               'domain': classified_domain.domain
@@ -262,7 +272,9 @@ class ServiceController(base.ServiceBase):
                                 data=json.dumps(policy_content),
                                 headers=self.request_header)
                             dp_obj = {'policy_name': dp,
-                                      'protocol': classified_domain.protocol}
+                                      'protocol': classified_domain.protocol,
+                                      'certificate':
+                                      classified_domain.certificate}
                             policies.remove(dp_obj)
                         else:
                             LOG.info('Start to create new policy %s' % dp)
@@ -278,14 +290,18 @@ class ServiceController(base.ServiceBase):
                         if resp.status_code != 200:
                             raise RuntimeError(resp.text)
                         dp_obj = {'policy_name': dp,
-                                  'protocol': classified_domain.protocol}
+                                  'protocol': classified_domain.protocol,
+                                  'certificate': classified_domain.certificate}
                         ids.append(dp_obj)
                         # TODO(tonytan4ever): leave empty links for now
                         # may need to work with dns integration
                         LOG.info('Creating/Updating policy %s on domain %s '
                                  'complete' % (dp, classified_domain.domain))
+                        edgeHostName = None
+                        if classified_domain.certificate == 'san':
+                            edgeHostName = self._pick_san_edgename()
                         provider_access_url = self._get_provider_access_url(
-                            classified_domain, dp)
+                            classified_domain, dp, edgeHostName)
                         links.append({'href': provider_access_url,
                                       'rel': 'access_url',
                                       'domain': dp
@@ -377,8 +393,13 @@ class ServiceController(base.ServiceBase):
                         return self.responder.failed(
                             "failed to update service")
 
+                    # This part may need to revisit
+                    edgeHostName = None
+                    if policy['certificate'] == 'san':
+                        edgeHostName = self._pick_san_edgename()
                     provider_access_url = self._get_provider_access_url(
-                        util.dict2obj(policy), policy['policy_name'])
+                        util.dict2obj(policy), policy['policy_name'],
+                        edgeHostName)
                     links.append({'href': provider_access_url,
                                   'rel': 'access_url',
                                   'domain': policy['policy_name']
@@ -624,11 +645,47 @@ class ServiceController(base.ServiceBase):
             configuration_number = self.driver.https_conf_number
         return configuration_number
 
-    def _get_provider_access_url(self, domain_obj, dp):
+    def _get_provider_access_url(self, domain_obj, dp, edgeHostName=None):
         provider_access_url = None
         if domain_obj.protocol == 'http':
             provider_access_url = self.driver.akamai_access_url_link
         elif domain_obj.protocol == 'https':
-            provider_access_url = '.'.join(
-                [dp, self.driver.akamai_https_access_url_suffix])
+            if domain_obj.certificate == 'san':
+                if edgeHostName is None:
+                    raise ValueError("No EdgeHost name provided for SAN Cert")
+                provider_access_url = '.'.join(
+                    [edgeHostName, self.driver.akamai_https_access_url_suffix])
+            else:
+                provider_access_url = '.'.join(
+                    [dp, self.driver.akamai_https_access_url_suffix])
         return provider_access_url
+
+    def _pick_san_edgename(self):
+        """Inspect && Pick a SAN cert cnameHostname for this user"""
+        if self.san_cert_cnames is None or len(self.san_cert_cnames) == 0:
+            raise ValueError('No valid SAN Cert has been configured. '
+                             'Please check you configuration')
+        find_idx = 0
+        minimum_number_hosts = 2
+        # Pick the san cert with the smallest number of hosts present
+        # 2 will be the initial number
+        for idx, san_cname in enumerate(self.san_cert_cnames):
+            n = utils.get_ssl_number_of_hosts('.'.join(
+                [san_cname, self.driver.akamai_https_access_url_suffix]))
+            if idx == 0:
+                minimum_number_hosts = n
+            if n == 2:
+                find_idx = idx
+                break
+            if n >= self.san_cert_hostname_limit:
+                if find_idx == len(self.san_cert_cnames)-1:
+                    raise ValueError('All SAN Certs are having the maximum'
+                                     ' # of hostnames.Please contact operation'
+                                     ' team to create more SAN Certs')
+                continue
+
+            if n < minimum_number_hosts:
+                find_idx = idx
+                minimum_number_hosts = n
+
+        return self.san_cert_cnames[find_idx]
