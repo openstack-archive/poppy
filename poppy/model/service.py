@@ -20,6 +20,7 @@ from poppy.model.helpers import domain
 from poppy.model.helpers import origin
 from poppy.model.helpers import provider_details
 from poppy.model.helpers import restriction
+from poppy.model import log_delivery as ld
 
 
 VALID_STATUSES = [u'create_in_progress', u'deployed', u'update_in_progress',
@@ -37,7 +38,8 @@ class Service(common.DictSerializableModel):
                  origins,
                  flavor_id,
                  caching=[],
-                 restrictions=[]):
+                 restrictions=[],
+                 log_delivery=None):
         self._service_id = str(service_id)
         self._name = name
         self._domains = domains
@@ -45,6 +47,7 @@ class Service(common.DictSerializableModel):
         self._flavor_id = flavor_id
         self._caching = caching
         self._restrictions = restrictions
+        self._log_delivery = log_delivery or ld.LogDelivery(False)
         self._status = 'create_in_progress'
         self._provider_details = {}
 
@@ -110,6 +113,16 @@ class Service(common.DictSerializableModel):
     @restrictions.setter
     def restrictions(self, value):
         self._restrictions = value
+
+    @property
+    def log_delivery(self):
+        """Get log_delivery."""
+        return self._log_delivery
+
+    @log_delivery.setter
+    def log_delivery(self, value):
+        """Set log_delivery."""
+        self._log_delivery = value
 
     @property
     def status(self):
@@ -197,7 +210,13 @@ class Service(common.DictSerializableModel):
             input_dict['provider_details'][provider_name] = (
                 provider_details.ProviderDetail.init_from_dict(pd))
 
+        log_delivery = input_dict.get('log_delivery', {})
+
+        input_dict['log_delivery'] = ld.LogDelivery.init_from_dict(
+            log_delivery)
+
         o.from_dict(input_dict)
+
         return o
 
     def to_dict(self):
@@ -229,5 +248,7 @@ class Service(common.DictSerializableModel):
             new_provider_details[provider] = (
                 provider_details[provider].to_dict())
         result['provider_details'] = new_provider_details
+
+        result['log_delivery'] = result['log_delivery'].to_dict()
 
         return result
