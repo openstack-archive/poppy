@@ -36,6 +36,7 @@ class Service(common.DictSerializableModel):
                  domains,
                  origins,
                  flavor_id,
+                 log_delivery=False,
                  caching=[],
                  restrictions=[]):
         self._service_id = str(service_id)
@@ -43,6 +44,7 @@ class Service(common.DictSerializableModel):
         self._domains = domains
         self._origins = origins
         self._flavor_id = flavor_id
+        self._log_delivery = log_delivery
         self._caching = caching
         self._restrictions = restrictions
         self._status = 'create_in_progress'
@@ -92,6 +94,15 @@ class Service(common.DictSerializableModel):
     @flavor_id.setter
     def flavor_id(self, value):
         self._flavor_id = value
+
+    @property
+    def log_delivery(self):
+        """Get or set log_delivery."""
+        return self._log_delivery
+
+    @log_delivery.setter
+    def log_delivery(self, value):
+        self._log_delivery = value
 
     @property
     def caching(self):
