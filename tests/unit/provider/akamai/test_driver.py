@@ -75,6 +75,13 @@ AKAMAI_OPTIONS = [
     cfg.StrOpt(
         'property_id',
         help='Operator propertyID'),
+
+    # SANCERT related configs
+    cfg.ListOpt('san_cert_cnames', default='secure.san.test.com',
+                help='A list of san certs cnamehost names'),
+    cfg.IntOpt('san_cert_hostname_limit', default=80,
+               help='default limit on how many hostnames can'
+               ' be held by a SAN cert'),
 ]
 
 

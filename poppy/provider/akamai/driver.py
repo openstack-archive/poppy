@@ -77,7 +77,14 @@ AKAMAI_OPTIONS = [
         help='Operator groupID'),
     cfg.StrOpt(
         'property_id',
-        help='Operator propertyID')
+        help='Operator propertyID'),
+
+    # SANCERT related configs
+    cfg.ListOpt('san_cert_cnames',
+                help='A list of san certs cnamehost names'),
+    cfg.IntOpt('san_cert_hostname_limit', default=80,
+               help='default limit on how many hostnames can'
+               ' be held by a SAN cert'),
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
@@ -141,6 +148,9 @@ class CDNProvider(base.Driver):
 
         self.akamai_sps_api_client = self.akamai_policy_api_client
         self.akamai_papi_api_client = self.akamai_policy_api_client
+
+        self.san_cert_cnames = self.akamai_conf.san_cert_cnames
+        self.san_cert_hostname_limit = self.akamai_conf.san_cert_hostname_limit
 
     def is_alive(self):
 
