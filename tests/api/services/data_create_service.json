@@ -14,8 +14,8 @@
          "restrictions_list": [
                         {"name": "test",
                         "rules": [{"name": "only me",
-                        "referrer": "www.mywebsite.com"}]}
-        ]
+                        "referrer": "www.mywebsite.com"}]}],
+        "log_delivery": false
     },
    "caching_empty": {
         "name": "caching_empty",
@@ -100,5 +100,19 @@
                           "ttl": 1200,
                           "rules": [{"name" : "Rule 1",
                                      "request_url" : "/images/test.jpg"}]}]
-    }
+    },
+    "log_delivery": {
+         "name": "log_delivery",
+         "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
+         "origin_list": [{"origin": "mywebsite1.com",
+                          "port": 80,
+                          "ssl": false}],
+          "caching_list": [{"name": "default", "ttl": 3600},
+                           {"name": "home",
+                            "ttl": 1200,
+                            "rules": [{"name" : "index",
+                                       "request_url" : "/index.htm"}]}],
+         "log_delivery": false
+     }
 }
