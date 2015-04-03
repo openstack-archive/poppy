@@ -349,6 +349,7 @@ class TestServiceActions(base.TestBase):
         super(TestServiceActions, self).setUp()
         self.service_name = str(uuid.uuid1())
         self.flavor_id = self.test_flavor
+        self.log_delivery = False
 
         domain = str(uuid.uuid1()) + u'.com'
         self.domain_list = [
