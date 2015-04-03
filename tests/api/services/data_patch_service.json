@@ -206,5 +206,15 @@
                    }
          }
     ],
+    "enable_log_delivery": [
+        {"op": "replace",
+         "path": "/log_delivery",
+         "value": true}
+    ],
+    "disable_log_delivery": [
+        {"op": "replace",
+         "path": "/log_delivery",
+         "value": false}
+    ],
     "empty_list": []
 }
