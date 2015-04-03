@@ -78,7 +78,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
                        domain_list=None, origin_list=None,
                        caching_list=None, restrictions_list=None,
                        requestslib_kwargs=None,
-                       flavor_id=None):
+                       flavor_id=None,
+                       log_delivery=None):
         """Creates Service
 
         :return: Response Object containing response code 200 and body with
@@ -87,13 +88,28 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         services/{service_name}
         """
         url = '{0}/services'.format(self.url)
-        request_object = requests.CreateService(
-            service_name=service_name,
-            domain_list=domain_list,
-            origin_list=origin_list,
-            caching_list=caching_list,
-            restrictions_list=restrictions_list,
-            flavor_id=flavor_id)
+
+        if not log_delivery:
+            log_delivery = {"enabled": False}
+
+        if log_delivery:
+            request_object = requests.CreateService(
+                service_name=service_name,
+                domain_list=domain_list,
+                origin_list=origin_list,
+                caching_list=caching_list,
+                restrictions_list=restrictions_list,
+                flavor_id=flavor_id,
+                log_delivery=log_delivery)
+        else:
+            request_object = requests.CreateService(
+                service_name=service_name,
+                domain_list=domain_list,
+                origin_list=origin_list,
+                caching_list=caching_list,
+                restrictions_list=restrictions_list,
+                flavor_id=flavor_id)
+
         return self.request('POST', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 

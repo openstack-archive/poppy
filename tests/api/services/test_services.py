@@ -49,13 +49,16 @@ class TestCreateService(providers.TestProviderBase):
             item['domain'] = str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
+        log_delivery =  test_data.get('log_delivery')
         flavor_id = self.flavor_id
 
         resp = self.client.create_service(service_name=self.service_name,
                                           domain_list=domain_list,
                                           origin_list=origin_list,
                                           caching_list=caching_list,
-                                          flavor_id=flavor_id)
+                                          flavor_id=flavor_id,
+                                          log_delivery=log_delivery)
+
         self.assertEqual(resp.status_code, 202)
         self.assertEqual(resp.text, '')
         self.service_url = resp.headers['location']
@@ -140,15 +143,6 @@ class TestCreateService(providers.TestProviderBase):
 
         self.assertEqual(resp.status_code, 400)
 
-    def tearDown(self):
-        if self.service_url != '':
-            self.client.delete_service(location=self.service_url)
-
-        if self.test_config.generate_flavors:
-            self.client.delete_flavor(flavor_id=self.flavor_id)
-
-        super(TestCreateService, self).tearDown()
-
     @ddt.file_data("data_create_service_xss.json")
     def test_create_service_with_xss_injection(self, test_data):
         # create with hacker data
@@ -159,6 +153,7 @@ class TestCreateService(providers.TestProviderBase):
 
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
+
         if 'flavor_id' in test_data:
             flavor_id = test_data['flavor_id']
         else:
@@ -221,6 +216,14 @@ class TestCreateService(providers.TestProviderBase):
                         cgi.escape(caching_list[1]['rules'][0]['request_url'])
                     )
 
+    def tearDown(self):
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
+
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
+
+        super(TestCreateService, self).tearDown()
 
 @ddt.ddt
 class TestListServices(base.TestBase):
@@ -239,12 +242,14 @@ class TestListServices(base.TestBase):
                              {"name": "home", "ttl": 1200,
                               "rules": [{"name": "index",
                                          "request_url": "/index.htm"}]}]
+        self.log_delivery = {"enabled": False}
 
         resp = self.client.create_service(service_name=service_name,
                                           domain_list=self.domain_list,
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
-                                          flavor_id=self.flavor_id)
+                                          flavor_id=self.flavor_id,
+                                          log_delivery=self.log_delivery)
 
         self.service_url = resp.headers["location"]
         return self.service_url
@@ -493,6 +498,7 @@ class TestServicePatch(base.TestBase):
         super(TestServicePatch, self).setUp()
         self.service_name = str(uuid.uuid1())
         self.flavor_id = self.test_flavor
+        self.log_delivery = {"enabled": False}
 
         domain = str(uuid.uuid1()) + '.com'
         self.domain_list = [{"domain": domain, "protocol": "http"}]
@@ -519,7 +525,8 @@ class TestServicePatch(base.TestBase):
             origin_list=self.origin_list,
             caching_list=self.caching_list,
             restrictions_list=self.restrictions_list,
-            flavor_id=self.flavor_id)
+            flavor_id=self.flavor_id,
+            log_delivery=self.log_delivery)
 
         self.service_url = resp.headers["location"]
 
@@ -529,7 +536,8 @@ class TestServicePatch(base.TestBase):
             "origins": self.origin_list,
             "caching": self.caching_list,
             "restrictions": self.restrictions_list,
-            "flavor_id": self.flavor_id}
+            "flavor_id": self.flavor_id,
+            "log_delivery": self.log_delivery}
 
         self.client.wait_for_service_status(
             location=self.service_url,
