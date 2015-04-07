@@ -119,10 +119,9 @@ class ServicesController(base.Controller, hooks.HookController):
         results = [
             resp_service_model.Model(s, self)
             for s in service_resultset]
-        # TODO(obulpathi): edge case: when the total number of services is a
-        # multiple of limit, the last batch has a non-null marker.
+
         links = []
-        if len(results) > 0:
+        if len(results) >= limit:
             links.append(
                 link.Model(u'{0}/services?marker={1}&limit={2}'.format(
                     self.base_url,
