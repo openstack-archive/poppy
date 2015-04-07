@@ -163,19 +163,19 @@
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
-                    "rules": [{"name": "rule1", "referrer": "thesite"}]
+                    "rules": [{"name": "rule1", "referrer": "thesite", "request_url": "/*"}]
                     }}
     ],
    "replace_restrictions":[
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
-                    "rules": [{"name": "rule1", "referrer": "thesite"}]
+                    "rules": [{"name": "rule1", "referrer": "thesite", "request_url": "/*"}]
                     }},
         {"op": "replace",
          "path": "/restrictions/0",
           "value": {"name": "new_restricted",
-                    "rules": [{"name": "rule1", "referrer": "thesite"}]
+                    "rules": [{"name": "rule1", "referrer": "thesite", "request_url": "/*"}]
                     }}
    ],
    "remove_restrictions": [
@@ -186,7 +186,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "r",
-                    "rules": [{"name": "rule1", "referrer": "thesite"}]
+                    "rules": [{"name": "rule1", "referrer": "thesite", "request_url": "/*"}]
                    }
          }
     ],
@@ -194,7 +194,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
-                    "rules": [{"name": "r", "referrer": "thesite"}]
+                    "rules": [{"name": "r", "referrer": "thesite", "request_url": "/*"}]
                    }
          }
     ],
@@ -202,7 +202,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
-                    "rules": [{"name": "rule1", "referrer": "abc"}]
+                    "rules": [{"name": "rule1", "referrer": "abc", "request_url":"/*"}]
                    }
          }
     ],

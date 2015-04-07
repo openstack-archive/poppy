@@ -21,8 +21,10 @@ class Rule(common.DictSerializableModel):
 
     def __init__(self, name,
                  referrer=None, http_host=None, client_ip=None,
-                 http_method=None, request_url=None):
+                 http_method=None, request_url="/*"):
         self._name = name
+        self._request_url = request_url
+
         if referrer:
             self._referrer = referrer
         if http_host:
@@ -31,8 +33,6 @@ class Rule(common.DictSerializableModel):
             self._client_ip = client_ip
         if http_method:
             self._http_method = http_method
-        if request_url:
-            self._request_url = request_url
 
     @property
     def name(self):
