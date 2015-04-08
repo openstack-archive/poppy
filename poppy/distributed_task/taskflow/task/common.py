@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import json
+import requests
 
 from oslo.config import cfg
 from taskflow import task
@@ -30,6 +31,65 @@ LOG = log.getLogger(__name__)
 
 conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
+
+LOG_DELIVERY_OPTIONS = [
+    cfg.StrOpt('identity_url', default='',
+               help='OpenStack Identity URL'),
+    cfg.StrOpt('container_name', default='.CDN_ACCESS_LOGS',
+               help='Swiftfs contailer to put logs'),
+    cfg.StrOpt('preferred_dcs', default='DC1,DC2',
+               help='Preferred DCs to create container'),
+]
+
+LOG_DELIVERY_GROUP = 'log_delivery'
+
+
+def create_log_delivery_container(project_id, auth_token):
+    # log delivery enabled, create log delivery container for the user
+    conf.register_opts(LOG_DELIVERY_OPTIONS, group=LOG_DELIVERY_GROUP)
+    identity_url = conf['log_delivery']['identity_url']
+    container_name = conf['log_delivery']['container_name']
+    preferred_dcs = conf['log_delivery']['preferred_dcs'].split(',')
+
+    payload = {
+        "auth": {
+            "tenantName": project_id,
+            "token": {
+                "id": auth_token
+            }
+        }
+    }
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(identity_url + 'tokens',
+                             data=json.dumps(payload),
+                             headers=headers)
+
+    catalog = response.json()
+    services = catalog['access']['serviceCatalog']
+
+    swifturl = None
+    for service in services:
+        if service['type'] == 'object-store':
+            endpoints = service['endpoints']
+            for endpoint in endpoints:
+                if endpoint['region'] in preferred_dcs:
+                    # TODO(obulpathi): Add both public and private urls.
+                    # Only private urls does not work because, not all
+                    # containers are accessable from all DC's using
+                    # private urls
+                    swifturl = endpoint['publicURL']
+                    break
+        if swifturl:
+            break
+
+    container_url = '{0}/{1}'.format(swifturl, container_name)
+    headers = {'Content-Type': 'application/json',
+               'X-Auth-Token': auth_token}
+    LOG.info('Starting to create container {0}'.format(container_url))
+    response = requests.put(container_url, None, headers=headers)
+    LOG.info('Created container {0}'.format(container_url))
+    log_responders = [container_url]
+    return log_responders
 
 
 class UpdateProviderDetailTask(task.Task):

@@ -39,6 +39,7 @@ def update_service():
                              provides='retry_sleep_time')).add(
             update_service_tasks.UpdateServiceDNSMappingTask(
                 rebind=['responders'])),
+        update_service_tasks.UpdateLogDeliveryContainerTask(),
         update_service_tasks.GatherProviderDetailsTask(
             rebind=['responders', 'dns_responder']),
         update_service_tasks.UpdateProviderDetailsTask_Errors(
