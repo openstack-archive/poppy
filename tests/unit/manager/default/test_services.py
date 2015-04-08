@@ -75,6 +75,7 @@ class DefaultManagerServiceTests(base.TestCase):
         self.project_id = str(uuid.uuid4())
         self.service_name = str(uuid.uuid4())
         self.service_id = str(uuid.uuid4())
+        self.auth_token = str(uuid.uuid4())
         self.service_json = {
             "name": self.service_name,
             "domains": [
@@ -162,8 +163,11 @@ class DefaultManagerServiceTests(base.TestCase):
             create_dns = create_service_tasks.CreateServiceDNSMappingTask()
             dns_responder = create_dns.execute(responders, 0)
             gather_provider = create_service_tasks.GatherProviderDetailsTask()
+            log_responder = []
             provider_details_dict = \
-                gather_provider.execute(responders, dns_responder)
+                gather_provider.execute(responders,
+                                        dns_responder,
+                                        log_responder)
             update_provider_details = common.UpdateProviderDetailTask()
             update_provider_details.execute(provider_details_dict,
                                             self.project_id, self.service_id)
@@ -233,7 +237,9 @@ class DefaultManagerServiceTests(base.TestCase):
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
 
-        service_obj = self.sc.create(self.project_id, self.service_json)
+        service_obj = self.sc.create(self.project_id,
+                                     self.auth_token,
+                                     self.service_json)
 
         # ensure the manager calls the storage driver with the appropriate data
         self.sc.storage_controller.create.assert_called_once_with(
@@ -347,7 +353,10 @@ class DefaultManagerServiceTests(base.TestCase):
             }
         ])
 
-        self.sc.update(self.project_id, self.service_id, service_updates)
+        self.sc.update(self.project_id,
+                       self.service_id,
+                       self.auth_token,
+                       service_updates)
 
         # ensure the manager calls the storage driver with the appropriate data
         self.sc.storage_controller.update.assert_called_once()
