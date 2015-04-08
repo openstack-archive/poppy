@@ -107,7 +107,7 @@ class DefaultServicesController(base.ServicesController):
         """
         return self.storage_controller.get(project_id, service_id)
 
-    def create(self, project_id, service_obj):
+    def create(self, project_id, auth_token, service_obj):
         """create.
 
         :param project_id
@@ -140,6 +140,7 @@ class DefaultServicesController(base.ServicesController):
         kwargs = {
             'providers_list_json': json.dumps(providers),
             'project_id': project_id,
+            'auth_token': auth_token,
             'service_id': service_id,
             'time_seconds': self.determine_sleep_times()
         }

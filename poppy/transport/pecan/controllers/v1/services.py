@@ -165,7 +165,9 @@ class ServicesController(base.Controller, hooks.HookController):
         service_obj = req_service_model.load_from_json(service_json_dict)
         service_id = service_obj.service_id
         try:
-            services_controller.create(self.project_id, service_obj)
+            services_controller.create(self.project_id,
+                                       self.auth_token,
+                                       service_obj)
         except LookupError as e:  # error handler for no flavor
             pecan.abort(400, detail=str(e))
         except ValueError as e:  # error handler for existing service name
