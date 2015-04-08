@@ -20,6 +20,7 @@ from oslo.config import cfg
 from taskflow import task
 
 from poppy import bootstrap
+from poppy.distributed_task.taskflow.task import common
 from poppy.model.helpers import provider_details
 from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import service
@@ -90,6 +91,23 @@ class UpdateServiceDNSMappingTask(task.Task):
         LOG.info('Sleeping for {0} seconds and '
                  'retrying'.format(retry_sleep_time))
         time.sleep(retry_sleep_time)
+
+
+class UpdateLogDeliveryContainerTask(task.Task):
+    default_provides = "log_responders"
+
+    def execute(self, project_id, auth_token, service_old, service_obj):
+        service_old_json = json.loads(service_old)
+        service_obj_json = json.loads(service_obj)
+
+        # check if log delivery is enabled in this PATCH
+        if service_old['log_delivery'] or not service_old['log_delivery']:
+            return log_responders
+
+        log_responders = common.create_log_delivery_container(
+            project_id, auth_token)
+
+        return log_responders
 
 
 class GatherProviderDetailsTask(task.Task):

@@ -135,7 +135,7 @@ class DefaultServicesController(base.ServicesController):
         """
         return self.storage_controller.get(project_id, service_id)
 
-    def create(self, project_id, service_json):
+    def create(self, project_id, auth_token, service_json):
         """create.
 
         :param project_id
@@ -179,6 +179,7 @@ class DefaultServicesController(base.ServicesController):
         kwargs = {
             'providers_list_json': json.dumps(providers),
             'project_id': project_id,
+            'auth_token': auth_token,
             'service_id': service_id,
             'time_seconds': self.determine_sleep_times()
         }
@@ -188,7 +189,7 @@ class DefaultServicesController(base.ServicesController):
 
         return service_obj
 
-    def update(self, project_id, service_id, service_updates):
+    def update(self, project_id, service_id, auth_token, service_updates):
         """update.
 
         :param project_id
@@ -271,6 +272,7 @@ class DefaultServicesController(base.ServicesController):
         kwargs = {
             'project_id': project_id,
             'service_id': service_id,
+            'auth_token': auth_token,
             'service_old': json.dumps(service_old.to_dict()),
             'service_obj': json.dumps(service_new.to_dict()),
             'time_seconds': self.determine_sleep_times()

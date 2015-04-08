@@ -20,6 +20,7 @@ from oslo.config import cfg
 from taskflow import task
 
 from poppy import bootstrap
+from poppy.distributed_task.taskflow.task import common
 from poppy.model.helpers import provider_details
 from poppy.openstack.common import log
 
@@ -84,10 +85,37 @@ class CreateServiceDNSMappingTask(task.Task):
         time.sleep(retry_sleep_time)
 
 
+class CreateLogDeliveryContainerTask(task.Task):
+    default_provides = "log_responders"
+
+    def execute(self, project_id, auth_token, service_id):
+        bootstrap_obj = bootstrap.Bootstrap(conf)
+        service_controller = bootstrap_obj.manager.services_controller
+        storage_controller = service_controller.storage_controller
+
+        try:
+            service_obj = storage_controller.get(project_id, service_id)
+            storage_controller._driver.close_connection()
+        except ValueError:
+            msg = 'Creating service {0} from Poppy failed. ' \
+                  'No such service exists'.format(service_id)
+            LOG.info(msg)
+            raise Exception(msg)
+
+        log_responders = []
+        # if log delivery is not enabled, return
+        if not service_obj.log_delivery:
+            return log_responders
+        # log delivery enabled, create log delivery container for the user
+        log_responders = common.create_log_delivery_container(
+            project_id, auth_token)
+        return log_responders
+
+
 class GatherProviderDetailsTask(task.Task):
     default_provides = "provider_details_dict"
 
-    def execute(self, responders, dns_responder):
+    def execute(self, responders, dns_responder, log_responders):
         provider_details_dict = {}
         for responder in responders:
             for provider_name in responder:
@@ -111,6 +139,8 @@ class GatherProviderDetailsTask(task.Task):
                             error_message=error_msg))
                 else:
                     access_urls = dns_responder[provider_name]['access_urls']
+                    if log_responders:
+                        access_urls.append({'log_delivery': log_responders[0]})
                     provider_details_dict[provider_name] = (
                         provider_details.ProviderDetail(
                             provider_service_id=responder[provider_name]['id'],
