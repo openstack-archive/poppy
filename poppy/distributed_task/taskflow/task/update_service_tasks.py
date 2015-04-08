@@ -20,6 +20,7 @@ from oslo.config import cfg
 from taskflow import task
 
 from poppy import bootstrap
+from poppy.distributed_task.taskflow.task import common
 from poppy.model.helpers import provider_details
 from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import service
@@ -92,10 +93,29 @@ class UpdateServiceDNSMappingTask(task.Task):
         time.sleep(retry_sleep_time)
 
 
+class UpdateLogDeliveryContainerTask(task.Task):
+    default_provides = "log_responders"
+
+    def execute(self, project_id, auth_token, service_old, service_obj):
+        service_old_json = json.loads(service_old)
+        service_obj_json = json.loads(service_obj)
+
+        # check if log delivery is enabled in this PATCH
+        if service_old_json['log_delivery']['enabled']:
+            return
+        if not service_obj_json['log_delivery']['enabled']:
+            return
+
+        log_responders = common.create_log_delivery_container(
+            project_id, auth_token)
+
+        return log_responders
+
+
 class GatherProviderDetailsTask(task.Task):
     default_provides = "provider_details_dict_errors_tuple"
 
-    def execute(self, responders, dns_responder, project_id,
+    def execute(self, responders, dns_responder, log_responders, project_id,
                 service_id, service_obj):
 
         bootstrap_obj = bootstrap.Bootstrap(conf)
@@ -127,6 +147,12 @@ class GatherProviderDetailsTask(task.Task):
                             error_message=error_msg))
                 else:
                     access_urls = dns_responder[provider_name]['access_urls']
+                    if log_responders:
+                        access_urls.append({'log_delivery': log_responders})
+                    provider_details_dict[provider_name] = (
+                        provider_details.ProviderDetail(
+                            provider_service_id=responder[provider_name]['id'],
+                            access_urls=access_urls))
                     provider_details_dict[provider_name] = (
                         provider_details.ProviderDetail(
                             provider_service_id=responder[provider_name]['id'],

@@ -68,9 +68,14 @@ class Model(collections.OrderedDict):
             # add the access urls
             access_urls = provider_detail.access_urls
             for access_url in access_urls:
-                self["links"].append(link.Model(
-                    access_url['operator_url'],
-                    'access_url'))
+                if 'operator_url' in access_url:
+                    self['links'].append(link.Model(
+                        access_url['operator_url'],
+                        'access_url'))
+                elif 'log_delivery' in access_url:
+                    self['links'].append(link.Model(
+                        access_url['log_delivery'],
+                        'log_delivery'))
 
             # add any errors
             error_message = provider_detail.error_message
