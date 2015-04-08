@@ -39,8 +39,9 @@ def create_service():
                              provides='retry_sleep_time')).add(
             create_service_tasks.CreateServiceDNSMappingTask(
                 rebind=['responders'])),
+        create_service_tasks.CreateLogDeliveryContainerTask(),
         create_service_tasks.GatherProviderDetailsTask(
-            rebind=['responders', 'dns_responder']),
+            rebind=['responders', 'dns_responder', 'log_responders']),
         common.UpdateProviderDetailTask(rebind=['provider_details_dict'])
     )
     return flow

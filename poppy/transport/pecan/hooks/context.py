@@ -63,3 +63,6 @@ class ContextHook(hooks.PecanHook):
                                                        "tenant", None)
         state.controller.__self__.base_url = getattr(local.store.context,
                                                      "base_url", None)
+        '''Attach auth_token as a member variable project_id to controller.'''
+        state.controller.__self__.auth_token = getattr(local.store.context,
+                                                       "auth_token", None)
