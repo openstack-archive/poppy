@@ -89,5 +89,5 @@ class RackspaceDNSClient(object):
             dns.resolver.query(target, 'CNAME')
         except dns.resolver.NXDOMAIN:
             time.sleep(retry_interval)
-            self.wait_cname_propagation(target)
+            self.wait_cname_propagation(target, retry_interval)
         return
