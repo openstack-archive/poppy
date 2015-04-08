@@ -109,12 +109,13 @@ class TestBase(fixtures.BaseTestFixture):
             retry_interval=self.dns_config.retry_interval)
 
     def setup_service(self, service_name, domain_list, origin_list,
-                      caching_list, flavor_id):
+                      caching_list=[], restrictions_list=[], flavor_id=None):
         resp = self.poppy_client.create_service(
             service_name=service_name,
             domain_list=domain_list,
             origin_list=origin_list,
-            caching_list=[],
+            caching_list=caching_list,
+            restrictions_list=restrictions_list,
             flavor_id=flavor_id)
 
         self.assertEqual(resp.status_code, 202)
