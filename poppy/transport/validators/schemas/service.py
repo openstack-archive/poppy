@@ -288,10 +288,6 @@ class ServiceSchema(schema_base.SchemaBase):
                             'properties': {
                                 'name': {
                                     'type': 'string',
-                                    'pattern': re.compile(
-                                        '^(?!default$).*',
-                                        re.IGNORECASE
-                                    ),
                                     'required': True,
                                     'minLength': 1,
                                     'maxLength': 256},

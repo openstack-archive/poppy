@@ -361,14 +361,21 @@ class TestServiceActions(base.TestBase):
                 u"origin": origin,
                 u"port": 80,
                 u"ssl": False,
-                u"rules": []
+                u"rules": [{
+                    u"name": u"default",
+                    u"request_url": u"/*"
+                }]
             }
         ]
 
         self.caching_list = [
             {
                 u"name": u"default",
-                u"ttl": 3600
+                u"ttl": 3600,
+                u"rules": [{
+                    u"name": "default",
+                    u"request_url": "/*"
+                }]
             },
             {
                 u"name": u"home",
@@ -494,21 +501,62 @@ class TestServicePatch(base.TestBase):
         self.flavor_id = self.test_flavor
 
         domain = str(uuid.uuid1()) + '.com'
-        self.domain_list = [{"domain": domain, "protocol": "http"}]
+        self.domain_list = [
+            {
+                "domain": domain,
+                "protocol": "http"
+            }
+        ]
 
         origin = str(uuid.uuid1()) + '.com'
-        self.origin_list = [{"origin": origin,
-                             "port": 80, "ssl": False, "rules": []}]
+        self.origin_list = [
+            {
+                "origin": origin,
+                "port": 80,
+                "ssl": False,
+                "rules": [
+                    {
+                        "name": "default",
+                        "request_url": "/*"
+                    }
+                ]
+            }
+        ]
 
-        self.caching_list = [{"name": "default", "ttl": 3600},
-                             {"name": "home", "ttl": 1200,
-                              "rules": [{"name": "index",
-                                         "request_url": "/index.htm"}]}]
+        self.caching_list = [
+            {
+                "name": "default",
+                "ttl": 3600,
+                "rules": [
+                    {
+                        "name": "default",
+                        "request_url": "/*"
+                    }
+                ]
+            },
+            {
+                "name": "home",
+                "ttl": 1200,
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ]
+            }
+        ]
 
         self.restrictions_list = [
-            {"name": "website only",
-             "rules": [{"name": "mywebsite.com",
-                        "referrer": "www.mywebsite.com"}]}]
+            {
+                "name": "website only",
+                "rules": [
+                    {
+                        "name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
 
         resp = self.client.create_service(
             service_name=self.service_name,

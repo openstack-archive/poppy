@@ -25,6 +25,7 @@ from poppy.distributed_task.taskflow.flow import delete_service
 from poppy.distributed_task.taskflow.flow import purge_service
 from poppy.distributed_task.taskflow.flow import update_service
 from poppy.manager import base
+from poppy.model.helpers import rule
 from poppy.model import service
 from poppy.openstack.common import log
 from poppy.transport.validators import helpers as validators
@@ -73,7 +74,7 @@ class DefaultServicesController(base.ServicesController):
             random.randrange(self.dns_conf.min_backoff_range,
                              self.dns_conf.max_backoff_range)
 
-        backoff = [(2**i) * determined_sleep_time for i in
+        backoff = [(2 ** i) * determined_sleep_time for i in
                    range(0, self.dns_conf.retries)]
 
         return backoff
@@ -87,6 +88,33 @@ class DefaultServicesController(base.ServicesController):
             raise LookupError(u'Service {0} does not exist'.format(
                 service_id))
         return provider_details
+
+    def _append_defaults(self, service_json):
+        # default origin rule
+        for origin in service_json.get('origins', []):
+            if origin.get('rules') is None:
+                # add a rules section
+                origin['rules'] = []
+
+            if origin.get('rules') == []:
+                # add the /* default request_url rule
+                default_rule = rule.Rule(
+                    name="default",
+                    request_url='/*')
+                origin['rules'].append(default_rule.to_dict())
+
+        # default caching rule
+        for caching_entry in service_json.get('caching', []):
+            if caching_entry.get('rules') is None:
+                # add a rules section
+                caching_entry['rules'] = []
+
+            if caching_entry.get('rules') == []:
+                # add the /* default request_url rule
+                default_rule = rule.Rule(
+                    name="default",
+                    request_url='/*')
+                caching_entry['rules'].append(default_rule.to_dict())
 
     def list(self, project_id, marker=None, limit=None):
         """list.
@@ -107,7 +135,7 @@ class DefaultServicesController(base.ServicesController):
         """
         return self.storage_controller.get(project_id, service_id)
 
-    def create(self, project_id, service_obj):
+    def create(self, project_id, service_json):
         """create.
 
         :param project_id
@@ -115,11 +143,16 @@ class DefaultServicesController(base.ServicesController):
         :raises LookupError, ValueError
         """
         try:
-            flavor = self.flavor_controller.get(service_obj.flavor_id)
+            flavor = self.flavor_controller.get(service_json.get('flavor_id'))
         # raise a lookup error if the flavor is not found
         except LookupError as e:
             raise e
-        providers = [p.provider_id for p in flavor.providers]
+
+        # add any default rules so its explicitly defined
+        self._append_defaults(service_json)
+
+        # convert to an object
+        service_obj = service.Service.init_from_dict(service_json)
         service_id = service_obj.service_id
 
         # deal with shared ssl domains
@@ -129,6 +162,11 @@ class DefaultServicesController(base.ServicesController):
                     domain.domain
                 )
 
+        # validate the service
+        service_json = service_obj.to_dict()
+        schema = service_schema.ServiceSchema.get_schema("service", "POST")
+        validators.is_valid_service_configuration(service_json, schema)
+
         try:
             self.storage_controller.create(
                 project_id,
@@ -137,6 +175,7 @@ class DefaultServicesController(base.ServicesController):
         except ValueError as e:
             raise e
 
+        providers = [p.provider_id for p in flavor.providers]
         kwargs = {
             'providers_list_json': json.dumps(providers),
             'project_id': project_id,
@@ -147,7 +186,7 @@ class DefaultServicesController(base.ServicesController):
         self.distributed_task_controller.submit_task(
             create_service.create_service, **kwargs)
 
-        return
+        return service_obj
 
     def update(self, project_id, service_id, service_updates):
         """update.
@@ -184,6 +223,9 @@ class DefaultServicesController(base.ServicesController):
 
         service_new_json = jsonpatch.apply_patch(
             service_old_json, service_updates)
+
+        # add any default rules so its explicitly defined
+        self._append_defaults(service_new_json)
 
         # validate the updates
         schema = service_schema.ServiceSchema.get_schema("service", "POST")
