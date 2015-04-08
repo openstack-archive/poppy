@@ -60,6 +60,10 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         """Flag to indicate if webpagetest tests should be run."""
         return self.get_boolean('webpagetest_enabled')
 
+    @property
+    def referree_origin(self):
+        """The origin to use during referrer restriction tests."""
+        return self.get('referree_origin')
 
 class AuthConfig(data_interfaces.ConfigSectionInterface):
     """Defines the auth config values."""
