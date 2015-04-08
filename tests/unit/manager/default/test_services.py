@@ -14,16 +14,19 @@
 # limitations under the License.
 
 import json
+import random
 import uuid
 
 import ddt
 import mock
 from oslo.config import cfg
+import requests
 
 from poppy.distributed_task.taskflow.task import common
 from poppy.distributed_task.taskflow.task import create_service_tasks
 from poppy.distributed_task.taskflow.task import delete_service_tasks
 from poppy.distributed_task.taskflow.task import purge_service_tasks
+from poppy.distributed_task.taskflow.task import update_service_tasks
 from poppy.manager.default import driver
 
 
@@ -32,6 +35,20 @@ from poppy.model import flavor
 from poppy.model.helpers import provider_details
 from poppy.transport.pecan.models.request import service
 from tests.unit import base
+
+
+class Response(object):
+
+    def __init__(self, resp_status, resp_json=None):
+        self.resp_status = resp_status
+        self.resp_json = resp_json
+
+    @property
+    def ok(self):
+        return self.resp_status
+
+    def json(self):
+        return self.resp_json
 
 
 @ddt.ddt
@@ -75,6 +92,7 @@ class DefaultManagerServiceTests(base.TestCase):
         self.project_id = str(uuid.uuid4())
         self.service_name = str(uuid.uuid4())
         self.service_id = str(uuid.uuid4())
+        self.auth_token = str(uuid.uuid4())
         self.service_json = {
             "name": self.service_name,
             "domains": [
@@ -105,7 +123,10 @@ class DefaultManagerServiceTests(base.TestCase):
                  ]
                  }
             ],
-            "flavor_id": "standard"
+            "flavor_id": "standard",
+            "log_delivery": {
+                "enabled": False
+            },
         }
 
         self.service_obj = service.load_from_json(self.service_json)
@@ -162,13 +183,64 @@ class DefaultManagerServiceTests(base.TestCase):
             create_dns = create_service_tasks.CreateServiceDNSMappingTask()
             dns_responder = create_dns.execute(responders, 0)
             gather_provider = create_service_tasks.GatherProviderDetailsTask()
+            log_responder = \
+                create_service_tasks.CreateLogDeliveryContainerTask()
             provider_details_dict = \
-                gather_provider.execute(responders, dns_responder)
+                gather_provider.execute(responders,
+                                        dns_responder,
+                                        log_responder)
             update_provider_details = common.UpdateProviderDetailTask()
             update_provider_details.execute(provider_details_dict,
                                             self.project_id, self.service_id)
 
         bootstrap_mock_create()
+
+    def mock_update_service(self, provider_details_json):
+        @mock.patch('poppy.bootstrap.Bootstrap')
+        def bootstrap_mock_update(mock_bootstrap):
+            mock_bootstrap.return_value = self.bootstrap_obj
+            service_old = json.dumps(self.service_json)
+            update_provider = update_service_tasks.UpdateProviderServicesTask()
+            service_updates = self.service_json.copy()
+            service_updates['log_delivery'] = {
+                'enabled': True
+            }
+            service_updates_json = json.dumps(service_updates)
+            responders = update_provider.execute(
+                service_old,
+                service_updates_json
+            )
+            update_dns = update_service_tasks.UpdateServiceDNSMappingTask()
+
+            dns_responder = update_dns.execute(responders, 0, service_old,
+                                               service_updates_json)
+
+            log_delivery_update = \
+                update_service_tasks.UpdateLogDeliveryContainerTask()
+            log_responder = log_delivery_update.execute(self.project_id,
+                                                        self.auth_token,
+                                                        service_old,
+                                                        service_updates_json)
+
+            gather_provider = update_service_tasks.GatherProviderDetailsTask()
+
+            provider_details_dict = \
+                gather_provider.execute(responders,
+                                        dns_responder,
+                                        log_responder,
+                                        self.project_id,
+                                        self.service_id,
+                                        service_old)
+
+            update_provider_details = \
+                update_service_tasks.UpdateProviderDetailsTask_Errors()
+            update_provider_details.execute(provider_details_dict,
+                                            self.project_id,
+                                            self.service_id,
+                                            service_old,
+                                            service_updates_json)
+
+        bootstrap_mock_update()
 
     def test_create(self):
         # fake one return value
@@ -204,7 +276,7 @@ class DefaultManagerServiceTests(base.TestCase):
             elif name == "fastly":
                 return_mock = mock.Mock(
                     return_value={
-                        'Fastly': {'error': "fail to create servcice",
+                        'Fastly': {'error': "fail to create service",
                                    'error_detail': 'Fastly Create failed'
                                    ' because of XYZ'}})
 
@@ -233,7 +305,9 @@ class DefaultManagerServiceTests(base.TestCase):
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
 
-        service_obj = self.sc.create(self.project_id, self.service_json)
+        service_obj = self.sc.create(self.project_id,
+                                     self.auth_token,
+                                     self.service_json)
 
         # ensure the manager calls the storage driver with the appropriate data
         self.sc.storage_controller.create.assert_called_once_with(
@@ -311,6 +385,131 @@ class DefaultManagerServiceTests(base.TestCase):
 
         self.mock_create_service(provider_details_json)
 
+    @ddt.file_data('data_provider_details.json')
+    def test_update_service_worker_success_and_failure(self,
+                                                       provider_details_json):
+        self.provider_details = {}
+        for provider_name in provider_details_json:
+            provider_detail_dict = json.loads(
+                provider_details_json[provider_name]
+            )
+            provider_service_id = provider_detail_dict.get('id', None)
+            access_urls = provider_detail_dict.get('access_urls', None)
+            status = provider_detail_dict.get('status', u'deployed')
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
+                status=status)
+            self.provider_details[provider_name] = provider_detail_obj
+
+            providers = self.sc._driver.providers
+
+        def get_provider_extension_by_name(name):
+            if name == 'cloudfront':
+                return_mock = {
+                    'CloudFront': {
+                        'id':
+                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                        'links': [{'href': 'www.mysite.com',
+                                   'rel': 'access_url'}],
+                        'status': 'deploy_in_progress'
+                    }
+                }
+                service_controller = mock.Mock(
+                    create=mock.Mock(return_value=return_mock)
+                )
+                return mock.Mock(obj=mock.Mock(
+                    provider_name='CloudFront',
+                    service_controller=service_controller)
+                )
+            elif name == 'fastly':
+                return_mock = {
+                    'Fastly': {'error': "fail to create servcice",
+                               'error_detail': 'Fastly Create failed'
+                               '     because of XYZ'}
+                }
+                service_controller = mock.Mock(
+                    create=mock.Mock(return_value=return_mock)
+                )
+                return mock.Mock(obj=mock.Mock(
+                    provider_name='MaxCDN',
+                    service_controller=service_controller)
+                )
+            else:
+                return_mock = {
+                    name.title(): {
+                        'id':
+                        '08d2e326-377e-11e4-b531-3c15c2b8d2d6',
+                        'links': [
+                            {'href': 'www.mysite.com',
+                             'rel': 'access_url'}]
+                    }
+                }
+                service_controller = mock.Mock(
+                    create=mock.Mock(return_value=return_mock)
+                )
+                return mock.Mock(obj=mock.Mock(
+                    provider_name=name.title(),
+                    service_controller=service_controller)
+                )
+
+        providers.__getitem__.side_effect = get_provider_extension_by_name
+
+        conf = cfg.CONF
+        conf(project='poppy', prog='poppy', args=[])
+        LOG_DELIVERY_OPTIONS = [
+            cfg.ListOpt('preferred_dcs', default=['DC1', 'DC2'],
+                        help='Preferred DCs to create container'),
+        ]
+
+        LOG_DELIVERY_GROUP = 'log_delivery'
+        conf.register_opts(LOG_DELIVERY_OPTIONS, group=LOG_DELIVERY_GROUP)
+        region = random.choice(conf['log_delivery']['preferred_dcs'])
+
+        catalog_json = {
+            'access': {
+                'serviceCatalog': [
+                    {
+                        'type': 'object-store',
+                        'endpoints': [
+                            {
+                                'region': region,
+                                'publicURL': 'public',
+                                'internalURL': 'private'
+                            }
+                        ]
+                    }
+                    ]
+                }
+            }
+
+        # NOTE(TheSriram): Successful update
+        with mock.patch.object(requests,
+                               'post',
+                               return_value=Response(True, catalog_json)):
+            with mock.patch.object(requests,
+                                   'put',
+                                   return_value=Response(True)):
+                self.mock_update_service(provider_details_json)
+
+        # NOTE(TheSriram): Unsuccessful update due to keystone
+        with mock.patch.object(requests,
+                               'post',
+                               return_value=Response(False, catalog_json)):
+            with mock.patch.object(requests,
+                                   'put',
+                                   return_value=Response(True)):
+                self.mock_update_service(provider_details_json)
+
+        # NOTE(TheSriram): Unsuccessful update due to swift
+        with mock.patch.object(requests,
+                               'post',
+                               return_value=Response(True, catalog_json)):
+            with mock.patch.object(requests,
+                                   'put',
+                                   return_value=Response(False)):
+                self.mock_update_service(provider_details_json)
+
     @ddt.file_data('service_update.json')
     def test_update(self, update_json):
         provider_details_dict = {
@@ -347,7 +546,10 @@ class DefaultManagerServiceTests(base.TestCase):
             }
         ])
 
-        self.sc.update(self.project_id, self.service_id, service_updates)
+        self.sc.update(self.project_id,
+                       self.service_id,
+                       self.auth_token,
+                       service_updates)
 
         # ensure the manager calls the storage driver with the appropriate data
         self.sc.storage_controller.update.assert_called_once()

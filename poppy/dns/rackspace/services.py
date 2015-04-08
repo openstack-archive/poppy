@@ -403,7 +403,8 @@ class ServicesController(base.ServicesBase):
             access_urls = provider_detail.access_urls
             old_access_urls_map[provider_name] = {'access_urls': access_urls}
             for access_url in access_urls:
-                old_domains.add(access_url['domain'])
+                if 'domain' in access_url:
+                    old_domains.add(access_url['domain'])
 
         # if there is a provider error, don't try dns update
         for responder in responders:

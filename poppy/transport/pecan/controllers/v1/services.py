@@ -162,8 +162,9 @@ class ServicesController(base.Controller, hooks.HookController):
         service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
         service_id = None
         try:
-            service_obj = services_controller.create(
-                self.project_id, service_json_dict)
+            service_obj = services_controller.create(self.project_id,
+                                                     self.auth_token,
+                                                     service_json_dict)
             service_id = service_obj.service_id
         except LookupError as e:  # error handler for no flavor
             pecan.abort(400, detail=str(e))
@@ -211,7 +212,7 @@ class ServicesController(base.Controller, hooks.HookController):
 
         try:
             services_controller.update(
-                self.project_id, service_id, service_updates)
+                self.project_id, service_id, self.auth_token, service_updates)
         except exceptions.ValidationFailed as e:
             pecan.abort(400, detail=str(e))
         except LookupError as e:  # error handler for no flavor
