@@ -171,7 +171,6 @@ class DefaultManagerServiceTests(base.TestCase):
         bootstrap_mock_create()
 
     def test_create(self):
-        service_obj = service.load_from_json(self.service_json)
         # fake one return value
         self.sc.flavor_controller.get.return_value = flavor.Flavor(
             "standard",
@@ -234,7 +233,7 @@ class DefaultManagerServiceTests(base.TestCase):
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
 
-        self.sc.create(self.project_id, service_obj)
+        service_obj = self.sc.create(self.project_id, self.service_json)
 
         # ensure the manager calls the storage driver with the appropriate data
         self.sc.storage_controller.create.assert_called_once_with(

@@ -24,7 +24,6 @@ from poppy.common import errors
 from poppy.common import uri
 from poppy.transport.pecan.controllers import base
 from poppy.transport.pecan import hooks as poppy_hooks
-from poppy.transport.pecan.models.request import service as req_service_model
 from poppy.transport.pecan.models.response import link
 from poppy.transport.pecan.models.response import service as resp_service_model
 from poppy.transport.validators import helpers
@@ -162,10 +161,12 @@ class ServicesController(base.Controller, hooks.HookController):
     def post(self):
         services_controller = self._driver.manager.services_controller
         service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
-        service_obj = req_service_model.load_from_json(service_json_dict)
-        service_id = service_obj.service_id
+        # service_obj = req_service_model.load_from_json(service_json_dict)
+        service_id = None
         try:
-            services_controller.create(self.project_id, service_obj)
+            service_obj = services_controller.create(
+                self.project_id, service_json_dict)
+            service_id = service_obj.service_id
         except LookupError as e:  # error handler for no flavor
             pecan.abort(400, detail=str(e))
         except ValueError as e:  # error handler for existing service name
