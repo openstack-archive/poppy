@@ -1,0 +1,100 @@
+{
+    "origin": {
+        "submit_value": {
+            "name": "my_service_name",
+            "domain_list": [
+                {
+                    "domain": "mywebsite.com",
+                    "protocol": "http"
+                }
+            ],
+            "origin_list": [
+                {
+                    "origin": "mywebsite1.com",
+                    "port": 80,
+                    "ssl": false
+                }
+            ]
+        },
+        "expected_result": {
+            "name": "my_service_name",
+            "domain_list": [
+                {
+                    "domain": "mywebsite.com",
+                    "protocol": "http"
+                }
+            ],
+            "origin_list": [
+                {
+                    "origin": "mywebsite1.com",
+                    "port": 80,
+                    "ssl": false,
+                    "rules": [
+                        {
+                            "name" : "default",
+                            "request_url" : "/*"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "caching": {
+        "submit_value": {
+            "name": "my_service_name",
+            "domain_list": [
+                {
+                    "domain": "mywebsite.com",
+                    "protocol": "http"
+                }
+            ],
+            "origin_list": [
+                {
+                    "origin": "mywebsite1.com",
+                    "port": 80,
+                    "ssl": false
+                }
+            ],
+            "caching_list": [
+                {
+                    "name": "default", 
+                    "ttl": 3600
+                }
+            ]
+        },
+        "expected_result": {
+            "name": "my_service_name",
+            "domain_list": [
+                {
+                    "domain": "mywebsite.com",
+                    "protocol": "http"
+                }
+            ],
+            "origin_list": [
+                {
+                    "origin": "mywebsite1.com",
+                    "port": 80,
+                    "ssl": false,
+                    "rules": [
+                        {
+                            "name" : "default",
+                            "request_url" : "/*"
+                        }
+                    ]
+                }
+            ],
+            "caching_list": [
+                {
+                    "name": "default", 
+                    "ttl": 3600, 
+                    "rules": [
+                        {
+                            "name" : "default",
+                            "request_url" : "/*"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

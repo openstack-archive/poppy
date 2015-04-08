@@ -590,7 +590,7 @@ class ServicesController(base.ServicesController):
             caching_rule.get('name'),
             caching_rule.get('ttl'),
             [rule.Rule(rule_i.get('name'),
-                       request_url=rule_i.get('request_url'))
+                       request_url=rule_i.get('request_url', '/*') or '/*')
              for rule_i in caching_rule['rules']])
             for caching_rule in caching_rules]
 
