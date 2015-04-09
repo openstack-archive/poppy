@@ -1,75 +1,3997 @@
 {
-    "name_injection": {
-        "name": "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
-                         "port": 80,
-                         "ssl": false}],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "home",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
-    },
-    "domain_injection": {
-        "name": "bad_domain",
+    "xss_escaped_jscript_into_domain": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
         "domain_list": [
             {
-                "domain": "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
+                "domain": "%3Cscript%3Ealert%281%29%3C/script%3E",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
                 "protocol": "http"
             }
         ],
-        "origin_list": [{"origin": "mywebsite1.com",
-                         "port": 80,
-                         "ssl": false}],
-        "caching_list": []
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
     },
-    "origin_injection": {
-        "name": "bad_origin",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
-                         "port": 80,
-                         "ssl": false}],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "home",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+    "xss_escaped_jscript_into_domain2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "%3Cscript%3Ealert%281%29%3C/script%3E",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
     },
-    "caching_name_injection": {
-        "name": "bad_caching_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
-                         "port": 80,
-                         "ssl": false}],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
+    "xss_escaped_jscript_into_name": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "%3Cscript%3Ealert%281%29%3C/script%3E",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
     },
-    "caching_rule_injection": {
-        "name": "bad_caching_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
-                         "port": 80,
-                         "ssl": false}],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "images",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>"}]}]
+    "xss_escaped_jscript_into_name2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "%3Cscript%3Ealert%281%29%3C/script%3E",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
     },
-    "caching_rule_name_injection": {
-        "name": "bad_caching_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
-                         "port": 80,
-                         "ssl": false}],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "images",
-                          "ttl": 1200,
-                          "rules": [{"name" : "<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>",
-                                     "request_url" : "/images"}]}]
+    "xss_escaped_jscript_into_name3": {
+        "caching_list": [
+            {
+                "name": "%3Cscript%3Ealert%281%29%3C/script%3E",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_jscript_into_name4": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "%3Cscript%3Ealert%281%29%3C/script%3E",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_jscript_into_name5": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "%3Cscript%3Ealert%281%29%3C/script%3E",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_jscript_into_name6": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "%3Cscript%3Ealert%281%29%3C/script%3E",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_jscript_into_origin": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "%3Cscript%3Ealert%281%29%3C/script%3E",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_jscript_into_port": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": "%3Cscript%3Ealert%281%29%3C/script%3E",
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_jscript_into_protocol": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "%3Cscript%3Ealert%281%29%3C/script%3E"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_jscript_into_protocol2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "%3Cscript%3Ealert%281%29%3C/script%3E"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_jscript_into_referrer": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "%3Cscript%3Ealert%281%29%3C/script%3E"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_jscript_into_request_url": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "%3Cscript%3Ealert%281%29%3C/script%3E"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_jscript_into_ssl": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": "%3Cscript%3Ealert%281%29%3C/script%3E"
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_jscript_into_ttl": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": "%3Cscript%3Ealert%281%29%3C/script%3E"
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_jscript_into_ttl2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": "%3Cscript%3Ealert%281%29%3C/script%3E"
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_domain": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "%22",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_domain2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "%22",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_name": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "%22",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_name2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "%22",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_name3": {
+        "caching_list": [
+            {
+                "name": "%22",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_name4": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "%22",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_name5": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "%22",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_name6": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "%22",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_origin": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "%22",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_port": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": "%22",
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_protocol": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "%22"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_protocol2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "%22"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_referrer": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "%22"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_request_url": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "%22"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_ssl": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": "%22"
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_ttl": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": "%22"
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_escaped_quote_into_ttl2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": "%22"
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_domain": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "<script>alert(1)</script>",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_domain2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "<script>alert(1)</script>",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_name": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "<script>alert(1)</script>",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_name2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "<script>alert(1)</script>",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_name3": {
+        "caching_list": [
+            {
+                "name": "<script>alert(1)</script>",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_name4": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "<script>alert(1)</script>",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_name5": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "<script>alert(1)</script>",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_name6": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "<script>alert(1)</script>",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_origin": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "<script>alert(1)</script>",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_port": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": "<script>alert(1)</script>",
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_protocol": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "<script>alert(1)</script>"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_protocol2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "<script>alert(1)</script>"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_referrer": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "<script>alert(1)</script>"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_request_url": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "<script>alert(1)</script>"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_ssl": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": "<script>alert(1)</script>"
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_ttl": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": "<script>alert(1)</script>"
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_javascript_into_ttl2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": "<script>alert(1)</script>"
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_domain": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "<",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_domain2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "<",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_name": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "<",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_name2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "<",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_name3": {
+        "caching_list": [
+            {
+                "name": "<",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_name4": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "<",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_name5": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "<",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_name6": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "<",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_origin": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "<",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_port": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": "<",
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_protocol": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "<"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_protocol2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "<"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_referrer": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "<"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_request_url": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "<"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_ssl": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": "<"
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_ttl": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": "<"
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_left_angle_bracket_into_ttl2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": "<"
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_domain": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": ">",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_domain2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": ">",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_name": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": ">",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_name2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": ">",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_name3": {
+        "caching_list": [
+            {
+                "name": ">",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_name4": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": ">",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_name5": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": ">",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_name6": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": ">",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_origin": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": ">",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_port": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": ">",
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_protocol": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": ">"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_protocol2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": ">"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_referrer": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": ">"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_request_url": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": ">"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_ssl": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": ">"
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_ttl": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": ">"
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": 1200
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
+    },
+    "xss_right_angle_bracket_into_ttl2": {
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600
+            },
+            {
+                "name": "home",
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ],
+                "ttl": ">"
+            }
+        ],
+        "domain_list": [
+            {
+                "domain": "mywebsite.com",
+                "protocol": "http"
+            },
+            {
+                "domain": "blog.mywebsite.com",
+                "protocol": "http"
+            }
+        ],
+        "name": "my_service_name",
+        "origin_list": [
+            {
+                "origin": "mywebsite1.com",
+                "port": 443,
+                "ssl": false
+            }
+        ],
+        "restrictions_list": [
+            {
+                "name": "test",
+                "rules": [
+                    {
+                        "name": "only me",
+                        "referrer": "www.mywebsite.com"
+                    }
+                ]
+            }
+        ]
     }
 }
