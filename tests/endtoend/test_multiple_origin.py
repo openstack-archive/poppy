@@ -54,6 +54,7 @@ class TestMultipleOrigin(base.TestBase):
         self.test_domain = "{0}.{1}".format(
             base.random_string('TestMultiOrigin'), self.dns_config.test_domain)
         self.service_name = base.random_string('MultiOriginService')
+        self.cname_rec = []
 
     def test_multiple_origin_default_first(self):
         domains = [{'domain': self.test_domain}]
@@ -87,7 +88,8 @@ class TestMultipleOrigin(base.TestBase):
         access_url = [link['href'] for link in links if
                       link['rel'] == 'access_url']
 
-        self.setup_cname(self.test_domain, access_url[0])
+        rec = self.setup_cname(self.test_domain, access_url[0])
+        self.cname_rec.append(rec)
 
         # Check that the CDN provider is grabbing other content from the
         # default origin, not the images origin
@@ -137,7 +139,8 @@ class TestMultipleOrigin(base.TestBase):
         access_url = [link['href'] for link in links if
                       link['rel'] == 'access_url']
 
-        self.setup_cname(self.test_domain, access_url[0])
+        rec = self.setup_cname(self.test_domain, access_url[0])
+        self.cname_rec.append(rec)
 
         # Everything should match the /* rule under the default origin,
         # since it's the last rule in the list
@@ -154,6 +157,9 @@ class TestMultipleOrigin(base.TestBase):
 
     def tearDown(self):
         self.poppy_client.delete_service(location=self.service_location)
+        """
+        @todo(malini): Fix Bug in Delete below
         for record in self.cname_rec:
             self.dns_client.delete_record(record)
+        """
         super(TestMultipleOrigin, self).tearDown()
