@@ -17,13 +17,37 @@
 from oslo.utils import uuidutils
 from taskflow.conductors import single_threaded
 from taskflow import engines
+from taskflow.listeners import logging as logging_listener
 from taskflow.persistence import logbook
+from taskflow.types.notifier import Notifier
 
 from poppy.distributed_task import base
 from poppy.openstack.common import log
 
 
 LOG = log.getLogger(__name__)
+
+
+class NotifyingConductor(single_threaded.SingleThreadedConductor):
+
+    def _listeners_from_job(self, job, engine):
+
+        def task_transition(state, details):
+            LOG.info("Task {0} transition"
+                     " to state {1}".format(details['task_name'], state))
+
+        def flow_transition(state, details):
+            LOG.info("Flow {0} transition"
+                     "to state {1}".format(details['flow_name'], state))
+
+        engine.task_notifier.register(Notifier.ANY, task_transition)
+        engine.notifier.register(Notifier.ANY, flow_transition)
+
+        listeners = super(NotifyingConductor,
+                          self)._listeners_from_job(job, engine)
+
+        listeners.append(logging_listener.LoggingListener(engine, log=LOG))
+        return listeners
 
 
 class ServicesController(base.ServicesController):
@@ -77,7 +101,7 @@ class ServicesController(base.ServicesController):
                     self.jobboard_backend_conf.copy(),
                     persistence=persistence) as board:
 
-                conductor = single_threaded.SingleThreadedConductor(
+                conductor = NotifyingConductor(
                     "Poppy service worker conductor", board, persistence,
                     engine='serial')
 
