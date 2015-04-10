@@ -34,11 +34,11 @@ class NotifyingConductor(single_threaded.SingleThreadedConductor):
 
         def task_transition(state, details):
             LOG.info("Task {0} transition"
-                     " to state {1}".format(details['task_name'], state))
+                     " to state {1}".format(details, state))
 
         def flow_transition(state, details):
             LOG.info("Flow {0} transition"
-                     "to state {1}".format(details['flow_name'], state))
+                     "to state {1}".format(details, state))
 
         engine.task_notifier.register(Notifier.ANY, task_transition)
         engine.notifier.register(Notifier.ANY, flow_transition)
