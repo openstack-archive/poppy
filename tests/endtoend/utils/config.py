@@ -156,6 +156,41 @@ class DNSConfig(data_interfaces.ConfigSectionInterface):
         return int(self.get('retry_interval'))
 
 
+class CacheRulesConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the cacherules config values."""
+    SECTION_NAME = 'cacherules'
+
+    @property
+    def cache_rule1(self):
+        """Cache Rule 1."""
+        return self.get('cache_rule1')
+
+    @property
+    def ttl_rule1(self):
+        """TTL for Cache Rule 1."""
+        return int(self.get('ttl_rule1'))
+
+    @property
+    def cache_rule2(self):
+        """Cache Rule 2."""
+        return self.get('cache_rule2')
+
+    @property
+    def ttl_rule2(self):
+        """TTL for Cache Rule 2."""
+        return int(self.get('ttl_rule2'))
+
+    @property
+    def cache_rule3(self):
+        """Cache Rule 3."""
+        return self.get('cache_rule3')
+
+    @property
+    def ttl_rule3(self):
+        """TTL for Cache Rule 3."""
+        return int(self.get('ttl_rule3'))
+
+
 class MultipleOriginConfig(data_interfaces.ConfigSectionInterface):
     """Configuration for testing multiple origins."""
     SECTION_NAME = 'multiple_origin'

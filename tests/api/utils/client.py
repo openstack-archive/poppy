@@ -210,6 +210,26 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
         return self.request('DELETE', url)
 
+    def purge_asset(self, location, asseturl):
+        """Delete Asset
+
+        :return: Response Object containing response code 204
+        DELETE
+        services/{service_id}/assets?url=​{url}
+        """
+        url = '{0}/services/assets?url={1}'.format(location, asseturl)
+        return self.request('DELETE', url)
+
+    def purge_all_assets(self, location):
+        """Delete Asset
+
+        :return: Response Object containing response code 204
+        DELETE
+        services/{service_id}/assets?​{all=True}
+        """
+        url = '{0}/services/assets?all=True'.format(location)
+        return self.request('DELETE', url)
+
     def wait_for_service_status(self, location, status,
                                 abort_on_status=None,
                                 retry_interval=2,

@@ -54,6 +54,7 @@ class TestBase(fixtures.BaseTestFixture):
 
         cls.test_config = config.TestConfig()
         cls.poppy_config = config.PoppyConfig()
+        cls.cacherules_config = config.CacheRulesConfig()
 
         if cls.poppy_config.project_id_in_url:
             cls.url = cls.poppy_config.base_url + '/v1.0/' + project_id
@@ -148,6 +149,32 @@ class TestBase(fixtures.BaseTestFixture):
             wpt_test_results[location] = self.wpt_client.get_test_details(
                 test_url=wpt_test_url)
         return wpt_test_results
+
+    def assertCDNHit(self, cdn_url):
+        """Asserts that the content is coming from a CDN Edge Node
+
+        :param cdn_url: CDN enabled url of the origin website
+        :returns: True/False
+        """
+        # GET content is done 3 times since it hits the origin server first
+        #    and then possibly a different edge node
+        headers = {'Pragma': 'akamai-x-cache-on'}
+        requests.get(cdn_url, headers=headers)
+        requests.get(cdn_url, headers=headers)
+        response = requests.get(cdn_url, headers=headers)
+        self.assertIn(response.headers['x-cache'].split(" ")[0],
+                      ['TCP_HIT', 'TCP_MEM_HIT'])
+
+    def assertCDNMiss(self, cdn_url):
+        """Asserts that the content is NOT coming from a CDN Edge Node
+
+        :param cdn_url: CDN enabled url of the origin website
+        :returns: True/False
+        """
+        headers = {'Pragma': 'akamai-x-cache-on'}
+        response = requests.get(cdn_url, headers=headers)
+        self.assertIn(response.headers['x-cache'].split(" ")[0],
+                      ['TCP_MISS', 'TCP_REFRESH_MISS', 'TCP_REFRESH_MISS'])
 
     @classmethod
     def tearDownClass(cls):
