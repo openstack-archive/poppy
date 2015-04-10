@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import random
+import time
 
 from bs4 import BeautifulSoup
 from cafe.drivers.unittest import fixtures
@@ -54,6 +55,8 @@ class TestBase(fixtures.BaseTestFixture):
 
         cls.test_config = config.TestConfig()
         cls.poppy_config = config.PoppyConfig()
+        cls.cacherules_config = config.CacheRulesConfig()
+        cls.purge_config = config.PurgeRulesConfig()
 
         if cls.poppy_config.project_id_in_url:
             cls.url = cls.poppy_config.base_url + '/v1.0/' + project_id
@@ -148,6 +151,55 @@ class TestBase(fixtures.BaseTestFixture):
             wpt_test_results[location] = self.wpt_client.get_test_details(
                 test_url=wpt_test_url)
         return wpt_test_results
+
+    def assertCDNHit(self, cdn_url):
+        """Asserts that the content is coming from a CDN Edge Node
+
+        :param cdn_url: CDN enabled url of the origin website
+        :returns: True/False
+        """
+        # GET content is done 3 times since it hits the origin server first
+        #    and then possibly a different edge node
+        """
+        todo: Check which node is getting hit
+        """
+        headers = {'Pragma': 'akamai-x-cache-on'}
+        requests.get(cdn_url, headers=headers)
+        requests.get(cdn_url, headers=headers)
+        response = requests.get(cdn_url, headers=headers)
+        self.assertIn(response.headers['x-cache'].split(" ")[0],
+                      ['TCP_HIT', 'TCP_MEM_HIT'])
+
+    def assertCDNMiss(self, cdn_url):
+        """Asserts that the content is NOT coming from a CDN Edge Node
+
+        :param cdn_url: CDN enabled url of the origin website
+        :returns: True/False
+        """
+        headers = {'Pragma': 'akamai-x-cache-on'}
+        response = requests.get(cdn_url, headers=headers)
+        self.assertIn(response.headers['x-cache'].split(" ")[0],
+                      ['TCP_MISS', 'TCP_REFRESH_MISS', 'TCP_REFRESH_MISS'])
+
+    def wait_for_CDN_status(self, cdn_url, status):
+        """Waits for a service to reach a given status.
+        :param cdn_url: CDN enabled url of the origin website
+        :param status: status being waited for
+        :returns: True/False
+        """
+        headers = {'Pragma': 'akamai-x-cache-on'}
+        current_status = ''
+        start_time = int(time.time())
+        stop_time = start_time + self.purge_config.purge_time
+        while current_status != status:
+            response = requests.get(cdn_url, headers=headers)
+            current_status = response.headers['x-cache'].split(" ")[0]
+            if current_status == status:
+                return
+
+            current_time = int(time.time())
+            if current_time > stop_time:
+                return
 
     @classmethod
     def tearDownClass(cls):
