@@ -13,8 +13,13 @@
                                      "request_url" : "/index.htm"}]}],
          "restrictions_list": [
                         {"name": "test",
-                        "rules": [{"name": "only me",
-                        "referrer": "www.mywebsite.com"}]}
+                        "rules": [
+                            {
+                                "name": "only me",
+                                "referrer": "www.mywebsite.com",
+                                "request_url" : "/*"
+                            }
+                        ]}
         ]
     },
    "caching_empty": {

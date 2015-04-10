@@ -386,7 +386,8 @@ class TestServiceActions(base.TestBase):
                 u"rules": [
                     {
                         u"name": domain,
-                        u"referrer": domain
+                        u"referrer": domain,
+                        u"request_url": "/*"
                     }
                 ]
             }
@@ -508,7 +509,9 @@ class TestServicePatch(base.TestBase):
         self.restrictions_list = [
             {"name": "website only",
              "rules": [{"name": "mywebsite.com",
-                        "referrer": "www.mywebsite.com"}]}]
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }]}]
 
         resp = self.client.create_service(
             service_name=self.service_name,

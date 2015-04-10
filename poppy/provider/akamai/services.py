@@ -58,29 +58,15 @@ class ServiceController(base.ServiceBase):
             for origin in service_obj.origins:
                 self._process_new_origin(origin, post_data['rules'])
 
-            # referrer restriction implementaiton for akamai
-            # get a list of referrer restriction domains/hosts
-            referrer_restriction_list = [rule.referrer
-                                         for restriction in
-                                         service_obj.restrictions
-                                         for rule in restriction.rules]
-
-            if any(referrer_restriction_list):
-                referrer_whitelist_value = ''.join(
-                    ['*%s*' % referrer
-                     for referrer
-                     in referrer_restriction_list
-                     if referrer is not None])
-                for rule in post_data['rules']:
-                    self._process_referrer_restriction(
-                        referrer_whitelist_value,
-                        rule)
-
             # implementing caching-rules for akamai
             # we do not have to use copy here, since caching is only used once
-            caching_rules = copy.deepcopy(service_obj.caching)
+            # caching_rules = copy.deepcopy(service_obj.caching)
+
             # Traverse existing rules list to add caching rules necessarys
-            self._process_caching_rules(caching_rules, post_data['rules'])
+            self._process_caching_rules(
+                service_obj.caching, post_data['rules'])
+            self._process_restriction_rules(
+                service_obj.restrictions, post_data['rules'])
 
             classified_domains = self._classify_domains(service_obj.domains)
 
@@ -190,29 +176,15 @@ class ServiceController(base.ServiceBase):
                         self._process_new_origin(
                             origin, policy_content['rules'])
 
-                # referrer restriction implementaiton for akamai
-                # get a list of referrer restriction domains/hosts
-                referrer_restriction_list = [rule.referrer
-                                             for restriction in
-                                             service_obj.restrictions
-                                             for rule in restriction.rules]
-
-                if any(referrer_restriction_list):
-                    referrer_whitelist_value = ''.join(
-                        ['*%s*' % referrer
-                         for referrer in referrer_restriction_list
-                         if referrer is not None])
-                    for rule in policy_content['rules']:
-                        self._process_referrer_restriction(
-                            referrer_whitelist_value, rule)
-
                 # implementing caching-rules for akamai
                 # we need deep copy since caching rules will be used in late
                 # upadate objects
-                caching_rules = copy.deepcopy(service_obj.caching)
+                # caching_rules = copy.deepcopy(service_obj.caching)
                 # Traverse existing rules list to add caching rules necessarys
                 self._process_caching_rules(
-                    caching_rules, policy_content['rules'])
+                    service_obj.caching, policy_content['rules'])
+                self._process_restriction_rules(
+                    service_obj.restrictions, policy_content['rules'])
 
                 # Update domain if necessary ( by adjust digital property)
                 classified_domains = self._classify_domains(
@@ -334,21 +306,6 @@ class ServiceController(base.ServiceBase):
                         for origin in service_obj.origins:
                             self._process_new_origin(origin,
                                                      policy_content['rules'])
-                    # referrer restriction implementaiton for akamai
-                    # get a list of referrer restriction domains/hosts
-                    referrer_restriction_list = [rule.referrer
-                                                 for restriction in
-                                                 service_obj.restrictions
-                                                 for rule in restriction.rules]
-
-                    if any(referrer_restriction_list):
-                        referrer_whitelist_value = ''.join(
-                            ['*%s*' % referrer for referrer
-                             in referrer_restriction_list
-                             if referrer is not None])
-                        for rule in policy_content['rules']:
-                            self._process_referrer_restriction(
-                                referrer_whitelist_value, rule)
 
                     # implementing caching-rules for akamai
                     caching_rules = copy.deepcopy(service_obj.caching)
@@ -356,6 +313,8 @@ class ServiceController(base.ServiceBase):
                     # necessarys
                     self._process_caching_rules(caching_rules,
                                                 policy_content['rules'])
+                    self._process_restriction_rules(
+                        service_obj.restrictions, policy_content['rules'])
 
                     # post new policies back with Akamai Policy API
                     try:
@@ -553,11 +512,61 @@ class ServiceController(base.ServiceBase):
                     behavior['params']['digitalProperty'] = dp
         return dp
 
-    def _process_referrer_restriction(self, referrer_whitelist_value, rule):
-        rule['behaviors'].append({
-            'name': 'referer-whitelist',
-            'value': referrer_whitelist_value
-        })
+    def _process_restriction_rules(self, restriction_rules, rules_list):
+        # restriction implementation for akamai
+        # for each restriction rule
+        for restriction_rule in restriction_rules:
+            for rule_entry in restriction_rule.rules:
+                if rule_entry.referrer is not None:
+                    found_match = False
+                    referrer_whitelist_value = ' '.join(
+                        ['*%s*' % referrer
+                         for referrer
+                         in rule_entry.referrer.split(' ')
+                         ])
+
+                    # if we have a matches rule already
+                    for rule in rules_list:
+                        for match in rule['matches']:
+                            if rule_entry.request_url == match['value']:
+                                # we found an existing matching rule.
+                                # add the cache behavior to it
+                                found_match = True
+
+                                rule['behaviors'].append({
+                                    'name': 'referer-whitelist',
+                                    'value': referrer_whitelist_value
+                                })
+
+                    # if there is no matches entry yet for this rule
+                    if not found_match:
+                        # create an akamai rule
+                        rule_dict_template = {
+                            'matches': [],
+                            'behaviors': []
+                        }
+
+                        # add the match and behavior to this new rule
+                        if rule_entry.request_url is not None:
+                            if "*" in rule_entry.request_url:
+                                match_rule = {
+                                    'name': 'url-wildcard',
+                                    'value': rule_entry.request_url
+                                }
+                            else:
+                                match_rule = {
+                                    'name': 'url-path',
+                                    'value': rule_entry.request_url
+                                }
+
+                            rule_dict_template['matches'].append(match_rule)
+                            rule_dict_template['behaviors'].append({
+                                'name': 'referer-whitelist',
+                                'value': referrer_whitelist_value
+                            })
+                            rules_list.append(rule_dict_template)
+            # end loop - restriction_rule.rules
+        # end lop - restriction_rules
 
     def _process_caching_rules(self, caching_rules, rules_list):
         # for each caching rule
@@ -608,8 +617,8 @@ class ServiceController(base.ServiceBase):
                         'value': '%ss' % caching_rule.ttl
                     })
                     rules_list.append(rule_dict_template)
-            # rof - caching_rule.rules
-        # rof - caching_rules
+            # end loop - caching_rule.rules
+        # end loop - caching_rules
 
     def _get_configuration_number(self, domain_obj):
         # TODO(tonytan4ever): also classify domains based on their
