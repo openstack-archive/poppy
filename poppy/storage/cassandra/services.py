@@ -431,6 +431,8 @@ class ServicesController(base.ServicesController):
         if (result):
             domains_list = [json.loads(d).get('domain')
                             for d in result.get('domains')]
+            pds = {key: value for key, value in
+                   result.get('provider_details').items()}
 
             if self._driver.archive_on_delete:
                 archive_args = {
@@ -442,7 +444,7 @@ class ServicesController(base.ServicesController):
                     'origins': result.get('origins'),
                     'caching_rules': result.get('caching_rules'),
                     'restrictions': result.get('restrictions'),
-                    'provider_details': result.get('provider_details'),
+                    'provider_details': pds,
                     'archived_time': datetime.datetime.utcnow(),
                     'domains_list': query.ValueSequence(domains_list)
                 }
