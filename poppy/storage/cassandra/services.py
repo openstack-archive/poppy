@@ -140,7 +140,7 @@ CQL_DELETE_SERVICE = '''
         WHERE project_id = %(project_id)s AND service_id = %(service_id)s
 
         DELETE FROM domain_names
-        WHERE domain_name IN %(domain_list)s
+        WHERE domain_name IN %(domains_list)s
     APPLY BATCH
 '''
 
@@ -431,6 +431,9 @@ class ServicesController(base.ServicesController):
         if (result):
             domains_list = [json.loads(d).get('domain')
                             for d in result.get('domains')]
+            # NOTE(obulpathi): Convert a OrderedMapSerializedKey to a Dict
+            pds = result.get('provider_details', {}) or {}
+            pds = {key: value for key, value in pds.items()}
 
             if self._driver.archive_on_delete:
                 archive_args = {
@@ -442,7 +445,7 @@ class ServicesController(base.ServicesController):
                     'origins': result.get('origins'),
                     'caching_rules': result.get('caching_rules'),
                     'restrictions': result.get('restrictions'),
-                    'provider_details': result.get('provider_details'),
+                    'provider_details': pds,
                     'archived_time': datetime.datetime.utcnow(),
                     'domains_list': query.ValueSequence(domains_list)
                 }
@@ -456,7 +459,7 @@ class ServicesController(base.ServicesController):
                 delete_args = {
                     'project_id': result.get('project_id'),
                     'service_id': result.get('service_id'),
-                    'domains_list': domains_list
+                    'domains_list': query.ValueSequence(domains_list)
                 }
                 stmt = query.SimpleStatement(
                     CQL_DELETE_SERVICE,
