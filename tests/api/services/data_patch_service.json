@@ -163,19 +163,19 @@
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
-                    "rules": [{"name": "rule1", "referrer": "thesite", "request_url": "/*"}]
+                    "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images/*"}]
                     }}
     ],
    "replace_restrictions":[
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
-                    "rules": [{"name": "rule1", "referrer": "thesite", "request_url": "/*"}]
+                    "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images2/*"}]
                     }},
         {"op": "replace",
          "path": "/restrictions/0",
           "value": {"name": "new_restricted",
-                    "rules": [{"name": "rule1", "referrer": "thesite", "request_url": "/*"}]
+                    "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/*"}]
                     }}
    ],
    "remove_restrictions": [
@@ -186,7 +186,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "r",
-                    "rules": [{"name": "rule1", "referrer": "thesite", "request_url": "/*"}]
+                    "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images/*"}]
                    }
          }
     ],
@@ -194,7 +194,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
-                    "rules": [{"name": "r", "referrer": "thesite", "request_url": "/*"}]
+                    "rules": [{"name": "r", "referrer": "www.thesite.com", "request_url": "/images/*"}]
                    }
          }
     ],
@@ -202,7 +202,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
-                    "rules": [{"name": "rule1", "referrer": "abc", "request_url":"/*"}]
+                    "rules": [{"name": "rule1", "referrer": "a.co", "request_url":"/images/*"}]
                    }
          }
     ],

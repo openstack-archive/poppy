@@ -134,7 +134,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "",
-                    "rules": [{"name": "rule1", "referrer": "thesite"}]
+                    "rules": [{"name": "rule1", "referrer": "www.thesite.com"}]
                    }
          }
     ],
@@ -142,7 +142,15 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
-                    "rules": [{"name": "", "referrer": "thesite"}]
+                    "rules": [{"name": "", "referrer": "www.thesite.com"}]
+                   }
+         }
+    ],
+    "add_restrictions_with_duplicate_path": [
+         {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted",
+                    "rules": [{"name": "", "referrer": "www.thesite.com", "request_url": "/*"}]
                    }
          }
     ],

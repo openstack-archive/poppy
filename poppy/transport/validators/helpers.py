@@ -184,7 +184,21 @@ def is_valid_service_configuration(service, schema):
             else:
                 domains.append(domain_value)
 
-    # 4. domains protocols must be of the same type, and domains protocols must
+    # 4. referrer restriction paths must be unique
+    if 'restrictions' in service:
+        restriction_paths = []
+        for restriction in service['restrictions']:
+            if 'rules' in restriction:
+                for rule in restriction['rules']:
+                    if 'referrer' in rule:
+                        request_url = rule['request_url']
+                        if request_url in restriction_paths:
+                            raise exceptions.ValidationFailed(
+                                'Referrer - the request_url must be unique')
+                        else:
+                            restriction_paths.append(request_url)
+
+    # 5. domains protocols must be of the same type, and domains protocols must
     # match the description (ssl/port) of the origin
     cdn_protocol = None
     if 'domains' in service:
