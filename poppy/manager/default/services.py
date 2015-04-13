@@ -155,17 +155,17 @@ class DefaultServicesController(base.ServicesController):
         service_obj = service.Service.init_from_dict(service_json)
         service_id = service_obj.service_id
 
+        # validate the service
+        service_json = service_obj.to_dict()
+        schema = service_schema.ServiceSchema.get_schema("service", "POST")
+        validators.is_valid_service_configuration(service_json, schema)
+
         # deal with shared ssl domains
         for domain in service_obj.domains:
             if domain.protocol == 'https' and domain.certificate == 'shared':
                 domain.domain = self._generate_shared_ssl_domain(
                     domain.domain
                 )
-
-        # validate the service
-        service_json = service_obj.to_dict()
-        schema = service_schema.ServiceSchema.get_schema("service", "POST")
-        validators.is_valid_service_configuration(service_json, schema)
 
         try:
             self.storage_controller.create(
@@ -207,6 +207,7 @@ class DefaultServicesController(base.ServicesController):
                 u'Service {0} neither deployed nor failed'.format(service_id))
 
         # Fixing the operator_url domain for ssl
+        # for schema validation
         existing_shared_domains = {}
         for domain in service_old.domains:
             if domain.protocol == 'https' and domain.certificate == 'shared':
