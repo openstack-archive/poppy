@@ -792,18 +792,20 @@ class TestDefaultServiceFields(providers.TestProviderBase):
     @ddt.file_data('data_default_service_values.json')
     def test_default_values(self, test_data):
 
-        domain_list = test_data['submit_value']['domain_list']
+        domain_list = test_data['submit_value'].get('domain_list', [])
         for item in domain_list:
             item['domain'] = str(uuid.uuid1()) + '.com'
 
-        origin_list = test_data['submit_value']['origin_list']
-        caching_list = test_data['submit_value']['caching_list']
+        origin_list = test_data['submit_value'].get('origin_list', [])
+        caching_list = test_data['submit_value'].get('caching_list', [])
+        restrictions_list = test_data['submit_value'].get('restrictions', [])
         flavor_id = self.flavor_id
 
         resp = self.client.create_service(service_name=self.service_name,
                                           domain_list=domain_list,
                                           origin_list=origin_list,
                                           caching_list=caching_list,
+                                          restrictions_list=restrictions_list,
                                           flavor_id=flavor_id)
         self.assertEqual(resp.status_code, 202)
         self.assertEqual(resp.text, '')
@@ -823,12 +825,17 @@ class TestDefaultServiceFields(providers.TestProviderBase):
         self.assertSchema(body, services.get_service)
 
         expected_domain_list = domain_list
-        expected_origin_list = test_data['expected_value']['origin_list']
-        expected_caching_list = test_data['expected_value']['caching_list']
+        expected_origin_list = test_data[
+            'expected_value'].get('origin_list', [])
+        expected_caching_list = test_data[
+            'expected_value'].get('caching_list', [])
+        expected_restrictions_list = test_data[
+            'expected_value'].get('restrictions', [])
 
         self.assertEqual(body['domains'], expected_domain_list)
         self.assertEqual(body['origins'], expected_origin_list)
         self.assertEqual(body['caching'], expected_caching_list)
+        self.assertEqual(body['restrictions'], expected_restrictions_list)
 
     def tearDown(self):
         if self.service_url != '':

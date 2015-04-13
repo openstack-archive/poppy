@@ -16,7 +16,7 @@
                 }
             ]
         },
-        "expected_result": {
+        "expected_value": {
             "name": "my_service_name",
             "domain_list": [
                 {
@@ -62,7 +62,7 @@
                 }
             ]
         },
-        "expected_result": {
+        "expected_value": {
             "name": "my_service_name",
             "domain_list": [
                 {
@@ -91,6 +91,87 @@
                         {
                             "name" : "default",
                             "request_url" : "/*"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "restrictions": {
+        "submit_value": {
+            "name": "my_service_name",
+            "domain_list": [
+                {
+                    "domain": "mywebsite.com",
+                    "protocol": "http"
+                }
+            ],
+            "origin_list": [
+                {
+                    "origin": "mywebsite1.com",
+                    "port": 80,
+                    "ssl": false
+                }
+            ],
+            "caching_list": [
+                {
+                    "name": "default",
+                    "ttl": 3600
+                }
+            ],
+            "restrictions": [
+                {
+                    "name": "test",
+                    "rules": [
+                        {
+                            "name": "only me",
+                            "referrer": "www.mywebsite.com"
+                        }
+                    ]
+                }
+            ]
+        },
+        "expected_value": {
+            "name": "my_service_name",
+            "domain_list": [
+                {
+                    "domain": "mywebsite.com",
+                    "protocol": "http"
+                }
+            ],
+            "origin_list": [
+                {
+                    "origin": "mywebsite1.com",
+                    "port": 80,
+                    "ssl": false,
+                    "rules": [
+                        {
+                            "name" : "default",
+                            "request_url" : "/*"
+                        }
+                    ]
+                }
+            ],
+            "caching_list": [
+                {
+                    "name": "default",
+                    "ttl": 3600,
+                    "rules": [
+                        {
+                            "name" : "default",
+                            "request_url" : "/*"
+                        }
+                    ]
+                }
+            ],
+            "restrictions": [
+                {
+                    "name": "test",
+                    "rules": [
+                        {
+                            "name": "only me",
+                            "referrer": "www.mywebsite.com",
+                            "request_url": "/*"
                         }
                     ]
                 }
