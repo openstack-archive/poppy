@@ -33,12 +33,12 @@ class NotifyingConductor(single_threaded.SingleThreadedConductor):
     def _listeners_from_job(self, job, engine):
 
         def task_transition(state, details):
-            LOG.info("Task {0} transition"
-                     " to state {1}".format(details['task_name'], state))
+            LOG.info("Taskflow transitioning to state {0}."
+                     " Details: {1}".format(state, details))
 
         def flow_transition(state, details):
-            LOG.info("Flow {0} transition"
-                     "to state {1}".format(details['flow_name'], state))
+            LOG.info("Taskflow transitioning to state {0}."
+                     " Details: {1}".format(state, details))
 
         engine.task_notifier.register(Notifier.ANY, task_transition)
         engine.notifier.register(Notifier.ANY, flow_transition)
