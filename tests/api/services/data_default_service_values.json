@@ -16,7 +16,7 @@
                 }
             ]
         },
-        "expected_result": {
+        "expected_value": {
             "name": "my_service_name",
             "domain_list": [
                 {
@@ -62,7 +62,7 @@
                 }
             ]
         },
-        "expected_result": {
+        "expected_value": {
             "name": "my_service_name",
             "domain_list": [
                 {
