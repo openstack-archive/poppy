@@ -15,6 +15,7 @@
 
 """Cassandra storage driver implementation."""
 
+import copy
 import multiprocessing
 import os
 import ssl
@@ -118,7 +119,10 @@ def _connection(conf, datacenter, keyspace=None):
     except cassandra.InvalidRequest:
         _create_keyspace(session, keyspace, conf.replication_strategy)
 
-    _run_migrations(conf.migrations_path, session)
+    migration_session = copy.copy(session)
+    migration_session.default_consistency_level = \
+        getattr(cassandra.ConsistencyLevel, 'ALL')
+    _run_migrations(conf.migrations_path, migration_session)
 
     session.row_factory = query.dict_factory
 
