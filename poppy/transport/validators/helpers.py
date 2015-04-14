@@ -191,7 +191,7 @@ def is_valid_service_configuration(service, schema):
             if 'rules' in restriction:
                 for rule in restriction['rules']:
                     if 'referrer' in rule:
-                        request_url = rule['request_url']
+                        request_url = rule.get('request_url', '/*')
                         if request_url in restriction_paths:
                             raise exceptions.ValidationFailed(
                                 'Referrer - the request_url must be unique')
