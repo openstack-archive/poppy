@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import requests
-
 from tests.endtoend import base
 from tests.endtoend.utils import config
 
@@ -36,15 +34,17 @@ class TestMultipleOrigin(base.TestBase):
     def check_preconditions(cls):
         """Ensure our environment meets our needs to ensure a valid test."""
         assert cls.default_origin != cls.images_origin
-        default_root = requests.get("http://" + cls.default_origin)
-        image_root = requests.get("http://" + cls.images_origin)
+        default_root = cls.http_client.get("http://" + cls.default_origin)
+        image_root = cls.http_client.get("http://" + cls.images_origin)
 
         assert default_root.status_code == 200
         assert image_root.status_code == 200
         assert default_root.text != image_root.text
 
-        blank = requests.get("http://" + cls.default_origin + cls.image_path)
-        image = requests.get("http://" + cls.images_origin + cls.image_path)
+        blank = cls.http_client.get(
+            "http://" + cls.default_origin + cls.image_path)
+        image = cls.http_client.get(
+            "http://" + cls.images_origin + cls.image_path)
 
         assert blank.status_code == 404
         assert image.status_code == 200
@@ -99,7 +99,7 @@ class TestMultipleOrigin(base.TestBase):
         cdn_url = "http://{0}{1}".format(self.test_domain, self.image_path)
         origin_url = "http://{0}{1}".format(self.images_origin,
                                             self.image_path)
-        response = requests.get(cdn_url)
+        response = self.http_client.get(cdn_url)
 
         # On a 200, the image exists. The CDN provider fetch from the images
         # origin which is what we want.
@@ -140,7 +140,8 @@ class TestMultipleOrigin(base.TestBase):
                       link['rel'] == 'access_url']
 
         rec = self.setup_cname(self.test_domain, access_url[0])
-        self.cname_rec.append(rec)
+        if rec:
+            self.cname_rec.append(rec[0])
 
         # Everything should match the /* rule under the default origin,
         # since it's the last rule in the list
@@ -150,16 +151,13 @@ class TestMultipleOrigin(base.TestBase):
         cdn_url = "http://{0}{1}".format(self.test_domain, self.image_path)
         origin_url = "http://{0}{1}".format(self.images_origin,
                                             self.image_path)
-        response = requests.get(cdn_url)
+        response = self.http_client.get(cdn_url)
         msg = ("Expected {0} to 404 on the image at {1} but got a {2} status"
                .format(cdn_url, origin_url, response.status_code))
         self.assertEqual(response.status_code, 404, msg)
 
     def tearDown(self):
         self.poppy_client.delete_service(location=self.service_location)
-        """
-        @todo(malini): Fix Bug in Delete below
         for record in self.cname_rec:
             self.dns_client.delete_record(record)
-        """
         super(TestMultipleOrigin, self).tearDown()

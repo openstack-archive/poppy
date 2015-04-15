@@ -84,10 +84,20 @@ class RackspaceDNSClient(object):
         recs = self.domain.delete_record(record)
         return recs
 
-    def wait_cname_propagation(self, target, retry_interval=120):
-        try:
-            dns.resolver.query(target, 'CNAME')
-        except dns.resolver.NXDOMAIN:
-            time.sleep(retry_interval)
-            self.wait_cname_propagation(target, retry_interval)
-        return
+    @classmethod
+    def wait_cname_propagation(cls, target, nameserver, retry_interval=120,
+                               retry_timeout=360):
+        resolver = dns.resolver.Resolver()
+        resolver.nameservers = [nameserver]
+
+        end_time = time.time() + retry_timeout
+        while time.time() < end_time:
+            try:
+                print "dig %s" % target
+                resp = resolver.query(target, 'CNAME')
+                if resp.response.answer:
+                    return
+            except dns.resolver.NXDOMAIN:
+                time.sleep(retry_interval)
+        raise Exception("`dig @{0} {1} CNAME` timed out after {2} seconds"
+                        .format(nameserver, target, retry_timeout))
