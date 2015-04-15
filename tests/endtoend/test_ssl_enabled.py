@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
+
 from tests.endtoend import base
 
 
@@ -55,6 +57,8 @@ class TestSSLCDN(base.TestBase):
         access_url = [link['href'] for link in links if
                       link['rel'] == 'access_url']
         cdn_url = 'https://' + access_url[0]
+
+        time.sleep(self.dns_config.cdn_provider_dns_sleep)
 
         self.assertSameContent(origin_url=origin_url,
                                cdn_url=cdn_url)

@@ -152,8 +152,28 @@ class DNSConfig(data_interfaces.ConfigSectionInterface):
 
     @property
     def retry_interval(self):
-        """Int value to set timeout for status check."""
+        """Int value to set retry interval for dns polling."""
         return int(self.get('retry_interval'))
+
+    @property
+    def retry_timeout(self):
+        """Int value to set timeout for dns polling."""
+        return int(self.get('retry_timeout'))
+
+    @property
+    def authoritative_nameserver(self):
+        """The authoritative nameserver to query, must be an ip address."""
+        return self.get('authoritative_nameserver')
+
+    @property
+    def cname_propagation_sleep(self):
+        """Sleep to wait for caching nameservers to pick up a changes."""
+        return int(self.get('cname_propagation_sleep'))
+
+    @property
+    def cdn_provider_dns_sleep(self):
+        """Sleep to avoid fetching an access_url too soon."""
+        return int(self.get('cdn_provider_dns_sleep'))
 
 
 class CacheRulesConfig(data_interfaces.ConfigSectionInterface):

@@ -247,7 +247,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         current_status = ''
         start_time = int(time.time())
         stop_time = start_time + retry_timeout
-        while current_status != status:
+        while current_status.lower() != status.lower():
             time.sleep(retry_interval)
             service = self.get_service(location=location)
             body = service.json()
@@ -264,4 +264,4 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
             current_time = int(time.time())
             if current_time > stop_time:
-                return
+                raise Exception("Timed out waiting for service status")
