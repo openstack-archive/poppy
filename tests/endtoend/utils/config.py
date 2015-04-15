@@ -141,6 +141,11 @@ class DNSConfig(data_interfaces.ConfigSectionInterface):
     SECTION_NAME = 'dns'
 
     @property
+    def nameserver(self):
+        """The nameserver to query. This must be an ip address."""
+        return self.get('nameserver')
+
+    @property
     def email(self):
         """Email address."""
         return self.get('email')
@@ -152,8 +157,13 @@ class DNSConfig(data_interfaces.ConfigSectionInterface):
 
     @property
     def retry_interval(self):
-        """Int value to set timeout for status check."""
+        """Int value to set retry interval for dns polling."""
         return int(self.get('retry_interval'))
+
+    @property
+    def retry_timeout(self):
+        """Int value to set timeout for dns polling."""
+        return int(self.get('retry_timeout'))
 
 
 class MultipleOriginConfig(data_interfaces.ConfigSectionInterface):

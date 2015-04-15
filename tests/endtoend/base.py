@@ -14,9 +14,11 @@
 # limitations under the License.
 
 import random
+import time
 
 from bs4 import BeautifulSoup
 from cafe.drivers.unittest import fixtures
+import cafe.engine.http.client as cafe_client
 import requests
 
 from tests.api.utils import client
@@ -44,6 +46,9 @@ class TestBase(fixtures.BaseTestFixture):
     def setUpClass(cls):
 
         super(TestBase, cls).setUpClass()
+
+        # use http_client.get (not requests.get) to have requests logged
+        cls.http_client = cafe_client.HTTPClient()
 
         cls.auth_config = config.AuthConfig()
         cls.auth_client = client.AuthClient()
@@ -105,9 +110,28 @@ class TestBase(fixtures.BaseTestFixture):
         """Create a CNAME record and wait for propagation."""
         cname_rec = self.dns_client.add_cname_rec(name=name, data=cname)
 
+        start = time.time()
+        # if we query caching nameservers and get an NXDOMAIN, that NXDOMAIN
+        # will then be cached for five minutes.
+        #
+        # In order to avoid this five minute wait, don't query the caching
+        # nameservers. Hit the authoritative nameserver(s) directly until
+        # the name shows up.
         self.dns_client.wait_cname_propagation(
             target=name,
-            retry_interval=self.dns_config.retry_interval)
+            nameserver=self.dns_config.nameserver,
+            retry_interval=self.dns_config.retry_interval,
+            retry_timeout=self.dns_config.retry_timeout)
+        print("waited {0} seconds to propagate to authoritive nameserver {1}"
+              .format(time.time() - start, self.dns_config.nameserver))
+
+        # once the name is on the authoritative nameserver, there will still be
+        # a delay for the name to propagate out to the caching nameservers
+        sleep_time = 30
+        print("waiting {0} additional seconds to propagate to caching "
+              "nameservers".format(sleep_time))
+        time.sleep(sleep_time)
+
         return cname_rec
 
     def setup_service(self, service_name, domain_list, origin_list,
