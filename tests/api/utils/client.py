@@ -239,7 +239,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
             service = self.get_service(location=location)
             body = service.json()
             current_status = body['status']
-            if (current_status == status):
+            if (current_status.lower() == status.lower()):
                 return
 
             if abort_on_status is not None:
