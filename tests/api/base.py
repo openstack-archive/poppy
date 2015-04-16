@@ -79,7 +79,7 @@ class TestBase(fixtures.BaseTestFixture):
     def generate_random_string(self, prefix='API-Tests', length=12):
         """Generates a random string of given prefix & length"""
         random_string = ''.join(random.choice(
-            string.ascii_uppercase + string.ascii_uppercase + string.digits)
+            string.ascii_lowercase + string.digits)
             for _ in range(length))
         random_string = prefix + random_string
         return random_string
@@ -107,6 +107,48 @@ class TestBase(fixtures.BaseTestFixture):
             flavor_id = self.test_config.default_flavor
 
         return flavor_id
+
+    def setup_service(self, service_name, domain_list, origin_list,
+                      caching_list=[], restrictions_list=[], flavor_id=None,
+                      log_delivery=False):
+        resp = self.client.create_service(
+            service_name=service_name,
+            domain_list=domain_list,
+            origin_list=origin_list,
+            caching_list=caching_list,
+            restrictions_list=restrictions_list,
+            flavor_id=flavor_id,
+            log_delivery=log_delivery)
+
+        self.assertEqual(resp.status_code, 202)
+        self.service_location = resp.headers['location']
+        self.client.wait_for_service_status(
+            location=self.service_location,
+            status='DEPLOYED',
+            abort_on_status='FAILED',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        return resp
+
+    def assert_patch_service_details(self, actual_response, expected_response):
+        self.assertEqual(actual_response['name'],
+                         expected_response['name'])
+        self.assertEqual(sorted(actual_response['origins']),
+                         sorted(expected_response['origins']))
+        self.assertEqual(sorted(actual_response['caching']),
+                         sorted(expected_response['caching']))
+        self.assertEqual(sorted(actual_response['restrictions']),
+                         sorted(expected_response['restrictions']))
+        self.assertEqual(actual_response['flavor_id'],
+                         expected_response['flavor_id'])
+
+        for item in actual_response['domains']:
+            if (('certificate' in item) and
+                    (item['certificate'] == 'shared')):
+                item['domain'] = item['domain'].split('.')[0]
+        self.assertEqual(sorted(actual_response['domains']),
+                         sorted(expected_response['domains']))
 
     @classmethod
     def tearDownClass(cls):
