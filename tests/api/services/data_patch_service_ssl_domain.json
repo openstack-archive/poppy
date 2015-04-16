@@ -1,0 +1,7 @@
+{
+   "add_shared_ssl_domain": [
+        {"op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "newshared", "protocol": "https", "certificate": "shared"}}
+    ]
+}
