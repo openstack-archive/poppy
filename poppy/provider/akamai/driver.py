@@ -66,7 +66,15 @@ AKAMAI_OPTIONS = [
         help='Akamai configuration number for http policies'),
     cfg.StrOpt(
         'akamai_https_config_number',
-        help='Akamai configuration number for https policies'),
+        help='Akamai configuration number for https policies'
+    ),
+
+    # SANCERT related configs
+    cfg.ListOpt('san_cert_cnames',
+                help='A list of san certs cnamehost names'),
+    cfg.IntOpt('san_cert_hostname_limit', default=80,
+               help='default limit on how many hostnames can'
+               ' be held by a SAN cert'),
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
@@ -112,6 +120,9 @@ class CDNProvider(base.Driver):
             access_token=self.akamai_conf.ccu_api_access_token
         )
 
+        self.san_cert_cnames = self.akamai_conf.san_cert_cnames
+        self.san_cert_hostname_limit = self.akamai_conf.san_cert_hostname_limit
+
     def is_alive(self):
 
         request_headers = {
@@ -142,6 +153,14 @@ class CDNProvider(base.Driver):
     @property
     def ccu_api_client(self):
         return self.akamai_ccu_api_client
+
+    @property
+    def sps_api_client(self):
+        return self.akamai_sps_api_client
+
+    @property
+    def papi_api_client(self):
+        return self.akamai_papi_api_client
 
     @property
     def service_controller(self):
