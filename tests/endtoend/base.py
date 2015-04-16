@@ -111,14 +111,16 @@ class TestBase(fixtures.BaseTestFixture):
         return cname_rec
 
     def setup_service(self, service_name, domain_list, origin_list,
-                      caching_list=[], restrictions_list=[], flavor_id=None):
+                      caching_list=[], restrictions_list=[], flavor_id=None,
+                      log_delivery=False):
         resp = self.poppy_client.create_service(
             service_name=service_name,
             domain_list=domain_list,
             origin_list=origin_list,
             caching_list=caching_list,
             restrictions_list=restrictions_list,
-            flavor_id=flavor_id)
+            flavor_id=flavor_id,
+            log_delivery=log_delivery)
 
         self.assertEqual(resp.status_code, 202)
         self.service_location = resp.headers['location']
