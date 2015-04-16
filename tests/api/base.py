@@ -79,7 +79,7 @@ class TestBase(fixtures.BaseTestFixture):
     def generate_random_string(self, prefix='API-Tests', length=12):
         """Generates a random string of given prefix & length"""
         random_string = ''.join(random.choice(
-            string.ascii_uppercase + string.ascii_uppercase + string.digits)
+            string.ascii_lowercase + string.digits)
             for _ in range(length))
         random_string = prefix + random_string
         return random_string

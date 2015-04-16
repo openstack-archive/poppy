@@ -37,7 +37,8 @@ class TestCreateService(providers.TestProviderBase):
     def setUp(self):
         super(TestCreateService, self).setUp()
         self.service_url = ''
-        self.service_name = str(uuid.uuid1())
+        self.service_name = self.generate_random_string(
+            prefix='api-test-service')
         self.flavor_id = self.test_flavor
 
     @attrib.attr('smoke')
@@ -46,7 +47,8 @@ class TestCreateService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = self.generate_random_string(
+                prefix='api-test-domain') + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         log_delivery = test_data.get('log_delivery')
@@ -123,7 +125,13 @@ class TestCreateService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1())
+            if item['certificate'] == 'shared':
+                item['domain'] = self.generate_random_string(
+                    prefix='shared-ssl')
+            else:
+                item['domain'] = self.generate_random_string(
+                    prefix='ssl-domain') + '.com'
+
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
@@ -189,7 +197,8 @@ class TestCreateService(providers.TestProviderBase):
         service_name = test_data['name']
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = self.generate_random_string(
+                prefix='api-test-xss') + '.com'
 
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
@@ -274,10 +283,11 @@ class TestListServices(base.TestBase):
     def _create_test_service(self):
         service_name = str(uuid.uuid1())
 
-        self.domain_list = [{"domain": str(uuid.uuid1()) + '.com'}]
+        self.domain_list = [{"domain": self.random_string(
+            prefix='api-test-domain') + '.com'}]
 
-        self.origin_list = [{"origin": str(uuid.uuid1()) + '.com',
-                             "port": 80, "ssl": False}]
+        self.origin_list = [{"origin": self.random_string(
+            prefix='api-test-origin') + '.com', "port": 80, "ssl": False}]
 
         self.caching_list = [{"name": "default", "ttl": 3600},
                              {"name": "home", "ttl": 1200,
@@ -393,15 +403,17 @@ class TestServiceActions(base.TestBase):
 
     def setUp(self):
         super(TestServiceActions, self).setUp()
-        self.service_name = str(uuid.uuid1())
+        self.service_name = self.generate_random_string(prefix='API-Test-')
         self.flavor_id = self.test_flavor
 
-        domain = str(uuid.uuid1()) + u'.com'
+        domain = self.generate_random_string(
+            prefix='api-test-domain') + u'.com'
         self.domain_list = [
             {"domain": domain, "protocol": "http"}
         ]
 
-        origin = str(uuid.uuid1()) + u'.com'
+        origin = self.generate_random_string(
+            prefix='api-test-origin') + u'.com'
         self.origin_list = [
             {
                 u"origin": origin,
@@ -544,11 +556,11 @@ class TestServicePatch(base.TestBase):
 
     def setUp(self):
         super(TestServicePatch, self).setUp()
-        self.service_name = str(uuid.uuid1())
+        self.service_name = self.generate_random_string(prefix='api-test')
         self.flavor_id = self.test_flavor
         self.log_delivery = {"enabled": False}
 
-        domain = str(uuid.uuid1()) + '.com'
+        domain = self.generate_random_string(prefix='api-test-domain') + '.com'
         self.domain_list = [
             {
                 "domain": domain,
@@ -556,7 +568,7 @@ class TestServicePatch(base.TestBase):
             }
         ]
 
-        origin = str(uuid.uuid1()) + '.com'
+        origin = self.generate_random_string(prefix='api-test-origin') + '.com'
         self.origin_list = [
             {
                 "origin": origin,
@@ -656,9 +668,9 @@ class TestServicePatch(base.TestBase):
         if ('protocol' in domain):
             if domain['protocol'] == 'https':
                 if (domain['certificate'] == u'shared'):
-                    return str(uuid.uuid1())
+                    return self.generate_random_string(prefix='api-test-ssl')
 
-        return str(uuid.uuid1()) + '.com'
+        return self.generate_random_string(prefix='api-test-ssl') + '.com'
 
     @ddt.file_data('data_patch_service.json')
     def test_patch_service(self, test_data):
@@ -841,7 +853,7 @@ class TestDefaultServiceFields(providers.TestProviderBase):
     def setUp(self):
         super(TestDefaultServiceFields, self).setUp()
         self.service_url = ''
-        self.service_name = str(uuid.uuid1())
+        self.service_name = self.generate_random_string(prefix='api-test')
         self.flavor_id = self.test_flavor
 
     @ddt.file_data('data_default_service_values.json')
