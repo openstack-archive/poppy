@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import requests
-
 from tests.endtoend import base
 
 
@@ -71,21 +69,22 @@ class TestReferrerRestriction(base.TestBase):
         cdn_url = "http://" + self.referree_domain
 
         # fetching from a whitelisted referrer should work
-        resp = requests.get(cdn_url, headers={'Referer': cdn_url})
+        resp = self.http_client.get(cdn_url, headers={'Referer': cdn_url})
         self.assertEqual(resp.status_code, 200)
 
         # fetching from a restriction domain should not work
-        resp = requests.get(cdn_url, headers={'Referer': "http://badsite.com"})
+        resp = self.http_client.get(cdn_url,
+                                    headers={'Referer': "http://badsite.com"})
         self.assertEqual(resp.status_code, 403)
 
         # fetching with no referrer should work
-        resp = requests.get(cdn_url)
+        resp = self.http_client.get(cdn_url)
         self.assertEqual(resp.status_code, 200)
 
     def test_referrer_restriction_with_request_url(self):
         # check preconditions. the referrer_request_url in the config needs to
         # give us a 200 response.
-        resp = requests.get(
+        resp = self.http_client.get(
             "http://" + self.referree_origin + self.referrer_request_url)
         assert resp.status_code == 200
 
@@ -128,26 +127,28 @@ class TestReferrerRestriction(base.TestBase):
         restricted_url = cdn_url + self.referrer_request_url
 
         # fetching a restricted url with a whitelisted referrer should work
-        resp = requests.get(restricted_url, headers={'Referer': cdn_url})
+        resp = self.http_client.get(restricted_url,
+                                    headers={'Referer': cdn_url})
         self.assertEqual(resp.status_code, 200)
 
         # fetching a restricted url with a bad referrer should fail
-        resp = requests.get(restricted_url,
-                            headers={'Referer': "http://badsite.com"})
+        resp = self.http_client.get(restricted_url,
+                                    headers={'Referer': "http://badsite.com"})
         self.assertEqual(resp.status_code, 403)
 
         # fetching the restricted url with no referrer should work
-        resp = requests.get(restricted_url)
+        resp = self.http_client.get(restricted_url)
         self.assertEqual(resp.status_code, 200)
 
         # the root path is unrestricted. any or no referrer is allowed.
-        resp = requests.get(cdn_url, headers={'Referer': cdn_url})
+        resp = self.http_client.get(cdn_url, headers={'Referer': cdn_url})
         self.assertEqual(resp.status_code, 200)
 
-        resp = requests.get(cdn_url, headers={'Referer': "http://badsite.com"})
+        resp = self.http_client.get(cdn_url,
+                                    headers={'Referer': "http://badsite.com"})
         self.assertEqual(resp.status_code, 200)
 
-        resp = requests.get(cdn_url)
+        resp = self.http_client.get(cdn_url)
         self.assertEqual(resp.status_code, 200)
 
     def tearDown(self):

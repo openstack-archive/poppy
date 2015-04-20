@@ -60,7 +60,8 @@ class TestWebsiteCDN(base.TestBase):
                       link['rel'] == 'access_url']
 
         rec = self.setup_cname(name=self.test_domain, cname=access_url[0])
-        self.cname_rec.append(rec)
+        if rec:
+            self.cname_rec.append(rec[0])
 
         origin_url = 'http://' + self.origin
         cdn_enabled_url = 'http://' + self.test_domain
@@ -104,10 +105,12 @@ class TestWebsiteCDN(base.TestBase):
 
         # Adds cname records corresponding to the test domains
         rec = self.setup_cname(name=self.test_domain, cname=access_url[0])
-        self.cname_rec.append(rec)
+        if rec:
+            self.cname_rec.append(rec[0])
 
         rec = self.setup_cname(name=self.test_domain2, cname=access_url[0])
-        self.cname_rec.append(rec)
+        if rec:
+            self.cname_rec.append(rec[0])
 
         origin_url = 'http://' + self.origin
         cdn_enabled_url1 = 'http://' + self.test_domain
@@ -307,9 +310,7 @@ class TestWebsiteCDN(base.TestBase):
 
     def tearDown(self):
         self.poppy_client.delete_service(location=self.service_location)
-        """
-        @todo(malini): Fix Bug in Delete below
         for record in self.cname_rec:
+            print("deleting dns record: {0}".format(record))
             self.dns_client.delete_record(record)
-        """
         super(TestWebsiteCDN, self).tearDown()
