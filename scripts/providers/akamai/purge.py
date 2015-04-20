@@ -50,17 +50,17 @@ def edge_session(env, config):
     s = requests.Session()
     s.auth = EdgeGridAuth(
         # This is akamai credential
-        client_token=config.get(env, 'client_token'),
-        client_secret=config.get(env, 'client_secret'),
-        access_token=config.get(env, 'access_token'))
+        client_token=config.get(env, 'ccu_api_client_token'),
+        client_secret=config.get(env, 'ccu_api_client_secret'),
+        access_token=config.get(env, 'ccu_api_access_token'))
 
     return s
 
 
 def akamai_purge(env, config, url):
-    purge_base_url = config.get(env, 'purge_base_url')
+    purge_base_url = config.get(env, 'ccu_api_base_url')
 
-    purge_url = ('https://{0}.purge.akamaiapis.net/ccu/v2/queues/default'
+    purge_url = ('{0}ccu/v2/queues/default'
                  .format(purge_base_url))
 
     print ("Purge URL: " + purge_url)
