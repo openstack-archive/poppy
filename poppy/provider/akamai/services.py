@@ -112,11 +112,11 @@ class ServiceController(base.ServiceBase):
                 LOG.info('Creating policy %s on domain %s complete' %
                          (dp, classified_domain.domain))
                 # pick a san cert for this domain
-                edgeHostName = None
+                edge_host_name = None
                 if classified_domain.certificate == 'san':
-                    edgeHostName = self._pick_san_edgename()
+                    edge_host_name = self._pick_san_edgename()
                 provider_access_url = self._get_provider_access_url(
-                    classified_domain, dp, edgeHostName)
+                    classified_domain, dp, edge_host_name)
                 links.append({'href': provider_access_url,
                               'rel': 'access_url',
                               'domain': classified_domain.domain,
@@ -260,11 +260,11 @@ class ServiceController(base.ServiceBase):
                         # may need to work with dns integration
                         LOG.info('Creating/Updating policy %s on domain %s '
                                  'complete' % (dp, classified_domain.domain))
-                        edgeHostName = None
+                        edge_host_name = None
                         if classified_domain.certificate == 'san':
-                            edgeHostName = self._pick_san_edgename()
+                            edge_host_name = self._pick_san_edgename()
                         provider_access_url = self._get_provider_access_url(
-                            classified_domain, dp, edgeHostName)
+                            classified_domain, dp, edge_host_name)
                         links.append({'href': provider_access_url,
                                       'rel': 'access_url',
                                       'domain': dp,
@@ -346,12 +346,12 @@ class ServiceController(base.ServiceBase):
                             "failed to update service")
 
                     # This part may need to revisit
-                    edgeHostName = None
+                    edge_host_name = None
                     if policy['certificate'] == 'san':
-                        edgeHostName = self._pick_san_edgename()
+                        edge_host_name = self._pick_san_edgename()
                     provider_access_url = self._get_provider_access_url(
                         util.dict2obj(policy), policy['policy_name'],
-                        edgeHostName)
+                        edge_host_name)
                     links.append({'href': provider_access_url,
                                   'rel': 'access_url',
                                   'domain': policy['policy_name'],
@@ -476,17 +476,13 @@ class ServiceController(base.ServiceBase):
         }
 
         wildcards = []
-        urlpaths = []
 
         # this is the global 'url-wildcard' rule
         if origin.rules == []:
             wildcards.append("/*")
         else:
             for rule in origin.rules:
-                if "*" in rule.request_url:
-                    wildcards.append(rule.request_url)
-                else:
-                    urlpaths.append(rule.request_url)
+                wildcards.append(rule.request_url)
 
         if len(wildcards) > 0:
             match_rule = {
@@ -497,20 +493,12 @@ class ServiceController(base.ServiceBase):
             rule_dict_template['matches'].append(
                 match_rule)
 
-        if len(urlpaths) > 0:
-            match_rule = {
-                'name': 'url-path',
-                'value': " ".join(urlpaths)
-            }
-
-            rule_dict_template['matches'].append(
-                match_rule)
-
         if origin.ssl:
             rule_dict_template['matches'].append({
                 'name': 'url-scheme',
                 'value': 'HTTPS'
             })
+
         origin_behavior_dict['params']['originDomain'] = (
             origin.origin
         )
@@ -565,16 +553,10 @@ class ServiceController(base.ServiceBase):
 
                         # add the match and behavior to this new rule
                         if rule_entry.request_url is not None:
-                            if "*" in rule_entry.request_url:
-                                match_rule = {
-                                    'name': 'url-wildcard',
-                                    'value': rule_entry.request_url
-                                }
-                            else:
-                                match_rule = {
-                                    'name': 'url-path',
-                                    'value': rule_entry.request_url
-                                }
+                            match_rule = {
+                                'name': 'url-wildcard',
+                                'value': rule_entry.request_url
+                            }
 
                             rule_dict_template['matches'].append(match_rule)
                             rule_dict_template['behaviors'].append({
@@ -614,16 +596,10 @@ class ServiceController(base.ServiceBase):
                     }
 
                     # add the match and behavior to this new rule
-                    if "*" in caching_rule_entry.request_url:
-                        match_rule = {
-                            'name': 'url-wildcard',
-                            'value': caching_rule_entry.request_url
-                        }
-                    else:
-                        match_rule = {
-                            'name': 'url-path',
-                            'value': caching_rule_entry.request_url
-                        }
+                    match_rule = {
+                        'name': 'url-wildcard',
+                        'value': caching_rule_entry.request_url
+                    }
 
                     rule_dict_template['matches'].append(match_rule)
                     rule_dict_template['behaviors'].append({
@@ -648,7 +624,7 @@ class ServiceController(base.ServiceBase):
             configuration_number = self.driver.https_conf_number
         return configuration_number
 
-    def _get_provider_access_url(self, domain_obj, dp, edgeHostName=None):
+    def _get_provider_access_url(self, domain_obj, dp, edge_host_name=None):
         provider_access_url = None
         if domain_obj.protocol == 'http':
             provider_access_url = self.driver.akamai_access_url_link
@@ -658,10 +634,11 @@ class ServiceController(base.ServiceBase):
                     ['.'.join(dp.split('.')[1:]),
                      self.driver.akamai_https_access_url_suffix])
             elif domain_obj.certificate == 'san':
-                if edgeHostName is None:
+                if edge_host_name is None:
                     raise ValueError("No EdgeHost name provided for SAN Cert")
                 provider_access_url = '.'.join(
-                    [edgeHostName, self.driver.akamai_https_access_url_suffix])
+                    [edge_host_name,
+                     self.driver.akamai_https_access_url_suffix])
             elif domain_obj.certificate == 'custom':
                 provider_access_url = '.'.join(
                     [dp, self.driver.akamai_https_access_url_suffix])
@@ -688,7 +665,7 @@ class ServiceController(base.ServiceBase):
                 find_idx = idx
                 break
             if n >= self.san_cert_hostname_limit:
-                if idx == len(self.san_cert_cnames)-1:
+                if idx == len(self.san_cert_cnames) - 1:
                     raise ValueError('All SAN Certs are having the maximum'
                                      ' # of hostnames.Please contact operation'
                                      ' team to create more SAN Certs')
