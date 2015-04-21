@@ -63,6 +63,16 @@ links = {'type': 'object',
                                                 'flavor']}}
          }
 
+log_delivery_links = {
+    'type': 'object',
+    'properties': {
+        'href': {'type': 'array',
+                 'items': {'type': 'string', 'format': 'uri'},
+                 'minItems': 2,
+                 'maxItems': 2},
+        'rel': {'type': 'string', 'enum': ['log_delivery']}}
+}
+
 error_message = {'type': 'object',
                  'properties': {
                      'message': {'type': 'string'}},
@@ -94,7 +104,7 @@ get_service = {
                     'items': cache,
                     },
         'links': {'type': 'array',
-                  'items': links,
+                  'items': {'anyOf': [links, log_delivery_links]},
                   'minItems': 1},
         'errors': {'type': 'array'},
         'status': {'type': 'string',
