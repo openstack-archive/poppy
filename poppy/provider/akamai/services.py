@@ -645,7 +645,15 @@ class ServiceController(base.ServiceBase):
         if domain_obj.protocol == 'http':
             configuration_number = self.driver.http_conf_number
         elif domain_obj.protocol == 'https':
-            configuration_number = self.driver.https_conf_number
+            if domain_obj.certificate == 'shared':
+                configuration_number = self.driver.https_shared_conf_number
+            elif domain_obj.certificate == 'san':
+                configuration_number = self.driver.https_san_conf_number
+            elif domain_obj.certificate == 'custom':
+                configuration_number = self.driver.https_custom_conf_number
+            else:
+                raise ValueError("Unknown certificate type: %s" %
+                                 domain_obj.certificate)
         return configuration_number
 
     def _get_provider_access_url(self, domain_obj, dp, edgeHostName=None):
@@ -657,14 +665,17 @@ class ServiceController(base.ServiceBase):
                 provider_access_url = '.'.join(
                     ['.'.join(dp.split('.')[1:]),
                      self.driver.akamai_https_access_url_suffix])
-            if domain_obj.certificate == 'san':
+            elif domain_obj.certificate == 'san':
                 if edgeHostName is None:
                     raise ValueError("No EdgeHost name provided for SAN Cert")
                 provider_access_url = '.'.join(
                     [edgeHostName, self.driver.akamai_https_access_url_suffix])
-            else:
+            elif domain_obj.certificate == 'custom':
                 provider_access_url = '.'.join(
                     [dp, self.driver.akamai_https_access_url_suffix])
+            else:
+                raise ValueError("Unknown certificate type: %s" %
+                                 domain_obj.certificate)
         return provider_access_url
 
     def _pick_san_edgename(self):

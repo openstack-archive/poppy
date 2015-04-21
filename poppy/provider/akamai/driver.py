@@ -65,8 +65,18 @@ AKAMAI_OPTIONS = [
         'akamai_http_config_number',
         help='Akamai configuration number for http policies'),
     cfg.StrOpt(
-        'akamai_https_config_number',
-        help='Akamai configuration number for https policies'
+        'akamai_https_shared_config_number',
+        help='Akamai configuration number for shared wildcard https policies'
+    ),
+    cfg.ListOpt(
+        'akamai_https_san_config_numbers',
+        help='A list of Akamai configuration number for '
+             'SAN cert https policies'
+    ),
+    cfg.ListOpt(
+        'akamai_https_custom_config_numbers',
+        help='A list of Akamai configuration number for '
+             'Custom cert https policies'
     ),
 
     # SANCERT related configs
@@ -99,7 +109,12 @@ class CDNProvider(base.Driver):
         ])
 
         self.http_conf_number = self.akamai_conf.akamai_http_config_number
-        self.https_conf_number = self.akamai_conf.akamai_https_config_number
+        self.https_shared_conf_number = (
+            self.akamai_conf.akamai_https_shared_config_number)
+        self.https_san_conf_number = (
+            self.akamai_conf.akamai_https_san_config_numbers[-1])
+        self.https_custom_conf_number = (
+            self.akamai_conf.akamai_https_custom_config_numbers[-1])
 
         self.akamai_access_url_link = self.akamai_conf.akamai_access_url_link
         self.akamai_https_access_url_suffix = (
