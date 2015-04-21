@@ -657,14 +657,17 @@ class ServiceController(base.ServiceBase):
                 provider_access_url = '.'.join(
                     ['.'.join(dp.split('.')[1:]),
                      self.driver.akamai_https_access_url_suffix])
-            if domain_obj.certificate == 'san':
+            elif domain_obj.certificate == 'san':
                 if edgeHostName is None:
                     raise ValueError("No EdgeHost name provided for SAN Cert")
                 provider_access_url = '.'.join(
                     [edgeHostName, self.driver.akamai_https_access_url_suffix])
-            else:
+            elif domain_obj.certificate == 'custom':
                 provider_access_url = '.'.join(
                     [dp, self.driver.akamai_https_access_url_suffix])
+            else:
+                raise ValueError("Unknown certificate type: %s" %
+                                 domain_obj.certificate)
         return provider_access_url
 
     def _pick_san_edgename(self):
