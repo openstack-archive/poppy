@@ -103,7 +103,12 @@ def create_log_delivery_container(project_id, auth_token):
                                 headers=headers)
         if response.ok:
             LOG.info('Created container {0}'.format(public_container_url))
-            log_responders = [public_container_url, internal_container_url]
+
+            container_urls = {
+                'publicURL': public_container_url,
+                'internalURL': internal_container_url
+            }
+            log_responders = [container_urls]
             return log_responders
         else:
             LOG.info('Error creating '

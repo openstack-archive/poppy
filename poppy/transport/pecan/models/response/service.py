@@ -74,7 +74,7 @@ class Model(collections.OrderedDict):
                         'access_url'))
                 elif 'log_delivery' in access_url:
                     self['links'].append(link.Model(
-                        access_url['log_delivery'],
+                        access_url['log_delivery'][0]['publicURL'],
                         'log_delivery'))
 
             # add any errors
