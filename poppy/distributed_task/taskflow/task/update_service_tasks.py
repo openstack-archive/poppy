@@ -148,7 +148,10 @@ class GatherProviderDetailsTask(task.Task):
                 else:
                     access_urls = dns_responder[provider_name]['access_urls']
                     if log_responders:
-                        access_urls.append({'log_delivery': log_responders})
+                        if not any('log_delivery' in access_url
+                                   for access_url in access_urls):
+                            access_urls.append({'log_delivery':
+                                                log_responders})
                     provider_details_dict[provider_name] = (
                         provider_details.ProviderDetail(
                             provider_service_id=responder[provider_name]['id'],
