@@ -250,23 +250,24 @@ class ServicesController(base.ServicesBase):
         for provider_name in provider_details:
             access_urls = provider_details[provider_name].access_urls
             for access_url in access_urls:
-                try:
-                    msg = self._delete_cname_record(
-                        access_url['operator_url'],
-                        access_url.get('shared_ssl_flag', False))
-                    if msg:
-                        error_msg = error_msg + msg
-                except exc.NotFound as e:
-                    LOG.error('Can not access the subdomain. Please make sure'
-                              ' it exists and you have permissions to CDN '
-                              'subdomain {0}'.format(e))
-                    error_msg = (error_msg + 'Can not access subdomain . '
-                                 'Exception: {0}'.format(e))
-                except Exception as e:
-                    LOG.error('Rackspace DNS Exception: {0}'.format(e))
-                    error_msg = error_msg + 'Rackspace DNS ' \
-                                            'Exception: {0}'.format(e)
-            # format the error message for this provider
+                if 'operator_url' in access_url:
+                    try:
+                        msg = self._delete_cname_record(
+                            access_url['operator_url'],
+                            access_url.get('shared_ssl_flag', False))
+                        if msg:
+                            error_msg = error_msg + msg
+                    except exc.NotFound as e:
+                        LOG.error('Can not access the subdomain. Please make '
+                                  'sure it exists and you have permissions '
+                                  'to CDN subdomain {0}'.format(e))
+                        error_msg = (error_msg + 'Can not access subdomain . '
+                                     'Exception: {0}'.format(e))
+                    except Exception as e:
+                        LOG.error('Rackspace DNS Exception: {0}'.format(e))
+                        error_msg = error_msg + 'Rackspace DNS ' \
+                                                'Exception: {0}'.format(e)
+                # format the error message for this provider
             if not error_msg:
                 dns_details[provider_name] = self.responder.deleted({})
 
