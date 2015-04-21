@@ -84,6 +84,16 @@ class RackspaceDNSClient(object):
         recs = self.domain.delete_record(record)
         return recs
 
+    def wait_cname_propagation(self, target, retry_interval=120):
+        try:
+            dns.resolver.query(target, 'CNAME')
+        except dns.resolver.NXDOMAIN:
+            time.sleep(retry_interval)
+            self.wait_cname_propagation(target, retry_interval)
+        return
+
+    """Uncomment below after figuring out how to connect to the nameserver
+
     @classmethod
     def wait_cname_propagation(cls, target, nameserver, retry_interval=120,
                                retry_timeout=360):
@@ -101,3 +111,4 @@ class RackspaceDNSClient(object):
                 time.sleep(retry_interval)
         raise Exception("`dig @{0} {1} CNAME` timed out after {2} seconds"
                         .format(nameserver, target, retry_timeout))
+    """

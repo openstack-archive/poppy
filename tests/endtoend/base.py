@@ -112,6 +112,12 @@ class TestBase(fixtures.BaseTestFixture):
         """Create a CNAME record and wait for propagation."""
         cname_rec = self.dns_client.add_cname_rec(name=name, data=cname)
 
+        self.dns_client.wait_cname_propagation(
+            target=name,
+            retry_interval=self.dns_config.retry_interval)
+
+        """Uncomment after unscrewing nameserver connectivity issue
+
         start = time.time()
         # if we query caching nameservers and get an NXDOMAIN, that NXDOMAIN
         # will then be cached for five minutes.
@@ -129,6 +135,7 @@ class TestBase(fixtures.BaseTestFixture):
 
         # once the name is on the authoritative nameserver, there will still be
         # a delay for the caching nameservers to pick up a change
+        """
         sleep_time = self.dns_config.cname_propagation_sleep
         print("waiting {0} additional seconds to propagate to caching "
               "nameservers".format(sleep_time))

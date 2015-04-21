@@ -244,14 +244,20 @@ class TestWebsiteCDN(base.TestBase):
         """
         @todo: Change the wait for CDN status to checking the real
         status of purge
-        """
         self.wait_for_CDN_status(cdn_url=cdn_enabled_url, status='TCP_MISS')
+        """
+        time.sleep(self.purge_config.purge_time)
         self.assertCDNMiss(cdn_url=cdn_enabled_url + rule1)
 
         # Purge all content and ensure rule 2 gets a TCP_MISS
         self.poppy_client.purge_asset(location=self.service_location)
+        """
+        @todo: Change the wait for CDN status to checking the real
+        status of purge
         self.wait_for_CDN_status(cdn_url=cdn_enabled_url, status='TCP_MISS')
-        self.assertCDNMiss(cdn_url=cdn_enabled_url + rule2)
+        """
+        time.sleep(self.purge_config.purge_time)
+        self.assertCDNMiss(cdn_url=cdn_enabled_url)
 
     def test_update_cache_rules(self):
 
