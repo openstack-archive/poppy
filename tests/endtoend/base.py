@@ -76,7 +76,8 @@ class TestBase(fixtures.BaseTestFixture):
         cls.dns_client = dnsclient.RackspaceDNSClient(
             user_name=cls.auth_config.user_name,
             api_key=cls.auth_config.api_key,
-            test_domain=cls.dns_config.test_domain)
+            test_domain=cls.dns_config.test_domain,
+            dns_api_timeout=cls.dns_config.dns_api_timeout)
 
         cls.heat_config = config.OrchestrationConfig()
         heat_url = cls.heat_config.base_url + '/' + project_id
