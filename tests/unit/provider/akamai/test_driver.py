@@ -62,9 +62,21 @@ AKAMAI_OPTIONS = [
         'akamai_http_config_number', default=str(random.randint(10000, 99999)),
         help='Akamai configuration number for http policies'),
     cfg.StrOpt(
-        'akamai_https_config_number',
+        'akamai_https_shared_config_number',
         default=str(random.randint(10000, 99999)),
-        help='Akamai configuration number for https policies'),
+        help='Akamai configuration number for shared wildcard https policies'),
+    cfg.ListOpt(
+        'akamai_https_san_config_numbers',
+        default=[str(random.randint(10000, 99999))],
+        help='A list of Akamai configuration number for '
+             'SAN cert https policies'
+    ),
+    cfg.ListOpt(
+        'akamai_https_custom_config_numbers',
+        default=[str(random.randint(10000, 99999))],
+        help='A list of Akamai configuration number for '
+             'Custom cert https policies'
+    ),
 
     # SANCERT related configs
     cfg.ListOpt('san_cert_cnames', default='secure.san.test.com',
