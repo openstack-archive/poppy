@@ -25,12 +25,13 @@ class RackspaceDNSClient(object):
 
     """Client Objects for Rackspace DNS call."""
 
-    def __init__(self, user_name, api_key, test_domain):
+    def __init__(self, user_name, api_key, test_domain, dns_api_timeout=15):
         super(RackspaceDNSClient, self).__init__()
 
         pyrax.settings.set('identity_type', 'rackspace')
         pyrax.set_credentials(user_name, api_key)
         self.dns_client = pyrax.cloud_dns
+        self.dns_client.set_timeout(dns_api_timeout)
         self.test_domain = test_domain
         self.domain = self.dns_client.find(name=test_domain)
 

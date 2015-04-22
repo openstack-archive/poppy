@@ -161,6 +161,11 @@ class DNSConfig(data_interfaces.ConfigSectionInterface):
         return int(self.get('retry_timeout'))
 
     @property
+    def dns_api_timeout(self):
+        """The timeout when waiting for Cloud DNS API requests to complete"""
+        return int(self.get('dns_api_timeout'))
+
+    @property
     def authoritative_nameserver(self):
         """The authoritative nameserver to query, must be an ip address."""
         return self.get('authoritative_nameserver')
