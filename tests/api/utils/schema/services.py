@@ -60,7 +60,7 @@ links = {'type': 'object',
          'properties': {
              'href': {'type': 'string', 'format': 'uri'},
              'rel': {'type': 'string', 'enum': ['self', 'access_url',
-                                                'flavor']}}
+                                                'flavor', 'log_delivery']}}
          }
 
 error_message = {'type': 'object',
