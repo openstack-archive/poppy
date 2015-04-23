@@ -37,6 +37,9 @@ class TestBase(fixtures.BaseTestFixture):
 
         super(TestBase, cls).setUpClass()
 
+        import requests.packages.urllib3
+        requests.packages.urllib3.disable_warnings()
+
         cls.auth_config = config.AuthConfig()
         if cls.auth_config.auth_enabled:
             cls.auth_client = client.AuthClient()
