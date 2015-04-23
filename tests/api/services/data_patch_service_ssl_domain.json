@@ -5,22 +5,26 @@
          "value": {"domain": "newshared", "protocol": "https", "certificate": "shared"}}
     ],
    "add_custom_ssl_domain": [
-        {"op": "add",
+        {"skip_test": true,
+         "op": "add",
          "path": "/domains/-",
          "value": {"domain": "newcustom.com", "protocol": "https", "certificate": "custom"}}
     ],
    "add_san_ssl_domain": [
-        {"op": "add",
+        {"skip_test": true,
+         "op": "add",
          "path": "/domains/-",
          "value": {"domain": "newsan.com", "protocol": "https", "certificate": "custom"}}
     ],
    "replace_with_custom_ssl_domain": [
-        {"op": "replace",
+        {"skip_test": true,
+         "op": "replace",
          "path": "/domains/0",
          "value": {"domain": "replacewithcustom.com", "protocol": "https", "certificate": "custom"}}
     ],
    "replace_with_san_ssl_domain": [
-        {"op": "replace",
+        {"skip_test": true,
+         "op": "replace",
          "path": "/domains/0",
          "value": {"domain": "replacewithsan.com", "protocol": "https", "certificate": "san"}}
     ],

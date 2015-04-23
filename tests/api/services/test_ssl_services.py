@@ -42,6 +42,9 @@ class TestCreateSSLService(base.TestBase):
     @ddt.file_data('data_create_service_ssl_domain.json')
     def test_create_service_ssl_domain_positive(self, test_data):
 
+        if 'skip_test' in test_data:
+            self.skipTest('SAN/Custom Not Implemented')
+
         domain_list = test_data['domain_list']
         for item in domain_list:
             if item['certificate'] == 'shared':
@@ -189,10 +192,11 @@ class TestPatchSSLService(base.TestBase):
         return self.generate_random_string(prefix='api-test-ssl') + '.com'
 
     @ddt.file_data('data_patch_service_ssl_domain.json')
-    @ddt.file_data('failed.json')
     def test_patch_ssl_domain(self, test_data):
 
         for item in test_data:
+            if 'skip_test' in item:
+                self.skipTest('SAN/Custom Not Implemented')
             if ('domain' in item['path']) and ('value' in item):
                 if isinstance(item['value'], (list)):
                     item['value'][0]['domain'] = self._replace_domain(
