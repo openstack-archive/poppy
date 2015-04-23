@@ -403,7 +403,7 @@ class ServicesController(base.ServicesController):
             CQL_RELINQUISH_DOMAINS,
             consistency_level=self._driver.consistency_level)
         domain_list = [json.loads(d).get('domain')
-                       for d in result.get('domains', [])]
+                       for d in result.get('domains', []) or []]
         args = {
             'domain_list': query.ValueSequence(domain_list)
         }
@@ -439,7 +439,7 @@ class ServicesController(base.ServicesController):
 
         if (result):
             domains_list = [json.loads(d).get('domain')
-                            for d in result.get('domains', [])]
+                            for d in result.get('domains', []) or []]
             # NOTE(obulpathi): Convert a OrderedMapSerializedKey to a Dict
             pds = result.get('provider_details', {}) or {}
             pds = {key: value for key, value in pds.items()}
