@@ -12,11 +12,12 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import cgi
 try:
     import ordereddict as collections
 except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
+
+from poppy.common import util
 
 
 class Model(collections.OrderedDict):
@@ -25,10 +26,10 @@ class Model(collections.OrderedDict):
 
     def __init__(self, rule):
         super(Model, self).__init__()
-        self['name'] = cgi.escape(rule.name)
-        self['request_url'] = cgi.escape(rule.request_url)
+        self['name'] = util.help_escape(rule.name)
+        self['request_url'] = util.help_escape(rule.request_url)
         for attr_name in ['http_host', 'http_method',
                           'client_ip', 'referrer']:
             attr = getattr(rule, attr_name, None)
             if attr is not None:
-                self[attr_name] = cgi.escape(attr)
+                self[attr_name] = util.help_escape(attr)

@@ -13,7 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cgi
 import pprint
+
+from poppy.openstack.common import log
+
+LOG = log.getLogger(__name__)
 
 
 class dict2obj(object):
@@ -43,3 +48,9 @@ class dict2obj(object):
 
     def __repr__(self):
         return pprint.pformat(self.__dict__)
+
+
+def help_escape(potentially_bad_string):
+    if potentially_bad_string is None:
+        LOG.warning('Should not happen: trying to escape a None object')
+    return cgi.escape(potentially_bad_string or "")
