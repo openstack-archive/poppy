@@ -37,6 +37,14 @@ from poppy.transport.pecan.models.request import service
 from tests.unit import base
 
 
+class Elapsed(object):
+    def __init__(self, time):
+        self.time = time
+
+    def total_seconds(self):
+        return self.time
+
+
 class Response(object):
 
     def __init__(self, resp_status, resp_json=None):
@@ -49,6 +57,10 @@ class Response(object):
 
     def json(self):
         return self.resp_json
+
+    @property
+    def elapsed(self):
+        return Elapsed(0.1)
 
 
 @ddt.ddt
