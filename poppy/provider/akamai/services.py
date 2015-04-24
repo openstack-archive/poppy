@@ -230,7 +230,7 @@ class ServiceController(base.ServiceBase):
                             resp = self.policy_api_client.put(
                                 self.policy_api_base_url.format(
                                     configuration_number=(
-                                        self.driver.http_conf_number),
+                                        configuration_number),
                                     policy_name=dp),
                                 data=json.dumps(policy_content),
                                 headers=self.request_header)
