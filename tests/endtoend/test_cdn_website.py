@@ -183,17 +183,12 @@ class TestWebsiteCDN(base.TestBase):
         self.assertSameContent(origin_url=origin_url,
                                cdn_url=cdn_enabled_url)
 
-        self.assertCDNHit(cdn_url=cdn_enabled_url + rule1)
-        time.sleep(ttlrule1)
-        self.assertCDNMiss(cdn_url=cdn_enabled_url + rule1)
-
-        self.assertCDNHit(cdn_url=cdn_enabled_url + rule2)
-        time.sleep(ttlrule2)
-        self.assertCDNMiss(cdn_url=cdn_enabled_url + rule2)
-
-        self.assertCDNHit(cdn_url=cdn_enabled_url + rule3)
-        time.sleep(ttlrule3)
-        self.assertCDNMiss(cdn_url=cdn_enabled_url + rule3)
+        print ("Checking rule 1:")
+        self.check_cache_rules(cdn_url=cdn_enabled_url + rule1, ttl=ttlrule1)
+        print ("Checking rule 2:")
+        self.check_cache_rules(cdn_url=cdn_enabled_url + rule2, ttl=ttlrule2)
+        print ("Checking rule 3:")
+        self.check_cache_rules(cdn_url=cdn_enabled_url + rule3, ttl=ttlrule3)
 
     def test_purge(self):
 

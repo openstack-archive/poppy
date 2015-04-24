@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import random
 import time
 
@@ -205,7 +206,7 @@ class TestBase(fixtures.BaseTestFixture):
         headers = {'Pragma': 'akamai-x-cache-on'}
         response = requests.get(cdn_url, headers=headers)
         self.assertIn(response.headers['x-cache'].split(" ")[0],
-                      ['TCP_MISS', 'TCP_REFRESH_MISS', 'TCP_REFRESH_MISS'])
+                      ['TCP_MISS', 'TCP_REFRESH_MISS', 'TCP_REFRESH_HIT'])
 
     def wait_for_CDN_status(self, cdn_url, status):
         """Waits for a service to reach a given status.
@@ -227,6 +228,33 @@ class TestBase(fixtures.BaseTestFixture):
             current_time = int(time.time())
             if current_time > stop_time:
                 return
+
+    def check_cache_rules(self, cdn_url, ttl):
+        headers = {'Pragma': 'akamai-x-cache-on'}
+
+        hit_times = []
+        loop = 300
+        sleep_time = 1
+        for x in range(0, loop/sleep_time):
+            response = requests.get(cdn_url, headers=headers)
+
+            if 'X-Cache' in response.headers:
+                print (str(datetime.datetime.now()) + " - Akamai Response: "
+                       + str(response.headers['X-Cache']))
+                if response.headers['x-cache'].split(" ")[0] in \
+                        ['TCP_HIT', 'TCP_REFRESH_HIT']:
+                    hit_times.append(datetime.datetime.now())
+                    if len(hit_times) > 1:
+                        time_diff = str(hit_times[len(hit_times)-1] -
+                                        hit_times[len(hit_times)-2])
+                        print ("Time object is cached: %s" % time_diff)
+                        time_diff_secs = time_diff.split(":")[2].split(".")[0]
+                        self.assertTrue(ttl-8 <= int(time_diff_secs))
+                        self.assertTrue(ttl+8 >= int(time_diff_secs))
+            else:
+                print ("Not served through Akamai")
+
+            time.sleep(sleep_time)
 
     @classmethod
     def tearDownClass(cls):
