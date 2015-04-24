@@ -94,7 +94,6 @@ class RackspaceDNSClient(object):
         end_time = time.time() + retry_timeout
         while time.time() < end_time:
             try:
-                print("dig %s" % target)
                 resp = resolver.query(target, 'CNAME')
                 if resp.response.answer:
                     return
