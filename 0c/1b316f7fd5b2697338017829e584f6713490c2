@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Code-Review+2: Malini Kamalambal <malini.kamalambal@rackspace.com>
+Workflow+1: Malini Kamalambal <malini.kamalambal@rackspace.com>
+Code-Review+1: Sriram Madapusi Vasudevan <sriram1991mv@gmail.com>
+Code-Review+2: Amit Gandhi <amit.gandhi@rackspace.com>
+Submitted-by: Jenkins
+Submitted-at: Fri, 24 Apr 2015 19:19:50 +0000
+Reviewed-on: https://review.openstack.org/177376
+Project: stackforge/poppy
+Branch: refs/heads/master
