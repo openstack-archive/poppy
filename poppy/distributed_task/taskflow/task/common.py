@@ -32,6 +32,13 @@ LOG = log.getLogger(__name__)
 conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
 
+DEFAULT_OPTIONS = [
+    cfg.StrOpt('datacenter', default='',
+               help='The datacenter in which poppy is deployed')
+]
+
+DEFAULT_GROUP = 'DEFAULT'
+
 LOG_DELIVERY_OPTIONS = [
     cfg.StrOpt('identity_url', default='',
                help='OpenStack Identity URL'),
@@ -47,6 +54,7 @@ LOG_DELIVERY_GROUP = 'log_delivery'
 def create_log_delivery_container(project_id, auth_token):
     # log delivery enabled, create log delivery container for the user
     conf.register_opts(LOG_DELIVERY_OPTIONS, group=LOG_DELIVERY_GROUP)
+    conf.register_opts(DEFAULT_OPTIONS, group=DEFAULT_GROUP)
     identity_url = conf['log_delivery']['identity_url']
     container_name = conf['log_delivery']['container_name']
     preferred_dcs = conf['log_delivery']['preferred_dcs']
@@ -65,7 +73,10 @@ def create_log_delivery_container(project_id, auth_token):
         response = requests.post(identity_url,
                                  data=json.dumps(payload),
                                  headers=headers)
-
+        LOG.info("Keystone request for {0}"
+                 "finished "
+                 "in {1} seconds".format(project_id,
+                                         response.elapsed.total_seconds()))
         catalog = response.json()
         services = catalog['access']['serviceCatalog']
     except KeyError:
@@ -76,33 +87,46 @@ def create_log_delivery_container(project_id, auth_token):
 
     swifturl_public = None
     swifturl_internal = None
+    current_dc = None
+
     for service in services:
 
         if service['type'] == 'object-store':
             endpoints = service['endpoints']
             for endpoint in endpoints:
                 if endpoint['region'] in preferred_dcs:
-                    # TODO(obulpathi): Add both public and private urls.
-                    # Only internal urls does not work because, not all
-                    # containers are accessable from all DC's using
-                    # internal urls
+                    current_dc = endpoint['region']
                     swifturl_public = endpoint['publicURL']
                     swifturl_internal = endpoint['internalURL']
                     break
+
     if swifturl_public and swifturl_internal:
         public_container_url = '{0}/{1}'.format(swifturl_public,
                                                 container_name)
         internal_container_url = '{0}/{1}'.format(swifturl_internal,
                                                   container_name)
-        headers = {'Content-Type': 'application/json',
-                   'X-Auth-Token': auth_token}
+        headers = {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': auth_token
+        }
+
+        if conf['DEFAULT']['datacenter'].upper() == current_dc.upper():
+            container_url = internal_container_url
+            LOG.info("Choosing internalURL : {0}".format(container_url))
+        else:
+            container_url = public_container_url
+            LOG.info("Choosing publicURL : {0}".format(container_url))
+
         LOG.info('Starting to '
-                 'create container {0}'.format(public_container_url))
-        response = requests.put(public_container_url,
-                                None,
+                 'create container {0}'.format(container_url))
+        response = requests.put(container_url,
                                 headers=headers)
+        LOG.info("Swift "
+                 "request for {0} finished "
+                 "in {1} seconds".format(project_id,
+                                         response.elapsed.total_seconds()))
         if response.ok:
-            LOG.info('Created container {0}'.format(public_container_url))
+            LOG.info('Created container {0}'.format(container_url))
 
             container_urls = {
                 'publicURL': public_container_url,
@@ -112,7 +136,7 @@ def create_log_delivery_container(project_id, auth_token):
             return log_responders
         else:
             LOG.info('Error creating '
-                     'container {0}'.format(public_container_url))
+                     'container {0}'.format(container_url))
             return []
     else:
         return []
