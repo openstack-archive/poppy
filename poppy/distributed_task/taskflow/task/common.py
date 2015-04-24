@@ -39,6 +39,9 @@ LOG_DELIVERY_OPTIONS = [
                help='Swift container to put logs'),
     cfg.ListOpt('preferred_dcs', default=['DC1', 'DC2'],
                 help='Preferred DCs to create container'),
+    cfg.BoolOpt('use_internal_url', default=False,
+                help='to use the internal url or the public url'
+                     'during interactions with openstack swift')
 ]
 
 LOG_DELIVERY_GROUP = 'log_delivery'
@@ -82,13 +85,10 @@ def create_log_delivery_container(project_id, auth_token):
             endpoints = service['endpoints']
             for endpoint in endpoints:
                 if endpoint['region'] in preferred_dcs:
-                    # TODO(obulpathi): Add both public and private urls.
-                    # Only internal urls does not work because, not all
-                    # containers are accessable from all DC's using
-                    # internal urls
                     swifturl_public = endpoint['publicURL']
                     swifturl_internal = endpoint['internalURL']
                     break
+
     if swifturl_public and swifturl_internal:
         public_container_url = '{0}/{1}'.format(swifturl_public,
                                                 container_name)
@@ -96,13 +96,15 @@ def create_log_delivery_container(project_id, auth_token):
                                                   container_name)
         headers = {'Content-Type': 'application/json',
                    'X-Auth-Token': auth_token}
+        container_url = internal_container_url \
+            if conf['log_delivery']['use_internal_url'] \
+            else public_container_url
         LOG.info('Starting to '
-                 'create container {0}'.format(public_container_url))
-        response = requests.put(public_container_url,
-                                None,
+                 'create container {0}'.format(container_url))
+        response = requests.put(container_url,
                                 headers=headers)
         if response.ok:
-            LOG.info('Created container {0}'.format(public_container_url))
+            LOG.info('Created container {0}'.format(container_url))
 
             container_urls = {
                 'publicURL': public_container_url,
@@ -112,7 +114,7 @@ def create_log_delivery_container(project_id, auth_token):
             return log_responders
         else:
             LOG.info('Error creating '
-                     'container {0}'.format(public_container_url))
+                     'container {0}'.format(container_url))
             return []
     else:
         return []
