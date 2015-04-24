@@ -234,10 +234,14 @@ class ServiceController(base.ServiceBase):
                                     policy_name=dp),
                                 data=json.dumps(policy_content),
                                 headers=self.request_header)
-                            dp_obj = {'policy_name': dp,
-                                      'protocol': classified_domain.protocol,
-                                      'certificate':
-                                      classified_domain.certificate}
+
+                            for policy in policies:
+                                # policies are based on domain_name
+                                # will be unique within a provider
+                                if policy['policy_name'] == dp:
+                                    dp_obj = policy
+                                    break
+
                             policies.remove(dp_obj)
                         else:
                             LOG.info('Start to create new policy %s' % dp)
