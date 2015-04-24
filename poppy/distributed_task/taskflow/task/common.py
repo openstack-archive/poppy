@@ -125,6 +125,8 @@ def create_log_delivery_container(project_id, auth_token):
                  "request for {0} finished "
                  "in {1} seconds".format(project_id,
                                          response.elapsed.total_seconds()))
+        LOG.info("Swift request's "
+                 "response headers : {0}".format(str(response.headers)))
         if response.ok:
             LOG.info('Created container {0}'.format(container_url))
 
