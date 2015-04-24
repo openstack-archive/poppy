@@ -12,12 +12,12 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import cgi
 try:
     import ordereddict as collections
 except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
 
+from poppy.common import util
 from poppy.transport.pecan.models.response import rule
 
 
@@ -27,7 +27,7 @@ class Model(collections.OrderedDict):
 
     def __init__(self, origin):
         super(Model, self).__init__()
-        self['origin'] = cgi.escape(origin.origin)
+        self['origin'] = util.help_escape(origin.origin)
         self['port'] = origin.port
         self['ssl'] = origin.ssl
         self['rules'] = [rule.Model(r) for r in origin.rules]
