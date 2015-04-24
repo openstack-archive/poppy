@@ -239,5 +239,5 @@ class PurgeRulesConfig(data_interfaces.ConfigSectionInterface):
     SECTION_NAME = 'purgetime'
 
     @property
-    def purge_time(self):
+    def purge_wait_time(self):
         return int(self.get('purge_wait_time'))

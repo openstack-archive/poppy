@@ -183,17 +183,30 @@ class TestWebsiteCDN(base.TestBase):
         self.assertSameContent(origin_url=origin_url,
                                cdn_url=cdn_enabled_url)
 
-        self.assertCDNHit(cdn_url=cdn_enabled_url + rule1)
-        time.sleep(ttlrule1)
-        self.assertCDNMiss(cdn_url=cdn_enabled_url + rule1)
+        # Verify cdn hit on rule urls
+        self.get_from_cdn_enabled_url(cdn_url=cdn_enabled_url + rule1, count=2)
+        self.assertCacheStatus(cdn_url=cdn_enabled_url + rule1,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
-        self.assertCDNHit(cdn_url=cdn_enabled_url + rule2)
-        time.sleep(ttlrule2)
-        self.assertCDNMiss(cdn_url=cdn_enabled_url + rule2)
+        self.get_from_cdn_enabled_url(cdn_url=cdn_enabled_url + rule2, count=2)
+        self.assertCacheStatus(cdn_url=cdn_enabled_url + rule2,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
-        self.assertCDNHit(cdn_url=cdn_enabled_url + rule3)
-        time.sleep(ttlrule3)
-        self.assertCDNMiss(cdn_url=cdn_enabled_url + rule3)
+        self.get_from_cdn_enabled_url(cdn_url=cdn_enabled_url + rule3, count=2)
+        self.assertCacheStatus(cdn_url=cdn_enabled_url + rule3,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+
+        time.sleep(max(ttlrule1, ttlrule2, ttlrule3))
+        # Verify that content in cache is stale/removed after the ttl expires
+        self.assertCacheStatus(
+            cdn_url=cdn_enabled_url + rule1,
+            status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
+        self.assertCacheStatus(
+            cdn_url=cdn_enabled_url + rule2,
+            status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
+        self.assertCacheStatus(
+            cdn_url=cdn_enabled_url + rule3,
+            status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
 
     def test_purge(self):
 
@@ -205,8 +218,6 @@ class TestWebsiteCDN(base.TestBase):
 
         rule1 = self.cacherules_config.cache_rule1
         ttlrule1 = self.cacherules_config.ttl_rule1
-
-        rule2 = self.cacherules_config.cache_rule2
 
         caching_list = [{"name": "images", "ttl": ttlrule1, "rules":
                         [{"name": "image_rule", "request_url": rule1}]}]
@@ -238,20 +249,26 @@ class TestWebsiteCDN(base.TestBase):
                                cdn_url=cdn_enabled_url)
 
         # Purge object in rule 1 and ensure it gets a TCP_MISS
-        self.assertCDNHit(cdn_url=cdn_enabled_url + rule1)
+        self.get_from_cdn_enabled_url(cdn_url=cdn_enabled_url + rule1, count=2)
+        self.assertCacheStatus(cdn_url=cdn_enabled_url + rule1,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
         self.poppy_client.purge_asset(location=self.service_location,
                                       asset_url=rule1)
-        """
-        @todo: Change the wait for CDN status to checking the real
-        status of purge
-        """
-        self.wait_for_CDN_status(cdn_url=cdn_enabled_url, status='TCP_MISS')
-        self.assertCDNMiss(cdn_url=cdn_enabled_url + rule1)
 
+        # Wait for purge to complete & verify that content is fetched from
+        # origin for subsequent call.
+        # @todo: Change the sleep to check the real status of purge. As is
+        # there is no way a poppy user can get the purge status.
+        time.sleep(self.purge_config.purge_wait_time)
+        self.assertCacheStatus(
+            cdn_url=cdn_enabled_url + rule1,
+            status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
+
+        # Currently not supported
         # Purge all content and ensure rule 2 gets a TCP_MISS
-        self.poppy_client.purge_asset(location=self.service_location)
-        self.wait_for_CDN_status(cdn_url=cdn_enabled_url, status='TCP_MISS')
-        self.assertCDNMiss(cdn_url=cdn_enabled_url + rule2)
+        # self.poppy_client.purge_asset(location=self.service_location)
+        # self.wait_for_CDN_status(cdn_url=cdn_enabled_url, status='TCP_MISS')
+        # self.assertCDNMiss(cdn_url=cdn_enabled_url + rule2)
 
     def test_update_cache_rules(self):
 
@@ -290,23 +307,38 @@ class TestWebsiteCDN(base.TestBase):
 
         self.assertSameContent(origin_url=origin_url, cdn_url=cdn_enabled_url)
 
-        self.assertCDNHit(cdn_url=cdn_enabled_url + rule1)
+        # Verify that content is cached after two requests
+        self.get_from_cdn_enabled_url(cdn_url=cdn_enabled_url + rule1, count=2)
+        self.assertCacheStatus(cdn_url=cdn_enabled_url + rule1,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+
+        # Verify that content in cache is stale/removed after the ttl expires
         time.sleep(ttlrule1 + 10)
-        self.assertCDNMiss(cdn_url=cdn_enabled_url + rule1)
+        self.assertCacheStatus(
+            cdn_url=cdn_enabled_url + rule1,
+            status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
 
         # Update cache rules
+        new_ttl = 50
         test_data = [{"op": "replace",
                       "path": "/caching/0",
                       "value": {"name": "cache_name",
-                                "ttl": 50,
+                                "ttl": new_ttl,
                                 "rules": [{"name": "image_rule",
                                            "request_url": rule1}]}}]
         resp = self.poppy_client.patch_service(location=self.service_location,
                                                request_body=test_data)
 
-        self.assertCDNHit(cdn_url=cdn_enabled_url + rule1)
-        time.sleep(50)
-        self.assertCDNMiss(cdn_url=cdn_enabled_url + rule1)
+        # Verify that content is cached after two requests
+        self.get_from_cdn_enabled_url(cdn_url=cdn_enabled_url + rule1, count=2)
+        self.assertCacheStatus(cdn_url=cdn_enabled_url + rule1,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+
+        time.sleep(new_ttl)
+        # Verify that content in cache is stale/removed after the ttl expires
+        self.assertCacheStatus(
+            cdn_url=cdn_enabled_url + rule1,
+            status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
 
     def tearDown(self):
         self.poppy_client.delete_service(location=self.service_location)
