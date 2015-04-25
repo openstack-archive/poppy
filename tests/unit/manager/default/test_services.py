@@ -51,6 +51,9 @@ class Response(object):
         self.resp_status = resp_status
         self.resp_json = resp_json
 
+    def headers(self):
+        return {}
+
     @property
     def ok(self):
         return self.resp_status
