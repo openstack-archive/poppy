@@ -43,6 +43,8 @@ CASSANDRA_OPTIONS = [
                help='Load balancing strategy for connecting to cluster nodes'),
     cfg.StrOpt('consistency_level', default='ONE',
                help='Consistency level of your cassandra query'),
+    cfg.StrOpt('migrations_consistency_level', default='LOCAL_QUORUM',
+               help='Consistency level of cassandra migration queries'),
     cfg.IntOpt('max_schema_agreement_wait', default=10,
                help='The maximum duration (in seconds) that the driver will'
                ' wait for schema agreement across the cluster.'),
@@ -96,7 +98,7 @@ class CassandraStorageDriverTests(base.TestCase):
     def test_ssl_disabled(self):
         cfg = mock.Mock()
         cfg.ssl_enabled = False
-
+        cfg.migrations_consistency_level = 'LOCAL_QUORUM'
         cfg.load_balance_strategy = 'RoundRobinPolicy'
 
         with mock.patch('cassandra.cluster.Cluster') as mock_cluster:
@@ -113,7 +115,7 @@ class CassandraStorageDriverTests(base.TestCase):
         cfg = mock.Mock()
         cfg.ssl_enabled = True
         cfg.ssl_ca_certs = '/absolute/path/to/certificate.crt'
-
+        cfg.migrations_consistency_level = 'LOCAL_QUORUM'
         cfg.load_balance_strategy = 'RoundRobinPolicy'
 
         with mock.patch('cassandra.cluster.Cluster') as mock_cluster:
@@ -127,6 +129,7 @@ class CassandraStorageDriverTests(base.TestCase):
 
     def test_auth_enabled(self):
         cfg = mock.Mock()
+        cfg.migrations_consistency_level = 'LOCAL_QUORUM'
         cfg.load_balance_strategy = "RoundRobinPolicy"
         cfg.auth_enabled = True
         cfg.cluster = ['localhost']
@@ -144,6 +147,7 @@ class CassandraStorageDriverTests(base.TestCase):
 
     def test_create_dc_aware_policy(self):
         cfg = mock.Mock()
+        cfg.migrations_consistency_level = 'LOCAL_QUORUM'
         cfg.load_balance_strategy = "DCAwareRoundRobinPolicy"
         cfg.cluster = ['localhost']
 

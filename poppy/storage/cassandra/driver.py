@@ -51,6 +51,8 @@ CASSANDRA_OPTIONS = [
                help='Load balancing strategy for connecting to cluster nodes'),
     cfg.StrOpt('consistency_level', default='ONE',
                help='Consistency level of your cassandra query'),
+    cfg.StrOpt('migrations_consistency_level', default='LOCAL_QUORUM',
+               help='Consistency level of cassandra migration queries'),
     cfg.IntOpt('max_schema_agreement_wait', default=10,
                help='The maximum duration (in seconds) that the driver will'
                ' wait for schema agreement across the cluster.'),
@@ -121,7 +123,7 @@ def _connection(conf, datacenter, keyspace=None):
 
     migration_session = copy.copy(session)
     migration_session.default_consistency_level = \
-        getattr(cassandra.ConsistencyLevel, 'ALL')
+        getattr(cassandra.ConsistencyLevel, conf.migrations_consistency_level)
     _run_migrations(conf.migrations_path, migration_session)
 
     session.row_factory = query.dict_factory
