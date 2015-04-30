@@ -162,7 +162,7 @@ class CassandraStorageDriverTests(base.TestCase):
 
             self.assertEqual(mock_session, session)
 
-    def test_consisltency_level(self):
+    def test_consistency_level(self):
         self.assertEqual(self.cassandra_driver.consistency_level,
                          cassandra.ConsistencyLevel.ONE)
 
@@ -249,11 +249,7 @@ class CassandraStorageDriverTests(base.TestCase):
     def test_close_connection(self):
         self.cassandra_driver.session = mock.Mock()
         self.cassandra_driver.close_connection()
-
-        self.cassandra_driver.session.cluster.shutdown.assert_called_once_with(
-        )
-        self.cassandra_driver.session.shutdown.assert_called_once_with(
-        )
+        self.assertIsNone(self.cassandra_driver.session)
 
     def test_service_controller(self):
         sc = self.cassandra_driver.services_controller

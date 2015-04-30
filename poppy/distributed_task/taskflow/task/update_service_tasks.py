@@ -88,9 +88,10 @@ class UpdateServiceDNSMappingTask(task.Task):
         return dns_responder
 
     def revert(self, responders, retry_sleep_time, **kwargs):
-        LOG.info('Sleeping for {0} seconds and '
-                 'retrying'.format(retry_sleep_time))
-        time.sleep(retry_sleep_time)
+        if self.name in kwargs['flow_failures'].keys():
+            LOG.info('Sleeping for {0} seconds and '
+                     'retrying'.format(retry_sleep_time))
+            time.sleep(retry_sleep_time)
 
 
 class UpdateLogDeliveryContainerTask(task.Task):
@@ -120,6 +121,7 @@ class GatherProviderDetailsTask(task.Task):
 
         bootstrap_obj = bootstrap.Bootstrap(conf)
         service_controller = bootstrap_obj.manager.services_controller
+        self.storage_controller = service_controller.storage_controller
         service_obj_json = json.loads(service_obj)
         service_obj = service.load_from_json(service_obj_json)
         # gather links and status for service from providers
@@ -172,13 +174,21 @@ class GatherProviderDetailsTask(task.Task):
             provider_details_dict[provider_name] = (
                 provider_details_dict[provider_name].to_dict())
 
-        service_controller.storage_controller.update(project_id, service_id,
-                                                     service_obj)
+        self.storage_controller.update(project_id, service_id, service_obj)
 
         provider_details_dict_error_tuple = (provider_details_dict, error_flag)
-        service_controller.storage_controller._driver.close_connection()
+        self.storage_controller._driver.close_connection()
 
         return provider_details_dict_error_tuple
+
+    def revert(self, *args, **kwargs):
+        try:
+            if getattr(self, 'storage_controller') \
+                    and self.storage_controller._driver.session:
+                self.storage_controller._driver.close_connection()
+                LOG.info('Cassandra session being shutdown')
+        except AttributeError:
+            LOG.info('Cassandra session already shutdown')
 
 
 class UpdateProviderDetailsTask_Errors(task.Task):
@@ -189,6 +199,7 @@ class UpdateProviderDetailsTask_Errors(task.Task):
         (provider_details_dict, error_flag) = provider_details_dict_error_tuple
         bootstrap_obj = bootstrap.Bootstrap(conf)
         service_controller = bootstrap_obj.manager.services_controller
+        self.storage_controller = service_controller.storage_controller
         service_old_json = json.loads(service_old)
         service_old = service.load_from_json(service_old_json)
         service_obj_json = json.loads(service_obj)
@@ -218,7 +229,15 @@ class UpdateProviderDetailsTask_Errors(task.Task):
             service_obj.provider_details = provider_details_dict
 
         # update the service object
-        service_controller.storage_controller.update(project_id, service_id,
-                                                     service_obj)
-        service_controller.storage_controller._driver.close_connection()
+        self.storage_controller.update(project_id, service_id, service_obj)
+        self.storage_controller._driver.close_connection()
         LOG.info('Update provider detail service worker process complete...')
+
+    def revert(self, *args, **kwargs):
+        try:
+            if getattr(self, 'storage_controller') \
+                    and self.storage_controller._driver.session:
+                self.storage_controller._driver.close_connection()
+                LOG.info('Cassandra session being shutdown')
+        except AttributeError:
+            LOG.info('Cassandra session already shutdown')
