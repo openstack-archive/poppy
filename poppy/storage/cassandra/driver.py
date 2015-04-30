@@ -263,6 +263,7 @@ class CassandraStorageDriver(base.Driver):
             lock_success = self.lock.acquire(block=True, timeout=10)
             self.session.cluster.shutdown()
             self.session.shutdown()
+            self.session = None
         finally:
             if lock_success:
                 self.lock.release()

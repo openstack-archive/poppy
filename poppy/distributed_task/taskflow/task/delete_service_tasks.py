@@ -82,9 +82,10 @@ class DeleteServiceDNSMappingTask(task.Task):
         return dns_responder
 
     def revert(self, provider_details, retry_sleep_time, **kwargs):
-        LOG.info('Sleeping for {0} seconds and '
-                 'retrying'.format(retry_sleep_time))
-        time.sleep(retry_sleep_time)
+        if self.name in kwargs['flow_failures'].keys():
+            LOG.info('Sleeping for {0} seconds and '
+                     'retrying'.format(retry_sleep_time))
+            time.sleep(retry_sleep_time)
 
 
 class GatherProviderDetailsTask(task.Task):
@@ -126,5 +127,15 @@ class DeleteStorageServiceTask(task.Task):
     def execute(self, project_id, service_id):
         bootstrap_obj = bootstrap.Bootstrap(conf)
         service_controller = bootstrap_obj.manager.services_controller
-        service_controller.storage_controller.delete(project_id, service_id)
-        service_controller.storage_controller._driver.close_connection()
+        self.storage_controller = service_controller.storage_controller
+        self.storage_controller.delete(project_id, service_id)
+        self.storage_controller._driver.close_connection()
+
+    def revert(self, *args, **kwargs):
+        try:
+            if getattr(self, 'storage_controller') \
+                    and self.storage_controller._driver.session:
+                self.storage_controller._driver.close_connection()
+                LOG.info('Cassandra session being shutdown')
+        except AttributeError:
+            LOG.info('Cassandra session already shutdown')

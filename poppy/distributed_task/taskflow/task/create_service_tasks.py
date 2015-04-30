@@ -36,11 +36,11 @@ class CreateProviderServicesTask(task.Task):
     def execute(self, providers_list_json, project_id, service_id):
         bootstrap_obj = bootstrap.Bootstrap(conf)
         service_controller = bootstrap_obj.manager.services_controller
-        storage_controller = service_controller.storage_controller
+        self.storage_controller = service_controller.storage_controller
 
         providers_list = json.loads(providers_list_json)
         try:
-            service_obj = storage_controller.get(project_id, service_id)
+            service_obj = self.storage_controller.get(project_id, service_id)
         except ValueError:
             msg = 'Creating service {0} from Poppy failed. ' \
                   'No such service exists'.format(service_id)
@@ -57,8 +57,17 @@ class CreateProviderServicesTask(task.Task):
             responders.append(responder)
             LOG.info('Create service from {0} complete...'.format(provider))
 
-        storage_controller._driver.close_connection()
+        self.storage_controller._driver.close_connection()
         return responders
+
+    def revert(self, *args, **kwargs):
+        try:
+            if getattr(self, 'storage_controller') \
+                    and self.storage_controller._driver.session:
+                self.storage_controller._driver.close_connection()
+                LOG.info('Cassandra session being shutdown')
+        except AttributeError:
+            LOG.info('Cassandra session already shutdown')
 
 
 class CreateServiceDNSMappingTask(task.Task):
@@ -80,9 +89,10 @@ class CreateServiceDNSMappingTask(task.Task):
         return dns_responder
 
     def revert(self, responders, retry_sleep_time, **kwargs):
-        LOG.info('Sleeping for {0} seconds and '
-                 'retrying'.format(retry_sleep_time))
-        time.sleep(retry_sleep_time)
+        if self.name in kwargs['flow_failures'].keys():
+            LOG.info('Sleeping for {0} seconds and '
+                     'retrying'.format(retry_sleep_time))
+            time.sleep(retry_sleep_time)
 
 
 class CreateLogDeliveryContainerTask(task.Task):
@@ -91,11 +101,11 @@ class CreateLogDeliveryContainerTask(task.Task):
     def execute(self, project_id, auth_token, service_id):
         bootstrap_obj = bootstrap.Bootstrap(conf)
         service_controller = bootstrap_obj.manager.services_controller
-        storage_controller = service_controller.storage_controller
+        self.storage_controller = service_controller.storage_controller
 
         try:
-            service_obj = storage_controller.get(project_id, service_id)
-            storage_controller._driver.close_connection()
+            service_obj = self.storage_controller.get(project_id, service_id)
+            self.storage_controller._driver.close_connection()
         except ValueError:
             msg = 'Creating service {0} from Poppy failed. ' \
                   'No such service exists'.format(service_id)
@@ -110,6 +120,15 @@ class CreateLogDeliveryContainerTask(task.Task):
         log_responders = common.create_log_delivery_container(
             project_id, auth_token)
         return log_responders
+
+    def revert(self, *args, **kwargs):
+        try:
+            if getattr(self, 'storage_controller') \
+                    and self.storage_controller._driver.session:
+                self.storage_controller._driver.close_connection()
+                LOG.info('Cassandra session being shutdown')
+        except AttributeError:
+            LOG.info('Cassandra session already shutdown')
 
 
 class GatherProviderDetailsTask(task.Task):

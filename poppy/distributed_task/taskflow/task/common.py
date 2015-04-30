@@ -153,8 +153,8 @@ class UpdateProviderDetailTask(task.Task):
             in provider_details_dict.items()])
         bootstrap_obj = bootstrap.Bootstrap(conf)
         service_controller = bootstrap_obj.manager.services_controller
-        storage_controller = service_controller.storage_controller
-        service_obj = storage_controller.get(project_id, service_id)
+        self.storage_controller = service_controller.storage_controller
+        service_obj = self.storage_controller.get(project_id, service_id)
         service_obj.provider_details = provider_details_dict
 
         enabled = lambda provider: any([True if 'log_delivery'
@@ -164,10 +164,19 @@ class UpdateProviderDetailTask(task.Task):
 
         if not all(map(enabled, provider_details_dict.values())):
             service_obj.log_delivery.enabled = False
-        storage_controller.update(project_id, service_id, service_obj)
+        self.storage_controller.update(project_id, service_id, service_obj)
 
-        storage_controller._driver.close_connection()
+        self.storage_controller._driver.close_connection()
         LOG.info('Update service detail task complete...')
+
+    def revert(self, *args, **kwargs):
+        try:
+            if getattr(self, 'storage_controller') \
+                    and self.storage_controller._driver.session:
+                self.storage_controller._driver.close_connection()
+                LOG.info('Cassandra session being shutdown')
+        except AttributeError:
+            LOG.info('Cassandra session already shutdown')
 
 
 class UpdateProviderDetailIfNotEmptyTask(task.Task):
@@ -181,15 +190,26 @@ class UpdateProviderDetailIfNotEmptyTask(task.Task):
                 in changed_provider_details_dict.items()])
             bootstrap_obj = bootstrap.Bootstrap(conf)
             service_controller = bootstrap_obj.manager.services_controller
-            service_controller.storage_controller.update_provider_details(
+            self.storage_controller = service_controller.storage_controller
+            self.storage_controller.update_provider_details(
                 project_id,
                 service_id,
                 provider_details_dict)
 
-            service_controller.storage_controller._driver.close_connection()
+            self.storage_controller._driver.close_connection()
+
         LOG.info('Updating service detail task'
                  'complete for Changed Provider Details :'
                  '{0}'.format(changed_provider_details_dict))
+
+    def revert(self, *args, **kwargs):
+        try:
+            if getattr(self, 'storage_controller') \
+                    and self.storage_controller._driver.session:
+                self.storage_controller._driver.close_connection()
+                LOG.info('Cassandra session being shutdown')
+        except AttributeError:
+            LOG.info('Cassandra session already shutdown')
 
 
 class UpdateProviderDetailErrorTask(task.Task):
