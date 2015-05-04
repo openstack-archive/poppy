@@ -76,8 +76,7 @@ class TestBase(fixtures.BaseTestFixture):
         cls.dns_client = dnsclient.RackspaceDNSClient(
             user_name=cls.auth_config.user_name,
             api_key=cls.auth_config.api_key,
-            test_domain=cls.dns_config.test_domain,
-            dns_api_timeout=cls.dns_config.dns_api_timeout)
+            test_domain=cls.dns_config.test_domain)
 
         cls.heat_config = config.OrchestrationConfig()
         heat_url = cls.heat_config.base_url + '/' + project_id
@@ -131,8 +130,6 @@ class TestBase(fixtures.BaseTestFixture):
         # once the name is on the authoritative nameserver, there will still be
         # a delay for the caching nameservers to pick up a change
         sleep_time = self.dns_config.cname_propagation_sleep
-        print("waiting {0} additional seconds to propagate to caching "
-              "nameservers".format(sleep_time))
         time.sleep(sleep_time)
 
         return cname_rec
@@ -178,34 +175,26 @@ class TestBase(fixtures.BaseTestFixture):
                 test_url=wpt_test_url)
         return wpt_test_results
 
-    def assertCDNHit(self, cdn_url):
-        """Asserts that the content is coming from a CDN Edge Node
+    def get_from_cdn_enabled_url(self, cdn_url, count=2):
+        """GETs using the cdn enabled url for the specified number of times
 
         :param cdn_url: CDN enabled url of the origin website
-        :returns: True/False
+        :param count: number of calls to make
         """
-        # GET content is done 3 times since it hits the origin server first
-        #    and then possibly a different edge node
-        """
-        todo: Check which node is getting hit
-        """
-        headers = {'Pragma': 'akamai-x-cache-on'}
-        requests.get(cdn_url, headers=headers)
-        requests.get(cdn_url, headers=headers)
-        response = requests.get(cdn_url, headers=headers)
-        self.assertIn(response.headers['x-cache'].split(" ")[0],
-                      ['TCP_HIT', 'TCP_MEM_HIT'])
+        for _ in range(count):
+            requests.get(cdn_url)
 
-    def assertCDNMiss(self, cdn_url):
-        """Asserts that the content is NOT coming from a CDN Edge Node
+    def assertCacheStatus(self, cdn_url, status_list):
+        """Asserts that the content is cached or NOT
 
         :param cdn_url: CDN enabled url of the origin website
+        :param status_list: list of acceptable status
+                            eg. ['TCP_MISS', 'TCP_REFRESH_MISS']
         :returns: True/False
         """
         headers = {'Pragma': 'akamai-x-cache-on'}
         response = requests.get(cdn_url, headers=headers)
-        self.assertIn(response.headers['x-cache'].split(" ")[0],
-                      ['TCP_MISS', 'TCP_REFRESH_MISS', 'TCP_REFRESH_MISS'])
+        self.assertIn(response.headers['x-cache'].split(" ")[0], status_list)
 
     def wait_for_CDN_status(self, cdn_url, status):
         """Waits for a service to reach a given status.
