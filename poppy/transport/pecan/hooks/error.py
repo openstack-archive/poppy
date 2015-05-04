@@ -41,6 +41,7 @@ class ErrorHook(hooks.PecanHook):
         exception_payload = {
             'status': 500,
         }
+        exception_str = u'{0}'.format(exception)
         message = {
             'message': (
                 'The server encountered an unexpected condition'
@@ -54,7 +55,7 @@ class ErrorHook(hooks.PecanHook):
         # and send out a a json body
         LOG.log(
             log_level,
-            'Exception message: %s' % str(exception),
+            u'Exception message: {0}'.format(exception_str),
             exc_info=True,
             extra=exception_payload
         )
@@ -62,13 +63,13 @@ class ErrorHook(hooks.PecanHook):
         if hasattr(exception, 'status'):
             exception_payload['status'] = exception.status
 
-            msg = str(exception)
+            exception_json = exception_str
             try:
-                msg = json.loads(str(exception))
+                exception_json = json.loads(exception_json)
             except Exception:
                 pass
 
-            message['message'] = msg
+            message['message'] = exception_json
 
         return webob.Response(
             json.dumps(message),

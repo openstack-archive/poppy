@@ -66,26 +66,6 @@
                         }],
         "caching_list": []
     },
-    "non_ASCII": {
-        "name": "איבערזעצן",
-        "domain_list": [{"domain": "сайт.com", "protocol": "http"},
-                        {"domain": "ਦੀ ਵੈੱਬਸਾਈਟ.com", "protocol": "http"}],
-        "origin_list": [{"origin": "www.இணையதளத்தில்.com",
-                         "port": 80,
-                         "ssl": false,
-                         "rules": [
-                            {
-                                "name" : "default",
-                                "request_url" : "/*"
-                            }
-                        ]
-                        }],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "home",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
-    },
     "multiple_origin_wildcard_caching": {
         "name": "my_service_name",
         "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],

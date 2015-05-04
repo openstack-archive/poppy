@@ -30,7 +30,7 @@ class Domain(common.DictSerializableModel):
 
     def __init__(self, domain, protocol='http',
                  certificate=None):
-        self._domain = domain.lower()
+        self._domain = domain.lower().strip()
 
         if (protocol in AVAILABLE_PROTOCOLS):
             self._protocol = protocol
@@ -64,7 +64,7 @@ class Domain(common.DictSerializableModel):
     @domain.setter
     def domain(self, value):
         """domain setter."""
-        self._domain = value.lower()
+        self._domain = value.lower().strip()
 
     @property
     def certificate(self):
@@ -115,7 +115,7 @@ class Domain(common.DictSerializableModel):
         :returns o
         """
         o = cls("")
-        o.domain = dict_obj.get("domain").lower()
+        o.domain = dict_obj.get("domain").lower().strip()
         o.protocol = dict_obj.get("protocol", "http")
         if o.protocol == 'https':
             o.certificate = dict_obj.get("certificate", None)
