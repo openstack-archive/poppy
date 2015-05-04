@@ -760,6 +760,9 @@ class TestServicePatch(base.TestBase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(body['status'], 'deployed')
 
+        # wait to make sure cassandra is eventually consistent
+        time.sleep(self.test_config.cassandra_consistency_wait_time)
+
         # patch original service with the duplicate domain
         add_duplicate_domain = (
             [{
