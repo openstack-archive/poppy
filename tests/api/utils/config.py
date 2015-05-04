@@ -77,6 +77,11 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         """Flag to indicate if positive tests for SSL cert should run."""
         return self.get_boolean('run_ssl_tests')
 
+    @property
+    def cassandra_consistency_wait_time(self):
+        """Int value in seconds to wait for cassandra consistency."""
+        return int(self.get('cassandra_consistency_wait_time'))
+
 
 class AuthConfig(data_interfaces.ConfigSectionInterface):
     """Defines the auth config values."""
