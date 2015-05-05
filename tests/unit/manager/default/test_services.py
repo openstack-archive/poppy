@@ -27,6 +27,7 @@ from poppy.distributed_task.taskflow.task import create_service_tasks
 from poppy.distributed_task.taskflow.task import delete_service_tasks
 from poppy.distributed_task.taskflow.task import purge_service_tasks
 from poppy.distributed_task.taskflow.task import update_service_tasks
+from poppy.distributed_task.utils import memoized_controllers
 from poppy.manager.default import driver
 
 
@@ -64,6 +65,32 @@ class Response(object):
     @property
     def elapsed(self):
         return Elapsed(0.1)
+
+
+class MonkeyPatchControllers(object):
+
+    def __init__(self, service_controller,
+                 dns_controller,
+                 storage_controller, func):
+        self.service_controller = service_controller
+        self.dns_controller = dns_controller
+        self.storage_controller = storage_controller
+        self.func = func
+
+    def __enter__(self):
+        def monkey_task_controllers(program, controller=None):
+
+            if controller == 'storage':
+                return self.service_controller, self.storage_controller
+            if controller == 'dns':
+                return self.service_controller, self.dns_controller
+            else:
+                return self.service_controller
+
+        memoized_controllers.task_controllers = monkey_task_controllers
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        memoized_controllers.task_controllers = self.func
 
 
 @ddt.ddt
@@ -398,7 +425,11 @@ class DefaultManagerServiceTests(base.TestCase):
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
 
-        self.mock_create_service(provider_details_json)
+        with MonkeyPatchControllers(self.sc,
+                                    self.sc.dns_controller,
+                                    self.sc.storage_controller,
+                                    memoized_controllers.task_controllers):
+            self.mock_create_service(provider_details_json)
 
     @ddt.file_data('data_provider_details.json')
     def test_update_service_worker_success_and_failure(self,
@@ -497,33 +528,37 @@ class DefaultManagerServiceTests(base.TestCase):
                     ]
                 }
             }
+        with MonkeyPatchControllers(self.sc,
+                                    self.sc.dns_controller,
+                                    self.sc.storage_controller,
+                                    memoized_controllers.task_controllers):
 
-        # NOTE(TheSriram): Successful update
-        with mock.patch.object(requests,
-                               'post',
-                               return_value=Response(True, catalog_json)):
+            # NOTE(TheSriram): Successful update
             with mock.patch.object(requests,
-                                   'put',
-                                   return_value=Response(True)):
-                self.mock_update_service(provider_details_json)
+                                   'post',
+                                   return_value=Response(True, catalog_json)):
+                with mock.patch.object(requests,
+                                       'put',
+                                       return_value=Response(True)):
+                    self.mock_update_service(provider_details_json)
 
-        # NOTE(TheSriram): Unsuccessful update due to keystone
-        with mock.patch.object(requests,
-                               'post',
-                               return_value=Response(False, catalog_json)):
+            # NOTE(TheSriram): Unsuccessful update due to keystone
             with mock.patch.object(requests,
-                                   'put',
-                                   return_value=Response(True)):
-                self.mock_update_service(provider_details_json)
+                                   'post',
+                                   return_value=Response(False, catalog_json)):
+                with mock.patch.object(requests,
+                                       'put',
+                                       return_value=Response(True)):
+                    self.mock_update_service(provider_details_json)
 
-        # NOTE(TheSriram): Unsuccessful update due to swift
-        with mock.patch.object(requests,
-                               'post',
-                               return_value=Response(True, catalog_json)):
+            # NOTE(TheSriram): Unsuccessful update due to swift
             with mock.patch.object(requests,
-                                   'put',
-                                   return_value=Response(False)):
-                self.mock_update_service(provider_details_json)
+                                   'post',
+                                   return_value=Response(True, catalog_json)):
+                with mock.patch.object(requests,
+                                       'put',
+                                       return_value=Response(False)):
+                    self.mock_update_service(provider_details_json)
 
     @ddt.file_data('service_update.json')
     def test_update(self, update_json):
@@ -668,7 +703,11 @@ class DefaultManagerServiceTests(base.TestCase):
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
 
-        self.mock_delete_service()
+        with MonkeyPatchControllers(self.sc,
+                                    self.sc.dns_controller,
+                                    self.sc.storage_controller,
+                                    memoized_controllers.task_controllers):
+            self.mock_delete_service()
 
     @ddt.file_data('data_provider_details.json')
     def test_delete_service_worker_with_error(self, provider_details_json):
@@ -727,7 +766,11 @@ class DefaultManagerServiceTests(base.TestCase):
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
 
-        self.mock_delete_service()
+        with MonkeyPatchControllers(self.sc,
+                                    self.sc.dns_controller,
+                                    self.sc.storage_controller,
+                                    memoized_controllers.task_controllers):
+            self.mock_delete_service()
 
     @ddt.file_data('data_provider_details.json')
     def test_purge(self, provider_details_json):
@@ -816,7 +859,11 @@ class DefaultManagerServiceTests(base.TestCase):
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
 
-        self.mock_purge_service()
+        with MonkeyPatchControllers(self.sc,
+                                    self.sc.dns_controller,
+                                    self.sc.storage_controller,
+                                    memoized_controllers.task_controllers):
+            self.mock_purge_service()
 
     @ddt.file_data('data_provider_details.json')
     def test_purge_service_worker_with_error(self, provider_details_json):
@@ -864,4 +911,8 @@ class DefaultManagerServiceTests(base.TestCase):
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
 
-        self.mock_purge_service()
+        with MonkeyPatchControllers(self.sc,
+                                    self.sc.dns_controller,
+                                    self.sc.storage_controller,
+                                    memoized_controllers.task_controllers):
+            self.mock_purge_service()
