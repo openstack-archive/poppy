@@ -41,7 +41,6 @@ class TestCreateService(providers.TestProviderBase):
             prefix='api-test-service')
         self.flavor_id = self.test_flavor
 
-    @attrib.attr('smoke')
     @ddt.file_data('data_create_service.json')
     def test_create_service_positive(self, test_data):
 
@@ -116,7 +115,6 @@ class TestCreateService(providers.TestProviderBase):
                     msg='Caching List Not Correct for {0} service name {1}'.
                         format(provider, self.service_name))
 
-    @attrib.attr('smoke')
     @ddt.file_data('data_create_service_negative.json')
     def test_create_service_negative(self, test_data):
 
@@ -264,7 +262,6 @@ class TestListServices(base.TestBase):
         self.service_list = []
         self.flavor_id = self.test_flavor
 
-    @attrib.attr('smoke')
     def test_list_single_service(self):
         self.service_list.append(self._create_test_service())
         resp = self.client.list_services()
@@ -282,7 +279,6 @@ class TestListServices(base.TestBase):
         self.assertEqual(body['services'], [])
         self.assertEqual(body['links'], [])
 
-    @attrib.attr('smoke')
     @ddt.data(1, 5, 10)
     def test_list_services_valid_limit(self, limit):
         self.service_list = [self._create_test_service() for _ in range(limit)]
@@ -316,27 +312,23 @@ class TestListServices(base.TestBase):
         self.assertEqual(len(body['services']), 1)
         self.assertSchema(body, services.list_services)
 
-    @attrib.attr('smoke')
     @ddt.data(-1, -10000000000, 0, 10000000, 'invalid', '')
     def test_list_services_invalid_limits(self, limit):
         url_param = {'limit': limit}
         resp = self.client.list_services(param=url_param)
         self.assertEqual(resp.status_code, 400)
 
-    @attrib.attr('smoke')
     @ddt.data(-1, -10000000000, 0, 10000000, 'invalid', '学校', '')
     def test_list_services_various_invalid_markers(self, marker):
         url_param = {'marker': marker}
         resp = self.client.list_services(param=url_param)
         self.assertEqual(resp.status_code, 400)
 
-    @attrib.attr('smoke')
     def test_list_services_markers(self):
         url_param = {'marker': str(uuid.uuid4())}
         resp = self.client.list_services(param=url_param)
         self.assertEqual(resp.status_code, 200)
 
-    @attrib.attr('smoke')
     def test_list_services_invalid_param(self):
         url_param = {'yummy': 123}
         resp = self.client.list_services(param=url_param)
@@ -422,6 +414,7 @@ class TestServiceActions(base.TestBase):
 
         self.service_url = resp.headers["location"]
 
+    @attrib.attr('smoke')
     def test_delete_service(self):
         resp = self.client.delete_service(location=self.service_url)
         self.assertEqual(resp.status_code, 202)
@@ -467,6 +460,7 @@ class TestServiceActions(base.TestBase):
 
         self.assertFalse(exception)
 
+    @attrib.attr('smoke')
     def test_get_service(self):
         resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 200)
