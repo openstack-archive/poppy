@@ -19,7 +19,7 @@ import time
 from oslo.config import cfg
 from taskflow import task
 
-from poppy import bootstrap
+from poppy.distributed_task.utils import memoized_controllers
 from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import (
     provider_details as req_provider_details
@@ -35,8 +35,7 @@ class DeleteProviderServicesTask(task.Task):
     default_provides = "responders"
 
     def execute(self, provider_details):
-        bootstrap_obj = bootstrap.Bootstrap(conf)
-        service_controller = bootstrap_obj.manager.services_controller
+        service_controller = memoized_controllers.task_controllers('poppy')
         provider_details = json.loads(provider_details)
 
         responders = []
@@ -59,8 +58,8 @@ class DeleteServiceDNSMappingTask(task.Task):
     default_provides = "dns_responder"
 
     def execute(self, provider_details, retry_sleep_time):
-        bootstrap_obj = bootstrap.Bootstrap(conf)
-        service_controller = bootstrap_obj.manager.services_controller
+        service_controller, dns = \
+            memoized_controllers.task_controllers('poppy', 'dns')
 
         provider_details = json.loads(provider_details)
         for provider in provider_details:
@@ -69,7 +68,7 @@ class DeleteServiceDNSMappingTask(task.Task):
                 )
 
         # delete associated cname records from DNS
-        dns_responder = service_controller.dns_controller.delete(
+        dns_responder = dns.delete(
             provider_details)
         for provider_name in dns_responder:
             if 'error' in dns_responder[provider_name]:
@@ -125,11 +124,9 @@ class GatherProviderDetailsTask(task.Task):
 class DeleteStorageServiceTask(task.Task):
 
     def execute(self, project_id, service_id):
-        bootstrap_obj = bootstrap.Bootstrap(conf)
-        service_controller = bootstrap_obj.manager.services_controller
-        self.storage_controller = service_controller.storage_controller
+        service_controller, self.storage_controller = \
+            memoized_controllers.task_controllers('poppy', 'storage')
         self.storage_controller.delete(project_id, service_id)
-        self.storage_controller._driver.close_connection()
 
     def revert(self, *args, **kwargs):
         try:

@@ -19,8 +19,8 @@ import time
 from oslo.config import cfg
 from taskflow import task
 
-from poppy import bootstrap
 from poppy.distributed_task.taskflow.task import common
+from poppy.distributed_task.utils import memoized_controllers
 from poppy.model.helpers import provider_details
 from poppy.openstack.common import log
 
@@ -34,9 +34,8 @@ class CreateProviderServicesTask(task.Task):
     default_provides = "responders"
 
     def execute(self, providers_list_json, project_id, service_id):
-        bootstrap_obj = bootstrap.Bootstrap(conf)
-        service_controller = bootstrap_obj.manager.services_controller
-        self.storage_controller = service_controller.storage_controller
+        service_controller, self.storage_controller = \
+            memoized_controllers.task_controllers('poppy', 'storage')
 
         providers_list = json.loads(providers_list_json)
         try:
@@ -57,7 +56,6 @@ class CreateProviderServicesTask(task.Task):
             responders.append(responder)
             LOG.info('Create service from {0} complete...'.format(provider))
 
-        self.storage_controller._driver.close_connection()
         return responders
 
     def revert(self, *args, **kwargs):
@@ -74,9 +72,8 @@ class CreateServiceDNSMappingTask(task.Task):
     default_provides = "dns_responder"
 
     def execute(self, responders, retry_sleep_time):
-        bootstrap_obj = bootstrap.Bootstrap(conf)
-        service_controller = bootstrap_obj.manager.services_controller
-        dns = service_controller.dns_controller
+        service_controller, dns = \
+            memoized_controllers.task_controllers('poppy', 'dns')
         dns_responder = dns.create(responders)
         for provider_name in dns_responder:
             if 'error' in dns_responder[provider_name]:
@@ -99,9 +96,8 @@ class CreateLogDeliveryContainerTask(task.Task):
     default_provides = "log_responders"
 
     def execute(self, project_id, auth_token, service_id):
-        bootstrap_obj = bootstrap.Bootstrap(conf)
-        service_controller = bootstrap_obj.manager.services_controller
-        self.storage_controller = service_controller.storage_controller
+        service_controller, self.storage_controller = \
+            memoized_controllers.task_controllers('poppy', 'storage')
 
         try:
             service_obj = self.storage_controller.get(project_id, service_id)
