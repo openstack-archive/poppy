@@ -264,4 +264,5 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
             current_time = int(time.time())
             if current_time > stop_time:
-                raise Exception("Timed out waiting for service status")
+                assert False, ('Timed out waiting for service status change'
+                               ' to {0}').format(status)
