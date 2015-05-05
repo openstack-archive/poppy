@@ -19,8 +19,8 @@ import time
 from oslo.config import cfg
 from taskflow import task
 
-from poppy import bootstrap
 from poppy.distributed_task.taskflow.task import common
+from poppy.distributed_task.utils import memoized_controllers
 from poppy.model.helpers import provider_details
 from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import service
@@ -36,8 +36,7 @@ class UpdateProviderServicesTask(task.Task):
     default_provides = "responders"
 
     def execute(self, service_old, service_obj):
-        bootstrap_obj = bootstrap.Bootstrap(conf)
-        service_controller = bootstrap_obj.manager.services_controller
+        service_controller = memoized_controllers.task_controllers('poppy')
 
         service_old_json = json.loads(service_old)
         service_obj_json = json.loads(service_obj)
@@ -62,9 +61,8 @@ class UpdateServiceDNSMappingTask(task.Task):
     default_provides = "dns_responder"
 
     def execute(self, responders, retry_sleep_time, service_old, service_obj):
-        bootstrap_obj = bootstrap.Bootstrap(conf)
-        service_controller = bootstrap_obj.manager.services_controller
-        dns = service_controller.dns_controller
+        service_controller, dns = \
+            memoized_controllers.task_controllers('poppy', 'dns')
         service_obj_json = json.loads(service_obj)
         service_obj = service.load_from_json(service_obj_json)
         service_old_json = json.loads(service_old)
@@ -119,9 +117,8 @@ class GatherProviderDetailsTask(task.Task):
     def execute(self, responders, dns_responder, log_responders, project_id,
                 service_id, service_obj):
 
-        bootstrap_obj = bootstrap.Bootstrap(conf)
-        service_controller = bootstrap_obj.manager.services_controller
-        self.storage_controller = service_controller.storage_controller
+        service_controller, self.storage_controller = \
+            memoized_controllers.task_controllers('poppy', 'storage')
         service_obj_json = json.loads(service_obj)
         service_obj = service.load_from_json(service_obj_json)
         # gather links and status for service from providers
@@ -177,7 +174,6 @@ class GatherProviderDetailsTask(task.Task):
         self.storage_controller.update(project_id, service_id, service_obj)
 
         provider_details_dict_error_tuple = (provider_details_dict, error_flag)
-        self.storage_controller._driver.close_connection()
 
         return provider_details_dict_error_tuple
 
@@ -197,9 +193,8 @@ class UpdateProviderDetailsTask_Errors(task.Task):
                 service_id, service_old, service_obj):
 
         (provider_details_dict, error_flag) = provider_details_dict_error_tuple
-        bootstrap_obj = bootstrap.Bootstrap(conf)
-        service_controller = bootstrap_obj.manager.services_controller
-        self.storage_controller = service_controller.storage_controller
+        service_controller, self.storage_controller = \
+            memoized_controllers.task_controllers('poppy', 'storage')
         service_old_json = json.loads(service_old)
         service_old = service.load_from_json(service_old_json)
         service_obj_json = json.loads(service_obj)
@@ -230,7 +225,6 @@ class UpdateProviderDetailsTask_Errors(task.Task):
 
         # update the service object
         self.storage_controller.update(project_id, service_id, service_obj)
-        self.storage_controller._driver.close_connection()
         LOG.info('Update provider detail service worker process complete...')
 
     def revert(self, *args, **kwargs):
