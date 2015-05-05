@@ -66,6 +66,8 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
         try:
             services_controller.purge(self.project_id, service_id,
                                       purge_url)
+        except errors.ServiceStatusNotDeployed as e:
+            pecan.abort(400, detail=str(e))
         except LookupError as e:
             pecan.abort(404, detail=str(e))
 
