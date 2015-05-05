@@ -15,6 +15,7 @@
 
 import functools
 import json
+import re
 import uuid
 
 import jsonschema
@@ -216,13 +217,28 @@ def is_valid_service_configuration(service, schema):
         'https': 443
     }
 
-    # origin port must match the domain's protocol
+    # 6. origin port must match the domain's protocol
     if 'origins' in service:
         for origin in service['origins']:
             origin_port = origin.get('port', 80)
             if protocol_port_mapping[cdn_protocol] != origin_port:
                 raise exceptions.ValidationFailed(
                     'Domain port does not match origin port')
+
+    # 7. domains must be valid
+    if 'domains' in service:
+        # only allow ascii
+        domain_regex = ('^((?=[a-z0-9-]{1,63}\.)[a-z0-9]+'
+                        '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
+        # allow Punycode
+        # domain_regex = ('^((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+'
+        #                 '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
+        domains = []
+        for domain in service['domains']:
+            domain_name = domain.get('domain').strip()
+            if not re.match(domain_regex, domain_name):
+                raise exceptions.ValidationFailed(
+                    u'Domain {0} is not valid'.format(domain_name))
     return
 
 
