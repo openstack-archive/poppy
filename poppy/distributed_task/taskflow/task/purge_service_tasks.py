@@ -18,10 +18,11 @@ import json
 from oslo.config import cfg
 from taskflow import task
 
-from poppy import bootstrap
+from poppy.distributed_task.utils import memoized_controllers
 from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import (
     provider_details as req_provider_details)
+
 
 LOG = log.getLogger(__name__)
 
@@ -33,8 +34,8 @@ class PurgeProviderServicesTask(task.Task):
     default_provides = "responders"
 
     def execute(self, provider_details, purge_url):
-        bootstrap_obj = bootstrap.Bootstrap(conf)
-        service_controller = bootstrap_obj.manager.services_controller
+        service_controller = memoized_controllers.task_controllers('poppy')
+
         provider_details = json.loads(provider_details)
         purge_url = None if purge_url == 'None' else purge_url
 
