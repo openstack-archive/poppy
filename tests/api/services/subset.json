@@ -1,0 +1,13 @@
+{
+    "add_ssl_domain_origin": [
+     {
+      "op": "replace",
+      "path": "/domains/0",
+      "value": {"domain": "replaceme.com", "protocol": "https",
+                "certificate": "shared"}},
+     {"op": "replace",
+      "path": "/origins/0",
+      "value": {"origin": "1.1.1.1", "port": 443, "ssl": true,
+      "rules": [{"name" : "origin", "request_url" : "/origin2.htm"}]}}
+     ]
+ }

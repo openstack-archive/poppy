@@ -186,7 +186,6 @@ class DefaultServicesController(base.ServicesController):
 
         self.distributed_task_controller.submit_task(
             create_service.create_service, **kwargs)
-
         return service_obj
 
     def update(self, project_id, service_id, auth_token, service_updates):
@@ -251,6 +250,7 @@ class DefaultServicesController(base.ServicesController):
                 raise ValueError(
                     "Domain {0} has already been taken".format(d.domain))
 
+        #import pdb; pdb.set_trace()
         # fixing the old and new shared ssl domains in service_new
         for domain in service_new.domains:
             if domain.protocol == 'https' and domain.certificate == 'shared':
@@ -262,13 +262,15 @@ class DefaultServicesController(base.ServicesController):
                     domain.domain = self._generate_shared_ssl_domain(
                         domain.domain
                     )
+                #import pdb; pdb.set_trace()
+
+        #import pdb; pdb.set_trace()
 
         # set status in provider details to u'update_in_progress'
         provider_details = service_old.provider_details
         for provider in provider_details:
             provider_details[provider].status = u'update_in_progress'
         self.storage_controller.update(project_id, service_id, service_old)
-
         kwargs = {
             'project_id': project_id,
             'service_id': service_id,

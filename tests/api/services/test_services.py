@@ -607,7 +607,8 @@ class TestServicePatch(base.TestBase):
 
         return self.generate_random_string(prefix='api-test-ssl') + '.com'
 
-    @ddt.file_data('data_patch_service.json')
+    #@ddt.file_data('data_patch_service.json')
+    @ddt.file_data('subset.json')
     def test_patch_service(self, test_data):
 
         for item in test_data:
@@ -642,6 +643,7 @@ class TestServicePatch(base.TestBase):
 
         self.assert_patch_service_details(body, expected_service_details)
 
+    """
     @ddt.file_data('data_patch_service_negative.json')
     def test_patch_service_HTTP_400(self, test_data):
 
@@ -775,7 +777,7 @@ class TestServicePatch(base.TestBase):
         resp = self.client.patch_service(location=self.service_url,
                                          request_body=add_duplicate_domain)
         self.assertEqual(resp.status_code, 400)
-
+    """
     def tearDown(self):
         self.client.delete_service(location=self.service_url)
         if self.test_config.generate_flavors:
