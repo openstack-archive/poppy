@@ -229,5 +229,21 @@
         "log_delivery": {
             "enabled": false
         }
-    }
+    },
+    "hyphen_in_domain_name": {
+         "name": "caching_empty",
+         "domain_list": [{"domain": "my-website.com", "protocol": "http"},
+                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
+         "origin_list": [{"origin": "mywebsite1.com",
+                          "port": 80,
+                          "ssl": false,
+                          "rules": [
+                             {
+                                 "name" : "default",
+                                 "request_url" : "/*"
+                             }
+                         ]
+                         }],
+         "caching_list": []
+     }
 }
