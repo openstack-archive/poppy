@@ -233,12 +233,21 @@ def is_valid_service_configuration(service, schema):
         # allow Punycode
         # domain_regex = ('^((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+'
         #                 '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
-        domains = []
+
+        # shared ssl domain
+        shared_ssl_domain_regex = '^[a-z0-9][a-z0-9-]+[a-z0-9]$'
+
         for domain in service['domains']:
-            domain_name = domain.get('domain').strip()
-            if not re.match(domain_regex, domain_name):
-                raise exceptions.ValidationFailed(
-                    u'Domain {0} is not valid'.format(domain_name))
+            domain_name = domain.get('domain')
+            if (domain.get('protocol') == 'https' and
+                    domain['certificate'] == u'shared'):
+                if not re.match(shared_ssl_domain_regex, domain_name):
+                    raise exceptions.ValidationFailed(
+                        u'Domain {0} is not valid'.format(domain_name))
+            else:
+                if not re.match(domain_regex, domain_name):
+                    raise exceptions.ValidationFailed(
+                        u'Domain {0} is not valid'.format(domain_name))
     return
 
 

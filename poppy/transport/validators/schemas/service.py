@@ -44,14 +44,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'type': 'string',
                                         'required': True,
                                         'minLength': 3,
-                                        'maxLength': 253,
-                                        'pattern': re.compile(
-                                            '^(([^:/?#]+):)?'
-                                            '(//([^/?#]*))?'
-                                            '([^?#]*)(\?([^#]*))?'
-                                            '(#(.*))?$',
-                                            re.UNICODE
-                                        )
+                                        'maxLength': 253
                                     }
                                 },
                                 "additionalProperties": False
@@ -62,14 +55,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'type': 'string',
                                         'required': True,
                                         'minLength': 3,
-                                        'maxLength': 253,
-                                        'pattern': re.compile(
-                                            '^(([^:/?#]+):)?'
-                                            '(//([^/?#]*))?'
-                                            '([^?#]*)(\?([^#]*))?'
-                                            '(#(.*))?$',
-                                            re.UNICODE
-                                        )
+                                        'maxLength': 253
                                     },
                                     'protocol': {
                                         'required': True,
@@ -91,11 +77,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'type': 'string',
                                         'required': True,
                                         'minLength': 3,
-                                        'maxLength': 253,
-                                        'pattern': re.compile(
-                                            '^[^\.]+$',
-                                            re.UNICODE
-                                        )
+                                        'maxLength': 253
                                     },
                                     'protocol': {
                                         'required': True,
@@ -118,14 +100,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'type': 'string',
                                         'required': True,
                                         'minLength': 3,
-                                        'maxLength': 253,
-                                        'pattern': re.compile(
-                                            '^(([^:/?#]+):)?'
-                                            '(//([^/?#]*))?'
-                                            '([^?#]*)(\?([^#]*))?'
-                                            '(#(.*))?$',
-                                            re.UNICODE
-                                        )
+                                        'maxLength': 253
                                     },
                                     'protocol': {
                                         'required': True,
