@@ -577,5 +577,31 @@
                         "referrer": "www.mywebsite.com",
                         "request_url" : "/index.htm"}]}
         ]
+    },
+    "invalid_domain_name_with_space": {
+        "service_name": "",
+        "domain_list": [{"domain": "mywebsite.com "}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
+    },
+    "invalid_domain_name_with_hyphen": {
+        "service_name": "",
+        "domain_list": [{"domain": "my-website.com"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     }
 }
