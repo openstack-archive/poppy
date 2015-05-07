@@ -19,7 +19,7 @@ import requests
 from oslo.config import cfg
 from taskflow import task
 
-from poppy import bootstrap
+from poppy.distributed_task.utils import memoized_controllers
 from poppy.model.helpers import provider_details
 from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import (
@@ -151,9 +151,8 @@ class UpdateProviderDetailTask(task.Task):
             (k, provider_details.ProviderDetail.init_from_dict(detail))
             for k, detail
             in provider_details_dict.items()])
-        bootstrap_obj = bootstrap.Bootstrap(conf)
-        service_controller = bootstrap_obj.manager.services_controller
-        self.storage_controller = service_controller.storage_controller
+        service_controller, self.storage_controller = \
+            memoized_controllers.task_controllers('poppy', 'storage')
         service_obj = self.storage_controller.get(project_id, service_id)
         service_obj.provider_details = provider_details_dict
 
@@ -166,7 +165,6 @@ class UpdateProviderDetailTask(task.Task):
             service_obj.log_delivery.enabled = False
         self.storage_controller.update(project_id, service_id, service_obj)
 
-        self.storage_controller._driver.close_connection()
         LOG.info('Update service detail task complete...')
 
     def revert(self, *args, **kwargs):
@@ -188,15 +186,12 @@ class UpdateProviderDetailIfNotEmptyTask(task.Task):
                 (k, provider_details.ProviderDetail.init_from_dict(detail))
                 for k, detail
                 in changed_provider_details_dict.items()])
-            bootstrap_obj = bootstrap.Bootstrap(conf)
-            service_controller = bootstrap_obj.manager.services_controller
-            self.storage_controller = service_controller.storage_controller
+            service_controller, self.storage_controller = \
+                memoized_controllers.task_controllers('poppy', 'storage')
             self.storage_controller.update_provider_details(
                 project_id,
                 service_id,
                 provider_details_dict)
-
-            self.storage_controller._driver.close_connection()
 
         LOG.info('Updating service detail task'
                  'complete for Changed Provider Details :'
