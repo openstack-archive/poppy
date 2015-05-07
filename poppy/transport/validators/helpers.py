@@ -239,6 +239,24 @@ def is_valid_service_configuration(service, schema):
             if not re.match(domain_regex, domain_name):
                 raise exceptions.ValidationFailed(
                     u'Domain {0} is not valid'.format(domain_name))
+
+    # 8. origins and domains cannot be the same
+    if 'origins' in service and 'domains' in service:
+        origins = []
+        for origin in service['origins']:
+            origin_name = origin.get('origin').lower().strip()
+            origins.append(origin_name)
+
+        domains = []
+        for domain in service['domains']:
+            domain_name = domain.get('domain').lower().strip()
+            domains.append(domain_name)
+
+        for origin in origins:
+            if origin in domains:
+                raise exceptions.ValidationFailed(
+                    u'Domains and origins canot be same: {0}'.format(origin))
+
     return
 
 
