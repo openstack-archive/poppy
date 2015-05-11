@@ -17,7 +17,6 @@
 
 import ddt
 import jsonpatch
-from nose.plugins import attrib
 
 from tests.api import base
 
@@ -38,7 +37,6 @@ class TestCreateSSLService(base.TestBase):
             prefix='api-test-service')
         self.flavor_id = self.test_flavor
 
-    @attrib.attr('smoke')
     @ddt.file_data('data_create_service_ssl_domain.json')
     def test_create_service_ssl_domain_positive(self, test_data):
 
