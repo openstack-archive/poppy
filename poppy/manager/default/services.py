@@ -317,6 +317,16 @@ class DefaultServicesController(base.ServicesController):
 
     def purge(self, project_id, service_id, purge_url=None):
         '''If purge_url is none, all content of this service will be purge.'''
+        try:
+            service_obj = self.storage_controller.get(project_id, service_id)
+        except ValueError as e:
+            # This except is hit when service object does exist
+            raise LookupError(str(e))
+
+        if service_obj.status not in [u'deployed']:
+            raise errors.ServiceStatusNotDeployed(
+                u'Service {0} is not deployed.'.format(service_id))
+
         provider_details = self._get_provider_details(project_id, service_id)
 
         # possible validation of purge url here...

@@ -782,7 +782,7 @@ class DefaultManagerServiceTests(base.TestCase):
             )
             provider_service_id = provider_detail_dict.get('id', None)
             access_urls = provider_detail_dict.get('access_urls', [])
-            status = provider_detail_dict.get('status', u'unknown')
+            status = provider_detail_dict.get('status', u'deployed')
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
                 access_urls=access_urls,
@@ -791,6 +791,11 @@ class DefaultManagerServiceTests(base.TestCase):
 
         self.sc.storage_controller.get_provider_details.return_value = (
             self.provider_details
+        )
+
+        self.service_obj.provider_details = self.provider_details
+        self.sc.storage_controller.get.return_value = (
+            self.service_obj
         )
 
         self.sc.purge(self.project_id, self.service_id, None)

@@ -36,3 +36,8 @@ class ServiceNotFound(Exception):
 class ServiceStatusNeitherDeployedNorFailed(Exception):
 
     """Raised when a neither deployed not failed service is updated with."""
+
+
+class ServiceStatusNotDeployed(Exception):
+
+    """Raised when a non-deployed service is purged."""
