@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import cgi
 import time
 import urlparse
 import uuid
@@ -142,80 +141,6 @@ class TestCreateService(providers.TestProviderBase):
             self.service_url = resp.headers['location']
 
         self.assertEqual(resp.status_code, 400)
-
-    @ddt.file_data("data_create_service_xss.json")
-    def test_create_service_with_xss_injection(self, test_data):
-        # create with hacker data
-        service_name = test_data['name']
-        domain_list = test_data['domain_list']
-        for item in domain_list:
-            item['domain'] = self.generate_random_string(
-                prefix='api-test-xss') + '.com'
-
-        origin_list = test_data['origin_list']
-        caching_list = test_data['caching_list']
-
-        if 'flavor_id' in test_data:
-            flavor_id = test_data['flavor_id']
-        else:
-            flavor_id = self.flavor_id
-
-        resp = self.client.create_service(service_name=service_name,
-                                          domain_list=domain_list,
-                                          origin_list=origin_list,
-                                          caching_list=caching_list,
-                                          flavor_id=flavor_id)
-        if 'location' in resp.headers:
-            self.service_url = resp.headers['location']
-
-        self.assertEqual(resp.status_code, 202)
-        self.assertEqual(resp.text, '')
-        self.service_url = resp.headers['location']
-
-        resp = self.client.get_service(location=self.service_url)
-        self.assertEqual(resp.status_code, 200)
-
-        body = resp.json()
-
-        # validate name
-        self.assertEqual(
-            body['name'],
-            cgi.escape(test_data['name'])
-        )
-
-        # validate domain
-        self.assertEqual(
-            body['domains'][0]['domain'],
-            cgi.escape(domain_list[0]['domain'])
-        )
-
-        # validate origin
-        self.assertEqual(
-            body['origins'][0]['origin'],
-            cgi.escape(origin_list[0]['origin'])
-        )
-
-        if len(caching_list) > 0:
-            # validate caching name
-            self.assertEqual(
-                body['caching'][1]['name'],
-                cgi.escape(caching_list[1]['name'])
-            )
-
-            if len(caching_list) > 1:
-                # we have more than just the default
-                if len(caching_list[1]['rules']) > 0:
-                    # validate caching rule name
-                    self.assertEqual(
-                        body['caching'][1]['rules'][0]['name'],
-                        cgi.escape(caching_list[1]['rules'][0]['name'])
-                    )
-
-                    # validate caching rule request_url
-                    self.assertEqual(
-                        body['caching'][1]['rules'][0]['request_url'],
-                        cgi.escape(caching_list[1]['rules'][0]['request_url'])
-                    )
 
     def tearDown(self):
         if self.service_url != '':
