@@ -27,11 +27,11 @@ class TestDomain(base.TestCase):
     @ddt.unpack
     @ddt.data({'domain_name': 'www.mydomain.com',
                'changed_domain_name': 'www.changed-domain.com'},
-              {'domain_name': u'www.düsseldorf-Lörick.com',
-               'changed_domain_name': u'www.düsseldorf.com'
+              {'domain_name': 'www.dusseldorf-Lorick.com',
+               'changed_domain_name': 'www.dusseldorf.com'
                },
-              {'domain_name': u'WWW.UPPERCASE.COM',
-               'changed_domain_name': u'WWW.UPPERCASE-CHANGED.COM'
+              {'domain_name': 'WWW.UPPERCASE.COM',
+               'changed_domain_name': 'WWW.UPPERCASE-CHANGED.COM'
                })
     def test_domain(self, domain_name, changed_domain_name):
         mydomain = domain.Domain(domain_name)

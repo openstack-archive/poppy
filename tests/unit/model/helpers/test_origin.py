@@ -27,8 +27,8 @@ class TestOrigin(base.TestCase):
     @ddt.unpack
     @ddt.data({'origin_url': 'www.mydomain.com',
                'changed_origin_url': 'www.changed-domain.com'},
-              {'origin_url': u'www.düsseldorf-Lörick.com',
-               'changed_origin_url': u'www.düsseldorf.com'
+              {'origin_url': 'www.dusseldorf-Lorick.com',
+               'changed_origin_url': 'www.dusseldorf.com'
                })
     def test_origin(self, origin_url, changed_origin_url):
 
