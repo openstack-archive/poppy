@@ -8,6 +8,7 @@ nose
 openstack.nose_plugin
 oslotest
 requests
+testrepository
 testtools
 python-heatclient
 beautifulsoup4
