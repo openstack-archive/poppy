@@ -49,3 +49,6 @@ write_file
 
 # patch files
 *.patch
+
+#testr files
+.testrepository/*
