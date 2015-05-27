@@ -71,7 +71,7 @@ installed and running.
     [drivers:storage:cassandra]
     cluster = "localhost"
     keyspace = poppy
-	migrations_path = /home/poppy/poppy/storage/cassandra/migrations
+    migrations_path = /home/poppy/poppy/storage/cassandra/migrations
 
 4. By using cassandra storage plugin, you will need to create the default 
    keyspace "poppy" on your cassandra host/cluster. So log into cqlsh, do::
@@ -91,21 +91,20 @@ installed and running.
 7. Install general requirements::
 
     $ pip install -r requirements/requirements.txt
-
-   Install Requirements for each Provider configured::
-
-    $ pip install -r poppy/providers/fastly/requirements.txt
   
    Run the following so you can see the results of any changes you
    make to the code without having to reinstall the package each time::
     
     $ pip install -e .
 
+  To install additional dependencies, see `Additional Dependencies`_.  
+    
+
 8. Install and start zookeeper driver::
 
     http://zookeeper.apache.org/doc/trunk/zookeeperStarted.html
 
-	or more easily use a zookeeper docker:
+    or more easily use a zookeeper docker:
 
     https://registry.hub.docker.com/u/jplock/zookeeper/
 
@@ -131,7 +130,7 @@ similar to this::
     Content-Type: application/json-home
     Cache-Control: max-age=86400
 
-10. To run unit/functional test::
+12. To run unit/functional test::
 
     $ tox
 
@@ -149,6 +148,30 @@ Then start a poppy server::
 
     $ tox -- --exclude=none
 
+
+Additional Dependencies
+-------------------------------------------------
+
+Ubuntu 14.04
+-----------------------------
+
+For Python 2.7::
+
+    $ sudo apt-get install python-dev
+
+For Python 3.4::
+
+    $ sudo apt-get install python3.4-dev 
+
+For PyPy::
+
+    $ sudo apt-get install pypy-dev
+
+Install these two packages regardless of the Python version::
+
+    $ sudo apt-get install libffi6 libffi-dev
+
+    $ sudo apt-get install libssl-dev
 
 
 Installing Cassandra Locally
@@ -173,10 +196,6 @@ Mac OSX
 
     CREATE KEYSPACE poppy WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
 
-4. Import the Cassandra Schema to set up the required tables that CDN will need::
-    
-    Open ./cqlsh and import the /poppy/storage/cassandra/schema.cql file
-
 
 
 Running tests
@@ -194,4 +213,3 @@ And then run tests::
 .. _`CassandraDB` : http://cassandra.apache.org
 .. _`pyenv` : https://github.com/yyuu/pyenv/
 .. _`virtualenv` : https://pypi.python.org/pypi/virtualenv/
-
