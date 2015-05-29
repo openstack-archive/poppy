@@ -52,6 +52,7 @@ class TestServiceController(base.TestCase):
         self.mock_persistence_n_board.post.assert_called()
 
     def test_run_task_worker(self):
-        self.distributed_task_driver.services_controller.run_task_worker()
+        self.distributed_task_driver.services_controller.run_task_worker(
+            'poppy')
         self.distributed_task_driver.persistence.assert_called()
         self.distributed_task_driver.job_board.assert_called()

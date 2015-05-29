@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import socket
+
 from oslo.config import cfg
 
 from poppy import bootstrap
@@ -25,6 +28,6 @@ LOG = log.getLogger(__name__)
 def run():
     conf = cfg.CONF
     conf(project='poppy', prog='poppy', args=[])
-
+    conductor_name = '{0}-{1}'.format(socket.gethostname(), os.getpid())
     b = bootstrap.Bootstrap(conf)
-    b.distributed_task.services_controller.run_task_worker()
+    b.distributed_task.services_controller.run_task_worker(name=conductor_name)
