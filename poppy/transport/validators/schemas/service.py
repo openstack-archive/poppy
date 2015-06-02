@@ -238,7 +238,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                 'ttl': {
                                     'type': 'integer',
                                     'required': True,
-                                    "minimum": 0},
+                                    "minimum": 0,
+                                    "maximum": 31536000},
                                 'rules': {
                                     'type': 'array',
                                     'required': False,
@@ -269,7 +270,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                 'ttl': {
                                     'type': 'integer',
                                     'required': True,
-                                    "minimum": 0},
+                                    "minimum": 0,
+                                    "maximum": 31536000},
                                 'rules': {
                                     'type': 'array',
                                     'required': True,
