@@ -15,6 +15,7 @@
 
 import datetime
 import json
+import threading
 import uuid
 try:
     import ordereddict as collections
@@ -65,7 +66,6 @@ CQL_LIST_SERVICES = '''
     WHERE project_id = %(project_id)s
         AND service_id > %(marker)s
     ORDER BY service_id
-    LIMIT %(limit)s
 '''
 
 CQL_GET_SERVICE = '''
@@ -213,17 +213,42 @@ class ServicesController(base.ServicesController):
 
         args = {
             'project_id': project_id,
-            'marker': uuid.UUID(str(marker)),
-            'limit': limit
+            'marker': uuid.UUID(str(marker))
         }
+
+        results = []
+
+        class FirstPagedResultHandler(object):
+            '''This handler retrieves and only retrieves the first page.'''
+            def __init__(self, future):
+                self.error = None
+                self.first_page_loaded_event = threading.Event()
+                self.has_next_page = True
+                self.future = future
+                self.future.add_callbacks(
+                    callback=self.handle_page,
+                    errback=self.handle_error)
+
+            def handle_page(self, rows):
+                for row in rows:
+                    results.append(row)
+                if not self.future.has_more_pages:
+                    self.has_next_page = False
+                self.first_page_loaded_event.set()
+
+            def handle_error(self, exc):
+                pass
 
         stmt = query.SimpleStatement(
             CQL_LIST_SERVICES,
-            consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
+            consistency_level=self._driver.consistency_level,
+            fetch_size=limit)
+        future = self.session.execute_async(stmt, args)
+        handler = FirstPagedResultHandler(future)
+        handler.first_page_loaded_event.wait()
         services = [self.format_result(r) for r in results]
 
-        return services
+        return services, handler.has_next_page
 
     def get(self, project_id, service_id):
         """get.
