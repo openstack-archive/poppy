@@ -22,6 +22,7 @@ from pecan import hooks
 
 from poppy.common import errors
 from poppy.common import uri
+from poppy.common import util
 from poppy.transport.pecan.controllers import base
 from poppy.transport.pecan import hooks as poppy_hooks
 from poppy.transport.pecan.models.response import link
@@ -226,7 +227,7 @@ class ServicesController(base.Controller, hooks.HookController):
         except errors.ServiceStatusNeitherDeployedNorFailed as e:
             pecan.abort(400, detail=str(e))
         except Exception as e:
-            pecan.abort(400, detail=str(e))
+            pecan.abort(400, detail=util.help_escape(str(e)))
 
         service_url = str(
             uri.encode(u'{0}/v1.0/services/{1}'.format(
