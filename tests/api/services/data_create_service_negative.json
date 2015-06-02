@@ -616,5 +616,18 @@
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
         "restrictions_list": []
+    },
+    "same_domain_and_origin": {
+        "service_name": "same_domain_and_origin",
+        "domain_list": [{"domain": "mywebsite.com "}],
+        "origin_list": [{"origin": "mywebsite.com",
+                         "port": 80,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     }
 }
