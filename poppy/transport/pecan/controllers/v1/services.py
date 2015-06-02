@@ -115,14 +115,14 @@ class ServicesController(base.Controller, hooks.HookController):
             pecan.abort(400, detail="Marker must be a valid UUID")
 
         services_controller = self._driver.manager.services_controller
-        service_resultset = services_controller.list(
+        service_resultset, more_pages = services_controller.list(
             self.project_id, marker, limit)
         results = [
             resp_service_model.Model(s, self)
             for s in service_resultset]
 
         links = []
-        if len(results) >= limit:
+        if len(results) >= limit and more_pages:
             links.append(
                 link.Model(u'{0}/services?marker={1}&limit={2}'.format(
                     self.base_url,
