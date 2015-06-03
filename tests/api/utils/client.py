@@ -157,6 +157,20 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
         return self.request('DELETE', location)
 
+    def update_service_state(self, location, new_state,
+                             requestslib_kwargs=None):
+        """Update Service State
+
+        :return: Response Object containing response code 202
+        POST
+        services/{service_id}/state
+        """
+
+        url = location + '/state'
+        request_object = requests.UpdateServiceState(status=new_state)
+        return self.request('POST', url, request_entity=request_object,
+                            requestslib_kwargs=requestslib_kwargs)
+
     def check_health(self):
         """Check Health of the application
 
