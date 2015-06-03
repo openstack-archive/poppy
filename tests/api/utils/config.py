@@ -43,6 +43,11 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         return self.get_boolean('provider_validation')
 
     @property
+    def run_operator_tests(self):
+        """Boolean flag indicating if tests for operator apis should be run."""
+        return self.get_boolean('run_operator_tests')
+
+    @property
     def status_check_retry_interval(self):
         """Int value to set retry intervals for status check."""
         return int(self.get('status_check_retry_interval'))
@@ -121,6 +126,16 @@ class AuthConfig(data_interfaces.ConfigSectionInterface):
     def alt_api_key(self):
         """The alternate user's api key, if applicable."""
         return self.get_raw('alt_api_key')
+
+    @property
+    def operator_user_name(self):
+        """The name of the user, if applicable."""
+        return self.get('operator_user_name')
+
+    @property
+    def operator_api_key(self):
+        """The user's api key, if applicable."""
+        return self.get_raw('operator_api_key')
 
 
 class FastlyConfig(data_interfaces.ConfigSectionInterface):

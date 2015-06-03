@@ -43,23 +43,25 @@ class TestBase(fixtures.BaseTestFixture):
         cls.auth_config = config.AuthConfig()
         if cls.auth_config.auth_enabled:
             cls.auth_client = client.AuthClient()
-            auth_token, project_id = cls.auth_client.authenticate_user(
-                cls.auth_config.base_url,
-                cls.auth_config.user_name,
-                cls.auth_config.api_key)
+            auth_token, cls.user_project_id = \
+                cls.auth_client.authenticate_user(
+                    cls.auth_config.base_url,
+                    cls.auth_config.user_name,
+                    cls.auth_config.api_key)
         else:
             auth_token = str(uuid.uuid4())
-            project_id = str(uuid.uuid4())
+            cls.user_project_id = str(uuid.uuid4())
 
         cls.test_config = config.TestConfig()
 
         cls.config = config.PoppyConfig()
         if cls.test_config.project_id_in_url:
-            cls.url = cls.config.base_url + '/v1.0/' + project_id
+            cls.url = cls.config.base_url + '/v1.0/' + cls.user_project_id
         else:
             cls.url = cls.config.base_url + '/v1.0'
 
-        cls.client = client.PoppyClient(cls.url, auth_token, project_id,
+        cls.client = client.PoppyClient(cls.url, auth_token,
+                                        cls.user_project_id,
                                         serialize_format='json',
                                         deserialize_format='json')
 
@@ -69,13 +71,29 @@ class TestBase(fixtures.BaseTestFixture):
                 cls.auth_config.alt_user_name,
                 cls.auth_config.alt_api_key)
             if cls.test_config.project_id_in_url:
-                cls.alt_url = cls.config.base_url + '/v1.0/' + alt_project_id
+                alt_url = cls.config.base_url + '/v1.0/' + alt_project_id
             else:
-                cls.alt_url = cls.config.base_url + '/v1.0'
+                alt_url = cls.config.base_url + '/v1.0'
 
             cls.alt_user_client = client.PoppyClient(
-                cls.alt_url, alt_auth_token,
-                alt_project_id,
+                alt_url, cls.alt_auth_token,
+                cls.alt_project_id,
+                serialize_format='json',
+                deserialize_format='json')
+
+        if cls.test_config.run_operator_tests:
+            operator_auth_token, operator_project_id = \
+                cls.auth_client.authenticate_user(
+                    cls.auth_config.base_url,
+                    cls.auth_config.operator_user_name,
+                    cls.auth_config.operator_api_key)
+            if cls.test_config.project_id_in_url:
+                cls.operator_url = cls.config.base_url + '/v1.0/' + \
+                    operator_project_id
+            else:
+                cls.operator_url = cls.config.base_url + '/v1.0'
+            cls.operator_client = client.PoppyClient(
+                cls.operator_url, operator_auth_token, operator_project_id,
                 serialize_format='json',
                 deserialize_format='json')
 
