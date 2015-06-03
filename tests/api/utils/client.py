@@ -157,6 +157,20 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
         return self.request('DELETE', location)
 
+    def update_service_state(self, location, new_state,
+                             requestslib_kwargs=None):
+        """Update Service State
+
+        :return: Response Object containing response code 202
+        POST
+        services/{service_id}/state
+        """
+
+        url = location + '/state'
+        request_object = requests.UpdateServiceState(new_state=new_state)
+        return self.request('POST', url, request_entity=request_object,
+                            requestslib_kwargs=requestslib_kwargs)
+
     def check_health(self):
         """Check Health of the application
 
@@ -253,14 +267,14 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
             body = service.json()
             current_status = body['status']
             if (current_status.lower() == status.lower()):
-                return
+                return service
 
             if abort_on_status is not None:
                 if current_status == abort_on_status:
                     # this is for debugging purpose,
                     # will be removed later, so simply use print
                     print(body.get('errors', []))
-                    return
+                    return service
 
             current_time = int(time.time())
             if current_time > stop_time:
