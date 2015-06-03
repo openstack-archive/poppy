@@ -20,7 +20,6 @@ import urlparse
 import uuid
 
 import ddt
-import jsonpatch
 from nose.plugins import attrib
 
 from tests.api import base
@@ -360,6 +359,66 @@ class TestServiceActions(base.TestBase):
 
         self.assertEqual(404, current_status)
 
+    @ddt.data('enabled', 'disabled')
+    def test_update_state(self, new_state):
+        resp = self.client.update_state(location=self.service_url,
+                                        new_state=new_state)
+        self.assertEqual(resp.status_code, 202)
+
+        self.client.wait_for_service_status(
+            location=self.service_url, status='deployed')
+
+        resp = self.client.get_service(location=self.service_url)
+        updated_state = resp.json()['status']
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(updated_state, new_state)
+
+    def test_update_state_disabled_to_enabled(self):
+        resp = self.client.update_state(location=self.service_url,
+                                        new_state='disabled')
+        self.assertEqual(resp.status_code, 202)
+
+        self.client.wait_for_service_status(
+            location=self.service_url, status='disabled')
+
+        resp = self.client.get_service(location=self.service_url)
+        updated_state = resp.json()['status']
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(updated_state, 'disabled')
+
+        resp = self.client.update_state(location=self.service_url,
+                                        new_state='enabled')
+        self.assertEqual(resp.status_code, 202)
+
+        self.client.wait_for_service_status(
+            location=self.service_url, status='deployed')
+
+        resp = self.client.get_service(location=self.service_url)
+        updated_state = resp.json()['status']
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(updated_state, 'deployed')
+
+    @ddt.data('MY_CRAZY_STATE')
+    def test_update_state_negative(self, new_state):
+        resp = self.client.get_service(location=self.service_url)
+        before_patch_state = resp.json()['status']
+
+        resp = self.client.update_state(location=self.service_url,
+                                        new_state=new_state)
+        self.assertEqual(resp.status_code, 400)
+
+        self.client.wait_for_service_status(
+            location=self.service_url, status='deployed')
+
+        resp = self.client.get_service(location=self.service_url)
+        after_patch_state = resp.json()['status']
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(before_patch_state, after_patch_state)
+
     def test_delete_non_existing_service(self):
         url = self.service_url.rsplit('/', 1)[0] + str(uuid.uuid4())
         resp = self.client.delete_service(location=url)
@@ -425,6 +484,7 @@ class TestServiceActions(base.TestBase):
 
 
 @ddt.ddt
+<<<<<<< HEAD
 class TestServicePatch(base.TestBase):
 
     """Tests for PATCH Services."""
@@ -851,6 +911,8 @@ class TestServicePatchWithLogDelivery(base.TestBase):
 
 
 @ddt.ddt
+=======
+>>>>>>> 4a075b3... Add API tests for PATCH state
 class TestDefaultServiceFields(providers.TestProviderBase):
 
     """Tests for Default Service Fields."""
