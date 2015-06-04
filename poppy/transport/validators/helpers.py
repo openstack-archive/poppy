@@ -125,6 +125,23 @@ def json_matches_flavor_schema_inner(request, schema=None):
     is_valid_flavor_configuration(data, schema)
 
 
+@decorators.validation_function
+def is_valid_domain_name(domain_name):
+    domain_regex = ('^((?=[a-z0-9-]{1,63}\.)[a-z0-9]+'
+                    '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
+    # allow Punycode
+    # domain_regex = ('^((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+'
+    #                 '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
+
+    # shared ssl domain
+    shared_ssl_domain_regex = '^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$'
+
+    if not re.match(domain_regex, domain_name):
+        if not re.match(shared_ssl_domain_regex, domain_name):
+            raise exceptions.ValidationFailed(
+                u'Domain {0} is not valid'.format(domain_name))
+
+
 def is_valid_service_configuration(service, schema):
     if schema is not None:
         errors_list = list(
@@ -231,27 +248,9 @@ def is_valid_service_configuration(service, schema):
 
     # 7. domains must be valid
     if 'domains' in service:
-        # only allow ascii
-        domain_regex = ('^((?=[a-z0-9-]{1,63}\.)[a-z0-9]+'
-                        '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
-        # allow Punycode
-        # domain_regex = ('^((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+'
-        #                 '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
-
-        # shared ssl domain
-        shared_ssl_domain_regex = '^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$'
-
         for domain in service['domains']:
             domain_name = domain.get('domain')
-            if (domain.get('protocol') == 'https' and
-                    domain['certificate'] == u'shared'):
-                if not re.match(shared_ssl_domain_regex, domain_name):
-                    raise exceptions.ValidationFailed(
-                        u'Domain {0} is not valid'.format(domain_name))
-            else:
-                if not re.match(domain_regex, domain_name):
-                    raise exceptions.ValidationFailed(
-                        u'Domain {0} is not valid'.format(domain_name))
+            is_valid_domain_name(domain_name)
 
     # 8. origins and domains cannot be the same
     if 'origins' in service and 'domains' in service:

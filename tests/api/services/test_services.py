@@ -480,6 +480,24 @@ class TestServiceActions(base.TestBase):
         self.assertEqual(body['restrictions'], self.restrictions_list)
         self.assertEqual(body['flavor_id'], self.flavor_id)
 
+    def test_get_service_by_domain(self):
+        resp = self.client.get_service_by_domain_name(
+            self.domain_list[0]['domain'])
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        self.assertSchema(body, services.get_service)
+
+        for item in self.domain_list:
+            if 'protocol' not in item:
+                item['protocol'] = 'http'
+        self.assertEqual(body['domains'], self.domain_list)
+
+        self.assertEqual(body['origins'], self.origin_list)
+        self.assertEqual(body['caching'], self.caching_list)
+        self.assertEqual(body['restrictions'], self.restrictions_list)
+        self.assertEqual(body['flavor_id'], self.flavor_id)
+
     def test_get_non_existing_service(self):
         url = self.service_url.rsplit('/', 1)[0] + str(uuid.uuid4())
         resp = self.client.get_service(location=url)
