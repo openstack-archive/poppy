@@ -130,8 +130,9 @@ def is_valid_shared_ssl_domain_name(domain_name):
     return re.match(shared_ssl_domain_regex, domain_name)
 
 
+@decorators.validation_function
 def is_valid_domain_name(domain_name):
-    # only allow ascii
+    # only allow ASCII
     domain_regex = ('^((?=[a-z0-9-]{1,63}\.)[a-z0-9]+'
                     '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
     # allow Punycode
@@ -266,9 +267,10 @@ def is_valid_service_configuration(service, schema):
     # 7. domains must be valid
     if 'domains' in service:
         for domain in service['domains']:
-            if not is_valid_domain(domain):
+            domain_name = domain.get('domain')
+            if not is_valid_domain_name(domain_name):
                 raise exceptions.ValidationFailed(
-                    u'Domain {0} is not valid'.format(domain.get('domain')))
+                    u'Domain {0} is not valid'.format(domain_name))
 
     # 8. origins and domains cannot be the same
     if 'origins' in service and 'domains' in service:
