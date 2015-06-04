@@ -280,6 +280,23 @@ def is_valid_service_id(service_id):
         raise exceptions.ValidationFailed('Invalid service id')
 
 
+@decorators.validation_function
+def is_valid_domain_name(domain_name):
+    domain_regex = ('^((?=[a-z0-9-]{1,63}\.)[a-z0-9]+'
+                    '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
+    # allow Punycode
+    # domain_regex = ('^((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+'
+    #                 '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
+
+    # shared ssl domain
+    shared_ssl_domain_regex = '^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$'
+
+    if not re.match(domain_regex, domain_name):
+        if not re.match(shared_ssl_domain_regex, domain_name):
+            raise exceptions.ValidationFailed(
+                u'Domain {0} is not valid'.format(domain_name))
+
+
 def is_valid_flavor_configuration(flavor, schema):
     if schema is not None:
         errors_list = list(
