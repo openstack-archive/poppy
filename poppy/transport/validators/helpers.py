@@ -125,6 +125,7 @@ def json_matches_flavor_schema_inner(request, schema=None):
     is_valid_flavor_configuration(data, schema)
 
 
+<<<<<<< HEAD
 def is_valid_shared_ssl_domain_name(domain_name):
     shared_ssl_domain_regex = '^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$'
     return re.match(shared_ssl_domain_regex, domain_name)
@@ -132,11 +133,16 @@ def is_valid_shared_ssl_domain_name(domain_name):
 
 def is_valid_domain_name(domain_name):
     # only allow ascii
+=======
+@decorators.validation_function
+def is_valid_domain_name(domain_name):
+>>>>>>> 91c7ea1... AUP Integrated. New API endpoint to search service by domain name
     domain_regex = ('^((?=[a-z0-9-]{1,63}\.)[a-z0-9]+'
                     '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
     # allow Punycode
     # domain_regex = ('^((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+'
     #                 '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
+<<<<<<< HEAD
     return re.match(domain_regex, domain_name)
 
 
@@ -157,6 +163,16 @@ def is_valid_ip_address(ip_address):
 def is_valid_origin(origin):
     return (is_valid_domain_name(origin.get('origin')) or
             is_valid_ip_address(origin.get('origin')))
+=======
+
+    # shared ssl domain
+    shared_ssl_domain_regex = '^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$'
+
+    if not re.match(domain_regex, domain_name):
+        if not re.match(shared_ssl_domain_regex, domain_name):
+            raise exceptions.ValidationFailed(
+                u'Domain {0} is not valid'.format(domain_name))
+>>>>>>> 91c7ea1... AUP Integrated. New API endpoint to search service by domain name
 
 
 def is_valid_service_configuration(service, schema):
@@ -266,9 +282,8 @@ def is_valid_service_configuration(service, schema):
     # 7. domains must be valid
     if 'domains' in service:
         for domain in service['domains']:
-            if not is_valid_domain(domain):
-                raise exceptions.ValidationFailed(
-                    u'Domain {0} is not valid'.format(domain.get('domain')))
+            domain_name = domain.get('domain')
+            is_valid_domain_name(domain_name)
 
     # 8. origins and domains cannot be the same
     if 'origins' in service and 'domains' in service:

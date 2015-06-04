@@ -42,6 +42,7 @@ class CassandraStorageServiceTests(base.TestCase):
         self.project_id = '123456'
         self.service_id = uuid.uuid4()
         self.service_name = 'mocksite'
+        self.domain_name = 'www.mocksite.com'
 
         # create mocked config and driver
         conf = cfg.ConfigOpts()
@@ -77,6 +78,28 @@ class CassandraStorageServiceTests(base.TestCase):
         # TODO(amitgandhinz): assert the response
         # matches the expectation (using jsonschema)
         self.assertEqual(str(actual_response.service_id), str(self.service_id))
+
+    @ddt.file_data('data_get_service.json')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    @mock.patch.object(services.ServicesController, 'get')
+    def test_get_service_by_domain(self, value, mock_session, mock_execute,
+                                   mock_get):
+
+        import ipdb
+        ipdb.set_trace()
+        # mock the response from cassandra
+        value[0]['service_id'] = self.service_id
+        mock_execute.execute.return_value = {'project_id': self.project_id,
+                                             'service_id': self.service_id}
+        mock_get.execute.return_value = value
+
+        actual_response = self.sc.get_service_details_by_domain_name(
+            self.domain_name)
+       # actual_response = value
+
+        self.assertEqual(str(actual_response.service_id),
+                         str(self.service_id))
 
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
