@@ -1,7 +1,7 @@
 {
     "domain_shared_ssl": {
         "name": "domain_shared_ssl",
-        "domain_list": [{"domain": "sharedsslwebsite",
+        "domain_list": [{"domain": "sharedsslwebsite.com",
                          "protocol": "https",
                          "certificate": "shared"}
                         ],
@@ -60,9 +60,9 @@
                         "referrer": "www.mywebsite.com"}]}
         ]
     },
-    "domain_shared_ssl": {
-        "name": "domain_shared_ssl",
-        "domain_list": [{"domain": "sharedsslwebsite",
+    "domain_shared_ssl_without_origin_rules": {
+        "name": "domain_shared_ssl_no_origin_rules",
+        "domain_list": [{"domain": "sharedsslwebsite.com",
                          "protocol": "https",
                          "certificate": "shared"}
                         ],
