@@ -91,7 +91,7 @@ class ServicesController(base.ServicesController):
                                  details=job_details)
                 LOG.info("%s posted" % (job))
 
-    def run_task_worker(self):
+    def run_task_worker(self, name):
         """Run a task flow worker (conductor).
 
         """
@@ -102,7 +102,7 @@ class ServicesController(base.ServicesController):
                     persistence=persistence) as board:
 
                 conductor = NotifyingConductor(
-                    "Poppy service worker conductor", board, persistence,
+                    name, board, persistence,
                     engine='serial')
 
                 conductor.run()
