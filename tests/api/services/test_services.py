@@ -30,7 +30,6 @@ from tests.api.utils.schema import services
 
 @ddt.ddt
 class TestCreateService(providers.TestProviderBase):
-
     """Tests for Create Service."""
 
     def setUp(self):
@@ -154,7 +153,6 @@ class TestCreateService(providers.TestProviderBase):
 
 @ddt.ddt
 class TestListServices(base.TestBase):
-
     """Tests for List Services."""
 
     def _create_test_service(self):
@@ -271,7 +269,6 @@ class TestListServices(base.TestBase):
 
 @ddt.ddt
 class TestServiceActions(base.TestBase):
-
     def setUp(self):
         super(TestServiceActions, self).setUp()
         self.service_name = self.generate_random_string(prefix='API-Test-')
@@ -405,6 +402,134 @@ class TestServiceActions(base.TestBase):
         self.assertEqual(body['restrictions'], self.restrictions_list)
         self.assertEqual(body['flavor_id'], self.flavor_id)
 
+    def test_get_service_by_domain(self):
+        resp = self.client.get_service_by_domain_name(
+            self.domain_list[0]['domain'], self.service_url)
+
+        self.assertEqual(resp.status_code, 200)
+        body = resp.json()
+        self.assertSchema(body, services.get_service)
+        for item in self.domain_list:
+            if 'protocol' not in item:
+                item['protocol'] = 'http'
+        self.assertEqual(body['domains'], self.domain_list)
+        self.assertEqual(body['origins'], self.origin_list)
+        self.assertEqual(body['caching'], self.caching_list)
+        self.assertEqual(body['restrictions'], self.restrictions_list)
+        self.assertEqual(body['flavor_id'], self.flavor_id)
+
+    def test_get_service_by_multiple_domains(self):
+        service_name = self.generate_random_string(prefix='API-Test-')
+        domain1 = self.generate_random_string(prefix='api-test-domain1') \
+            + u'.com'
+        domain2 = self.generate_random_string(prefix='api-test-domain2') \
+            + u'.com'
+        domain3 = self.generate_random_string(prefix='api-test-domain3') \
+            + u'.com'
+        domain_list = [
+            {"domain": domain1, "protocol": "http"},
+            {"domain": domain2, "protocol": "http"},
+            {"domain": domain3, "protocol": "http"}
+        ]
+        resp = self.client.create_service(
+            service_name=service_name,
+            domain_list=domain_list,
+            origin_list=self.origin_list,
+            caching_list=self.caching_list,
+            flavor_id=self.flavor_id)
+        service_url = resp.headers["location"]
+        self.client.wait_for_service_status(
+            location=service_url, status='deployed')
+
+        api_resp = self.client.get_service_by_domain_name(domain1,
+                                                          self.service_url)
+        self.assertEqual(api_resp.status_code, 200)
+
+        api_resp1 = self.client.get_service_by_domain_name(domain2,
+                                                           self.service_url)
+        self.assertEqual(api_resp1.status_code, 200)
+
+        api_resp2 = self.client.get_service_by_domain_name(domain3,
+                                                           self.service_url)
+        self.assertEqual(api_resp2.status_code, 200)
+
+    @ddt.file_data('data_create_service_ssl_domain.json')
+    def test_get_service_by_shared_cert_domain(self, test_data):
+
+        domain_list = test_data['domain_list']
+        for item in domain_list:
+            if item['certificate'] == 'shared':
+                item['domain'] = self.generate_random_string(
+                    prefix='shared-ssl') + '.com'
+            else:
+                item['domain'] = self.generate_random_string(
+                    prefix='ssl-domain') + '.com'
+
+        origin_list = test_data['origin_list']
+        caching_list = test_data['caching_list']
+        flavor_id = self.flavor_id
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=domain_list,
+                                          origin_list=origin_list,
+                                          caching_list=caching_list,
+                                          flavor_id=flavor_id)
+
+        self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.text, '')
+        service_url = resp.headers['location']
+        self.client.wait_for_service_status(
+            location=service_url, status='deployed')
+
+        get_resp = self.client.get_service(service_url)
+        resp_body = get_resp.json()
+        domain = resp_body['domains'][0]['domain']
+        response = self.client.get_service_by_domain_name(domain,
+                                                          self.service_url)
+
+        self.assertEqual(response.status_code, 200)
+        # body = resp.json()
+        # self.assertSchema(body, services.get_service)
+        # for item in self.domain_list:
+        #     if 'protocol' not in item:
+        #         item['protocol'] = 'http'
+        # self.assertEqual(body['domains'], domain_list)
+        # self.assertEqual(body['origins'], self.origin_list)
+        # self.assertEqual(body['caching'], self.caching_list)
+        # self.assertEqual(body['restrictions'], self.restrictions_list)
+        # self.assertEqual(body['flavor_id'], self.flavor_id)
+
+    def test_get_service_by_non_existing_http_domain(self):
+        domain = "http://www." + \
+                 self.generate_random_string(prefix='non-existing-domain') \
+                 + u'.com'
+        resp = self.client.get_service_by_domain_name(domain, self.service_url)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_get_service_by_non_existing_https_domain(self):
+        domain = "https://www." + \
+                 self.generate_random_string(prefix='non-existing-domain') \
+                 + u'.com'
+        resp = self.client.get_service_by_domain_name(domain, self.service_url)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_get_service_by_non_existing_too_long_domain(self):
+        domain = "http://www.too_long_name_too_long_name_too_long_name_" \
+                 "too_long_name_too_long_name_too_long_name_too_long_name_" \
+                 "too_long_name_too_long_name_too_long_name_too_long_name_" \
+                 "too_long_name_too_long_name_too_long_name_too_long_name_t" \
+                 "oo_long_name_too_long_name_too_long_name_too_long_name_too" \
+                 "_long_name_too_long_name_too_long_name_too_long_name_too_" \
+                 "long_name" + \
+                 self.generate_random_string(prefix='non-existing-domain') \
+                 + u'.com'
+        resp = self.client.get_service_by_domain_name(domain, self.service_url)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_get_service_by_non_existing_non_ascii_domain(self):
+        domain = "http://www.קאַץ.com"
+        resp = self.client.get_service_by_domain_name(domain, self.service_url)
+        self.assertEqual(resp.status_code, 404)
+
     def test_get_non_existing_service(self):
         url = self.service_url.rsplit('/', 1)[0] + str(uuid.uuid4())
         resp = self.client.get_service(location=url)
@@ -426,7 +551,6 @@ class TestServiceActions(base.TestBase):
 
 @ddt.ddt
 class TestServicePatch(base.TestBase):
-
     """Tests for PATCH Services."""
 
     def setUp(self):
@@ -706,7 +830,6 @@ class TestServicePatch(base.TestBase):
 
 @ddt.ddt
 class TestServicePatchWithLogDelivery(base.TestBase):
-
     """Tests for PATCH Services."""
 
     def setUp(self):
@@ -852,7 +975,6 @@ class TestServicePatchWithLogDelivery(base.TestBase):
 
 @ddt.ddt
 class TestDefaultServiceFields(providers.TestProviderBase):
-
     """Tests for Default Service Fields."""
 
     def setUp(self):
