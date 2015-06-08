@@ -780,6 +780,152 @@ class TestServicePatch(base.TestBase):
 
 
 @ddt.ddt
+class TestServicePatchWithLogDelivery(base.TestBase):
+
+    """Tests for PATCH Services."""
+
+    def setUp(self):
+        super(TestServicePatchWithLogDelivery, self).setUp()
+        self.service_name = self.generate_random_string(prefix='api-test')
+        self.flavor_id = self.test_flavor
+        self.log_delivery = {"enabled": True}
+
+        domain = self.generate_random_string(prefix='api-test-domain') + '.com'
+        self.domain_list = [
+            {
+                "domain": domain,
+                "protocol": "http"
+            }
+        ]
+
+        origin = self.generate_random_string(prefix='api-test-origin') + '.com'
+        self.origin_list = [
+            {
+                "origin": origin,
+                "port": 80,
+                "ssl": False,
+                "rules": [
+                    {
+                        "name": "default",
+                        "request_url": "/*"
+                    }
+                ]
+            }
+        ]
+
+        self.caching_list = [
+            {
+                "name": "default",
+                "ttl": 3600,
+                "rules": [
+                    {
+                        "name": "default",
+                        "request_url": "/*"
+                    }
+                ]
+            },
+            {
+                "name": "home",
+                "ttl": 1200,
+                "rules": [
+                    {
+                        "name": "index",
+                        "request_url": "/index.htm"
+                    }
+                ]
+            }
+        ]
+
+        self.restrictions_list = [
+            {"name": "website only",
+             "rules": [{"name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }]}]
+
+        resp = self.client.create_service(
+            service_name=self.service_name,
+            domain_list=self.domain_list,
+            origin_list=self.origin_list,
+            caching_list=self.caching_list,
+            restrictions_list=self.restrictions_list,
+            flavor_id=self.flavor_id,
+            log_delivery=self.log_delivery)
+
+        self.service_url = resp.headers["location"]
+
+        self.original_service_details = {
+            "name": self.service_name,
+            "domains": self.domain_list,
+            "origins": self.origin_list,
+            "caching": self.caching_list,
+            "restrictions": self.restrictions_list,
+            "flavor_id": self.flavor_id,
+            "log_delivery": self.log_delivery}
+
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        resp = self.client.get_service(location=self.service_url)
+        body = resp.json()
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(body['status'], 'deployed')
+
+    def _replace_domain(self, domain):
+        if ('protocol' in domain):
+            if domain['protocol'] == 'https':
+                if (domain['certificate'] == u'shared'):
+                    return self.generate_random_string(prefix='api-test-ssl')
+
+        return self.generate_random_string(prefix='api-test-ssl') + '.com'
+
+    @ddt.file_data('data_patch_service.json')
+    def test_patch_service(self, test_data):
+
+        for item in test_data:
+            if 'skip_test' in item:
+                self.skipTest('Not Implemented - bug# 1433807')
+
+            if ('domain' in item['path']) and ('value' in item):
+                if isinstance(item['value'], (list)):
+                    item['value'][0]['domain'] = self._replace_domain(
+                        domain=item['value'][0])
+                else:
+                    item['value']['domain'] = self._replace_domain(
+                        domain=item['value'])
+
+        patch = jsonpatch.JsonPatch(test_data)
+        expected_service_details = patch.apply(self.original_service_details)
+
+        resp = self.client.patch_service(location=self.service_url,
+                                         request_body=test_data)
+        self.assertEqual(resp.status_code, 202)
+
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        resp = self.client.get_service(location=self.service_url)
+        body = resp.json()
+        self.assertEqual(body['status'], 'deployed')
+
+        self.assert_patch_service_details(body, expected_service_details)
+
+    def tearDown(self):
+        self.client.delete_service(location=self.service_url)
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
+        super(TestServicePatchWithLogDelivery, self).tearDown()
+
+
+@ddt.ddt
 class TestDefaultServiceFields(providers.TestProviderBase):
 
     """Tests for Default Service Fields."""

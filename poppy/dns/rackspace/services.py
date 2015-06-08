@@ -357,7 +357,9 @@ class ServicesController(base.ServicesBase):
         for provider_name in provider_details:
             provider_detail = provider_details[provider_name]
             for access_url in provider_detail.access_urls:
-                if access_url['domain'] not in removed_domains:
+                # log delivery access url does not have domain field
+                if 'domain' in access_url and (
+                        access_url['domain'] not in removed_domains):
                     continue
                 try:
                     msg = self._delete_cname_record(access_url['operator_url'],
