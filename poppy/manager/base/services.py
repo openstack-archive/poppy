@@ -73,6 +73,16 @@ class ServicesControllerBase(controller.ManagerControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def update_state(self, project_id, service_id, state):
+        """update_state
+
+        :param project_id
+        :param service_id
+        :param state
+        :raises ValueError
+        """
+
+    @abc.abstractmethod
     def delete(self, project_id, service_id):
         """DELETE
 

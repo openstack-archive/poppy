@@ -151,6 +151,24 @@ class ServicesController(base.ServicesController):
         # update configuration in storage
         return ''
 
+    def update_state(self, project_id, service_id, state):
+        """update_state
+
+        Update service state
+
+        :param project_id
+        :param service_id
+        :param state
+
+        :returns service_obj
+        """
+
+        service_obj = self.get(project_id, service_id)
+        service_obj.operator_status = state
+        self.update(project_id, service_id, service_obj)
+
+        return self.get(project_id, service_id)
+
     def delete(self, project_id, service_id):
         if (service_id in self.created_service_ids):
             self.created_service_ids.remove(service_id)

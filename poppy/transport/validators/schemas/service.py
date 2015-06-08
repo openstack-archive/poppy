@@ -338,7 +338,8 @@ class ServiceSchema(schema_base.SchemaBase):
                             }
                         }
                     }
-                }},
+                }
+            },
             'PATCH': {
                 'type': 'array',
                 'properties': {

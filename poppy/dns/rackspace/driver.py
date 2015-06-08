@@ -49,6 +49,8 @@ RACKSPACE_OPTIONS = [
                help='Authentication end point for DNS'),
     cfg.IntOpt('timeout', default=30, help='DNS response timeout'),
     cfg.IntOpt('delay', default=1, help='DNS retry delay'),
+    cfg.StrOpt('url_404', default='',
+               help='The url to CNAME to when a service is disabled'),
 ]
 
 RACKSPACE_GROUP = 'drivers:dns:rackspace'

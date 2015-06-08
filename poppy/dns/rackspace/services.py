@@ -103,11 +103,12 @@ class ServicesController(base.ServicesBase):
             subdomain.add_records(cname_records)
         return dns_links
 
-    def _delete_cname_record(self, access_url, shared_ssl_flag):
-        """Delete a CNAME record
+    def _search_cname_record(self, access_url, shared_ssl_flag):
+        """Search a CNAME record
 
         :param access_url: DNS Access URL
-        :return error_msg: returns error message, if any
+        :param shared_ssl_flag: flag indicating if this is a shared ssl domain
+        :return records: returns records, if any
         """
 
         # extract shard name
@@ -129,17 +130,50 @@ class ServicesController(base.ServicesBase):
         name = access_url
         record_type = 'CNAME'
         records = self.client.search_records(subdomain, record_type, name)
+
+        return records
+
+    def _delete_cname_record(self, access_url, shared_ssl_flag):
+        """Delete a CNAME record
+
+        :param access_url: DNS Access URL
+        :return error_msg: returns error message, if any
+        """
+
+        records = self._search_cname_record(access_url, shared_ssl_flag)
         # delete the record
         # we should get one record,
         # or none if it has been deleted already
         if not records:
             LOG.info('DNS record already deleted: {0}'.format(access_url))
-        elif len(records) == 1:
-            LOG.info('Deleting DNS records for : {0}'.format(access_url))
-            records[0].delete()
         elif len(records) > 1:
             error_msg = 'Multiple DNS records found: {0}'.format(access_url)
             return error_msg
+        elif len(records) == 1:
+            LOG.info('Deleting DNS records for : {0}'.format(access_url))
+            records[0].delete()
+        return
+
+    def _change_cname_record(self, access_url, target_url, shared_ssl_flag):
+        """Change a CNAME record
+
+        :param access_url: DNS Access URL
+        :param target_url: Operator Access URL
+        :param shared_ssl_flag: flag indicating if this is a shared ssl domain
+        :return error_msg: returns error message, if any
+        """
+
+        records = self._search_cname_record(access_url, shared_ssl_flag)
+        # we should get one record, or none if it has been deleted already
+        if not records:
+            LOG.info('DNS record not found for: {0}'.format(access_url))
+        elif len(records) > 1:
+            LOG.info('Multiple DNS records found: {0}'.format(access_url))
+        elif len(records) == 1:
+            LOG.info('Updating DNS record for : {0}'.format(access_url))
+            records[0].update(data=target_url)
+            LOG.info('Updated DNS record for : {0}'.format(access_url))
+
         return
 
     def _generate_sharded_domain_name(self, shard_prefix, num_shards, suffix):
@@ -498,3 +532,55 @@ class ServicesController(base.ServicesBase):
                 dns_details[provider_name] = {'access_urls': access_urls}
 
         return self.responder.updated(dns_details)
+
+    def gather_cname_links(self, service_obj):
+        provider_details = service_obj.provider_details
+        dns_details = {}
+        for provider_name in provider_details:
+            access_urls = []
+            for link in provider_details[provider_name].access_urls:
+                # if this is a log delivery URL, don't add
+                if 'log_delivery' in link:
+                    continue
+
+                access_url = {
+                    'domain': link['domain'],
+                    'provider_url': link['provider_url'],
+                    'operator_url': link['operator_url']
+                }
+                # Need to indicate if this access_url is a shared ssl
+                # access url, since its has different shard_prefix and
+                # num_shard
+                if link.get('certificate', None) == 'shared':
+                    access_url['shared_ssl_flag'] = True
+                else:
+                    access_url['shared_ssl_flag'] = False
+
+                access_urls.append(access_url)
+            dns_details[provider_name] = {'access_urls': access_urls}
+
+        return dns_details
+
+    def enable(self, service_obj):
+        dns_details = self.gather_cname_links(service_obj)
+        for provider_name in dns_details:
+            access_urls = dns_details[provider_name]['access_urls']
+            for access_url in access_urls:
+                provider_url = access_url['provider_url']
+                operator_url = access_url['operator_url']
+                shared_ssl_flag = access_url['shared_ssl_flag']
+                self._change_cname_record(operator_url,
+                                          provider_url,
+                                          shared_ssl_flag)
+
+    def disable(self, service_obj):
+        dns_details = self.gather_cname_links(service_obj)
+        provider_url = self._driver.rackdns_conf.url_404
+        for provider_name in dns_details:
+            access_urls = dns_details[provider_name]['access_urls']
+            for access_url in access_urls:
+                operator_url = access_url['operator_url']
+                shared_ssl_flag = access_url['shared_ssl_flag']
+                self._change_cname_record(operator_url,
+                                          provider_url,
+                                          shared_ssl_flag)
