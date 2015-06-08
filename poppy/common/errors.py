@@ -41,3 +41,11 @@ class ServiceStatusNeitherDeployedNorFailed(Exception):
 class ServiceStatusNotDeployed(Exception):
 
     """Raised when a non-deployed service is purged."""
+
+class ServiceStatusDisabled(Exception):
+
+    """Raised when a disabled status is updated."""
+
+class InvalidServiceState(Exception):
+
+    """Raised when a operator state is updated with an invalid status."""
