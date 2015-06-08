@@ -119,6 +119,8 @@ class GatherProviderDetailsTask(task.Task):
 
         service_controller, self.storage_controller = \
             memoized_controllers.task_controllers('poppy', 'storage')
+        import pdb; pdb.set_trace()
+        
         service_obj_json = json.loads(service_obj)
         service_obj = service.load_from_json(service_obj_json)
         # gather links and status for service from providers

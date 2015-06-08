@@ -167,6 +167,9 @@ class DefaultServicesController(base.ServicesController):
                     domain.domain
                 )
 
+        # enable operator status
+        service_obj.operator_status = "enabled"
+
         try:
             self.storage_controller.create(
                 project_id,

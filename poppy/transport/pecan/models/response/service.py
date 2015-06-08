@@ -45,6 +45,7 @@ class Model(collections.OrderedDict):
         self["status"] = service_obj.status
         self["flavor_id"] = service_obj.flavor_id
         self["log_delivery"] = log_delivery.Model(service_obj.log_delivery)
+        self["operator_status"] = service_obj.operator_status
 
         self["errors"] = []
 

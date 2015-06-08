@@ -37,6 +37,7 @@ from poppy.storage import base
 LOG = logging.getLogger(__name__)
 
 
+# do we use this still?
 CQL_GET_ALL_SERVICES = '''
     SELECT project_id,
         service_id,
@@ -60,6 +61,7 @@ CQL_LIST_SERVICES = '''
         caching_rules,
         restrictions,
         provider_details,
+        operator_status,
         log_delivery
     FROM services
     WHERE project_id = %(project_id)s
@@ -78,6 +80,7 @@ CQL_GET_SERVICE = '''
         caching_rules,
         restrictions,
         provider_details,
+        operator_status,
         log_delivery
     FROM services
     WHERE project_id = %(project_id)s AND service_id = %(service_id)s
@@ -116,6 +119,7 @@ CQL_ARCHIVE_SERVICE = '''
             caching_rules,
             restrictions,
             provider_details,
+            operator_status,
             archived_time
             )
         VALUES (%(project_id)s,
@@ -127,6 +131,7 @@ CQL_ARCHIVE_SERVICE = '''
             %(caching_rules)s,
             %(restrictions)s,
             %(provider_details)s,
+            %(operator_status)s,
             %(archived_time)s)
 
         DELETE FROM services
@@ -157,6 +162,7 @@ CQL_CREATE_SERVICE = '''
         caching_rules,
         restrictions,
         provider_details,
+        operator_status,
         log_delivery
         )
     VALUES (%(project_id)s,
@@ -168,6 +174,7 @@ CQL_CREATE_SERVICE = '''
         %(caching_rules)s,
         %(restrictions)s,
         %(provider_details)s,
+        %(operator_status)s,
         %(log_delivery)s)
 '''
 
@@ -182,6 +189,12 @@ CQL_GET_PROVIDER_DETAILS = '''
 CQL_UPDATE_PROVIDER_DETAILS = '''
     UPDATE services
     set provider_details = %(provider_details)s
+    WHERE project_id = %(project_id)s AND service_id = %(service_id)s
+'''
+
+CQL_GET_OPERATOR_STATUS = '''
+    SELECT operator_status
+    FROM services
     WHERE project_id = %(project_id)s AND service_id = %(service_id)s
 '''
 
@@ -329,7 +342,8 @@ class ServicesController(base.ServicesController):
             'caching_rules': caching_rules,
             'restrictions': restrictions,
             'log_delivery': log_delivery,
-            'provider_details': {}
+            'provider_details': {},
+            'operator_status': 'enabled'
         }
 
         LOG.debug("Creating New Service - {0} ({1})".format(service_id,
@@ -378,6 +392,7 @@ class ServicesController(base.ServicesController):
         }
         results = self.session.execute(CQL_GET_SERVICE, args)
         result = results[0]
+        import pdb; pdb.set_trace()
 
         # updates an existing service
         args = {
@@ -390,7 +405,8 @@ class ServicesController(base.ServicesController):
             'caching_rules': caching_rules,
             'restrictions': restrictions,
             'provider_details': pds,
-            'log_delivery': log_delivery
+            'log_delivery': log_delivery,
+            'operator_status': service_obj.operator_status
         }
 
         stmt = query.SimpleStatement(
@@ -574,6 +590,7 @@ class ServicesController(base.ServicesController):
         caching_rules = [json.loads(c) for c in result.get('caching_rules', [])
                          or []]
         log_delivery = json.loads(result.get('log_delivery', '{}') or '{}')
+        operator_status = result.get('operator_status', 'enabled')
 
         # create models for each item
         origins = [
@@ -613,7 +630,8 @@ class ServicesController(base.ServicesController):
         s = service.Service(service_id, name, domains, origins, flavor_id,
                             caching=caching_rules,
                             restrictions=restrictions,
-                            log_delivery=log_delivery)
+                            log_delivery=log_delivery,
+                            operator_status=operator_status)
 
         # format the provider details
         provider_detail_results = result.get('provider_details') or {}
