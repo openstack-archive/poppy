@@ -142,6 +142,7 @@ class DefaultServicesController(base.ServicesController):
         :param service_obj
         :raises LookupError, ValueError
         """
+        
         try:
             flavor = self.flavor_controller.get(service_json.get('flavor_id'))
         # raise a lookup error if the flavor is not found
@@ -166,6 +167,9 @@ class DefaultServicesController(base.ServicesController):
                 domain.domain = self._generate_shared_ssl_domain(
                     domain.domain
                 )
+
+        # enable operator status
+        service_obj.operator_status = "enabled"
 
         try:
             self.storage_controller.create(
@@ -282,6 +286,26 @@ class DefaultServicesController(base.ServicesController):
             update_service.update_service, **kwargs)
 
         return
+
+    def update_state(self, project_id, service_id, state):
+        """update.
+
+        :param project_id
+        :param service_id
+        :param state
+        :raises ValueError, InvalidServiceState
+        """
+
+        if state not in [u'enabled', u'disabled']:
+            raise errors.InvalidServiceState(
+                u'Service state {0} is invalid'.format(state))
+
+        # call storage and update service state
+        try:
+            service_old = self.storage_controller.update_state(
+                project_id, service_id, state)
+        except ValueError:
+            raise errors.ServiceNotFound("Service not found")
 
     def delete(self, project_id, service_id):
         """delete.

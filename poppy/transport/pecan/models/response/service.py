@@ -42,9 +42,12 @@ class Model(collections.OrderedDict):
                                 service_obj.restrictions]
         self["caching"] = [cachingrules.Model(c) for c in
                            service_obj.caching]
-        self["status"] = service_obj.status
         self["flavor_id"] = service_obj.flavor_id
         self["log_delivery"] = log_delivery.Model(service_obj.log_delivery)
+        self["status"] = service_obj.status
+        
+        if service_obj.operator_status == "disabled":
+            self["status"] = service_obj.operator_status
 
         self["errors"] = []
 
