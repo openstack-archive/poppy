@@ -142,6 +142,7 @@ class DefaultServicesController(base.ServicesController):
         :param service_obj
         :raises LookupError, ValueError
         """
+
         try:
             flavor = self.flavor_controller.get(service_json.get('flavor_id'))
         # raise a lookup error if the flavor is not found
@@ -203,6 +204,10 @@ class DefaultServicesController(base.ServicesController):
         except ValueError:
             raise errors.ServiceNotFound("Service not found")
 
+        if service_old.operator_status == u'disabled':
+            raise errors.ServiceStatusDisabled(
+                u'Service {0} is disabled'.format(service_id))
+
         if service_old.status not in [u'deployed', u'failed']:
             raise errors.ServiceStatusNeitherDeployedNorFailed(
                 u'Service {0} neither deployed nor failed'.format(service_id))
@@ -221,6 +226,7 @@ class DefaultServicesController(base.ServicesController):
         # remove fields that cannot be part of PATCH
         del service_old_json['service_id']
         del service_old_json['status']
+        del service_old_json['operator_status']
         del service_old_json['provider_details']
 
         service_new_json = jsonpatch.apply_patch(
@@ -282,6 +288,25 @@ class DefaultServicesController(base.ServicesController):
             update_service.update_service, **kwargs)
 
         return
+
+    def update_state(self, project_id, service_id, state):
+        """update.
+
+        :param project_id
+        :param service_id
+        :param state
+        :raises ValueError, InvalidServiceState
+        """
+
+        if state not in [u'enabled', u'disabled']:
+            raise errors.InvalidServiceState(
+                u'Service state {0} is invalid'.format(state))
+
+        # call storage and update service state
+        try:
+            self.storage_controller.update_state(project_id, service_id, state)
+        except ValueError:
+            raise errors.ServiceNotFound("Service not found")
 
     def delete(self, project_id, service_id):
         """delete.
