@@ -474,10 +474,6 @@ class ServiceControllerTest1(base.FunctionalTest):
         self.assertEqual(202, response.status_code)
         self.assertTrue('Location' in response.headers)
         self.service_url = urlparse.urlparse(response.headers["Location"]).path
-        # import pdb; pdb.set_trace()
-        # print '#############################################################'
-        # print self.service_url
-        # print '#############################################################'
 
     def tearDown(self):
         super(ServiceControllerTest1, self).tearDown()
@@ -492,15 +488,10 @@ class ServiceControllerTest1(base.FunctionalTest):
 
     def test_update_with_good_input(self):
         self.skipTest('Skip failing test')
-        # import pdb; pdb.set_trace()
-        # print '###################################'
-        # print self.service_url
         response = self.app.get(
             self.service_url,
             headers={'X-Project-ID': self.project_id})
         self.assertEqual(200, response.status_code)
-        # print '###################################'
-        # print self.service_url
         # update with good data
         response = self.app.patch(self.service_url,
                                   params=json.dumps([
