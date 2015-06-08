@@ -39,7 +39,8 @@ class Service(common.DictSerializableModel):
                  flavor_id,
                  caching=[],
                  restrictions=[],
-                 log_delivery=None):
+                 log_delivery=None,
+                 operator_status='enabled'):
         self._service_id = str(service_id)
         self._name = name
         self._domains = domains
@@ -50,6 +51,7 @@ class Service(common.DictSerializableModel):
         self._log_delivery = log_delivery or ld.LogDelivery(False)
         self._status = 'create_in_progress'
         self._provider_details = {}
+        self._operator_status = operator_status
 
     @property
     def service_id(self):
@@ -123,6 +125,16 @@ class Service(common.DictSerializableModel):
     def log_delivery(self, value):
         """Set log_delivery."""
         self._log_delivery = value
+
+    @property
+    def operator_status(self):
+        """Get operator status."""
+        return self._operator_status
+
+    @operator_status.setter
+    def operator_status(self, value):
+        """Set operator status."""
+        self._operator_status = value
 
     @property
     def status(self):
