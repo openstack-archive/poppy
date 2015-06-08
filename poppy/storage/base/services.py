@@ -56,6 +56,21 @@ class ServicesControllerBase(controller.StorageControllerBase):
         :param project_id
         :param service_id
         :param service_json
+
+        :returns service_obj
+        :raise NotImplementedError
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def update_state(self, project_id, service_id, state):
+        """update_state
+
+        Update service state
+
+        :param project_id
+        :param service_id
+        :param state
         :raise NotImplementedError
         """
         raise NotImplementedError
