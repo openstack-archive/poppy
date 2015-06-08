@@ -52,6 +52,26 @@
          "value": {},
          "op": "replace"}
     ],
+   "replace_origin_spaces_prefix": [
+        {"op": "replace",
+         "path": "/origins/0",
+         "value": {"origin": "   1.2.3.4", "port": 80, "rules": [{"name": "default", "request_url": "/replacement"}], "ssl": false}}
+    ],
+   "replace_origin_http_prefix": [
+        {"op": "replace",
+         "path": "/origins/0",
+         "value": {"origin": "http://1.2.3.4", "port": 80, "rules": [{"name": "default", "request_url": "/replacement"}], "ssl": false}}
+    ],
+   "replace_origin_https_prefix": [
+        {"op": "replace",
+         "path": "/origins/0",
+         "value": {"origin": "https://1.2.3.4", "port": 80, "rules": [{"name": "default", "request_url": "/replacement"}], "ssl": false}}
+    ],
+   "replace_origin_non_ASCII": [
+        {"op": "replace",
+         "path": "/origins/0",
+         "value": {"origin": "הינטיש.com", "port": 80, "rules": [{"name": "default", "request_url": "/replacement"}], "ssl": false}}
+    ],
    "remove_domain": [
         {"op": "remove",
          "path": "/domains/0"}
