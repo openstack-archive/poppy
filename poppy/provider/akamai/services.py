@@ -497,12 +497,6 @@ class ServiceController(base.ServiceBase):
             rule_dict_template['matches'].append(
                 match_rule)
 
-        if origin.ssl:
-            rule_dict_template['matches'].append({
-                'name': 'url-scheme',
-                'value': 'HTTPS'
-            })
-
         origin_behavior_dict['params']['originDomain'] = (
             origin.origin
         )
