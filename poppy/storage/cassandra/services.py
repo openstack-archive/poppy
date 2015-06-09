@@ -608,6 +608,8 @@ class ServicesController(base.ServicesController):
         origins = [
             origin.Origin(
                 o['origin'],
+                o.get('hostheadertype', 'domain'),
+                o.get('hostheadervalue', None),
                 o.get('port', 80),
                 o.get('ssl', False), [
                     rule.Rule(
