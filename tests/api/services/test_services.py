@@ -70,10 +70,13 @@ class TestCreateService(providers.TestProviderBase):
             retry_interval=self.test_config.status_check_retry_interval,
             retry_timeout=self.test_config.status_check_retry_timeout)
 
+       # try:
         resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 200)
 
         body = resp.json()
+        # import ipdb
+        # ipdb.set_trace()
         self.assertSchema(body, services.get_service)
 
         for item in domain_list:
@@ -85,6 +88,10 @@ class TestCreateService(providers.TestProviderBase):
             if 'rules' not in item:
                 item[u'rules'] = []
         self.assertEqual(body['origins'], origin_list)
+        # except Exception as e:
+        #     print "Exception in create service positive: " + e.message
+        #     import ipdb
+        #     ipdb.set_trace()
 
         # TODO(malini): uncomment below after caching list is implemented.
         # self.assertEqual(body['caching_list'], caching_list)
@@ -164,7 +171,9 @@ class TestListServices(base.TestBase):
             prefix='api-test-domain') + '.com'}]
 
         self.origin_list = [{"origin": self.generate_random_string(
-            prefix='api-test-origin') + '.com', "port": 80, "ssl": False}]
+            prefix='api-test-origin') + '.com', "port": 80, "ssl": False,
+                             "hostheadertype": "custom", "hostheadervalue":
+                                 "www.customweb.com"}]
 
         self.caching_list = [{"name": "default", "ttl": 3600},
                              {"name": "home", "ttl": 1200,
@@ -293,7 +302,9 @@ class TestServiceActions(base.TestBase):
                 u"rules": [{
                     u"name": u"default",
                     u"request_url": u"/*"
-                }]
+                }],
+                u"hostheadertype": "custom",
+                u"hostheadervalue": "www.customweb.com"
             }
         ]
 
@@ -454,7 +465,9 @@ class TestServicePatch(base.TestBase):
                         "name": "default",
                         "request_url": "/*"
                     }
-                ]
+                ],
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ]
 
@@ -734,7 +747,9 @@ class TestServicePatchWithLogDelivery(base.TestBase):
                         "name": "default",
                         "request_url": "/*"
                     }
-                ]
+                ],
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com   "
             }
         ]
 

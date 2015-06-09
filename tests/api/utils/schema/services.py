@@ -43,9 +43,11 @@ origin = {
                  'minumum': 0,
                  'maximum': 100000},
         'ssl': {'type': 'boolean'},
-        'rules': {'type': 'array'}},
+        'rules': {'type': 'array'},
+        'hostheadertype': {'type': 'any'},
+        'hostheadervalue': {'type': 'any'}},
     'required': ['origin', 'port', 'ssl'],
-    'additionalProperties': False
+   'additionalProperties': False
 }
 
 cache = {'type': 'object',
