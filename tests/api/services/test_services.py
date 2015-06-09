@@ -72,6 +72,8 @@ class TestCreateService(providers.TestProviderBase):
 
         resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 200)
+        import ipdb
+        ipdb.set_trace()
 
         body = resp.json()
         self.assertSchema(body, services.get_service)
@@ -164,7 +166,9 @@ class TestListServices(base.TestBase):
             prefix='api-test-domain') + '.com'}]
 
         self.origin_list = [{"origin": self.generate_random_string(
-            prefix='api-test-origin') + '.com', "port": 80, "ssl": False}]
+            prefix='api-test-origin') + '.com', "port": 80, "ssl": False,
+                             "hostheadertype": "custom",
+                             "hostheadervalue": "www.customweb.com"}]
 
         self.caching_list = [{"name": "default", "ttl": 3600},
                              {"name": "home", "ttl": 1200,
@@ -293,7 +297,9 @@ class TestServiceActions(base.TestBase):
                 u"rules": [{
                     u"name": u"default",
                     u"request_url": u"/*"
-                }]
+                }],
+                u"hostheadertype": "custom",
+                u"hostheadervalue": "www.customweb.com"
             }
         ]
 
@@ -454,7 +460,9 @@ class TestServicePatch(base.TestBase):
                         "name": "default",
                         "request_url": "/*"
                     }
-                ]
+                ],
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ]
 
@@ -734,7 +742,9 @@ class TestServicePatchWithLogDelivery(base.TestBase):
                         "name": "default",
                         "request_url": "/*"
                     }
-                ]
+                ],
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com   "
             }
         ]
 

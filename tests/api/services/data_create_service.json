@@ -11,8 +11,9 @@
                             {
                                 "name" : "default",
                                 "request_url" : "/*"
-                            }
-                        ]
+                            }],
+                         "hostheadertype": "custom",
+                         "hostheadervalue": "www.customweb.com"
                         }],
         "caching_list": [
             {
@@ -58,11 +59,12 @@
                          "port": 80,
                          "ssl": false,
                          "rules": [
-                            {
-                                "name" : "default",
-                                "request_url" : "/*"
-                            }
-                        ]
+                           {
+                             "name": "default",
+                             "request_url": "/*"
+                           }],
+                         "hostheadertype": "custom",
+                         "hostheadervalue": "www.customweb.com"
                         }],
         "caching_list": []
     },
@@ -78,7 +80,9 @@
                                 "name": "default rule",
                                 "request_url": "/*"
                               }
-                             ]
+                             ],
+                         "hostheadertype": "custom",
+                         "hostheadervalue": "www.customweb.com"
                          },
                          {
                             "origin": "mywebsite2.com",
@@ -89,7 +93,9 @@
                                 "name": "images rules",
                                 "request_url": "/images/*"
                               }
-                             ]
+                             ],
+                             "hostheadertype": "custom",
+                             "hostheadervalue": "www.customweb.com"
                         }
                         ],
         "caching_list": [{"name": "default",
@@ -109,7 +115,9 @@
                                 "name": "default rule",
                                 "request_url": "/*"
                               }
-                             ]
+                             ],
+                             "hostheadertype": "custom",
+                             "hostheadervalue": "www.customweb.com"
                          },
                          {
                             "origin": "mywebsite2.com",
@@ -120,7 +128,9 @@
                                 "name": "images rules",
                                 "request_url": "/images/test.jpg"
                               }
-                             ]
+                             ],
+                             "hostheadertype": "custom",
+                             "hostheadervalue": "www.customweb.com"
                         }
                         ],
         "caching_list": [{"name": "default",
@@ -137,11 +147,12 @@
                          "port": 80,
                          "ssl": false,
                          "rules": [
-                            {
-                                "name" : "default",
-                                "request_url" : "/*"
-                            }
-                        ]
+                           {
+                             "name": "default",
+                             "request_url": "/*"
+                           }],
+                         "hostheadertype": "custom",
+                         "hostheadervalue": "www.customweb.com"
                         }],
         "caching_list": [
             {
@@ -192,7 +203,9 @@
                                 "name" : "default",
                                 "request_url" : "/*"
                             }
-                        ]
+                        ],
+                         "hostheadertype": "custom",
+                         "hostheadervalue": "www.customweb.com"
                         }],
         "caching_list": [
             {
@@ -242,7 +255,30 @@
                                  "name" : "default",
                                  "request_url" : "/*"
                              }
-                         ]
+                         ],
+                         "hostheadertype": "custom",
+                         "hostheadervalue": "www.customweb.com"
+                         }],
+         "caching_list": []
+     },
+     "origin_hostheadertype": {
+         "name": "origin_hostheadertype",
+         "domain_list": [{"domain": "my-website.com", "protocol": "http"}],
+         "origin_list": [{"origin": "mywebsite1.com",
+                          "port": 80,
+                          "ssl": false,
+                          "hostheadertype": "origin"
+                         }],
+         "caching_list": []
+     },
+     "custom_hostheadertype": {
+         "name": "custom_hostheadertype",
+         "domain_list": [{"domain": "my-website.com", "protocol": "http"}],
+         "origin_list": [{"origin": "mywebsite1.com",
+                          "port": 80,
+                          "ssl": false,
+                          "hostheadertype": "custom",
+                          "hostheadervalue": "customweb.com"
                          }],
          "caching_list": []
      }

@@ -20,11 +20,14 @@ from poppy.model.helpers import rule
 class Origin(common.DictSerializableModel):
     """Origin."""
 
-    def __init__(self, origin, port=80, ssl=False, rules=[]):
+    def __init__(self, origin, hostheadertype='domain', hostheadervalue='-',
+                 port=80, ssl=False, rules=[]):
         self._origin = origin
         self._port = port
         self._ssl = ssl
         self._rules = rules
+        self._hostheadertype = hostheadertype
+        self._hostheadervalue = hostheadervalue
 
     @property
     def origin(self):
@@ -76,6 +79,26 @@ class Origin(common.DictSerializableModel):
         # TODO(tonytan4ever) this field should by typed too
         self._rules = value
 
+    @property
+    def hostheadertype(self):
+        """hostheadertype."""
+        return self._hostheadertype
+
+    @hostheadertype.setter
+    def hostheadertype(self, value):
+        """hostheadertype setter."""
+        self._hostheadertype = value
+
+    @property
+    def hostheadervalue(self):
+        """hostheadervalue."""
+        return self._hostheadervalue
+
+    @hostheadervalue.setter
+    def hostheadervalue(self, value):
+        """hostheadervalue setter."""
+        self._hostheadervalue = value
+
     @classmethod
     def init_from_dict(cls, dict_obj):
         """Construct a model instance from a dictionary.
@@ -90,6 +113,10 @@ class Origin(common.DictSerializableModel):
         o.origin = dict_obj.get("origin", "unnamed")
         o.port = dict_obj.get("port", 80)
         o.ssl = dict_obj.get("ssl", False)
+        o.hostheadertype = dict_obj.get("hostheadertype", "domain")
+        o.hostheadervalue = dict_obj.get("hostheadervalue", None)
+        if o.hostheadertype == 'origin':
+            o.hostheadervalue = o.origin
         rules_dict_list = dict_obj.get("rules", [])
         o.rules = []
         for rule_dict in rules_dict_list:
@@ -97,7 +124,6 @@ class Origin(common.DictSerializableModel):
             del rule_dict['name']
             new_rule.from_dict(rule_dict)
             o.rules.append(new_rule)
-        return o
         return o
 
     def to_dict(self):

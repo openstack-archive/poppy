@@ -31,7 +31,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -78,7 +80,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -125,7 +129,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -172,7 +178,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -219,7 +227,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -266,7 +276,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -313,7 +325,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -360,7 +374,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -407,7 +423,9 @@
             {
                 "origin": "%3Cscript%3Ealert%281%29%3C/script%3E",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -454,7 +472,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": "%3Cscript%3Ealert%281%29%3C/script%3E",
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -501,7 +521,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -548,7 +570,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -595,7 +619,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -642,7 +668,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -689,7 +717,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": "%3Cscript%3Ealert%281%29%3C/script%3E"
+                "ssl": "%3Cscript%3Ealert%281%29%3C/script%3E",
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -736,7 +766,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -783,7 +815,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -830,7 +864,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -877,7 +913,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -924,7 +962,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -971,7 +1011,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1018,7 +1060,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1065,7 +1109,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1112,7 +1158,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1159,7 +1207,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1206,7 +1256,9 @@
             {
                 "origin": "%22",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1253,7 +1305,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": "%22",
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1300,7 +1354,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1347,7 +1403,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1394,7 +1452,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1441,7 +1501,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1488,7 +1550,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": "%22"
+                "ssl": "%22",
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1535,7 +1599,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1582,7 +1648,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1629,7 +1697,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1676,7 +1746,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1723,7 +1795,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1770,7 +1844,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1817,7 +1893,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1864,7 +1942,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1911,7 +1991,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -1958,7 +2040,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2005,7 +2089,9 @@
             {
                 "origin": "<script>alert(1)</script>",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2052,7 +2138,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": "<script>alert(1)</script>",
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2099,7 +2187,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2146,7 +2236,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2193,7 +2285,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2240,7 +2334,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2287,7 +2383,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": "<script>alert(1)</script>"
+                "ssl": "<script>alert(1)</script>",
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2334,7 +2432,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2381,7 +2481,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2428,7 +2530,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2475,7 +2579,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2522,7 +2628,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2569,7 +2677,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2616,7 +2726,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2663,7 +2775,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2710,7 +2824,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2757,7 +2873,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2804,7 +2922,9 @@
             {
                 "origin": "<",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2851,7 +2971,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": "<",
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2898,7 +3020,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2945,7 +3069,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -2992,7 +3118,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3039,7 +3167,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3086,7 +3216,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": "<"
+                "ssl": "<",
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3133,7 +3265,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3180,7 +3314,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3227,7 +3363,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3274,7 +3412,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3321,7 +3461,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3368,7 +3510,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3415,7 +3559,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3462,7 +3608,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3509,7 +3657,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3556,7 +3706,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3603,7 +3755,9 @@
             {
                 "origin": ">",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3650,7 +3804,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": ">",
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3697,7 +3853,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3744,7 +3902,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3791,7 +3951,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3838,7 +4000,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3885,7 +4049,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": ">"
+                "ssl": ">",
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3932,7 +4098,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
@@ -3979,7 +4147,9 @@
             {
                 "origin": "mywebsite1.com",
                 "port": 443,
-                "ssl": false
+                "ssl": false,
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ],
         "restrictions_list": [
