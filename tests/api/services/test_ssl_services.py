@@ -123,8 +123,9 @@ class TestPatchSSLService(base.TestBase):
                     {
                         "name": "default",
                         "request_url": "/*"
-                    }
-                ]
+                    }],
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ]
 

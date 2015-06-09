@@ -46,7 +46,7 @@
    "replace_origin": [
         {"op": "replace",
          "path": "/origins/0",
-         "value": {"origin": "1.2.3.4", "port": 80, "rules": [{"name": "default", "request_url": "/replacement"}], "ssl": false}}
+         "value": {"origin": "1.2.3.4", "port": 80, "rules": [{"name": "default", "request_url": "/replacement"}], "ssl": false, "hostheadertype": "custom", "hostheadervalue": "www.customweb.com"}}
     ],
    "add_origin": [
         {"op": "add",
@@ -113,11 +113,25 @@
         {"op": "remove",
          "path": "/origins/0"}
     ],
+   "add_origin_with_origin_hostheadertype": [
+        {"op": "add",
+         "path": "/origins/1",
+         "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                   "rules": [{"name" : "origin", "request_url" : "/origin.htm"}], "hostheadertype": "origin"}
+        }
+    ],
+   "add_origin_with_custom_hostheadertype": [
+        {"op": "add",
+         "path": "/origins/1",
+         "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                   "rules": [{"name" : "origin", "request_url" : "/origin.htm"}], "hostheadertype": "custom", "hostheadervalue": "www.mycustom.com"}
+        }
+    ],
    "add_caching": [
         {"op": "add",
          "path": "/caching/-",
          "value": {"name": "cache_name", "ttl": 111,
-                   "rules": [{"name" : "index","request_url" : "/cats.jpg"}]}}
+                   "rules": [{"name" : "index","request_url" : "/cats.jpg"}] }}
     ],
     "add_caching_with_minimum_length_name": [
         {"op": "add",
@@ -225,7 +239,7 @@
         {"op": "replace",
          "path": "/origins/0",
          "value": {"origin": "1.1.1.1", "port": 443, "ssl": true,
-         "rules": [{"name" : "origin", "request_url" : "/origin2.htm"}]}}
+         "rules": [{"name" : "origin", "request_url" : "/origin2.htm"}], "hostheadertype": "custom", "hostheadervalue": "www.customweb.com"}}
     ],
     "empty_list": []
 }

@@ -20,10 +20,14 @@ from poppy.transport.pecan.models.request import rule
 def load_from_json(json_data):
     origin_name = json_data.get("origin")
     origin_name = origin_name.rstrip("/")
+    hostheadertype = json_data.get("hostheadertype", "domain")
+    hostheadervalue = json_data.get("hostheadervalue", None)
     port = json_data.get("port", 80)
     ssl = json_data.get("ssl", False)
     rules = json_data.get("rules", [])
     rules = [rule.load_from_json(r) for r in rules]
-    result = origin.Origin(origin_name, port, ssl)
+    result = origin.Origin(origin=origin_name, hostheadertype=hostheadertype,
+                           hostheadervalue=hostheadervalue, port=port,
+                           ssl=ssl)
     result.rules = rules
     return result
