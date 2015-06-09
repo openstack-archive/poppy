@@ -699,5 +699,23 @@
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
         "restrictions_list": []
+    },
+    "invalid_hostheadertype":{
+        "service_name": "invalid_hostheadertype",
+        "domain_list": [{"domain": "mywebsite.com"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false,
+                         "hostheadertype": "org"}],
+        "caching_list": []
+    },
+    "missing_hostheadervalue":{
+        "service_name": "missing_hostheadervalue",
+        "domain_list": [{"domain": "mywebsite.com"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false,
+                         "hostheadertype": "custom"}],
+        "caching_list": []
     }
 }
