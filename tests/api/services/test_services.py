@@ -84,6 +84,11 @@ class TestCreateService(providers.TestProviderBase):
         for item in origin_list:
             if 'rules' not in item:
                 item[u'rules'] = []
+            if 'hostheadertype' not in item:
+                item[u'hostheadertype'] = 'domain'
+                item[u'hostheadervalue'] = None
+            elif item['hostheadertype'] == 'origin':
+                item[u'hostheadervalue'] = item['origin']
         self.assertEqual(body['origins'], origin_list)
 
         # TODO(malini): uncomment below after caching list is implemented.
@@ -164,7 +169,9 @@ class TestListServices(base.TestBase):
             prefix='api-test-domain') + '.com'}]
 
         self.origin_list = [{"origin": self.generate_random_string(
-            prefix='api-test-origin') + '.com', "port": 80, "ssl": False}]
+            prefix='api-test-origin') + '.com', "port": 80, "ssl": False,
+            "hostheadertype": "custom", "hostheadervalue":
+            "www.customweb.com"}]
 
         self.caching_list = [{"name": "default", "ttl": 3600},
                              {"name": "home", "ttl": 1200,
@@ -293,7 +300,9 @@ class TestServiceActions(base.TestBase):
                 u"rules": [{
                     u"name": u"default",
                     u"request_url": u"/*"
-                }]
+                }],
+                u"hostheadertype": "custom",
+                u"hostheadervalue": "www.customweb.com"
             }
         ]
 
@@ -454,7 +463,9 @@ class TestServicePatch(base.TestBase):
                         "name": "default",
                         "request_url": "/*"
                     }
-                ]
+                ],
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com"
             }
         ]
 
@@ -734,7 +745,9 @@ class TestServicePatchWithLogDelivery(base.TestBase):
                         "name": "default",
                         "request_url": "/*"
                     }
-                ]
+                ],
+                "hostheadertype": "custom",
+                "hostheadervalue": "www.customweb.com   "
             }
         ]
 

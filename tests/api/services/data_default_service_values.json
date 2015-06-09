@@ -12,7 +12,9 @@
                 {
                     "origin": "mywebsite1.com",
                     "port": 80,
-                    "ssl": false
+                    "ssl": false,
+                    "hostheadertype": "custom",
+                    "hostheadervalue": "www.customweb.com"
                 }
             ]
         },
@@ -34,7 +36,9 @@
                             "name" : "default",
                             "request_url" : "/*"
                         }
-                    ]
+                    ],
+                    "hostheadertype": "custom",
+                    "hostheadervalue": "www.customweb.com"
                 }
             ]
         }
@@ -52,7 +56,9 @@
                 {
                     "origin": "mywebsite1.com",
                     "port": 80,
-                    "ssl": false
+                    "ssl": false,
+                    "hostheadertype": "custom",
+                    "hostheadervalue": "www.customweb.com"
                 }
             ],
             "caching_list": [
@@ -80,7 +86,9 @@
                             "name" : "default",
                             "request_url" : "/*"
                         }
-                    ]
+                    ],
+                    "hostheadertype": "custom",
+                    "hostheadervalue": "www.customweb.com"
                 }
             ],
             "caching_list": [
@@ -110,7 +118,9 @@
                 {
                     "origin": "mywebsite1.com",
                     "port": 80,
-                    "ssl": false
+                    "ssl": false,
+                    "hostheadertype": "custom",
+                    "hostheadervalue": "www.customweb.com"
                 }
             ],
             "caching_list": [
@@ -149,7 +159,9 @@
                             "name" : "default",
                             "request_url" : "/*"
                         }
-                    ]
+                    ],
+                    "hostheadertype": "custom",
+                    "hostheadervalue": "www.customweb.com"
                 }
             ],
             "caching_list": [
