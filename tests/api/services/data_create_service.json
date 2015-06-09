@@ -245,5 +245,26 @@
                          ]
                          }],
          "caching_list": []
+     },
+     "origin_hostheadertype": {
+         "name": "origin_hostheadertype",
+         "domain_list": [{"domain": "my-website.com", "protocol": "http"}],
+         "origin_list": [{"origin": "mywebsite1.com",
+                          "port": 80,
+                          "ssl": false,
+                          "hostheadertype": "origin"
+                         }],
+         "caching_list": []
+     },
+     "custom_hostheadertype": {
+         "name": "custom_hostheadertype",
+         "domain_list": [{"domain": "my-website.com", "protocol": "http"}],
+         "origin_list": [{"origin": "mywebsite1.com",
+                          "port": 80,
+                          "ssl": false,
+                          "hostheadertype": "custom",
+                          "hostheadervalue": "customweb.com"
+                         }],
+         "caching_list": []
      }
 }
