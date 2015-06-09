@@ -20,7 +20,6 @@ from poppy.transport.validators import schema_base
 
 
 class ServiceSchema(schema_base.SchemaBase):
-
     '''JSON Schmema validation for /service.'''
 
     schema = {
@@ -61,7 +60,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'required': True,
                                         'type': 'string',
                                         'enum': [
-                                                'http']
+                                            'http']
                                     },
                                     # When protocol is http
                                     # certificate must be null
@@ -83,13 +82,13 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'required': True,
                                         'type': 'string',
                                         'enum': [
-                                                'https']
+                                            'https']
                                     },
                                     'certificate': {
                                         'required': True,
                                         'type': 'string',
                                         'enum': [
-                                                'shared']
+                                            'shared']
                                     },
                                 },
                                 "additionalProperties": False
@@ -106,14 +105,14 @@ class ServiceSchema(schema_base.SchemaBase):
                                         'required': True,
                                         'type': 'string',
                                         'enum': [
-                                                'https']
+                                            'https']
                                     },
                                     'certificate': {
                                         'required': True,
                                         'type': 'string',
                                         'enum': [
-                                                'san',
-                                                'custom']
+                                            'san',
+                                            'custom']
                                     },
                                 },
                                 "additionalProperties": False
@@ -127,50 +126,116 @@ class ServiceSchema(schema_base.SchemaBase):
                         # the first origin does not have to
                         # have rules field, it will be defaulted
                         # to global url matching
-                        'items': [{
-                            'type': 'object',
-                            'properties': {
-                                'origin': {
-                                    'type': 'string',
-                                    'pattern': re.compile(
-                                        '^(([^:/?#]+):)?'
-                                        '(//([^/?#]*))?'
-                                        '([^?#]*)(\?([^#]*))?'
-                                        '(#(.*))?$',
-                                        re.UNICODE
-                                    ),
-                                    'required': True,
-                                    'minLength': 3,
-                                    'maxLength': 253},
-                                'port': {
-                                    'type': 'integer',
-                                    'enum': [
-                                        80,
-                                        443]},
-                                'ssl': {
-                                    'type': 'boolean'},
-                                'rules': {
-                                    'type': 'array',
-                                    'items': {
-                                        'type': 'object',
-                                        'properties': {
-                                            'name': {
-                                                'type': 'string',
-                                                'required': True,
-                                                'minLength': 1,
-                                                'maxLength': 256
-                                            },
-                                            'request_url': {
-                                                'type': 'string',
-                                                'required': True,
-                                                'minLength': 1,
-                                                'maxLength': 1024
+                        'items': {
+                            'type': [{
+                                'type': 'object',
+                                'properties': {
+                                    'origin': {
+                                        'type': 'string',
+                                        'pattern': re.compile(
+                                            '^(([^:/?#]+):)?'
+                                            '(//([^/?#]*))?'
+                                            '([^?#]*)(\?([^#]*))?'
+                                            '(#(.*))?$',
+                                            re.UNICODE
+                                        ),
+                                        'required': True,
+                                        'minLength': 3,
+                                        'maxLength': 253},
+                                    'port': {
+                                        'type': 'integer',
+                                        'enum': [
+                                            80,
+                                            443]},
+                                    'ssl': {
+                                        'type': 'boolean'},
+                                    'rules': {
+                                        'type': 'array',
+                                        'items': {
+                                            'type': 'object',
+                                            'properties': {
+                                                'name': {
+                                                    'type': 'string',
+                                                    'required': True,
+                                                    'minLength': 1,
+                                                    'maxLength': 256
+                                                },
+                                                'request_url': {
+                                                    'type': 'string',
+                                                    'required': True,
+                                                    'minLength': 1,
+                                                    'maxLength': 1024
+                                                }
                                             }
                                         }
+                                    },
+                                    'hostheadertype': {
+                                        'type': 'string',
+                                        'enum': ['domain', 'origin'],
+                                        'required': False,
+                                    },
+                                }
+                            }, {
+                                'type': 'object',
+                                'properties': {
+                                    'origin': {
+                                        'type': 'string',
+                                        'pattern': re.compile(
+                                            '^(([^:/?#]+):)?'
+                                            '(//([^/?#]*))?'
+                                            '([^?#]*)(\?([^#]*))?'
+                                            '(#(.*))?$',
+                                            re.UNICODE
+                                        ),
+                                        'required': True,
+                                        'minLength': 3,
+                                        'maxLength': 253},
+                                    'port': {
+                                        'type': 'integer',
+                                        'enum': [
+                                            80,
+                                            443]},
+                                    'ssl': {
+                                        'type': 'boolean'},
+                                    'rules': {
+                                        'type': 'array',
+                                        'items': {
+                                            'type': 'object',
+                                            'properties': {
+                                                'name': {
+                                                    'type': 'string',
+                                                    'required': True,
+                                                    'minLength': 1,
+                                                    'maxLength': 256
+                                                },
+                                                'request_url': {
+                                                    'type': 'string',
+                                                    'required': True,
+                                                    'minLength': 1,
+                                                    'maxLength': 1024
+                                                }
+                                            }
+                                        }
+                                    },
+                                    'hostheadertype': {
+                                        'type': 'string',
+                                        'enum': ['custom'],
+                                        'required': False,
+                                    },
+                                    'hostheadervalue': {
+                                        'type': 'string',
+                                        'pattern': re.compile(
+                                            '^(([^:/?#]+):)?'
+                                            '(//([^/?#]*))?'
+                                            '([^?#]*)(\?([^#]*))?'
+                                            '(#(.*))?$',
+                                            re.UNICODE
+                                        ),
+                                        'required': True,
                                     }
                                 }
                             }
-                        }],
+                            ]},
                         'required': True,
                         'minItems': 1,
                         'maxItems': 10,
@@ -220,6 +285,71 @@ class ServiceSchema(schema_base.SchemaBase):
                                     'required': True,
                                     'minItems': 1,
                                 },
+                                'hostheadertype': {
+                                    'type': 'string',
+                                    'enum': ['domain', 'origin'],
+                                    'required': False,
+                                }
+                            },
+                            'type': 'object',
+                            'properties': {
+                                'origin': {
+                                    'type': 'string',
+                                    'pattern': re.compile(
+                                        '^(([^:/?#]+):)?'
+                                        '(//([^/?#]*))?'
+                                        '([^?#]*)(\?([^#]*))?'
+                                        '(#(.*))?$',
+                                        re.UNICODE
+                                    ),
+                                    'required': True,
+                                    'minLength': 3,
+                                    'maxLength': 253},
+                                'port': {
+                                    'type': 'integer',
+                                    'enum': [
+                                        80,
+                                        443]},
+                                'ssl': {
+                                    'type': 'boolean'},
+                                'rules': {
+                                    'type': 'array',
+                                    'items': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'name': {
+                                                'type': 'string',
+                                                'required': True,
+                                                'minLength': 1,
+                                                'maxLength': 256,
+                                            },
+                                            'request_url': {
+                                                'type': 'string',
+                                                'required': True,
+                                                'minLength': 1,
+                                                'maxLength': 1024,
+                                            }
+                                        }
+                                    },
+                                    'required': True,
+                                    'minItems': 1,
+                                },
+                                'hostheadertype': {
+                                    'type': 'string',
+                                    'enum': ['custom'],
+                                    'required': False,
+                                },
+                                'hostheadervalue': {
+                                    'type': 'string',
+                                    'pattern': re.compile(
+                                        '^(([^:/?#]+):)?'
+                                        '(//([^/?#]*))?'
+                                        '([^?#]*)(\?([^#]*))?'
+                                        '(#(.*))?$',
+                                        re.UNICODE
+                                    ),
+                                    'required': True,
+                                }
                             }
                         }
                     },
