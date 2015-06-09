@@ -479,6 +479,13 @@ class ServiceController(base.ServiceBase):
             }
         }
 
+        if origin.hostheadertype == 'origin':
+            origin_behavior_dict['hostHeaderType'] = 'origin'
+            origin_behavior_dict['hostHeaderValue'] = origin.origin
+        elif origin.hostheadertype == 'custom':
+            origin_behavior_dict['hostHeaderType'] = 'custom'
+            origin_behavior_dict['hostHeaderValue'] = origin.hostheadervalue
+
         wildcards = []
 
         # this is the global 'url-wildcard' rule

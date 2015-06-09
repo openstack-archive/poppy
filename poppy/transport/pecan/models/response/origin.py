@@ -31,3 +31,5 @@ class Model(collections.OrderedDict):
         self['port'] = origin.port
         self['ssl'] = origin.ssl
         self['rules'] = [rule.Model(r) for r in origin.rules]
+        self['hostheadertype'] = origin.hostheadertype
+        self['hostheadervalue'] = origin.hostheadervalue
