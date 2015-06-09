@@ -90,6 +90,8 @@ class TestBase(fixtures.BaseTestFixture):
     def assertSchema(self, response_json, expected_schema):
         """Verify response schema aligns with the expected schema."""
         try:
+            #import ipdb
+            #ipdb.set_trace()
             jsonschema.validate(response_json, expected_schema)
         except jsonschema.ValidationError as message:
             assert False, message

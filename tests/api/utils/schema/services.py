@@ -43,7 +43,9 @@ origin = {
                  'minumum': 0,
                  'maximum': 100000},
         'ssl': {'type': 'boolean'},
-        'rules': {'type': 'array'}},
+        'rules': {'type': 'array'},
+        'hostheadertype': {'type': 'any'},
+        'hostheadervalue': {'type': 'any'}},
     'required': ['origin', 'port', 'ssl'],
     'additionalProperties': False
 }
@@ -83,7 +85,7 @@ get_service = {
         'id': service_id,
         'name': service_name,
         'domains': {'type': 'array',
-                    'items': {'anyOf': [domain, domain_https]},
+                    'items': {'type': [domain, domain_https]},
                     'minItems': 1
                     },
         'origins': {'type': 'array',
