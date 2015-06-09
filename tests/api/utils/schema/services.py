@@ -43,7 +43,9 @@ origin = {
                  'minumum': 0,
                  'maximum': 100000},
         'ssl': {'type': 'boolean'},
-        'rules': {'type': 'array'}},
+        'rules': {'type': 'array'},
+        'hostheadertype': {'type': 'string'},
+        'hostheadervalue': {'type': ['string', 'null']}},
     'required': ['origin', 'port', 'ssl'],
     'additionalProperties': False
 }
