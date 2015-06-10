@@ -125,6 +125,40 @@ def json_matches_flavor_schema_inner(request, schema=None):
     is_valid_flavor_configuration(data, schema)
 
 
+def is_valid_shared_ssl_domain_name(domain_name):
+    shared_ssl_domain_regex = '^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$'
+    return re.match(shared_ssl_domain_regex, domain_name)
+
+
+def is_valid_domain_name(domain_name):
+    # only allow ascii
+    domain_regex = ('^((?=[a-z0-9-]{1,63}\.)[a-z0-9]+'
+                    '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
+    # allow Punycode
+    # domain_regex = ('^((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+'
+    #                 '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
+    return re.match(domain_regex, domain_name)
+
+
+def is_valid_domain(domain):
+    domain_name = domain.get('domain')
+    if (domain.get('protocol') == 'https' and
+            domain['certificate'] == u'shared'):
+        return is_valid_shared_ssl_domain_name(domain_name)
+    else:
+        return is_valid_domain_name(domain_name)
+
+
+def is_valid_ip_address(ip_address):
+    ipv4_regex = '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
+    return re.match(ipv4_regex, ip_address)
+
+
+def is_valid_origin(origin):
+    return (is_valid_domain_name(origin.get('origin')) or
+            is_valid_ip_address(origin.get('origin')))
+
+
 def is_valid_service_configuration(service, schema):
     if schema is not None:
         errors_list = list(
@@ -231,27 +265,10 @@ def is_valid_service_configuration(service, schema):
 
     # 7. domains must be valid
     if 'domains' in service:
-        # only allow ascii
-        domain_regex = ('^((?=[a-z0-9-]{1,63}\.)[a-z0-9]+'
-                        '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
-        # allow Punycode
-        # domain_regex = ('^((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+'
-        #                 '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
-
-        # shared ssl domain
-        shared_ssl_domain_regex = '^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$'
-
         for domain in service['domains']:
-            domain_name = domain.get('domain')
-            if (domain.get('protocol') == 'https' and
-                    domain['certificate'] == u'shared'):
-                if not re.match(shared_ssl_domain_regex, domain_name):
-                    raise exceptions.ValidationFailed(
-                        u'Domain {0} is not valid'.format(domain_name))
-            else:
-                if not re.match(domain_regex, domain_name):
-                    raise exceptions.ValidationFailed(
-                        u'Domain {0} is not valid'.format(domain_name))
+            if not is_valid_domain(domain):
+                raise exceptions.ValidationFailed(
+                    u'Domain {0} is not valid'.format(domain.get('domain')))
 
     # 8. origins and domains cannot be the same
     if 'origins' in service and 'domains' in service:
@@ -269,6 +286,12 @@ def is_valid_service_configuration(service, schema):
             raise exceptions.ValidationFailed(
                 u'Domains and origins cannot be same: {0}'.format(origin))
 
+    # 9. origins must be valid
+    if 'origins' in service:
+        for origin in service['origins']:
+            if not is_valid_origin(origin):
+                raise exceptions.ValidationFailed(
+                    u'Origin {0} is not valid'.format(origin.get('origin')))
     return
 
 

@@ -217,7 +217,7 @@ class ServicesController(base.Controller, hooks.HookController):
             services_controller.update(
                 self.project_id, service_id, self.auth_token, service_updates)
         except exceptions.ValidationFailed as e:
-            pecan.abort(400, detail=str(e))
+            pecan.abort(400, detail=u'{0}'.format(e))
         except LookupError as e:  # error handler for no flavor
             pecan.abort(400, detail=str(e))
         except ValueError as e:  # error handler for existing service name
