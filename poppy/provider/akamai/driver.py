@@ -21,8 +21,12 @@ from akamai import edgegrid
 from oslo.config import cfg
 import requests
 
+from poppy.openstack.common import log
 from poppy.provider.akamai import controllers
 from poppy.provider import base
+
+LOG = log.getLogger(__name__)
+
 
 AKAMAI_OPTIONS = [
     # credentials && base URL for policy API
@@ -155,6 +159,9 @@ class CDNProvider(base.Driver):
         if resp.ok:
             return True
         else:
+            LOG.warn("Akamai Health Check Failed")
+            LOG.warn("Response Status Code : {0}".format(resp.status_code))
+            LOG.warn("Response Text : {0}".format(resp.text))
             return False
 
     @property

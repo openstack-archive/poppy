@@ -89,12 +89,22 @@ AKAMAI_OPTIONS = [
 
 class Response(object):
 
-    def __init__(self, resp_status):
+    def __init__(self, status_code, text, resp_status):
+        self._status_code = status_code
+        self._text = text
         self.resp_status = resp_status
 
     @property
     def ok(self):
         return self.resp_status
+
+    @property
+    def status_code(self):
+        return self._status_code
+
+    @property
+    def text(self):
+        return self._text
 
 
 @ddt.ddt
@@ -136,7 +146,7 @@ class TestDriver(base.TestCase):
         status_code, text, health_status = details
         provider = driver.CDNProvider(self.conf)
         mock_api_client = provider.service_controller.driver.policy_api_client
-        resp = Response(health_status)
+        resp = Response(status_code, text, health_status)
         with mock.patch.object(mock_api_client, 'put',
                                return_value=resp):
             self.assertEqual(health_status, provider.is_alive())
