@@ -41,6 +41,20 @@
                                      "request_url" : "/index.htm"}]}],
         "restrictions_list": []
     },
+    "upper_case_domain": {
+        "service_name": "upper_case_domain",
+        "domain_list": [{"domain": "ab"},
+                        {"domain": "Blog.UPPER.com"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
+    },
     "too_long_name": {
         "service_name": "too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name",
         "domain_list": [{"domain": "mywebsite.com"},
