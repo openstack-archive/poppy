@@ -8,7 +8,7 @@ Note: This is a work in progress and is not currently recommended for production
 What is Poppy
 ============
 
-Users have come to expect exceptional speed in their applications, websites, and video experiences.  Because of this, using a CDN has become standard for companies, no matter their size.  
+Users have come to expect exceptional speed in their applications, websites, and video experiences.  Because of this, using a CDN has become standard for companies, no matter their size.
 
 Poppy will take all the guess work out of the CDN market for our users.  Poppy will give them a consistently speedy experience from integrated partners, with an easy to use RESTful API.
 
@@ -73,9 +73,9 @@ installed and running.
     keyspace = poppy
     migrations_path = /home/poppy/poppy/storage/cassandra/migrations
 
-4. By using cassandra storage plugin, you will need to create the default 
+4. By using cassandra storage plugin, you will need to create the default
    keyspace "poppy" on your cassandra host/cluster. So log into cqlsh, do::
-    
+
     cqlsh> CREATE KEYSPACE poppy WITH REPLICATION = { 'class' : 'SimpleStrategy' , 'replication_factor' :  1}  ;
 
 5. For logging, find the ``[DEFAULT]`` section in
@@ -91,14 +91,14 @@ installed and running.
 7. Install general requirements::
 
     $ pip install -r requirements/requirements.txt
-  
+
    Run the following so you can see the results of any changes you
    make to the code without having to reinstall the package each time::
-    
+
     $ pip install -e .
 
-  To install additional dependencies, see `Additional Dependencies`_.  
-    
+  To install additional dependencies, see `Additional Dependencies`_.
+
 
 8. Install and start zookeeper driver::
 
@@ -118,7 +118,7 @@ installed and running.
 
 11. Test out that Poppy is working by requesting the home doc (with a sample project ID)::
 
-    $ curl -i -X GET http://0.0.0.0:8888/v1.0/123
+    $ curl -i -X GET -H "X-Project-ID: 000" -H "X-Auth-Token: 000" -H "Content-Type: application/json" http://0.0.0.0:8888/v1.0/
 
 You should get an **HTTP 200** along with some headers that will look
 similar to this::
@@ -161,7 +161,7 @@ For Python 2.7::
 
 For Python 3.4::
 
-    $ sudo apt-get install python3.4-dev 
+    $ sudo apt-get install python3.4-dev
 
 For PyPy::
 
@@ -185,11 +185,11 @@ Mac OSX
     http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 
    You can check the version currently running with::
-    
+
     $java -version
 
 2. Follow the instructions on the datastax site to install cassandra for Mac OSX::
-    
+
     http://www.datastax.com/2012/01/working-with-apache-cassandra-on-mac-os-x
 
 3. Create a Keyspace with Replication::
