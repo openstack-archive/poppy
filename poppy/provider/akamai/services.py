@@ -523,7 +523,7 @@ class ServiceController(base.ServiceBase):
                 if rule_entry.referrer is not None:
                     found_match = False
                     referrer_whitelist_value = ' '.join(
-                        ['*%s*' % referrer
+                        ['%s' % referrer
                          for referrer
                          in rule_entry.referrer.split(' ')
                          ])
