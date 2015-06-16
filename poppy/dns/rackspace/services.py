@@ -552,7 +552,7 @@ class ServicesController(base.ServicesBase):
                 # Need to indicate if this access_url is a shared ssl
                 # access url, since its has different shard_prefix and
                 # num_shard
-                if link.get('certificate', None) == 'shared':
+                if link.get('shared_ssl_flag', None):
                     access_url['shared_ssl_flag'] = True
                 else:
                     access_url['shared_ssl_flag'] = False
