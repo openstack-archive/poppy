@@ -361,7 +361,7 @@ class TestServiceActions(base.TestBase):
         self.assertEqual(404, current_status)
 
     def test_delete_non_existing_service(self):
-        url = self.service_url.rsplit('/', 1)[0] + str(uuid.uuid4())
+        url = self.service_url.rsplit('/', 1)[0] + "/" + str(uuid.uuid4())
         resp = self.client.delete_service(location=url)
         self.assertEqual(resp.status_code, 404)
 
