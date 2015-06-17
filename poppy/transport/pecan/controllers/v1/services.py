@@ -29,6 +29,7 @@ from poppy.transport.pecan.models.response import link
 from poppy.transport.pecan.models.response import service as resp_service_model
 from poppy.transport.validators import helpers
 from poppy.transport.validators.schemas import service
+from poppy.transport.validators.schemas import service_state
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import exceptions
 from poppy.transport.validators.stoplight import helpers as stoplight_helpers
@@ -83,18 +84,21 @@ class OperatorStateController(base.Controller, hooks.HookController):
         super(OperatorStateController, self).__init__(driver)
 
     @pecan.expose('json')
+    @decorators.validate(
+        service_id=rule.Rule(
+            helpers.is_valid_service_id(),
+            helpers.abort_with_message),
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                service_state.ServiceStateSchema.get_schema(
+                    "service_state", "POST")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter))
     def post(self, service_id):
 
         service_state_json = json.loads(pecan.request.body.decode('utf-8'))
-        service_state = service_state_json.get('state', None)
+        service_state = service_state_json['state']
         services_controller = self._driver.manager.services_controller
-
-        if not service_state:
-            pecan.abort(400, detail='Invalid JSON, state is a required field')
-
-        if service_state not in [u'enabled', u'disabled']:
-            pecan.abort(400, detail=u'Service state {0} is invalid'
-                                    .format(service_state))
 
         try:
             services_controller.update_state(self.project_id,
