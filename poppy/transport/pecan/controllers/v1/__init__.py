@@ -15,6 +15,7 @@
 
 """Pecan v1.0 Controllers"""
 
+from poppy.transport.pecan.controllers.v1 import admin
 from poppy.transport.pecan.controllers.v1 import flavors
 from poppy.transport.pecan.controllers.v1 import health
 from poppy.transport.pecan.controllers.v1 import home
@@ -31,3 +32,4 @@ Health = health.HealthController
 DNSHealth = health.DNSHealthController
 StorageHealth = health.StorageHealthController
 ProviderHealth = health.ProviderHealthController
+Admin = admin.AdminController
