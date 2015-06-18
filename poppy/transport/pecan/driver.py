@@ -62,6 +62,7 @@ class PecanTransportDriver(transport.Driver):
         health_controller.add_controller('provider', v1.ProviderHealth(self))
         home_controller.add_controller('services', v1.Services(self))
         home_controller.add_controller('flavors', v1.Flavors(self))
+        home_controller.add_controller('admin', v1.Admin(self))
 
         self._app = pecan.make_app(root_controller,
                                    guess_content_type_from_ext=False)
