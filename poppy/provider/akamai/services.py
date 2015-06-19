@@ -14,13 +14,13 @@
 # limitations under the License.
 
 import copy
+import datetime
 import json
 import traceback
 
 from poppy.common import decorators
 from poppy.common import util
 from poppy.openstack.common import log
-from poppy.provider.akamai import utils
 from poppy.provider import base
 
 # to use log inside worker, we need to directly use logging
@@ -46,9 +46,8 @@ class ServiceController(base.ServiceBase):
         self.request_header = {'Content-type': 'application/json',
                                'Accept': 'text/plain'}
 
-        self.san_cert_cnames = self.driver.akamai_conf.san_cert_cnames
-        self.san_cert_hostname_limit = (
-            self.driver.akamai_conf.san_cert_hostname_limit)
+        self.san_cert_cnames = self.driver.san_cert_cnames
+        self.san_cert_hostname_limit = self.driver.san_cert_hostname_limit
 
     def create(self, service_obj):
         try:
@@ -654,31 +653,11 @@ class ServiceController(base.ServiceBase):
         return provider_access_url
 
     def _pick_san_edgename(self):
-        """Inspect && Pick a SAN cert cnameHostname for this user"""
-        if self.san_cert_cnames is None or len(self.san_cert_cnames) == 0:
-            raise ValueError('No valid SAN Cert has been configured. '
-                             'Please check your configuration')
-        find_idx = 0
-        minimum_number_hosts = 2
-        # Pick the san cert with the smallest number of hosts present
-        # 2 will be the initial number
-        for idx, san_cname in enumerate(self.san_cert_cnames):
-            n = utils.get_ssl_number_of_hosts('.'.join(
-                [san_cname, self.driver.akamai_https_access_url_suffix]))
-            if idx == 0:
-                minimum_number_hosts = n
-            if n == 2:
-                find_idx = idx
-                break
-            if n >= self.san_cert_hostname_limit:
-                if idx == len(self.san_cert_cnames) - 1:
-                    raise ValueError('All SAN Certs are having the maximum'
-                                     ' # of hostnames.Please contact operation'
-                                     ' team to create more SAN Certs')
-                continue
+        """Inspect && Pick a SAN cert cnameHostname for this user.
 
-            if n < minimum_number_hosts:
-                find_idx = idx
-                minimum_number_hosts = n
+        Based on what the date is it current date, pick a san cert
+        """
+        find_idx = (
+            datetime.datetime.today().weekday() % len(self.san_cert_cnames))
 
         return self.san_cert_cnames[find_idx]
