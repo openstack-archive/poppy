@@ -21,43 +21,42 @@ from pecan import hooks
 from poppy.transport.pecan.controllers import base
 from poppy.transport.pecan import hooks as poppy_hooks
 from poppy.transport.validators import helpers
-from poppy.transport.validators.schemas import service_state
+from poppy.transport.validators.schemas import service_action
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import helpers as stoplight_helpers
 from poppy.transport.validators.stoplight import rule
 
 
-class OperatorStateController(base.Controller, hooks.HookController):
+class OperatorServiceActionController(base.Controller, hooks.HookController):
 
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
     def __init__(self, driver):
-        super(OperatorStateController, self).__init__(driver)
+        super(OperatorServiceActionController, self).__init__(driver)
 
     @pecan.expose('json')
     @decorators.validate(
         request=rule.Rule(
             helpers.json_matches_service_schema(
-                service_state.ServiceStateSchema.get_schema(
-                    "service_state", "POST")),
+                service_action.ServiceActionSchema.get_schema(
+                    "service_action", "POST")),
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
     def post(self):
 
         service_state_json = json.loads(pecan.request.body.decode('utf-8'))
-        service_state = service_state_json.get('state', None)
+        service_action = service_state_json.get('action', None)
         project_id = service_state_json.get('project_id', None)
-        service_id = service_state_json.get('service_id', None)
 
         services_controller = self._driver.manager.services_controller
 
         try:
-            services_controller.update_state(project_id,
-                                             service_id,
-                                             service_state)
-        except ValueError:
-            pecan.abort(404, detail='Service {0} could not be found'.format(
-                        service_id))
+            services_controller.services_action(project_id, service_action)
+        except Exception as e:
+            pecan.abort(404, detail=(
+                        'Services action {0} on tenant: {1} failed, '
+                        'Reason: {2}'.format(service_action,
+                                             project_id, str(e))))
 
         return pecan.Response(None, 202)
 
@@ -65,7 +64,7 @@ class OperatorStateController(base.Controller, hooks.HookController):
 class AdminServiceController(base.Controller, hooks.HookController):
     def __init__(self, driver):
         super(AdminServiceController, self).__init__(driver)
-        self.__class__.state = OperatorStateController(driver)
+        self.__class__.action = OperatorServiceActionController(driver)
 
 
 class AdminController(base.Controller, hooks.HookController):

@@ -16,12 +16,12 @@
 from poppy.transport.validators import schema_base
 
 
-class ServiceStateSchema(schema_base.SchemaBase):
+class ServiceActionSchema(schema_base.SchemaBase):
 
-    '''JSON Schmema validation for /services/service_id/state.'''
+    '''JSON Schmema validation for /admin/services/action.'''
 
     schema = {
-        'service_state': {
+        'service_action': {
             'POST': {
                 'type': 'object',
                 'additionalProperties': False,
@@ -30,12 +30,8 @@ class ServiceStateSchema(schema_base.SchemaBase):
                         'type': 'string',
                         'required': True
                     },
-                    'service_id': {
-                        'type': 'string',
-                        'required': True
-                    },
-                    'state': {
-                        'enum': ['enabled', 'disabled'],
+                    'action': {
+                        'enum': ['delete', 'enable', 'disable'],
                         'required': True
                     }
                 }

@@ -290,33 +290,56 @@ class DefaultServicesController(base.ServicesController):
 
         return
 
-    def update_state(self, project_id, service_id, state):
-        """update_state.
+    def services_action(self, project_id, action):
+        """find services of a .
 
         :param project_id
-        :param service_id
         :param state
 
         :raises ValueError
         """
-        # call storage and update service state
-        try:
-            service_obj = self.storage_controller.update_state(project_id,
-                                                               service_id,
-                                                               state)
-        except ValueError:
-            raise errors.ServiceNotFound("Service not found")
+        # list all the services of for this project_id
+        # 10 per batch
+        marker = None
+        service_batch = self.storage_controller.list(project_id, marker, 10)
+        while len(service_batch) > 0:
+            marker = service_batch[-1].service_id
+            # process previous batch
+            for service_obj in service_batch:
+                kwargs = {
+                    'project_id': project_id,
+                    'service_obj': json.dumps(service_obj.to_dict()),
+                }
+                try:
+                    if action == 'delete':
+                        LOG.info('Deleting  service: %s, project_id: %s' % (
+                            service_obj.service_id, project_id))
+                        self.delete(project_id, service_obj.service_id)
+                    elif action == 'enable':
+                        LOG.info('Enabling  service: %s, project_id: %s' % (
+                            service_obj.service_id, project_id))
+                        kwargs['state'] = 'enabled'
+                        self.distributed_task_controller.submit_task(
+                            update_service_state.enable_service, **kwargs)
+                    elif action == 'disable':
+                        LOG.info('Disabling  service: %s, project_id: %s' % (
+                            service_obj.service_id, project_id))
+                        kwargs['state'] = 'disabled'
+                        self.distributed_task_controller.submit_task(
+                            update_service_state.disable_service, **kwargs)
+                except Exception as e:
+                    # If one service's action failed, we log it and not
+                    # impact other services' action
+                    LOG.warning('Perform action %s on service: %s,'
+                                ' project_id: %s failed, reason: %s' % (
+                                    action,
+                                    service_obj.service_id,
+                                    project_id,
+                                    str(e)))
+            service_batch = self.storage_controller.list(project_id, marker,
+                                                         10)
 
-        kwargs = {
-            'service_obj': json.dumps(service_obj.to_dict())
-        }
-
-        if state == 'enabled':
-            self.distributed_task_controller.submit_task(
-                update_service_state.enable_service, **kwargs)
-        elif state == 'disabled':
-            self.distributed_task_controller.submit_task(
-                update_service_state.disable_service, **kwargs)
+        return
 
     def delete(self, project_id, service_id):
         """delete.

@@ -29,6 +29,22 @@ conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
 
 
+class UpdateServiceStateTask(task.Task):
+    def execute(self, project_id, service_obj, state):
+        service_obj_json = json.loads(service_obj)
+        service_obj = service.load_from_json(service_obj_json)
+
+        service_controller, self.storage_controller = \
+            memoized_controllers.task_controllers('poppy', 'storage')
+
+        LOG.info(u'Starting to update service state to %s, for '
+                 'project_id: %s, service_id: %s'
+                 % (state, project_id, service_obj.service_id))
+        self.storage_controller.update_state(
+            project_id, service_obj.service_id, state)
+        LOG.info(u'Update service state complete.')
+
+
 class FixDNSChainTask(task.Task):
     def execute(self, service_obj):
         service_obj_json = json.loads(service_obj)

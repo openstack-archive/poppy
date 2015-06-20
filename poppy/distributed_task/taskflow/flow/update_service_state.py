@@ -28,14 +28,16 @@ conf(project='poppy', prog='poppy', args=[])
 
 
 def disable_service():
-    flow = linear_flow.Flow('Breaking CNAME chain').add(
+    flow = linear_flow.Flow('Disable service').add(
+        update_service_state_tasks.UpdateServiceStateTask(),
         update_service_state_tasks.BreakDNSChainTask()
     )
     return flow
 
 
 def enable_service():
-    flow = linear_flow.Flow('Fixing CNAME chain').add(
+    flow = linear_flow.Flow('Enable service').add(
+        update_service_state_tasks.UpdateServiceStateTask(),
         update_service_state_tasks.FixDNSChainTask()
     )
     return flow

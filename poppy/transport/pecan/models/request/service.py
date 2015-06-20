@@ -24,7 +24,7 @@ from poppy.transport.pecan.models.request import restriction
 
 
 def load_from_json(json_data):
-    service_id = uuid.uuid4()
+    service_id = json_data.get('service_id', uuid.uuid4())
 
     name = json_data.get("name")
     origins = json_data.get("origins", [])

@@ -75,38 +75,6 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
         return pecan.Response(None, 202)
 
 
-class OperatorStateController(base.Controller, hooks.HookController):
-
-    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
-
-    def __init__(self, driver):
-        super(OperatorStateController, self).__init__(driver)
-
-    @pecan.expose('json')
-    def post(self, service_id):
-
-        service_state_json = json.loads(pecan.request.body.decode('utf-8'))
-        service_state = service_state_json.get('state', None)
-        services_controller = self._driver.manager.services_controller
-
-        if not service_state:
-            pecan.abort(400, detail='Invalid JSON, state is a required field')
-
-        if service_state not in [u'enabled', u'disabled']:
-            pecan.abort(400, detail=u'Service state {0} is invalid'
-                                    .format(service_state))
-
-        try:
-            services_controller.update_state(self.project_id,
-                                             service_id,
-                                             service_state)
-        except ValueError:
-            pecan.abort(404, detail='Service {0} could not be found'.format(
-                        service_id))
-
-        return pecan.Response(None, 202)
-
-
 class ServicesController(base.Controller, hooks.HookController):
 
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
@@ -123,7 +91,6 @@ class ServicesController(base.Controller, hooks.HookController):
         # so added it in __init__ method.
         # see more in: http://pecan.readthedocs.org/en/latest/rest.html
         self.__class__.assets = ServiceAssetsController(driver)
-        self.__class__.state = OperatorStateController(driver)
 
     @pecan.expose('json')
     def get_all(self):
