@@ -42,7 +42,7 @@ Features
 What Poppy is not
 ----------------------
 
-Poppy does not run its own Edge Cache or POP servers.  This is purely a management API to abstract away the myriad of CDN providers on the market. 
+Poppy does not run its own Edge Cache or POP servers.  This is purely a management API to abstract away the myriad of CDN providers on the market.
 
 
 
