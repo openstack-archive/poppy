@@ -21,14 +21,85 @@ from pecan import hooks
 from poppy.transport.pecan.controllers import base
 from poppy.transport.pecan import hooks as poppy_hooks
 from poppy.transport.validators import helpers
+<<<<<<< HEAD
 from poppy.transport.validators.schemas import service_action
+=======
+from poppy.transport.validators.schemas import san_migration
+from poppy.transport.validators.schemas import service_state
+>>>>>>> dc59b7e... Adds an admin API for migrating the SAN domain.
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import helpers as stoplight_helpers
 from poppy.transport.validators.stoplight import rule
 
 
+<<<<<<< HEAD
 class OperatorServiceActionController(base.Controller, hooks.HookController):
+=======
+class SANDomainMigrationController(base.Controller, hooks.HookController):
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
+    def __init__(self, driver):
+        super(SANDomainMigrationController, self).__init__(driver)
+
+    @pecan.expose('json')
+    @decorators.validate(
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                san_migration.SANMigrationServiceSchema.get_schema(
+                    "SAN_migration", "POST")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter))
+    def post(self):
+        request_json = json.loads(pecan.request.body.decode('utf-8'))
+        project_id = request_json.get('project_id', None)
+        service_id = request_json.get('service_id', None)
+        domain_name = request_json.get('domain_name', None)
+        new_cert = request_json.get('new_cert', None)
+
+        if "edgekey.net" not in new_cert:
+            new_cert = new_cert + ".edgekey.net"
+
+        dns_controller = self._driver._manager.dns.services_controller
+        storage_controller = self._driver._manager.storage.services_controller
+>>>>>>> dc59b7e... Adds an admin API for migrating the SAN domain.
+
+        try:
+            # Update CNAME records and provider_details in cassandra
+            provider_details = storage_controller.get_provider_details(
+                project_id, service_id)
+            for provider in provider_details:
+                for url in provider_details[provider].access_urls:
+                    if url['domain'] == domain_name:
+                        if 'operator_url' in url:
+                            access_url = url['operator_url']
+                            dns_controller.migrate_SAN_domain(access_url,
+                                                              new_cert)
+                            url['provider_url'] = new_cert
+                            storage_controller.update_provider_details(
+                                project_id,
+                                service_id,
+                                provider_details
+                                )
+        except ValueError:
+            pecan.abort(404, detail='Service {0} could not be found'.format(
+                service_id))
+
+        return pecan.Response(None, 202)
+
+
+class AkamaiController(base.Controller, hooks.HookController):
+    def __init__(self, driver):
+        super(AkamaiController, self).__init__(driver)
+        self.__class__.service = SANDomainMigrationController(driver)
+
+
+class ProviderController(base.Controller, hooks.HookController):
+    def __init__(self, driver):
+        super(ProviderController, self).__init__(driver)
+        self.__class__.akamai = AkamaiController(driver)
+
+
+class OperatorStateController(base.Controller, hooks.HookController):
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
     def __init__(self, driver):
@@ -51,12 +122,21 @@ class OperatorServiceActionController(base.Controller, hooks.HookController):
         services_controller = self._driver.manager.services_controller
 
         try:
+<<<<<<< HEAD
             services_controller.services_action(project_id, service_action)
         except Exception as e:
             pecan.abort(404, detail=(
                         'Services action {0} on tenant: {1} failed, '
                         'Reason: {2}'.format(service_action,
                                              project_id, str(e))))
+=======
+            services_controller.update_state(project_id,
+                                             service_id,
+                                             service_state)
+        except ValueError:
+            pecan.abort(404, detail='Service {0} could not be found'.format(
+                service_id))
+>>>>>>> dc59b7e... Adds an admin API for migrating the SAN domain.
 
         return pecan.Response(None, 202)
 
@@ -71,3 +151,4 @@ class AdminController(base.Controller, hooks.HookController):
     def __init__(self, driver):
         super(AdminController, self).__init__(driver)
         self.__class__.services = AdminServiceController(driver)
+        self.__class__.provider = ProviderController(driver)
