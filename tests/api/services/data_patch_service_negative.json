@@ -84,6 +84,11 @@
          "path": "/domains/0",
         "value": {"domain": "www.domain.com"}}
     ],
+    "add_uppercase_domain": [
+        {"op": "add",
+         "path": "/domains/0",
+        "value": {"domain": "www.DOMAIN.com", "protocol": "http"}}
+    ],
    "replace_empty_origin": [
         {"op": "replace",
          "path": "/origins/0",
@@ -103,6 +108,11 @@
         {"op": "replace",
          "path": "/domains/0",
          "value": {"domain": "", "protocol": "http"}}
+    ],
+   "replace_with_uppercase_domain": [
+        {"op": "replace",
+         "path": "/domains/0",
+         "value": {"domain": "MYDOMAIN.com", "protocol": "http"}}
     ],
    "replace_domain_empty_dict": [
         {"op": "replace",
