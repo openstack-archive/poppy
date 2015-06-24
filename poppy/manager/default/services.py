@@ -274,7 +274,8 @@ class DefaultServicesController(base.ServicesController):
         provider_details = service_old.provider_details
         for provider in provider_details:
             provider_details[provider].status = u'update_in_progress'
-        self.storage_controller.update(project_id, service_id, service_old)
+        service_new.provider_details = provider_details
+        self.storage_controller.update(project_id, service_id, service_new)
 
         kwargs = {
             'project_id': project_id,
