@@ -157,6 +157,21 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
         return self.request('DELETE', location)
 
+    def admin_service_action(self, project_id, action,
+                             requestslib_kwargs=None):
+        """Update Tenant State
+
+        :return: Response Object containing response code 202
+        POST
+        /admin/services/action
+        """
+
+        url = '{0}/admin/services/action'.format(self.url)
+        request_object = requests.ServiceAction(
+            project_id=project_id, action=action)
+        return self.request('POST', url, request_entity=request_object,
+                            requestslib_kwargs=requestslib_kwargs)
+
     def check_health(self):
         """Check Health of the application
 
@@ -253,16 +268,42 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
             body = service.json()
             current_status = body['status']
             if (current_status.lower() == status.lower()):
-                return
+                return service
 
             if abort_on_status is not None:
                 if current_status == abort_on_status:
                     # this is for debugging purpose,
                     # will be removed later, so simply use print
                     print(body.get('errors', []))
-                    return
+                    return service
 
             current_time = int(time.time())
             if current_time > stop_time:
                 assert False, ('Timed out waiting for service status change'
                                ' to {0}').format(status)
+
+    def wait_for_service_delete(self, location,
+                                abort_on_status=None,
+                                retry_interval=2,
+                                retry_timeout=30):
+        """Waits for a service to be deleted."""
+        current_status = ''
+        start_time = int(time.time())
+        stop_time = start_time + retry_timeout
+        resp = self.get_service(location=location)
+        while resp.status_code == 200:
+            time.sleep(retry_interval)
+            resp = self.get_service(location=location)
+            if (resp.status_code == 404):
+                return resp
+
+            if abort_on_status is not None:
+                if current_status == abort_on_status:
+                    # this is for debugging purpose,
+                    # will be removed later, so simply use print
+                    print(resp.get('errors', []))
+                    return resp
+
+            current_time = int(time.time())
+            if current_time > stop_time:
+                assert False, ('Timed out waiting for service to be deleted')
