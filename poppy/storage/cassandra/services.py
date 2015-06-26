@@ -37,19 +37,6 @@ from poppy.storage import base
 LOG = logging.getLogger(__name__)
 
 
-CQL_GET_ALL_SERVICES = '''
-    SELECT project_id,
-        service_id,
-        service_name,
-        domains,
-        flavor_id,
-        origins,
-        caching_rules,
-        restrictions
-    FROM services
-    WHERE project_id = %(project_id)s
-'''
-
 CQL_LIST_SERVICES = '''
     SELECT project_id,
         service_id,
