@@ -10,7 +10,7 @@ RUN apt-get -qq update
 RUN apt-get -qq upgrade
 
 # Install Pip, Python, etc
-RUN apt-get -qqy install git-core wget curl libpython-dev vim memcached libev4 libev-dev python-dev
+RUN apt-get -qqy install git-core wget curl libpython-dev libev4 libev-dev libffi6 libffi-dev libssl-dev python-dev
 
 # setuptools
 RUN wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
@@ -32,12 +32,12 @@ RUN sudo pip install -r /home/poppy/requirements/requirements.txt
 RUN sudo pip install -e /home/poppy/.
 
 # Set up the configuration files
-ADD ./docker/api/poppy.conf /etc/poppy.conf
-ADD ./docker/api/logging.conf /etc/logging.conf
-ADD ./docker/api/uwsgi.ini /root/uwsgi.ini
+ADD poppy.conf /etc/poppy.conf
+ADD logging.conf /etc/logging.conf
+ADD uwsgi.ini /root/uwsgi.ini
 
-# Deploy startup script
-ADD ./docker/api/init.sh /usr/local/bin/poppy_startup
+# Deploy the startup script
+ADD startup.sh /usr/local/bin/poppy_startup       
 RUN chmod 755 /usr/local/bin/poppy_startup
 
 # create uwsgi log directory
@@ -48,6 +48,10 @@ RUN chmod -R +w /var/log/poppy
 RUN mkdir -p /var/run/poppy
 RUN chmod -R +w /var/run/poppy
 
-# Start Poppy
-EXPOSE 8081
-CMD poppy-startup
+# Run the startup script     
+RUN chmod 755 /usr/local/bin/poppy_startup
+
+EXPOSE 8080
+
+# wait for the cassandra container to initialize before starting up
+CMD poppy_startup
