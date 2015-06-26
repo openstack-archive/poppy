@@ -59,7 +59,7 @@ def akamai_request(env, domain, config):
     base_url = config.get(env, 'base_url')
     policy_num = config.get(env, 'policy_number')
 
-    policy_url = ('{0}partner-api/v1/network/production/properties/'
+    policy_url = ('{0}partner-api/v1/network/staging/properties/'
                   '{1}/sub-properties/{2}/policy')
     policy_url = policy_url.format(
         base_url,
@@ -76,32 +76,32 @@ def akamai_request(env, domain, config):
             {
                 "behaviors": [
                     {
-                        "name": "origin",
+                        "name": "origin", 
                         "params": {
-                            "cacheKeyType": "origin",
-                            "cacheKeyValue": "-",
-                            "digitalProperty": domain,
-                            "hostHeaderType": "digital_property",
-                            "hostHeaderValue": "-",
-                            "originDomain": domain
-                        },
+                            "cacheKeyType": "digital_property", 
+                            "cacheKeyValue": "-", 
+                            "digitalProperty": "www.drawbuildplay.com", 
+                            "hostHeaderType": "digital_property", 
+                            "hostHeaderValue": "-", 
+                            "originDomain": "origin.drawbuildplay.com"
+                        }, 
                         "value": "-"
-                    },
-                    {
-                        "name": "caching",
-                        "type": "fixed",
-                        "value": "3600s"
                     }
-                ],
+                ], 
                 "matches": [
                     {
-                        "name": "url-wildcard",
+                        "name": "url-wildcard", 
                         "value": "/*"
                     }
                 ]
             }
         ]
     }
+
+
+
+
+
 
     response = s.put(
         policy_url,
