@@ -1,17 +1,5 @@
-repose:
-  build: ../repose/.
-  ports:
-   - "80:8080"
-  environment:
-   KEYSTONE_ADMIN: Username
-   KEYSTONE_PASSWORD: Password
-   KEYSTONE_URI: Uri
-   DESTINATION_HOST: poppy
-   DESTINATION_PORT: 8081
-  links:
-   - poppydev
-poppydev:
-    build: ../../.
+poppy:
+    build: ../api/.
     ports:
      - "81:8081"
     environment:
@@ -33,10 +21,15 @@ poppydev:
      AKAM_ACCESS_URL_LINK: value
     links:
      - cassandra
-    volumes:
-     - ../../:/home/poppy
-cassandra:
-    build: ../cassandra/.
+     - zookeeper
+
+zookeeper:
+    image: jplock/zookeeper
     ports:
-     - "9160:9160"
-     - "9042:9042"
+     - 2181:2181
+
+cassandra:
+    image: library/cassandra
+    ports:
+     - 9160:9160
+     - 9042:9042

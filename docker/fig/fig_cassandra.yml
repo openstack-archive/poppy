@@ -1,5 +1,0 @@
-cassandra:
-    build: ../cassandra/.
-    ports:
-     - "9160:9160"
-     - "9042:9042"
