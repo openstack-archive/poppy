@@ -1,0 +1,17 @@
+poppy:
+    build: ../api/.
+    ports:
+        - "80:8080"
+    links:
+        - cassandra
+        - zookeeper
+
+zookeeper:
+    extends:
+        file: dependencies.yml
+        service: zookeeper
+
+cassandra:
+    extends:
+        file: dependencies.yml
+        service: cassandra

@@ -23,12 +23,13 @@ from akamai.edgegrid import EdgeGridAuth
 
 def main(args):
     if len(args) != 3:
-        print("usage: python get.py [env] [domain]")
+        print("usage: python put.py [env] [domain]")
         print(
-            "example : python get.py [prod|test] www.mysite.com")
+            "example : python put.py [prod|test|prod_staging] www.mysite.com")
         sys.exit(2)
 
-    env = args[1]
+    env = args[1].replace('_staging', '')
+    use_staging = args[1].endswith('_staging')
     domain = args[2]
 
     config_parser = ConfigParser.RawConfigParser()
@@ -39,7 +40,7 @@ def main(args):
     print("")
 
     print("updating api with policy definition: ")
-    akamai_request(env, domain, config_parser)
+    akamai_request(env, domain, use_staging, config_parser)
     print("")
     print("")
 
@@ -55,16 +56,21 @@ def edge_session(env, config):
     return s
 
 
-def akamai_request(env, domain, config):
+def akamai_request(env, domain, use_staging, config):
     base_url = config.get(env, 'base_url')
     policy_num = config.get(env, 'policy_number')
 
-    policy_url = ('{0}partner-api/v1/network/production/properties/'
+    env_var = "production"
+    if use_staging:
+        env_var = "staging"
+
+    policy_url = ('{0}partner-api/v1/network/{3}/properties/'
                   '{1}/sub-properties/{2}/policy')
     policy_url = policy_url.format(
         base_url,
         policy_num,
-        domain
+        domain,
+        env_var
     )
 
     print ("API URL: " + policy_url)
@@ -76,26 +82,26 @@ def akamai_request(env, domain, config):
             {
                 "behaviors": [
                     {
-                        "name": "origin",
+                        "name": "origin", 
                         "params": {
-                            "cacheKeyType": "origin",
-                            "cacheKeyValue": "-",
-                            "digitalProperty": domain,
-                            "hostHeaderType": "digital_property",
-                            "hostHeaderValue": "-",
-                            "originDomain": domain
-                        },
+                            "cacheKeyType": "digital_property", 
+                            "cacheKeyValue": "-", 
+                            "digitalProperty": domain, 
+                            "hostHeaderType": "fixed", 
+                            "hostHeaderValue": "wp.altcdn.com", 
+                            "originDomain": "wp.altcdn.com"
+                        }, 
                         "value": "-"
-                    },
+                    }, 
                     {
-                        "name": "caching",
-                        "type": "fixed",
-                        "value": "3600s"
+                        "name": "caching", 
+                        "type": "fixed", 
+                        "value": "172800s"
                     }
-                ],
+                ], 
                 "matches": [
                     {
-                        "name": "url-wildcard",
+                        "name": "url-wildcard", 
                         "value": "/*"
                     }
                 ]

@@ -1,0 +1,10 @@
+zookeeper:
+    image: jplock/zookeeper
+    ports:
+     - 2181:2181
+
+cassandra:
+    image: library/cassandra
+    ports:
+     - 9160:9160
+     - 9042:9042
