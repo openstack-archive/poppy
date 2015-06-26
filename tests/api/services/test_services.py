@@ -423,6 +423,7 @@ class TestServiceActions(base.TestBase):
         super(TestServiceActions, self).tearDown()
 
 
+@ddt.ddt
 class TestDefaultServiceFields(providers.TestProviderBase):
 
     """Tests for Default Service Fields."""
