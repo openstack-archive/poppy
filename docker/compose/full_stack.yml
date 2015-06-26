@@ -1,0 +1,30 @@
+repose:
+    build: ../repose/.
+    ports:
+     - "80:8080"
+    env_file:
+     - ./env/auth/repose.env
+    links:
+     - poppy
+
+poppy:
+    build: ../api/.
+    ports:
+     - "81:8081"
+    env_file:
+     - ./env/dns/rackspace.env
+     - ./env/provider/akamai.env
+     - ./env/log_delivery.env
+    links:
+     - cassandra
+     - zookeeper
+
+zookeeper:
+    extends:
+        file: development.yml
+        service: zookeeper
+
+cassandra:
+    extends:
+        file: development.yml
+        service: cassandra
