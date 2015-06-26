@@ -44,7 +44,8 @@ write_file
 .settings/*
 
 /Dockerfile
-/docker/fig/fig_local.yml
+/docker/*/secret.yml
+/docker/api/poppy.conf
 /.idea
 
 # patch files
