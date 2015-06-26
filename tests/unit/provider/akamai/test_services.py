@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import json
 import uuid
 
@@ -39,6 +40,8 @@ class TestServices(base.TestCase):
         super(TestServices, self).setUp()
         self.driver = mock_driver()
         self.driver.akamai_https_access_url_suffix = str(uuid.uuid1())
+        self.san_cert_cnames = [str(x) for x in range(7)]
+        self.driver.san_cert_cnames = self.san_cert_cnames
         self.controller = services.ServiceController(self.driver)
 
     @ddt.file_data('domains_list.json')
@@ -287,3 +290,10 @@ class TestServices(base.TestCase):
                 controller.request_header
             ))
         self.assertIn('id', resp[self.driver.provider_name])
+
+    def test_pick_san_edgename(self):
+        controller = services.ServiceController(self.driver)
+        picked_san_cert = controller._pick_san_edgename()
+        picked_idx = (
+            datetime.datetime.today().weekday() % len(self.san_cert_cnames))
+        self.assertTrue(picked_san_cert == self.san_cert_cnames[picked_idx])
