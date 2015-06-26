@@ -25,6 +25,7 @@ import uuid
 import jsonschema
 import pecan
 
+from poppy.common import util
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import exceptions
 
@@ -326,7 +327,8 @@ def is_valid_flavor_id(flavor_id):
 
 
 def abort_with_message(error_info):
-    pecan.abort(400, detail=getattr(error_info, "message", ""),
+    pecan.abort(400, detail=util.help_escape(
+                getattr(error_info, "message", "")),
                 headers={'Content-Type': "application/json"})
 
 
