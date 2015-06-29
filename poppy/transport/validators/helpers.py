@@ -293,6 +293,25 @@ def is_valid_service_configuration(service, schema):
             if not is_valid_origin(origin):
                 raise exceptions.ValidationFailed(
                     u'Origin {0} is not valid'.format(origin.get('origin')))
+
+    # 10. origin must not be a root domain
+    if 'origins' in service:
+        for origin in service['origins']:
+            # atleast 3 segments
+            minimum_segments = '[^.]+\.[^.]+\.[^.]+'
+            # generic top level domain
+            generic_cc_tld = '([^.]+\.(ac|biz|co|com|edu|gov|id|int|ltd|me|mil|mod|my|name|net|nhs|nic|nom|or|org|plc|sch|web)\.(ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cw|cx|cy|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sk|sl|sm|sn|so|sr|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|za|zm|zw))$'
+            australia_tld = '([^.]+\.(act|asn|com|csiro|edu|gov|id|net|nsw|nt|org|oz|qld|sa|tas|vic|wa)\.au)$'
+            austria_tld = '([^.]+\.(ac|co|gv|or|priv)\.at)$'
+            france_tld = '([^.]+\.(aeroport|avocat|avoues|cci|chambagri|chirurgiens-dentistes|experts-comptables|geometre-expert|greta|huissier-justice|medecin|notaires|pharmacien|port|veterinaire)\.fr)$'
+            hungary_tld = '([^.]+\.(co|2000|erotika|jogasz|sex|video|info|agrar|film|konyvelo|shop|org|bolt|forum|lakas|suli|priv|casino|games|media|szex|sport|city|hotel|news|tozsde|tm|erotica|ingatlan|reklam|utazas)\.hu)$'
+            russia_tld = '([^.]+\.(ac|com|edu|int|net|org|pp|gov|mil|test|adygeya|bashkiria|ulan-ude|buryatia|dagestan|nalchik|kalmykia|kchr|ptz|karelia|komi|mari-el|joshkar-ola|mari|mordovia|yakutia|vladikavkaz|kazan|tatarstan|tuva|udmurtia|izhevsk|udm|khakassia|grozny|chuvashia|altai|kuban|krasnoyarsk|marine|vladivostok|stavropol|stv|khabarovsk|khv|amur|arkhangelsk|astrakhan|belgorod|bryansk|vladimir|volgograd|tsaritsyn|vologda|voronezh|vrn|cbg|ivanovo|irkutsk|koenig|kaluga|kamchatka|kemerovo|kirov|vyatka|kostroma|kurgan|kursk|lipetsk|magadan|mosreg|murmansk|nnov|nov|nsk|novosibirsk|omsk|orenburg|oryol|penza|perm|pskov|rnd|ryazan|samara|saratov|sakhalin|yuzhno-sakhalinsk|yekaterinburg|e-burg|smolensk|tambov|tver|tomsk|tsk|tom|tula|tyumen|simbirsk|chelyabinsk|chel|chita|yaroslavl|msk|spb|bir|jar|palana|dudinka|surgut|chukotka|yamal|amursk|baikal|cmw|fareast|jamal|kms|k-uralsk|kustanai|kuzbass|magnitka|mytis|nakhodka|nkz|norilsk|snz|oskol|pyatigorsk|rubtsovsk|syzran|vdonskzgrad)\.ru)$'
+            south_africa_tld = '([^.]+\.(ac|gov|law|mil|net|nom|school)\.za)$'
+            spain_tld = '([^.]+\.(gob|nom|org)\.es)$'
+            turkey_tld = '([^.]+\.(av|bbs|bel|biz|com|dr|edu|gen|gov|info|k12|kep|name|net|org|pol|tel|tsk|tv|web)\.tr)$'
+            uk_tld = '([^.]+\.(ac|co|gov|ltd|me|mod|net|nhs|org|plc|police|sch).\uk)$'
+            usa_tld = '([^.]+\.(al|ak|az|ar|as|ca|co|ct|de|dc|fl|ga|gu|hi|id|il|in|ia|ks|ky|la|me|md|ma|mi|mn|mp|ms|mo|mt|ne|nv|nh|nj|nm|ny|nc|nd|oh|ok|or|pa|pr|ri|sc|sd|tn|tx|um|ut|vt|va|vi|wa|wv|wi|wy)\.us)$'
+
     return
 
 
