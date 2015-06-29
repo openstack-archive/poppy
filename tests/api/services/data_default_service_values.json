@@ -34,7 +34,9 @@
                             "name" : "default",
                             "request_url" : "/*"
                         }
-                    ]
+                    ],
+                    "hostheadertype": "domain",
+                    "hostheadervalue": null
                 }
             ]
         }
@@ -80,7 +82,9 @@
                             "name" : "default",
                             "request_url" : "/*"
                         }
-                    ]
+                    ],
+                    "hostheadertype": "domain",
+                    "hostheadervalue": null
                 }
             ],
             "caching_list": [
@@ -149,7 +153,261 @@
                             "name" : "default",
                             "request_url" : "/*"
                         }
+                    ],
+                    "hostheadertype": "domain",
+                    "hostheadervalue": null
+                }
+            ],
+            "caching_list": [
+                {
+                    "name": "default",
+                    "ttl": 3600,
+                    "rules": [
+                        {
+                            "name" : "default",
+                            "request_url" : "/*"
+                        }
                     ]
+                }
+            ],
+            "restrictions": [
+                {
+                    "name": "test",
+                    "rules": [
+                        {
+                            "name": "only me",
+                            "referrer": "www.mywebsite.com",
+                            "request_url": "/*"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "default_hostheadertype": {
+        "submit_value": {
+            "name": "my_service_name",
+            "domain_list": [
+                {
+                    "domain": "mywebsite.com",
+                    "protocol": "http"
+                }
+            ],
+            "origin_list": [
+                {
+                    "origin": "mywebsite1.com",
+                    "port": 80,
+                    "ssl": false
+                }
+            ],
+            "caching_list": [
+                {
+                    "name": "default",
+                    "ttl": 3600
+                }
+            ],
+            "restrictions": [
+                {
+                    "name": "test",
+                    "rules": [
+                        {
+                            "name": "only me",
+                            "referrer": "www.mywebsite.com"
+                        }
+                    ]
+                }
+            ]
+        },
+        "expected_value": {
+            "name": "my_service_name",
+            "domain_list": [
+                {
+                    "domain": "mywebsite.com",
+                    "protocol": "http"
+                }
+            ],
+            "origin_list": [
+                {
+                    "origin": "mywebsite1.com",
+                    "port": 80,
+                    "ssl": false,
+                    "rules": [
+                        {
+                            "name" : "default",
+                            "request_url" : "/*"
+                        }
+                    ],
+                    "hostheadertype": "domain",
+                    "hostheadervalue": null
+                }
+            ],
+            "caching_list": [
+                {
+                    "name": "default",
+                    "ttl": 3600,
+                    "rules": [
+                        {
+                            "name" : "default",
+                            "request_url" : "/*"
+                        }
+                    ]
+                }
+            ],
+            "restrictions": [
+                {
+                    "name": "test",
+                    "rules": [
+                        {
+                            "name": "only me",
+                            "referrer": "www.mywebsite.com",
+                            "request_url": "/*"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "origin_hostheadertype": {
+        "submit_value": {
+            "name": "my_service_name",
+            "domain_list": [
+                {
+                    "domain": "mywebsite.com",
+                    "protocol": "http"
+                }
+            ],
+            "origin_list": [
+                {
+                    "origin": "mywebsite1.com",
+                    "port": 80,
+                    "ssl": false,
+                    "hostheadertype": "origin"
+                }
+            ],
+            "caching_list": [
+                {
+                    "name": "default",
+                    "ttl": 3600
+                }
+            ],
+            "restrictions": [
+                {
+                    "name": "test",
+                    "rules": [
+                        {
+                            "name": "only me",
+                            "referrer": "www.mywebsite.com"
+                        }
+                    ]
+                }
+            ]
+        },
+        "expected_value": {
+            "name": "my_service_name",
+            "domain_list": [
+                {
+                    "domain": "mywebsite.com",
+                    "protocol": "http"
+                }
+            ],
+            "origin_list": [
+                {
+                    "origin": "mywebsite1.com",
+                    "port": 80,
+                    "ssl": false,
+                    "rules": [
+                        {
+                            "name" : "default",
+                            "request_url" : "/*"
+                        }
+                    ],
+                    "hostheadertype": "origin",
+                    "hostheadervalue": "mywebsite1.com"
+                }
+            ],
+            "caching_list": [
+                {
+                    "name": "default",
+                    "ttl": 3600,
+                    "rules": [
+                        {
+                            "name" : "default",
+                            "request_url" : "/*"
+                        }
+                    ]
+                }
+            ],
+            "restrictions": [
+                {
+                    "name": "test",
+                    "rules": [
+                        {
+                            "name": "only me",
+                            "referrer": "www.mywebsite.com",
+                            "request_url": "/*"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "custom_hostheadertype": {
+        "submit_value": {
+            "name": "my_service_name",
+            "domain_list": [
+                {
+                    "domain": "mywebsite.com",
+                    "protocol": "http"
+                }
+            ],
+            "origin_list": [
+                {
+                    "origin": "mywebsite1.com",
+                    "port": 80,
+                    "ssl": false,
+                    "hostheadertype": "custom",
+                    "hostheadervalue": "www.customweb.com"
+                }
+            ],
+            "caching_list": [
+                {
+                    "name": "default",
+                    "ttl": 3600
+                }
+            ],
+            "restrictions": [
+                {
+                    "name": "test",
+                    "rules": [
+                        {
+                            "name": "only me",
+                            "referrer": "www.mywebsite.com"
+                        }
+                    ]
+                }
+            ]
+        },
+        "expected_value": {
+            "name": "my_service_name",
+            "domain_list": [
+                {
+                    "domain": "mywebsite.com",
+                    "protocol": "http"
+                }
+            ],
+            "origin_list": [
+                {
+                    "origin": "mywebsite1.com",
+                    "port": 80,
+                    "ssl": false,
+                    "rules": [
+                        {
+                            "name" : "default",
+                            "request_url" : "/*"
+                        }
+                    ],
+                    "hostheadertype": "custom",
+                    "hostheadervalue": "www.customweb.com"
                 }
             ],
             "caching_list": [

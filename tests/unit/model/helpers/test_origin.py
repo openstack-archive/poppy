@@ -26,15 +26,15 @@ class TestOrigin(base.TestCase):
 
     @ddt.unpack
     @ddt.data({'origin_url': 'www.mydomain.com',
-               'changed_origin_url': 'www.changed-domain.com'},
+              'changed_origin_url': 'www.changed-domain.com'},
               {'origin_url': u'www.düsseldorf-Lörick.com',
-               'changed_origin_url': u'www.düsseldorf.com'
-               })
+              'changed_origin_url': u'www.düsseldorf.com'})
     def test_origin(self, origin_url, changed_origin_url):
 
-        port = 443
+        port = 80
         ssl = True
-        myorigin = origin.Origin(origin_url, port, ssl)
+        myorigin = origin.Origin(origin=origin_url, hostheadertype="origin",
+                                 hostheadervalue="", port=80, ssl=True)
 
         # test all properties
         # origin
@@ -44,8 +44,8 @@ class TestOrigin(base.TestCase):
 
         # port
         self.assertEqual(myorigin.port, port)
-        myorigin.port = 80
-        self.assertEqual(myorigin.port, 80)
+        myorigin.port = 443
+        self.assertEqual(myorigin.port, 443)
 
         # ssl
         self.assertEqual(myorigin.ssl, ssl)
