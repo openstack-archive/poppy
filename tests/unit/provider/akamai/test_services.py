@@ -20,7 +20,9 @@ import uuid
 import ddt
 import mock
 
+from poppy.model.helpers import cachingrule
 from poppy.model.helpers import domain
+from poppy.model.helpers import rule
 from poppy.provider.akamai import services
 from poppy.transport.pecan.models.request import service
 from tests.unit import base
@@ -297,3 +299,38 @@ class TestServices(base.TestCase):
         picked_idx = (
             datetime.datetime.today().weekday() % len(self.san_cert_cnames))
         self.assertTrue(picked_san_cert == self.san_cert_cnames[picked_idx])
+
+    def test_process_caching_rules(self):
+        controller = services.ServiceController(self.driver)
+        caching_rule_entry = rule.Rule('index', request_url='*.jpg')
+        caching_rule = cachingrule.CachingRule('home',
+                                               600,
+                                               rules=[caching_rule_entry])
+        caching_rules = [caching_rule]
+        rules_list = [{
+            'matches': [{
+                'name': 'url-wildcard',
+                'value': u'/*'
+            }],
+            'behaviors': [{
+                'params': {
+                    'hostHeaderValue': '-',
+                    'cacheKeyType': 'digital_property',
+                    'cacheKeyValue': '-',
+                    'originDomain': 'www.mydomain.com',
+                    'hostHeaderType': 'digital_property'
+                },
+                'name': 'origin',
+                'value': '-'
+            }]
+        }]
+        controller._process_caching_rules(caching_rules, rules_list)
+        caching_rule_valid = False
+        for caching_rule in rules_list:
+            matches = caching_rule['matches']
+            for match in matches:
+                if match['value'] == u'/*.jpg':
+                    caching_rule_valid = True
+                    break
+
+        self.assertTrue(caching_rule_valid)
