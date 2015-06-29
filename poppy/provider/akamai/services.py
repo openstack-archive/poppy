@@ -574,6 +574,15 @@ class ServiceController(base.ServiceBase):
         # end lop - restriction_rules
 
     def _process_caching_rules(self, caching_rules, rules_list):
+        # akamai requires all caching rules to start with '/'
+        # so, if a caching rules does not start with '/'
+        # prefix the caching rule with '/'
+        for caching_rule in caching_rules:
+            for caching_rule_entry in caching_rule.rules:
+                if not caching_rule_entry.request_url.startswith('/'):
+                    caching_rule_entry.request_url = (
+                        '/' + caching_rule_entry.request_url)
+
         # for each caching rule
         for caching_rule in caching_rules:
             for caching_rule_entry in caching_rule.rules:
