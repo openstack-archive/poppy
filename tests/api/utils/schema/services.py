@@ -132,7 +132,6 @@ list_services = {
         'links': {
             'type': 'array',
             'items': list_services_link,
-            'minItems': 1,
             'maxItems': 1},
         'services': {
             'type': 'array',
