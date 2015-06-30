@@ -117,7 +117,7 @@
         {"op": "add",
          "path": "/origins/1",
          "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
-                   "rules": [{"name" : "origin", "request_url" : "/origin.htm"}], "hostheadertype": "origin"}
+                   "rules": [{"name" : "origin", "request_url" : "/origin.htm"}], "hostheadertype": "origin", "hostheadervalue": "1.2.3.4"}
         }
     ],
    "add_origin_with_custom_hostheadertype": [
