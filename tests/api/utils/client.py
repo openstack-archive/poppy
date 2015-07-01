@@ -16,6 +16,7 @@
 # limitations under the License.
 
 import json
+import pyrax
 import time
 
 from cafe.engine.http import client
@@ -54,6 +55,18 @@ class AuthClient(client.HTTPClient):
         token = response.json()['access']['token']['id']
         project_id = response.json()['access']['token']['tenant']['id']
         return token, project_id
+
+
+class DNSClient(client.HTTPClient):
+    def __init__(self, username, api_key):
+        super(DNSClient, self).__init__()
+
+        self.username = username
+        self.api_key = api_key
+
+        pyrax.set_setting('identity_type', 'rackspace')
+        pyrax.set_credentials(self.username,
+                              self.api_key)
 
 
 class PoppyClient(client.AutoMarshallingHTTPClient):
@@ -169,6 +182,22 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         url = '{0}/admin/services/action'.format(self.url)
         request_object = requests.ServiceAction(
             project_id=project_id, action=action)
+        return self.request('POST', url, request_entity=request_object,
+                            requestslib_kwargs=requestslib_kwargs)
+
+    def admin_migrate_domain(self, project_id, service_id, domain, new_cert,
+                             requestslib_kwargs=None):
+        """Update SAN domain
+
+        :return: Response Object containing response code 202
+        POST
+        /admin/provider/akamai/service
+        """
+
+        url = '{0}/admin/provider/akamai/service'.format(self.url)
+        request_object = requests.MigrateSANDomain(
+            project_id=project_id, service_id=service_id, domain=domain,
+            new_cert=new_cert)
         return self.request('POST', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
