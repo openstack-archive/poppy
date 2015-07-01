@@ -172,6 +172,22 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('POST', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
+    def admin_migrate_domain(self, project_id, service_id, domain, new_cert,
+                             requestslib_kwargs=None):
+        """Update SAN domain
+
+        :return: Response Object containing response code 202
+        POST
+        /admin/provider/akamai/service
+        """
+
+        url = '{0}/admin/provider/akamai/service'.format(self.url)
+        request_object = requests.MigrateSANDomain(
+            project_id=project_id, service_id=service_id, domain=domain,
+            new_cert=new_cert)
+        return self.request('POST', url, request_entity=request_object,
+                            requestslib_kwargs=requestslib_kwargs)
+
     def check_health(self):
         """Check Health of the application
 
