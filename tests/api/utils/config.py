@@ -88,6 +88,50 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         return int(self.get('cassandra_consistency_wait_time'))
 
 
+class DNSConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the values for DNS configuration."""
+    SECTION_NAME = 'dns'
+
+    @property
+    def dns_username(self):
+        """The user name for the Cloud DNS service"""
+        return self.get('dns_username')
+
+    @property
+    def dns_api_key(self):
+        """The API Key for the Cloud DNS service"""
+        return self.get('dns_api_key')
+
+    @property
+    def url(self):
+        """The url for customers to CNAME to."""
+        return self.get('url')
+
+    @property
+    def akamai_https_access_url_suffix(self):
+        """The suffix of Akamai's access url"""
+        return self.get('akamai_https_access_url_suffix')
+
+    @property
+    def shared_ssl_shard_prefix(self):
+        """The prefix of shared SSL url shard"""
+        return self.get('shared_ssl_shard_prefix')
+
+    @property
+    def shared_ssl_domain_suffix(self):
+        """The suffix of shared SSL domain"""
+        return self.get('shared_ssl_domain_suffix')
+
+
+class SANCerts(data_interfaces.ConfigSectionInterface):
+    """Gets the list of SAN certificates for testing"""
+    SECTION_NAME = 'san_certificates'
+
+    @property
+    def certs(self):
+        return self.get('certs')
+
+
 class AuthConfig(data_interfaces.ConfigSectionInterface):
     """Defines the auth config values."""
     SECTION_NAME = 'auth'
