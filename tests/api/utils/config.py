@@ -87,6 +87,21 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         """Int value in seconds to wait for cassandra consistency."""
         return int(self.get('cassandra_consistency_wait_time'))
 
+    @property
+    def dns_username(self):
+        """The user name for the Cloud DNS service"""
+        return self.get('dns_username')
+
+    @property
+    def dns_api_key(self):
+        """The API Key for the Cloud DNS service"""
+        return self.get('dns_api_key')
+
+    @property
+    def url(self):
+        """The url for customers to CNAME to."""
+        return self.get('url')
+
 
 class AuthConfig(data_interfaces.ConfigSectionInterface):
     """Defines the auth config values."""
