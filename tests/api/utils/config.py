@@ -88,6 +88,26 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         return int(self.get('cassandra_consistency_wait_time'))
 
 
+class DNSConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the values for DNS configuration."""
+    SECTION_NAME = 'dns'
+
+    @property
+    def dns_username(self):
+        """The user name for the Cloud DNS service"""
+        return self.get('dns_username')
+
+    @property
+    def dns_api_key(self):
+        """The API Key for the Cloud DNS service"""
+        return self.get('dns_api_key')
+
+    @property
+    def dns_url_suffix(self):
+        """The url for customers to CNAME to."""
+        return self.get('dns_url_suffix')
+
+
 class AuthConfig(data_interfaces.ConfigSectionInterface):
     """Defines the auth config values."""
     SECTION_NAME = 'auth'
@@ -136,6 +156,21 @@ class AuthConfig(data_interfaces.ConfigSectionInterface):
     def operator_api_key(self):
         """The user's api key, if applicable."""
         return self.get_raw('operator_api_key')
+
+
+class AkamaiConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the Akamai config values."""
+    SECTION_NAME = 'provider_akamai'
+
+    @property
+    def access_url_suffix(self):
+        """The access URL suffix for Akamai"""
+        return self.get('access_url_suffix')
+
+    @property
+    def san_certs(self):
+        """A list of SAN certificates from Akamai"""
+        return self.get('san_certs')
 
 
 class FastlyConfig(data_interfaces.ConfigSectionInterface):
