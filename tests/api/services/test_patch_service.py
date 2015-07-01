@@ -117,6 +117,7 @@ class TestServicePatch(base.TestBase):
         return self.generate_random_string(prefix='api-test-ssl') + '.com'
 
     @ddt.file_data('data_patch_service.json')
+    #@ddt.file_data('fail-patch.json')
     def test_patch_service(self, test_data):
 
         for item in test_data:
@@ -327,7 +328,8 @@ class TestServicePatchWithLogDelivery(base.TestBase):
                         "name": "default",
                         "request_url": "/*"
                     }
-                ]
+                ],
+                "hostheadertype": "domain"
             }
         ]
 
@@ -406,6 +408,10 @@ class TestServicePatchWithLogDelivery(base.TestBase):
 
         patch = jsonpatch.JsonPatch(test_data)
         expected_service_details = patch.apply(self.original_service_details)
+        expected_origin = expected_service_details['origins']
+        for item in expected_origin:
+            if 'hostheadertype' not in item:
+                item['hostheadertype'] = 'domain'
 
         resp = self.client.patch_service(location=self.service_url,
                                          request_body=test_data)
