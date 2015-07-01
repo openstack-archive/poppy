@@ -76,8 +76,8 @@ class TestBase(fixtures.BaseTestFixture):
                 alt_url = cls.config.base_url + '/v1.0'
 
             cls.alt_user_client = client.PoppyClient(
-                alt_url, cls.alt_auth_token,
-                cls.alt_project_id,
+                alt_url, alt_auth_token,
+                alt_project_id,
                 serialize_format='json',
                 deserialize_format='json')
 
