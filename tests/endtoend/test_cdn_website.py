@@ -27,7 +27,7 @@ class TestWebsiteCDN(base.TestBase):
     def setUp(self):
         super(TestWebsiteCDN, self).setUp()
 
-        sub_domain = base.random_string(prefix='TestCDN-')
+        sub_domain = base.random_string(prefix='test-cdn-')
         self.test_domain = sub_domain + '.' + self.dns_config.test_domain
 
         print('Domain Name', self.test_domain)
@@ -75,7 +75,7 @@ class TestWebsiteCDN(base.TestBase):
     def test_multiple_domains(self):
 
         # Create another domain in addition to the one created in setUp
-        sub_domain2 = base.random_string(prefix='TestCDN-')
+        sub_domain2 = base.random_string(prefix='test-cdn-')
         self.test_domain2 = sub_domain2 + '.' + self.dns_config.test_domain
 
         print('Additional Domain Name', self.test_domain2)
