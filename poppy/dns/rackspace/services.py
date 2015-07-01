@@ -585,3 +585,7 @@ class ServicesController(base.ServicesBase):
                 self._change_cname_record(operator_url,
                                           provider_url,
                                           shared_ssl_flag)
+
+    def modify_cname(self, access_url, new_cert):
+        self._change_cname_record(access_url=access_url,
+                                  target_url=new_cert, shared_ssl_flag=False)
