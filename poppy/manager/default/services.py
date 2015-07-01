@@ -406,3 +406,39 @@ class DefaultServicesController(base.ServicesController):
         shared_ssl_domain_suffix = (
             self.dns_controller.generate_shared_ssl_domain_suffix())
         return '.'.join([domain_name, shared_ssl_domain_suffix])
+
+    def migrate_SAN_domain(self, project_id, service_id, domain_name,
+                           new_cert):
+        dns_controller = self.dns_controller
+        storage_controller = self.storage_controller
+
+        try:
+            # Update CNAME records and provider_details in cassandra
+            provider_details = storage_controller.get_provider_details(
+                project_id, service_id)
+        except ValueError as e:
+            # If service is not found
+            LOG.warning('Migrating SAN domain failed: Service {0} could not '
+                        'be found.. Error message: {1}'.format(service_id, e))
+            raise errors.ServiceNotFound(e)
+
+        for provider in provider_details:
+            domain_found = False
+            for url in provider_details[provider].access_urls:
+                if url['domain'] == domain_name:
+                    if 'operator_url' in url:
+                        access_url = url['operator_url']
+                        dns_controller.modify_cname(access_url, new_cert)
+                        url['provider_url'] = new_cert
+                        storage_controller.update_provider_details(
+                            project_id,
+                            service_id,
+                            provider_details
+                            )
+                        domain_found = True
+                        break
+        if not domain_found:
+            LOG.warning('Migrating SAN domain failed: Domain {0} could not '
+                        'be found.'.format(domain_name))
+            raise LookupError('Domain {0} could not be found.'.format(
+                domain_name))
