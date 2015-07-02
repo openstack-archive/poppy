@@ -14,7 +14,8 @@
                     "port": 80,
                     "ssl": false
                 }
-            ]
+            ],
+            "hostheadertype": "domain",
         },
         "expected_value": {
             "name": "my_service_name",
@@ -35,8 +36,7 @@
                             "request_url" : "/*"
                         }
                     ],
-                    "hostheadertype": "domain",
-                    "hostheadervalue": null
+                    "hostheadertype": "domain"
                 }
             ]
         }
@@ -54,7 +54,8 @@
                 {
                     "origin": "mywebsite1.com",
                     "port": 80,
-                    "ssl": false
+                    "ssl": false,
+                    "hostheadertype": "domain"
                 }
             ],
             "caching_list": [
@@ -83,8 +84,7 @@
                             "request_url" : "/*"
                         }
                     ],
-                    "hostheadertype": "domain",
-                    "hostheadervalue": null
+                    "hostheadertype": "domain"
                 }
             ],
             "caching_list": [
@@ -114,7 +114,8 @@
                 {
                     "origin": "mywebsite1.com",
                     "port": 80,
-                    "ssl": false
+                    "ssl": false,
+                    "hostheadertype": "domain"
                 }
             ],
             "caching_list": [
@@ -155,7 +156,6 @@
                         }
                     ],
                     "hostheadertype": "domain",
-                    "hostheadervalue": null
                 }
             ],
             "caching_list": [
@@ -197,7 +197,8 @@
                 {
                     "origin": "mywebsite1.com",
                     "port": 80,
-                    "ssl": false
+                    "ssl": false,
+                    "hostheadertype": "domain"
                 }
             ],
             "caching_list": [
@@ -237,8 +238,7 @@
                             "request_url" : "/*"
                         }
                     ],
-                    "hostheadertype": "domain",
-                    "hostheadervalue": null
+                    "hostheadertype": "domain"
                 }
             ],
             "caching_list": [
