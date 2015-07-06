@@ -12,10 +12,10 @@
                 {
                     "origin": "mywebsite1.com",
                     "port": 80,
-                    "ssl": false
+                    "ssl": false,
+                    "hostheadertype": "domain"
                 }
-            ],
-            "hostheadertype": "domain",
+            ]
         },
         "expected_value": {
             "name": "my_service_name",
@@ -155,7 +155,7 @@
                             "request_url" : "/*"
                         }
                     ],
-                    "hostheadertype": "domain",
+                    "hostheadertype": "domain"
                 }
             ],
             "caching_list": [
