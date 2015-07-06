@@ -300,6 +300,7 @@
          "origin_list": [{"origin": "mywebsite1.com",
                           "port": 80,
                           "ssl": false,
+                          "hostheadertype": "domain",
                           "rules": [
                              {
                                  "name" : "default",

@@ -85,7 +85,6 @@ class TestCreateService(providers.TestProviderBase):
                 item[u'rules'] = []
             if 'hostheadertype' not in item:
                 item[u'hostheadertype'] = 'domain'
-                item[u'hostheadervalue'] = None
             elif item['hostheadertype'] == 'origin':
                 item[u'hostheadervalue'] = item['origin']
         self.assertEqual(body['origins'], origin_list)
