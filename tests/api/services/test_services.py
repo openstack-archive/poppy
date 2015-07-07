@@ -89,6 +89,8 @@ class TestCreateService(providers.TestProviderBase):
             elif item['hostheadertype'] == 'origin':
                 item[u'hostheadervalue'] = item['origin']
         self.assertEqual(body['origins'], origin_list)
+        if log_delivery:
+            self.assertEqual(body['log_delivery'], log_delivery)
 
         if caching_list:
             self.assertEqual(body['caching'], caching_list)
