@@ -293,6 +293,17 @@ def is_valid_service_configuration(service, schema):
             if not is_valid_origin(origin):
                 raise exceptions.ValidationFailed(
                     u'Origin {0} is not valid'.format(origin.get('origin')))
+
+    # 10. Hostheadervalue must be valid
+    if 'origins' in service:
+        for origin in service['origins']:
+            if 'hostheadervalue' in origin:
+                hostheadervalue = origin.get('hostheadervalue')
+                if hostheadervalue is not None:
+                    if not is_valid_domain_name(hostheadervalue):
+                        raise exceptions.ValidationFailed(
+                            u'HostHeaderValue {0} is not valid'.format(
+                                hostheadervalue))
     return
 
 

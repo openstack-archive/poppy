@@ -224,14 +224,9 @@ class ServiceSchema(schema_base.SchemaBase):
                                     },
                                     'hostheadervalue': {
                                         'type': 'string',
-                                        'pattern': re.compile(
-                                            '^(([^:/?#]+):)?'
-                                            '(//([^/?#]*))?'
-                                            '([^?#]*)(\?([^#]*))?'
-                                            '(#(.*))?$',
-                                            re.UNICODE
-                                        ),
                                         'required': True,
+                                        'minLength': 3,
+                                        'maxLength': 253
                                     }
                                 }
                             }
@@ -341,14 +336,9 @@ class ServiceSchema(schema_base.SchemaBase):
                                 },
                                 'hostheadervalue': {
                                     'type': 'string',
-                                    'pattern': re.compile(
-                                        '^(([^:/?#]+):)?'
-                                        '(//([^/?#]*))?'
-                                        '([^?#]*)(\?([^#]*))?'
-                                        '(#(.*))?$',
-                                        re.UNICODE
-                                    ),
                                     'required': True,
+                                    'minLength': 3,
+                                    'maxLength': 253
                                 }
                             }
                         }

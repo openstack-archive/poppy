@@ -770,5 +770,43 @@
       ],
       "caching_list": [],
       "restrictions_list": []
+    },
+    "invalid_hostheadervalue": {
+      "service_name": "nonASCII_hostheadervalue",
+      "domain_list": [
+        {
+          "domain": "mywebsite.com"
+        }
+      ],
+      "origin_list": [
+        {
+          "origin": "mywebsite1.com",
+          "port": 443,
+          "ssl": false,
+          "hostheadertype": "custom",
+          "hostheadervalue": "123"
+        }
+      ],
+      "caching_list": [],
+      "restrictions_list": []
+    },
+    "invalid_hostheadervalue_with_space": {
+      "service_name": "nonASCII_hostheadervalue",
+      "domain_list": [
+        {
+          "domain": "mywebsite.com"
+        }
+      ],
+      "origin_list": [
+        {
+          "origin": "mywebsite1.com",
+          "port": 443,
+          "ssl": false,
+          "hostheadertype": "custom",
+          "hostheadervalue": "www. domain.com"
+        }
+      ],
+      "caching_list": [],
+      "restrictions_list": []
     }
 }
