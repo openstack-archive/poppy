@@ -19,6 +19,7 @@ import ddt
 import jsonpatch
 
 from tests.api import base
+from tests.api.utils.schema import services
 
 
 @ddt.ddt
@@ -51,13 +52,15 @@ class TestCreateSSLService(base.TestBase):
 
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
+        log_delivery = test_data.get('log_delivery')
         flavor_id = self.flavor_id
 
         resp = self.client.create_service(service_name=self.service_name,
                                           domain_list=domain_list,
                                           origin_list=origin_list,
                                           caching_list=caching_list,
-                                          flavor_id=flavor_id)
+                                          flavor_id=flavor_id,
+                                          log_delivery=log_delivery)
         self.assertEqual(resp.status_code, 202)
         self.assertEqual(resp.text, '')
         self.service_url = resp.headers['location']
@@ -78,6 +81,27 @@ class TestCreateSSLService(base.TestBase):
         body = resp.json()
         status = body['status']
         self.assertEqual(status, 'deployed')
+
+        self.assertSchema(body, services.get_service)
+
+        for item in domain_list:
+            if 'protocol' not in item:
+                item['protocol'] = 'http'
+            elif item['certificate'] == 'shared':
+                body['domains'][0]['domain'] = \
+                    body['domains'][0]['domain'].split('.')[0]
+        self.assertEqual(body['domains'], domain_list)
+
+        for item in origin_list:
+            if 'rules' not in item:
+                item[u'rules'] = []
+            if 'hostheadertype' not in item:
+                item[u'hostheadertype'] = 'domain'
+            elif item['hostheadertype'] == 'origin':
+                item[u'hostheadervalue'] = item['origin']
+        self.assertEqual(body['origins'], origin_list)
+        if log_delivery:
+            self.assertEqual(body['log_delivery'], log_delivery)
 
     def tearDown(self):
         if self.service_url != '':
