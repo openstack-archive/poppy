@@ -1,9 +1,9 @@
 {
     "invalid_name": {
         "service_name": "",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -15,9 +15,9 @@
     },
     "too_short_name": {
         "service_name": "ab",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -31,7 +31,7 @@
         "service_name": "abcdefg",
         "domain_list": [{"domain": "ab"},
                         {"domain": "blog.mywebsite.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -45,7 +45,7 @@
         "service_name": "upper_case_domain",
         "domain_list": [{"domain": "ab"},
                         {"domain": "Blog.UPPER.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -57,9 +57,9 @@
     },
     "too_long_name": {
         "service_name": "too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -73,7 +73,7 @@
         "service_name": "asdsad",
         "domain_list": [{"domain": "too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name"},
                         {"domain": "blog.mywebsite.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -86,7 +86,7 @@
     "empty_domain_list": {
         "service_name": "empty_domain_list",
         "domain_list": [],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -111,7 +111,7 @@
             {"domain": "blog10.mywebsite.com"},
             {"domain": "blog11.mywebsite.com"}
             ],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -127,7 +127,7 @@
     },
     "empty_origin_list": {
         "service_name": "empty_origin_list",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -139,7 +139,7 @@
     },
     "too_many_origins": {
         "service_name": "many_origin_list",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [
             {"origin": "origin1"},
@@ -163,7 +163,7 @@
     },
     "duplicate_origin_rule": {
         "service_name": "many_origin_list",
-        "domain_list": [{"domain": "mywebsite.com"}],
+        "domain_list": [{"domain": "www.mywebsite.com"}],
         "origin_list": [
             {"origin": "origin1"},
             {"origin": "origin2", "rules": [{"name" : "index", "request_url" : "/index.htm"}]},
@@ -178,7 +178,7 @@
     },
     "non_numeric_origin_port": {
         "service_name": "non_numeric_origin_port",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": "invalid_origin_value",
                          "port": "fourfourthree",
@@ -192,7 +192,7 @@
     },
     "non_boolean_origin_ssl": {
         "service_name": "non_boolean_origin_ssl",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": "invalid_origin_value",
                          "port": 443,
@@ -206,7 +206,7 @@
     },
     "invalid_origin_spaces_prefix": {
         "service_name": "invalid_origin_spaces_prefix",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": "   spacesinorigin.com",
                          "port": "80",
@@ -220,7 +220,7 @@
     },
     "invalid_origin_with_slash": {
         "service_name": "invalid_origin_with_slash",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": " originwithslash.com/slash",
                          "port": "80",
@@ -234,7 +234,7 @@
     },
     "invalid_origin_http_prefix": {
         "service_name": "invalid_origin_http_prefix",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": "http://origin.com",
                          "port": "80",
@@ -248,7 +248,7 @@
     },
     "invalid_origin_https_prefix": {
         "service_name": "invalid_origin_https_prefix",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": "https://origin.com",
                          "port": "443",
@@ -262,7 +262,7 @@
     },
     "invalid_origin_non_ASCII": {
         "service_name": "invalid_origin_non_ASCII",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": "קאַץ.com",
                          "port": "443",
@@ -276,9 +276,9 @@
     },
     "invalid_flavor": {
         "service_name": "invalid_flavor",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "flavor_id": "non_exist",
@@ -291,9 +291,9 @@
     },
     "caching_list_no_name": {
         "service_name": "caching_list_no_name",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"ttl": 3600}],
@@ -301,9 +301,9 @@
     },
     "caching_list_no_rule_name": {
         "service_name": "caching_list_no_rule_name",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -314,9 +314,9 @@
     },
     "caching_list_no_rule_url": {
         "service_name": "caching_list_no_url",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -328,9 +328,9 @@
     },
     "caching_negative_ttl": {
         "service_name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -342,9 +342,9 @@
     },
     "caching_duplicate_rule": {
         "service_name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -360,9 +360,9 @@
     },
     "restrictions_empty_item": {
         "service_name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -374,11 +374,11 @@
     },
     "http_domain_with_certificate": {
         "service_name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com",
+        "domain_list": [{"domain": "www.mywebsite.com",
                          "protocol": "http",
                          "certificate": "shared"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 80,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -390,10 +390,10 @@
     },
     "https_domain_with_no_certificate": {
         "service_name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com",
+        "domain_list": [{"domain": "www.mywebsite.com",
                          "protocol": "https"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -405,11 +405,11 @@
     },
     "https_domain_with_invalid_certificate": {
         "service_name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com",
+        "domain_list": [{"domain": "www.mywebsite.com",
                          "protocol": "https",
                          "certificate": "whatacert"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -425,7 +425,7 @@
                          "protocol": "https",
                          "certificate": "shared"},
                         {"domain": "website.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 80,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -441,9 +441,9 @@
     },
     "restrictions_no_rules": {
         "service_name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -455,9 +455,9 @@
     },
     "restrictions_rule_no_name": {
         "service_name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -470,7 +470,7 @@
     },
     "origin_invalid_port": {
         "service_name": "origin_invalid_port",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": "not an origin", "port": 8080, "rules":[{"name": "name", "request_url": "www.somewebsite.com"}]}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -482,7 +482,7 @@
     },
     "origin_null_port": {
         "service_name": "origin_null_port",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": "not an origin", "port": null, "rules":[{"name": "name", "request_url": "www.somewebsite.com"}]}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -494,7 +494,7 @@
     },
     "origin_negative_port": {
         "service_name": "origin_negative_port",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": "not an origin", "port": -80, "rules":[{"name": "name", "request_url": "www.somewebsite.com"}]}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -506,7 +506,7 @@
     },
     "origin_string_port": {
         "service_name": "origin_string_port",
-        "domain_list": [{"domain": "mywebsite.com"},
+        "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [{"origin": "not an origin", "port": "80", "rules":[{"name": "name", "request_url": "www.somewebsite.com"}]}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -522,7 +522,7 @@
                          "protocol": "http",
                          "certificate": "shared"},
                         {"domain": "website.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 80,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -542,7 +542,7 @@
                          "protocol": "https",
                          "certificate": "shared"},
                         {"domain": "website.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 80,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -562,7 +562,7 @@
                          "protocol": "http",
                          "certificate": "san"},
                         {"domain": "website.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 80,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -582,7 +582,7 @@
                          "protocol": "http",
                          "certificate": "custom"},
                         {"domain": "website.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 80,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -601,7 +601,7 @@
         "domain_list": [{"domain": "sharedsslwebsite",
                          "protocol": "https",
                          "certificate": "shared"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 80,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -621,7 +621,7 @@
                          "protocol": "https",
                          "certificate": "shared"},
                         {"domain": "httpwebsite"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": true}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -665,7 +665,7 @@
     "invalid_domain_name_with_space": {
         "service_name": "invalid_domain_name_with_space",
         "domain_list": [{"domain": "mywebsite.com "}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -678,7 +678,7 @@
     "invalid_domain_name_with_hyphen_at_benginning": {
         "service_name": "invalid_domain_name_with_hyphen",
         "domain_list": [{"domain": "abcd.-mywebsite.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 80,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -691,7 +691,7 @@
     "invalid_domain_name_with_hyphen_at_end": {
         "service_name": "invalid_domain_name_with_hyphen",
         "domain_list": [{"domain": "mywebsite-.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 80,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -704,7 +704,7 @@
     "same_domain_and_origin": {
         "service_name": "same_domain_and_origin",
         "domain_list": [{"domain": "mywebsite.com "}],
-        "origin_list": [{"origin": "mywebsite.com",
+        "origin_list": [{"origin": "www.mywebsite.com",
                          "port": 80,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -716,8 +716,8 @@
     },
     "invalid_hostheadertype":{
         "service_name": "invalid_hostheadertype",
-        "domain_list": [{"domain": "mywebsite.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "domain_list": [{"domain": "www.mywebsite.com"}],
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false,
                          "hostheadertype": "org"}],
@@ -726,8 +726,8 @@
     },
     "missing_hostheadervalue":{
         "service_name": "missing_hostheadervalue",
-        "domain_list": [{"domain": "mywebsite.com"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "domain_list": [{"domain": "www.mywebsite.com"}],
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false,
                          "hostheadertype": "custom"}],
@@ -738,12 +738,12 @@
       "service_name": "nonASCII_hostheadertype",
       "domain_list": [
         {
-          "domain": "mywebsite.com"
+          "domain": "www.mywebsite.com"
         }
       ],
       "origin_list": [
         {
-          "origin": "mywebsite1.com",
+          "origin": "myorigin.com",
           "port": 443,
           "ssl": false,
           "hostheadertype": ": איבערזעצן"
@@ -756,12 +756,12 @@
       "service_name": "nonASCII_hostheadervalue",
       "domain_list": [
         {
-          "domain": "mywebsite.com"
+          "domain": "www.mywebsite.com"
         }
       ],
       "origin_list": [
         {
-          "origin": "mywebsite1.com",
+          "origin": "myorigin.com",
           "port": 443,
           "ssl": false,
           "hostheadertype": "custom",
@@ -770,5 +770,47 @@
       ],
       "caching_list": [],
       "restrictions_list": []
+    },
+    "invalid_root_domain": {
+        "service_name": "",
+        "domain_list": [{"domain": "www.mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "myorigin.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
+    },
+    "invalid_country_level_root_domain_1": {
+        "service_name": "",
+        "domain_list": [{"domain": "mywebsite.co.uk"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "myorigin.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
+    },
+    "invalid_country_level_root_domain_2": {
+        "service_name": "",
+        "domain_list": [{"domain": "mywebsite.co.au"},
+                        {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "myorigin.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
     }
 }

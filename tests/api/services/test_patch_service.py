@@ -34,7 +34,8 @@ class TestServicePatch(base.TestBase):
         self.flavor_id = self.test_flavor
         self.log_delivery = {"enabled": False}
 
-        domain = self.generate_random_string(prefix='api-test-domain') + '.com'
+        domain = self.generate_random_string(
+            prefix='www.api-test-domain') + '.com'
         self.domain_list = [
             {
                 "domain": domain,
@@ -114,7 +115,7 @@ class TestServicePatch(base.TestBase):
                 if (domain['certificate'] == u'shared'):
                     return self.generate_random_string(prefix='api-test-ssl')
 
-        return self.generate_random_string(prefix='api-test-ssl') + '.com'
+        return (self.generate_random_string(prefix='www.api-test-ssl'))
 
     @ddt.file_data('data_patch_service.json')
     def test_patch_service(self, test_data):
@@ -173,7 +174,7 @@ class TestServicePatch(base.TestBase):
         self.assert_patch_service_details(body, self.original_service_details)
 
     def test_patch_service_claim_relinquish_domain(self):
-        newdomain = str(uuid.uuid4()) + ".com"
+        newdomain = "www." + str(uuid.uuid4()) + ".com"
         add_domain = (
             [{
                 "op": "add",
@@ -246,7 +247,7 @@ class TestServicePatch(base.TestBase):
     def test_patch_service_add_duplicate_domain(self):
         # create second service
         service_name = str(uuid.uuid1())
-        duplicate_domain = str(uuid.uuid1()) + '.com'
+        duplicate_domain = 'www.' + str(uuid.uuid1()) + '.com'
         domain_list = [{"domain": duplicate_domain, "protocol": "http"}]
 
         origin = str(uuid.uuid1()) + '.com'
@@ -308,7 +309,7 @@ class TestServicePatchWithLogDelivery(base.TestBase):
         self.flavor_id = self.test_flavor
         self.log_delivery = {"enabled": True}
 
-        domain = self.generate_random_string(prefix='api-test-domain') + '.com'
+        domain = self.generate_random_string(prefix='www.api-test-domain') + '.com'
         self.domain_list = [
             {
                 "domain": domain,
@@ -388,7 +389,7 @@ class TestServicePatchWithLogDelivery(base.TestBase):
                 if (domain['certificate'] == u'shared'):
                     return self.generate_random_string(prefix='api-test-ssl')
 
-        return self.generate_random_string(prefix='api-test-ssl') + '.com'
+        return self.generate_random_string(prefix='www.api-test-ssl') + '.com'
 
     @ddt.file_data('data_patch_service.json')
     def test_patch_service(self, test_data):
