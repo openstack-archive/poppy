@@ -26,6 +26,7 @@ import jsonschema
 import pecan
 
 from poppy.common import util
+from poppy.transport.validators import root_domain_regexes as regexes
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import exceptions
 
@@ -160,6 +161,37 @@ def is_valid_origin(origin):
             is_valid_ip_address(origin.get('origin')))
 
 
+def is_root_domain(domain):
+    domain_name = domain.get('domain')
+
+    # if the domain contains four or more segments, it a not a root domain
+    if re.search(regexes.four_or_more_segments, domain_name):
+        return False
+
+    cc_tld = (re.search(regexes.generic_cc_tld, domain_name) or
+              re.search(regexes.generic_cc_tld, domain_name) or
+              re.search(regexes.australia_tld, domain_name) or
+              re.search(regexes.austria_tld, domain_name) or
+              re.search(regexes.france_tld, domain_name) or
+              re.search(regexes.hungary_tld, domain_name) or
+              re.search(regexes.russia_tld, domain_name) or
+              re.search(regexes.south_africa_tld, domain_name) or
+              re.search(regexes.spain_tld, domain_name) or
+              re.search(regexes.turkey_tld, domain_name) or
+              re.search(regexes.uk_tld, domain_name) or
+              re.search(regexes.usa_tld, domain_name))
+
+    # domain is a valid root domain if it is a
+    # country code top level domain with three segments
+    if cc_tld and re.match(regexes.three_segments, domain_name):
+        return True
+    # international top level domain with two segments
+    elif re.match(regexes.two_segments, domain_name):
+        return True
+
+    return False
+
+
 def is_valid_service_configuration(service, schema):
     if schema is not None:
         errors_list = list(
@@ -282,7 +314,22 @@ def is_valid_service_configuration(service, schema):
                 raise exceptions.ValidationFailed(
                     u'Origin {0} is not valid'.format(origin.get('origin')))
 
-    # 10. Hostheadervalue must be valid
+    # 10. domains must not be root domains
+    if 'domains' in service:
+        for domain in service['domains']:
+            protocol = domain.get('protocol', 'http')
+            certificate = domain.get('certificate')
+            # for a shared SSL domains, domain name is a single segment
+            # so, root domain validation does not apply to it
+            if protocol == "https" and certificate == "shared":
+                continue
+            if is_root_domain(domain):
+                raise exceptions.ValidationFailed(
+                    u'{0} is a root domain. Most DNS providers do not allow '
+                    'setting a CNAME on a root domain. Please use a subdomain '
+                    'instead (e.g. www.{0})'.format(domain.get('domain')))
+
+    # 11. Hostheadervalue must be valid
     if 'origins' in service:
         for origin in service['origins']:
             if 'hostheadervalue' in origin:
@@ -293,7 +340,7 @@ def is_valid_service_configuration(service, schema):
                             u'HostHeaderValue {0} is not valid'.format(
                                 hostheadervalue))
 
-    # 11. Need to validate restriction correctness here
+    # 12. Need to validate restriction correctness here
     # Cannot allow one restriction rule entity to have both
     # "blacklist" and "whitelist" restriction type
     whitelist_restriction_entities = {

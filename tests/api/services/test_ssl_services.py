@@ -47,7 +47,7 @@ class TestCreateSSLService(base.TestBase):
                     prefix='shared-ssl')
             else:
                 item['domain'] = self.generate_random_string(
-                    prefix='ssl-domain') + '.com'
+                    prefix='www.ssl-domain') + '.com'
 
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
@@ -187,7 +187,7 @@ class TestPatchSSLService(base.TestBase):
                 if (domain['certificate'] == u'shared'):
                     return self.generate_random_string(prefix='api-test-ssl')
 
-        return self.generate_random_string(prefix='api-test-ssl') + '.com'
+        return self.generate_random_string(prefix='www.api-test-ssl') + '.com'
 
     @ddt.file_data('data_patch_service_ssl_domain.json')
     @ddt.file_data('failed.json')
