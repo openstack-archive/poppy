@@ -4,7 +4,7 @@
             "name": "my_service_name",
             "domain_list": [
                 {
-                    "domain": "mywebsite.com",
+                    "domain": "www.mywebsite.com",
                     "protocol": "http"
                 }
             ],
@@ -21,7 +21,7 @@
             "name": "my_service_name",
             "domain_list": [
                 {
-                    "domain": "mywebsite.com",
+                    "domain": "www.mywebsite.com",
                     "protocol": "http"
                 }
             ],
@@ -46,7 +46,7 @@
             "name": "my_service_name",
             "domain_list": [
                 {
-                    "domain": "mywebsite.com",
+                    "domain": "www.mywebsite.com",
                     "protocol": "http"
                 }
             ],
@@ -69,7 +69,7 @@
             "name": "my_service_name",
             "domain_list": [
                 {
-                    "domain": "mywebsite.com",
+                    "domain": "www.mywebsite.com",
                     "protocol": "http"
                 }
             ],
@@ -106,7 +106,7 @@
             "name": "my_service_name",
             "domain_list": [
                 {
-                    "domain": "mywebsite.com",
+                    "domain": "www.mywebsite.com",
                     "protocol": "http"
                 }
             ],
@@ -140,7 +140,7 @@
             "name": "my_service_name",
             "domain_list": [
                 {
-                    "domain": "mywebsite.com",
+                    "domain": "www.mywebsite.com",
                     "protocol": "http"
                 }
             ],
@@ -189,7 +189,7 @@
             "name": "my_service_name",
             "domain_list": [
                 {
-                    "domain": "mywebsite.com",
+                    "domain": "www.mywebsite.com",
                     "protocol": "http"
                 }
             ],
@@ -223,7 +223,7 @@
             "name": "my_service_name",
             "domain_list": [
                 {
-                    "domain": "mywebsite.com",
+                    "domain": "www.mywebsite.com",
                     "protocol": "http"
                 }
             ],
@@ -272,7 +272,7 @@
             "name": "my_service_name",
             "domain_list": [
                 {
-                    "domain": "mywebsite.com",
+                    "domain": "www.mywebsite.com",
                     "protocol": "http"
                 }
             ],
@@ -306,7 +306,7 @@
             "name": "my_service_name",
             "domain_list": [
                 {
-                    "domain": "mywebsite.com",
+                    "domain": "www.mywebsite.com",
                     "protocol": "http"
                 }
             ],
@@ -356,7 +356,7 @@
             "name": "my_service_name",
             "domain_list": [
                 {
-                    "domain": "mywebsite.com",
+                    "domain": "www.mywebsite.com",
                     "protocol": "http"
                 }
             ],
@@ -391,7 +391,7 @@
             "name": "my_service_name",
             "domain_list": [
                 {
-                    "domain": "mywebsite.com",
+                    "domain": "www.mywebsite.com",
                     "protocol": "http"
                 }
             ],

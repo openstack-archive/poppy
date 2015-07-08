@@ -34,7 +34,8 @@ class TestServicePatch(base.TestBase):
         self.flavor_id = self.test_flavor
         self.log_delivery = {"enabled": False}
 
-        domain = self.generate_random_string(prefix='api-test-domain') + '.com'
+        domain = self.generate_random_string(
+            prefix='www.api-test-domain') + '.com'
         self.domain_list = [
             {
                 "domain": domain,
@@ -114,7 +115,9 @@ class TestServicePatch(base.TestBase):
                 if (domain['certificate'] == u'shared'):
                     return self.generate_random_string(prefix='api-test-ssl')
 
-        return self.generate_random_string(prefix='api-test-ssl') + '.com'
+        top_level_domain = '.'.join(item['domain'].split('.')[1:])
+        return (self.generate_random_string(prefix='api-test-ssl') + '.' +
+            top_level_domain)
 
     @ddt.file_data('data_patch_service.json')
     def test_patch_service(self, test_data):

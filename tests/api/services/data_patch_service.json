@@ -2,41 +2,41 @@
    "add_domain": [
         {"op": "add",
          "path": "/domains/-",
-         "value": {"domain": "replaceme.com", "protocol": "http"}}
+         "value": {"domain": "www.replaceme.com", "protocol": "http"}}
     ],
     "replace_domain":  [
         {"op": "replace",
          "path": "/domains/0",
-         "value": {"domain": "replaceme.com", "protocol": "http"}}
+         "value": {"domain": "www.replaceme.com", "protocol": "http"}}
     ],
    "add_multiple_domains": [
         {"op": "add",
          "path": "/domains/-",
-         "value": {"domain": "replaceme.com", "protocol": "http"}},
+         "value": {"domain": "www.replaceme.com", "protocol": "http"}},
         {"op": "add",
          "path": "/domains/-",
-         "value": {"domain": "replaceme.com", "protocol": "http"}}
+         "value": {"domain": "www.replaceme.com", "protocol": "http"}}
     ],
     "add_same_domains_with_different_ssl": [
         {"skip_test": true,
          "op": "add",
          "path": "/domains/-",
-         "value": {"domain": "replaceme.com", "protocol": "http"}},
+         "value": {"domain": "www.replaceme.com", "protocol": "http"}},
         {"op": "add",
          "path": "/domains/-",
-         "value": {"domain": "replaceme.com", "protocol": "https"}}
+         "value": {"domain": "www.replaceme.com", "protocol": "https"}}
     ],
    "add_and_remove_domains": [
         {"op": "add",
          "path": "/domains/-",
-         "value": {"domain": "replaceme.com", "protocol": "http"}},
+         "value": {"domain": "www.replaceme.com", "protocol": "http"}},
         {"op": "remove",
          "path": "/domains/0"}
     ],
     "add_domain_list": [
         {"op": "add",
          "path": "/domains",
-         "value": [{"domain": "replaceme.com", "protocol": "http"}]}
+         "value": [{"domain": "www.replaceme.com", "protocol": "http"}]}
     ],
     "replace_service_name": [
         {"op": "replace",
@@ -234,7 +234,7 @@
         {
          "op": "replace",
          "path": "/domains/0",
-         "value": {"domain": "replaceme.com", "protocol": "https",
+         "value": {"domain": "www.replaceme.com", "protocol": "https",
                    "certificate": "shared"}},
         {"op": "replace",
          "path": "/origins/0",
