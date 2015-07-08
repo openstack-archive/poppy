@@ -26,7 +26,7 @@
     },
     "domain_san_ssl": {
         "name": "domain_san_ssl",
-        "domain_list": [{"domain": "sansslwebsite.com",
+        "domain_list": [{"domain": "www.sansslwebsite.com",
                          "protocol": "https",
                          "certificate": "san"}],
         "origin_list": [{"origin": "mywebsite1.com",
@@ -47,7 +47,7 @@
     },
     "domain_custom_ssl": {
         "name": "domain_san_ssl",
-        "domain_list": [{"domain": "customsslwebsite.com",
+        "domain_list": [{"domain": "www.customsslwebsite.com",
                          "protocol": "https",
                          "certificate": "custom"}],
         "origin_list": [{"origin": "mywebsite1.com",

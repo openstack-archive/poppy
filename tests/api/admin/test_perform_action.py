@@ -29,7 +29,7 @@ class TestHttpService(base.TestBase):
         self.flavor_id = self.test_flavor
 
         domain = self.generate_random_string(
-            prefix='api-test-domain') + u'.com'
+            prefix='www.api-test-domain') + u'.com'
         self.domain_list = [
             {"domain": domain, "protocol": "http"}
         ]
@@ -356,7 +356,7 @@ class TestSanCertService(base.TestBase):
         self.flavor_id = self.test_flavor
 
         domain = self.generate_random_string(
-            prefix='api-test-domain') + '.com'
+            prefix='www.api-test-domain') + '.com'
         self.domain_list = [
             {"domain": domain, "protocol": "https", "certificate": "san"}
         ]
@@ -510,7 +510,7 @@ class TestCustomCertService(base.TestBase):
         self.flavor_id = self.test_flavor
 
         domain = self.generate_random_string(
-            prefix='api-test-domain') + '.com'
+            prefix='www.api-test-domain') + '.com'
         self.domain_list = [
             {"domain": domain, "protocol": "https", "certificate": "custom"}
         ]
@@ -664,7 +664,7 @@ class TestHttpServiceWithLogDelivery(base.TestBase):
         self.flavor_id = self.test_flavor
 
         domain = self.generate_random_string(
-            prefix='api-test-domain') + u'.com'
+            prefix='www.api-test-domain') + u'.com'
         self.domain_list = [
             {"domain": domain, "protocol": "http"}
         ]
