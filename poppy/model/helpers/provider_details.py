@@ -34,13 +34,14 @@ class ProviderDetail(common.DictSerializableModel):
 
     def __init__(self, provider_service_id=None, access_urls=[],
                  status=u"deploy_in_progress", name=None, error_info=None,
-                 error_message=None):
+                 error_message=None, error_class=None):
         self._provider_service_id = provider_service_id
         self._access_urls = access_urls
         self._status = status
         self._name = name
         self._error_info = error_info
         self._error_message = error_message
+        self._error_class = error_class
 
     @property
     def provider_service_id(self):
@@ -98,6 +99,14 @@ class ProviderDetail(common.DictSerializableModel):
     def error_message(self, value):
         self._error_message = value
 
+    @property
+    def error_class(self):
+        return self._error_class
+
+    @error_class.setter
+    def error_class(self, value):
+        self._error_class = value
+
     def to_dict(self):
         result = collections.OrderedDict()
         result["id"] = self.provider_service_id
@@ -106,7 +115,7 @@ class ProviderDetail(common.DictSerializableModel):
         result["name"] = self.name
         result["error_info"] = self.error_info
         result["error_message"] = self.error_message
-
+        result["error_class"] = self.error_class
         return result
 
     @classmethod
@@ -127,4 +136,5 @@ class ProviderDetail(common.DictSerializableModel):
         o.name = dict_obj.get("name", None)
         o.error_info = dict_obj.get("error_info", None)
         o.error_message = dict_obj.get("error_message", None)
+        o.error_class = dict_obj.get("error_class", None)
         return o

@@ -17,6 +17,7 @@
 
 from poppy.dns import base
 from poppy.dns.default import controllers
+from poppy.dns.default.helpers import retry_exceptions
 from poppy.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -62,3 +63,12 @@ class DNSProvider(base.Driver):
         """
 
         return controllers.ServicesController(self)
+
+    @property
+    def retry_exceptions(self):
+        """Retry on certain exceptions.
+
+        :return list
+        """
+
+        return retry_exceptions
