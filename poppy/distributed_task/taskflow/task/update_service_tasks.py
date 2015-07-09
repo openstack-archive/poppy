@@ -20,6 +20,7 @@ from oslo.config import cfg
 from taskflow import task
 
 from poppy.distributed_task.taskflow.task import common
+from poppy.distributed_task.utils import exc_loader
 from poppy.distributed_task.utils import memoized_controllers
 from poppy.model.helpers import provider_details
 from poppy.openstack.common import log
@@ -72,12 +73,21 @@ class UpdateServiceDNSMappingTask(task.Task):
         for provider_name in dns_responder:
             try:
                 if 'error' in dns_responder[provider_name]:
-                    if 'DNS Exception'\
-                            in dns_responder[provider_name]['error']:
-                        msg = 'Update DNS for {0}' \
-                              'failed!'.format(provider_name)
-                        LOG.info(msg)
-                        raise Exception(msg)
+                    msg = 'Update DNS for {0} ' \
+                          'failed!'.format(provider_name)
+                    LOG.info(msg)
+                    if 'error_class' in dns_responder[provider_name]:
+                        exception_repr = \
+                            dns_responder[provider_name]['error_class']
+                        exception_class = exc_loader(exception_repr)
+
+                        if any([isinstance(exception_class(), exception) for
+                                exception in dns._driver.retry_exceptions]):
+                            LOG.info('Due to {0} Exception, '
+                                     'Task {1} will '
+                                     'be retried'.format(exception_class,
+                                                         self.__class__))
+                            raise exception_class(msg)
             except KeyError:
                 # NOTE(TheSriram): This means the provider updates failed, and
                 # just access_urls were returned
@@ -123,6 +133,7 @@ class GatherProviderDetailsTask(task.Task):
         service_obj = service.load_from_json(service_obj_json)
         # gather links and status for service from providers
         error_flag = False
+        error_class = None
         provider_details_dict = {}
         for responder in responders:
             for provider_name in responder:
@@ -138,12 +149,16 @@ class GatherProviderDetailsTask(task.Task):
                     error_flag = True
                     error_msg = dns_responder[provider_name]['error']
                     error_info = dns_responder[provider_name]['error_detail']
-
+                    if 'error_class' in dns_responder[provider_name]:
+                        # stores the error class for debugging purposes.
+                        error_class = dns_responder[provider_name].get(
+                            'error_class')
                     provider_details_dict[provider_name] = (
                         provider_details.ProviderDetail(
                             error_info=error_info,
                             status='failed',
-                            error_message=error_msg))
+                            error_message=error_msg,
+                            error_class=error_class))
                 else:
                     access_urls = dns_responder[provider_name]['access_urls']
                     if log_responders:

@@ -266,6 +266,9 @@ class TestServicesDelete(base.TestCase):
         for provider_name in provider_details:
             self.assertIsNotNone(dns_responder[provider_name]['error'])
             self.assertIsNotNone(dns_responder[provider_name]['error_detail'])
+            self.assertIsNotNone(
+                dns_responder[provider_name]['error_class']
+            )
 
     def test_delete_with_generic_exception(self):
         akamai_access_urls = [
@@ -303,6 +306,9 @@ class TestServicesDelete(base.TestCase):
         for provider_name in provider_details:
             self.assertIsNotNone(dns_responder[provider_name]['error'])
             self.assertIsNotNone(dns_responder[provider_name]['error_detail'])
+            self.assertIsNotNone(
+                dns_responder[provider_name]['error_class']
+            )
 
     def test_delete_no_records_found(self):
         akamai_access_urls = [
@@ -414,6 +420,9 @@ class TestServicesDelete(base.TestCase):
         for provider_name in provider_details:
             self.assertIsNotNone(dns_responder[provider_name]['error'])
             self.assertIsNotNone(dns_responder[provider_name]['error_detail'])
+            self.assertIsNotNone(
+                dns_responder[provider_name]['error_class']
+            )
 
     def test_delete(self):
         akamai_access_urls = [
@@ -542,6 +551,9 @@ class TestServicesUpdate(base.TestCase):
                     self.assertIsNotNone(dns_details[provider_name]['error'])
                     self.assertIsNotNone(
                         dns_details[provider_name]['error_detail'])
+                    self.assertIsNotNone(
+                        dns_details[provider_name]['error_class']
+                    )
 
     def test_update_remove_domains_provider_error(self):
         domains_new = [domain.Domain('test.domain.com'),

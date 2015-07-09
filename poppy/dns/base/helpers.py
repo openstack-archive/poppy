@@ -13,21 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import importlib
-
-
-def exc_loader(exc_class):
-    """Exception Loader
-
-    Creates of the instance of the specified
-    exception class given the fully-qualified name.
-    The module is dynamically imported.
-
-    """
-
-    pos = exc_class.rfind('.')
-    module_name = exc_class[:pos]
-    class_name = exc_class[pos + 1:]
-
-    mod = importlib.import_module(module_name)
-    return getattr(mod, class_name)
+retry_exceptions = []

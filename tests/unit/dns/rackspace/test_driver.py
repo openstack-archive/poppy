@@ -20,6 +20,7 @@ from oslo.config import cfg
 import pyrax
 
 from poppy.dns.rackspace import driver
+from poppy.dns.rackspace.helpers import retry_exceptions
 from tests.unit import base
 
 RACKSPACE_OPTIONS = [
@@ -103,3 +104,9 @@ class TestDriver(base.TestCase):
     def test_service_controller(self, mock_set_credentials):
         provider = driver.DNSProvider(self.conf)
         self.assertNotEqual(provider.services_controller, None)
+
+    @mock.patch('pyrax.set_credentials')
+    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
+    def test_retry_exceptions(self, mock_set_credentials):
+        provider = driver.DNSProvider(self.conf)
+        self.assertEqual(provider.retry_exceptions, retry_exceptions)
