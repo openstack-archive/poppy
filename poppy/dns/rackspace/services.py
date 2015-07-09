@@ -220,7 +220,10 @@ class ServicesController(base.ServicesBase):
             for provider_name in responder:
                 if 'error' in responder[provider_name]:
                     error_msg = responder[provider_name]['error_detail']
-                    return self.responder.failed(providers, error_msg)
+                    error_dict = {
+                        'error_msg': error_msg
+                    }
+                    return self.responder.failed(providers, error_dict)
 
         # gather the provider urls and cname them
         links = {}
@@ -238,9 +241,13 @@ class ServicesController(base.ServicesBase):
         try:
             dns_links = self._create_cname_records(links)
         except Exception as e:
-            error_msg = 'Rackspace DNS Exception: {0}'.format(e)
-            LOG.error(error_msg)
-            return self.responder.failed(providers, error_msg)
+            msg = 'Rackspace DNS Exception: {0}'.format(e)
+            error = {
+                'error_msg': msg,
+                'error_class': e.__class__
+            }
+            LOG.error(msg)
+            return self.responder.failed(providers, error)
 
         # gather the CNAMED links
         dns_details = {}
@@ -282,6 +289,7 @@ class ServicesController(base.ServicesBase):
 
         dns_details = {}
         error_msg = ''
+        error_class = None
         for provider_name in provider_details:
             access_urls = provider_details[provider_name].access_urls
             for access_url in access_urls:
@@ -298,17 +306,23 @@ class ServicesController(base.ServicesBase):
                                   'to CDN subdomain {0}'.format(e))
                         error_msg = (error_msg + 'Can not access subdomain . '
                                      'Exception: {0}'.format(e))
+                        error_class = e.__class__
                     except Exception as e:
                         LOG.error('Rackspace DNS Exception: {0}'.format(e))
                         error_msg = error_msg + 'Rackspace DNS ' \
                                                 'Exception: {0}'.format(e)
+                        error_class = e.__class__
                 # format the error message for this provider
             if not error_msg:
                 dns_details[provider_name] = self.responder.deleted({})
 
         # format the error message
         if error_msg:
-            return self.responder.failed(providers, error_msg)
+            error = {
+                'error_msg': error_msg,
+                'error_class': error_class
+            }
+            return self.responder.failed(providers, error)
 
         return dns_details
 
@@ -344,8 +358,13 @@ class ServicesController(base.ServicesBase):
             dns_links = self._create_cname_records(links)
         except Exception as e:
             error_msg = 'Rackspace DNS Exception: {0}'.format(e)
+            error_class = e.__class__
+            error = {
+                'error_msg': error_msg,
+                'error_class': error_class
+            }
             LOG.error(error_msg)
-            return self.responder.failed(providers, error_msg)
+            return self.responder.failed(providers, error)
 
         # gather the CNAMED links for added domains
         for responder in responders:
@@ -389,6 +408,7 @@ class ServicesController(base.ServicesBase):
 
         # delete the records for deleted domains
         error_msg = ''
+        error_class = None
         for provider_name in provider_details:
             provider_detail = provider_details[provider_name]
             for access_url in provider_detail.access_urls:
@@ -409,16 +429,22 @@ class ServicesController(base.ServicesBase):
                               'subdomain {0}'.format(e))
                     error_msg = (error_msg + 'Can not access subdomain. '
                                  'Exception: {0}'.format(e))
+                    error_class = e.__class__
                 except Exception as e:
                     LOG.error('Exception: {0}'.format(e))
                     error_msg = error_msg + 'Exception: {0}'.format(e)
+                    error_class = e.__class__
             # format the success message for this provider
             if not error_msg:
                 dns_details[provider_name] = self.responder.deleted({})
 
         # format the error message
         if error_msg:
-            return self.responder.failed(providers, error_msg)
+            error_dict = {
+                'error_msg': error_msg,
+                'error_class': error_class
+            }
+            return self.responder.failed(providers, error_dict)
 
         return dns_details
 
@@ -487,7 +513,15 @@ class ServicesController(base.ServicesBase):
         for provider_name in dns_links:
             if 'error' in dns_links[provider_name]:
                 error_msg = dns_links[provider_name]['error_detail']
-                return self.responder.failed(providers, error_msg)
+                error_dict = {
+                    'error_msg': error_msg
+                }
+
+                if 'error_class' in dns_links[provider_name]:
+                    error_dict['error_class'] = \
+                        dns_links[provider_name]['error_class']
+
+                return self.responder.failed(providers, error_dict)
 
         # gather the CNAMED links and remove stale links
         dns_details = {}

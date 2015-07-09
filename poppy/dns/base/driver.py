@@ -71,3 +71,11 @@ class DNSDriverBase(object):
          :raises NotImplementedError
         """
         raise NotImplementedError
+
+    @abc.abstractproperty
+    def retry_exceptions(self):
+        """Retry on certain exceptions.
+
+         :raises NotImplementedError
+        """
+        raise NotImplementedError

@@ -19,6 +19,7 @@ import time
 from oslo.config import cfg
 from taskflow import task
 
+from poppy.distributed_task.utils import exc_loader
 from poppy.distributed_task.utils import memoized_controllers
 from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import (
@@ -72,11 +73,21 @@ class DeleteServiceDNSMappingTask(task.Task):
             provider_details)
         for provider_name in dns_responder:
             if 'error' in dns_responder[provider_name]:
-                if 'DNS Exception'\
-                        in dns_responder[provider_name]['error']:
-                    msg = 'Deleting DNS for {0} failed!'.format(provider_name)
-                    LOG.info(msg)
-                    raise Exception(msg)
+                msg = 'Delete DNS for {0} ' \
+                      'failed!'.format(provider_name)
+                LOG.info(msg)
+                if 'error_class' in dns_responder[provider_name]:
+                    exception_repr = \
+                        dns_responder[provider_name]['error_class']
+                    exception_class = exc_loader(exception_repr)
+
+                    if any([isinstance(exception_class(), exception) for
+                            exception in dns._driver.retry_exceptions]):
+                        LOG.info('Due to {0} Exception, '
+                                 'Task {1} will '
+                                 'be retried'.format(exception_class,
+                                                     self.__class__))
+                        raise exception_class(msg)
 
         return dns_responder
 
@@ -111,6 +122,10 @@ class GatherProviderDetailsTask(task.Task):
                 # stores the error info for debugging purposes.
                 provider_details[provider_name].error_info = (
                     dns_responder[provider_name].get('error_info'))
+                if 'error_class' in dns_responder[provider_name]:
+                    # stores the error class for debugging purposes.
+                    provider_details[provider_name].error_class = (
+                        dns_responder[provider_name].get('error_class'))
             else:
                 # delete service successful, remove this provider detail record
                 del provider_details[provider_name]

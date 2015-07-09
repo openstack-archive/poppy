@@ -35,10 +35,26 @@ class Responder(object):
                 error_detail = traceback.format_exc()
             except AttributeError:
                 error_detail = msg
+
+            error_class = None
+            if 'error_msg' in msg and 'error_class' in msg:
+                error_msg = msg['error_msg']
+                error_class = msg['error_class']
+            else:
+                error_msg = error_detail
             error_details[provider] = {
-                'error': msg,
+                'error': error_msg,
                 'error_detail': error_detail
             }
+
+            if error_class:
+                try:
+                    module_name = error_class.__module__
+                    exc_name = error_class.__name__
+                    error_details[provider]['error_class'] = \
+                        ".".join([module_name, exc_name])
+                except AttributeError:
+                    error_details[provider]['error_class'] = error_class
 
         return error_details
 
