@@ -300,7 +300,8 @@ def is_valid_service_configuration(service, schema):
             if 'hostheadervalue' in origin:
                 hostheadervalue = origin.get('hostheadervalue')
                 if hostheadervalue is not None:
-                    if not is_valid_domain_name(hostheadervalue):
+                    if not (is_valid_domain_name(hostheadervalue) or
+                            is_valid_ip_address(hostheadervalue)):
                         raise exceptions.ValidationFailed(
                             u'HostHeaderValue {0} is not valid'.format(
                                 hostheadervalue))
