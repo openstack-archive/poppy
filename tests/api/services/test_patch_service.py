@@ -53,8 +53,7 @@ class TestServicePatch(base.TestBase):
                         "name": "default",
                         "request_url": "/*"
                     }
-                ],
-                "hostheadertype": "domain"
+                ]
             }
         ]
 
@@ -118,7 +117,9 @@ class TestServicePatch(base.TestBase):
 
     @ddt.file_data('data_patch_service.json')
     def test_patch_service(self, test_data):
-
+        # import ipdb
+        # ipdb.set_trace()
+        test_data_copy = test_data
         for item in test_data:
             if 'skip_test' in item:
                 self.skipTest('Not Implemented - bug# 1433807')
@@ -134,13 +135,8 @@ class TestServicePatch(base.TestBase):
         patch = jsonpatch.JsonPatch(test_data)
         expected_service_details = patch.apply(self.original_service_details)
 
-        expected_origin = expected_service_details['origins']
-        for item in expected_origin:
-            if 'hostheadertype' not in item:
-                item['hostheadertype'] = 'domain'
-
         resp = self.client.patch_service(location=self.service_url,
-                                         request_body=test_data)
+                                         request_body=test_data_copy)
         self.assertEqual(resp.status_code, 202)
 
         self.client.wait_for_service_status(
@@ -153,6 +149,13 @@ class TestServicePatch(base.TestBase):
         resp = self.client.get_service(location=self.service_url)
         body = resp.json()
         self.assertEqual(body['status'], 'deployed')
+
+        expected_origin = expected_service_details['origins']
+        for field in expected_origin:
+            if 'hostheadertype' not in field:
+                field['hostheadertype'] = 'domain'
+            elif field['hostheadertype'] == 'origin':
+                field['hostheadervalue'] = field['origin']
 
         self.assert_patch_service_details(body, expected_service_details)
 
@@ -170,6 +173,12 @@ class TestServicePatch(base.TestBase):
         body = resp.json()
         self.assertEqual(body['status'], 'deployed')
 
+        expected_origin = self.original_service_details['origins']
+        for field in expected_origin:
+            if 'hostheadertype' not in field:
+                field['hostheadertype'] = 'domain'
+            elif field['hostheadertype'] == 'origin':
+                field['hostheadervalue'] = field['origin']
         self.assert_patch_service_details(body, self.original_service_details)
 
     def test_patch_service_claim_relinquish_domain(self):
@@ -327,8 +336,7 @@ class TestServicePatchWithLogDelivery(base.TestBase):
                         "name": "default",
                         "request_url": "/*"
                     }
-                ],
-                "hostheadertype": "domain"
+                ]
             }
         ]
 
@@ -407,10 +415,6 @@ class TestServicePatchWithLogDelivery(base.TestBase):
 
         patch = jsonpatch.JsonPatch(test_data)
         expected_service_details = patch.apply(self.original_service_details)
-        expected_origin = expected_service_details['origins']
-        for item in expected_origin:
-            if 'hostheadertype' not in item:
-                item['hostheadertype'] = 'domain'
 
         resp = self.client.patch_service(location=self.service_url,
                                          request_body=test_data)
@@ -426,6 +430,13 @@ class TestServicePatchWithLogDelivery(base.TestBase):
         resp = self.client.get_service(location=self.service_url)
         body = resp.json()
         self.assertEqual(body['status'], 'deployed')
+
+        expected_origin = expected_service_details['origins']
+        for item in expected_origin:
+            if 'hostheadertype' not in item:
+                item['hostheadertype'] = 'domain'
+            elif item['hostheadertype'] == 'origin':
+                item['hostheadervalue'] = item['origin']
 
         self.assert_patch_service_details(body, expected_service_details)
 
