@@ -204,6 +204,41 @@
                    }
          }
     ],
+    "replace_restrictions_white_to_blacklist":[
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "new_restricted",
+          			"type": "blacklist",
+                    "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images2/*"}]
+                    }}
+    ],
+    "replace_restrictions_black_to_whitelist":[
+        {"op": "add",
+         "path": "/restrictions/-",
+         "value": {"name": "restricted",
+         			"type": "blacklist",
+                    "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images2/*"}]
+                    }},
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "new_restricted",
+          			"type": "whitelist",
+                    "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/*"}]
+                    }}
+    ],
+    "replace_restrictions_black_to_default":[
+        {"op": "add",
+         "path": "/restrictions/-",
+         "value": {"name": "restricted",
+         			"type": "blacklist",
+                    "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images2/*"}]
+                    }},
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "new_restricted",
+                    "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/*"}]
+                    }}
+    ],
     "add_restrictions_with_minimum_length_rule_name": [
          {"op": "add",
           "path": "/restrictions/-",
