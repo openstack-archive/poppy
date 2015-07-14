@@ -20,6 +20,7 @@ import pyrax
 
 from poppy.dns import base
 from poppy.dns.rackspace import controllers
+from poppy.dns.rackspace.helpers import retry_exceptions
 from poppy.openstack.common import log as logging
 
 
@@ -113,3 +114,11 @@ class DNSProvider(base.Driver):
         """
 
         return controllers.ServicesController(self)
+
+    @property
+    def retry_exceptions(self):
+        """Retry on certain exceptions.
+
+        :return list
+        """
+        return retry_exceptions

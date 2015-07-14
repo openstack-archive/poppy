@@ -20,6 +20,7 @@ from oslo.config import cfg
 from taskflow import task
 
 from poppy.distributed_task.taskflow.task import common
+from poppy.distributed_task.utils import exc_loader
 from poppy.distributed_task.utils import memoized_controllers
 from poppy.model.helpers import provider_details
 from poppy.openstack.common import log
@@ -77,11 +78,21 @@ class CreateServiceDNSMappingTask(task.Task):
         dns_responder = dns.create(responders)
         for provider_name in dns_responder:
             if 'error' in dns_responder[provider_name]:
-                if 'DNS Exception'\
-                        in dns_responder[provider_name]['error']:
-                    msg = 'Create DNS for {0} failed!'.format(provider_name)
-                    LOG.info(msg)
-                    raise Exception(msg)
+                msg = 'Create DNS for {0} ' \
+                      'failed!'.format(provider_name)
+                LOG.info(msg)
+                if 'error_class' in dns_responder[provider_name]:
+                    exception_repr = \
+                        dns_responder[provider_name]['error_class']
+                    exception_class = exc_loader(exception_repr)
+
+                    if any([isinstance(exception_class(), exception) for
+                            exception in dns._driver.retry_exceptions]):
+                        LOG.info('Due to {0} Exception, '
+                                 'Task {1} will '
+                                 'be retried'.format(exception_class,
+                                                     self.__class__))
+                        raise exception_class(msg)
 
         return dns_responder
 
@@ -134,24 +145,31 @@ class GatherProviderDetailsTask(task.Task):
         provider_details_dict = {}
         for responder in responders:
             for provider_name in responder:
+                error_class = None
                 if 'error' in responder[provider_name]:
                     error_msg = responder[provider_name]['error']
                     error_info = responder[provider_name]['error_detail']
-
+                    if 'error_class' in responder[provider_name]:
+                        error_class = \
+                            responder[provider_name]['error_class']
                     provider_details_dict[provider_name] = (
                         provider_details.ProviderDetail(
                             error_info=error_info,
                             status='failed',
-                            error_message=error_msg))
+                            error_message=error_msg,
+                            error_class=error_class))
                 elif 'error' in dns_responder[provider_name]:
                     error_msg = dns_responder[provider_name]['error']
                     error_info = dns_responder[provider_name]['error_detail']
-
+                    if 'error_class' in dns_responder[provider_name]:
+                        error_class = \
+                            dns_responder[provider_name]['error_class']
                     provider_details_dict[provider_name] = (
                         provider_details.ProviderDetail(
                             error_info=error_info,
                             status='failed',
-                            error_message=error_msg))
+                            error_message=error_msg,
+                            error_class=error_class))
                 else:
                     access_urls = dns_responder[provider_name]['access_urls']
                     if log_responders:
