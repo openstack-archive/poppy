@@ -87,10 +87,9 @@ class Restriction(common.DictSerializableModel):
         :returns o
         """
 
-        o = cls("unnamed", 'whitelist')
-        o.restriction = dict_obj.get("restriction", "unnamed")
+        r_type = dict_obj.get("type", 'whitelist')
+        o = cls("unnamed", r_type)
         o.name = dict_obj.get("name", "unnamed")
-        o.type = dict_obj.get("type")
         rules_dict_list = dict_obj.get("rules", [])
         o.rules = []
         for rule_dict in rules_dict_list:
