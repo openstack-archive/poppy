@@ -19,8 +19,8 @@ from poppy.transport.pecan.models.request import rule
 
 def load_from_json(json_data):
     name = json_data.get('name')
-    r_type = json_data.get('type', 'whitelist')
-    res = restriction.Restriction(name, r_type)
+    access = json_data.get('access', 'whitelist')
+    res = restriction.Restriction(name, access)
     rules = json_data.get('rules', [])
     rules = [rule.load_from_json(r) for r in rules]
     res.rules = rules

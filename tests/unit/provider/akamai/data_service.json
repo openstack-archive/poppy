@@ -61,7 +61,7 @@
         "restrictions": [
             {
                 "name": "website only",
-                "type": "whitelist",
+                "access": "whitelist",
                 "rules": [
                     {
                         "name": "mocksite.com",
@@ -71,7 +71,7 @@
             },
             {
                 "name": "graphic and US only",
-                "type": "whitelist",
+                "access": "whitelist",
                 "rules": [
                     {
                         "name": "mockgraphicsite.com",
@@ -192,7 +192,7 @@
             },
             {
                 "name": "no graphic",
-                "type": "blacklist",
+                "access": "blacklist",
                 "rules": [
                     {
                         "name": "mockgraphicsite.com",
@@ -202,7 +202,7 @@
             },
             {
                 "name": "no logo",
-                "type": "blacklist",
+                "access": "blacklist",
                 "rules": [
                     {
                         "name": "mockgraphicsite.com",
@@ -241,7 +241,7 @@
         "restrictions": [
             {
                 "name": "only from ip 1234",
-                "type": "blacklist",
+                "access": "blacklist",
                 "rules": [
                     {
                         "name": "only ip",

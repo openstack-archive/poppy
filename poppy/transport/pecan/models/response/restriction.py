@@ -29,5 +29,5 @@ class Model(collections.OrderedDict):
     def __init__(self, restriction):
         super(Model, self).__init__()
         self['name'] = util.help_escape(restriction.name)
-        self['type'] = restriction.type
+        self['access'] = restriction.access
         self['rules'] = [rule.Model(r) for r in restriction.rules]

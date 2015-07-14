@@ -185,7 +185,7 @@
             "restrictions": [
                 {
                     "name": "test",
-                    "type": "whitelist",
+                    "access": "whitelist",
                     "rules": [
                         {
                             "name": "only me",
@@ -223,7 +223,7 @@
             "restrictions": [
                 {
                     "name": "test",
-                    "type": "blacklist",
+                    "access": "blacklist",
                     "rules": [
                         {
                             "name": "only me",
@@ -270,7 +270,7 @@
             "restrictions": [
                 {
                     "name": "test",
-                    "type": "blacklist",
+                    "access": "blacklist",
                     "rules": [
                         {
                             "name": "only me",
@@ -354,7 +354,7 @@
             "restrictions": [
                 {
                     "name": "test",
-                    "type": "whitelist",
+                    "access": "whitelist",
                     "rules": [
                         {
                             "name": "only me",
@@ -439,7 +439,7 @@
             "restrictions": [
                 {
                     "name": "test",
-                    "type": "whitelist",
+                    "access": "whitelist",
                     "rules": [
                         {
                             "name": "only me",
@@ -525,7 +525,7 @@
             "restrictions": [
                 {
                     "name": "test",
-                    "type": "whitelist",
+                    "access": "whitelist",
                     "rules": [
                         {
                             "name": "only me",

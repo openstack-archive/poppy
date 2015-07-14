@@ -639,7 +639,7 @@ class ServicesController(base.ServicesController):
 
         restrictions = [restriction.Restriction(
             r.get('name'),
-            r.get('type'),
+            r.get('access'),
 
             [rule.Rule(r_rule.get('name'),
                        referrer=r_rule.get('referrer'),
