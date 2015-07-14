@@ -1,6 +1,6 @@
 # coding= utf-8
 
-# Copyright (c) 2014 Rackspace, Inc.
+# Copyright (c) 2015 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -125,7 +125,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('PATCH', location, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def get_service(self, location=None):
+    def get_service(self, location=None,
+                    requestslib_kwargs=None):
         """Get Service
 
         :return: Response Object containing response code 200 and body with
@@ -133,9 +134,11 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         GET
         services/{service_id}
         """
-        return self.request('GET', location)
+        return self.request('GET', location,
+                            requestslib_kwargs=requestslib_kwargs)
 
-    def list_services(self, param=None):
+    def list_services(self, param=None,
+                      requestslib_kwargs=None):
         """Get a list of Services
 
         :return: Response Object containing response code 200 and body with
@@ -145,9 +148,11 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         """
 
         url = '{0}/services'.format(self.url)
-        return self.request('GET', url, params=param)
+        return self.request('GET', url, params=param,
+                            requestslib_kwargs=requestslib_kwargs)
 
-    def delete_service(self, location):
+    def delete_service(self, location,
+                       requestslib_kwargs=None):
         """Delete Service
 
         :return: Response Object containing response code 204
@@ -155,7 +160,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         services/{service_id}
         """
 
-        return self.request('DELETE', location)
+        return self.request('DELETE', location,
+                            requestslib_kwargs=requestslib_kwargs)
 
     def admin_service_action(self, project_id, action,
                              requestslib_kwargs=None):
@@ -212,7 +218,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
                             request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def get_flavor(self, flavor_location=None, flavor_id=None):
+    def get_flavor(self, flavor_location=None, flavor_id=None,
+                   requestslib_kwargs=None):
         """Get Flavor
 
         :return: Response Object containing response code 200 and body with
@@ -225,9 +232,11 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         else:
             url = '{0}/flavors/{1}'.format(self.url, flavor_id)
 
-        return self.request('GET', url)
+        return self.request('GET', url,
+                            requestslib_kwargs=requestslib_kwargs)
 
-    def delete_flavor(self, flavor_location=None, flavor_id=None):
+    def delete_flavor(self, flavor_location=None, flavor_id=None,
+                      requestslib_kwargs=None):
         """Delete Flavor
 
         :return: Response Object containing response code 204
@@ -239,7 +248,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         else:
             url = u'{0}/flavors/{1}'.format(self.url, flavor_id)
 
-        return self.request('DELETE', url)
+        return self.request('DELETE', url,
+                            requestslib_kwargs=requestslib_kwargs)
 
     def purge_asset(self, location=None, asset_url='all=True'):
         """Delete Asset
