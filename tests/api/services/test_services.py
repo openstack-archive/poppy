@@ -326,6 +326,7 @@ class TestServiceActions(base.TestBase):
         self.restrictions_list = [
             {
                 u"name": u"website only",
+                u"type": u"whitelist",
                 u"rules": [
                     {
                         u"name": domain,
