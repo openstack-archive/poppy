@@ -154,6 +154,8 @@ class TestPatchSSLService(base.TestBase):
 
         self.restrictions_list = [
             {"name": "website only",
+             # add whitelist to make restriction type explicit
+             "type": "whitelist",
              "rules": [{"name": "mywebsite.com",
                         "referrer": "www.mywebsite.com",
                         "request_url": "/*"
@@ -202,6 +204,12 @@ class TestPatchSSLService(base.TestBase):
 
         patch = jsonpatch.JsonPatch(test_data)
         expected_service_details = patch.apply(self.original_service_details)
+
+        # Default restriction to whitelist
+        expected_restrictions = expected_service_details['restrictions']
+        for restriction in expected_restrictions:
+            if 'type' not in restriction:
+                restriction['type'] = 'whitelist'
 
         resp = self.client.patch_service(location=self.service_url,
                                          request_body=test_data)
