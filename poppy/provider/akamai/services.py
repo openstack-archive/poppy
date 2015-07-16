@@ -609,13 +609,23 @@ class ServiceController(base.ServiceBase):
                             # we found an existing matching rule.
                             # add the cache behavior to it
                             found_match = True
-                            rule['behaviors'].append({
-                                'name': 'caching',
-                                'type': 'fixed',
-                                # assuming the input number to caching rule
-                                # ttl is in second
-                                'value': '%ss' % caching_rule.ttl
-                            })
+                            if caching_rule.ttl == 0:
+                                # NOTE(TheSriram): if ttl is set zero,
+                                # we directly serve content from origin and do
+                                # not cache the content on edge server.
+                                rule['behaviors'].append({
+                                    'name': 'caching',
+                                    'type': 'no-store',
+                                    'value': '%ss' % caching_rule.ttl
+                                })
+                            else:
+                                rule['behaviors'].append({
+                                    'name': 'caching',
+                                    'type': 'fixed',
+                                    # assuming the input number to caching rule
+                                    # ttl is in second
+                                    'value': '%ss' % caching_rule.ttl
+                                })
 
                 # if there is no matches entry yet for this rule
                 if not found_match:
@@ -632,13 +642,23 @@ class ServiceController(base.ServiceBase):
                     }
 
                     rule_dict_template['matches'].append(match_rule)
-                    rule_dict_template['behaviors'].append({
-                        'name': 'caching',
-                        'type': 'fixed',
-                        # assuming the input number to caching rule
-                        # ttl is in second
-                        'value': '%ss' % caching_rule.ttl
-                    })
+                    if caching_rule.ttl == 0:
+                        # NOTE(TheSriram): if ttl is set zero,
+                        # we directly serve content from origin and do
+                        # not cache the content on edge server.
+                        rule_dict_template['behaviors'].append({
+                            'name': 'caching',
+                            'type': 'no-store',
+                            'value': '%ss' % caching_rule.ttl
+                        })
+                    else:
+                        rule_dict_template['behaviors'].append({
+                            'name': 'caching',
+                            'type': 'fixed',
+                            # assuming the input number to caching rule
+                            # ttl is in second
+                            'value': '%ss' % caching_rule.ttl
+                        })
                     rules_list.append(rule_dict_template)
             # end loop - caching_rule.rules
         # end loop - caching_rules

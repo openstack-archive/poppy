@@ -53,7 +53,7 @@ origin = {
 cache = {'type': 'object',
          'properties': {
              'name': {'type': 'string'},
-             'ttl': {'type': 'number', 'minimum': 1, 'maximum': 3600},
+             'ttl': {'type': 'number', 'minimum': 0, 'maximum': 3600},
              'rules': {'type': 'array'}},
          'required': ['name', 'ttl'],
          'additionalProperties': False}

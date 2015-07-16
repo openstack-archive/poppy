@@ -166,6 +166,11 @@
          "path": "/caching/0",
          "value": {"name": "cache_name", "ttl": 111, "rules": [{"name" : "index","request_url" : "new_path"}]}}
     ],
+   "replace_caching_with_zero_ttl": [
+        {"op": "replace",
+         "path": "/caching/0",
+         "value": {"name": "dynamic_cache", "ttl": 0, "rules": [{"name" : "dynamic","request_url" : "/latest_news/*"}]}}
+    ],
    "remove_caching": [
         {"op": "remove",
          "path": "/caching/0"}
@@ -181,6 +186,12 @@
          "value": {"name": "cache_name2", "ttl": 121,
                    "rules": [{"name" : "index2",
                               "request_url" : "/index2.htm"}]}
+               },
+        {"op": "add",
+         "path": "/caching/-",
+         "value": {"name": "cache_name3", "ttl": 0,
+                   "rules": [{"name" : "index3",
+                              "request_url" : "/index3.htm"}]}
                }
     ],
    "add_restrictions": [
