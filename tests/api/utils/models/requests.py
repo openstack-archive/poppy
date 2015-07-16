@@ -73,6 +73,27 @@ class ServiceAction(base.AutoMarshallingModel):
         return json.dumps(service_action_request)
 
 
+class MigrateDomain(base.AutoMarshallingModel):
+    """Marshalling for Action on Services requests."""
+
+    def __init__(self, project_id, service_id, domain, new_cert):
+        super(MigrateDomain, self).__init__()
+
+        self.project_id = project_id
+        self.service_id = service_id
+        self.domain = domain
+        self.new_cert = new_cert
+
+    def _obj_to_json(self):
+        service_action_request = {
+            "project_id": self.project_id,
+            "service_id": self.service_id,
+            "domain_name": self.domain,
+            "new_cert": self.new_cert
+        }
+        return json.dumps(service_action_request)
+
+
 class CreateFlavor(base.AutoMarshallingModel):
     """Marshalling for Create Flavor requests."""
 

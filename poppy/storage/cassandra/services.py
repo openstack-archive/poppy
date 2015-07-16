@@ -512,6 +512,10 @@ class ServicesController(base.ServicesController):
             consistency_level=self._driver.consistency_level)
         exec_results = self.session.execute(stmt, args)
 
+        if len(exec_results) != 1:
+            raise ValueError('No service found: %s'
+                             % service_id)
+
         provider_details_result = exec_results[0]['provider_details'] or {}
         results = {}
         for provider_name in provider_details_result:
