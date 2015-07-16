@@ -90,6 +90,18 @@
                   "request_url": "/*.gif"
                 }       
              ]
+		    },
+            {"name": "zero-cache", "ttl": 0 },
+            {"name": "dynamic-content",
+             "ttl": 0,
+             "rules": [
+                { "name": "dynamic-jpeg-rules",
+                  "request_url": "/*.jpeg"
+                },
+                { "name": "dynamic-gif-rules",
+                  "request_url": "/*.gif"
+                }
+             ]
 		    }
         ],
         "flavor_id" : "standard"

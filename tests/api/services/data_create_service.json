@@ -138,6 +138,45 @@
                           "rules": [{"name" : "Rule 1",
                                      "request_url" : "/images/test.jpg"}]}]
     },
+      "multiple_origin_path_multiple_caching_types": {
+        "name": "my_service_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
+        "origin_list": [{
+                         "origin": "mywebsite1.com",
+                         "port": 80,
+                         "ssl": false,
+                         "rules":[
+                              {
+                                "name": "default rule",
+                                "request_url": "/*"
+                              }
+                             ],
+                             "hostheadertype": "custom",
+                             "hostheadervalue": "www.customweb.com"
+                         },
+                         {
+                            "origin": "mywebsite2.com",
+                             "port": 80,
+                             "ssl": false,
+                             "rules":[
+                              {
+                                "name": "images rules",
+                                "request_url": "/images/test.jpg"
+                              }
+                             ],
+                             "hostheadertype": "custom",
+                             "hostheadervalue": "www.customweb.com"
+                        }
+                        ],
+        "caching_list": [{"name": "default",
+                          "ttl": 1200,
+                          "rules": [{"name" : "Rule 1",
+                                     "request_url" : "/images/test.jpg"}]},
+                         {"name": "no-store",
+                          "ttl": 0,
+                          "rules": [{"name" : "Rule 2",
+                                     "request_url" : "/news/latestnews.html"}]}]
+    },
     "log_delivery_enabled": {
         "name": "my_service_name",
         "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
