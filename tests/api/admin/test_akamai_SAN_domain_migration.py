@@ -101,7 +101,7 @@ class TestSanCertService(base.TestBase):
         get_resp = self.client.get_service(location=self.service_url)
         get_resp_body = get_resp.json()
         domain = get_resp_body['domains'][0]['domain']
-        resp = self.client.admin_migrate_domain(
+        resp = self.operator_client.admin_migrate_domain(
             project_id=self.user_project_id, service_id=get_resp_body['id'],
             domain=domain, new_cert=new_cert)
 
@@ -134,7 +134,7 @@ class TestSanCertService(base.TestBase):
         get_resp_body = get_resp.json()
         domain = get_resp_body['domains'][0]['domain']
         project_id = self.generate_random_string(prefix=self.user_project_id)
-        resp = self.client.admin_migrate_domain(
+        resp = self.operator_client.admin_migrate_domain(
             project_id=project_id, service_id=get_resp_body['id'],
             domain=domain, new_cert=new_cert)
 
@@ -150,7 +150,7 @@ class TestSanCertService(base.TestBase):
         get_resp_body = get_resp.json()
         domain = get_resp_body['domains'][0]['domain']
         service_id = self.generate_random_string(prefix=get_resp_body['id'])
-        resp = self.client.admin_migrate_domain(
+        resp = self.operator_client.admin_migrate_domain(
             project_id=self.user_project_id, service_id=service_id,
             domain=domain, new_cert=new_cert)
 
@@ -166,7 +166,7 @@ class TestSanCertService(base.TestBase):
         get_resp_body = get_resp.json()
         domain = "1234"
         service_id = self.generate_random_string(prefix=get_resp_body['id'])
-        resp = self.client.admin_migrate_domain(
+        resp = self.operator_client.admin_migrate_domain(
             project_id=self.user_project_id, service_id=service_id,
             domain=domain, new_cert=new_cert)
 
@@ -262,7 +262,7 @@ class TestSanCertServiceWithLogDelivery(base.TestBase):
         get_resp_body = get_resp.json()
         domain = get_resp_body['domains'][0]['domain']
 
-        resp = self.client.admin_migrate_domain(
+        resp = self.operator_client.admin_migrate_domain(
             project_id=self.user_project_id, service_id=get_resp_body['id'],
             domain=domain, new_cert=new_cert)
         self.assertEqual(resp.status_code, 202)
