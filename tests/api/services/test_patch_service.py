@@ -421,6 +421,17 @@ class TestServicePatchWithLogDelivery(base.TestBase):
         patch = jsonpatch.JsonPatch(test_data)
         expected_service_details = patch.apply(self.original_service_details)
 
+        # Default restriction to whitelist
+        expected_restrictions = expected_service_details['restrictions']
+        for restriction in expected_restrictions:
+            if 'type' not in restriction:
+                restriction['type'] = 'whitelist'
+
+        expected_origin = expected_service_details['origins']
+        for item in expected_origin:
+            if 'hostheadertype' not in item:
+                item['hostheadertype'] = 'domain'
+
         resp = self.client.patch_service(location=self.service_url,
                                          request_body=test_data)
         self.assertEqual(resp.status_code, 202)
