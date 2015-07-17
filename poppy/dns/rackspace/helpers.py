@@ -13,9 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pyrax
+from pyrax import exceptions
 
 retry_exceptions = [
-    pyrax.exc.DNSCallTimedOut,
-    pyrax.exc.OverLimit
+    exceptions.DNSCallTimedOut,
+    exceptions.OverLimit,
+    exceptions.DomainCreationFailed,
+    exceptions.DomainDeletionFailed,
+    exceptions.DomainRecordUpdateFailed,
+    exceptions.DomainRecordAdditionFailed,
+    exceptions.DomainRecordDeletionFailed,
+    exceptions.DomainRecordUpdateFailed,
 ]
