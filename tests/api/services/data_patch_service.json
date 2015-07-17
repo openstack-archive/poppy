@@ -238,7 +238,7 @@
           "value": {"name": "new_restricted",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images3/*"}]
                     }}
-    ]
+    ],
     "add_restrictions_with_minimum_length_rule_name": [
          {"op": "add",
           "path": "/restrictions/-",
