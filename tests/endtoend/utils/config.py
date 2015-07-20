@@ -234,6 +234,19 @@ class MultipleOriginConfig(data_interfaces.ConfigSectionInterface):
         return self.get('image_path')
 
 
+class HostHeaderConfig(data_interfaces.ConfigSectionInterface):
+    """Configuration for testing multiple origins."""
+    SECTION_NAME = 'host_header'
+
+    @property
+    def origin(self):
+        return self.get('origin')
+
+    @property
+    def endpoint(self):
+        return self.get('endpoint')
+
+
 class PurgeRulesConfig(data_interfaces.ConfigSectionInterface):
     """Configuration for purge wait time."""
     SECTION_NAME = 'purgetime'
