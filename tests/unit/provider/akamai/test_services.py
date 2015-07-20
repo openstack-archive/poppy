@@ -22,6 +22,8 @@ import mock
 
 from poppy.model.helpers import cachingrule
 from poppy.model.helpers import domain
+from poppy.model.helpers import origin
+from poppy.model.helpers import restriction
 from poppy.model.helpers import rule
 from poppy.provider.akamai import services
 from poppy.transport.pecan.models.request import service
@@ -334,3 +336,73 @@ class TestServices(base.TestCase):
                     break
 
         self.assertTrue(caching_rule_valid)
+
+    def test_process_origin_rule(self):
+        controller = services.ServiceController(self.driver)
+        rule_entry = rule.Rule('index', request_url='*.jpg')
+        origin_rule = origin.Origin(origin='poppy.com', rules=[rule_entry])
+
+        rules_list = [{
+            'matches': [{
+                'name': 'url-wildcard',
+                'value': u'/*'
+            }],
+            'behaviors': [{
+                'params': {
+                    'hostHeaderValue': '-',
+                    'cacheKeyType': 'digital_property',
+                    'cacheKeyValue': '-',
+                    'originDomain': 'www.mydomain.com',
+                    'hostHeaderType': 'digital_property'
+                },
+                'name': 'origin',
+                'value': '-'
+            }]
+        }]
+        controller._process_new_origin(origin_rule, rules_list)
+        origin_rule_valid = False
+        for origin_rule in rules_list:
+            matches = origin_rule['matches']
+            for match in matches:
+                if match['value'] == u'/*.jpg':
+                    origin_rule_valid = True
+                    break
+
+        self.assertTrue(origin_rule_valid)
+
+    def test_process_restriction_rules(self):
+        controller = services.ServiceController(self.driver)
+        rule_entry = rule.Rule('index',
+                               request_url='*.jpg',
+                               referrer='www.poppy.com')
+        restriction_rule = restriction.Restriction(name='restriction',
+                                                   rules=[rule_entry])
+
+        restriction_rules = [restriction_rule]
+        rules_list = [{
+            'matches': [{
+                'name': 'url-wildcard',
+                'value': u'/*'
+            }],
+            'behaviors': [{
+                'params': {
+                    'hostHeaderValue': '-',
+                    'cacheKeyType': 'digital_property',
+                    'cacheKeyValue': '-',
+                    'originDomain': 'www.mydomain.com',
+                    'hostHeaderType': 'digital_property'
+                },
+                'name': 'origin',
+                'value': '-'
+            }]
+        }]
+        controller._process_restriction_rules(restriction_rules, rules_list)
+        restriction_rule_valid = False
+        for restriction_rule in rules_list:
+            matches = restriction_rule['matches']
+            for match in matches:
+                if match['value'] == u'/*.jpg':
+                    restriction_rule_valid = True
+                    break
+
+        self.assertTrue(restriction_rule_valid)
