@@ -89,8 +89,7 @@ class TestCreateService(providers.TestProviderBase):
                 item[u'hostheadervalue'] = item['origin']
         self.assertEqual(body['origins'], origin_list)
 
-        # TODO(malini): uncomment below after caching list is implemented.
-        # self.assertEqual(body['caching_list'], caching_list)
+        self.assertEqual(body['caching'], caching_list)
 
         # Verify the service is updated at all Providers for the flavor
         if self.test_config.provider_validation:
