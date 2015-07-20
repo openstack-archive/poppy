@@ -15,7 +15,7 @@
 
 from wsgiref import simple_server
 
-from oslo.config import cfg
+from oslo_config import cfg
 import pecan
 
 from poppy.openstack.common import log

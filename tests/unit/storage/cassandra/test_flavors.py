@@ -18,7 +18,7 @@ import uuid
 import cassandra
 import ddt
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy.model import flavor as model_flavor
 from poppy.storage.cassandra import driver

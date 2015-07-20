@@ -19,7 +19,7 @@ from poppy.openstack.common import log as logging
 from poppy.storage import base
 from poppy.storage.mockdb import controllers
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 LOG = logging.getLogger(__name__)
 

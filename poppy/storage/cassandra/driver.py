@@ -26,7 +26,7 @@ from cassandra import cluster
 from cassandra import policies
 from cassandra import query
 from cdeploy import migrator
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy.openstack.common import log as logging
 from poppy.storage import base

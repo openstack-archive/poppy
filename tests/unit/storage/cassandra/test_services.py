@@ -23,7 +23,7 @@ except ImportError:        # pragma: no cover
 import cassandra
 import ddt
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy.model.helpers import provider_details
 from poppy.storage.cassandra import driver

@@ -16,7 +16,7 @@
 import json
 import time
 
-from oslo.config import cfg
+from oslo_config import cfg
 from taskflow import task
 
 from poppy.distributed_task.utils import exc_loader

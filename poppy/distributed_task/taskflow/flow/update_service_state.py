@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo.config import cfg
+from oslo_config import cfg
 from taskflow.patterns import linear_flow
 
 from poppy.distributed_task.taskflow.task import update_service_state_tasks

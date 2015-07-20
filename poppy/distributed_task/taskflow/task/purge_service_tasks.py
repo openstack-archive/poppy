@@ -15,7 +15,7 @@
 
 import json
 
-from oslo.config import cfg
+from oslo_config import cfg
 from taskflow import task
 
 from poppy.distributed_task.utils import memoized_controllers

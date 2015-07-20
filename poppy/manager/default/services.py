@@ -17,7 +17,7 @@ import json
 import random
 
 import jsonpatch
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy.common import errors
 from poppy.distributed_task.taskflow.flow import create_service

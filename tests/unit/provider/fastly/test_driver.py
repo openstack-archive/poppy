@@ -15,7 +15,7 @@
 
 import fastly
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy.common import util
 from poppy.provider.fastly import driver

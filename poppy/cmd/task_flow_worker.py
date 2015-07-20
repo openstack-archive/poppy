@@ -16,7 +16,7 @@
 import os
 import socket
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy import bootstrap
 from poppy.openstack.common import log

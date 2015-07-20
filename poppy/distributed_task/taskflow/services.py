@@ -14,7 +14,7 @@
 # limitations under the License.
 
 
-from oslo.utils import uuidutils
+from oslo_utils import uuidutils
 from taskflow.conductors import single_threaded
 from taskflow import engines
 from taskflow.listeners import logging as logging_listener

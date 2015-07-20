@@ -17,7 +17,7 @@ import uuid
 
 import ddt
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy.storage.mockdb import driver
 from poppy.storage.mockdb import flavors

@@ -18,7 +18,7 @@ import uuid
 
 import ddt
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy.provider.maxcdn import driver
 from poppy.provider.maxcdn import services

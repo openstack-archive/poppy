@@ -23,7 +23,7 @@ class TransportDriverBase(object):
     """Base class for Transport Drivers to document the expected interface.
 
     :param conf: configuration instance
-    :type conf: oslo.config.cfg.CONF
+    :type conf: oslo_config.cfg.CONF
     """
 
     def __init__(self, conf, manager):

@@ -21,7 +21,7 @@ except ImportError:
 import uuid
 
 import ddt
-from oslo.config import cfg
+from oslo_config import cfg
 import pecan
 
 from poppy.transport.pecan.controllers import base as c_base

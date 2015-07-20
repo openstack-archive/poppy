@@ -6,7 +6,7 @@ hacking
 mock
 nose
 openstack.nose_plugin
-oslotest
+oslotest>=1.9.0
 requests
 testrepository
 testtools

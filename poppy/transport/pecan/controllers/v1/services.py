@@ -16,7 +16,7 @@
 import json
 import uuid
 
-from oslo.config import cfg
+from oslo_config import cfg
 import pecan
 from pecan import hooks
 

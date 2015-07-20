@@ -15,7 +15,7 @@
 
 import uuid
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy.storage.mockdb import driver
 from poppy.storage.mockdb import services

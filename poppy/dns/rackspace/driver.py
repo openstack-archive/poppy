@@ -15,7 +15,7 @@
 
 """DNS Provider implementation."""
 
-from oslo.config import cfg
+from oslo_config import cfg
 import pyrax
 
 from poppy.dns import base

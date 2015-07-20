@@ -16,7 +16,7 @@
 """CloudFront CDN Provider implementation."""
 
 import boto
-from oslo.config import cfg
+from oslo_config import cfg
 import requests
 
 from poppy.openstack.common import log as logging

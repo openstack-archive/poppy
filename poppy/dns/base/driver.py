@@ -31,7 +31,7 @@ class DNSDriverBase(object):
     CDN provider url.
 
     :param conf: Configuration containing options for this driver.
-    :type conf: `oslo.config.ConfigOpts`
+    :type conf: `oslo_config.ConfigOpts`
     """
 
     def __init__(self, conf):

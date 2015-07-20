@@ -19,7 +19,7 @@ import uuid
 
 import ddt
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 import requests
 
 from poppy.distributed_task.taskflow.task import common

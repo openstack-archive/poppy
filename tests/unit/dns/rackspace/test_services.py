@@ -17,7 +17,7 @@ import uuid
 
 import ddt
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 import pyrax.exceptions as exc
 
 from poppy.dns.rackspace import driver

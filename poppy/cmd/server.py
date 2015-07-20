@@ -14,7 +14,7 @@
 # limitations under the License.
 import os
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy import bootstrap
 from poppy.common import cli

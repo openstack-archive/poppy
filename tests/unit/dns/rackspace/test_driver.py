@@ -16,7 +16,7 @@
 """Unittests for Rackspace DNS Provider implementation."""
 
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 import pyrax
 
 from poppy.dns.rackspace import driver

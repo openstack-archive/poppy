@@ -16,7 +16,7 @@
 """Unittests for TaskFlow distributed_task service_controller."""
 
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy.distributed_task.taskflow import driver
 from tests.unit import base

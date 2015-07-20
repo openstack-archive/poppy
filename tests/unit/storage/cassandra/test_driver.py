@@ -17,7 +17,7 @@ import ssl
 
 import cassandra
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy.storage.cassandra import driver
 from poppy.storage.cassandra import flavors

@@ -17,7 +17,7 @@ import random
 
 import ddt
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy.provider.akamai import driver
 from tests.unit import base

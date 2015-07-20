@@ -17,7 +17,7 @@ import os
 import uuid
 
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 
 from poppy.manager.default import driver
 from poppy.manager.default import flavors
