@@ -58,6 +58,7 @@ class AuthClient(client.HTTPClient):
 
 
 class DNSClient(client.HTTPClient):
+
     def __init__(self, username, api_key):
         super(DNSClient, self).__init__()
 
@@ -339,6 +340,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
                     # this is for debugging purpose,
                     # will be removed later, so simply use print
                     print(body.get('errors', []))
+                    assert False, ("Aborted on status {0}").format(
+                        current_status)
                     return service
 
             current_time = int(time.time())
@@ -366,6 +369,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
                     # this is for debugging purpose,
                     # will be removed later, so simply use print
                     print(resp.get('errors', []))
+                    assert False, ("Aborted on status {0}").format(
+                        current_status)
                     return resp
 
             current_time = int(time.time())

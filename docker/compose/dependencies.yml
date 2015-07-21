@@ -8,3 +8,8 @@ cassandra:
     ports:
      - 9160:9160
      - 9042:9042
+
+mimic:
+    image: amitgandhinz/mimic
+    ports:
+     - 8900:8900
