@@ -8,6 +8,11 @@ cassandra:
         file: dependencies.yml
         service: cassandra
 
+mimic:
+    extends:
+        file: dependencies.yml
+        service: mimic
+
 poppy:
     build: ../api/.
     ports:
@@ -15,3 +20,5 @@ poppy:
     links:
         - cassandra
         - zookeeper
+        - mimic
+

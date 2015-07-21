@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 RUN /usr/bin/curl -s https://bootstrap.pypa.io/get-pip.py | python
 
 WORKDIR /home/source
-RUN git clone https://github.com/malini-kamalambal/mimic .
+RUN git clone https://github.com/rackerlabs/mimic .
 RUN pip install -r requirements.txt
 
 EXPOSE 8900
