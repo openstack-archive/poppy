@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
+
 from tests.endtoend import base
 from tests.endtoend.utils import config
 
@@ -25,29 +27,29 @@ class TestOriginHeaders(base.TestBase):
 
         cls.origin_header_config = config.OriginHeaderConfig()
 
-        cls.default_origin = cls.origin_header_config.origin
-        cls.expires_endpoint = cls.origin_header_config.expires_endpoint
-        cls.cache_control_endpoint = \
-            cls.origin_header_config.cache_control_endpoint
-        cls.expires_and_cache_control_endpoint = \
-            cls.origin_header_config.expires_and_cache_control_endpoint
+        cls.default_origin = cls.origin_header_config.default_origin
+        cls.expires_path = cls.origin_header_config.expires_path
+        cls.cache_control_path = \
+            cls.origin_header_config.cache_control_path
+        cls.expires_and_cache_control_path = \
+            cls.origin_header_config.expires_and_cache_control_path
         cls.check_preconditions()
 
     @classmethod
     def check_preconditions(cls):
         """Ensure our environment meets our needs to ensure a valid test."""
-        expires_endpoint = cls.http_client.get(
-            "http://" + cls.default_origin + cls.expires_endpoint)
-        assert expires_endpoint.status_code == 200
+        expires_path = cls.http_client.get(
+            "http://" + cls.default_origin + cls.expires_path)
+        assert expires_path.status_code == 200
 
-        cache_control_endpoint = cls.http_client.get(
-            "http://" + cls.default_origin + cls.cache_control_endpoint)
-        assert cache_control_endpoint.status_code == 200
+        cache_control_path = cls.http_client.get(
+            "http://" + cls.default_origin + cls.cache_control_path)
+        assert cache_control_path.status_code == 200
 
-        expires_and_cache_control_endpoint = cls.http_client.get(
+        expires_and_cache_control_path = cls.http_client.get(
             "http://" + cls.default_origin +
-            cls.expires_and_cache_control_endpoint)
-        assert expires_and_cache_control_endpoint.status_code == 200
+            cls.expires_and_cache_control_path)
+        assert expires_and_cache_control_path.status_code == 200
 
     def setUp(self):
         super(TestOriginHeaders, self).setUp()
@@ -87,8 +89,15 @@ class TestOriginHeaders(base.TestBase):
         if rec:
             self.cname_rec.append(rec[0])
 
-        cdn_url = 'http://' + self.test_domain + self.expires_endpoint
-        
+        cdn_url = 'http://' + self.test_domain + self.expires_path
+        self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=4)
+        # import ipdb; ipdb.set_trace()
+        self.assertCacheStatus(
+            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        # import ipdb; ipdb.set_trace()
+        time.sleep(self.origin_header_config.expires_ttl + 2)
+        self.assertCacheStatus(
+            cdn_url=cdn_url, status_list=['TCP_MISS'])
         # resp = self.http_client.get(url=cdn_url + self.test_endpoint)
 
     def test_expires_header_with_caching_ttl(self):
@@ -105,7 +114,7 @@ class TestOriginHeaders(base.TestBase):
         }]
         caching = [
             {"name": "default",
-             "ttl": 3600,
+             "ttl": self.origin_header_config.service_ttl,
              "rules": [{"name": "default", "request_url": "/*"}]}]
         resp = self.setup_service(
             service_name=self.service_name,
@@ -124,13 +133,18 @@ class TestOriginHeaders(base.TestBase):
         if rec:
             self.cname_rec.append(rec[0])
 
-        cdn_url = 'http://' + self.test_domain
-        resp = self.http_client.get(url=cdn_url + self.test_endpoint)
-        self.assertIn(self.default_origin, resp.content)
+        cdn_url = 'http://' + self.test_domain + self.expires_path
+        self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=4)
+        self.assertCacheStatus(
+            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        time.sleep(self.origin_header_config.service_ttl + 2)
+        # import ipdb; ipdb.set_trace()
+        self.assertCacheStatus(
+            cdn_url=cdn_url, status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
+        # resp = self.http_client.get(url=cdn_url + self.test_endpoint)
 
-    def test_custom_host_header(self):
+    def test_cache_control_header_no_caching_ttl(self):
         domains = [{'domain': self.test_domain}]
-        host_header_value = 'llama-llama-red-pajama.com'
         origins = [{
             "origin": self.default_origin,
             "port": 80,
@@ -139,13 +153,9 @@ class TestOriginHeaders(base.TestBase):
                 "name": "default",
                 "request_url": "/*",
             }],
-            "hostheadertype": "custom",
-            "hostheadervalue": host_header_value
+            "hostheadertype": "origin"
         }]
-        caching = [
-            {"name": "default",
-             "ttl": 3600,
-             "rules": [{"name": "default", "request_url": "/*"}]}]
+        caching = []
         resp = self.setup_service(
             service_name=self.service_name,
             domain_list=domains,
@@ -163,12 +173,18 @@ class TestOriginHeaders(base.TestBase):
         if rec:
             self.cname_rec.append(rec[0])
 
-        cdn_url = 'http://' + self.test_domain
-        url = cdn_url + self.test_endpoint
-        resp = self.http_client.get(url=url)
-        self.assertIn(host_header_value, resp.content)
+        cdn_url = 'http://' + self.test_domain + self.cache_control_path
+        self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=4)
+        # import ipdb; ipdb.set_trace()
+        self.assertCacheStatus(
+            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        # import ipdb; ipdb.set_trace()
+        time.sleep(self.origin_header_config.cache_control_ttl + 2)
+        self.assertCacheStatus(
+            cdn_url=cdn_url, status_list=['TCP_MISS'])
+        # resp = self.http_client.get(url=cdn_url + self.test_endpoint)
 
-    def test_default_host_header(self):
+    def test_cache_control_header_with_caching_ttl(self):
         domains = [{'domain': self.test_domain}]
         origins = [{
             "origin": self.default_origin,
@@ -177,11 +193,12 @@ class TestOriginHeaders(base.TestBase):
             "rules": [{
                 "name": "default",
                 "request_url": "/*",
-            }]
+            }],
+            "hostheadertype": "origin"
         }]
         caching = [
             {"name": "default",
-             "ttl": 3600,
+             "ttl": self.origin_header_config.service_ttl,
              "rules": [{"name": "default", "request_url": "/*"}]}]
         resp = self.setup_service(
             service_name=self.service_name,
@@ -200,10 +217,15 @@ class TestOriginHeaders(base.TestBase):
         if rec:
             self.cname_rec.append(rec[0])
 
-        cdn_url = 'http://' + self.test_domain
-        url = cdn_url + self.test_endpoint
-        resp = self.http_client.get(url=url)
-        self.assertIn(self.test_domain, resp.content)
+        cdn_url = 'http://' + self.test_domain + self.expires_path
+        self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=4)
+        self.assertCacheStatus(
+            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        time.sleep(self.origin_header_config.service_ttl + 2)
+        # import ipdb; ipdb.set_trace()
+        self.assertCacheStatus(
+            cdn_url=cdn_url, status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
+        # resp = self.http_client.get(url=cdn_url + self.test_endpoint)
 
     def tearDown(self):
         self.poppy_client.delete_service(location=self.service_location)

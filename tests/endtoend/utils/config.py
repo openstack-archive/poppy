@@ -241,3 +241,39 @@ class PurgeRulesConfig(data_interfaces.ConfigSectionInterface):
     @property
     def purge_wait_time(self):
         return int(self.get('purge_wait_time'))
+
+
+class OriginHeaderConfig(data_interfaces.ConfigSectionInterface):
+    """Configuration for testing origin headers."""
+    SECTION_NAME = 'origin_headers'
+
+    @property
+    def default_origin(self):
+        return self.get('default_origin')
+
+    @property
+    def expires_path(self):
+        return self.get('expires_path')
+
+    @property
+    def expires_ttl(self):
+        """TTL set by Expires header."""
+        return int(self.get('expires_ttl'))
+
+    @property
+    def cache_control_path(self):
+        return self.get('cache_control_path')
+
+    @property
+    def cache_control_ttl(self):
+        """TTL set by Cache Control header."""
+        return int(self.get('cache_control_ttl'))
+
+    @property
+    def expires_and_cache_control_path(self):
+        """Path to hit endpoint with Cache Control & Expires header."""
+        return self.get('expires_and_cache_control_path')
+
+    @property
+    def service_ttl(self):
+        return int(self.get('service_ttl'))
