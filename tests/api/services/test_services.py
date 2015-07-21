@@ -357,7 +357,9 @@ class TestServiceActions(base.TestBase):
 
         self.service_url = resp.headers["location"]
         self.client.wait_for_service_status(
-            location=self.service_url, status='deployed')
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed')
 
     @attrib.attr('smoke')
     def test_delete_service(self):
