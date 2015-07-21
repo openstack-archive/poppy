@@ -25,6 +25,7 @@ from tests.api.utils import config
 
 
 class TestBase(fixtures.BaseTestFixture):
+
     """Child class of fixtures.BaseTestFixture for testing CDN.
 
     Inherit from this and write your test methods. If the child class defines
@@ -92,14 +93,15 @@ class TestBase(fixtures.BaseTestFixture):
                     operator_project_id
             else:
                 cls.operator_url = cls.config.base_url + '/v1.0'
+
             cls.operator_client = client.PoppyClient(
                 cls.operator_url, operator_auth_token, operator_project_id,
                 serialize_format='json',
                 deserialize_format='json')
 
-        cls.dns_config = config.DNSConfig()
-        cls.dns_client = client.DNSClient(cls.dns_config.dns_username,
-                                          cls.dns_config.dns_api_key)
+            cls.dns_config = config.DNSConfig()
+            cls.dns_client = client.DNSClient(cls.dns_config.dns_username,
+                                              cls.dns_config.dns_api_key)
 
         cls.akamai_config = config.AkamaiConfig()
 

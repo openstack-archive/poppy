@@ -25,6 +25,11 @@ class TestHttpService(base.TestBase):
 
     def setUp(self):
         super(TestHttpService, self).setUp()
+
+        if self.test_config.run_operator_tests is False:
+            self.skipTest(
+                'Test Operator Functions is disabled in configuration')
+
         self.service_name = self.generate_random_string(prefix='API-Test-')
         self.flavor_id = self.test_flavor
 
@@ -198,6 +203,11 @@ class TestSharedCertService(base.TestBase):
 
     def setUp(self):
         super(TestSharedCertService, self).setUp()
+
+        if self.test_config.run_operator_tests is False:
+            self.skipTest(
+                'Test Operator Functions is disabled in configuration')
+
         self.service_name = self.generate_random_string(prefix='API-Test-')
         self.flavor_id = self.test_flavor
 
@@ -352,6 +362,11 @@ class TestSanCertService(base.TestBase):
 
     def setUp(self):
         super(TestSanCertService, self).setUp()
+
+        if self.test_config.run_operator_tests is False:
+            self.skipTest(
+                'Test Operator Functions is disabled in configuration')
+
         self.service_name = self.generate_random_string(prefix='API-Test-')
         self.flavor_id = self.test_flavor
 
@@ -506,6 +521,11 @@ class TestCustomCertService(base.TestBase):
 
     def setUp(self):
         super(TestCustomCertService, self).setUp()
+
+        if self.test_config.run_operator_tests is False:
+            self.skipTest(
+                'Test Operator Functions is disabled in configuration')
+
         self.service_name = self.generate_random_string(prefix='API-Test-')
         self.flavor_id = self.test_flavor
 
@@ -660,6 +680,11 @@ class TestHttpServiceWithLogDelivery(base.TestBase):
 
     def setUp(self):
         super(TestHttpServiceWithLogDelivery, self).setUp()
+
+        if self.test_config.run_operator_tests is False:
+            self.skipTest(
+                'Test Operator Functions is disabled in configuration')
+
         self.service_name = self.generate_random_string(prefix='API-Test-')
         self.flavor_id = self.test_flavor
 
