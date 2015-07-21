@@ -26,6 +26,9 @@ class TestSanCertService(base.TestBase):
 
     def setUp(self):
         super(TestSanCertService, self).setUp()
+        if self.test_config.run_operator_tests is False:
+            self.skipTest(
+                'Test Operator Functions is disabled in configuration')
 
         self.service_name = self.generate_random_string(prefix='API-Test-')
         self.flavor_id = self.test_flavor
@@ -93,9 +96,10 @@ class TestSanCertService(base.TestBase):
         self.service_url = resp.headers["location"]
 
     def test_migrate(self):
+
         new_certs = self.akamai_config.san_certs
         new_certs_list = new_certs.split(',')
-        index = random.randint(0, len(new_certs_list)-1)
+        index = random.randint(0, len(new_certs_list) - 1)
         new_cert = new_certs_list[index]
 
         get_resp = self.client.get_service(location=self.service_url)
@@ -125,9 +129,10 @@ class TestSanCertService(base.TestBase):
         self.assertEqual(data, new_cert)
 
     def test_migrate_negative_invalid_projectid(self):
+
         new_certs = self.akamai_config.san_certs
         new_certs_list = new_certs.split(',')
-        index = random.randint(0, len(new_certs_list)-1)
+        index = random.randint(0, len(new_certs_list) - 1)
         new_cert = new_certs_list[index]
 
         get_resp = self.client.get_service(location=self.service_url)
@@ -141,9 +146,10 @@ class TestSanCertService(base.TestBase):
         self.assertEqual(resp.status_code, 404)
 
     def test_migrate_negative_invalid_serviceid(self):
+
         new_certs = self.akamai_config.san_certs
         new_certs_list = new_certs.split(',')
-        index = random.randint(0, len(new_certs_list)-1)
+        index = random.randint(0, len(new_certs_list) - 1)
         new_cert = new_certs_list[index]
 
         get_resp = self.client.get_service(location=self.service_url)
@@ -157,9 +163,10 @@ class TestSanCertService(base.TestBase):
         self.assertEqual(resp.status_code, 404)
 
     def test_migrate_negative_invalid_domain(self):
+
         new_certs = self.akamai_config.san_certs
         new_certs_list = new_certs.split(',')
-        index = random.randint(0, len(new_certs_list)-1)
+        index = random.randint(0, len(new_certs_list) - 1)
         new_cert = new_certs_list[index]
 
         get_resp = self.client.get_service(location=self.service_url)
@@ -184,6 +191,10 @@ class TestSanCertServiceWithLogDelivery(base.TestBase):
 
     def setUp(self):
         super(TestSanCertServiceWithLogDelivery, self).setUp()
+
+        if self.test_config.run_operator_tests is False:
+            self.skipTest(
+                'Test Operator Functions is disabled in configuration')
 
         self.service_name = self.generate_random_string(prefix='API-Test-')
         self.flavor_id = self.test_flavor
@@ -256,7 +267,7 @@ class TestSanCertServiceWithLogDelivery(base.TestBase):
     def test_migrate(self):
         new_certs = self.akamai_config.san_certs
         new_certs_list = new_certs.split(',')
-        index = random.randint(0, len(new_certs_list)-1)
+        index = random.randint(0, len(new_certs_list) - 1)
         new_cert = new_certs_list[index]
         get_resp = self.client.get_service(location=self.service_url)
         get_resp_body = get_resp.json()
