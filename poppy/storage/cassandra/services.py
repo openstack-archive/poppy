@@ -80,6 +80,8 @@ CQL_VERIFY_DOMAIN = '''
     WHERE domain_name = %(domain_name)s
 '''
 
+CQL_SEARCH_BY_DOMAIN = CQL_VERIFY_DOMAIN
+
 CQL_CLAIM_DOMAIN = '''
     INSERT INTO domain_names (domain_name,
         project_id,
@@ -534,6 +536,28 @@ class ServicesController(base.ServicesController):
                 error_message=error_message)
             results[provider_name] = provider_detail_obj
         return results
+
+    def get_service_details_by_domain_name(self, domain_name):
+        """get_provider_details_by_domain_name.
+
+        :param domain_name
+        :returns Provider details
+        """
+
+        LOG.info("Getting details of service having domain: '{0}'".format(
+            domain_name))
+        args = {
+            'domain_name': domain_name.lower()
+        }
+        stmt = query.SimpleStatement(
+            CQL_SEARCH_BY_DOMAIN,
+            consistency_level=self._driver.consistency_level)
+        results = self.session.execute(stmt, args)
+        for r in results:
+            proj_id = r.get('project_id')
+            service = r.get('service_id')
+        details = self.get(proj_id, service)
+        return details
 
     def update_provider_details(self, project_id, service_id,
                                 provider_details):

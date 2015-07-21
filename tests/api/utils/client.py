@@ -189,6 +189,18 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('DELETE', location,
                             requestslib_kwargs=requestslib_kwargs)
 
+    def admin_get_service_by_domain_name(self, domain):
+        """Get Service By domain name
+
+        :return: Response Object containing response code 200 and body with
+        details of service
+        GET
+        domain/{domain_name}
+        """
+
+        domain_url = '{0}/admin/domains/{1}'.format(self.url, domain)
+        return self.request('GET', domain_url)
+
     def admin_service_action(self, project_id, action,
                              requestslib_kwargs=None):
         """Update Tenant State
