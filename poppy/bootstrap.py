@@ -51,6 +51,8 @@ _DRIVER_OPTIONS = [
                help='Storage driver to use'),
     cfg.ListOpt('providers', default=['mock'],
                 help='Provider driver(s) to use'),
+    cfg.ListOpt('notifications', default=['mail'],
+                help='Notification driver(s) to use'),
     cfg.StrOpt('dns', default='default',
                help='DNS driver to use'),
     cfg.StrOpt('distributed_task', default='taskflow',
@@ -120,6 +122,26 @@ class Bootstrap(object):
         return mgr
 
     @decorators.lazy_property(write=False)
+    def notification(self):
+        """notification.
+
+        :returns mgr
+        """
+
+        LOG.debug((u'Loading notification extension(s)'))
+
+        # create the driver manager to load the appropriate drivers
+        notification_type = 'poppy.notification'
+        args = [self.conf]
+        notification_type_names = self.driver_conf.notifications
+
+        mgr = named.NamedExtensionManager(namespace=notification_type,
+                                          names=notification_type_names,
+                                          invoke_on_load=True,
+                                          invoke_args=args)
+        return mgr
+
+    @decorators.lazy_property(write=False)
     def storage(self):
         """storage.
 
@@ -156,7 +178,7 @@ class Bootstrap(object):
         manager_name = self.driver_conf.manager
 
         args = [self.conf, self.storage, self.provider, self.dns,
-                self.distributed_task]
+                self.distributed_task, self.notification]
 
         try:
             mgr = driver.DriverManager(namespace=manager_type,
