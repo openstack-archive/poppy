@@ -165,7 +165,7 @@ class TestGetServiceByDomain(base.TestBase):
                  "_long_name_too_long_name_too_long_name_too_long_name_too_" \
                  "long_name.com"
         resp = self.operator_client.admin_get_service_by_domain_name(domain)
-        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.status_code, 400)
 
     def tearDown(self):
         self.client.delete_service(location=self.service_url)
