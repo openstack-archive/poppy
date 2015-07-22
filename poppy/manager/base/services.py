@@ -18,6 +18,7 @@ import abc
 import six
 
 from poppy.manager.base import controller
+from poppy.manager.base import notifications
 from poppy.manager.base import providers
 
 
@@ -29,6 +30,7 @@ class ServicesControllerBase(controller.ManagerControllerBase):
         super(ServicesControllerBase, self).__init__(manager)
 
         self.provider_wrapper = providers.ProviderWrapper()
+        self.notification_wrapper = notifications.NotificationWrapper()
 
     @abc.abstractmethod
     def list(self, project_id, marker=None, limit=None):
