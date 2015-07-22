@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Red Hat, Inc.
+# Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Rackspace Cloud DNS driver"""
+from poppy.notification import base
+from poppy.openstack.common import log
 
-from poppy.dns.rackspace import driver
 
-# Hoist classes into package namespace
-Driver = driver.DNSProvider
+class ServicesController(base.ServicesBase):
+
+    """Services Controller Base class."""
+
+    def __init__(self, driver):
+        super(ServicesController, self).__init__(driver)
+
+    def send(self):
+        """send notification to a (list) of recipients.
+
+        :param provider_details
+        :raises NotImplementedError
+        """
+
+        return "Sent"

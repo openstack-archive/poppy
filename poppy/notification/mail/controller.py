@@ -13,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Rackspace Cloud DNS driver"""
+from poppy.notification.mail import services
 
-from poppy.dns.rackspace import driver
-
-# Hoist classes into package namespace
-Driver = driver.DNSProvider
+ServicesController = services.ServicesController
