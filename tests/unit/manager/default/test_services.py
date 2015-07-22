@@ -21,6 +21,7 @@ import ddt
 import mock
 from oslo_config import cfg
 import requests
+import six
 
 from poppy.distributed_task.taskflow.task import common
 from poppy.distributed_task.taskflow.task import create_service_tasks
@@ -284,6 +285,30 @@ class DefaultManagerServiceTests(base.TestCase):
                                             service_updates_json)
 
         bootstrap_mock_update()
+
+    def test_defaults_caching(self):
+        service_json = {
+            'caching': []
+        }
+        self.sc._append_defaults(service_json)
+        changed_service_json = {
+            'caching': [
+                {
+                    'name': 'default',
+                    'rules': [
+                        {
+                            'name': 'default',
+                            'request_url': '/*'
+                        }
+                    ]
+                }
+            ]
+        }
+
+        self.assertTrue(isinstance(service_json['caching'][0]['ttl'],
+                        six.integer_types))
+        del service_json['caching'][0]['ttl']
+        self.assertEqual(service_json, changed_service_json)
 
     def test_create(self):
         # fake one return value
