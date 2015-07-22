@@ -48,6 +48,11 @@
          "path": "/origins/0",
          "value": {"origin": "1.2.3.4", "port": 80, "rules": [{"name": "default", "request_url": "/replacement"}], "ssl": false, "hostheadertype": "custom", "hostheadervalue": "www.customweb.com"}}
     ],
+   "replace_origin_no_slashes_request_url": [
+        {"op": "replace",
+         "path": "/origins/0",
+         "value": {"origin": "1.2.3.4", "port": 80, "rules": [{"name": "default", "request_url": "replacement"}], "ssl": false, "hostheadertype": "custom", "hostheadervalue": "www.customweb.com"}}
+    ],
    "add_origin": [
         {"op": "add",
          "path": "/origins/1",
@@ -156,6 +161,11 @@
          "path": "/caching/0",
          "value": {"name": "cache_name", "ttl": 111, "rules": [{"name" : "index","request_url" : "/new_path/*"}]}}
     ],
+   "replace_caching_no_slashes_request_url": [
+        {"op": "replace",
+         "path": "/caching/0",
+         "value": {"name": "cache_name", "ttl": 111, "rules": [{"name" : "index","request_url" : "new_path"}]}}
+    ],
    "remove_caching": [
         {"op": "remove",
          "path": "/caching/0"}
@@ -190,6 +200,18 @@
          "path": "/restrictions/0",
           "value": {"name": "new_restricted",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/*"}]
+                    }}
+   ],
+   "replace_restrictions_no_slashes_request_url":[
+        {"op": "add",
+         "path": "/restrictions/-",
+         "value": {"name": "restricted",
+                    "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images2/*"}]
+                    }},
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "new_restricted",
+                    "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "images2"}]
                     }}
    ],
    "remove_restrictions": [

@@ -460,6 +460,13 @@ class ServiceController(base.ServiceBase):
         return domains_list
 
     def _process_new_origin(self, origin, rules_list):
+
+        # NOTE(TheSriram): ensure that request_url starts with a '/'
+        for rule in origin.rules:
+            if rule.request_url:
+                if not rule.request_url.startswith('/'):
+                    rule.request_url = ('/' + rule.request_url)
+
         rule_dict_template = {
             'matches': [],
             'behaviors': []
@@ -524,6 +531,14 @@ class ServiceController(base.ServiceBase):
         return dp
 
     def _process_restriction_rules(self, restriction_rules, rules_list):
+
+        # NOTE(TheSriram): ensure that request_url starts with a '/'
+        for restriction_rule in restriction_rules:
+            for rule_entry in restriction_rule.rules:
+                if rule_entry.request_url:
+                    if not rule_entry.request_url.startswith('/'):
+                        rule_entry.request_url = (
+                            '/' + rule_entry.request_url)
         # restriction implementation for akamai
         # for each restriction rule
         for restriction_rule in restriction_rules:
