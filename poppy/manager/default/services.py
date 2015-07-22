@@ -90,6 +90,15 @@ class DefaultServicesController(base.ServicesController):
                 service_id))
         return provider_details
 
+    def get_service_by_domain_name(self, domain_name):
+        try:
+            service_details = self.storage_controller\
+                .get_service_details_by_domain_name(domain_name)
+        except Exception:
+            raise LookupError(u'Domain {0} does not exist'.format(
+                domain_name))
+        return service_details
+
     def _append_defaults(self, service_json):
         # default origin rule
         for origin in service_json.get('origins', []):
