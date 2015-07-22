@@ -104,7 +104,8 @@ class CreateServiceDNSMappingTask(task.Task):
         if self.name in kwargs['flow_failures'].keys():
             LOG.info('Sleeping for {0} seconds and '
                      'retrying'.format(retry_sleep_time))
-            time.sleep(retry_sleep_time)
+            if retry_sleep_time is not None:
+                time.sleep(retry_sleep_time)
 
 
 class CreateLogDeliveryContainerTask(task.Task):
