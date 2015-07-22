@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import six
 import time
 import urlparse
 import uuid
@@ -89,7 +90,15 @@ class TestCreateService(providers.TestProviderBase):
                 item[u'hostheadervalue'] = item['origin']
         self.assertEqual(body['origins'], origin_list)
 
-        self.assertEqual(body['caching'], caching_list)
+
+        if caching_list:
+            self.assertEqual(body['caching'], caching_list)
+        else:
+            self.assertEqual(body['caching'][0]['name'], 'default')
+            self.assertEqual(body['caching'][0]['rules']['name'], 'default')
+            self.assertEqual(body['caching'][0]['rules']['request_url'], '/*')
+            self.assertTrue(isinstance(body['caching'][0]['ttl'],
+                                       six.integer_types))
 
         # Verify the service is updated at all Providers for the flavor
         if self.test_config.provider_validation:
