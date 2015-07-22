@@ -97,11 +97,12 @@ class MonkeyPatchControllers(object):
 class DefaultManagerServiceTests(base.TestCase):
 
     @mock.patch('poppy.bootstrap.Bootstrap')
+    @mock.patch('poppy.notification.base.driver.NotificationDriverBase')
     @mock.patch('poppy.dns.base.driver.DNSDriverBase')
     @mock.patch('poppy.storage.base.driver.StorageDriverBase')
     @mock.patch('poppy.distributed_task.base.driver.DistributedTaskDriverBase')
     def setUp(self, mock_distributed_task, mock_storage,
-              mock_dns, mock_bootstrap):
+              mock_dns, mock_notification, mock_bootstrap):
         # NOTE(TheSriram): the mock.patch decorator applies mocks
         # in the reverse order of the arguments present
         super(DefaultManagerServiceTests, self).setUp()
@@ -126,7 +127,8 @@ class DefaultManagerServiceTests(base.TestCase):
                                                      mock_storage,
                                                      mock_providers,
                                                      mock_dns,
-                                                     mock_distributed_task)
+                                                     mock_distributed_task,
+                                                     mock_notification)
 
         # stubbed driver
         self.sc = services.DefaultServicesController(manager_driver)
