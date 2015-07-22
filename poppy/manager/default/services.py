@@ -26,6 +26,7 @@ from poppy.distributed_task.taskflow.flow import purge_service
 from poppy.distributed_task.taskflow.flow import update_service
 from poppy.distributed_task.taskflow.flow import update_service_state
 from poppy.manager import base
+from poppy.model.helpers import cachingrule
 from poppy.model.helpers import rule
 from poppy.model import service
 from poppy.openstack.common import log
@@ -49,7 +50,15 @@ DNS_OPTIONS = [
         help='Maximum Number of seconds to sleep between retries'),
 ]
 
+PROVIDER_OPTIONS = [
+    cfg.IntOpt(
+        'default_cache_ttl',
+        default=86400,
+        help='Default ttl to be set, when no caching rules are specified'),
+]
+
 DNS_GROUP = 'drivers:dns'
+PROVIDER_GROUP = 'drivers:provider'
 
 
 class DefaultServicesController(base.ServicesController):
@@ -67,7 +76,10 @@ class DefaultServicesController(base.ServicesController):
 
         self.driver.conf.register_opts(DNS_OPTIONS,
                                        group=DNS_GROUP)
+        self.driver.conf.register_opts(PROVIDER_OPTIONS,
+                                       group=PROVIDER_GROUP)
         self.dns_conf = self.driver.conf[DNS_GROUP]
+        self.provider_conf = self.driver.conf[PROVIDER_GROUP]
 
     def determine_sleep_times(self):
 
@@ -99,7 +111,7 @@ class DefaultServicesController(base.ServicesController):
                 domain_name))
         return service_details
 
-    def _append_defaults(self, service_json):
+    def _append_defaults(self, service_json, operation='create'):
         # default origin rule
         for origin in service_json.get('origins', []):
             if origin.get('rules') is None:
@@ -112,13 +124,23 @@ class DefaultServicesController(base.ServicesController):
                     name="default",
                     request_url='/*')
                 origin['rules'].append(default_rule.to_dict())
+        if operation == 'create':
+            # default caching rule
+            if not service_json.get('caching'):
+                # add the /* default request_url rule
+                default_rule = rule.Rule(
+                    name="default",
+                    request_url='/*')
+                default_ttl = self.provider_conf.default_cache_ttl
+                default_cache = cachingrule.CachingRule(name='default',
+                                                        ttl=default_ttl,
+                                                        rules=[default_rule])
+                service_json['caching'] = [default_cache.to_dict()]
 
-        # default caching rule
         for caching_entry in service_json.get('caching', []):
             if caching_entry.get('rules') is None:
                 # add a rules section
                 caching_entry['rules'] = []
-
             if caching_entry.get('rules') == []:
                 # add the /* default request_url rule
                 default_rule = rule.Rule(
@@ -152,7 +174,6 @@ class DefaultServicesController(base.ServicesController):
         :param service_obj
         :raises LookupError, ValueError
         """
-
         try:
             flavor = self.flavor_controller.get(service_json.get('flavor_id'))
         # raise a lookup error if the flavor is not found
@@ -160,7 +181,7 @@ class DefaultServicesController(base.ServicesController):
             raise e
 
         # add any default rules so its explicitly defined
-        self._append_defaults(service_json)
+        self._append_defaults(service_json, operation='create')
 
         # convert to an object
         service_obj = service.Service.init_from_dict(service_json)
@@ -243,7 +264,7 @@ class DefaultServicesController(base.ServicesController):
             service_old_json, service_updates)
 
         # add any default rules so its explicitly defined
-        self._append_defaults(service_new_json)
+        self._append_defaults(service_new_json, operation='update')
 
         # validate the updates
         schema = service_schema.ServiceSchema.get_schema("service", "POST")

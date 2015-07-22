@@ -38,6 +38,18 @@
                     ],
                     "hostheadertype": "domain"
                 }
+            ],
+            "caching_list": [
+                {
+                    "name": "default",
+                    "ttl": 86400,
+                    "rules": [
+                        {
+                            "name" : "default",
+                            "request_url" : "/*"
+                        }
+                    ]
+                }
             ]
         }
     },
