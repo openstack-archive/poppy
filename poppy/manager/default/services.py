@@ -27,6 +27,7 @@ from poppy.distributed_task.taskflow.flow import update_service
 from poppy.distributed_task.taskflow.flow import update_service_state
 from poppy.manager import base
 from poppy.model.helpers import rule
+from poppy.model.helpers import cachingrule
 from poppy.model import service
 from poppy.openstack.common import log
 from poppy.transport.validators import helpers as validators
@@ -105,17 +106,27 @@ class DefaultServicesController(base.ServicesController):
                 origin['rules'].append(default_rule.to_dict())
 
         # default caching rule
-        for caching_entry in service_json.get('caching', []):
-            if caching_entry.get('rules') is None:
-                # add a rules section
-                caching_entry['rules'] = []
+        if not service_json.get('caching'):
+            # add the /* default request_url rule
+            default_rule = rule.Rule(
+                name="default",
+                request_url='/*')
+            default_cache = cachingrule.CachingRule(name='default',
+                                                    ttl=86400,
+                                                    rules=[default_rule])
+            service_json['caching'] = [default_cache.to_dict()]
 
-            if caching_entry.get('rules') == []:
-                # add the /* default request_url rule
-                default_rule = rule.Rule(
-                    name="default",
-                    request_url='/*')
-                caching_entry['rules'].append(default_rule.to_dict())
+        else:
+            for caching_entry in service_json.get('caching', []):
+                if caching_entry.get('rules') is None:
+                    # add a rules section
+                    caching_entry['rules'] = []
+                if caching_entry.get('rules') == []:
+                    # add the /* default request_url rule
+                    default_rule = rule.Rule(
+                        name="default",
+                        request_url='/*')
+                    caching_entry['rules'].append(default_rule.to_dict())
 
     def list(self, project_id, marker=None, limit=None):
         """list.
@@ -143,7 +154,8 @@ class DefaultServicesController(base.ServicesController):
         :param service_obj
         :raises LookupError, ValueError
         """
-
+        import ipdb
+        ipdb.set_trace()
         try:
             flavor = self.flavor_controller.get(service_json.get('flavor_id'))
         # raise a lookup error if the flavor is not found
