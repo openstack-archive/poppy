@@ -59,7 +59,6 @@ class TestBase(fixtures.BaseTestFixture):
 
         cls.test_config = config.TestConfig()
         cls.poppy_config = config.PoppyConfig()
-        cls.cacherules_config = config.CacheRulesConfig()
         cls.purge_config = config.PurgeRulesConfig()
 
         if cls.poppy_config.project_id_in_url:
