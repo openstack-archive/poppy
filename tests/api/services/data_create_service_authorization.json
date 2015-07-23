@@ -1,0 +1,54 @@
+{
+    "one_service": {
+        "name": "my_service_name",
+        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{
+                         "origin": "mywebsite1.com",
+                         "port": 80,
+                         "ssl": false,
+                         "rules": [
+                            {
+                                "name" : "default",
+                                "request_url" : "/*"
+                            }],
+                         "hostheadertype": "custom",
+                         "hostheadervalue": "www.customweb.com"
+                        }],
+        "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600,
+                "rules": [
+                    {
+                        "name" : "default",
+                        "request_url" : "/*"
+                    }
+                ]
+            },
+            {
+                "name": "home",
+                "ttl": 1200,
+                "rules": [
+                    {
+                        "name" : "index",
+                        "request_url" : "/index.htm"
+                    }
+                ]
+            }
+        ],
+         "restrictions_list": [
+                        {"name": "test",
+                        "rules": [
+                            {
+                                "name": "only me",
+                                "referrer": "www.mywebsite.com",
+                                "request_url" : "/*"
+                            }
+                        ]}
+        ],
+        "log_delivery": {
+            "enabled": false
+        }
+    }
+}
