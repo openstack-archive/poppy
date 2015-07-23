@@ -181,39 +181,49 @@ class DNSConfig(data_interfaces.ConfigSectionInterface):
         return int(self.get('cdn_provider_dns_sleep'))
 
 
-class CacheRulesConfig(data_interfaces.ConfigSectionInterface):
-    """Defines the cacherules config values."""
-    SECTION_NAME = 'cacherules'
+class CachingConfig(data_interfaces.ConfigSectionInterface):
+    """Defines the config values for caching tests."""
+    SECTION_NAME = 'caching'
 
     @property
-    def cache_rule1(self):
-        """Cache Rule 1."""
-        return self.get('cache_path_rule1')
+    def origin(self):
+        """Default Origin for Caching Tests."""
+        return self.get('default_origin')
 
     @property
-    def ttl_rule1(self):
-        """TTL for Cache Rule 1."""
-        return int(self.get('ttl_rule1'))
+    def endpoint(self):
+        """Path to cacheable content."""
+        return self.get('cache_path')
 
     @property
-    def cache_rule2(self):
-        """Cache Rule 2."""
-        return self.get('cache_path_rule2')
+    def jpg_endpoint(self):
+        """Path to jpg content."""
+        return self.get('jpg_path')
 
     @property
-    def ttl_rule2(self):
-        """TTL for Cache Rule 2."""
-        return int(self.get('ttl_rule2'))
+    def jpg_ttl(self):
+        """TTL for jpg content."""
+        return int(self.get('jpg_ttl'))
 
     @property
-    def cache_rule3(self):
-        """Cache Rule 3."""
-        return self.get('cache_path_rule3')
+    def txt_endpoint(self):
+        """Path to txt content."""
+        return self.get('txt_path')
 
     @property
-    def ttl_rule3(self):
-        """TTL for Cache Rule 3."""
-        return int(self.get('ttl_rule3'))
+    def txt_ttl(self):
+        """TTL for txt content."""
+        return int(self.get('txt_ttl'))
+
+    @property
+    def zip_endpoint(self):
+        """Path to zip content."""
+        return self.get('zip_path')
+
+    @property
+    def zip_ttl(self):
+        """TTL for zip content."""
+        return int(self.get('zip_ttl'))
 
 
 class MultipleOriginConfig(data_interfaces.ConfigSectionInterface):
