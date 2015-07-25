@@ -1,0 +1,51 @@
+# The order of packages is significant, because pip processes them in the order
+# of appearance. Changing the order has an impact on the overall integration
+# process, which may cause wedges in the gate later.
+
+# See: https://bugs.launchpad.net/pbr/+bug/1384919 for why this is here...
+pbr>=1.6
+
+# Packages needed for using this library.
+
+# Python 2->3 compatibility library.
+six>=1.9.0
+
+# Enum library made for <= python 3.3
+enum34;python_version=='2.7' or python_version=='2.6'
+
+# For async and/or periodic work
+futurist>=0.1.2 # Apache-2.0
+
+# For reader/writer + interprocess locks.
+fasteners>=0.7 # Apache-2.0
+
+# Very nice graph library
+networkx>=1.10
+
+# For contextlib new additions/compatibility for <= python 3.3
+contextlib2>=0.4.0 # PSF License
+
+# Used for backend storage engine loading.
+stevedore>=1.5.0 # Apache-2.0
+
+# Backport for concurrent.futures which exists in 3.2+
+futures>=3.0;python_version=='2.7' or python_version=='2.6'
+
+# Backport for time.monotonic which is in 3.3+
+monotonic>=0.3 # Apache-2.0
+
+# Used for structured input validation
+jsonschema!=2.5.0,<3.0.0,>=2.0.0
+
+# For the state machine we run with
+automaton>=0.5.0 # Apache-2.0
+
+# For common utilities
+oslo.utils>=2.4.0 # Apache-2.0
+oslo.serialization>=1.4.0 # Apache-2.0
+
+# For lru caches and such
+cachetools>=1.0.0 # MIT License
+
+# For deprecation of things
+debtcollector>=0.3.0 # Apache-2.0
