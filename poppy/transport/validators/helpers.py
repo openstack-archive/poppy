@@ -393,6 +393,14 @@ def is_valid_domain_by_name(domain_name):
     # shared ssl domain
     shared_ssl_domain_regex = '^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$'
 
+    if len(domain_name) > 253:
+        raise exceptions.ValidationFailed(
+            u'Domain {0} is too long'.format(domain_name))
+
+    if len(domain_name) < 3:
+        raise exceptions.ValidationFailed(
+            u'Domain {0} is too short'.format(domain_name))
+
     if not re.match(domain_regex, domain_name):
         if not re.match(shared_ssl_domain_regex, domain_name):
             raise exceptions.ValidationFailed(
