@@ -1,9 +1,7 @@
 Poppy
 =======
 
-CDN Provider Management as a Service
-
-Note: This is a work in progress and is not currently recommended for production use.
+CDN as a Service
 
 What is Poppy
 ============
@@ -23,17 +21,22 @@ Features
 ---------
 
 + Wraps third party CDN provider API's
-    - Fastly (http://www.fastly.com)
-    - Amazon CloudFront
-    - MaxCDN
+    - Akamai (Production Ready)
+    - Fastly (In Development)
+    - Amazon CloudFront (In Development)
+    - MaxCDN (In Development)
     - Your CDN Here...
 + Sends configurations to *n* configured CDN providers
 + Supports multiple backends (CassandraDB recommended)
     - CassandraDB
     - Your DB provider here
++ Supports multiple dns providers
+    - Rackspace DNS
+    - Openstack Designate (Coming Soon)
 + Openstack Compatable
     - Uses Keystone for authentication
-+ Multiple Origins to pull from (including Rackspace Cloud Files)
+    - Uses Swift for log delivery
++ Multiple Origins to pull from (Public Servers, Amazon S3 Buckets, ...)
 + Supports Multiple Domains
 + Custom Caching and TTL rules
 + Set Restrictions on who can access cached content
@@ -50,8 +53,8 @@ Getting Started
 -------------------------------------------
 
 **Note:** These instructions are for running a local instance of CDN and
-not all of these steps are required. It is assumed you have `CassandraDB`
-installed and running.
+not all of these steps are required. It is assumed you have `CassandraDB` and `Zookeeper`
+installed and running in a Docker Container.
 
 1. From your home folder create the ``~/.poppy`` folder and clone the repo::
 
@@ -69,14 +72,10 @@ installed and running.
    to your local casssandra cluster::
 
     [drivers:storage:cassandra]
-    cluster = "localhost"
+    cluster = <docker ip>
     keyspace = poppy
     migrations_path = /home/poppy/poppy/storage/cassandra/migrations
 
-4. By using cassandra storage plugin, you will need to create the default
-   keyspace "poppy" on your cassandra host/cluster. So log into cqlsh, do::
-
-    cqlsh> CREATE KEYSPACE poppy WITH REPLICATION = { 'class' : 'SimpleStrategy' , 'replication_factor' :  1}  ;
 
 5. For logging, find the ``[DEFAULT]`` section in
    ``~/.poppy/poppy.conf`` and modify as desired::
@@ -100,13 +99,10 @@ installed and running.
   To install additional dependencies, see `Additional Dependencies`_.
 
 
-8. Install and start zookeeper driver::
+8. Install and start cassandra and zookeeper driver::
 
-    http://zookeeper.apache.org/doc/trunk/zookeeperStarted.html
-
-    or more easily use a zookeeper docker:
-
-    https://registry.hub.docker.com/u/jplock/zookeeper/
+    $ pip install docker-compose
+    $ docker-compose -f docker/compose/dependencies.yml up -d
 
 9. Start poppy task flow worker::
 
@@ -150,10 +146,10 @@ Then start a poppy server::
 
 
 Additional Dependencies
--------------------------------------------------
+-----------------------
 
 Ubuntu 14.04
------------------------------
+------------
 
 For Python 2.7::
 
@@ -174,28 +170,12 @@ Install these two packages regardless of the Python version::
     $ sudo apt-get install libssl-dev
 
 
-Installing Cassandra Locally
------------------------------
+Installing Cassandra and Zookeeper Locally
+------------------------------------------
 
-Mac OSX
--------
+We recommend running Cassandra and Zookeeper in a docker container when developing locally.
 
-1. Update your Java SDK to the latest version (v7+)::
-
-    http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-
-   You can check the version currently running with::
-
-    $java -version
-
-2. Follow the instructions on the datastax site to install cassandra for Mac OSX::
-
-    http://www.datastax.com/2012/01/working-with-apache-cassandra-on-mac-os-x
-
-3. Create a Keyspace with Replication::
-
-    CREATE KEYSPACE poppy WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
-
+Follow the instuctions in the /poppy/docker/compose/README.md file for running Poppy locally.
 
 
 Running tests
