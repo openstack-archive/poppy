@@ -20,6 +20,7 @@ import uuid
 import ddt
 import mock
 
+# from poppy.model import ssl_certificate
 from poppy.model.helpers import cachingrule
 from poppy.model.helpers import domain
 from poppy.model.helpers import origin
@@ -406,3 +407,14 @@ class TestServices(base.TestCase):
                     break
 
         self.assertTrue(restriction_rule_valid)
+
+    def test_create_ssl_certificate(self):
+        # controller = services.ServiceController(self.driver)
+        # data = {
+        #   "cert_type": "san",
+        #   "domain_name": "www.abc.com",
+        #   "flavor_id": "premium"
+        # }
+        # controller.create_certificate(ssl_certificate.SSLCertificate(data))
+        # TODO(tonytan4ever): wrap up the create_ssl test
+        pass

@@ -1,0 +1,10 @@
+{         
+      "all_fields": {
+		  "cert_type": "san",
+		  "domain_name": "www.abc.com",
+		  "flavor_id": "mock"
+    }
+}
+
+
+

@@ -70,3 +70,13 @@ class ProviderWrapper(object):
         return ext.obj.service_controller.purge(
             provider_service_id,
             purge_url)
+
+    def create_certificate(self, ext, cert_obj):
+        """Create a provider
+
+        :param ext
+        :param service_obj
+        :returns: ext.obj.service_controller.create(service_obj)
+        """
+
+        return ext.obj.service_controller.create_certificate(cert_obj)
