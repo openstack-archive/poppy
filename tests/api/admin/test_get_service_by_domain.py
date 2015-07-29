@@ -157,13 +157,12 @@ class TestGetServiceByDomain(base.TestBase):
         self.assertEqual(resp.status_code, 404)
 
     def test_get_service_negative_very_long_domain(self):
-        domain = "http://www.too_long_name_too_long_name_too_long_name_" \
-                 "too_long_name_too_long_name_too_long_name_too_long_name_" \
-                 "too_long_name_too_long_name_too_long_name_too_long_name_" \
-                 "too_long_name_too_long_name_too_long_name_too_long_name_t" \
-                 "oo_long_name_too_long_name_too_long_name_too_long_name_too" \
-                 "_long_name_too_long_name_too_long_name_too_long_name_too_" \
-                 "long_name.com"
+        domain = "www.too_long_name_too_long_name_too_long_name_too_long_" \
+                 "name_too_long_name_too_long_name_too_long_name_too_long_" \
+                 "name_too_long_name_too_long_name_too_long_name_too_long_" \
+                 "name_too_long_name_too_long_name_too_long_name_too_long_" \
+                 "name_too_long_name_too_long.com"
+
         resp = self.operator_client.admin_get_service_by_domain_name(domain)
         self.assertEqual(resp.status_code, 400)
 
