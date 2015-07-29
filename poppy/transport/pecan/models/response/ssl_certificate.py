@@ -12,17 +12,20 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+try:
+    import ordereddict as collections
+except ImportError:        # pragma: no cover
+    import collections     # pragma: no cover
 
-from poppy.manager.base import driver
-from poppy.manager.base import flavors
-from poppy.manager.base import home
-from poppy.manager.base import services
-from poppy.manager.base import ssl_certificate
+from poppy.common import util
 
 
-Driver = driver.ManagerDriverBase
+class Model(collections.OrderedDict):
 
-FlavorsController = flavors.FlavorsControllerBase
-ServicesController = services.ServicesControllerBase
-HomeController = home.HomeControllerBase
-SSLCertificateController = ssl_certificate.SSLCertificateController
+    'response class for SSLCertificate'
+
+    def __init__(self, ssl_certificate):
+        super(Model, self).__init__()
+        self["flavor_id"] = ssl_certificate.flavor_id
+        self['domain_name'] = util.help_escape(ssl_certificate.domain_name)
+        self['cert_type'] = ssl_certificate.cert_type
