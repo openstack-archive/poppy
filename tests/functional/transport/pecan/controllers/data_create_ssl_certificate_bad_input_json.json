@@ -1,0 +1,19 @@
+{
+    "missing_domain_name": {
+        "cert_type": "san",
+        "flavor_id": "mock"
+    },
+    "missing_cert_type": {
+        "domain_name": "www.abc.com",
+        "flavor_id": "mock"
+    },
+    "non_existing_flavor_input": {
+        "cert_type": "san",
+        "domain_name": "www.abc.com",
+        "flavor_id": "non_exist"
+    },
+    "missing_flavor_id": {
+        "cert_type": "san",
+        "domain_name": "www.abc.com"
+    }
+}

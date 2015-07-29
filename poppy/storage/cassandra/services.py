@@ -166,6 +166,22 @@ CQL_CREATE_SERVICE = '''
         %(log_delivery)s)
 '''
 
+CQL_CREATE_CERT = '''
+    INSERT INTO certificate_info (project_id,
+        flavor_id,
+        cert_type,
+        domain_name,
+        cert_domain,
+        cert_details
+        )
+    VALUES (%(project_id)s,
+        %(flavor_id)s,
+        %(cert_type)s,
+        %(domain_name)s,
+        %(cert_domain)s,
+        %(cert_details)s)
+'''
+
 CQL_UPDATE_SERVICE = CQL_CREATE_SERVICE
 
 CQL_GET_PROVIDER_DETAILS = '''
@@ -491,6 +507,22 @@ class ServicesController(base.ServicesController):
                     CQL_DELETE_SERVICE,
                     consistency_level=self._driver.consistency_level)
                 self.session.execute(stmt, delete_args)
+
+    def create_cert(self, project_id, cert_obj):
+        args = {
+            'project_id': project_id,
+            'flavor_id': cert_obj.flavor_id,
+            'cert_type': cert_obj.cert_type,
+            'domain_name': cert_obj.domain_name,
+            # when create the cert, cert domain has not been assigned yet
+            # In future we can tweak the logic to assign cert_domain
+            'cert_domain': '',
+            'cert_details': {}
+        }
+        stmt = query.SimpleStatement(
+            CQL_CREATE_CERT,
+            consistency_level=self._driver.consistency_level)
+        self.session.execute(stmt, args)
 
     def get_provider_details(self, project_id, service_id):
         """get_provider_details.

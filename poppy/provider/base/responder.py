@@ -123,3 +123,18 @@ class Responder(object):
                 'caching': cache_list
             }
         }
+
+    def ssl_certificate_provisioned(self, cert_domain, extra_info=None):
+        """get.
+
+        :param domain_list
+        :param origin_list
+        :param cache_list
+        :returns provider msg{cert_domain, extra_info}
+        """
+        return {
+            self.provider: {
+                'cert_domain': cert_domain,
+                'extra_info': extra_info
+            }
+        }
