@@ -112,6 +112,16 @@ class ServicesControllerBase(controller.StorageControllerBase):
         """
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def create_cert(self, project_id, cert_obj):
+        """create_cert
+
+        :param project_id
+        :param cert_obj
+        :raise NotImplementedError
+        """
+        raise NotImplementedError
+
     @staticmethod
     def format_result(result):
         """format_result

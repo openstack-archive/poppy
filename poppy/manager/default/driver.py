@@ -43,3 +43,7 @@ class DefaultManagerDriver(base.Driver):
     @decorators.lazy_property(write=False)
     def health_controller(self):
         return controllers.Health(self)
+
+    @decorators.lazy_property(write=False)
+    def ssl_certificate_controller(self):
+        return controllers.SSLCertificate(self)
