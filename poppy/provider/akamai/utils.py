@@ -16,6 +16,7 @@
 import ssl
 import sys
 
+from kazoo import client
 from OpenSSL import crypto
 import six
 
@@ -65,12 +66,34 @@ def get_ssl_number_of_hosts(remote_host):
 
         # We can actually print all the Subject Alternative Names
         # for san in sans:
-        #    print san
+        #     print(san)
         result = len(sans)
         break
     else:
         raise ValueError('Get remote host certificate info failed...')
     return result
+
+
+def connect_to_zookeeper_storage_backend(conf):
+    """Connect to a zookeeper cluster"""
+    storage_backend_hosts = ','.join(['%s:%s' % (
+        host, conf.storage_backend_port)
+        for host in
+        conf.storage_backend_host])
+    zk_client = client.KazooClient(storage_backend_hosts)
+    zk_client.start()
+    return zk_client
+
+
+def connect_to_zookeeper_queue_backend(conf):
+    """Connect to a zookeeper cluster"""
+    storage_backend_hosts = ','.join(['%s:%s' % (
+        host, conf.queue_backend_port)
+        for host in
+        conf.queue_backend_host])
+    zk_client = client.KazooClient(storage_backend_hosts)
+    zk_client.start()
+    return zk_client
 
 
 if __name__ == "__main__":

@@ -1,0 +1,9 @@
+# This for running cdeploy command
+
+development:
+    hosts: [localhost]
+    keyspace: poppy
+
+production:
+    hosts: [your_production_env_host(s)]
+    keyspace: poppy
