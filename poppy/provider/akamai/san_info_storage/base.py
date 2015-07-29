@@ -13,16 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager.base import driver
-from poppy.manager.base import flavors
-from poppy.manager.base import home
-from poppy.manager.base import services
-from poppy.manager.base import ssl_certificate
+import abc
+
+import six
 
 
-Driver = driver.ManagerDriverBase
+@six.add_metaclass(abc.ABCMeta)
+class BaseAkamaiSanInfoStorage(object):
+    """Interface definition for Akamai San Info Storage.
 
-FlavorsController = flavors.FlavorsControllerBase
-ServicesController = services.ServicesControllerBase
-HomeController = home.HomeControllerBase
-SSLCertificateController = ssl_certificate.SSLCertirifcateController
+    """
+
+    def __init__(self, conf):
+        self._conf = conf
+
+    def get_cert_info(self, san_cert_name):
+        raise NotImplementedError
+
+    def save_cert_last_spsid(self, san_cert_name, sps_id_value):
+        raise NotImplementedError
+
+    def get_cert_last_spsid(self, san_cert_name):
+        raise NotImplementedError

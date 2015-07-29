@@ -13,16 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager.base import driver
-from poppy.manager.base import flavors
-from poppy.manager.base import home
-from poppy.manager.base import services
-from poppy.manager.base import ssl_certificate
+from oslo_config import cfg
+from taskflow.patterns import graph_flow
+from taskflow import retry
+
+from poppy.distributed_task.taskflow.task import create_ssl_certificate_tasks
+from poppy.openstack.common import log
 
 
-Driver = driver.ManagerDriverBase
+LOG = log.getLogger(__name__)
 
-FlavorsController = flavors.FlavorsControllerBase
-ServicesController = services.ServicesControllerBase
-HomeController = home.HomeControllerBase
-SSLCertificateController = ssl_certificate.SSLCertirifcateController
+
+conf = cfg.CONF
+conf(project='poppy', prog='poppy', args=[])
+
+
+def create_ssl_certificate():
+    flow = graph_flow.Flow('Creating poppy-service').add(
+        create_ssl_certificate_tasks.CreateProviderSSLCertificateTask(),
+        retry=retry.Times(1000)
+    )
+    return flow
