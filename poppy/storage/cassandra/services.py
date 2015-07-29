@@ -166,6 +166,30 @@ CQL_CREATE_SERVICE = '''
         %(log_delivery)s)
 '''
 
+CQL_CREATE_CERT = '''
+    INSERT INTO certificate_info (project_id,
+        flavor_id,
+        cert_type,
+        domain_name,
+        cert_details
+        )
+    VALUES (%(project_id)s,
+        %(flavor_id)s,
+        %(cert_type)s,
+        %(domain_name)s,
+        %(cert_details)s)
+'''
+
+CQL_VERIFY_CERT = '''
+    SELECT project_id,
+        flavor_id,
+        cert_type,
+        domain_name
+    FROM certificate_info
+    WHERE domain_name = %(domain_name)s
+    ALLOW FILTERING
+'''
+
 CQL_UPDATE_SERVICE = CQL_CREATE_SERVICE
 
 CQL_GET_PROVIDER_DETAILS = '''
@@ -178,6 +202,13 @@ CQL_UPDATE_PROVIDER_DETAILS = '''
     UPDATE services
     set provider_details = %(provider_details)s
     WHERE project_id = %(project_id)s AND service_id = %(service_id)s
+'''
+
+CQL_UPDATE_CERT_DETAILS = '''
+    UPDATE certificate_info
+    set cert_details = %(cert_details)s
+    WHERE domain_name = %(domain_name)s
+    IF cert_type = %(cert_type)s AND flavor_id = %(flavor_id)s
 '''
 
 
@@ -281,6 +312,51 @@ class ServicesController(base.ServicesController):
             else:
                 return False
         except ValueError:
+            return False
+
+    def cert_already_exist(self, domain_name, comparing_cert_type,
+                           comparing_flavor_id,
+                           comparing_project_id):
+        """cert_already_exist
+
+        Check if a cert with this domain name and type has already been
+        created, or if the domain has been taken by other customers
+
+        :param domain_name
+        :param cert_type
+        :param comparing_project_id
+
+        :raises ValueError
+        :returns Boolean if the cert with same type exists with another user.
+        """
+        LOG.info("Check if cert on '{0}' exists".format(domain_name))
+        args = {
+            'domain_name': domain_name.lower()
+        }
+        stmt = query.SimpleStatement(
+            CQL_VERIFY_CERT,
+            consistency_level=self._driver.consistency_level)
+        results = self.session.execute(stmt, args)
+
+        if results:
+            msg = None
+            for r in results:
+                if str(r.get('project_id')) != str(comparing_project_id):
+                    msg = "Domain '{0}' has already been created cert by {1}"\
+                        .format(domain_name, r.get('project_id'))
+                    LOG.warn(msg)
+                    raise ValueError(msg)
+                elif (str(r.get('flavor_id')) == str(comparing_flavor_id)
+                      and
+                      str(r.get('cert_type')) == str(comparing_cert_type)):
+                    msg = "{0} have already created cert of type {1} on {2}"\
+                        .format(str(comparing_project_id),
+                                comparing_cert_type,
+                                domain_name)
+                    LOG.warn(msg)
+                    raise ValueError(msg)
+            return False
+        else:
             return False
 
     def create(self, project_id, service_obj):
@@ -498,6 +574,29 @@ class ServicesController(base.ServicesController):
                     consistency_level=self._driver.consistency_level)
                 self.session.execute(stmt, delete_args)
 
+    def create_cert(self, project_id, cert_obj):
+
+        if not self.cert_already_exist(cert_obj.domain_name,
+                                       cert_obj.cert_type,
+                                       cert_obj.flavor_id,
+                                       project_id):
+            pass
+
+        args = {
+            'project_id': project_id,
+            'flavor_id': cert_obj.flavor_id,
+            'cert_type': cert_obj.cert_type,
+            'domain_name': cert_obj.domain_name,
+            # when create the cert, cert domain has not been assigned yet
+            # In future we can tweak the logic to assign cert_domain
+            'cert_domain': '',
+            'cert_details': {}
+        }
+        stmt = query.SimpleStatement(
+            CQL_CREATE_CERT,
+            consistency_level=self._driver.consistency_level)
+        self.session.execute(stmt, args)
+
     def get_provider_details(self, project_id, service_id):
         """get_provider_details.
 
@@ -602,6 +701,27 @@ class ServicesController(base.ServicesController):
         # returns the dictionary
         stmt = query.SimpleStatement(
             CQL_UPDATE_PROVIDER_DETAILS,
+            consistency_level=self._driver.consistency_level)
+        self.session.execute(stmt, args)
+
+    def update_cert_info(self, domain_name, cert_type, flavor_id,
+                         cert_details):
+        """update_cert_info.
+
+        :param domain_name
+        :param cert_type
+        :param flavor_id
+        :param cert_info
+        """
+
+        args = {
+            'domain_name': domain_name,
+            'cert_type': cert_type,
+            'flavor_id': flavor_id,
+            'cert_details': cert_details
+        }
+        stmt = query.SimpleStatement(
+            CQL_UPDATE_CERT_DETAILS,
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
 
