@@ -444,6 +444,9 @@ class DefaultServicesController(base.ServicesController):
 
         return
 
+    def create_cert(self):
+        pass
+
     def _generate_shared_ssl_domain(self, domain_name):
         shared_ssl_domain_suffix = (
             self.dns_controller.generate_shared_ssl_domain_suffix())
