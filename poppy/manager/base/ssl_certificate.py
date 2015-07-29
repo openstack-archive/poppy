@@ -13,16 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager.base import driver
-from poppy.manager.base import flavors
-from poppy.manager.base import home
-from poppy.manager.base import services
-from poppy.manager.base import ssl_certificate
+import abc
+
+import six
+
+from poppy.manager.base import controller
 
 
-Driver = driver.ManagerDriverBase
+@six.add_metaclass(abc.ABCMeta)
+class SSLCertificateController(controller.ManagerControllerBase):
+    """Home controller base class."""
 
-FlavorsController = flavors.FlavorsControllerBase
-ServicesController = services.ServicesControllerBase
-HomeController = home.HomeControllerBase
-SSLCertificateController = ssl_certificate.SSLCertificateController
+    def __init__(self, manager):
+        super(SSLCertificateController, self).__init__(manager)
+
+    @abc.abstractmethod
+    def create_ssl_certificate(self, project_id, domain_name, **extras):
+        """DELETE
+
+       :param project_id
+       :param domain_name
+       :raises: NotImplementedError
+       """
+        raise NotImplementedError
