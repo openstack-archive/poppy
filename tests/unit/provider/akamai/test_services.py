@@ -27,6 +27,7 @@ from poppy.model.helpers import restriction
 from poppy.model.helpers import rule
 from poppy.provider.akamai import services
 from poppy.transport.pecan.models.request import service
+from poppy.transport.pecan.models.request import ssl_certificate
 from tests.unit import base
 
 
@@ -406,3 +407,75 @@ class TestServices(base.TestCase):
                     break
 
         self.assertTrue(restriction_rule_valid)
+
+    def test_create_ssl_certificate_happy_path(self):
+        controller = services.ServiceController(self.driver)
+        data = {
+            "cert_type": "san",
+            "domain_name": "www.abc.com",
+            "flavor_id": "premium"
+        }
+        controller.san_cert_cnames = ["secure.san1.altcdn.com",
+                                      "secure.san2.altcdn.com"]
+
+        lastSpsId = (
+            controller.san_info_storage.get_cert_last_spsid(
+                "secure.san1.altcdn.com"))
+
+        controller.san_info_storage.get_cert_info.return_value = {
+            'cnameHostname': "secure.san1.altcdn.com",
+            'jobId': "secure.san1.altcdn.com",
+            'issuer': 1789,
+            'createType': 'modSan',
+            'ipVersion': 'ipv4',
+            'slot-deployment.class': 'esslType'
+        }
+
+        cert_info = controller.san_info_storage.get_cert_info(
+            "secure.san1.altcdn.com")
+        cert_info['add.sans'] = "www.abc.com"
+        string_post_cert_info = '&'.join(
+            ['%s=%s' % (k, v) for (k, v) in cert_info.items()])
+
+        controller.sps_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            # Mock an SPS request
+            text=json.dumps({
+                "requestList":
+                    [{"resourceUrl": "/config-secure-provisioning-service/"
+                                     "v1/sps-requests/1849",
+                        "parameters": [{
+                            "name": "cnameHostname",
+                            "value": "secure.san1.altcdn.com"
+                            }, {"name": "createType", "value": "modSan"},
+                            {"name": "csr.cn",
+                             "value": "secure.san3.altcdn.com"},
+                            {"name": "add.sans",
+                             "value": "www.abc.com"}],
+                     "lastStatusChange": "2015-03-19T21:47:10Z",
+                        "spsId": 1789,
+                        "status": "SPS Request Complete",
+                        "jobId": 44306}]})
+        )
+        controller.sps_api_client.post.return_value = mock.Mock(
+            status_code=202,
+            text=json.dumps({
+                "spsId": 1789,
+                "resourceLocation":
+                    "/config-secure-provisioning-service/v1/sps-requests/1856",
+                "Results": {
+                    "size": 1,
+                    "data": [{
+                        "text": None,
+                        "results": {
+                            "type": "SUCCESS",
+                            "jobID": 44434}
+                    }]}})
+        )
+        controller.create_certificate(ssl_certificate.load_from_json(data))
+        controller.sps_api_client.get.assert_called_once_with(
+            controller.sps_api_base_url.format(spsId=lastSpsId))
+        controller.sps_api_client.post.assert_called_once_with(
+            controller.sps_api_base_url.format(spsId=lastSpsId),
+            data=string_post_cert_info)
+        return

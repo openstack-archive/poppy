@@ -200,6 +200,9 @@ class ServicesController(base.ServicesController):
                                 provider_details):
         pass
 
+    def create_cert(self, project_id, cert_obj):
+        pass
+
     @staticmethod
     def format_result(result):
         service_id = result.get('service_id')
