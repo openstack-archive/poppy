@@ -97,11 +97,11 @@ class TestBase(fixtures.BaseTestFixture):
                 serialize_format='json',
                 deserialize_format='json')
 
-        cls.dns_config = config.DNSConfig()
-        cls.dns_client = client.DNSClient(cls.dns_config.dns_username,
-                                          cls.dns_config.dns_api_key)
+            cls.dns_config = config.DNSConfig()
+            cls.dns_client = client.DNSClient(cls.dns_config.dns_username,
+                                              cls.dns_config.dns_api_key)
 
-        cls.akamai_config = config.AkamaiConfig()
+            cls.akamai_config = config.AkamaiConfig()
 
     def generate_random_string(self, prefix='API-Tests', length=12):
         """Generates a random string of given prefix & length"""
