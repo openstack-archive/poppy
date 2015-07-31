@@ -48,6 +48,11 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         return self.get_boolean('run_operator_tests')
 
     @property
+    def run_https_link_tests(self):
+        """Boolean flag indicating if secure https links should be run."""
+        return self.get_boolean('run_https_link_tests')
+
+    @property
     def status_check_retry_interval(self):
         """Int value to set retry intervals for status check."""
         return int(self.get('status_check_retry_interval'))
