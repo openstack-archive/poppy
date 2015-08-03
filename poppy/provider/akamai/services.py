@@ -20,9 +20,10 @@ import traceback
 
 from poppy.common import decorators
 from poppy.common import util
+from poppy.model.helpers import invalidationrule
+from poppy.model.helpers.rule import Rule
 from poppy.openstack.common import log
 from poppy.provider import base
-
 # to use log inside worker, we need to directly use logging
 LOG = log.getLogger(__name__)
 
@@ -192,7 +193,8 @@ class ServiceController(base.ServiceBase):
                     service_obj.caching, policy_content['rules'])
                 self._process_restriction_rules(
                     service_obj.restrictions, policy_content['rules'])
-
+                self._process_cache_invalidation_rules_rules(
+                    service_obj.invalidations, policy_content['rules'])
                 # Update domain if necessary ( by adjust digital property)
                 classified_domains = self._classify_domains(
                     service_obj.domains)
@@ -402,7 +404,7 @@ class ServiceController(base.ServiceBase):
         else:
             return self.responder.deleted(provider_service_id)
 
-    def purge(self, provider_service_id, purge_url=None):
+    def purge(self, provider_service_id, service_obj, hard, purge_url=None):
         try:
             # Get the service
             if purge_url is None:
@@ -418,7 +420,14 @@ class ServiceController(base.ServiceBase):
                                            % provider_service_id)
                     except Exception as e:
                         return self.responder.failed(str(e))
-
+                if hard:
+                    rules = [Rule(request_url=purge_url)]
+                    service_obj.invalidations = \
+                        invalidationrule.InvalidationRule(
+                            name='content-refresh',
+                            rule_type='natural',
+                            rules=rules)
+                    return self.update(provider_service_id, service_obj)
                 for policy in policies:
                     url_scheme = None
                     if policy['protocol'] == 'http':
@@ -545,7 +554,7 @@ class ServiceController(base.ServiceBase):
         restriction_entities = ['referrer', 'client_ip']
 
         class entityRequestUrlMappingList(dict):
-            '''A dictionary with a name attribute'''
+            """A dictionary with a name attribute"""
             def __init__(self, name, orig_dict):
                 self.name = name
                 self.update(orig_dict)
@@ -634,6 +643,58 @@ class ServiceController(base.ServiceBase):
                             rules_list.append(rule_dict_template)
                 # end loop - request url
             # end loop - entity
+
+    def _process_cache_invalidation_rules(self, cache_invalidation_rules,
+                                          rules_list):
+
+        # NOTE(TheSriram): ensure that request_url starts with a '/'
+        for cache_invalidation_rule in cache_invalidation_rules:
+            for rule_entry in cache_invalidation_rule.rules:
+                if rule_entry.request_url:
+                    if not rule_entry.request_url.startswith('/'):
+                        rule_entry.request_url = (
+                            '/' + rule_entry.request_url)
+
+        for cache_invalidation_rule in cache_invalidation_rules:
+            for cache_invalidation_rule_entry in cache_invalidation_rule.rules:
+                found_match = False
+                # if we have a matches rule already
+                for rule in rules_list:
+                    for match in rule['matches']:
+                        if cache_invalidation_rule_entry.request_url \
+                                == match['value']:
+                            # we found an existing matching rule.
+                            # add the cache invalidation behavior to it
+                            found_match = True
+                            rule['behaviors'].append({
+                                'name': 'content-refresh',
+                                'type': 'natural',
+                            })
+
+                # if there is no matches entry yet for this rule
+                if not found_match:
+                    # create an akamai rule
+                    rule_dict_template = {
+                        'matches': [],
+                        'behaviors': []
+                    }
+
+                    # add the match and behavior to this new rule
+                    match_rule = {
+                        'name': 'url-wildcard',
+                        'value': cache_invalidation_rule_entry.request_url
+                    }
+
+                    rule_dict_template['matches'].append(match_rule)
+
+                    rule_dict_template['behaviors'].append({
+                        'name': 'content-refresh',
+                        'type': 'natural',
+                    })
+
+                    rules_list.append(rule_dict_template)
+            # end loop - cache_invalidation_rule.rules
+        # end loop - cache_invalidation_rule
 
     def _get_behavior_name(self, entity, entity_restriction_type):
         prefix = suffix = None

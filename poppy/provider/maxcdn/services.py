@@ -109,7 +109,7 @@ class ServiceController(base.ServiceBase):
             # this exception branch will most likely for a network failure
             return self.responder.failed(str(e))
 
-    def purge(self, pullzone_id, purge_url=None):
+    def purge(self, pullzone_id, hard, purge_url=None):
         try:
             purge_response = self.client.purge(pullzone_id, purge_url)
             if purge_response['code'] != 200:

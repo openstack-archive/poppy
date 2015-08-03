@@ -17,6 +17,7 @@ import uuid
 from poppy.model import common
 from poppy.model.helpers import cachingrule
 from poppy.model.helpers import domain
+from poppy.model.helpers import invalidationrule
 from poppy.model.helpers import origin
 from poppy.model.helpers import provider_details
 from poppy.model.helpers import restriction
@@ -39,6 +40,7 @@ class Service(common.DictSerializableModel):
                  flavor_id,
                  caching=[],
                  restrictions=[],
+                 invalidations=[],
                  log_delivery=None,
                  operator_status='enabled'):
         self._service_id = str(service_id)
@@ -48,6 +50,7 @@ class Service(common.DictSerializableModel):
         self._flavor_id = flavor_id
         self._caching = caching
         self._restrictions = restrictions
+        self._invalidations = invalidations
         self._log_delivery = log_delivery or ld.LogDelivery(False)
         self._status = 'create_in_progress'
         self._provider_details = {}
@@ -115,6 +118,15 @@ class Service(common.DictSerializableModel):
     @restrictions.setter
     def restrictions(self, value):
         self._restrictions = value
+
+    @property
+    def invalidations(self):
+        """Get or set invalidations."""
+        return self._invalidations
+
+    @invalidations.setter
+    def invalidations(self, value):
+        self._invalidations = value
 
     @property
     def log_delivery(self):
@@ -216,6 +228,11 @@ class Service(common.DictSerializableModel):
         input_dict['restrictions'] = [restriction.Restriction.init_from_dict(r)
                                       for r in restrictions]
 
+        invalidations = input_dict.get('invalidations', [])
+        input_dict['invalidations'] = \
+            [invalidationrule.InvalidationRule.init_from_dict(r)
+             for r in invalidations]
+
         pds = input_dict.get('provider_details', {})
         for provider_name in pds:
             pd = pds[provider_name]
@@ -250,6 +267,9 @@ class Service(common.DictSerializableModel):
 
         restrictions_obj_list = result['restrictions']
         result['restrictions'] = [r.to_dict() for r in restrictions_obj_list]
+
+        invalidations_obj_list = result['invalidations']
+        result['invalidations'] = [r.to_dict() for r in invalidations_obj_list]
 
         caching_obj_list = result['caching']
         result['caching'] = [c.to_dict() for c in caching_obj_list]
