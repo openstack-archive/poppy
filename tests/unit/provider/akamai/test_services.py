@@ -25,6 +25,7 @@ from poppy.model.helpers import domain
 from poppy.model.helpers import origin
 from poppy.model.helpers import restriction
 from poppy.model.helpers import rule
+from poppy.model.service import Service
 from poppy.provider.akamai import services
 from poppy.transport.pecan.models.request import service
 from tests.unit import base
@@ -47,6 +48,14 @@ class TestServices(base.TestCase):
         self.san_cert_cnames = [str(x) for x in range(7)]
         self.driver.san_cert_cnames = self.san_cert_cnames
         self.controller = services.ServiceController(self.driver)
+        service_id = str(uuid.uuid4())
+        domains_old = domain.Domain(domain='cdn.poppy.org')
+        current_origin = origin.Origin(origin='poppy.org')
+        self.service_obj = Service(service_id=service_id,
+                                   name='poppy cdn service',
+                                   domains=[domains_old],
+                                   origins=[current_origin],
+                                   flavor_id='cdn')
 
     @ddt.file_data('domains_list.json')
     def test_classify_domains(self, domains_list):
@@ -247,13 +256,17 @@ class TestServices(base.TestCase):
                                            'protocol': 'http',
                                            'certificate': None}])
         controller = services.ServiceController(self.driver)
-        resp = controller.purge(provider_service_id, None)
+        resp = controller.purge(provider_service_id,
+                                service_obj=self.service_obj,
+                                hard=True, purge_url=None)
         self.assertIn('error', resp[self.driver.provider_name])
 
     def test_purge_with_service_id_json_load_error(self):
         provider_service_id = None
         controller = services.ServiceController(self.driver)
-        resp = controller.purge(provider_service_id, None)
+        resp = controller.purge(provider_service_id,
+                                service_obj=self.service_obj,
+                                hard=True, purge_url=None)
         self.assertIn('error', resp[self.driver.provider_name])
 
     def test_purge_with_ccu_exception(self):
@@ -265,7 +278,9 @@ class TestServices(base.TestCase):
             status_code=400,
             text="purge request post failed"
         )
-        resp = controller.purge(provider_service_id, '/img/abc.jpeg')
+        resp = controller.purge(provider_service_id,
+                                service_obj=self.service_obj,
+                                hard=True, purge_url='/img/abc.jpeg')
         self.assertIn('error', resp[self.driver.provider_name])
 
     def test_purge(self):
@@ -286,13 +301,39 @@ class TestServices(base.TestCase):
                 actual_purge_url
             ]
         }
-        resp = controller.purge(provider_service_id, purge_url)
+        resp = controller.purge(provider_service_id,
+                                service_obj=self.service_obj,
+                                hard=True, purge_url=purge_url)
         controller.ccu_api_client.post.assert_called_once_with(
             controller.ccu_api_base_url,
             data=json.dumps(data),
             headers=(
                 controller.request_header
             ))
+        self.assertIn('id', resp[self.driver.provider_name])
+
+    def test_cache_invalidate(self):
+        provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
+                                           'protocol': 'https',
+                                           'certificate': 'shared'}])
+        controller = services.ServiceController(self.driver)
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            text=json.dumps(dict(rules=[]))
+        )
+        controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
+        controller.policy_api_client.delete.return_value = mock.Mock(
+            status_code=200,
+            text='Delete successful'
+        )
+        purge_url = '/img/abc.jpeg'
+
+        resp = controller.purge(provider_service_id,
+                                service_obj=self.service_obj,
+                                hard=False, purge_url=purge_url)
         self.assertIn('id', resp[self.driver.provider_name])
 
     def test_pick_san_edgename(self):
