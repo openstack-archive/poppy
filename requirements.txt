@@ -1,0 +1,10 @@
+-r requirements/common.txt
+-r requirements/docs.txt
+-r requirements/transport/pecan.txt
+-r requirements/storage/cassandra.txt
+-r requirements/dns/rackspace.txt
+-r requirements/provider/akamai.txt
+-r requirements/provider/cloudfront.txt
+-r requirements/provider/fastly.txt
+-r requirements/provider/maxcdn.txt
+-r requirements/distributed_task/taskflow.txt
