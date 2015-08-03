@@ -44,14 +44,14 @@ def load_from_json(json_data):
     caching = json_data.get("caching", [])
     caching = [cachingrule.load_from_json(c) for c in caching]
 
-    r = service.Service(service_id,
-                        name,
-                        domains,
-                        origins,
-                        flavor_id,
-                        caching,
-                        restrictions,
-                        log_delivery)
+    r = service.Service(service_id=service_id,
+                        name=name,
+                        domains=domains,
+                        origins=origins,
+                        flavor_id=flavor_id,
+                        caching=caching,
+                        restrictions=restrictions,
+                        log_delivery=log_delivery)
 
     r.provider_details = dict([(k, provider_details.load_from_json(v))
                                for k, v in pd.items()])
