@@ -43,7 +43,7 @@ class ServiceController(base.ServiceBase):
     def delete(self, provider_service_id):
         return self.responder.deleted(provider_service_id)
 
-    def purge(self, provider_service_id, purge_url=None):
+    def purge(self, provider_service_id, hard=False, purge_url=None):
         return self.responder.purged(provider_service_id,
                                      purge_url=purge_url)
 
