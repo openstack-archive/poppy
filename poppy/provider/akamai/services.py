@@ -20,9 +20,10 @@ import traceback
 
 from poppy.common import decorators
 from poppy.common import util
+from poppy.model.helpers import invalidationrule
+from poppy.model.helpers.rule import Rule
 from poppy.openstack.common import log
 from poppy.provider import base
-
 # to use log inside worker, we need to directly use logging
 LOG = log.getLogger(__name__)
 
@@ -192,7 +193,8 @@ class ServiceController(base.ServiceBase):
                     service_obj.caching, policy_content['rules'])
                 self._process_restriction_rules(
                     service_obj.restrictions, policy_content['rules'])
-
+                self._process_cache_invalidation_rules(
+                    service_obj.invalidations, policy_content['rules'])
                 # Update domain if necessary ( by adjust digital property)
                 classified_domains = self._classify_domains(
                     service_obj.domains)
@@ -402,51 +404,64 @@ class ServiceController(base.ServiceBase):
         else:
             return self.responder.deleted(provider_service_id)
 
-    def purge(self, provider_service_id, purge_url=None):
-        try:
-            # Get the service
-            if purge_url is None:
-                raise RuntimeError('Akamai purge-all functionality has not'
-                                   ' been implemented')
-            else:
-                try:
-                    policies = json.loads(provider_service_id)
-                except Exception:
-                    # raise a more meaningful error for debugging info
+    def purge(self, provider_service_id, service_obj, hard=False,
+              purge_url=None):
+        if not hard:
+            rules = [Rule(request_url=purge_url)]
+            service_obj.invalidations = \
+                [invalidationrule.InvalidationRule(
+                    name='content-refresh',
+                    rule_type='natural',
+                    rules=rules)]
+            return self.update(provider_service_id, service_obj)
+        else:
+            try:
+
+                # Get the service
+                if purge_url is None:
+                    raise RuntimeError('Akamai purge-all functionality has not'
+                                       ' been implemented')
+                else:
                     try:
-                        raise RuntimeError('Mal-formed Akamai policy ids: %s'
-                                           % provider_service_id)
-                    except Exception as e:
-                        return self.responder.failed(str(e))
+                        policies = json.loads(provider_service_id)
+                    except Exception:
+                        # raise a more meaningful error for debugging info
+                        try:
+                            raise RuntimeError('Mal-formed Akamai '
+                                               'policy ids: %s'
+                                               % provider_service_id)
+                        except Exception as e:
+                            return self.responder.failed(str(e))
 
-                for policy in policies:
-                    url_scheme = None
-                    if policy['protocol'] == 'http':
-                        url_scheme = 'http://'
-                    elif policy['protocol'] == 'https':
-                        url_scheme = 'https://'
+                    for policy in policies:
+                        url_scheme = None
+                        if policy['protocol'] == 'http':
+                            url_scheme = 'http://'
+                        elif policy['protocol'] == 'https':
+                            url_scheme = 'https://'
 
-                    # purge_url has to be a full path with a starting slash,
-                    # e.g: /cdntest.html
-                    actual_purge_url = ''.join([url_scheme,
-                                                policy['policy_name'],
-                                                purge_url])
-                    data = {
-                        'objects': [
-                            actual_purge_url
-                        ]
-                    }
-                    resp = self.ccu_api_client.post(self.ccu_api_base_url,
-                                                    data=json.dumps(data),
-                                                    headers=(
-                                                        self.request_header
-                                                    ))
-                    if resp.status_code != 201:
-                        raise RuntimeError(resp.text)
-                return self.responder.purged(provider_service_id,
-                                             purge_url=purge_url)
-        except Exception as e:
-            return self.responder.failed(str(e))
+                        # purge_url has to be a full path
+                        # with a starting slash,
+                        # e.g: /cdntest.html
+                        actual_purge_url = ''.join([url_scheme,
+                                                    policy['policy_name'],
+                                                    purge_url])
+                        data = {
+                            'objects': [
+                                actual_purge_url
+                            ]
+                        }
+                        resp = self.ccu_api_client.post(self.ccu_api_base_url,
+                                                        data=json.dumps(data),
+                                                        headers=(
+                                                            self.request_header
+                                                        ))
+                        if resp.status_code != 201:
+                            raise RuntimeError(resp.text)
+                    return self.responder.purged(provider_service_id,
+                                                 purge_url=purge_url)
+            except Exception as e:
+                return self.responder.failed(str(e))
 
     @decorators.lazy_property(write=False)
     def current_customer(self):
@@ -545,7 +560,7 @@ class ServiceController(base.ServiceBase):
         restriction_entities = ['referrer', 'client_ip']
 
         class entityRequestUrlMappingList(dict):
-            '''A dictionary with a name attribute'''
+            """A dictionary with a name attribute"""
             def __init__(self, name, orig_dict):
                 self.name = name
                 self.update(orig_dict)
@@ -634,6 +649,60 @@ class ServiceController(base.ServiceBase):
                             rules_list.append(rule_dict_template)
                 # end loop - request url
             # end loop - entity
+
+    def _process_cache_invalidation_rules(self, cache_invalidation_rules,
+                                          rules_list):
+
+        # NOTE(TheSriram): ensure that request_url starts with a '/'
+        for cache_invalidation_rule in cache_invalidation_rules:
+            for rule_entry in cache_invalidation_rule.rules:
+                if rule_entry.request_url:
+                    if not rule_entry.request_url.startswith('/'):
+                        rule_entry.request_url = (
+                            '/' + rule_entry.request_url)
+
+        for cache_invalidation_rule in cache_invalidation_rules:
+            for cache_invalidation_rule_entry in cache_invalidation_rule.rules:
+                found_match = False
+                # if we have a matches rule already
+                for rule in rules_list:
+                    for match in rule['matches']:
+                        if cache_invalidation_rule_entry.request_url \
+                                == match['value']:
+                            # we found an existing matching rule.
+                            # add the cache invalidation behavior to it
+                            found_match = True
+                            rule['behaviors'].append({
+                                'name': 'content-refresh',
+                                'type': 'natural',
+                                'value': 'now',
+                            })
+
+                # if there is no matches entry yet for this rule
+                if not found_match:
+                    # create an akamai rule
+                    rule_dict_template = {
+                        'matches': [],
+                        'behaviors': []
+                    }
+
+                    # add the match and behavior to this new rule
+                    match_rule = {
+                        'name': 'url-wildcard',
+                        'value': cache_invalidation_rule_entry.request_url
+                    }
+
+                    rule_dict_template['matches'].append(match_rule)
+
+                    rule_dict_template['behaviors'].append({
+                        'name': 'content-refresh',
+                        'type': 'natural',
+                        'value': 'now',
+                    })
+
+                    rules_list.append(rule_dict_template)
+            # end loop - cache_invalidation_rule.rules
+        # end loop - cache_invalidation_rule
 
     def _get_behavior_name(self, entity, entity_restriction_type):
         prefix = suffix = None

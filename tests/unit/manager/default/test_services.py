@@ -182,7 +182,11 @@ class DefaultManagerServiceTests(base.TestCase):
         provider_details = json.dumps(
             dict([(k, v.to_dict()) for k, v
                   in self.provider_details.items()]))
-        responders = purge_provider.execute(provider_details, str(None))
+        responders = \
+            purge_provider.execute(json.dumps(self.service_obj.to_dict()),
+                                   False,
+                                   provider_details,
+                                   str(None))
         error_update = common.UpdateProviderDetailErrorTask()
         changed_provider_details_dict = error_update.execute(responders,
                                                              self.service_id,
