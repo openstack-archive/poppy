@@ -268,7 +268,9 @@ class TestFlowRuns(base.TestCase):
             'provider_details': json.dumps(
                 dict([(k, v.to_dict())
                       for k, v in service_obj.provider_details.items()])),
-            'purge_url': 'cdn.poppy.org'
+            'purge_url': 'cdn.poppy.org',
+            'hard': json.dumps(True),
+            'service_obj': json.dumps(service_obj.to_dict())
         }
 
         service_controller, storage_controller, dns_controller = \
