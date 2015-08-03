@@ -210,7 +210,7 @@ class UpdateProviderDetailIfNotEmptyTask(task.Task):
 class UpdateProviderDetailErrorTask(task.Task):
     default_provides = "changed_provider_details_dict"
 
-    def execute(self, responders, service_id, provider_details):
+    def execute(self, responders, service_id, provider_details, hard):
         provider_details = json.loads(provider_details)
         for provider in provider_details:
             # NOTE(tonytan4ever): if the purge_url is None, it means to purge
@@ -230,9 +230,9 @@ class UpdateProviderDetailErrorTask(task.Task):
             provider_name = list(responder.items())[0][0]
 
             if 'error' in responder[provider_name]:
-                LOG.info('Purging content from {0}'
+                LOG.info('Purging content from {0} '
                          'failed'.format(provider_name))
-                LOG.info('Updating provider detail'
+                LOG.info('Updating provider detail '
                          'status of {0} for {1}'.format(provider_name,
                                                         service_id))
                 # stores the error info for debugging purposes.
@@ -240,9 +240,24 @@ class UpdateProviderDetailErrorTask(task.Task):
                     provider_details[provider_name]
                 )
                 changed_provider_details_dict[provider_name].error_info = (
-                    responder[provider_name].get('error_info')
+                    responder[provider_name].get('error_detail')
                 )
-
+                changed_provider_details_dict[provider_name].error_message = (
+                    responder[provider_name].get('error')
+                )
+                if not json.loads(hard):
+                    changed_provider_details_dict[provider_name].status = \
+                        'failed'
+            else:
+                changed_provider_details_dict[provider_name] = (
+                    provider_details[provider_name]
+                )
+                changed_provider_details_dict[provider_name].status = (
+                    'deployed')
+                changed_provider_details_dict[provider_name].error_info = \
+                    None
+                changed_provider_details_dict[provider_name].error_message = \
+                    None
         # serialize changed_provider_details_dict
         for provider_name in changed_provider_details_dict:
             changed_provider_details_dict[provider_name] = (
