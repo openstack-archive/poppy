@@ -59,7 +59,8 @@ class ProviderWrapper(object):
         provider_service_id = provider_detail.provider_service_id
         return ext.obj.service_controller.delete(provider_service_id)
 
-    def purge(self, ext, provider_details, purge_url=None):
+    def purge(self, ext, service_obj, provider_details,
+              hard=False, purge_url=None):
         try:
             provider_detail = provider_details[ext.obj.provider_name]
         except KeyError:
@@ -69,4 +70,6 @@ class ProviderWrapper(object):
         provider_service_id = provider_detail.provider_service_id
         return ext.obj.service_controller.purge(
             provider_service_id,
+            service_obj,
+            hard,
             purge_url)

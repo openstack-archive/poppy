@@ -178,17 +178,22 @@ class DefaultManagerServiceTests(base.TestCase):
         self.service_obj = service.load_from_json(self.service_json)
 
     @mock.patch('poppy.bootstrap.Bootstrap')
-    def mock_purge_service(self, mock_bootstrap):
+    def mock_purge_service(self, mock_bootstrap, hard=False):
         mock_bootstrap.return_value = self.bootstrap_obj
         purge_provider = purge_service_tasks.PurgeProviderServicesTask()
         provider_details = json.dumps(
             dict([(k, v.to_dict()) for k, v
                   in self.provider_details.items()]))
-        responders = purge_provider.execute(provider_details, str(None))
+        responders = \
+            purge_provider.execute(json.dumps(self.service_obj.to_dict()),
+                                   json.dumps(hard),
+                                   provider_details,
+                                   str(None))
         error_update = common.UpdateProviderDetailErrorTask()
         changed_provider_details_dict = error_update.execute(responders,
                                                              self.service_id,
-                                                             provider_details)
+                                                             provider_details,
+                                                             hard)
         not_empty_update = common.UpdateProviderDetailIfNotEmptyTask()
         not_empty_update.execute(changed_provider_details_dict,
                                  self.project_id,
@@ -825,7 +830,7 @@ class DefaultManagerServiceTests(base.TestCase):
             self.service_obj
         )
 
-        self.sc.purge(self.project_id, self.service_id, None)
+        self.sc.purge(self.project_id, self.service_id)
 
         # ensure the manager calls the storage driver with the appropriate data
         sc = self.sc.storage_controller
@@ -896,7 +901,8 @@ class DefaultManagerServiceTests(base.TestCase):
                                     self.sc.dns_controller,
                                     self.sc.storage_controller,
                                     memoized_controllers.task_controllers):
-            self.mock_purge_service()
+            self.mock_purge_service(hard=True)
+            self.mock_purge_service(hard=False)
 
     @ddt.file_data('data_provider_details.json')
     def test_purge_service_worker_with_error(self, provider_details_json):
@@ -948,4 +954,5 @@ class DefaultManagerServiceTests(base.TestCase):
                                     self.sc.dns_controller,
                                     self.sc.storage_controller,
                                     memoized_controllers.task_controllers):
-            self.mock_purge_service()
+            self.mock_purge_service(hard=True)
+            self.mock_purge_service(hard=False)
