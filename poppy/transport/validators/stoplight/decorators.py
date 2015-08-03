@@ -67,7 +67,7 @@ def validate(**rules):
                     value = getval(param)
 
                     # Ensure that this validation function
-                    # did not return a funciton. This
+                    # did not return a function. This
                     # checks that the user did not forget to
                     # execute the outer function of a closure
                     # in the rule declaration
