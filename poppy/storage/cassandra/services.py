@@ -660,7 +660,11 @@ class ServicesController(base.ServicesController):
         log_delivery = ld.LogDelivery(log_delivery.get('enabled', False))
 
         # create the service object
-        s = service.Service(service_id, name, domains, origins, flavor_id,
+        s = service.Service(service_id=service_id,
+                            name=name,
+                            domains=domains,
+                            origins=origins,
+                            flavor_id=flavor_id,
                             caching=caching_rules,
                             restrictions=restrictions,
                             log_delivery=log_delivery,
