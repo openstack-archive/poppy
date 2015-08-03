@@ -404,12 +404,12 @@ class DefaultServicesController(base.ServicesController):
 
         return
 
-    def purge(self, project_id, service_id, purge_url=None):
-        '''If purge_url is none, all content of this service will be purge.'''
+    def purge(self, project_id, service_id, hard=False, purge_url=None):
+        """If purge_url is none, all content of this service will be purge."""
         try:
             service_obj = self.storage_controller.get(project_id, service_id)
         except ValueError as e:
-            # This except is hit when service object does exist
+            # This except is hit when service object does not exist
             raise LookupError(str(e))
 
         if service_obj.status not in [u'deployed']:
@@ -420,9 +420,11 @@ class DefaultServicesController(base.ServicesController):
 
         # possible validation of purge url here...
         kwargs = {
+            'service_obj': json.dumps(service_obj.to_dict()),
             'provider_details': json.dumps(
                 dict([(k, v.to_dict()) for k, v in provider_details.items()])),
             'project_id': project_id,
+            'hard': json.dumps(hard),
             'service_id': service_id,
             'purge_url': str(purge_url)
         }

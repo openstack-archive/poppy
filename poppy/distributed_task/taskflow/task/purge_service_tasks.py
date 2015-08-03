@@ -22,6 +22,7 @@ from poppy.distributed_task.utils import memoized_controllers
 from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import (
     provider_details as req_provider_details)
+from poppy.transport.pecan.models.request import service
 
 
 LOG = log.getLogger(__name__)
@@ -33,8 +34,10 @@ conf(project='poppy', prog='poppy', args=[])
 class PurgeProviderServicesTask(task.Task):
     default_provides = "responders"
 
-    def execute(self, provider_details, purge_url):
+    def execute(self, service_obj, hard, provider_details, purge_url):
         service_controller = memoized_controllers.task_controllers('poppy')
+        service_json = json.loads(service_obj)
+        service_obj = service.load_from_json(service_json)
 
         provider_details = json.loads(provider_details)
         purge_url = None if purge_url == 'None' else purge_url
@@ -56,8 +59,10 @@ class PurgeProviderServicesTask(task.Task):
 
             responder = service_controller.provider_wrapper.purge(
                 service_controller._driver.providers[provider.lower()],
+                service_obj,
                 provider_details,
-                purge_url)
+                hard=hard,
+                purge_url=purge_url)
             responders.append(responder)
 
             LOG.info('Purge service {0}  on  {1} complete...'.format(

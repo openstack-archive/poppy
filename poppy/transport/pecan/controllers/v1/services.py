@@ -55,6 +55,7 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
     def delete(self, service_id):
         purge_url = pecan.request.GET.get('url', None)
         purge_all = pecan.request.GET.get('all', False)
+        hard = pecan.request.GET.get('hard', False)
         purge_all = (
             True if purge_all and purge_all.lower() == 'true' else False)
         if purge_url is None and not purge_all:
@@ -65,7 +66,7 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
                                     'and a url at the same time')
         services_controller = self._driver.manager.services_controller
         try:
-            services_controller.purge(self.project_id, service_id,
+            services_controller.purge(self.project_id, service_id, hard,
                                       purge_url)
         except errors.ServiceStatusNotDeployed as e:
             pecan.abort(400, detail=str(e))
