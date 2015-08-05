@@ -164,6 +164,18 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('GET', location,
                             requestslib_kwargs=requestslib_kwargs)
 
+    def purge_assets(self, location, param=None, requestslib_kwargs=None):
+        """Purge Assets
+
+        :return: Response Object containing response code 204
+        DELETE
+        /services/{service_id}/assets​?{url,​all}
+        """
+        url = '{0}/assets'.format(location)
+
+        return self.request('DELETE', url, params=param,
+                            requestslib_kwargs=requestslib_kwargs)
+
     def list_services(self, param=None,
                       requestslib_kwargs=None):
         """Get a list of Services
