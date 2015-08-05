@@ -61,3 +61,16 @@ get_flavor = {
     'required': ['id', 'providers', 'links'],
     'additionalProperties': False
 }
+
+# Response Schema definition for List Flavors API
+list_flavors = {
+    'type': 'object',
+    'properties': {
+        'flavors': {'type': 'array',
+                    'items': get_flavor,
+                    'minItems': 1
+                    }
+    },
+    'required': ['flavors'],
+    'additionalProperties': False
+}

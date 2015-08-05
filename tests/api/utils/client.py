@@ -306,6 +306,18 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('DELETE', url,
                             requestslib_kwargs=requestslib_kwargs)
 
+    def list_flavors(self, requestslib_kwargs=None):
+        """List Flavors
+
+        :return: Response Object containing response code 200 and body with
+        list of flavors
+        GET
+        flavors
+        """
+        url = '{0}/flavors'.format(self.url)
+
+        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
+
     def purge_asset(self, location=None, asset_url='all=True'):
         """Delete Asset
 
