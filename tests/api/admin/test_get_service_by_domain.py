@@ -28,6 +28,10 @@ class TestGetServiceByDomain(base.TestBase):
     def setUp(self):
         super(TestGetServiceByDomain, self).setUp()
 
+        if self.test_config.run_operator_tests is False:
+            self.skipTest(
+                'Test Operator Functions is disabled in configuration')
+
         self.service_name = self.generate_random_string(prefix='api-test')
         self.flavor_id = self.test_flavor
 
@@ -141,6 +145,10 @@ class TestGetServiceByDomain(base.TestBase):
         self.assertEqual(api_resp2.status_code, 200)
 
     def test_negative_get_by_non_existing_domain(self):
+        if self.test_config.run_operator_tests is False:
+            self.skipTest(
+                'Test Operator Functions is disabled in configuration')
+
         domain_name = self.domain_list[0]['domain'] + str(uuid.uuid1()) + \
             ".com"
         resp = self.operator_client.admin_get_service_by_domain_name(
@@ -178,6 +186,10 @@ class TestGetServiceBySharedDomain(base.TestBase):
 
     def setUp(self):
         super(TestGetServiceBySharedDomain, self).setUp()
+
+        if self.test_config.run_operator_tests is False:
+            self.skipTest(
+                'Test Operator Functions is disabled in configuration')
 
         self.service_name = self.generate_random_string(prefix='API-Test-')
         self.flavor_id = self.test_flavor
@@ -246,6 +258,7 @@ class TestGetServiceBySharedDomain(base.TestBase):
         self.service_url = resp.headers["location"]
 
     def test_get_service_by_domain(self):
+
         get_resp = self.client.get_service(self.service_url)
         resp_body = get_resp.json()
         domain = resp_body['domains'][0]['domain']
@@ -280,6 +293,11 @@ class TestGetServiceBySANCertDomain(base.TestBase):
 
     def setUp(self):
         super(TestGetServiceBySANCertDomain, self).setUp()
+
+        if self.test_config.run_operator_tests is False:
+            self.skipTest(
+                'Test Operator Functions is disabled in configuration')
+
         self.service_name = self.generate_random_string(prefix='API-Test-')
         self.flavor_id = self.test_flavor
 
@@ -347,6 +365,7 @@ class TestGetServiceBySANCertDomain(base.TestBase):
         self.service_url = resp.headers["location"]
 
     def test_get_service_by_domain(self):
+
         get_resp = self.client.get_service(self.service_url)
         resp_body = get_resp.json()
         domain = resp_body['domains'][0]['domain']
@@ -381,6 +400,11 @@ class TestGetServiceByCustomCertDomain(base.TestBase):
 
     def setUp(self):
         super(TestGetServiceByCustomCertDomain, self).setUp()
+
+        if self.test_config.run_operator_tests is False:
+            self.skipTest(
+                'Test Operator Functions is disabled in configuration')
+
         self.service_name = self.generate_random_string(prefix='API-Test-')
         self.flavor_id = self.test_flavor
 
@@ -448,6 +472,7 @@ class TestGetServiceByCustomCertDomain(base.TestBase):
         self.service_url = resp.headers["location"]
 
     def test_get_service_by_domain(self):
+
         get_resp = self.client.get_service(self.service_url)
         resp_body = get_resp.json()
         domain = resp_body['domains'][0]['domain']
