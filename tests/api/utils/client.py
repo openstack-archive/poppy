@@ -71,7 +71,7 @@ class DNSClient(client.HTTPClient):
 
     def verify_domain_migration(self, access_url, suffix):
                 # Note: use rindex to find last occurence of the suffix
-        shard_name = access_url[:access_url.rindex(suffix)-1].split('.')[-1]
+        shard_name = access_url[:access_url.rindex(suffix) - 1].split('.')[-1]
         subdomain_name = '.'.join([shard_name, suffix])
 
         # get subdomain

@@ -51,6 +51,11 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
     SECTION_NAME = 'test_configuration'
 
     @property
+    def default_origin(self):
+        """default origin for test."""
+        return self.get('default_origin')
+
+    @property
     def wordpress_origin(self):
         """IP address for wordpress origin."""
         return self.get('wordpress_origin')
