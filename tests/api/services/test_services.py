@@ -45,8 +45,8 @@ class TestCreateService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = self.generate_random_string(
-                prefix='api-test-domain') + '.com'
+                item['domain'] = self.generate_random_string(
+                    prefix='www.api-test-domain') + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         log_delivery = test_data.get('log_delivery')
@@ -174,7 +174,7 @@ class TestListServices(base.TestBase):
         service_name = str(uuid.uuid1())
 
         self.domain_list = [{"domain": self.generate_random_string(
-            prefix='api-test-domain') + '.com'}]
+            prefix='www.api-test-domain') + '.com'}]
 
         self.origin_list = [{"origin": self.generate_random_string(
             prefix='api-test-origin') + '.com', "port": 80, "ssl": False,
@@ -293,7 +293,7 @@ class TestServiceActions(base.TestBase):
         self.flavor_id = self.test_flavor
 
         domain = self.generate_random_string(
-            prefix='api-test-domain') + u'.com'
+            prefix='www.api-test-domain') + u'.com'
         self.domain_list = [
             {"domain": domain, "protocol": "http"}
         ]
@@ -459,8 +459,9 @@ class TestDefaultServiceFields(providers.TestProviderBase):
     def test_default_values(self, test_data):
 
         domain_list = test_data['submit_value'].get('domain_list', [])
+
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'www.' + str(uuid.uuid1()) + '.com'
 
         origin_list = test_data['submit_value'].get('origin_list', [])
         caching_list = test_data['submit_value'].get('caching_list', [])

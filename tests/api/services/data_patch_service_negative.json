@@ -236,5 +236,17 @@
                     "rules": [{"name": "rule1", "client_ip": "5.6.7.8"}]
                    }
          }
+    ],
+    "add_root_domain":[
+        {"op": "add",
+         "path": "/domains/0",
+        "value": {"domain": "website.com", "protocol": "http"}
+        }
+    ],
+    "add_root_domain2":[
+        {"op": "add",
+         "path": "/domains/0",
+        "value": {"domain": "website.co.uk", "protocol": "http"}
+        }
     ]
 }

@@ -1,10 +1,10 @@
 {
     "all_fields": {
         "name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
         "origin_list": [{
-                         "origin": "mywebsite1.com",
+                         "origin": "myorigin.com",
                          "port": 80,
                          "ssl": false,
                          "rules": [
@@ -60,9 +60,9 @@
     },
    "caching_empty": {
         "name": "caching_empty",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
-        "origin_list": [{"origin": "mywebsite1.com",
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 80,
                          "ssl": false,
                          "rules": [
@@ -77,9 +77,9 @@
     },
     "multiple_origin_wildcard_caching": {
         "name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"}],
         "origin_list": [{
-                         "origin": "mywebsite1.com",
+                         "origin": "myorigin.com",
                          "port": 80,
                          "ssl": false,
                          "rules":[
@@ -112,9 +112,9 @@
     },
     "multiple_origin_path_caching": {
         "name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"}],
         "origin_list": [{
-                         "origin": "mywebsite1.com",
+                         "origin": "myorigin.com",
                          "port": 80,
                          "ssl": false,
                          "rules":[
@@ -147,7 +147,7 @@
     },
     "multiple_origin_path_multiple_caching_types": {
         "name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"}],
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"}],
         "origin_list": [{
                          "origin": "mywebsite1.com",
                          "port": 80,
@@ -186,10 +186,10 @@
     },
     "log_delivery_enabled": {
         "name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
         "origin_list": [{
-                         "origin": "mywebsite1.com",
+                         "origin": "myorigin.com",
                          "port": 80,
                          "ssl": false,
                          "rules": [
@@ -238,10 +238,10 @@
     },
     "log_delivery_disabled": {
         "name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
         "origin_list": [{
-                         "origin": "mywebsite1.com",
+                         "origin": "myorigin.com",
                          "port": 80,
                          "ssl": false,
                          "rules": [
@@ -291,9 +291,9 @@
     },
     "hyphen_in_domain_name": {
          "name": "caching_empty",
-         "domain_list": [{"domain": "my-website.com", "protocol": "http"},
+         "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
                          {"domain": "blog.mywebsite.com", "protocol": "http"}],
-         "origin_list": [{"origin": "mywebsite1.com",
+         "origin_list": [{"origin": "myorigin.com",
                           "port": 80,
                           "ssl": false,
                           "rules": [
@@ -309,8 +309,8 @@
      },
      "origin_hostheadertype": {
          "name": "origin_hostheadertype",
-         "domain_list": [{"domain": "my-website.com", "protocol": "http"}],
-         "origin_list": [{"origin": "mywebsite1.com",
+         "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"}],
+         "origin_list": [{"origin": "myorigin.com",
                           "port": 80,
                           "ssl": false,
                           "hostheadertype": "origin",
@@ -325,8 +325,8 @@
      },
      "custom_hostheadertype": {
          "name": "custom_hostheadertype",
-         "domain_list": [{"domain": "my-website.com", "protocol": "http"}],
-         "origin_list": [{"origin": "mywebsite1.com",
+         "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"}],
+         "origin_list": [{"origin": "myorigin.com",
                           "port": 80,
                           "ssl": false,
                           "hostheadertype": "custom",
@@ -342,8 +342,8 @@
      },
      "domain_hostheadertype": {
          "name": "domain_hostheadertype",
-         "domain_list": [{"domain": "my-website.com", "protocol": "http"}],
-         "origin_list": [{"origin": "mywebsite1.com",
+         "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"}],
+         "origin_list": [{"origin": "myorigin.com",
                           "port": 80,
                           "ssl": false,
                           "hostheadertype": "domain",
@@ -358,8 +358,8 @@
      },
      "origin_hostheadertype_other_hostheadervalue": {
          "name": "origin_hostheadertype_other_hostheadervalue",
-         "domain_list": [{"domain": "my-website.com", "protocol": "http"}],
-         "origin_list": [{"origin": "mywebsite1.com",
+         "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"}],
+         "origin_list": [{"origin": "myorigin.com",
                           "port": 80,
                           "ssl": false,
                           "rules": [
@@ -375,8 +375,8 @@
      },
      "multiple_hostheadertypes": {
          "name": "multiple_hostheadertypes",
-         "domain_list": [{"domain": "my-website.com", "protocol": "http"}],
-         "origin_list": [{"origin": "mywebsite1.com",
+         "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"}],
+         "origin_list": [{"origin": "myorigin.com",
                           "port": 80,
                           "ssl": false,
                           "rules": [
@@ -410,8 +410,8 @@
      },
      "request_url_no_slashes": {
          "name": "multiple_hostheadertypes",
-         "domain_list": [{"domain": "my-website.com", "protocol": "http"}],
-         "origin_list": [{"origin": "mywebsite1.com",
+         "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"}],
+         "origin_list": [{"origin": "myorigin.com",
                           "port": 80,
                           "ssl": false,
                           "rules": [
@@ -445,10 +445,10 @@
      },
      "ip_restriction": {
         "name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
         "origin_list": [{
-                         "origin": "mywebsite1.com",
+                         "origin": "myorigin.com",
                          "port": 80,
                          "ssl": false,
                          "rules": [
@@ -494,10 +494,10 @@
     },
     "ip_restriction_blacklist": {
         "name": "my_service_name",
-        "domain_list": [{"domain": "mywebsite.com", "protocol": "http"},
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
                         {"domain": "blog.mywebsite.com", "protocol": "http"}],
         "origin_list": [{
-                         "origin": "mywebsite1.com",
+                         "origin": "myorigin.com",
                          "port": 80,
                          "ssl": false,
                          "rules": [
@@ -540,6 +540,39 @@
                             }
                         ]}
         ]
-    }
-
+    },
+     "non_root_domains": {
+          "name": "non_root_domains",
+          "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
+                          {"domain": "blog.mywebsite.com", "protocol": "http"}],
+          "origin_list": [{"origin": "myorigin.com",
+                           "port": 80,
+                           "ssl": false,
+                           "rules": [
+                             {
+                               "name": "default",
+                               "request_url": "/*"
+                             }],
+                           "hostheadertype": "custom",
+                           "hostheadervalue": "www.customweb.com"
+                          }],
+          "caching_list": []
+    },
+    "international_non_root_domains": {
+         "name": "international_non_root_domains",
+         "domain_list": [{"domain": "www.mywebsite.co.in", "protocol": "http"},
+                         {"domain": "blog.mywebsite.ac.nz", "protocol": "http"}],
+         "origin_list": [{"origin": "myorigin.com",
+                          "port": 80,
+                          "ssl": false,
+                          "rules": [
+                            {
+                              "name": "default",
+                              "request_url": "/*"
+                            }],
+                          "hostheadertype": "custom",
+                          "hostheadervalue": "www.customweb.com"
+                         }],
+         "caching_list": []
+   }
 }
