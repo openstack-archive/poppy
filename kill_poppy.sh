@@ -1,1 +1,0 @@
-ps -ef | grep [p]oppy- | awk -F ' ' '{print$2}' | xargs kill -9

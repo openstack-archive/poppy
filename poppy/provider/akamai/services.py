@@ -99,7 +99,8 @@ class ServiceController(base.ServiceBase):
                     headers=self.request_header)
                 LOG.info('akamai response code: %s' % resp.status_code)
                 LOG.info('akamai response text: %s' % resp.text)
-                if resp.status_code != 200:
+                if resp.status_code not in [200, 201, 202]:
+                    LOG.info('akamai response code: %s' % resp.status_code)
                     raise RuntimeError(resp.text)
 
                 dp_obj = {'policy_name': dp,
@@ -170,7 +171,8 @@ class ServiceController(base.ServiceBase):
                         LOG.info('upserting service with'
                                  'akamai: %s' % service_obj.service_id)
                         return self.create(service_obj)
-                    elif resp.status_code != 200:
+                    elif resp.status_code not in [200, 201, 202]:
+                        LOG.info('akamai response code: %s' % resp.status_code)
                         raise RuntimeError(resp.text)
                 except Exception as e:
                     return self.responder.failed(str(e))
@@ -252,7 +254,9 @@ class ServiceController(base.ServiceBase):
                                 headers=self.request_header)
                         LOG.info('akamai response code: %s' % resp.status_code)
                         LOG.info('akamai response text: %s' % resp.text)
-                        if resp.status_code != 200:
+                        if resp.status_code not in [200, 201, 202]:
+                            LOG.info('akamai response code: %s' %
+                                     resp.status_code)
                             raise RuntimeError(resp.text)
                         dp_obj = {'policy_name': dp,
                                   'protocol': classified_domain.protocol,
@@ -289,7 +293,7 @@ class ServiceController(base.ServiceBase):
                                 policy_name=policy['policy_name']))
                         LOG.info('akamai response code: %s' % resp.status_code)
                         LOG.info('akamai response text: %s' % resp.text)
-                        if resp.status_code != 200:
+                        if resp.status_code not in [200, 201, 202]:
                             raise RuntimeError(resp.text)
                         LOG.info('Delete old policy %s complete' %
                                  policy['policy_name'])
@@ -308,7 +312,9 @@ class ServiceController(base.ServiceBase):
                                 configuration_number=configuration_number,
                                 policy_name=policy['policy_name']),
                             headers=self.request_header)
-                        if resp.status_code != 200:
+                        if resp.status_code not in [200, 201, 202]:
+                            LOG.info('akamai response code: %s' %
+                                     resp.status_code)
                             raise RuntimeError(resp.text)
                     except Exception as e:
                         return self.responder.failed(str(e))
@@ -395,7 +401,8 @@ class ServiceController(base.ServiceBase):
                         policy_name=policy['policy_name']))
                 LOG.info('akamai response code: %s' % resp.status_code)
                 LOG.info('akamai response text: %s' % resp.text)
-                if resp.status_code != 200:
+                if resp.status_code not in [200, 204]:
+                    LOG.info('akamai response code: %s' % resp.status_code)
                     raise RuntimeError(resp.text)
         except Exception as e:
             return self.responder.failed(str(e))
@@ -545,7 +552,9 @@ class ServiceController(base.ServiceBase):
         restriction_entities = ['referrer', 'client_ip']
 
         class entityRequestUrlMappingList(dict):
+
             '''A dictionary with a name attribute'''
+
             def __init__(self, name, orig_dict):
                 self.name = name
                 self.update(orig_dict)
