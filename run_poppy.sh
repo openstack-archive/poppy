@@ -1,6 +1,6 @@
 #!/bin/bash
 DAEMONIZED=false
-WORKERS = 6
+WORKERS=6
 
 for i in "$@"
 do
@@ -33,16 +33,11 @@ do
   esac
 done
 
-pip install docker-compose
-
-
-# remove existing containers
-docker kill compose_cassandra_1
-docker kill compose_zookeeper_1
-docker rm compose_cassandra_1
-docker rm compose_zookeeper_1
+# kill existing services
+./kill_poppy.sh
 
 # start new containers
+pip install docker-compose
 docker-compose -f docker/compose/dependencies.yml up -d
 
 is_cassandra_ready() {
