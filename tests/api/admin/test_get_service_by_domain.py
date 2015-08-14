@@ -106,6 +106,7 @@ class TestGetServiceByDomain(base.TestBase):
         self.service_url = resp.headers["location"]
 
     def test_get_service_by_domain(self):
+        self.skipTest('See Bug CDN-775')
         resp = self.operator_client.admin_get_service_by_domain_name(
             self.domain_list[0]['domain'])
 
@@ -259,6 +260,7 @@ class TestGetServiceBySharedDomain(base.TestBase):
 
     def test_get_service_by_domain(self):
 
+        self.skipTest('See Bug CDN-775')
         get_resp = self.client.get_service(self.service_url)
         resp_body = get_resp.json()
         domain = resp_body['domains'][0]['domain']
