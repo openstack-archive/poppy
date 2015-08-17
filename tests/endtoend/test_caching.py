@@ -25,10 +25,9 @@ class TestCaching(base.TestBase):
     def setUpClass(cls):
         super(TestCaching, cls).setUpClass()
 
+        cls.default_origin = cls.test_config.default_origin
+
         cls.caching_config = config.CachingConfig()
-
-        cls.default_origin = cls.caching_config.origin
-
         cls.cacheable_endpoint = cls.caching_config.endpoint
         cls.jpg_path = cls.caching_config.jpg_endpoint
         cls.txt_path = cls.caching_config.txt_endpoint
@@ -176,6 +175,84 @@ class TestCaching(base.TestBase):
             status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
         self.assertCacheStatus(
             cdn_url=cdn_zip_url,
+            status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
+
+    def test_update_cache_rules(self):
+
+        # Create a Poppy Service for the test website
+        domain_list = [{"domain": self.test_domain}]
+        origin_list = [{
+            "origin": self.default_origin, "port": 80, "ssl": False}]
+
+        jpg_ttl = self.caching_config.jpg_ttl
+
+        caching_list = [{
+            "name": "images", "ttl": jpg_ttl,
+            "rules":
+                [{"name": "image_rule", "request_url": self.jpg_path}]}]
+        self.service_name = base.random_string(prefix='testService-')
+
+        resp = self.setup_service(
+            service_name=self.service_name,
+            domain_list=domain_list,
+            origin_list=origin_list,
+            caching_list=caching_list,
+            flavor_id=self.poppy_config.flavor)
+
+        self.service_location = resp.headers['location']
+
+        resp = self.poppy_client.get_service(location=self.service_location)
+        links = resp.json()['links']
+        access_url = [link['href'] for link in links if
+                      link['rel'] == 'access_url']
+
+        # Adds cname records corresponding to the test domains
+        rec = self.setup_cname(name=self.test_domain, cname=access_url[0])
+        if rec:
+            self.cname_rec.append(rec[0])
+
+        origin_jpg = 'http://' + self.default_origin + self.jpg_path
+
+        cdn_url = 'http://' + self.test_domain
+        cdn_jpg_url = cdn_url + self.jpg_path
+
+        self.assertSameContent(
+            origin_url=origin_jpg, cdn_url=cdn_jpg_url)
+
+        # Verify that content is cached after two requests
+        self.get_from_cdn_enabled_url(cdn_url=cdn_jpg_url, count=2)
+        self.assertCacheStatus(cdn_url=cdn_jpg_url,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+
+        # Verify that content in cache is stale/removed after the ttl expires
+        time.sleep(jpg_ttl + 10)
+        self.assertCacheStatus(
+            cdn_url=cdn_jpg_url,
+            status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
+
+        # Update cache rules
+        new_ttl = 50
+        test_data = [{
+            "op": "replace",
+            "path": "/caching/0",
+            "value": {
+                "name": "cache_name",
+                "ttl": new_ttl,
+                "rules": [{"name": "image_rule",
+                           "request_url": self.jpg_path}]}
+        }]
+        resp = self.poppy_client.patch_service(location=self.service_location,
+                                               request_body=test_data)
+
+        # Verify that content is cached after two requests
+        self.get_from_cdn_enabled_url(cdn_url=cdn_jpg_url, count=2)
+        self.assertCacheStatus(cdn_url=cdn_jpg_url,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+
+        time.sleep(new_ttl)
+        # Verify that content in cache is stale/removed after the ttl expires
+        self.assertCacheStatus(
+            cdn_url=cdn_jpg_url,
             status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
 
     def tearDown(self):

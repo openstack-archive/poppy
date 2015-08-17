@@ -51,6 +51,11 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
     SECTION_NAME = 'test_configuration'
 
     @property
+    def default_origin(self):
+        """Default origin for all tests."""
+        return self.get('default_origin')
+
+    @property
     def wordpress_origin(self):
         """IP address for wordpress origin."""
         return self.get('wordpress_origin')
@@ -99,21 +104,6 @@ class AuthConfig(data_interfaces.ConfigSectionInterface):
     def api_key(self):
         """The user's api key, if applicable."""
         return self.get_raw('api_key')
-
-
-class OrchestrationConfig(data_interfaces.ConfigSectionInterface):
-    """Defines the Rackspace orchestration config values."""
-    SECTION_NAME = 'orchestration'
-
-    @property
-    def base_url(self):
-        """Orchestration base url."""
-        return self.get('base_url')
-
-    @property
-    def yaml_path(self):
-        """path to the heat yaml file."""
-        return self.get('yaml_path')
 
 
 class WebPageTestConfig(data_interfaces.ConfigSectionInterface):
@@ -186,11 +176,6 @@ class CachingConfig(data_interfaces.ConfigSectionInterface):
     SECTION_NAME = 'caching'
 
     @property
-    def origin(self):
-        """Default Origin for Caching Tests."""
-        return self.get('default_origin')
-
-    @property
     def endpoint(self):
         """Path to cacheable content."""
         return self.get('cache_path')
@@ -231,10 +216,6 @@ class MultipleOriginConfig(data_interfaces.ConfigSectionInterface):
     SECTION_NAME = 'multiple_origin'
 
     @property
-    def default_origin(self):
-        return self.get('default_origin')
-
-    @property
     def images_origin(self):
         return self.get('images_origin')
 
@@ -249,17 +230,21 @@ class HostHeaderConfig(data_interfaces.ConfigSectionInterface):
     SECTION_NAME = 'host_header'
 
     @property
-    def origin(self):
-        return self.get('origin')
-
-    @property
     def endpoint(self):
         return self.get('endpoint')
 
 
-class PurgeRulesConfig(data_interfaces.ConfigSectionInterface):
-    """Configuration for purge wait time."""
-    SECTION_NAME = 'purgetime'
+class PurgeConfig(data_interfaces.ConfigSectionInterface):
+    """Configuration for purge tests."""
+    SECTION_NAME = 'purge'
+
+    @property
+    def purge_path(self):
+        return self.get('purge_path')
+
+    @property
+    def cache_ttl(self):
+        return int(self.get('cache_ttl'))
 
     @property
     def purge_wait_time(self):
@@ -269,11 +254,6 @@ class PurgeRulesConfig(data_interfaces.ConfigSectionInterface):
 class OriginHeaderConfig(data_interfaces.ConfigSectionInterface):
     """Defines the origin header config values."""
     SECTION_NAME = 'origin_headers'
-
-    @property
-    def default_origin(self):
-        """Default Origin."""
-        return self.get('default_origin')
 
     @property
     def expires_ttl(self):

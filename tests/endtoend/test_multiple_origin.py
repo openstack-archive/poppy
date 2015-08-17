@@ -24,7 +24,6 @@ class TestMultipleOrigin(base.TestBase):
         super(TestMultipleOrigin, cls).setUpClass()
         cls.multiorigin_config = config.MultipleOriginConfig()
 
-        cls.default_origin = cls.multiorigin_config.default_origin
         cls.images_origin = cls.multiorigin_config.images_origin
         cls.image_path = cls.multiorigin_config.image_path
 
@@ -52,8 +51,9 @@ class TestMultipleOrigin(base.TestBase):
     def setUp(self):
         super(TestMultipleOrigin, self).setUp()
         self.test_domain = "{0}.{1}".format(
-            base.random_string('TestMultiOrigin'), self.dns_config.test_domain)
-        self.service_name = base.random_string('MultiOriginService')
+            base.random_string('test-multi-origin-'),
+            self.dns_config.test_domain)
+        self.service_name = base.random_string('E2E-MultiOrigin')
         self.cname_rec = []
 
     def test_multiple_origin_default_first(self):
@@ -76,12 +76,13 @@ class TestMultipleOrigin(base.TestBase):
             }]
         }]
 
-        self.setup_service(
+        resp = self.setup_service(
             service_name=self.service_name,
             domain_list=domains,
             origin_list=origins,
             caching_list=[],
             flavor_id=self.poppy_config.flavor)
+        self.service_location = resp.headers['location']
 
         resp = self.poppy_client.get_service(location=self.service_location)
         links = resp.json()['links']

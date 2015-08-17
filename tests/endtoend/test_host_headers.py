@@ -25,7 +25,6 @@ class TestHostHeaders(base.TestBase):
 
         cls.host_header_config = config.HostHeaderConfig()
 
-        cls.default_origin = cls.host_header_config.origin
         cls.test_endpoint = cls.host_header_config.endpoint
         cls.check_preconditions()
 
