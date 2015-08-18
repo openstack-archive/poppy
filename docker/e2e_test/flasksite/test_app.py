@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import datetime
+from sys import argv
 
 from flask import Flask
 from flask import make_response
@@ -49,7 +50,7 @@ def test_host_header():
 @app.route('/hello/<user_name>/upload/', methods=['GET', 'POST'])
 def upload_file(user_name):
     if request.method == 'POST':
-        form.photo.data.save('/var/www/uploads/{0}.jpg'.format(user_name))
+        form.photo.data.save('/tmp/{0}.jpg'.format(user_name))
     else:
         return render_template('gorilla.html', name=user_name)
 
@@ -101,5 +102,10 @@ def test_expires_and_cache_control():
 
 
 if __name__ == '__main__':
+    if len(argv) > 1:
+        port = int(argv[1])
+    else:
+        port = 80
+
     app.debug = True
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=port)
