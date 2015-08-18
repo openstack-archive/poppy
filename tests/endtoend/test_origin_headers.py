@@ -27,7 +27,6 @@ class TestOriginHeaders(base.TestBase):
 
         cls.origin_header_config = config.OriginHeaderConfig()
 
-        cls.default_origin = cls.origin_header_config.default_origin
         cls.expires_path = cls.origin_header_config.expires_path
         cls.cache_control_path = \
             cls.origin_header_config.cache_control_path

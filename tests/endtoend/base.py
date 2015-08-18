@@ -24,7 +24,6 @@ import requests
 from tests.api.utils import client
 from tests.endtoend.utils import config
 from tests.endtoend.utils import dnsclient
-from tests.endtoend.utils import heatclient
 from tests.endtoend.utils import wptclient
 
 
@@ -58,8 +57,9 @@ class TestBase(fixtures.BaseTestFixture):
             cls.auth_config.api_key)
 
         cls.test_config = config.TestConfig()
+        cls.default_origin = cls.test_config.default_origin
+
         cls.poppy_config = config.PoppyConfig()
-        cls.purge_config = config.PurgeRulesConfig()
 
         if cls.poppy_config.project_id_in_url:
             cls.url = cls.poppy_config.base_url + '/v1.0/' + project_id
@@ -76,11 +76,6 @@ class TestBase(fixtures.BaseTestFixture):
             user_name=cls.auth_config.user_name,
             api_key=cls.auth_config.api_key,
             test_domain=cls.dns_config.test_domain)
-
-        cls.heat_config = config.OrchestrationConfig()
-        heat_url = cls.heat_config.base_url + '/' + project_id
-        cls.heat_client = heatclient.HeatClient(heat_url=heat_url,
-                                                token=auth_token)
 
         cls.wpt_config = config.WebPageTestConfig()
         cls.wpt_client = wptclient.WebpageTestClient(
