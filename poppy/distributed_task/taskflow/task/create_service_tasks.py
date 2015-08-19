@@ -86,7 +86,7 @@ class CreateServiceDNSMappingTask(task.Task):
                         dns_responder[provider_name]['error_class']
                     exception_class = exc_loader(exception_repr)
 
-                    if any([isinstance(exception_class(), exception) for
+                    if any([exception_class == exception for
                             exception in dns._driver.retry_exceptions]):
                         LOG.info('Due to {0} Exception, '
                                  'Task {1} will '
