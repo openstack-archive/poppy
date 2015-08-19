@@ -40,7 +40,7 @@
          "restrictions_list": [
                         {
                         "name": "test",
-                        "type": "whitelist",
+                        "access": "whitelist",
                         "rules": [
                             {
                                 "name": "only me",
@@ -482,7 +482,7 @@
          "restrictions_list": [
                         {
                         "name": "test",
-                        "type": "whitelist",
+                        "access": "whitelist",
                         "rules": [
                             {
                                 "name": "only 1234",
@@ -531,7 +531,7 @@
          "restrictions_list": [
                         {
                         "name": "test",
-                        "type": "blacklist",
+                        "access": "blacklist",
                         "rules": [
                             {
                                 "name": "only 1234",

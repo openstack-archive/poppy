@@ -423,7 +423,7 @@ class ServiceSchema(schema_base.SchemaBase):
                                     'required': True,
                                     'minLength': 1,
                                     'maxLength': 256},
-                                'type': {
+                                'access': {
                                     'type': 'string',
                                     'enum': [
                                         "whitelist",

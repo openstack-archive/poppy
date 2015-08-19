@@ -562,9 +562,9 @@ class ServiceController(base.ServiceBase):
 
         for restriction_rule in restriction_rules:
             entity_rule_mapping = {}
-            if restriction_rule.type == 'whitelist':
+            if restriction_rule.access == 'whitelist':
                 entity_rule_mapping = white_list_entities
-            elif restriction_rule.type == 'blacklist':
+            elif restriction_rule.access == 'blacklist':
                 entity_rule_mapping = black_list_entities
             for rule_entry in restriction_rule.rules:
                 # classify rules based on their entities, then request_urls
@@ -635,16 +635,16 @@ class ServiceController(base.ServiceBase):
                 # end loop - request url
             # end loop - entity
 
-    def _get_behavior_name(self, entity, entity_restriction_type):
+    def _get_behavior_name(self, entity, entity_restriction_access):
         prefix = suffix = None
         if entity == 'referrer':
             prefix = 'referer'
         elif entity == 'client_ip':
             prefix = 'ip'
 
-        if entity_restriction_type == 'whitelist':
+        if entity_restriction_access == 'whitelist':
             suffix = 'whitelist'
-        elif entity_restriction_type == 'blacklist':
+        elif entity_restriction_access == 'blacklist':
             suffix = 'blacklist'
 
         return '-'.join([prefix, suffix])

@@ -206,13 +206,13 @@
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
-                    "type": "whitelist",
+                    "access": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images2/*"}]
                     }},
         {"op": "replace",
          "path": "/restrictions/0",
           "value": {"name": "new_restricted",
-                    "type": "whitelist",
+                    "access": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/*"}]
                     }}
    ],
@@ -236,7 +236,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "r",
-                    "type": "whitelist",
+                    "access": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images/*"}]
                    }
          }
@@ -245,7 +245,7 @@
         {"op": "replace",
          "path": "/restrictions/0",
          "value": {"name": "new_restricted",
-                   "type": "blacklist",
+                   "access": "blacklist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images2/*"}]
                     }}
     ],
@@ -253,13 +253,13 @@
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
-                   "type": "blacklist",
+                   "access": "blacklist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images3/*"}]
                     }},
         {"op": "replace",
          "path": "/restrictions/1",
           "value": {"name": "new_restricted",
-                    "type": "whitelist",
+                    "access": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images3/*"}]
                     }}
     ],
@@ -267,7 +267,7 @@
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
-                    "type": "blacklist",
+                    "access": "blacklist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images3/*"}]
                     }},
         {"op": "replace",
@@ -280,7 +280,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
-                    "type": "whitelist",
+                    "access": "whitelist",
                     "rules": [{"name": "r", "referrer": "www.thesite.com", "request_url": "/images/*"}]
                    }
          }
@@ -289,7 +289,7 @@
          {"op": "add",
           "path": "/restrictions/-",
           "value": {"name": "restricted",
-                    "type": "whitelist",
+                    "access": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "a.co", "request_url":"/images/*"}]
                    }
          }
@@ -320,7 +320,7 @@
         {"op": "replace",
          "path": "/restrictions/0",
           "value": {"name": "website only",
-             "type": "whitelist",
+             "access": "whitelist",
              "rules": [{"name": "mywebsite.com",
                         "referrer": "www.mywebsite.com",
                         "request_url": "/*"
@@ -337,7 +337,7 @@
         {"op": "replace",
          "path": "/restrictions/0",
           "value": {"name": "website only",
-             "type": "whitelist",
+             "access": "whitelist",
              "rules": [{"name": "mywebsite.com",
                         "referrer": "www.mywebsite.com",
                         "request_url": "/*"
@@ -347,7 +347,7 @@
         {"op": "replace",
          "path": "/restrictions/0",
           "value": {"name": "website only",
-             "type": "whitelist",
+             "access": "whitelist",
              "rules": [{"name": "mywebsite.com",
                         "referrer": "www.mywebsite.com",
                         "request_url": "/*"

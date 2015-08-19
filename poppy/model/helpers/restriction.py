@@ -17,7 +17,7 @@ from poppy.model import common
 from poppy.model.helpers import rule
 
 
-VALID_RESTRICTION_TYPES = [
+VALID_RESTRICTION_ACCESSES = [
     u'whitelist',
     u'blacklist']
 
@@ -29,9 +29,9 @@ class Restriction(common.DictSerializableModel):
     def __init__(self, name,
                  # use r_type because type is
                  # a python reserved word
-                 r_type='whitelist', rules=[]):
+                 access='whitelist', rules=[]):
         self._name = name
-        self._type = r_type
+        self._access = access
         self._rules = rules
 
     @property
@@ -47,22 +47,22 @@ class Restriction(common.DictSerializableModel):
         self._name = value
 
     @property
-    def type(self):
+    def access(self):
         """name.
 
         :returns name
         """
-        return self._type
+        return self._access
 
-    @type.setter
-    def type(self, value):
-        if (value in VALID_RESTRICTION_TYPES):
+    @access.setter
+    def access(self, value):
+        if (value in VALID_RESTRICTION_ACCESSES):
             self._status = value
         else:
             raise ValueError(
                 u'Type {0} not in valid options: {1}'.format(
                     value,
-                    VALID_RESTRICTION_TYPES)
+                    VALID_RESTRICTION_ACCESSES)
             )
 
     @property
@@ -87,8 +87,8 @@ class Restriction(common.DictSerializableModel):
         :returns o
         """
 
-        r_type = dict_obj.get("type", 'whitelist')
-        o = cls("unnamed", r_type)
+        access = dict_obj.get("access", 'whitelist')
+        o = cls("unnamed", access)
         o.name = dict_obj.get("name", "unnamed")
         rules_dict_list = dict_obj.get("rules", [])
         o.rules = []

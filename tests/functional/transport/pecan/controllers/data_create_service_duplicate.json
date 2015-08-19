@@ -22,7 +22,7 @@
         "restrictions": [
              {
                 "name": "website only",
-                "type": "whitelist",
+                "access": "whitelist",
                 "rules": [
                     {
                         "name": "mocksite.com",
