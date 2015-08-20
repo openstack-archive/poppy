@@ -155,7 +155,7 @@ class TestPatchSSLService(base.TestBase):
         self.restrictions_list = [
             {"name": "website only",
              # add whitelist to make restriction type explicit
-             "type": "whitelist",
+             "access": "whitelist",
              "rules": [{"name": "mywebsite.com",
                         "referrer": "www.mywebsite.com",
                         "request_url": "/*"
