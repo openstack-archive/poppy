@@ -198,7 +198,7 @@
         {"op": "add",
          "path": "/restrictions/-",
          "value": {"name": "restricted",
-                    "type": "whitelist",
+                    "access": "whitelist",
                     "rules": [{"name": "rule1", "referrer": "www.thesite.com", "request_url": "/images/*"}]
                     }}
     ],
