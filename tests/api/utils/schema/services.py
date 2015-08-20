@@ -100,9 +100,7 @@ get_service = {
                   'minItems': 1},
         'errors': {'type': 'array'},
         'status': {'type': 'string',
-                   # TODO(malini): Remove creating from the status list
-                   # after status update patch is merged.
-                   'enum': ['create_in_progress', 'creating',
+                   'enum': ['create_in_progress', 'disabled',
                             'delete_in_progress', 'deployed', 'failed']},
         'restrictions': restrictions,
         'flavor_id': flavor_id,
