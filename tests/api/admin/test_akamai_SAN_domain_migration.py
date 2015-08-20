@@ -34,7 +34,7 @@ class TestSanCertService(base.TestBase):
         self.flavor_id = self.test_flavor
 
         domain = self.generate_random_string(
-            prefix='api-test-domain') + '.com'
+            prefix='www.api-test-domain') + '.com'
         self.domain_list = [
             {"domain": domain, "protocol": "https", "certificate": "san"}
         ]
@@ -200,7 +200,7 @@ class TestSanCertServiceWithLogDelivery(base.TestBase):
         self.flavor_id = self.test_flavor
 
         domain = self.generate_random_string(
-            prefix='api-test-domain') + '.com'
+            prefix='www.api-test-domain') + '.com'
         self.domain_list = [
             {"domain": domain, "protocol": "https", "certificate": "san"}
         ]
