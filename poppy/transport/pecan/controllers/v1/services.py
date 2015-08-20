@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import ast
 import json
 import uuid
 
@@ -55,6 +56,20 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
     def delete(self, service_id):
         purge_url = pecan.request.GET.get('url', None)
         purge_all = pecan.request.GET.get('all', False)
+        hard = pecan.request.GET.get('hard', 'False')
+        if purge_url:
+            try:
+                purge_url.encode('ascii')
+            except (UnicodeDecodeError, UnicodeEncodeError):
+                pecan.abort(400, detail='non ascii character present in url')
+        if hard and hard.lower() == 'true':
+            hard = 'True'
+        try:
+            hard = ast.literal_eval(hard)
+        except ValueError:
+            pecan.abort(400, detail='hard can only be set to True or False')
+        if hard not in [True, False]:
+            pecan.abort(400, detail='hard can only be set to True or False')
         purge_all = (
             True if purge_all and purge_all.lower() == 'true' else False)
         if purge_url is None and not purge_all:
@@ -65,7 +80,7 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
                                     'and a url at the same time')
         services_controller = self._driver.manager.services_controller
         try:
-            services_controller.purge(self.project_id, service_id,
+            services_controller.purge(self.project_id, service_id, hard,
                                       purge_url)
         except errors.ServiceStatusNotDeployed as e:
             pecan.abort(400, detail=str(e))

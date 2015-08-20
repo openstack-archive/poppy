@@ -97,6 +97,7 @@ class Responder(object):
 
         :param provider_service_id
         :param purge_url
+        :param hard
         :returns provider msg{provider service id, purge urls}
         """
         provider_response = {

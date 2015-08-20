@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 # Copyright (c) 2015 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -104,14 +105,49 @@ class TestAssets(base.TestBase):
                                         param=url_param)
         self.assertEqual(resp.status_code, 202)
 
-    @attrib.attr('smoke')
     @ddt.data('mywebiste.com', 'images/maakri.jpg')
-    def test_purge_assets_url(self, url):
+    def test_purge_assets_url_hard_invalidate(self, url):
 
-        url_param = {'url': url}
+        url_param = {
+            'url': url,
+            'hard': True
+        }
         resp = self.client.purge_assets(location=self.service_url,
                                         param=url_param)
         self.assertEqual(resp.status_code, 202)
+
+    @ddt.data('mywebiste.com', 'images/maakri.jpg')
+    def test_purge_assets_url_soft_invalidate(self, url):
+
+        url_param = {
+            'url': url,
+            'hard': False
+        }
+        resp = self.client.purge_assets(location=self.service_url,
+                                        param=url_param)
+        self.assertEqual(resp.status_code, 202)
+
+    @ddt.data('mywebiste.com', 'images/maakri.jpg')
+    def test_purge_assets_url_negative_invalidate_non_bool_hard(self, url):
+
+        url_param = {
+            'url': url,
+            'hard': 'negative'
+        }
+        resp = self.client.purge_assets(location=self.service_url,
+                                        param=url_param)
+        self.assertEqual(resp.status_code, 400)
+
+    @ddt.data('mywebiste.com', '/¢¢¢¢¢¢.jpg')
+    def test_purge_assets_url_negative_invalidate_non_ascii_url(self, url):
+
+        url_param = {
+            'url': url,
+            'hard': False
+        }
+        resp = self.client.purge_assets(location=self.service_url,
+                                        param=url_param)
+        self.assertEqual(resp.status_code, 400)
 
     @attrib.attr('smoke')
     def test_purge_assets_negative(self):
