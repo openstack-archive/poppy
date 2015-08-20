@@ -36,11 +36,11 @@ class TestGetServiceByDomain(base.TestBase):
         self.flavor_id = self.test_flavor
 
         domain1 = self.generate_random_string(
-            prefix='api-test-domain') + '.com'
+            prefix='www.api-test-domain') + '.com'
         domain2 = self.generate_random_string(
-            prefix='api-test-domain') + '.com'
+            prefix='www.api-test-domain') + '.com'
         domain3 = self.generate_random_string(
-            prefix='api-test-domain') + '.com'
+            prefix='www.api-test-domain') + '.com'
 
         self.domain_list = [
             {"domain": domain1, "protocol": "http"},
@@ -304,7 +304,7 @@ class TestGetServiceBySANCertDomain(base.TestBase):
         self.flavor_id = self.test_flavor
 
         domain = self.generate_random_string(
-            prefix='api-test-domain') + '.com'
+            prefix='www.api-test-domain') + '.com'
         self.domain_list = [
             {"domain": domain, "protocol": "https", "certificate": "san"}
         ]
@@ -411,7 +411,7 @@ class TestGetServiceByCustomCertDomain(base.TestBase):
         self.flavor_id = self.test_flavor
 
         domain = self.generate_random_string(
-            prefix='api-test-domain') + '.com'
+            prefix='www.api-test-domain') + '.com'
         self.domain_list = [
             {"domain": domain, "protocol": "https", "certificate": "custom"}
         ]
