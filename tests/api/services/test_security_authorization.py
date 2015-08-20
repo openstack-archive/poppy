@@ -55,7 +55,7 @@ class TestAuthorizationService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test.' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
@@ -86,7 +86,7 @@ class TestAuthorizationService(providers.TestProviderBase):
         kwargs = {"headers": headers}
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test.' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
@@ -142,7 +142,7 @@ class TestAuthorizationService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test.' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
@@ -176,7 +176,7 @@ class TestAuthorizationService(providers.TestProviderBase):
         kwargs = {"headers": headers}
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test.' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
@@ -210,7 +210,7 @@ class TestAuthorizationService(providers.TestProviderBase):
         kwargs = {"headers": headers}
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test.' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
@@ -248,13 +248,13 @@ class TestAuthorizationService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test.' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
 
         test_patch_data = []
-        domain_name = "replacemereplaceme%s.com" % str(uuid.uuid1())
+        domain_name = "api-test.replacemereplaceme%s.com" % str(uuid.uuid1())
         test_patch_data.append({"op": "add",
                                 "path": "/domains/-",
                                 "value": {"domain": "%s" % (domain_name)}})
@@ -290,7 +290,7 @@ class TestAuthorizationService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test.' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
@@ -326,7 +326,7 @@ class TestAuthorizationService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test.' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
@@ -362,7 +362,7 @@ class TestAuthorizationService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test.' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
@@ -409,7 +409,7 @@ class TestAuthorizationService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
@@ -438,13 +438,13 @@ class TestAuthorizationService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test.' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
 
         test_patch_data = []
-        domain_name = "replacemereplaceme%s.com" % str(uuid.uuid1())
+        domain_name = "api-test.replacemereplaceme%s.com" % str(uuid.uuid1())
         test_patch_data.append({"op": "add",
                                 "path": "/domains/-",
                                 "value": {"domain": "%s" % (domain_name)}})
@@ -480,13 +480,13 @@ class TestAuthorizationService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test.' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
 
         test_patch_data = []
-        domain_name = "replacemereplaceme%s.com" % str(uuid.uuid1())
+        domain_name = "api-test.replacemereplaceme%s.com" % str(uuid.uuid1())
         test_patch_data.append({"op": "add",
                                 "path": "/domains/-",
                                 "value": {"domain": "%s" % (domain_name)}})
@@ -523,13 +523,13 @@ class TestAuthorizationService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
-            item['domain'] = str(uuid.uuid1()) + '.com'
+            item['domain'] = 'api-test.' + str(uuid.uuid1()) + '.com'
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         flavor_id = self.flavor_id
 
         test_patch_data = []
-        domain_name = "replacemereplaceme%s.com" % str(uuid.uuid1())
+        domain_name = "api-test.replacemereplaceme%s.com" % str(uuid.uuid1())
         test_patch_data.append({"op": "add",
                                 "path": "/domains/-",
                                 "value": {"domain": "%s" % (domain_name)}})
