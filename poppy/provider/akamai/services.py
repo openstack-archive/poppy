@@ -410,6 +410,8 @@ class ServiceController(base.ServiceBase):
     def purge(self, provider_service_id, service_obj, hard=False,
               purge_url=None):
         if not hard:
+            if not purge_url.startswith('/'):
+                purge_url = ('/' + purge_url)
             return self._policy(provider_service_id, service_obj,
                                 invalidate=True, invalidate_url=purge_url)
         else:

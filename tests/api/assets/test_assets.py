@@ -116,7 +116,7 @@ class TestAssets(base.TestBase):
                                         param=url_param)
         self.assertEqual(resp.status_code, 202)
 
-    @ddt.data('mywebiste.com', 'images/maakri.jpg')
+    @ddt.data('mywebiste.com', 'images/maakri.jpg', 'images')
     def test_purge_assets_url_soft_invalidate(self, url):
 
         url_param = {
