@@ -371,7 +371,7 @@ class TestServicePatchWithLogDelivery(base.TestBase):
 
         self.restrictions_list = [
             {"name": "website only",
-             "type": "whitelist",
+             "access": "whitelist",
              "rules": [{"name": "mywebsite.com",
                         "referrer": "www.mywebsite.com",
                         "request_url": "/*"
@@ -426,8 +426,8 @@ class TestServicePatchWithLogDelivery(base.TestBase):
         # Default restriction to whitelist
         expected_restrictions = expected_service_details['restrictions']
         for restriction in expected_restrictions:
-            if 'type' not in restriction:
-                restriction['type'] = 'whitelist'
+            if 'access' not in restriction:
+                restriction['access'] = 'whitelist'
 
         expected_origin = expected_service_details['origins']
         for item in expected_origin:
