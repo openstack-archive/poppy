@@ -84,7 +84,7 @@ class TestGetServiceByDomain(base.TestBase):
         self.restrictions_list = [
             {
                 u"name": u"website only",
-                u"type": u"whitelist",
+                u"access": u"whitelist",
                 u"rules": [
                     {
                         u"name": domain1,
@@ -244,7 +244,7 @@ class TestGetServiceBySharedDomain(base.TestBase):
                         u"request_url": "/*"
                     }
                 ],
-                u"type": "whitelist"
+                u"access": "whitelist"
             }
         ]
 
@@ -352,7 +352,7 @@ class TestGetServiceBySANCertDomain(base.TestBase):
                         u"request_url": "/*"
                     }
                 ],
-                u"type": "whitelist"
+                u"access": "whitelist"
             }
         ]
 
@@ -459,7 +459,7 @@ class TestGetServiceByCustomCertDomain(base.TestBase):
                         u"request_url": "/*"
                     }
                 ],
-                u"type": "whitelist"
+                u"access": "whitelist"
             }
         ]
 

@@ -208,8 +208,8 @@ class TestPatchSSLService(base.TestBase):
         # Default restriction to whitelist
         expected_restrictions = expected_service_details['restrictions']
         for restriction in expected_restrictions:
-            if 'type' not in restriction:
-                restriction['type'] = 'whitelist'
+            if 'access' not in restriction:
+                restriction['access'] = 'whitelist'
 
         resp = self.client.patch_service(location=self.service_url,
                                          request_body=test_data)
