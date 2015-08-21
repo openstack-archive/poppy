@@ -350,7 +350,7 @@ def is_valid_service_configuration(service, schema):
 
     if 'restrictions' in service:
         for restriction in service['restrictions']:
-            if restriction.get('type', 'blacklist') == 'blacklist':
+            if restriction.get('access', 'blacklist') == 'blacklist':
                 for rule in restriction['rules']:
                     entity = None
                     request_url = '/*'
@@ -368,7 +368,7 @@ def is_valid_service_configuration(service, schema):
                     if request_url not in blacklist_restriction_entities:
                         blacklist_restriction_entities[request_url] = []
                     blacklist_restriction_entities[request_url].append(entity)
-            elif restriction.get('type', 'whitelist') == 'whitelist':
+            elif restriction.get('access', 'whitelist') == 'whitelist':
                 for rule in restriction['rules']:
                     entity = None
                     request_url = '/*'

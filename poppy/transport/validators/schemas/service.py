@@ -438,10 +438,15 @@ class ServiceSchema(schema_base.SchemaBase):
                                                 "properties": {
                                                     "name": {
                                                         "type": "string",
+                                                        'minLength': 1,
+                                                        'maxLength': 256,
+                                                        "required": True,
                                                     },
                                                     "referrer": {
                                                         "type": "string",
                                                         'required': True,
+                                                        'minLength': 3,
+                                                        'maxLength': 1024
                                                     },
                                                     'request_url': {
                                                         'type': 'string',
