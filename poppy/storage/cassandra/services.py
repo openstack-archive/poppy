@@ -372,7 +372,10 @@ class ServicesController(base.ServicesController):
             'project_id': project_id,
             'service_id': uuid.UUID(str(service_id)),
         }
-        results = self.session.execute(CQL_GET_SERVICE, args)
+        stmt = query.SimpleStatement(
+            CQL_GET_SERVICE,
+            consistency_level=self._driver.consistency_level)
+        results = self.session.execute(stmt, args)
         result = results[0]
 
         # updates an existing service
@@ -449,7 +452,10 @@ class ServicesController(base.ServicesController):
         }
 
         # get the existing service
-        results = self.session.execute(CQL_GET_SERVICE, args)
+        stmt = query.SimpleStatement(
+            CQL_GET_SERVICE,
+            consistency_level=self._driver.consistency_level)
+        results = self.session.execute(stmt, args)
         result = results[0]
 
         if (result):
