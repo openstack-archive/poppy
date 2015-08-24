@@ -88,6 +88,11 @@ class DeleteServiceDNSMappingTask(task.Task):
                                  'be retried'.format(exception_class,
                                                      self.__class__))
                         raise exception_class(msg)
+            else:
+                LOG.info("DNS Deletion Successful "
+                         "for Provider {0} : "
+                         "{1}".format(provider_name,
+                                      dns_responder[provider_name]))
 
         return dns_responder
 

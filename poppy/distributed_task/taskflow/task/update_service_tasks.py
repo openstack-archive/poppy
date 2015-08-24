@@ -88,6 +88,11 @@ class UpdateServiceDNSMappingTask(task.Task):
                                      'be retried'.format(exception_class,
                                                          self.__class__))
                             raise exception_class(msg)
+                else:
+                    LOG.info("DNS Update Successful "
+                             "for Provider {0} : "
+                             "{1}".format(provider_name,
+                                          dns_responder[provider_name]))
             except KeyError:
                 # NOTE(TheSriram): This means the provider updates failed, and
                 # just access_urls were returned
