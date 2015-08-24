@@ -163,6 +163,11 @@ class UpdateProviderDetailTask(task.Task):
 
         if not all(map(enabled, provider_details_dict.values())):
             service_obj.log_delivery.enabled = False
+        LOG.info("Service to be updated to {0} "
+                 "for project_id: {1} "
+                 "and service_id: {2}".format(service_obj.to_dict(),
+                                              project_id,
+                                              service_id))
         self.storage_controller.update(project_id, service_id, service_obj)
 
         LOG.info('Update service detail task complete...')
@@ -192,6 +197,12 @@ class UpdateProviderDetailIfNotEmptyTask(task.Task):
                 project_id,
                 service_id,
                 provider_details_dict)
+
+        LOG.info("Provider Details to be updated to {0} "
+                 "for project_id: {1} "
+                 "and service_id: {2}".format(changed_provider_details_dict,
+                                              project_id,
+                                              service_id))
 
         LOG.info('Updating service detail task'
                  'complete for Changed Provider Details :'
