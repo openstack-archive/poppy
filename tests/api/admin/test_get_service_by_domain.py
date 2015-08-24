@@ -368,6 +368,7 @@ class TestGetServiceBySANCertDomain(base.TestBase):
 
     def test_get_service_by_domain(self):
 
+        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
         get_resp = self.client.get_service(self.service_url)
         resp_body = get_resp.json()
         domain = resp_body['domains'][0]['domain']
