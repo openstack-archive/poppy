@@ -169,16 +169,28 @@ class TestBase(fixtures.BaseTestFixture):
                 test_url=wpt_test_url)
         return wpt_test_results
 
-    def get_from_cdn_enabled_url(self, cdn_url, count=2):
+    def get_from_cdn_enabled_url(self, cdn_url, edge_server=None, count=2):
         """GETs using the cdn enabled url for the specified number of times
 
         :param cdn_url: CDN enabled url of the origin website
         :param count: number of calls to make
         """
-        for _ in range(count):
-            requests.get(cdn_url)
+        request_headers = {'Pragma': 'akamai-x-cache-on'}
+        if edge_server:
+            cdn_domain, cdn_path = cdn_url.lsplit('.com')
+            cdn_domain = cdn_domain.split('http://')[1]
+            request_url = edge_server + cdn_path
+            request_headers['Host'] = cdn_domain
+            resp = requests.get(request_url, headers=request_headers)
+        else:
+            for _ in range(count):
+                resp = requests.get(cdn_url, headers=request_headers)
+        edge_server_substring = resp.headers['x-cache'].split('from ')[1]
+        edge_server = \
+            'http://' + edge_server_substring.split(' (AkamaiGHost')[0]
+        return edge_server
 
-    def assertCacheStatus(self, cdn_url, status_list):
+    def assertCacheStatus(self, cdn_url, status_list, edge_server=None):
         """Asserts that the content is cached or NOT
 
         :param cdn_url: CDN enabled url of the origin website
@@ -187,7 +199,15 @@ class TestBase(fixtures.BaseTestFixture):
         :returns: True/False
         """
         headers = {'Pragma': 'akamai-x-cache-on'}
-        response = requests.get(cdn_url, headers=headers)
+        if edge_server:
+            cdn_domain, cdn_path = cdn_url.split('.com')
+            cdn_domain = cdn_domain.split('http://')[1] + '.com'
+            request_url = edge_server + cdn_path
+            headers['Host'] = cdn_domain
+            response = requests.get(request_url, headers=headers)
+        else:
+            response = requests.get(cdn_url, headers=headers)
+
         self.assertIn(response.headers['x-cache'].split(" ")[0], status_list)
 
     def wait_for_CDN_status(self, cdn_url, status):
