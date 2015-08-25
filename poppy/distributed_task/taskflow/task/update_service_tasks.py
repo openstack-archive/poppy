@@ -88,6 +88,11 @@ class UpdateServiceDNSMappingTask(task.Task):
                                      'be retried'.format(exception_class,
                                                          self.__class__))
                             raise exception_class(msg)
+                else:
+                    LOG.info("DNS Update Successful "
+                             "for Provider {0} : "
+                             "{1}".format(provider_name,
+                                          dns_responder[provider_name]))
             except KeyError:
                 # NOTE(TheSriram): This means the provider updates failed, and
                 # just access_urls were returned
@@ -239,6 +244,11 @@ class UpdateProviderDetailsTask_Errors(task.Task):
             service_obj.provider_details = provider_details_dict
 
         # update the service object
+        LOG.info("Service to be updated to {0} "
+                 "for project_id: {1} "
+                 "and service_id: {2}".format(service_obj.to_dict(),
+                                              project_id,
+                                              service_id))
         self.storage_controller.update(project_id, service_id, service_obj)
         LOG.info('Update provider detail service worker process complete...')
 
