@@ -176,7 +176,9 @@ class TestBase(fixtures.BaseTestFixture):
         :param count: number of calls to make
         """
         for _ in range(count):
-            requests.get(cdn_url)
+            headers = {'Pragma': 'akamai-x-cache-on'}
+            resp = requests.get(cdn_url, headers=headers)
+            print('get_from_cdn_enabled_url', resp.headers)
 
     def assertCacheStatus(self, cdn_url, status_list):
         """Asserts that the content is cached or NOT
@@ -188,6 +190,7 @@ class TestBase(fixtures.BaseTestFixture):
         """
         headers = {'Pragma': 'akamai-x-cache-on'}
         response = requests.get(cdn_url, headers=headers)
+        print('assertCacheStatus', response.headers)
         self.assertIn(response.headers['x-cache'].split(" ")[0], status_list)
 
     def wait_for_CDN_status(self, cdn_url, status):
