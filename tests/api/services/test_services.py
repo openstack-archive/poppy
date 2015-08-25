@@ -50,6 +50,7 @@ class TestCreateService(providers.TestProviderBase):
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         log_delivery = test_data.get('log_delivery')
+        restrictions_list = test_data.get('restrictions_list')
         flavor_id = self.flavor_id
 
         resp = self.client.create_service(service_name=self.service_name,
@@ -57,6 +58,7 @@ class TestCreateService(providers.TestProviderBase):
                                           origin_list=origin_list,
                                           caching_list=caching_list,
                                           flavor_id=flavor_id,
+                                          restrictions_list=restrictions_list,
                                           log_delivery=log_delivery)
 
         self.assertEqual(resp.status_code, 202)
@@ -126,6 +128,11 @@ class TestCreateService(providers.TestProviderBase):
                     sorted(caching_list),
                     msg='Caching List Not Correct for {0} service name {1}'.
                         format(provider, self.service_name))
+                self.assertEqual(
+                    sorted(service_details[provider]['restrictions_list']),
+                    sorted(restrictions_list),
+                    msg='Restrictions Lists Not Correct for {0} service name '
+                        '{1}'.format(provider, self.service_name))
 
     @ddt.file_data('data_create_service_negative.json')
     def test_create_service_negative(self, test_data):
