@@ -443,6 +443,55 @@
                         ]}
         ]
      },
+     "referrer_restriction_blacklist": {
+        "name": "my_service_name",
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{
+                         "origin": "myorigin.com",
+                         "port": 80,
+                         "ssl": false,
+                         "rules": [
+                            {
+                                "name" : "default",
+                                "request_url" : "/*"
+                            }]
+                        }],
+         "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600,
+                "rules": [
+                    {
+                        "name" : "default",
+                        "request_url" : "/*"
+                    }
+                ]
+            },
+            {
+                "name": "home",
+                "ttl": 1200,
+                "rules": [
+                    {
+                        "name" : "index",
+                        "request_url" : "/index.htm"
+                    }
+                ]
+            }
+         ],
+         "restrictions_list": [
+                        {
+                        "name": "test",
+                        "access": "blacklist",
+                        "rules": [
+                            {
+                                "name": "only me",
+                                "referrer": "www.mywebsite.com",
+                                "request_url" : "/*"
+                            }
+                        ]}
+        ]
+    },
      "ip_restriction": {
         "name": "my_service_name",
         "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
