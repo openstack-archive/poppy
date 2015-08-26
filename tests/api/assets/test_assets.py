@@ -104,6 +104,8 @@ class TestAssets(base.TestBase):
         resp = self.client.purge_assets(location=self.service_url,
                                         param=url_param)
         self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.headers["location"],
+                         self.service_url)
 
     @ddt.data('mywebiste.com', 'images/maakri.jpg')
     def test_purge_assets_url_hard_invalidate(self, url):
@@ -115,6 +117,8 @@ class TestAssets(base.TestBase):
         resp = self.client.purge_assets(location=self.service_url,
                                         param=url_param)
         self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.headers["location"],
+                         self.service_url)
 
     @ddt.data('mywebiste.com', 'images/maakri.jpg', 'images')
     def test_purge_assets_url_soft_invalidate(self, url):
@@ -126,6 +130,8 @@ class TestAssets(base.TestBase):
         resp = self.client.purge_assets(location=self.service_url,
                                         param=url_param)
         self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.headers["location"],
+                         self.service_url)
 
     @ddt.data('mywebiste.com', 'images/maakri.jpg')
     def test_purge_assets_url_negative_invalidate_non_bool_hard(self, url):
