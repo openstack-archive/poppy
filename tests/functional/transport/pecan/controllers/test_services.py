@@ -388,6 +388,8 @@ class ServiceControllerTest(base.FunctionalTest):
             expect_errors=True)
 
         self.assertEqual(202, response.status_code)
+        self.assertEqual(self.service_url,
+                         urlparse.urlparse(response.headers["Location"]).path)
 
     def test_purge_single_url(self):
         response = self.app.delete(
@@ -399,6 +401,8 @@ class ServiceControllerTest(base.FunctionalTest):
             expect_errors=True)
 
         self.assertEqual(202, response.status_code)
+        self.assertEqual(self.service_url,
+                         urlparse.urlparse(response.headers["Location"]).path)
 
     def test_purge_single_url_non_ascii(self):
         response = self.app.delete(
@@ -422,6 +426,8 @@ class ServiceControllerTest(base.FunctionalTest):
             expect_errors=True)
 
         self.assertEqual(202, response.status_code)
+        self.assertEqual(self.service_url,
+                         urlparse.urlparse(response.headers["Location"]).path)
 
     def test_purge_single_url_and_soft_invalidate(self):
         response = self.app.delete(
@@ -433,6 +439,8 @@ class ServiceControllerTest(base.FunctionalTest):
             expect_errors=True)
 
         self.assertEqual(202, response.status_code)
+        self.assertEqual(self.service_url,
+                         urlparse.urlparse(response.headers["Location"]).path)
 
     def test_purge_wildcard_url_and_soft_invalidate(self):
         response = self.app.delete(
@@ -444,6 +452,8 @@ class ServiceControllerTest(base.FunctionalTest):
             expect_errors=True)
 
         self.assertEqual(202, response.status_code)
+        self.assertEqual(self.service_url,
+                         urlparse.urlparse(response.headers["Location"]).path)
 
     def test_purge_single_url_and_non_boolean_invalidate(self):
         response = self.app.delete(
