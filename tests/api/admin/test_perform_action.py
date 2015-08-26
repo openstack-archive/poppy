@@ -93,9 +93,16 @@ class TestHttpService(base.TestBase):
             restrictions_list=self.restrictions_list,
             flavor_id=self.flavor_id)
 
-        self.service_url = resp.headers["location"]
+        self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.text, '')
+        self.service_url = resp.headers['location']
+
         resp = self.client.wait_for_service_status(
-            location=self.service_url, status='deployed')
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         self.before_patch_body = resp.json()
         self.before_patch_state = resp.json()['status']
@@ -271,9 +278,16 @@ class TestSharedCertService(base.TestBase):
             restrictions_list=self.restrictions_list,
             flavor_id=self.flavor_id)
 
-        self.service_url = resp.headers["location"]
+        self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.text, '')
+        self.service_url = resp.headers['location']
+
         resp = self.client.wait_for_service_status(
-            location=self.service_url, status='deployed')
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
         self.before_patch_body = resp.json()
         self.before_patch_state = resp.json()['status']
 
@@ -430,9 +444,16 @@ class TestSanCertService(base.TestBase):
             restrictions_list=self.restrictions_list,
             flavor_id=self.flavor_id)
 
-        self.service_url = resp.headers["location"]
+        self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.text, '')
+        self.service_url = resp.headers['location']
+
         resp = self.client.wait_for_service_status(
-            location=self.service_url, status='deployed')
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
         self.before_patch_body = resp.json()
         self.before_patch_state = resp.json()['status']
 
@@ -589,9 +610,16 @@ class TestCustomCertService(base.TestBase):
             restrictions_list=self.restrictions_list,
             flavor_id=self.flavor_id)
 
-        self.service_url = resp.headers["location"]
+        self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.text, '')
+        self.service_url = resp.headers['location']
+
         resp = self.client.wait_for_service_status(
-            location=self.service_url, status='deployed')
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
         self.before_patch_body = resp.json()
         self.before_patch_state = resp.json()['status']
 
@@ -751,9 +779,16 @@ class TestHttpServiceWithLogDelivery(base.TestBase):
             flavor_id=self.flavor_id,
             log_delivery=self.log_delivery)
 
-        self.service_url = resp.headers["location"]
+        self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.text, '')
+        self.service_url = resp.headers['location']
+
         resp = self.client.wait_for_service_status(
-            location=self.service_url, status='deployed')
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         self.before_patch_body = resp.json()
         self.before_patch_state = resp.json()['status']
