@@ -103,10 +103,19 @@ class TestGetServiceByDomain(base.TestBase):
             restrictions_list=self.restrictions_list,
             flavor_id=self.flavor_id)
 
-        self.service_url = resp.headers["location"]
+        self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.text, '')
+        self.service_url = resp.headers['location']
+
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
     def test_get_service_by_domain(self):
-        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
+
         resp = self.operator_client.admin_get_service_by_domain_name(
             self.domain_list[0]['domain'])
 
@@ -256,11 +265,19 @@ class TestGetServiceBySharedDomain(base.TestBase):
             restrictions_list=self.restrictions_list,
             flavor_id=self.flavor_id)
 
-        self.service_url = resp.headers["location"]
+        self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.text, '')
+        self.service_url = resp.headers['location']
+
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
     def test_get_service_by_domain(self):
 
-        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
         get_resp = self.client.get_service(self.service_url)
         resp_body = get_resp.json()
         domain = resp_body['domains'][0]['domain']
@@ -368,7 +385,6 @@ class TestGetServiceBySANCertDomain(base.TestBase):
 
     def test_get_service_by_domain(self):
 
-        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
         get_resp = self.client.get_service(self.service_url)
         resp_body = get_resp.json()
         domain = resp_body['domains'][0]['domain']
@@ -472,7 +488,16 @@ class TestGetServiceByCustomCertDomain(base.TestBase):
             restrictions_list=self.restrictions_list,
             flavor_id=self.flavor_id)
 
-        self.service_url = resp.headers["location"]
+        self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.text, '')
+        self.service_url = resp.headers['location']
+
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
     def test_get_service_by_domain(self):
 
