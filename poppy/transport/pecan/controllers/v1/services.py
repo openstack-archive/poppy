@@ -87,7 +87,12 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
         except LookupError as e:
             pecan.abort(404, detail=str(e))
 
-        return pecan.Response(None, 202)
+        service_url = str(
+            uri.encode(u'{0}/v1.0/services/{1}'.format(
+                pecan.request.host_url,
+                service_id)))
+
+        return pecan.Response(None, 202, headers={"Location": service_url})
 
 
 class ServicesController(base.Controller, hooks.HookController):
