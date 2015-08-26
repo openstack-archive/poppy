@@ -27,9 +27,9 @@ VALID_STATUSES = [
     u'delete_in_progress',
     u'failed']
 
-VALID_DOMAIN_CERTIFICATE_STATUSES = [
+VALID_DOMAIN_STATUSES = [
     u'create_in_progress',
-    u'deployed',
+    u'update_in_progress',
     u'failed']
 
 

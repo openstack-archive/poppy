@@ -26,10 +26,12 @@ class SSLCertificate(common.DictSerializableModel):
     def __init__(self,
                  flavor_id,
                  domain_name,
-                 cert_type):
+                 cert_type,
+                 cert_detail={}):
         self._flavor_id = flavor_id
         self._domain_name = domain_name
         self._cert_type = cert_type
+        self._cert_detail = cert_detail
 
     @property
     def flavor_id(self):
@@ -64,3 +66,13 @@ class SSLCertificate(common.DictSerializableModel):
                     value,
                     VALID_CERT_TYPES)
             )
+
+    @property
+    def cert_detail(self):
+        """Get service id."""
+        return self._cert_detail
+
+    @cert_detail.setter
+    def cert_detail(self, valueS):
+        """Get service id."""
+        return self._cert_type

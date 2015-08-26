@@ -172,6 +172,12 @@ class DefaultServicesController(base.ServicesController):
                     domain.domain
                 )
 
+            elif domain.protocol == 'https' and domain.certificate == 'san':
+                cert_for_domain = self.storage_controller.get_cert_by_domain(
+                    domain.domain, domain.certificate,
+                    service_obj.flavor_id, project_id)
+                domain.san_edge_domain = cert_for_domain
+
         try:
             self.storage_controller.create(
                 project_id,

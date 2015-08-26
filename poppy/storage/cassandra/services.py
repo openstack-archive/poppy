@@ -31,6 +31,7 @@ from poppy.model.helpers import restriction
 from poppy.model.helpers import rule
 from poppy.model import log_delivery as ld
 from poppy.model import service
+from poppy.model import ssl_certificate
 from poppy.openstack.common import log as logging
 from poppy.storage import base
 
@@ -187,7 +188,16 @@ CQL_VERIFY_CERT = '''
         domain_name
     FROM certificate_info
     WHERE domain_name = %(domain_name)s
-    ALLOW FILTERING
+'''
+
+CQL_SEARCH_CERT_BY_DOMAIN = '''
+    SELECT project_id,
+        flavor_id,
+        cert_type,
+        domain_name,
+        cert_details
+    FROM certificate_info
+    WHERE domain_name = %(domain_name)s
 '''
 
 CQL_UPDATE_SERVICE = CQL_CREATE_SERVICE
@@ -358,6 +368,39 @@ class ServicesController(base.ServicesController):
             return False
         else:
             return False
+
+    def get_cert_by_domain(self, domain_name, cert_type,
+                           flavor_id,
+                           project_id):
+
+        LOG.info(("Search for cert on '{0}', type: {1}, flavor_id: {2}, "
+                  "project_id: {3}").format(domain_name))
+        args = {
+            'domain_name': domain_name.lower()
+        }
+        stmt = query.SimpleStatement(
+            CQL_VERIFY_CERT,
+            consistency_level=self._driver.consistency_level)
+        results = self.session.execute(stmt, args)
+
+        if results:
+            for r in results:
+                r_project_id = str(r.get('project_id'))
+                r_flavor_id = str(r.get('flavor_id'))
+                r_cert_type = str(r.get('cert_type'))
+                r_cert_detail = str(r.get('cert_details'))
+                if r_project_id == str(project_id) and \
+                        r_flavor_id == str(flavor_id) and \
+                        r_cert_type == str(cert_type):
+                    res = ssl_certificate.SSLCertificate(r_flavor_id,
+                                                         domain_name,
+                                                         r_cert_type,
+                                                         r_cert_detail)
+                    return res
+            else:
+                return None
+        else:
+            return None
 
     def create(self, project_id, service_obj):
         """create.
@@ -722,6 +765,20 @@ class ServicesController(base.ServicesController):
         }
         stmt = query.SimpleStatement(
             CQL_UPDATE_CERT_DETAILS,
+            consistency_level=self._driver.consistency_level)
+        self.session.execute(stmt, args)
+
+    def get_cert_by_domain(self, domain_name):
+        """get_cert_by_domain.
+
+        :param domain_name
+        """
+
+        args = {
+            'domain_name': domain_name
+        }
+        stmt = query.SimpleStatement(
+            CQL_VERIFY_CERT,
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
 

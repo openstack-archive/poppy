@@ -126,7 +126,12 @@ class ServiceController(base.ServiceBase):
                 # pick a san cert for this domain
                 edge_host_name = None
                 if classified_domain.certificate == 'san':
-                    edge_host_name = self._pick_san_edgename()
+                    if classified_domain.san_edge_domain is None:
+                        continue
+                    else:
+                        edge_host_name = (
+                            classified_domain.san_edge_domain.
+                            get_san_edge_name())
                 provider_access_url = self._get_provider_access_url(
                     classified_domain, dp, edge_host_name)
                 links.append({'href': provider_access_url,
@@ -284,7 +289,12 @@ class ServiceController(base.ServiceBase):
                                  'complete' % (dp, classified_domain.domain))
                         edge_host_name = None
                         if classified_domain.certificate == 'san':
-                            edge_host_name = self._pick_san_edgename()
+                            if classified_domain.san_edge_domain is None:
+                                continue
+                            else:
+                                edge_host_name = (
+                                    classified_domain.san_edge_domain.
+                                    get_san_edge_name())
                         provider_access_url = self._get_provider_access_url(
                             classified_domain, dp, edge_host_name)
                         links.append({'href': provider_access_url,
@@ -376,7 +386,12 @@ class ServiceController(base.ServiceBase):
                     # This part may need to revisit
                     edge_host_name = None
                     if policy['certificate'] == 'san':
-                        edge_host_name = self._pick_san_edgename()
+                        if classified_domain.san_edge_domain is None:
+                            continue
+                        else:
+                            edge_host_name = (
+                                classified_domain.san_edge_domain.
+                                get_san_edge_name())
                     provider_access_url = self._get_provider_access_url(
                         util.dict2obj(policy), policy['policy_name'],
                         edge_host_name)
