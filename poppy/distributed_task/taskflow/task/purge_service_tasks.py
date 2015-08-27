@@ -40,8 +40,8 @@ class PurgeProviderServicesTask(task.Task):
         service_obj = service.load_from_json(service_json)
         hard = json.loads(hard)
         provider_details = json.loads(provider_details)
-        purge_url = None if purge_url == 'None' else purge_url
-
+        if hard:
+            purge_url = None if purge_url == 'None' else purge_url
         responders = []
         # try to purge all service from each provider presented
         # in provider_details

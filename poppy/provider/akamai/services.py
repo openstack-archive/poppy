@@ -407,7 +407,7 @@ class ServiceController(base.ServiceBase):
         else:
             return self.responder.deleted(provider_service_id)
 
-    def purge(self, provider_service_id, service_obj, hard=False,
+    def purge(self, provider_service_id, service_obj, hard=True,
               purge_url=None):
         if not hard:
             if not purge_url.startswith('/'):
@@ -443,6 +443,8 @@ class ServiceController(base.ServiceBase):
                         # purge_url has to be a full path
                         # with a starting slash,
                         # e.g: /cdntest.html
+                        if not purge_url.startswith('/'):
+                            purge_url = ('/' + purge_url)
                         actual_purge_url = ''.join([url_scheme,
                                                     policy['policy_name'],
                                                     purge_url])
