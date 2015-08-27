@@ -54,14 +54,16 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
             helpers.abort_with_message)
     )
     def delete(self, service_id):
-        purge_url = pecan.request.GET.get('url', None)
+        purge_url = pecan.request.GET.get('url', '/*')
         purge_all = pecan.request.GET.get('all', False)
-        hard = pecan.request.GET.get('hard', 'False')
+        hard = pecan.request.GET.get('hard', 'True')
         if purge_url:
             try:
                 purge_url.encode('ascii')
             except (UnicodeDecodeError, UnicodeEncodeError):
                 pecan.abort(400, detail='non ascii character present in url')
+        if hard and hard.lower() == 'false':
+            hard = 'False'
         if hard and hard.lower() == 'true':
             hard = 'True'
         try:
@@ -75,7 +77,7 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
         if purge_url is None and not purge_all:
             pecan.abort(400, detail='No purge url provided '
                         'when not purging all...')
-        elif purge_all and purge_url is not None:
+        if purge_all and purge_url != '/*':
             pecan.abort(400, detail='Cannot provide all=true '
                                     'and a url at the same time')
         services_controller = self._driver.manager.services_controller
