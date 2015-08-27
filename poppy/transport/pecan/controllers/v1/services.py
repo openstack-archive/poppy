@@ -56,12 +56,14 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
     def delete(self, service_id):
         purge_url = pecan.request.GET.get('url', None)
         purge_all = pecan.request.GET.get('all', False)
-        hard = pecan.request.GET.get('hard', 'False')
+        hard = pecan.request.GET.get('hard', 'True')
         if purge_url:
             try:
                 purge_url.encode('ascii')
             except (UnicodeDecodeError, UnicodeEncodeError):
                 pecan.abort(400, detail='non ascii character present in url')
+        if hard and hard.lower() == 'false':
+            hard = 'False'
         if hard and hard.lower() == 'true':
             hard = 'True'
         try:

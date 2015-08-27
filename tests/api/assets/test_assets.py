@@ -181,6 +181,14 @@ class TestAssets(base.TestBase):
                                         param=url_param)
         self.assertEqual(resp.status_code, 400)
 
+    @attrib.attr('smoke')
+    def test_purge_assets_no_url(self):
+
+        url_param = {'url': 'myurl.com'}
+        resp = self.client.purge_assets(location=self.service_url,
+                                        param=url_param)
+        self.assertEqual(resp.status_code, 400)
+
     def tearDown(self):
         self.client.delete_service(location=self.service_location)
         if self.test_config.generate_flavors:
