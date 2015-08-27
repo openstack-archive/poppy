@@ -84,7 +84,7 @@ class ServiceController(base.ServiceBase):
         except Exception as e:
             return self.responder.failed(str(e))
 
-    def purge(self, distribution_id, hard=False, purge_url=None):
+    def purge(self, distribution_id, hard=True, purge_url='/*'):
         # NOTE(tonytan4ever): boto does not have an API to efficiently
         # purge all urls yet
         try:

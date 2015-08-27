@@ -384,6 +384,13 @@ class TestGetServiceBySANCertDomain(base.TestBase):
 
         self.service_url = resp.headers["location"]
 
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
     def test_get_service_by_domain(self):
         self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
         get_resp = self.client.get_service(self.service_url)
