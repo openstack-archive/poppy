@@ -407,7 +407,7 @@ class ServiceController(base.ServiceBase):
         else:
             return self.responder.deleted(provider_service_id)
 
-    def purge(self, provider_service_id, service_obj, hard=False,
+    def purge(self, provider_service_id, service_obj, hard=True,
               purge_url=None):
         if not hard:
             if not purge_url.startswith('/'):
