@@ -284,3 +284,17 @@ class OriginHeaderConfig(data_interfaces.ConfigSectionInterface):
     def expires_and_cache_control_path(self):
         """expires_and_cache_control_path endpoint."""
         return self.get('expires_and_cache_control_path')
+
+
+class GeoRestrictionsConfig(data_interfaces.ConfigSectionInterface):
+    """Configuration for testing geo restrictions."""
+    SECTION_NAME = 'geo_restrictions'
+
+    @property
+    def test_geo(self):
+        return self.get('test_geo')
+
+    @property
+    def image_path(self):
+        """The uri at which the images_origin serves an image."""
+        return self.get('image_path')
