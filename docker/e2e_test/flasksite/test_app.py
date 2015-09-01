@@ -20,39 +20,18 @@ from flask import Flask
 from flask import make_response
 from flask import render_template
 from flask import request
-from flask_wtf import form
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def index():
-    return 'Test Flask Site from 23.253.156.204'
+    return 'Test Flask Site'
 
 
-@app.route('/hello/', strict_slashes=False)
-def hello():
-    return 'halo halo from 23.253.156.204'
-
-
-@app.route('/hello/<user_name>/')
-def hello_user(user_name):
-    print(request.headers)
-    return render_template('hello.html', name=user_name)
-
-
-@app.route('/test/host-header/')
+@app.route('/test/host-header/', strict_slashes=False)
 def test_host_header():
-    print(request.headers)
     return render_template('hello.html', name=request.headers['Host'])
-
-
-@app.route('/hello/<user_name>/upload/', methods=['GET', 'POST'])
-def upload_file(user_name):
-    if request.method == 'POST':
-        form.photo.data.save('/tmp/{0}.jpg'.format(user_name))
-    else:
-        return render_template('gorilla.html', name=user_name)
 
 
 @app.route('/test/camera.jpg', strict_slashes=False)
