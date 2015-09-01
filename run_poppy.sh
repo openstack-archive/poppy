@@ -1,6 +1,6 @@
 #!/bin/bash
 DAEMONIZED=false
-WORKERS = 6
+WORKERS=6
 
 for i in "$@"
 do

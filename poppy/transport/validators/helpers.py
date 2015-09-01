@@ -407,6 +407,15 @@ def is_valid_service_configuration(service, schema):
                                 request_url
                             ))
 
+            # referrer domains must be valid
+            for rule in restriction['rules']:
+                if rule.get("referrer"):
+                    referrer = rule.get("referrer")
+                    if not is_valid_domain_name(referrer):
+                        raise exceptions.ValidationFailed(
+                            u'Referrer {0} is not a valid domain'
+                            .format(referrer))
+
     return
 
 

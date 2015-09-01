@@ -393,6 +393,62 @@
                         "referrer": "www.mywebsite.com"}]}
         ]
     },
+    "referrer_invalid_domain_with_http": {
+        "service_name": "referrer_invalid_domain",
+        "domain_list": [{"domain": "www.mywebsite.com",
+                         "protocol": "http"},
+                        {"domain": "www.test.website.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 80,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+         "restrictions_list": [
+                        {
+                            "name": "invalid domain",
+                            "access": "whitelist",
+                            "rules": 
+                            [
+                                {
+                                    "name": "only me",
+                                    "referrer": "http://www.mywebsite.com",
+                                    "request_url": "/*"
+                            }
+                        ]
+                        }
+        ]
+    },
+    "referrer_invalid_domain_with_bad_format": {
+        "service_name": "referrer_invalid_domain",
+        "domain_list": [{"domain": "www.mywebsite.com",
+                         "protocol": "http"},
+                        {"domain": "www.test.website.com", "protocol": "http"}],
+        "origin_list": [{"origin": "mywebsite1.com",
+                         "port": 80,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+         "restrictions_list": [
+                        {
+                            "name": "invalid domain",
+                            "access": "whitelist",
+                            "rules": 
+                            [
+                                {
+                                    "name": "only me",
+                                    "referrer": "www.-mywebsite.com",
+                                    "request_url": "/*"
+                            }
+                        ]
+                        }
+        ]
+    },
     "http_domain_with_certificate": {
         "service_name": "my_service_name",
         "domain_list": [{"domain": "www.mywebsite.com",
@@ -728,7 +784,7 @@
                                      "request_url" : "/index.htm"}]}],
         "restrictions_list": []
     },
-    "invalid_domain_name_with_hyphen_at_benginning": {
+    "invalid_domain_name_with_hyphen_at_beginning": {
         "service_name": "invalid_domain_name_with_hyphen",
         "domain_list": [{"domain": "abcd.-mywebsite.com"}],
         "origin_list": [{"origin": "myorigin.com",
