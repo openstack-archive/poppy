@@ -185,6 +185,74 @@ class ServiceControllerTest(base.FunctionalTest):
                                      'X-Project-ID': self.project_id})
         self.assertEqual(202, response.status_code)
 
+    def test_patch_shared_ssl_domain(self):
+
+        service_json = {
+            "name": "mocksite.com",
+            "domains": [
+                {"domain": "mocksite",
+                 'protocol': 'https',
+                 'certificate': 'shared'}
+            ],
+            "flavor_id": "mock",
+            "origins": [
+                {
+                    "origin": "mocksite.com",
+                    "port": 443,
+                    "ssl": True
+                }
+            ]
+        }
+
+        response = self.app.post('/v1.0/services',
+                                 params=json.dumps(service_json),
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'X-Project-ID': self.project_id
+                                 })
+        self.assertEqual(202, response.status_code)
+
+        # This is mocksite2
+        service_json = {
+            "name": "mocksite.com",
+            "domains": [
+                {"domain": "mocksite2",
+                 'protocol': 'https',
+                 'certificate': 'shared'}
+            ],
+            "flavor_id": "mock",
+            "origins": [
+                {
+                    "origin": "mocksite.com",
+                    "port": 443,
+                    "ssl": True
+                }
+            ]
+        }
+
+        response = self.app.post('/v1.0/services',
+                                 params=json.dumps(service_json),
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'X-Project-ID': self.project_id
+                                 })
+        self.assertEqual(202, response.status_code)
+
+        response = self.app.patch(response.location,
+                                  params=json.dumps([{
+                                      "op": "add",
+                                      "path": "/domains/-",
+                                      "value": {
+                                            "domain": "mocksite",
+                                            "protocol": "https",
+                                            "certificate": "shared"}
+                                  }]),
+                                  headers={'Content-Type': 'application/json',
+                                           'X-Project-ID': self.project_id
+                                           }, expect_errors=True)
+        self.assertEqual(400, response.status_code)
+        self.assertTrue('has already been taken' in response)
+
     def test_create_with_invalid_json(self):
         # create with errorenous data: invalid json data
         response = self.app.post('/v1.0/services',
