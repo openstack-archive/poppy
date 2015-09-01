@@ -100,7 +100,11 @@ class TestBase(fixtures.BaseTestFixture):
         """
         origin_content = self.get_content(url=origin_url)
         cdn_content = self.get_content(url=cdn_url)
-        self.assertEqual(origin_content, cdn_content)
+        self.assertEqual(
+            origin_content, cdn_content,
+            msg='Contents do not match \n \
+                Origin url {0} \n \
+                CDN enabled url {1}'.format(origin_url, cdn_url))
 
     def setup_cname(self, name, cname):
         """Create a CNAME record and wait for propagation."""

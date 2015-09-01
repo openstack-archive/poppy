@@ -56,9 +56,9 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         return self.get('default_origin')
 
     @property
-    def wordpress_origin(self):
-        """IP address for wordpress origin."""
-        return self.get('wordpress_origin')
+    def random_origin(self):
+        """Any random origin."""
+        return self.get('random_origin')
 
     @property
     def ssl_origin(self):
