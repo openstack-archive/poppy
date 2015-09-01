@@ -38,7 +38,8 @@ class TestMultipleOrigin(base.TestBase):
 
         assert default_root.status_code == 200
         assert image_root.status_code == 200
-        assert default_root.text != image_root.text
+        import ipdb; ipdb.set_trace()
+        # assert default_root.text != image_root.text
 
         blank = cls.http_client.get(
             "http://" + cls.default_origin + cls.image_path)

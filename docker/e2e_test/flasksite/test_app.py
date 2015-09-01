@@ -35,19 +35,20 @@ def hello():
     return 'halo halo from 23.253.156.204'
 
 
-@app.route('/hello/<user_name>/')
+@app.route('/hello/<user_name>/', strict_slashes=False)
 def hello_user(user_name):
     print(request.headers)
     return render_template('hello.html', name=user_name)
 
 
-@app.route('/test/host-header/')
+@app.route('/test/host-header/', strict_slashes=False)
 def test_host_header():
     print(request.headers)
     return render_template('hello.html', name=request.headers['Host'])
 
 
-@app.route('/hello/<user_name>/upload/', methods=['GET', 'POST'])
+@app.route('/hello/<user_name>/upload/', , strict_slashes=False,
+           methods=['GET', 'POST'])
 def upload_file(user_name):
     if request.method == 'POST':
         form.photo.data.save('/tmp/{0}.jpg'.format(user_name))
