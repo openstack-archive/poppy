@@ -98,8 +98,8 @@ class TestCaching(base.TestBase):
         cdn_url = 'http://' + self.test_domain + self.cacheable_endpoint
 
         # Verify content is not cached
-        self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=4)
-        self.assertCacheStatus(cdn_url=cdn_url,
+        edge_server = self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=1)
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
                                status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
 
     def test_cache_rules(self):
@@ -151,30 +151,33 @@ class TestCaching(base.TestBase):
 
         # Verify cdn hit on rule urls
         cdn_jpg_url = cdn_url + self.jpg_path
-        self.get_from_cdn_enabled_url(cdn_url=cdn_jpg_url, count=2)
-        self.assertCacheStatus(cdn_url=cdn_jpg_url,
+        edge_server = self.get_from_cdn_enabled_url(
+            cdn_url=cdn_jpg_url, count=1)
+        self.assertCacheStatus(cdn_url=cdn_jpg_url, edge_server=edge_server,
                                status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         cdn_txt_url = cdn_url + self.txt_path
-        self.get_from_cdn_enabled_url(cdn_url=cdn_txt_url, count=2)
-        self.assertCacheStatus(cdn_url=cdn_txt_url,
+        edge_server = self.get_from_cdn_enabled_url(
+            cdn_url=cdn_txt_url, count=1)
+        self.assertCacheStatus(cdn_url=cdn_txt_url, edge_server=edge_server,
                                status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         cdn_zip_url = cdn_url + self.zip_path
-        self.get_from_cdn_enabled_url(cdn_url=cdn_zip_url, count=2)
-        self.assertCacheStatus(cdn_url=cdn_zip_url,
+        edge_server = self.get_from_cdn_enabled_url(
+            cdn_url=cdn_zip_url, count=1)
+        self.assertCacheStatus(cdn_url=cdn_zip_url, edge_server=edge_server,
                                status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         time.sleep(max(jpg_ttl, zip_ttl, txt_ttl))
         # Verify that content in cache is stale/removed after the ttl expires
         self.assertCacheStatus(
-            cdn_url=cdn_jpg_url,
+            cdn_url=cdn_jpg_url, edge_server=edge_server,
             status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
         self.assertCacheStatus(
-            cdn_url=cdn_txt_url,
+            cdn_url=cdn_txt_url, edge_server=edge_server,
             status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
         self.assertCacheStatus(
-            cdn_url=cdn_zip_url,
+            cdn_url=cdn_zip_url, edge_server=edge_server,
             status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
 
     def test_update_cache_rules(self):
@@ -220,14 +223,15 @@ class TestCaching(base.TestBase):
             origin_url=origin_jpg, cdn_url=cdn_jpg_url)
 
         # Verify that content is cached after two requests
-        self.get_from_cdn_enabled_url(cdn_url=cdn_jpg_url, count=2)
-        self.assertCacheStatus(cdn_url=cdn_jpg_url,
+        edge_server = self.get_from_cdn_enabled_url(
+            cdn_url=cdn_jpg_url, count=1)
+        self.assertCacheStatus(cdn_url=cdn_jpg_url, edge_server=edge_server,
                                status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         # Verify that content in cache is stale/removed after the ttl expires
         time.sleep(jpg_ttl + 10)
         self.assertCacheStatus(
-            cdn_url=cdn_jpg_url,
+            cdn_url=cdn_jpg_url, edge_server=edge_server,
             status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
 
         # Update cache rules
@@ -245,14 +249,15 @@ class TestCaching(base.TestBase):
                                                request_body=test_data)
 
         # Verify that content is cached after two requests
-        self.get_from_cdn_enabled_url(cdn_url=cdn_jpg_url, count=2)
-        self.assertCacheStatus(cdn_url=cdn_jpg_url,
+        edge_server = self.get_from_cdn_enabled_url(
+            cdn_url=cdn_jpg_url, count=1)
+        self.assertCacheStatus(cdn_url=cdn_jpg_url, edge_server=edge_server,
                                status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         time.sleep(new_ttl)
         # Verify that content in cache is stale/removed after the ttl expires
         self.assertCacheStatus(
-            cdn_url=cdn_jpg_url,
+            cdn_url=cdn_jpg_url, edge_server=edge_server,
             status_list=['TCP_REFRESH_HIT', 'TCP_REFRESH_MISS', 'TCP_MISS'])
 
     def tearDown(self):

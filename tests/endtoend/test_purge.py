@@ -88,9 +88,10 @@ class TestPurge(base.TestBase):
 
         cdn_jpg_url = cdn_url + self.purge_path
         # Purge object in rule 1 and ensure it gets a TCP_MISS
-        self.get_from_cdn_enabled_url(cdn_url=cdn_jpg_url, count=2)
-        self.assertCacheStatus(
-            cdn_url=cdn_jpg_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        edge_server = self.get_from_cdn_enabled_url(
+            cdn_url=cdn_jpg_url, count=1)
+        self.assertCacheStatus(cdn_url=cdn_jpg_url, edge_server=edge_server,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
         url_param = {
             'url': self.purge_path,
             'hard': False

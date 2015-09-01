@@ -99,13 +99,13 @@ class TestOriginHeaders(base.TestBase):
             self.cname_rec.append(rec[0])
 
         cdn_url = 'http://' + self.test_domain + self.expires_path
-        self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=4)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        edge_server = self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=1)
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         time.sleep(self.origin_header_config.expires_ttl + 2)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
 
     def test_expires_header_with_caching_ttl(self):
         domains = [{'domain': self.test_domain}]
@@ -141,17 +141,17 @@ class TestOriginHeaders(base.TestBase):
             self.cname_rec.append(rec[0])
 
         cdn_url = 'http://' + self.test_domain + self.expires_path
-        self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=4)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        edge_server = self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=1)
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         time.sleep(self.origin_header_config.expires_ttl + 2)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         time.sleep(self.origin_header_config.service_ttl + 2)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
 
     def test_cache_control_header_no_caching_ttl(self):
         domains = [{'domain': self.test_domain}]
@@ -185,13 +185,13 @@ class TestOriginHeaders(base.TestBase):
             self.cname_rec.append(rec[0])
 
         cdn_url = 'http://' + self.test_domain + self.cache_control_path
-        self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=4)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        edge_server = self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=1)
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         time.sleep(self.origin_header_config.cache_control_ttl + 2)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
 
     def test_cache_control_header_with_caching_ttl(self):
         domains = [{'domain': self.test_domain}]
@@ -227,17 +227,17 @@ class TestOriginHeaders(base.TestBase):
             self.cname_rec.append(rec[0])
 
         cdn_url = 'http://' + self.test_domain + self.expires_path
-        self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=4)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        edge_server = self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=1)
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         time.sleep(self.origin_header_config.cache_control_ttl + 2)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         time.sleep(self.origin_header_config.service_ttl + 2)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
 
     def test_expires_and_cache_control_header_no_caching_ttl(self):
         domains = [{'domain': self.test_domain}]
@@ -272,13 +272,13 @@ class TestOriginHeaders(base.TestBase):
 
         cdn_url = \
             'http://' + self.test_domain + self.expires_and_cache_control_path
-        self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=4)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        edge_server = self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=4)
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         time.sleep(self.origin_header_config.cache_control_ttl + 2)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
 
     def test_expires_and_cache_control_header_with_caching_ttl(self):
         domains = [{'domain': self.test_domain}]
@@ -315,17 +315,17 @@ class TestOriginHeaders(base.TestBase):
 
         cdn_url = \
             'http://' + self.test_domain + self.expires_and_cache_control_path
-        self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=4)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        edge_server = self.get_from_cdn_enabled_url(cdn_url=cdn_url, count=1)
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         time.sleep(self.origin_header_config.cache_control_ttl + 2)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_HIT', 'TCP_MEM_HIT'])
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_HIT', 'TCP_MEM_HIT'])
 
         time.sleep(self.origin_header_config.service_ttl + 2)
-        self.assertCacheStatus(
-            cdn_url=cdn_url, status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
+        self.assertCacheStatus(cdn_url=cdn_url, edge_server=edge_server,
+                               status_list=['TCP_MISS', 'TCP_REFRESH_MISS'])
 
     def tearDown(self):
         self.poppy_client.delete_service(location=self.service_location)

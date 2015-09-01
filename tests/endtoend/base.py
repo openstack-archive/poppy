@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import hashlib
 import random
 import time
 
@@ -99,8 +100,18 @@ class TestBase(fixtures.BaseTestFixture):
         :returns: True/False
         """
         origin_content = self.get_content(url=origin_url)
+        origin_content_hash = hashlib.md5()
+        origin_content_hash.update(origin_content)
+
         cdn_content = self.get_content(url=cdn_url)
-        self.assertEqual(origin_content, cdn_content)
+        cdn_content_hash = hashlib.md5()
+        cdn_content_hash.update(cdn_content)
+
+        self.assertEqual(
+            origin_content_hash.hexdigest(), cdn_content_hash.hexdigest(),
+            msg='Contents do not match \n \
+                Origin url {0} \n \
+                CDN enabled url {1}'.format(origin_url, cdn_url))
 
     def setup_cname(self, name, cname):
         """Create a CNAME record and wait for propagation."""
