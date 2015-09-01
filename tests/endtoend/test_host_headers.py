@@ -45,6 +45,12 @@ class TestHostHeaders(base.TestBase):
         self.cname_rec = []
 
     def test_origin_host_header(self):
+        '''Test for CDN Service with origin host header
+
+        In this case the CDN provider will inject 'Host: self.default_origin'
+        header when forwarding requests from the CDN enabled url to the
+        origin server.
+        '''
         domains = [{'domain': self.test_domain}]
         origins = [{
             "origin": self.default_origin,
@@ -82,6 +88,15 @@ class TestHostHeaders(base.TestBase):
         self.assertIn(self.default_origin, resp.content)
 
     def test_custom_host_header(self):
+        '''Test for CDN Service with custom host header
+
+        In this case the CDN provider will inject the header
+        'Host: custom_value'
+        when forwarding requests from the CDN enabled url to the origin server.
+        The custom value is whatever was specified when the service was created
+        For eg. in the test below the header injected will be
+        'Host: llama-llama-red-pajama.com'
+        '''
         domains = [{'domain': self.test_domain}]
         host_header_value = 'llama-llama-red-pajama.com'
         origins = [{
@@ -122,6 +137,12 @@ class TestHostHeaders(base.TestBase):
         self.assertIn(host_header_value, resp.content)
 
     def test_default_host_header(self):
+        '''Test for CDN Service with default host header
+
+        The default host header is the domain value.
+        In this case Akamai will inject the 'Host: self.test_domain' header
+        when forwarding requests from the CDN enable url to the origin server.
+        '''
         domains = [{'domain': self.test_domain}]
         origins = [{
             "origin": self.default_origin,
