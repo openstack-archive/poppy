@@ -68,7 +68,8 @@ class ServiceController(base.ServiceBase):
         referrer_restriction_list = [rule.referrer
                                      for restriction in
                                      service_obj.restrictions
-                                     for rule in restriction.rules]
+                                     for rule in restriction.rules
+                                     if hasattr(rule, 'referrer')]
 
         # if there is a referrer_restricted host/domains at all in
         # this list. It is equivalent of 'if the list is not empty' and
