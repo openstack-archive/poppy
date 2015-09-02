@@ -358,6 +358,28 @@
                             "client_ip": "5.6.7.8",
                             "request_url": "/*"}]}}
    ],
+   "add_new_restricted_ipv6":[
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "website only",
+             "access": "whitelist",
+             "rules": [{"name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }, {"name": "myrestricted-ip",
+                            "client_ip": "1.2.3.4",
+                            "request_url": "/*"}]}},
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "website only",
+             "access": "whitelist",
+             "rules": [{"name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }, {"name": "myrestricted-ip",
+                            "client_ip": "2001:4802:7802:104:be76:4eff:fe20:4b5f",
+                            "request_url": "/*"}]}}  
+   ],
    "replace_add_geo_restriction":[
         {"op": "replace",
          "path": "/restrictions/0",

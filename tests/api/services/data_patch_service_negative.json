@@ -261,6 +261,15 @@
                    }
          }
     ],
+    "add_restrictions_with_invalid_ipv6_address": [
+        {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted-whitelist",
+                    "access": "whitelist",
+                    "rules": [{"name": "rule1", "client_ip": ":"}]
+                   }
+         }
+    ],
     "add_root_domain":[
         {"op": "add",
          "path": "/domains/0",
