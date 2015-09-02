@@ -27,8 +27,6 @@ class Restriction(common.DictSerializableModel):
     """Restriction."""
 
     def __init__(self, name,
-                 # use r_type because type is
-                 # a python reserved word
                  access='whitelist', rules=[]):
         self._name = name
         self._access = access
