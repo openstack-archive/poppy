@@ -225,6 +225,9 @@ def is_valid_service_configuration(service, schema):
             if 'rules' in origin:
                 for rule in origin['rules']:
                     request_url = rule['request_url']
+                    if not request_url.startswith('/'):
+                        request_url = ('/' + request_url)
+
                     if request_url in origin_rules:
                         raise exceptions.ValidationFailed(
                             'Origins - the request_url must be unique')
