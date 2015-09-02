@@ -143,17 +143,17 @@
         "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
         "origin_list": [
-            {"origin": "origin1"},
-            {"origin": "origin2", "rules": [{"name" : "index", "request_url" : "/index1.htm"}]},
-            {"origin": "origin3", "rules": [{"name" : "index", "request_url" : "/index2.htm"}]},
-            {"origin": "origin4", "rules": [{"name" : "index", "request_url" : "/index3.htm"}]},
-            {"origin": "origin5", "rules": [{"name" : "index", "request_url" : "/index4.htm"}]},
-            {"origin": "origin6", "rules": [{"name" : "index", "request_url" : "/index5.htm"}]},
-            {"origin": "origin7", "rules": [{"name" : "index", "request_url" : "/index6.htm"}]},
-            {"origin": "origin8", "rules": [{"name" : "index", "request_url" : "/index7.htm"}]},
-            {"origin": "origin9", "rules": [{"name" : "index", "request_url" : "/index8.htm"}]},
-            {"origin": "origin10", "rules": [{"name" : "index", "request_url" : "/index9.htm"}]},
-            {"origin": "origin11", "rules": [{"name" : "index", "request_url" : "/index10.htm"}]}
+            {"origin": "origin1.com"},
+            {"origin": "origin2.com", "rules": [{"name" : "index", "request_url" : "/index1.htm"}]},
+            {"origin": "origin3.com", "rules": [{"name" : "index", "request_url" : "/index2.htm"}]},
+            {"origin": "origin4.com", "rules": [{"name" : "index", "request_url" : "/index3.htm"}]},
+            {"origin": "origin5.com", "rules": [{"name" : "index", "request_url" : "/index4.htm"}]},
+            {"origin": "origin6.com", "rules": [{"name" : "index", "request_url" : "/index5.htm"}]},
+            {"origin": "origin7.com", "rules": [{"name" : "index", "request_url" : "/index6.htm"}]},
+            {"origin": "origin8.com", "rules": [{"name" : "index", "request_url" : "/index7.htm"}]},
+            {"origin": "origin9.com", "rules": [{"name" : "index", "request_url" : "/index8.htm"}]},
+            {"origin": "origin10.com", "rules": [{"name" : "index", "request_url" : "/index9.htm"}]},
+            {"origin": "origin11.com", "rules": [{"name" : "index", "request_url" : "/index10.htm"}]}
         ],
         "caching_list": [{"name": "default", "ttl": 3600},
                          {"name": "home",
@@ -166,9 +166,9 @@
         "service_name": "many_origin_list",
         "domain_list": [{"domain": "www.mywebsite.com"}],
         "origin_list": [
-            {"origin": "origin1"},
-            {"origin": "origin2", "rules": [{"name" : "index", "request_url" : "/index.htm"}]},
-            {"origin": "origin3", "rules": [{"name" : "index", "request_url" : "/index.htm"}]}
+            {"origin": "origin1.com"},
+            {"origin": "origin2.com", "rules": [{"name" : "index", "request_url" : "/index.htm"}]},
+            {"origin": "origin3.com", "rules": [{"name" : "index", "request_url" : "/index.htm"}]}
         ],
         "caching_list": [{"name": "default", "ttl": 3600},
                          {"name": "home",
@@ -176,6 +176,77 @@
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}],
         "restrictions_list": []
+    },
+    "duplicate_origin_matches": {
+        "service_name": "duplicate_origin_matches",
+        "domain_list": [{"domain": "www.mywebsite.com"}],
+        "origin_list": [
+            {"origin": "origin1.com", "rules": [{"name" : "index", "request_url" : "/*"}]},
+            {"origin": "origin2.com", "rules": [{"name" : "index", "request_url" : "*"}]}
+        ],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
+    },
+    "duplicate_caching_matches": {
+        "service_name": "duplicate_caching_matches",
+        "domain_list": [{"domain": "www.mywebsite.com"}],
+        "origin_list": [
+            {"origin": "origin1.com", "rules": [{"name" : "index", "request_url" : "/*"}]}
+        ],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/*"}]},
+                         {"name": "home2",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "*"}]}
+                        ],
+        "restrictions_list": []
+    },
+    "duplicate_restriction_matches": {
+        "service_name": "duplicate_restriction_matches",
+        "domain_list": [{"domain": "www.mywebsite.com"}],
+        "origin_list": [
+            {"origin": "origin1.com", "rules": [{"name" : "index", "request_url" : "/*"}]}
+        ],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/*"}]}
+                        ],
+        "restrictions_list": [
+                    {
+                        "name": "restriction one",
+                        "access": "whitelist",
+                        "rules":
+                        [
+                            {
+                                "name": "only me",
+                                "referrer": "www.mywebsite.com",
+                                "request_url": "/*"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "restriction two",
+                        "access": "whitelist",
+                        "rules":
+                        [
+                            {
+                                "name": "only me",
+                                "referrer": "www.mywebsite.com",
+                                "request_url": "*"
+                            }
+                        ]
+                    }
+        ]
     },
     "non_numeric_origin_port": {
         "service_name": "non_numeric_origin_port",

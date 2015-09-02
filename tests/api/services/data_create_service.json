@@ -58,6 +58,40 @@
             "enabled": false
         }
     },
+    "wildcard_path_no_slash": {
+        "name": "caching_empty",
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "myorigin.com",
+                         "port": 80,
+                         "ssl": false,
+                         "rules": [
+                           {
+                             "name": "default",
+                             "request_url": "*"
+                           }],
+                         "hostheadertype": "custom",
+                         "hostheadervalue": "www.customweb.com"
+                        }],
+        "caching_list": []
+    },
+    "wildcard_path_with_slash": {
+        "name": "caching_empty",
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "myorigin.com",
+                         "port": 80,
+                         "ssl": false,
+                         "rules": [
+                           {
+                             "name": "default",
+                             "request_url": "/*"
+                           }],
+                         "hostheadertype": "custom",
+                         "hostheadervalue": "www.customweb.com"
+                        }],
+        "caching_list": []
+    },
    "caching_empty": {
         "name": "caching_empty",
         "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
