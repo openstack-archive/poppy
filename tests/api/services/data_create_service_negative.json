@@ -17,7 +17,6 @@
         "service_name": "ab",
         "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
-        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
@@ -559,6 +558,21 @@
                                      "request_url" : "/index.htm"}]}],
         "restrictions_list": [{"name":"default",
                                "rules": [{"client_ip": "1.2.3"}]}]
+    },
+    "restrictions_invalid_ipv6_address": {
+        "service_name": "my_service_name",
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "myorigin.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 3600,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": [{"name":"default",
+                               "rules": [{"client_ip": ":"}]}]
     },
     "restrictions_black_and_whitelist_ip": {
         "service_name": "my_service_name",
