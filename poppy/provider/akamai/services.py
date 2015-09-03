@@ -408,8 +408,8 @@ class ServiceController(base.ServiceBase):
         else:
             return self.responder.deleted(provider_service_id)
 
-    def purge(self, provider_service_id, service_obj, hard=False,
-              purge_url=None):
+    def purge(self, provider_service_id, service_obj, hard=True,
+              purge_url='/*'):
         if not hard:
             if not purge_url.startswith('/'):
                 purge_url = ('/' + purge_url)
@@ -419,7 +419,7 @@ class ServiceController(base.ServiceBase):
             try:
 
                 # Get the service
-                if purge_url is None:
+                if purge_url == '/*':
                     raise RuntimeError('Akamai purge-all functionality has not'
                                        ' been implemented')
                 else:
@@ -444,6 +444,8 @@ class ServiceController(base.ServiceBase):
                         # purge_url has to be a full path
                         # with a starting slash,
                         # e.g: /cdntest.html
+                        if not purge_url.startswith('/'):
+                            purge_url = ('/' + purge_url)
                         actual_purge_url = ''.join([url_scheme,
                                                     policy['policy_name'],
                                                     purge_url])

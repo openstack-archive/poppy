@@ -223,10 +223,10 @@ class ServiceController(base.ServiceBase):
         except Exception as e:
             return self.responder.failed(str(e))
 
-    def purge(self, service_id, hard=False, purge_url=None):
+    def purge(self, service_id, hard=True, purge_url='/*'):
         try:
             # Get the service
-            if purge_url is None:
+            if purge_url == '/*':
                 self.client.purge_service(service_id)
                 return self.responder.purged(service_id, purge_url=purge_url)
             else:

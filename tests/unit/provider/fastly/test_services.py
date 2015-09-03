@@ -332,14 +332,16 @@ class TestServices(base.TestCase):
         controller = services.ServiceController(self.driver)
         exception = fastly.FastlyError(Exception('ding'))
         controller.client.purge_service.side_effect = exception
-        resp = controller.purge(provider_service_id, None)
+        resp = controller.purge(provider_service_id, hard=True,
+                                purge_url='/*')
         self.assertIn('error', resp[self.driver.provider_name])
 
     def test_purge_all(self):
         provider_service_id = uuid.uuid1()
         controller = services.ServiceController(self.driver)
         controller.client.purge_service.return_value = 'some_value'
-        resp = controller.purge(provider_service_id, None)
+        resp = controller.purge(provider_service_id, hard=True,
+                                purge_url='/*')
         controller.client.purge_service.assert_called_once_with(
             provider_service_id
         )
