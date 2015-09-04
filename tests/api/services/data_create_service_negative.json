@@ -17,6 +17,7 @@
         "service_name": "ab",
         "domain_list": [{"domain": "www.mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}],
+        "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
         "caching_list": [{"name": "default", "ttl": 3600},
