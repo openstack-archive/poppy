@@ -261,6 +261,33 @@
                    }
          }
     ],
+    "add_restrictions_with_invalid_ipv6_address": [
+        {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted-whitelist",
+                    "access": "whitelist",
+                    "rules": [{"name": "rule1", "client_ip": ":"}]
+                   }
+         }
+    ],
+    "add_restrictions_with_invalid_ipv6_address_2": [
+        {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted-whitelist",
+                    "access": "whitelist",
+                    "rules": [{"name": "rule1", "client_ip": "1200::AB00:1234::2552:7777:1313"}]
+                   }
+         }
+    ],
+    "add_restrictions_with_invalid_ipv6_address_3": [
+        {"op": "add",
+          "path": "/restrictions/-",
+          "value": {"name": "restricted-whitelist",
+                    "access": "whitelist",
+                    "rules": [{"name": "rule1", "client_ip": "1200:0000:AB00:1234:O000:2552:7777:1313"}]
+                   }
+         }
+    ],
     "add_root_domain":[
         {"op": "add",
          "path": "/domains/0",
