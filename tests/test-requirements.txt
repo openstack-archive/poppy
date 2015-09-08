@@ -7,7 +7,6 @@ mock
 nose
 openstack.nose_plugin
 oslotest>=1.9.0
-requests
 testrepository
 testtools
 python-heatclient
