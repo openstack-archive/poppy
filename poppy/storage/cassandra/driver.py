@@ -255,6 +255,9 @@ class CassandraStorageDriver(base.Driver):
         :returns connection
         """
         self.session = _connection(self.cassandra_conf, self.datacenter)
+        # NOTE(TheSriram): Just an absurdly large number to make
+        #  sure traces are captured.
+        self.session.max_trace_wait = 5000.0
 
     def close_connection(self):
         """close_connection."""
