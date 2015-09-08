@@ -613,6 +613,7 @@ class ServicesController(base.ServicesController):
         :returns formatted result
         """
         service_id = result.get('service_id')
+        project_id = result.get('project_id')
         name = result.get('service_name')
 
         flavor_id = result.get('flavor_id')
@@ -673,7 +674,8 @@ class ServicesController(base.ServicesController):
                             caching=caching_rules,
                             restrictions=restrictions,
                             log_delivery=log_delivery,
-                            operator_status=operator_status)
+                            operator_status=operator_status,
+                            project_id=project_id)
 
         # format the provider details
         provider_detail_results = result.get('provider_details') or {}

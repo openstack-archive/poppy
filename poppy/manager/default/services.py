@@ -184,7 +184,7 @@ class DefaultServicesController(base.ServicesController):
         self._append_defaults(service_json, operation='create')
 
         # convert to an object
-        service_obj = service.Service.init_from_dict(service_json)
+        service_obj = service.Service.init_from_dict(project_id, service_json)
         service_id = service_obj.service_id
 
         # validate the service
@@ -278,7 +278,8 @@ class DefaultServicesController(base.ServicesController):
 
         # must be valid, carry on
         service_new_json['service_id'] = service_old.service_id
-        service_new = service.Service.init_from_dict(service_new_json)
+        service_new = service.Service.init_from_dict(project_id,
+                                                     service_new_json)
 
         # fixing the old and new shared ssl domains in service_new
         for domain in service_new.domains:
@@ -477,7 +478,7 @@ class DefaultServicesController(base.ServicesController):
                             project_id,
                             service_id,
                             provider_details
-                            )
+                        )
                         domain_found = True
                         break
         if not domain_found:

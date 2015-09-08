@@ -1,6 +1,7 @@
 {
     "using_all_fields": [
         {
+            "project_id": "123456",
             "service_name": "mocksite",
             "domains": [
                 "{\"domain\": \"www.mocksite.com\"}",
@@ -25,6 +26,7 @@
             }
         },
         {
+            "project_id": "123456",
             "service_name": "another_mocksite",
             "domain": [
                 "{\"domain\": \"www.mocksite.co.uk\"}",
