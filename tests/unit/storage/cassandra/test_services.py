@@ -218,7 +218,7 @@ class CassandraStorageServiceTests(base.TestCase):
         }
 
         # This is to verify mock has been called with the correct arguments
-        def assert_mock_execute_args(*args):
+        def assert_mock_execute_args(*args, **kwargs):
             self.assertEqual(args[0].query_string,
                              services.CQL_UPDATE_PROVIDER_DETAILS)
             self.assertEqual(args[1], call_args)

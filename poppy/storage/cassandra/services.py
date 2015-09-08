@@ -215,7 +215,7 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_LIST_SERVICES,
             consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
+        results = self.session.execute(stmt, args, trace=True)
         services = [self.format_result(r) for r in results]
 
         return services
@@ -237,7 +237,7 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_GET_SERVICE,
             consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
+        results = self.session.execute(stmt, args, trace=True)
 
         if len(results) != 1:
             raise ValueError('No service found: %s'
@@ -268,7 +268,7 @@ class ServicesController(base.ServicesController):
             stmt = query.SimpleStatement(
                 CQL_VERIFY_DOMAIN,
                 consistency_level=self._driver.consistency_level)
-            results = self.session.execute(stmt, args)
+            results = self.session.execute(stmt, args, trace=True)
 
             if results:
                 for r in results:
@@ -342,7 +342,7 @@ class ServicesController(base.ServicesController):
             }
             batch.add(query.SimpleStatement(CQL_CLAIM_DOMAIN), domain_args)
 
-        self.session.execute(batch)
+        self.session.execute(batch, trace=True)
 
     def update(self, project_id, service_id, service_obj):
         """update.
@@ -375,7 +375,7 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_GET_SERVICE,
             consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
+        results = self.session.execute(stmt, args, trace=True)
         result = results[0]
 
         # updates an existing service
@@ -396,7 +396,7 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_UPDATE_SERVICE,
             consistency_level=self._driver.consistency_level)
-        self.session.execute(stmt, args)
+        self.session.execute(stmt, args, trace=True)
 
         # relinquish old domains
         stmt = query.SimpleStatement(
@@ -407,7 +407,7 @@ class ServicesController(base.ServicesController):
         args = {
             'domain_list': query.ValueSequence(domain_list)
         }
-        self.session.execute(stmt, args)
+        self.session.execute(stmt, args, trace=True)
 
         # claim new domains
         batch_claim = query.BatchStatement(
@@ -420,7 +420,7 @@ class ServicesController(base.ServicesController):
             }
             batch_claim.add(query.SimpleStatement(CQL_CLAIM_DOMAIN),
                             domain_args)
-        self.session.execute(batch_claim)
+        self.session.execute(batch_claim, trace=True)
 
     def update_state(self, project_id, service_id, state):
         """update_state
@@ -455,7 +455,7 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_GET_SERVICE,
             consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
+        results = self.session.execute(stmt, args, trace=True)
         result = results[0]
 
         if (result):
@@ -486,7 +486,7 @@ class ServicesController(base.ServicesController):
                 stmt = query.SimpleStatement(
                     CQL_ARCHIVE_SERVICE,
                     consistency_level=self._driver.consistency_level)
-                self.session.execute(stmt, archive_args)
+                self.session.execute(stmt, archive_args, trace=True)
             else:
                 delete_args = {
                     'project_id': result.get('project_id'),
@@ -496,7 +496,7 @@ class ServicesController(base.ServicesController):
                 stmt = query.SimpleStatement(
                     CQL_DELETE_SERVICE,
                     consistency_level=self._driver.consistency_level)
-                self.session.execute(stmt, delete_args)
+                self.session.execute(stmt, delete_args, trace=True)
 
     def get_provider_details(self, project_id, service_id):
         """get_provider_details.
@@ -518,7 +518,7 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_GET_PROVIDER_DETAILS,
             consistency_level=self._driver.consistency_level)
-        exec_results = self.session.execute(stmt, args)
+        exec_results = self.session.execute(stmt, args, trace=True)
 
         if len(exec_results) != 1:
             raise ValueError('No service found: %s'
@@ -558,7 +558,7 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_SEARCH_BY_DOMAIN,
             consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
+        results = self.session.execute(stmt, args, trace=True)
         for r in results:
             proj_id = r.get('project_id')
             service = r.get('service_id')
@@ -603,7 +603,7 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_UPDATE_PROVIDER_DETAILS,
             consistency_level=self._driver.consistency_level)
-        self.session.execute(stmt, args)
+        self.session.execute(stmt, args, trace=True)
 
     @staticmethod
     def format_result(result):
