@@ -280,6 +280,8 @@ class ServiceController(base.ServiceBase):
                                       classified_domain.certificate
                                       })
                 except Exception:
+                    LOG.error("Failed to Update Service - {0}".
+                              format(provider_service_id))
                     return self.responder.failed("failed to update service")
 
                 try:
@@ -300,6 +302,8 @@ class ServiceController(base.ServiceBase):
                         LOG.info('Delete old policy %s complete' %
                                  policy['policy_name'])
                 except Exception:
+                    LOG.error("Failed to Update Service - {0}".
+                              format(provider_service_id))
                     return self.responder.failed("failed to update service")
 
             else:
@@ -350,6 +354,8 @@ class ServiceController(base.ServiceBase):
                         LOG.info('Update policy %s complete' %
                                  policy['policy_name'])
                     except Exception:
+                        LOG.error("Failed to Update Service - {0}".
+                                  format(provider_service_id))
                         return self.responder.failed(
                             "failed to update service")
 
@@ -369,6 +375,8 @@ class ServiceController(base.ServiceBase):
             return self.responder.updated(json.dumps(ids), links)
 
         except Exception as e:
+            LOG.error("Failed to Update Service - {0}".
+                      format(provider_service_id))
             LOG.error('Updating policy failed: %s', traceback.format_exc())
 
             return self.responder.failed(
@@ -404,8 +412,12 @@ class ServiceController(base.ServiceBase):
                 if resp.status_code != 200:
                     raise RuntimeError(resp.text)
         except Exception as e:
+            LOG.error("Failed to Delete Service - {0}".
+                      format(provider_service_id))
             return self.responder.failed(str(e))
         else:
+            LOG.info("Sucessfully Deleted Service - {0}".
+                     format(provider_service_id))
             return self.responder.deleted(provider_service_id)
 
     def purge(self, provider_service_id, service_obj, hard=True,
@@ -464,6 +476,8 @@ class ServiceController(base.ServiceBase):
                     return self.responder.purged(provider_service_id,
                                                  purge_url=purge_url)
             except Exception as e:
+                LOG.error("Failed to Purge/Invalidate Service - {0}".
+                          format(provider_service_id))
                 return self.responder.failed(str(e))
 
     @decorators.lazy_property(write=False)
@@ -563,7 +577,9 @@ class ServiceController(base.ServiceBase):
         restriction_entities = ['referrer', 'geography', 'client_ip']
 
         class entityRequestUrlMappingList(dict):
+
             """A dictionary with a name attribute"""
+
             def __init__(self, name, orig_dict):
                 self.name = name
                 self.update(orig_dict)
