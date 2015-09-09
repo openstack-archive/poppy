@@ -125,6 +125,7 @@ class CassandraStorageServiceTests(base.TestCase):
     @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_list_services(self, value, mock_session, mock_execute):
         # mock the response from cassandra
+        value[0]['project_id'] = self.project_id
         mock_execute.prepare.return_value = mock.Mock()
         mock_execute.execute.return_value = value
 
@@ -133,6 +134,7 @@ class CassandraStorageServiceTests(base.TestCase):
         # TODO(amitgandhinz): assert the response
         # matches the expectation (using jsonschema)
         self.assertEqual(actual_response[0].name, "mocksite")
+        self.assertEqual(actual_response[0].project_id, self.project_id)
 
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')

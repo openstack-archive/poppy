@@ -40,7 +40,8 @@ class Service(common.DictSerializableModel):
                  caching=[],
                  restrictions=[],
                  log_delivery=None,
-                 operator_status='enabled'):
+                 operator_status='enabled',
+                 project_id=''):
         self._service_id = str(service_id)
         self._name = name
         self._domains = domains
@@ -52,6 +53,16 @@ class Service(common.DictSerializableModel):
         self._status = 'create_in_progress'
         self._provider_details = {}
         self._operator_status = operator_status
+        self._project_id = project_id
+
+    @property
+    def project_id(self):
+        """Get project id."""
+        return self._project_id
+
+    @project_id.setter
+    def project_id(self, value):
+        self._project_id = value
 
     @property
     def service_id(self):
@@ -191,7 +202,7 @@ class Service(common.DictSerializableModel):
         self._provider_details = value
 
     @classmethod
-    def init_from_dict(cls, input_dict):
+    def init_from_dict(cls, project_id, input_dict):
         """Construct a model instance from a dictionary.
 
         This is only meant to be used for converting a
@@ -200,7 +211,9 @@ class Service(common.DictSerializableModel):
         use to_dict.
         """
         o = cls(service_id=uuid.uuid4(), name='unnamed',
-                domains=[], origins=[], flavor_id='unnamed')
+                domains=[], origins=[], flavor_id='unnamed',
+                project_id=project_id)
+
         domains = input_dict.get('domains', [])
         input_dict['domains'] = [domain.Domain.init_from_dict(d)
                                  for d in domains]

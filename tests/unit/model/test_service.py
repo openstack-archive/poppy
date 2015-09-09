@@ -32,6 +32,7 @@ class TestServiceModel(base.TestCase):
     def setUp(self):
         super(TestServiceModel, self).setUp()
 
+        self.project_id = str(uuid.uuid4())
         self.service_id = str(uuid.uuid4())
         self.service_name = uuid.uuid1()
         self.flavor_id = "strawberry"
@@ -114,7 +115,8 @@ class TestServiceModel(base.TestCase):
             self.service_id,
             self.service_name, self.mydomains, self.myorigins, self.flavor_id,
             self.mycaching, self.myrestrictions)
-        cloned_service = service.Service.init_from_dict(myservice.to_dict())
+        cloned_service = service.Service.init_from_dict(self.project_id,
+                                                        myservice.to_dict())
 
         self.assertEqual(cloned_service.service_id, myservice.service_id)
         self.assertEqual(cloned_service.name, myservice.name)
