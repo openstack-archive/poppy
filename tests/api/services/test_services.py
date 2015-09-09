@@ -77,6 +77,7 @@ class TestCreateService(providers.TestProviderBase):
 
         body = resp.json()
         self.assertSchema(body, services.get_service)
+        self.assertEqual(body['project_id'], self.user_project_id)
 
         for item in domain_list:
             if 'protocol' not in item:

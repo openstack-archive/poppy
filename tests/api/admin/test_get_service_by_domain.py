@@ -140,6 +140,7 @@ class TestGetServiceByDomain(base.TestBase):
         self.assertEqual(body['caching'], self.caching_list)
         self.assertEqual(body['restrictions'], self.restrictions_list)
         self.assertEqual(body['flavor_id'], self.flavor_id)
+        self.assertEqual(body['project_id'], self.user_project_id)
 
     def test_get_service_by_multiple_domains(self):
         self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')

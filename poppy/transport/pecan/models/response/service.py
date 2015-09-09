@@ -36,6 +36,7 @@ class Model(collections.OrderedDict):
         super(Model, self).__init__()
         self["name"] = util.help_escape(service_obj.name)
         self["id"] = str(service_obj.service_id)
+        self["project_id"] = str(service_obj.project_id)
         self["domains"] = [domain.Model(d) for d in service_obj.domains]
         self["origins"] = [origin.Model(o) for o in service_obj.origins]
         self["restrictions"] = [restriction.Model(r) for r in
