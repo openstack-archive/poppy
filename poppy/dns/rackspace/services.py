@@ -42,6 +42,7 @@ class ServicesController(base.ServicesBase):
         """
 
         try:
+            LOG.debug("Fetching DNS Record - {0}".format(subdomain_name))
             subdomain = self.client.find(name=subdomain_name)
         except exc.NotFound:
             subdomain = self.client.create(
@@ -93,6 +94,7 @@ class ServicesController(base.ServicesBase):
             }
 
             if certificate == "shared":
+                LOG.debug("Creating Shared SSL DNS Record - {0}".format(name))
                 shared_ssl_subdomain = self._get_subdomain(
                     shared_ssl_subdomain_name)
                 shared_ssl_subdomain.add_records([cname_record])
@@ -100,6 +102,7 @@ class ServicesController(base.ServicesBase):
                 cname_records.append(cname_record)
         # add the cname records
         if cname_records != []:
+            LOG.debug("Creating DNS Record - {0}".format(cname_records))
             subdomain.add_records(cname_records)
         return dns_links
 
@@ -127,6 +130,8 @@ class ServicesController(base.ServicesBase):
         # get subdomain
         subdomain = self.client.find(name=subdomain_name)
         # search and find the CNAME record
+        LOG.debug('Searching DNS records for : {0}'.format(subdomain))
+
         name = access_url
         record_type = 'CNAME'
         records = self.client.search_records(subdomain, record_type, name)
@@ -146,12 +151,13 @@ class ServicesController(base.ServicesBase):
         # we should get one record,
         # or none if it has been deleted already
         if not records:
-            LOG.info('DNS record already deleted: {0}'.format(access_url))
+            LOG.error('DNS record already deleted: {0}'.format(access_url))
         elif len(records) > 1:
             error_msg = 'Multiple DNS records found: {0}'.format(access_url)
+            LOG.error(error_msg)
             return error_msg
         elif len(records) == 1:
-            LOG.info('Deleting DNS records for : {0}'.format(access_url))
+            LOG.debug('Deleting DNS records for : {0}'.format(access_url))
             records[0].delete()
         return
 
@@ -167,13 +173,13 @@ class ServicesController(base.ServicesBase):
         records = self._search_cname_record(access_url, shared_ssl_flag)
         # we should get one record, or none if it has been deleted already
         if not records:
-            LOG.info('DNS record not found for: {0}'.format(access_url))
+            LOG.error('DNS record not found for: {0}'.format(access_url))
         elif len(records) > 1:
-            LOG.info('Multiple DNS records found: {0}'.format(access_url))
+            LOG.error('Multiple DNS records found: {0}'.format(access_url))
         elif len(records) == 1:
-            LOG.info('Updating DNS record for : {0}'.format(access_url))
+            LOG.debug('Updating DNS record for : {0}'.format(access_url))
             records[0].update(data=target_url)
-            LOG.info('Updated DNS record for : {0}'.format(access_url))
+            LOG.debug('Updated DNS record for : {0}'.format(access_url))
 
         return
 
