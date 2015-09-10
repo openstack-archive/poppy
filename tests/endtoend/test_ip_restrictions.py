@@ -155,7 +155,7 @@ class TestIpRestrictions(base.TestBase):
         cdn_url = 'http://' + test_domain
         resp = self.http_client.get(url=cdn_url)
         self.assertEqual(resp.status_code, 200)
-        self.assertIn(self.default_origin, resp.content)
+        self.assertIn('Test Flask Site', resp.content)
 
         # Verify wpt cannot fetch cdn content
         wpt_result = self.run_webpagetest(url=cdn_url)

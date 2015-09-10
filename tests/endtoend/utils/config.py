@@ -52,13 +52,17 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
 
     @property
     def default_origin(self):
-        """Default origin for all tests."""
+        """Default origin for all tests
+
+        Use the test site below.
+        https://github.com/stackforge/poppy/tree/master/docker/e2e_test.
+        """
         return self.get('default_origin')
 
     @property
-    def wordpress_origin(self):
-        """IP address for wordpress origin."""
-        return self.get('wordpress_origin')
+    def alternate_origin(self):
+        """Alternate origin with any type of content."""
+        return self.get('alternate_origin')
 
     @property
     def ssl_origin(self):
