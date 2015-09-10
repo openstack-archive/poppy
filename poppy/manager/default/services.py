@@ -17,7 +17,6 @@ import json
 import random
 
 import jsonpatch
-from oslo_config import cfg
 
 from poppy.common import errors
 from poppy.distributed_task.taskflow.flow import create_service
@@ -35,29 +34,7 @@ from poppy.transport.validators.schemas import service as service_schema
 
 LOG = log.getLogger(__name__)
 
-DNS_OPTIONS = [
-    cfg.IntOpt(
-        'retries',
-        default=5,
-        help='Total number of Retries after Exponentially Backing Off'),
-    cfg.IntOpt(
-        'min_backoff_range',
-        default=20,
-        help='Minimum Number of seconds to sleep between retries'),
-    cfg.IntOpt(
-        'max_backoff_range',
-        default=30,
-        help='Maximum Number of seconds to sleep between retries'),
-]
-
-PROVIDER_OPTIONS = [
-    cfg.IntOpt(
-        'default_cache_ttl',
-        default=86400,
-        help='Default ttl to be set, when no caching rules are specified'),
-]
-
-DNS_GROUP = 'drivers:dns'
+DNS_GROUP = 'driver:dns'
 PROVIDER_GROUP = 'drivers:provider'
 
 
@@ -74,10 +51,6 @@ class DefaultServicesController(base.ServicesController):
         self.distributed_task_controller = (
             self._driver.distributed_task.services_controller)
 
-        self.driver.conf.register_opts(DNS_OPTIONS,
-                                       group=DNS_GROUP)
-        self.driver.conf.register_opts(PROVIDER_OPTIONS,
-                                       group=PROVIDER_GROUP)
         self.dns_conf = self.driver.conf[DNS_GROUP]
         self.provider_conf = self.driver.conf[PROVIDER_GROUP]
 

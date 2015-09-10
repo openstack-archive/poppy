@@ -110,6 +110,36 @@ class DefaultManagerServiceTests(base.TestCase):
 
         # create mocked config and driver
         conf = cfg.ConfigOpts()
+
+        _DRIVER_DNS_OPTIONS = [
+            cfg.IntOpt(
+                'retries',
+                default=5,
+                help='Total number of Retries after '
+                     'Exponentially Backing Off'),
+            cfg.IntOpt(
+                'min_backoff_range',
+                default=20,
+                help='Minimum Number of seconds to sleep between retries'),
+            cfg.IntOpt(
+                'max_backoff_range',
+                default=30,
+                help='Maximum Number of seconds to sleep between retries'),
+        ]
+
+        _PROVIDER_OPTIONS = [
+            cfg.IntOpt(
+                'default_cache_ttl',
+                default=86400,
+                help='Default ttl to be set, when no caching '
+                     'rules are specified'),
+        ]
+
+        _DRIVER_DNS_GROUP = 'driver:dns'
+        _PROVIDER_GROUP = 'drivers:provider'
+
+        conf.register_opts(_PROVIDER_OPTIONS, group=_PROVIDER_GROUP)
+        conf.register_opts(_DRIVER_DNS_OPTIONS, group=_DRIVER_DNS_GROUP)
         self.bootstrap_obj = mock_bootstrap(conf)
 
         # mock a stevedore provider extension
@@ -208,7 +238,8 @@ class DefaultManagerServiceTests(base.TestCase):
                   in self.provider_details.items()]))
         responders = delete_provider.execute(provider_details)
         delete_dns = delete_service_tasks.DeleteServiceDNSMappingTask()
-        dns_responders = delete_dns.execute(provider_details, 0)
+        dns_responders = delete_dns.execute(provider_details, 0, responders,
+                                            self.project_id, self.service_id)
 
         gather_provider = delete_service_tasks.GatherProviderDetailsTask()
         changed_provider_dict = gather_provider.execute(responders,
@@ -232,7 +263,8 @@ class DefaultManagerServiceTests(base.TestCase):
                 self.project_id,
                 self.service_id)
             create_dns = create_service_tasks.CreateServiceDNSMappingTask()
-            dns_responder = create_dns.execute(responders, 0)
+            dns_responder = create_dns.execute(responders, 0, self.project_id,
+                                               self.service_id)
             gather_provider = create_service_tasks.GatherProviderDetailsTask()
             log_responder = \
                 create_service_tasks.CreateLogDeliveryContainerTask()
@@ -264,7 +296,9 @@ class DefaultManagerServiceTests(base.TestCase):
             update_dns = update_service_tasks.UpdateServiceDNSMappingTask()
 
             dns_responder = update_dns.execute(responders, 0, service_old,
-                                               service_updates_json)
+                                               service_updates_json,
+                                               self.project_id,
+                                               self.service_id)
 
             log_delivery_update = \
                 update_service_tasks.UpdateLogDeliveryContainerTask()

@@ -17,6 +17,25 @@ import abc
 
 import six
 
+from oslo_config import cfg
+
+_DRIVER_DNS_OPTIONS = [
+    cfg.IntOpt(
+        'retries',
+        default=5,
+        help='Total number of Retries after Exponentially Backing Off'),
+    cfg.IntOpt(
+        'min_backoff_range',
+        default=20,
+        help='Minimum Number of seconds to sleep between retries'),
+    cfg.IntOpt(
+        'max_backoff_range',
+        default=30,
+        help='Maximum Number of seconds to sleep between retries'),
+]
+
+_DRIVER_DNS_GROUP = 'driver:dns'
+
 
 @six.add_metaclass(abc.ABCMeta)
 class DNSDriverBase(object):
@@ -36,6 +55,7 @@ class DNSDriverBase(object):
 
     def __init__(self, conf):
         self._conf = conf
+        self._conf.register_opts(_DRIVER_DNS_OPTIONS, group=_DRIVER_DNS_GROUP)
 
     @abc.abstractmethod
     def is_alive(self):
