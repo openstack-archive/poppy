@@ -42,6 +42,25 @@ class TestFlowRuns(base.TestCase):
         super(TestFlowRuns, self).setUp()
         self.time_factor = 0.001
         self.total_retries = 5
+        self.dns_exception_responder = [
+            {
+                'cdn_provider':
+                    {
+                        'error': 'DNSException',
+                        'error_class': 'tests.unit.distributed_task'
+                                       '.taskflow.test_flows.DNSException'
+                    }
+            }
+        ]
+
+        self.dns_responder = [
+            {
+                'cdn_provider':
+                    {
+                        'success': 'True',
+                    }
+            }
+        ]
 
     def all_controllers(self):
         service_controller, storage_controller = \
@@ -50,52 +69,19 @@ class TestFlowRuns(base.TestCase):
             memoized_controllers.task_controllers('poppy', 'dns')
         return service_controller, storage_controller, dns_controller
 
-    def dns_exceptions(self):
+    def dns_exceptions_and_succeed(self):
         # NOTE(TheSriram): create a chain of mocked return values,
         # to allow for retries, and finally succeed. The last value
         # indicating success, is just shown to indicate
         # that exceptions were not thrown.
-        dns_responder_returns = [
-            [
-                {
-                    'cdn_provider':
-                        {
-                            'error': 'DNSException',
-                            'error_class': 'tests.unit.distributed_task'
-                                           '.taskflow.test_flows.DNSException'
-                        }
-                }
-            ],
-            [
-                {
-                    'cdn_provider':
-                        {
-                            'error': 'DNSException',
-                            'error_class': 'tests.unit.distributed_task'
-                                           '.taskflow.test_flows.DNSException'
-                        }
-                }
-            ],
-            [
-                {
-                    'cdn_provider':
-                        {
-                            'error': 'DNSException',
-                            'error_class': 'tests.unit.distributed_task'
-                                           '.taskflow.test_flows.DNSException'
-                        }
-                }
-            ],
-            [
-                {
-                    'cdn_provider':
-                        {
-                            'success': 'True',
-                        }
-                }
-            ],
-        ]
+        dns_responder_returns = [self.dns_exception_responder * 3]
+        dns_responder_returns.append(self.dns_responder)
+        return dns_responder_returns
 
+    def dns_exceptions_only(self):
+        # NOTE(TheSriram): create a chain of mocked return values,
+        # to allow for retries, and finally fail.
+        dns_responder_returns = [self.dns_exception_responder * 5]
         return dns_responder_returns
 
     def patch_create_flow(self, service_controller,
@@ -439,7 +425,8 @@ class TestFlowRuns(base.TestCase):
             engines.run(delete_service.delete_service(), store=kwargs)
 
     @mock.patch('pyrax.set_credentials')
-    def test_update_flow_dns_exception_with_retry(self, mock_creds):
+    def test_update_flow_dns_exception_with_retry_and_succeed(self,
+                                                              mock_creds):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         domains_new = domain.Domain(domain='mycdn.poppy.org')
@@ -476,7 +463,7 @@ class TestFlowRuns(base.TestCase):
             self.patch_update_flow(service_controller, storage_controller,
                                    dns_controller)
             dns_controller.update = mock.Mock()
-            dns_responder_returns = self.dns_exceptions()
+            dns_responder_returns = self.dns_exceptions_and_succeed()
 
             dns_controller.update._mock_side_effect = (dns_responder for
                                                        dns_responder in
@@ -485,7 +472,54 @@ class TestFlowRuns(base.TestCase):
             engines.run(update_service.update_service(), store=kwargs)
 
     @mock.patch('pyrax.set_credentials')
-    def test_create_flow_dns_exception_with_retry(self, mock_creds):
+    def test_update_flow_dns_exception_with_retry_and_fail(self, mock_creds):
+        service_id = str(uuid.uuid4())
+        domains_old = domain.Domain(domain='cdn.poppy.org')
+        domains_new = domain.Domain(domain='mycdn.poppy.org')
+        current_origin = origin.Origin(origin='poppy.org')
+        service_old = service.Service(service_id=service_id,
+                                      name='poppy cdn service',
+                                      domains=[domains_old],
+                                      origins=[current_origin],
+                                      flavor_id='cdn')
+        service_new = service.Service(service_id=service_id,
+                                      name='poppy cdn service',
+                                      domains=[domains_new],
+                                      origins=[current_origin],
+                                      flavor_id='cdn')
+
+        kwargs = {
+            'project_id': json.dumps(str(uuid.uuid4())),
+            'auth_token': json.dumps(str(uuid.uuid4())),
+            'service_id': json.dumps(service_id),
+            'time_seconds': [i * self.time_factor for
+                             i in range(self.total_retries)],
+            'service_old': json.dumps(service_old.to_dict()),
+            'service_obj': json.dumps(service_new.to_dict())
+        }
+
+        service_controller, storage_controller, dns_controller = \
+            self.all_controllers()
+
+        with MonkeyPatchControllers(service_controller,
+                                    dns_controller,
+                                    storage_controller,
+                                    memoized_controllers.task_controllers):
+
+            self.patch_update_flow(service_controller, storage_controller,
+                                   dns_controller)
+            dns_controller.update = mock.Mock()
+            dns_responder_returns = self.dns_exceptions_only()
+
+            dns_controller.update._mock_side_effect = (dns_responder for
+                                                       dns_responder in
+                                                       dns_responder_returns)
+
+            engines.run(update_service.update_service(), store=kwargs)
+
+    @mock.patch('pyrax.set_credentials')
+    def test_create_flow_dns_exception_with_retry_and_succeed(self,
+                                                              mock_creds):
         providers = ['cdn_provider']
         kwargs = {
             'providers_list_json': json.dumps(providers),
@@ -508,7 +542,7 @@ class TestFlowRuns(base.TestCase):
                                    dns_controller)
             dns_controller.create = mock.Mock()
 
-            dns_responder_returns = self.dns_exceptions()
+            dns_responder_returns = self.dns_exceptions_and_succeed()
 
             dns_controller.create._mock_side_effect = (dns_responder for
                                                        dns_responder in
@@ -517,7 +551,40 @@ class TestFlowRuns(base.TestCase):
             engines.run(create_service.create_service(), store=kwargs)
 
     @mock.patch('pyrax.set_credentials')
-    def test_delete_flow_dns_exception_with_retry(self, mock_creds):
+    def test_create_flow_dns_exception_with_retry_and_fail(self, mock_creds):
+        providers = ['cdn_provider']
+        kwargs = {
+            'providers_list_json': json.dumps(providers),
+            'project_id': json.dumps(str(uuid.uuid4())),
+            'auth_token': json.dumps(str(uuid.uuid4())),
+            'service_id': json.dumps(str(uuid.uuid4())),
+            'time_seconds': [i * self.time_factor for
+                             i in range(self.total_retries)]
+        }
+
+        service_controller, storage_controller, dns_controller = \
+            self.all_controllers()
+
+        with MonkeyPatchControllers(service_controller,
+                                    dns_controller,
+                                    storage_controller,
+                                    memoized_controllers.task_controllers):
+
+            self.patch_create_flow(service_controller, storage_controller,
+                                   dns_controller)
+            dns_controller.create = mock.Mock()
+
+            dns_responder_returns = self.dns_exceptions_only()
+
+            dns_controller.create._mock_side_effect = (dns_responder for
+                                                       dns_responder in
+                                                       dns_responder_returns)
+
+            engines.run(create_service.create_service(), store=kwargs)
+
+    @mock.patch('pyrax.set_credentials')
+    def test_delete_flow_dns_exception_with_retry_and_succeed(self,
+                                                              mock_creds):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         current_origin = origin.Origin(origin='poppy.org')
@@ -548,7 +615,46 @@ class TestFlowRuns(base.TestCase):
             self.patch_delete_flow(service_controller, storage_controller,
                                    dns_controller)
             dns_controller.delete = mock.Mock()
-            dns_responder_returns = self.dns_exceptions()
+            dns_responder_returns = self.dns_exceptions_and_succeed()
+
+            dns_controller.delete._mock_side_effect = (dns_responder for
+                                                       dns_responder in
+                                                       dns_responder_returns)
+            engines.run(delete_service.delete_service(), store=kwargs)
+
+    @mock.patch('pyrax.set_credentials')
+    def test_delete_flow_dns_exception_with_retry_and_fail(self, mock_creds):
+        service_id = str(uuid.uuid4())
+        domains_old = domain.Domain(domain='cdn.poppy.org')
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = service.Service(service_id=service_id,
+                                      name='poppy cdn service',
+                                      domains=[domains_old],
+                                      origins=[current_origin],
+                                      flavor_id='cdn')
+
+        kwargs = {
+            'project_id': json.dumps(str(uuid.uuid4())),
+            'service_id': json.dumps(service_id),
+            'time_seconds': [i * self.time_factor for
+                             i in range(self.total_retries)],
+            'provider_details': json.dumps(
+                dict([(k, v.to_dict())
+                      for k, v in service_obj.provider_details.items()]))
+        }
+
+        service_controller, storage_controller, dns_controller = \
+            self.all_controllers()
+
+        with MonkeyPatchControllers(service_controller,
+                                    dns_controller,
+                                    storage_controller,
+                                    memoized_controllers.task_controllers):
+
+            self.patch_delete_flow(service_controller, storage_controller,
+                                   dns_controller)
+            dns_controller.delete = mock.Mock()
+            dns_responder_returns = self.dns_exceptions_only()
 
             dns_controller.delete._mock_side_effect = (dns_responder for
                                                        dns_responder in

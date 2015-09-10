@@ -17,6 +17,17 @@ import abc
 
 import six
 
+from oslo_config import cfg
+
+_PROVIDER_OPTIONS = [
+    cfg.IntOpt(
+        'default_cache_ttl',
+        default=86400,
+        help='Default ttl to be set, when no caching rules are specified'),
+]
+
+_PROVIDER_GROUP = 'drivers:provider'
+
 
 @six.add_metaclass(abc.ABCMeta)
 class ProviderDriverBase(object):
@@ -34,6 +45,7 @@ class ProviderDriverBase(object):
 
     def __init__(self, conf):
         self._conf = conf
+        self._conf.register_opts(_PROVIDER_OPTIONS, group=_PROVIDER_GROUP)
 
     @abc.abstractmethod
     def is_alive(self):
