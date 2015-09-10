@@ -508,9 +508,10 @@ class ServiceControllerTest(base.FunctionalTest):
         self.assertEqual(self.service_url,
                          urlparse.urlparse(response.headers["Location"]).path)
 
-    def test_purge_single_url_and_soft_invalidate(self):
+    @ddt.data('False', 'false', 'fALsE')
+    def test_purge_single_url_and_soft_invalidate(self, hard):
         response = self.app.delete(
-            self.service_url + '/assets?url=/abc&hard=False',
+            self.service_url + '/assets?url=/abc&hard={0}'.format(hard),
             headers={
                 "Content-Type": "application/json",
                 'X-Project-ID': self.project_id

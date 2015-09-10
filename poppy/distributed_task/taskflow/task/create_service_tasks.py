@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import division
+
 import json
 import time
 
@@ -29,6 +31,15 @@ from poppy.openstack.common import log
 LOG = log.getLogger(__name__)
 conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
+
+DNS_OPTIONS = [
+    cfg.IntOpt('retries', default=5,
+               help='Total number of Retries after Exponentially Backing Off')
+]
+
+DNS_GROUP = 'driver:dns'
+
+conf.register_opts(DNS_OPTIONS, group=DNS_GROUP)
 
 
 class CreateProviderServicesTask(task.Task):
@@ -72,7 +83,7 @@ class CreateProviderServicesTask(task.Task):
 class CreateServiceDNSMappingTask(task.Task):
     default_provides = "dns_responder"
 
-    def execute(self, responders, retry_sleep_time):
+    def execute(self, responders, retry_sleep_time, project_id, service_id):
         service_controller, dns = \
             memoized_controllers.task_controllers('poppy', 'dns')
         dns_responder = dns.create(responders)
@@ -100,12 +111,49 @@ class CreateServiceDNSMappingTask(task.Task):
                                       dns_responder[provider_name]))
         return dns_responder
 
-    def revert(self, responders, retry_sleep_time, **kwargs):
+    def revert(self, responders, retry_sleep_time,
+               project_id, service_id, **kwargs):
+
         if self.name in kwargs['flow_failures'].keys():
-            LOG.info('Sleeping for {0} seconds and '
-                     'retrying'.format(retry_sleep_time))
-            if retry_sleep_time is not None:
-                time.sleep(retry_sleep_time)
+            retries = conf[DNS_GROUP].retries
+            current_progress = (1.0 / retries)
+            if hasattr(self, 'retry_progress'):
+                self.retry_progress = self.retry_progress + current_progress
+            if not hasattr(self, 'retry_progress'):
+                self.retry_progress = current_progress
+            if self.retry_progress == 1.0:
+                LOG.warn('Maximum retry attempts of '
+                         '{0} reached for Task {1}'.format(retries, self.name))
+                LOG.warn('Setting of state of service_id: '
+                         '{0} and project_id: {1} '
+                         'to failed'.format(service_id, project_id))
+                provider_details_dict = {}
+                result = kwargs['result']
+                for responder in responders:
+                    for provider_name in responder:
+                        provider_details_dict[provider_name] = (
+                            provider_details.ProviderDetail(
+                                error_info=result.traceback_str,
+                                status='failed',
+                                error_message='Failed after '
+                                              '{0} DNS '
+                                              'retries'.format(retries),
+                                error_class=str(result.exc_info[0])))
+
+                # serialize provider_details_dict
+                for provider_name in provider_details_dict:
+                    provider_details_dict[provider_name] = (
+                        provider_details_dict[provider_name].to_dict())
+
+                update_provider_details = common.UpdateProviderDetailTask()
+                update_provider_details.execute(provider_details_dict,
+                                                project_id,
+                                                service_id)
+            else:
+                LOG.warn('Sleeping for {0} seconds and '
+                         'retrying'.format(retry_sleep_time))
+                if retry_sleep_time is not None:
+                    time.sleep(retry_sleep_time)
 
 
 class CreateLogDeliveryContainerTask(task.Task):

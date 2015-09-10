@@ -208,7 +208,8 @@ class DefaultManagerServiceTests(base.TestCase):
                   in self.provider_details.items()]))
         responders = delete_provider.execute(provider_details)
         delete_dns = delete_service_tasks.DeleteServiceDNSMappingTask()
-        dns_responders = delete_dns.execute(provider_details, 0)
+        dns_responders = delete_dns.execute(provider_details, 0, responders,
+                                            self.project_id, self.service_id)
 
         gather_provider = delete_service_tasks.GatherProviderDetailsTask()
         changed_provider_dict = gather_provider.execute(responders,
@@ -232,7 +233,8 @@ class DefaultManagerServiceTests(base.TestCase):
                 self.project_id,
                 self.service_id)
             create_dns = create_service_tasks.CreateServiceDNSMappingTask()
-            dns_responder = create_dns.execute(responders, 0)
+            dns_responder = create_dns.execute(responders, 0, self.project_id,
+                                               self.service_id)
             gather_provider = create_service_tasks.GatherProviderDetailsTask()
             log_responder = \
                 create_service_tasks.CreateLogDeliveryContainerTask()
@@ -264,7 +266,9 @@ class DefaultManagerServiceTests(base.TestCase):
             update_dns = update_service_tasks.UpdateServiceDNSMappingTask()
 
             dns_responder = update_dns.execute(responders, 0, service_old,
-                                               service_updates_json)
+                                               service_updates_json,
+                                               self.project_id,
+                                               self.service_id)
 
             log_delivery_update = \
                 update_service_tasks.UpdateLogDeliveryContainerTask()
