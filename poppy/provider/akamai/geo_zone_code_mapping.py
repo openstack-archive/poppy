@@ -100,7 +100,7 @@ REGION_COUNTRY_MAPPING = {
         'India'
     ],
 
-    'Australia': [
+    'Australia/NZ': [
         'Australia',
         'New Zealand'
     ],
