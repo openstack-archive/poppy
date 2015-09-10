@@ -234,7 +234,8 @@ def is_valid_service_configuration(service, schema):
                                                origin.get('origin'))
             if origin_value in origins:
                 raise exceptions.ValidationFailed(
-                    'Origins must be unique')
+                    'The origin {0} already exists for another '
+                    'origin on this service'.format(origin_value))
             else:
                 origins.append(origin_value)
 
@@ -246,7 +247,8 @@ def is_valid_service_configuration(service, schema):
 
                     if request_url in origin_rules:
                         raise exceptions.ValidationFailed(
-                            'Origins - the request_url must be unique')
+                            'The path {0} already exists for another '
+                            'origin on this service'.format(request_url))
                     else:
                         origin_rules.append(request_url)
 
@@ -259,7 +261,8 @@ def is_valid_service_configuration(service, schema):
                     request_url = rule['request_url']
                     if request_url in caching_rules:
                         raise exceptions.ValidationFailed(
-                            'Caching Rules - the request_url must be unique')
+                            'The path {0} already exists for another '
+                            'caching rule on this service'.format(request_url))
                     else:
                         caching_rules.append(request_url)
 
@@ -271,7 +274,8 @@ def is_valid_service_configuration(service, schema):
                 domain.get('protocol', 'http'), domain.get('domain'))
             if domain_value in domains:
                 raise exceptions.ValidationFailed(
-                    'Domains must be unique')
+                    'The domain {0} already exists on another service'.
+                    format(domain_value))
             else:
                 domains.append(domain_value)
 
@@ -288,7 +292,7 @@ def is_valid_service_configuration(service, schema):
             else:
                 if cdn_protocol != domain_protocol:
                     raise exceptions.ValidationFailed(
-                        'Domains must in the same protocol')
+                        'Domains must use the same protocol')
 
     protocol_port_mapping = {
         'http': 80,
@@ -301,14 +305,15 @@ def is_valid_service_configuration(service, schema):
             origin_port = origin.get('port', 80)
             if protocol_port_mapping[cdn_protocol] != origin_port:
                 raise exceptions.ValidationFailed(
-                    'Domain port does not match origin port')
+                    'Domain port does not match the origin port')
 
     # 7. domains must be valid
     if 'domains' in service:
         for domain in service['domains']:
             if not is_valid_domain(domain):
                 raise exceptions.ValidationFailed(
-                    u'Domain {0} is not valid'.format(domain.get('domain')))
+                    u'Domain {0} is not a valid domain'.
+                    format(domain.get('domain')))
 
     # 8. origins and domains cannot be the same
     if 'origins' in service and 'domains' in service:
@@ -345,8 +350,8 @@ def is_valid_service_configuration(service, schema):
             if is_root_domain(domain):
                 raise exceptions.ValidationFailed(
                     u'{0} is a root domain. Most DNS providers do not allow '
-                    'setting a CNAME on a root domain. Please use a subdomain '
-                    'instead (e.g. www.{0})'.format(domain.get('domain')))
+                    'setting a CNAME on a root domain. Please add a subdomain '
+                    '(e.g. www.{0})'.format(domain.get('domain')))
 
     # 11. Hostheadervalue must be valid
     if 'origins' in service:
@@ -356,7 +361,7 @@ def is_valid_service_configuration(service, schema):
                 if hostheadervalue is not None:
                     if not is_valid_domain_name(hostheadervalue):
                         raise exceptions.ValidationFailed(
-                            u'HostHeaderValue {0} is not valid'.format(
+                            u'The host header {0} is not valid'.format(
                                 hostheadervalue))
 
     # 12. Need to validate restriction correctness here
