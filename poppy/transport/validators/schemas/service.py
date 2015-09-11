@@ -450,8 +450,8 @@ class ServiceSchema(schema_base.SchemaBase):
                                                     },
                                                     'request_url': {
                                                         'type': 'string',
-                                                        'minLength': 2,
-                                                        'maxLength': 100
+                                                        'minLength': 1,
+                                                        'maxLength': 1024
                                                     }
                                                 },
                                                 "additionalProperties": False,

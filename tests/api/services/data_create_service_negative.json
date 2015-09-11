@@ -215,12 +215,7 @@
         "origin_list": [
             {"origin": "origin1.com", "rules": [{"name" : "index", "request_url" : "/*"}]}
         ],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "home",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "/*"}]}
-                        ],
+        "caching_list": [{"name": "default", "ttl": 3600}],
         "restrictions_list": [
                     {
                         "name": "restriction one",
@@ -236,7 +231,7 @@
                     },
                     {
                         "name": "restriction two",
-                        "access": "whitelist",
+                        "access": "blacklist",
                         "rules":
                         [
                             {
