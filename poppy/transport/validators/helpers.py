@@ -260,6 +260,9 @@ def is_valid_service_configuration(service, schema):
             if 'rules' in caching:
                 for rule in caching['rules']:
                     request_url = rule['request_url']
+                    if not request_url.startswith('/'):
+                        request_url = ('/' + request_url)
+
                     if request_url in caching_rules:
                         raise exceptions.ValidationFailed(
                             'The path {0} already exists for another '
@@ -384,6 +387,8 @@ def is_valid_service_configuration(service, schema):
                             pass
                         elif key == 'request_url':
                             request_url = rule['request_url']
+                            if not request_url.startswith('/'):
+                                request_url = ('/' + request_url)
                         else:
                             entity = key
                             # validate country code is valid
@@ -402,6 +407,8 @@ def is_valid_service_configuration(service, schema):
                             pass
                         elif key == 'request_url':
                             request_url = rule['request_url']
+                            if not request_url.startswith('/'):
+                                request_url = ('/' + request_url)
                         else:
                             entity = key
                             # validate country code is valid

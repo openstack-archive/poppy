@@ -144,6 +144,28 @@
                           "rules": [{"name" : "Rule 1",
                                      "request_url" : "/*"}]}]
     },
+    "wildcard_caching_no_slash": {
+        "name": "my_service_name",
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{
+                         "origin": "myorigin.com",
+                         "port": 80,
+                         "ssl": false,
+                         "rules":[
+                              {
+                                "name": "default rule",
+                                "request_url": "/*"
+                              }
+                             ],
+                         "hostheadertype": "custom",
+                         "hostheadervalue": "www.customweb.com"
+                         }
+                        ],
+        "caching_list": [{"name": "default",
+                          "ttl": 1200,
+                          "rules": [{"name" : "Rule 1",
+                                     "request_url" : "*"}]}]
+    },
     "multiple_origin_path_caching": {
         "name": "my_service_name",
         "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"}],
@@ -472,7 +494,7 @@
                             {
                                 "name": "only me",
                                 "referrer": "www.mywebsite.com",
-                                "request_url" : "restrictions"
+                                "request_url" : "*"
                             }
                         ]}
         ]
