@@ -211,18 +211,13 @@
                         ],
         "restrictions_list": []
     },
-    "duplicate_restriction_matches": {
+    "duplicate_restriction_matches_blacklist*_whitelist/*": {
         "service_name": "duplicate_restriction_matches",
         "domain_list": [{"domain": "www.mywebsite.com"}],
         "origin_list": [
             {"origin": "origin1.com", "rules": [{"name" : "index", "request_url" : "/*"}]}
         ],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "home",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "/*"}]}
-                        ],
+        "caching_list": [{"name": "default", "ttl": 3600}],
         "restrictions_list": [
                     {
                         "name": "restriction one",
@@ -238,6 +233,28 @@
                     },
                     {
                         "name": "restriction two",
+                        "access": "blacklist",
+                        "rules":
+                        [
+                            {
+                                "name": "only me",
+                                "referrer": "www.mywebsite.com",
+                                "request_url": "*"
+                            }
+                        ]
+                    }
+        ]
+    },
+    "duplicate_restriction_matches_blacklist/*_whitelist*": {
+        "service_name": "duplicate_restriction_matches",
+        "domain_list": [{"domain": "www.mywebsite.com"}],
+        "origin_list": [
+            {"origin": "origin1.com", "rules": [{"name" : "index", "request_url" : "/*"}]}
+        ],
+        "caching_list": [{"name": "default", "ttl": 3600}],
+        "restrictions_list": [
+                    {
+                        "name": "restriction one",
                         "access": "whitelist",
                         "rules":
                         [
@@ -245,6 +262,86 @@
                                 "name": "only me",
                                 "referrer": "www.mywebsite.com",
                                 "request_url": "*"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "restriction two",
+                        "access": "blacklist",
+                        "rules":
+                        [
+                            {
+                                "name": "only me",
+                                "referrer": "www.mywebsite.com",
+                                "request_url": "/*"
+                            }
+                        ]
+                    }
+        ]
+    },
+    "duplicate_restriction_matches_blacklist*_whitelist*": {
+        "service_name": "duplicate_restriction_matches",
+        "domain_list": [{"domain": "www.mywebsite.com"}],
+        "origin_list": [
+            {"origin": "origin1.com", "rules": [{"name" : "index", "request_url" : "/*"}]}
+        ],
+        "caching_list": [{"name": "default", "ttl": 3600}],
+        "restrictions_list": [
+                    {
+                        "name": "restriction one",
+                        "access": "whitelist",
+                        "rules":
+                        [
+                            {
+                                "name": "only me",
+                                "referrer": "www.mywebsite.com",
+                                "request_url": "*"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "restriction two",
+                        "access": "blacklist",
+                        "rules":
+                        [
+                            {
+                                "name": "only me",
+                                "referrer": "www.mywebsite.com",
+                                "request_url": "*"
+                            }
+                        ]
+                    }
+        ]
+    },
+    "duplicate_restriction_matches_blacklist/*_whitelist/*": {
+        "service_name": "duplicate_restriction_matches",
+        "domain_list": [{"domain": "www.mywebsite.com"}],
+        "origin_list": [
+            {"origin": "origin1.com", "rules": [{"name" : "index", "request_url" : "/*"}]}
+        ],
+        "caching_list": [{"name": "default", "ttl": 3600}],
+        "restrictions_list": [
+                    {
+                        "name": "restriction one",
+                        "access": "whitelist",
+                        "rules":
+                        [
+                            {
+                                "name": "only me",
+                                "referrer": "www.mywebsite.com",
+                                "request_url": "/*"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "restriction two",
+                        "access": "blacklist",
+                        "rules":
+                        [
+                            {
+                                "name": "only me",
+                                "referrer": "www.mywebsite.com",
+                                "request_url": "/*"
                             }
                         ]
                     }
