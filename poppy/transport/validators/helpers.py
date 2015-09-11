@@ -152,7 +152,8 @@ def is_valid_domain(domain):
 
 
 def is_valid_ip_address(ip_address):
-    ipv4_regex = '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
+    ipv4_regex = ('^(((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]'
+                  '|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$')
     # ipv6 is not used to validate origin since akamai does not support ipv6
     # origins
     # ipv6_regex = "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]"
