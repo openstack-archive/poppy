@@ -90,7 +90,8 @@ class TestBase(fixtures.BaseTestFixture):
         """
         response = requests.get(url)
         content = BeautifulSoup(response.text)
-        return content.findAll()
+        text = content.getText()
+        return text.encode('utf-8')
 
     def assertSameContent(self, origin_url, cdn_url):
         """Asserts that the origin & access_url serve the same content
