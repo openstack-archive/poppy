@@ -4,6 +4,11 @@
          "path": "/domains/-",
          "value": {"domain": "www.replaceme.com", "protocol": "http"}}
     ],
+    "add_domain_different_protocol": [
+        {"op": "add",
+         "path": "/domains/-",
+         "value": {"domain": "www.replaceme.com", "protocol": "https", "certificate": "san"}}
+    ],
     "replace_domain":  [
         {"op": "replace",
          "path": "/domains/0",

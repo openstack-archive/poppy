@@ -58,6 +58,21 @@
             "enabled": false
         }
     },
+     "domain_different_protocol": {
+        "name": "domain_different_protocol",
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "https", "certificate": "san"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{"origin": "myorigin.com",
+        				 "port": 80,
+                         "ssl": false,
+                         "rules": [
+                            {
+                                "name" : "default",
+                                "request_url" : "/*"
+                            }]
+                        }],
+        "caching_list": []
+    }
     "wildcard_path_no_slash": {
         "name": "caching_empty",
         "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
