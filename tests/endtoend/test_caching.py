@@ -71,8 +71,7 @@ class TestCaching(base.TestBase):
             "rules": [{
                 "name": "default",
                 "request_url": "/*",
-            }],
-            "hostheadertype": "origin"
+            }]
         }]
         caching = [
             {"name": "default",
