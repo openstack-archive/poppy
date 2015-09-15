@@ -129,7 +129,7 @@ def json_matches_flavor_schema_inner(request, schema=None):
 
 def is_valid_shared_ssl_domain_name(domain_name):
     shared_ssl_domain_regex = '^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$'
-    return re.match(shared_ssl_domain_regex, domain_name)
+    return re.match(shared_ssl_domain_regex, domain_name) is not None
 
 
 def is_valid_domain_name(domain_name):
@@ -139,7 +139,7 @@ def is_valid_domain_name(domain_name):
     # allow Punycode
     # domain_regex = ('^((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+'
     #                 '(-[a-z0-9]+)*\.)+[a-z]{2,63}$')
-    return re.match(domain_regex, domain_name)
+    return re.match(domain_regex, domain_name) is not None
 
 
 def is_valid_domain(domain):
@@ -282,33 +282,7 @@ def is_valid_service_configuration(service, schema):
 
     # We allow multiple restrictions rules on the same path
 
-    # 5. domains protocols must be of the same type, and domains protocols must
-    # match the description (ssl/port) of the origin
-    cdn_protocol = None
-    if 'domains' in service:
-        for domain in service['domains']:
-            domain_protocol = domain.get('protocol', 'http')
-            if cdn_protocol is None:
-                cdn_protocol = domain_protocol
-            else:
-                if cdn_protocol != domain_protocol:
-                    raise exceptions.ValidationFailed(
-                        'Domains must use the same protocol')
-
-    protocol_port_mapping = {
-        'http': 80,
-        'https': 443
-    }
-
-    # 6. origin port must match the domain's protocol
-    if 'origins' in service:
-        for origin in service['origins']:
-            origin_port = origin.get('port', 80)
-            if protocol_port_mapping[cdn_protocol] != origin_port:
-                raise exceptions.ValidationFailed(
-                    'Domain port does not match the origin port')
-
-    # 7. domains must be valid
+    # 5. domains must be valid
     if 'domains' in service:
         for domain in service['domains']:
             if not is_valid_domain(domain):
@@ -316,7 +290,7 @@ def is_valid_service_configuration(service, schema):
                     u'Domain {0} is not a valid domain'.
                     format(domain.get('domain')))
 
-    # 8. origins and domains cannot be the same
+    # 6. origins and domains cannot be the same
     if 'origins' in service and 'domains' in service:
         origins = set()
         for origin in service['origins']:
@@ -332,14 +306,14 @@ def is_valid_service_configuration(service, schema):
             raise exceptions.ValidationFailed(
                 u'Domains and origins cannot be same: {0}'.format(origin))
 
-    # 9. origins must be valid
+    # 7. origins must be valid
     if 'origins' in service:
         for origin in service['origins']:
             if not is_valid_origin(origin):
                 raise exceptions.ValidationFailed(
                     u'Origin {0} is not valid'.format(origin.get('origin')))
 
-    # 10. domains must not be root domains
+    # 8. domains must not be root domains
     if 'domains' in service:
         for domain in service['domains']:
             protocol = domain.get('protocol', 'http')
@@ -354,7 +328,7 @@ def is_valid_service_configuration(service, schema):
                     'setting a CNAME on a root domain. Please add a subdomain '
                     '(e.g. www.{0})'.format(domain.get('domain')))
 
-    # 11. Hostheadervalue must be valid
+    # 9. Hostheadervalue must be valid
     if 'origins' in service:
         for origin in service['origins']:
             if 'hostheadervalue' in origin:
@@ -365,7 +339,7 @@ def is_valid_service_configuration(service, schema):
                             u'The host header {0} is not valid'.format(
                                 hostheadervalue))
 
-    # 12. Need to validate restriction correctness here
+    # 10. Need to validate restriction correctness here
     # Cannot allow one restriction rule entity to have both
     # "blacklist" and "whitelist" restriction type
     whitelist_restriction_entities = {
