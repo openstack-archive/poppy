@@ -165,12 +165,13 @@ class DefaultServicesController(base.ServicesController):
         schema = service_schema.ServiceSchema.get_schema("service", "POST")
         validators.is_valid_service_configuration(service_json, schema)
 
-        # deal with shared ssl domains
+        # deal with ssl domains
         for domain in service_obj.domains:
-            if domain.protocol == 'https' and domain.certificate == 'shared':
-                domain.domain = self._generate_shared_ssl_domain(
-                    domain.domain
-                )
+            if domain.protocol == 'https':
+                if domain.certificate == 'shared':
+                    domain.domain = self._generate_shared_ssl_domain(
+                        domain.domain
+                    )
 
         try:
             self.storage_controller.create(
@@ -225,6 +226,14 @@ class DefaultServicesController(base.ServicesController):
                 existing_shared_domains[customer_domain] = domain.domain
                 domain.domain = customer_domain
 
+            # old domains need to bind as well
+            elif domain.certificate == 'san':
+                cert_for_domain = (
+                    self.storage_controller.get_cert_by_domain(
+                        domain.domain, domain.certificate,
+                        service_old.flavor_id, project_id))
+                domain.cert_info = cert_for_domain
+
         service_old_json = json.loads(json.dumps(service_old.to_dict()))
 
         # remove fields that cannot be part of PATCH
@@ -232,6 +241,10 @@ class DefaultServicesController(base.ServicesController):
         del service_old_json['status']
         del service_old_json['operator_status']
         del service_old_json['provider_details']
+
+        for domain in service_old_json['domains']:
+            if 'cert_info' in domain:
+                del domain['cert_info']
 
         service_new_json = jsonpatch.apply_patch(
             service_old_json, service_updates)
@@ -256,15 +269,24 @@ class DefaultServicesController(base.ServicesController):
 
         # fixing the old and new shared ssl domains in service_new
         for domain in service_new.domains:
-            if domain.protocol == 'https' and domain.certificate == 'shared':
-                customer_domain = domain.domain.split('.')[0]
-                # if this domain is from service_old
-                if customer_domain in existing_shared_domains:
-                    domain.domain = existing_shared_domains[customer_domain]
-                else:
-                    domain.domain = self._generate_shared_ssl_domain(
-                        domain.domain
-                    )
+            if domain.protocol == 'https':
+                if domain.certificate == 'shared':
+                    customer_domain = domain.domain.split('.')[0]
+                    # if this domain is from service_old
+                    if customer_domain in existing_shared_domains:
+                        domain.domain = (
+                            existing_shared_domains[customer_domain])
+                    else:
+                        domain.domain = self._generate_shared_ssl_domain(
+                            domain.domain
+                        )
+
+                elif domain.certificate == 'san':
+                    cert_for_domain = (
+                        self.storage_controller.get_cert_by_domain(
+                            domain.domain, domain.certificate,
+                            service_new.flavor_id, project_id))
+                    domain.cert_info = cert_for_domain
 
         # check if the service domain names already exist
         # existing ones doesnot count!
