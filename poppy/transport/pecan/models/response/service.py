@@ -80,6 +80,16 @@ class Model(collections.OrderedDict):
                         access_url['log_delivery'][0]['publicURL'],
                         'log_delivery'))
 
+            # add any certificate_status for non shared ssl domains
+            # Note(tonytan4ever): for right now we only consider one provider,
+            # in case of multiple providers we really should consider all
+            # provider's domain certificate status
+            for domain_d in self["domains"]:
+                if domain_d.get("protocol", "http") == "https":
+                    domain_d["certificate_status"] = (
+                        provider_detail.get_domain_certificate_status(
+                            domain_d['domain']))
+
             # add any errors
             error_message = provider_detail.error_message
             if error_message:
