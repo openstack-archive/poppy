@@ -38,6 +38,15 @@ class Model(collections.OrderedDict):
         self["id"] = str(service_obj.service_id)
         self["project_id"] = str(service_obj.project_id)
         self["domains"] = [domain.Model(d) for d in service_obj.domains]
+
+        for domain_d in self["domains"]:
+            # default other type of certificate domains to create_in_progress
+            # Note(tonytan4ever): with out this piece of code
+            # there will be a short period of time domain without certificate
+            # status
+            if domain_d.get("protocol", "http") == "https":
+                domain_d["certificate_status"] = 'create_in_progress'
+
         self["origins"] = [origin.Model(o) for o in service_obj.origins]
         self["restrictions"] = [restriction.Model(r) for r in
                                 service_obj.restrictions]
@@ -87,7 +96,9 @@ class Model(collections.OrderedDict):
             for domain_d in self["domains"]:
                 if domain_d.get("protocol", "http") == "https":
                     domain_d["certificate_status"] = (
-                        provider_detail.get_domain_certificate_status(
+                        provider_detail.
+                        domains_certificate_status.
+                        get_domain_certificate_status(
                             domain_d['domain']))
 
             # add any errors
