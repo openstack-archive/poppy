@@ -132,7 +132,7 @@ class ProviderDetail(common.DictSerializableModel):
 
     @domains_certificate_status.setter
     def domains_certificate_status(self, value):
-        self._domains_certificate_status = value
+        self._domains_certificate_status = DomainCertificatesStatus(value)
 
     @property
     def error_message(self):
@@ -150,12 +150,24 @@ class ProviderDetail(common.DictSerializableModel):
     def error_class(self, value):
         self._error_class = value
 
+    def get_domain_access_url(self, domain):
+        '''Find an access url of a domain.
+
+        :param domain
+        '''
+        for access_url in self.access_urls:
+            if access_url['domain'] == domain:
+                return access_url
+        return None
+
     def to_dict(self):
         result = collections.OrderedDict()
         result["id"] = self.provider_service_id
         result["access_urls"] = self.access_urls
         result["status"] = self.status
         result["name"] = self.name
+        result["domains_certificate_status"] = (
+            self.domains_certificate_status.to_dict())
         result["error_info"] = self.error_info
         result["error_message"] = self.error_message
         result["error_class"] = self.error_class
@@ -176,6 +188,8 @@ class ProviderDetail(common.DictSerializableModel):
                                              "unknown_id")
         o.access_urls = dict_obj.get("access_urls", [])
         o.status = dict_obj.get("status", u"deploy_in_progress")
+        o.domains_certificate_status = dict_obj.get(
+            "domains_certificate_status", {})
         o.name = dict_obj.get("name", None)
         o.error_info = dict_obj.get("error_info", None)
         o.error_message = dict_obj.get("error_message", None)

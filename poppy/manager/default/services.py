@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import json
 import random
 import uuid
@@ -29,6 +30,7 @@ from poppy.manager import base
 from poppy.model.helpers import cachingrule
 from poppy.model.helpers import rule
 from poppy.model import service
+from poppy.model import ssl_certificate
 from poppy.openstack.common import log
 from poppy.transport.validators import helpers as validators
 from poppy.transport.validators.schemas import service as service_schema
@@ -185,6 +187,7 @@ class DefaultServicesController(base.ServicesController):
                 raise e
             except ValueError as e:
                 raise e
+
         try:
             self.storage_controller.create(project_id,
                                            service_obj)
@@ -244,6 +247,10 @@ class DefaultServicesController(base.ServicesController):
         del service_old_json['operator_status']
         del service_old_json['provider_details']
 
+        for domain in service_old_json['domains']:
+            if 'cert_info' in domain:
+                del domain['cert_info']
+
         service_new_json = jsonpatch.apply_patch(
             service_old_json, service_updates)
 
@@ -265,21 +272,85 @@ class DefaultServicesController(base.ServicesController):
         service_new = service.Service.init_from_dict(project_id,
                                                      service_new_json)
         store = str(uuid.uuid4()).replace('-', '_')
-        # fixing the old and new shared ssl domains in service_new
+        service_new.provider_details = service_old.provider_details
 
+        # fixing the old and new shared ssl domains in service_new
         for domain in service_new.domains:
-            if domain.protocol == 'https' and domain.certificate == 'shared':
-                customer_domain = domain.domain.split('.')[0]
-                # if this domain is from service_old
-                if customer_domain in existing_shared_domains:
-                    domain.domain = existing_shared_domains[customer_domain]
-                else:
-                    domain.domain = self._pick_shared_ssl_domain(
-                        customer_domain,
-                        service_new.service_id,
-                        store)
+            if domain.protocol == 'https':
+                if domain.certificate == 'shared':
+                    customer_domain = domain.domain.split('.')[0]
+                    # if this domain is from service_old
+                    if customer_domain in existing_shared_domains:
+                        domain.domain = existing_shared_domains[
+                            customer_domain
+                        ]
+                    else:
+                        domain.domain = self._pick_shared_ssl_domain(
+                            customer_domain,
+                            service_new.service_id,
+                            store)
+
+                elif domain.certificate == 'san':
+                    cert_for_domain = (
+                        self.storage_controller.get_cert_by_domain(
+                            domain.domain, domain.certificate,
+                            service_new.flavor_id, project_id))
+                    domain.cert_info = cert_for_domain
+
+                    # retrofit the access url info into
+                    # certificate_info table
+                    # Note(tonytan4ever): this is for backward
+                    # compatibility
+                    if domain.cert_info is None and \
+                            service_new.provider_details is not None:
+                        # Note(tonytan4ever): right now we assume
+                        # only one provider per flavor, that's
+                        # why we use values()[0]
+                        access_url_for_domain = (
+                            service_new.provider_details.values()[0].
+                            get_domain_access_url(domain.domain))
+                        if access_url_for_domain is not None:
+                            providers = (
+                                self.flavor_controller.get(
+                                    service_new.flavor_id).providers
+                            )
+                            san_cert_url = access_url_for_domain.get(
+                                'provider_url')
+                            # Note(tonytan4ever): stored san_cert_url
+                            # for two times, that's intentional
+                            # a little extra info does not hurt
+                            new_cert_detail = {
+                                providers[0].provider_id.title():
+                                json.dumps(dict(
+                                    cert_domain=san_cert_url,
+                                    extra_info={
+                                        'status': 'deployed',
+                                        'san cert': san_cert_url,
+                                        'created_at': str(
+                                            datetime.datetime.now())
+                                    }
+                                ))
+                            }
+                            new_cert_obj = ssl_certificate.SSLCertificate(
+                                service_new.flavor_id,
+                                domain.domain,
+                                'san',
+                                new_cert_detail
+                            )
+                            self.storage_controller.create_cert(
+                                project_id,
+                                new_cert_obj
+                            )
+                            # deserialize cert_details dict
+                            new_cert_obj.cert_details[
+                                providers[0].provider_id.title()] = json.loads(
+                                new_cert_obj.cert_details[
+                                    providers[0].provider_id.title()]
+                            )
+                            domain.cert_info = new_cert_obj
         if hasattr(self, store):
             delattr(self, store)
+
         # check if the service domain names already exist
         # existing ones does not count!
         for d in service_new.domains:
