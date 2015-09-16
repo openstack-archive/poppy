@@ -65,16 +65,19 @@ class Responder(object):
             self.provider: provider_response
         }
 
-    def updated(self, provider_service_id, links):
+    def updated(self, provider_service_id, links, **extras):
         """updated.
 
         :param provider_service_id
+        :param links
+        :param **extras
         :returns provider msg{provider service id}
         """
         provider_response = {
             "id": provider_service_id,
             "links": links
         }
+        provider_response.update(extras)
 
         return {
             self.provider: provider_response
