@@ -165,12 +165,20 @@ class DefaultServicesController(base.ServicesController):
         schema = service_schema.ServiceSchema.get_schema("service", "POST")
         validators.is_valid_service_configuration(service_json, schema)
 
-        # deal with shared ssl domains
+        # deal with ssl domains
         for domain in service_obj.domains:
-            if domain.protocol == 'https' and domain.certificate == 'shared':
-                domain.domain = self._generate_shared_ssl_domain(
-                    domain.domain
-                )
+            if domain.protocol == 'https':
+                if domain.certificate == 'shared':
+                    domain.domain = self._generate_shared_ssl_domain(
+                        domain.domain
+                    )
+
+                elif domain.certificate == 'san':
+                    cert_for_domain = (
+                        self.storage_controller.get_cert_by_domain(
+                            domain.domain, domain.certificate,
+                            service_obj.flavor_id, project_id))
+                    domain.cert_info = cert_for_domain
 
         try:
             self.storage_controller.create(
@@ -256,15 +264,24 @@ class DefaultServicesController(base.ServicesController):
 
         # fixing the old and new shared ssl domains in service_new
         for domain in service_new.domains:
-            if domain.protocol == 'https' and domain.certificate == 'shared':
-                customer_domain = domain.domain.split('.')[0]
-                # if this domain is from service_old
-                if customer_domain in existing_shared_domains:
-                    domain.domain = existing_shared_domains[customer_domain]
-                else:
-                    domain.domain = self._generate_shared_ssl_domain(
-                        domain.domain
-                    )
+            if domain.protocol == 'https':
+                if domain.certificate == 'shared':
+                    customer_domain = domain.domain.split('.')[0]
+                    # if this domain is from service_old
+                    if customer_domain in existing_shared_domains:
+                        domain.domain = (
+                            existing_shared_domains[customer_domain])
+                    else:
+                        domain.domain = self._generate_shared_ssl_domain(
+                            domain.domain
+                        )
+
+                elif domain.certificate == 'san':
+                    cert_for_domain = (
+                        self.storage_controller.get_cert_by_domain(
+                            domain.domain, domain.certificate,
+                            service_new.flavor_id, project_id))
+                    domain.cert_info = cert_for_domain
 
         # check if the service domain names already exist
         # existing ones doesnot count!

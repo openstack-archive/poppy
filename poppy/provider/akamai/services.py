@@ -92,6 +92,7 @@ class ServiceController(base.ServiceBase):
             # a list to represent provide_detail id
             ids = []
             links = []
+            domain_certificate_status = {}
             for classified_domain in classified_domains:
                 # assign the content realm to be the digital property field
                 # of each group
@@ -126,7 +127,16 @@ class ServiceController(base.ServiceBase):
                 # pick a san cert for this domain
                 edge_host_name = None
                 if classified_domain.certificate == 'san':
-                    edge_host_name = self._pick_san_edgename()
+                    cert_info = getattr(classified_domain, 'cert_info')
+                    if cert_info is None:
+                        continue
+                    else:
+                        edge_host_name = (
+                            classified_domain.cert_info.get_san_edge_name())
+                        if edge_host_name is None:
+                            continue
+                        domain_certificate_status[classified_domain.domain] = (
+                            classified_domain.cert_info.get_cert_status())
                 provider_access_url = self._get_provider_access_url(
                     classified_domain, dp, edge_host_name)
                 links.append({'href': provider_access_url,
@@ -141,7 +151,9 @@ class ServiceController(base.ServiceBase):
             return self.responder.failed(
                 "failed to create service - %s" % str(e))
         else:
-            return self.responder.created(json.dumps(ids), links)
+            return self.responder.created(
+                json.dumps(ids), links,
+                domain_certificate_status=domain_certificate_status)
 
     def get(self, service_name):
         pass
@@ -169,6 +181,7 @@ class ServiceController(base.ServiceBase):
 
             ids = []
             links = []
+            domain_certificate_status = {}
             if len(service_obj.domains) > 0:
                 # in this case we need to copy
                 # and tweak the content of one old policy
@@ -284,7 +297,18 @@ class ServiceController(base.ServiceBase):
                                  'complete' % (dp, classified_domain.domain))
                         edge_host_name = None
                         if classified_domain.certificate == 'san':
-                            edge_host_name = self._pick_san_edgename()
+                            cert_info = getattr(classified_domain, 'cert_info')
+                            if cert_info is None:
+                                continue
+                            else:
+                                edge_host_name = (
+                                    classified_domain.cert_info.
+                                    get_san_edge_name())
+                                if edge_host_name is None:
+                                    continue
+                            domain_certificate_status[classified_domain.domain] \
+                                = (
+                                classified_domain.cert_info.get_cert_status())
                         provider_access_url = self._get_provider_access_url(
                             classified_domain, dp, edge_host_name)
                         links.append({'href': provider_access_url,
@@ -375,8 +399,19 @@ class ServiceController(base.ServiceBase):
 
                     # This part may need to revisit
                     edge_host_name = None
-                    if policy['certificate'] == 'san':
-                        edge_host_name = self._pick_san_edgename()
+                    if classified_domain.certificate == 'san':
+                        cert_info = getattr(classified_domain, 'cert_info')
+                        if cert_info is None:
+                            continue
+                        else:
+                            edge_host_name = (
+                                classified_domain.cert_info.
+                                get_san_edge_name())
+                            if edge_host_name is None:
+                                continue
+                        domain_certificate_status[classified_domain.domain] \
+                            = (
+                            classified_domain.cert_info.get_cert_status())
                     provider_access_url = self._get_provider_access_url(
                         util.dict2obj(policy), policy['policy_name'],
                         edge_host_name)
@@ -386,7 +421,9 @@ class ServiceController(base.ServiceBase):
                                   'certificate': policy['certificate']
                                   })
                 ids = policies
-            return self.responder.updated(json.dumps(ids), links)
+            return self.responder.updated(
+                json.dumps(ids), links,
+                domain_certificate_status=domain_certificate_status)
 
         except Exception as e:
             LOG.exception("Failed to Update Service - {0}".
@@ -540,6 +577,8 @@ class ServiceController(base.ServiceBase):
                             'status': 'create_in_progress',
                             'san cert': san_cert_name,
                             'akamai_spsId': this_sps_id,
+                            'status': 'san cert pending',
+                            'san cert': san_cert_name,
                             'action': 'Waiting for customer domain '
                                       'validation for %s' %
                                       (cert_obj.domain_name)

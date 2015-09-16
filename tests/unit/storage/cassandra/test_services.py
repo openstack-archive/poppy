@@ -21,6 +21,7 @@ except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
 
 import cassandra
+from cassandra import query
 import ddt
 import mock
 from oslo_config import cfg
