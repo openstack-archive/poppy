@@ -123,6 +123,13 @@ class ServicesController(base.ServicesController):
     def domain_exists_elsewhere(self, domain_name, service_id):
         return domain_name in self.claimed_domains
 
+    def update_cert_info(self, domain_name, cert_type, flavor_id,
+                         cert_details):
+        pass
+
+    def create_cert(self, project_id, cert_obj):
+        pass
+
     @staticmethod
     def format_result(result):
         service_id = result.get('service_id')

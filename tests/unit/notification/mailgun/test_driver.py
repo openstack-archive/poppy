@@ -34,7 +34,10 @@ MAIL_NOTIFICATION_OPTIONS = [
     cfg.StrOpt('from_address', default='noreply@poppycdn.org',
                help='Sent from email address'),
     cfg.ListOpt('recipients', default=['recipient@gmail.com'],
-                help='A list of emails addresses to receive notification ')
+                help='A list of emails addresses to receive notification '),
+    cfg.StrOpt('notification_subject',
+               default='Poppy SSL Certificate Provisioned',
+               help='The subject of the email notification ')
 ]
 
 MAIL_NOTIFICATION_GROUP = 'drivers:notification:mailgun'
