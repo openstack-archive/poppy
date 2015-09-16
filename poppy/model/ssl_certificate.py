@@ -89,7 +89,7 @@ class SSLCertificate(common.DictSerializableModel):
         # provider per flavor (that is akamai), so the first one
         # value of this dictionary is akamai cert_details
         first_provider_cert_details = (
-            self.cert_details.values()[0].get("extra_info", None))
+            list(self.cert_details.values())[0].get("extra_info", None))
         if first_provider_cert_details is None:
             return "deployed"
         else:
@@ -109,7 +109,7 @@ class SSLCertificate(common.DictSerializableModel):
             if self.cert_details is None or self.cert_details == {}:
                 return None
             first_provider_cert_details = (
-                self.cert_details.values()[0].get("extra_info", None))
+                list(self.cert_details.values())[0].get("extra_info", None))
             if first_provider_cert_details is None:
                 return None
             else:
