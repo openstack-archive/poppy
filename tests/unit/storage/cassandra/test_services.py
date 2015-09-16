@@ -21,6 +21,7 @@ except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
 
 import cassandra
+from cassandra import query
 import ddt
 import mock
 from oslo_config import cfg
@@ -190,7 +191,9 @@ class CassandraStorageServiceTests(base.TestCase):
             provider_details_dict[k] = provider_details.ProviderDetail(
                 provider_service_id=(
                     provider_detail_dict["id"]),
-                access_urls=provider_detail_dict["access_urls"])
+                access_urls=provider_detail_dict["access_urls"],
+                domains_certificate_status=provider_detail_dict.get(
+                    "domains_certificate_status", {}))
 
         # mock the response from cassandra
         mock_execute.execute.return_value = None
@@ -207,12 +210,16 @@ class CassandraStorageServiceTests(base.TestCase):
                 provider_details_dict[provider_name].status)
             the_provider_detail_dict["name"] = (
                 provider_details_dict[provider_name].name)
+            the_provider_detail_dict["domains_certificate_status"] = (
+                provider_details_dict[provider_name].
+                domains_certificate_status.to_dict())
             the_provider_detail_dict["error_info"] = (
                 provider_details_dict[provider_name].error_info)
             the_provider_detail_dict["error_message"] = (
                 provider_details_dict[provider_name].error_message)
             arg_provider_details_dict[provider_name] = json.dumps(
                 the_provider_detail_dict)
+
         call_args = {
             'project_id': self.project_id,
             'service_id': self.service_id,
@@ -230,8 +237,6 @@ class CassandraStorageServiceTests(base.TestCase):
             self.project_id,
             self.service_id,
             provider_details_dict)
-
-        mock_execute.execute.assert_called_once()
 
     @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_session(self, mock_service_database):
