@@ -52,6 +52,13 @@ class CreateProviderServicesTask(task.Task):
         providers_list = json.loads(providers_list_json)
         try:
             service_obj = self.storage_controller.get(project_id, service_id)
+            for domain in service_obj.domains:
+                if domain.certificate == 'san':
+                    cert_for_domain = (
+                        self.storage_controller.get_cert_by_domain(
+                            domain.domain, domain.certificate,
+                            service_obj.flavor_id, project_id))
+                    domain.cert_info = cert_for_domain
         except ValueError:
             msg = 'Creating service {0} from Poppy failed. ' \
                   'No such service exists'.format(service_id)
@@ -203,6 +210,8 @@ class GatherProviderDetailsTask(task.Task):
         for responder in responders:
             for provider_name in responder:
                 error_class = None
+                domains_certificate_status = responder[provider_name].get(
+                    'domains_certificate_status', {})
                 if 'error' in responder[provider_name]:
                     error_msg = responder[provider_name]['error']
                     error_info = responder[provider_name]['error_detail']
@@ -213,6 +222,8 @@ class GatherProviderDetailsTask(task.Task):
                         provider_details.ProviderDetail(
                             error_info=error_info,
                             status='failed',
+                            domains_certificate_status=(
+                                domains_certificate_status),
                             error_message=error_msg,
                             error_class=error_class))
                 elif 'error' in dns_responder[provider_name]:
@@ -225,6 +236,8 @@ class GatherProviderDetailsTask(task.Task):
                         provider_details.ProviderDetail(
                             error_info=error_info,
                             status='failed',
+                            domains_certificate_status=(
+                                domains_certificate_status),
                             error_message=error_msg,
                             error_class=error_class))
                 else:
@@ -234,6 +247,8 @@ class GatherProviderDetailsTask(task.Task):
                     provider_details_dict[provider_name] = (
                         provider_details.ProviderDetail(
                             provider_service_id=responder[provider_name]['id'],
+                            domains_certificate_status=(
+                                domains_certificate_status),
                             access_urls=access_urls))
 
                     if 'status' in responder[provider_name]:

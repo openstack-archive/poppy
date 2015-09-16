@@ -89,6 +89,7 @@ class TestFlowRuns(base.TestCase):
     def patch_create_flow(self, service_controller,
                           storage_controller, dns_controller):
         storage_controller.get = mock.Mock()
+        storage_controller.get.return_value = mock.Mock(domains=[])
         storage_controller.update = mock.Mock()
         storage_controller._driver.close_connection = mock.Mock()
         service_controller.provider_wrapper.create = mock.Mock()
