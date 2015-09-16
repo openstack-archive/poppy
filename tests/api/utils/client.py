@@ -404,3 +404,24 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
                 assert False, ('Timed out waiting for service '
                                'to be deleted, after '
                                'waiting {0} seconds'.format(retry_timeout))
+
+    def create_ssl_certificate(self, cert_type=None,
+                               domain_name=None, flavor_id=None,
+                               requestslib_kwargs=None,):
+        """Creates SSL Certificate
+
+        :return: Response Object containing response code 200 and body with
+                details of service
+        POST
+        ssl_certificate
+        """
+        url = '{0}/ssl_certificate'.format(self.url)
+
+        requests_object = requests.CreateSSLCertificate(
+            cert_type=cert_type,
+            domain_name=domain_name,
+            flavor_id=flavor_id
+        )
+
+        return self.request('POST', url, request_entity=requests_object,
+                            requestslib_kwargs=requestslib_kwargs)
