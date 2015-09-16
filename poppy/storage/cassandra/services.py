@@ -261,7 +261,7 @@ class ServicesController(base.ServicesController):
         :returns Boolean if the service exists with another user.
         """
         try:
-            LOG.info("Check if service '{0}' exists".format(domain_name))
+            LOG.info("Check if domain '{0}' exists".format(domain_name))
             args = {
                 'domain_name': domain_name.lower()
             }
@@ -271,6 +271,9 @@ class ServicesController(base.ServicesController):
             results = self.session.execute(stmt, args)
 
             if results:
+                LOG.info("Checking for domain '{0}'"
+                         "existence yielded {1}".format(domain_name,
+                                                        str(results)))
                 for r in results:
                     if str(r.get('service_id')) != str(service_id):
                         LOG.info(
@@ -279,9 +282,14 @@ class ServicesController(base.ServicesController):
                         return True
                 return False
             else:
+                LOG.info("Checking if domain '{0}' exists, "
+                         "yielded no results".format(domain_name))
                 return False
-        except ValueError:
-            return False
+        except ValueError as ex:
+                LOG.warn("Checking for domain '{0}'"
+                         "failed!".format(domain_name))
+                LOG.exception(ex)
+                return False
 
     def create(self, project_id, service_obj):
         """create.
