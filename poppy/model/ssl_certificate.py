@@ -26,10 +26,12 @@ class SSLCertificate(common.DictSerializableModel):
     def __init__(self,
                  flavor_id,
                  domain_name,
-                 cert_type):
+                 cert_type,
+                 cert_details={}):
         self._flavor_id = flavor_id
         self._domain_name = domain_name
         self._cert_type = cert_type
+        self._cert_details = cert_details
 
     @property
     def flavor_id(self):
@@ -64,3 +66,36 @@ class SSLCertificate(common.DictSerializableModel):
                     value,
                     VALID_CERT_TYPES)
             )
+
+    @property
+    def cert_details(self):
+        """Get service id."""
+        return self._cert_details
+
+    @cert_details.setter
+    def cert_details(self, value):
+        """Get service id."""
+        self._cert_type = value
+
+    def get_cert_status(self):
+        if self.cert_details is None or self.cert_details == {}:
+            return "deployed"
+        first_provider_cert_details = (
+            list(self.cert_details.values()[0]).get("extra_info", None))
+        if first_provider_cert_details is None:
+            return "deployed"
+        else:
+            return first_provider_cert_details.get('status', "deployed")
+
+    def get_san_edge_name(self):
+        if self.cert_type == 'san':
+            if self.cert_details is None or self.cert_details == {}:
+                return None
+            first_provider_cert_details = (
+                list(self.cert_details.values())[0].get("extra_info", None))
+            if first_provider_cert_details is None:
+                return None
+            else:
+                return first_provider_cert_details.get('san cert', None)
+        else:
+            return None
