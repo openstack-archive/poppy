@@ -31,6 +31,7 @@ from poppy.model.helpers import restriction
 from poppy.model.helpers import rule
 from poppy.model import log_delivery as ld
 from poppy.model import service
+from poppy.model import ssl_certificate
 from poppy.openstack.common import log as logging
 from poppy.storage import base
 
@@ -187,7 +188,16 @@ CQL_VERIFY_CERT = '''
         domain_name
     FROM certificate_info
     WHERE domain_name = %(domain_name)s
-    ALLOW FILTERING
+'''
+
+CQL_SEARCH_CERT_BY_DOMAIN = '''
+    SELECT project_id,
+        flavor_id,
+        cert_type,
+        domain_name,
+        cert_details
+    FROM certificate_info
+    WHERE domain_name = %(domain_name)s
 '''
 
 CQL_UPDATE_SERVICE = CQL_CREATE_SERVICE
@@ -366,6 +376,45 @@ class ServicesController(base.ServicesController):
             return False
         else:
             return False
+
+    def get_cert_by_domain(self, domain_name, cert_type,
+                           flavor_id,
+                           project_id):
+
+        LOG.info(("Search for cert on '{0}', type: {1}, flavor_id: {2}, "
+                  "project_id: {3}").format(domain_name, cert_type, flavor_id,
+                                            project_id))
+        args = {
+            'domain_name': domain_name.lower()
+        }
+        stmt = query.SimpleStatement(
+            CQL_SEARCH_CERT_BY_DOMAIN,
+            consistency_level=self._driver.consistency_level)
+        results = self.session.execute(stmt, args)
+
+        if results:
+            for r in results:
+                r_project_id = str(r.get('project_id'))
+                r_flavor_id = str(r.get('flavor_id'))
+                r_cert_type = str(r.get('cert_type'))
+                r_cert_details = {}
+                cert_details = r.get('cert_details', {})
+                # Need to convert cassandra dict into real dict
+                # And the value of cert_details is a string dict
+                for key in cert_details:
+                    r_cert_details[key] = json.loads(cert_details[key])
+                if r_project_id == str(project_id) and \
+                        r_flavor_id == str(flavor_id) and \
+                        r_cert_type == str(cert_type):
+                    res = ssl_certificate.SSLCertificate(r_flavor_id,
+                                                         domain_name,
+                                                         r_cert_type,
+                                                         r_cert_details)
+                    return res
+            else:
+                return None
+        else:
+            return None
 
     def create(self, project_id, service_obj):
         """create.
@@ -683,7 +732,7 @@ class ServicesController(base.ServicesController):
         :param service_id
         :param provider_details
         """
-        provider_detail_dict = collections.OrderedDict()
+        provider_detail_dict = {}
         for provider_name in sorted(provider_details.keys()):
             the_provider_detail_dict = collections.OrderedDict()
             the_provider_detail_dict["id"] = (
@@ -703,6 +752,7 @@ class ServicesController(base.ServicesController):
                 provider_details[provider_name].error_message)
             provider_detail_dict[provider_name] = json.dumps(
                 the_provider_detail_dict)
+
         args = {
             'project_id': project_id,
             'service_id': uuid.UUID(str(service_id)),
