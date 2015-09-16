@@ -21,6 +21,7 @@ from poppy.transport.pecan.controllers.v1 import health
 from poppy.transport.pecan.controllers.v1 import home
 from poppy.transport.pecan.controllers.v1 import ping
 from poppy.transport.pecan.controllers.v1 import services
+from poppy.transport.pecan.controllers.v1 import ssl_certificates
 
 
 # Hoist into package namespace
@@ -33,3 +34,4 @@ DNSHealth = health.DNSHealthController
 StorageHealth = health.StorageHealthController
 ProviderHealth = health.ProviderHealthController
 Admin = admin.AdminController
+SSLCertificate = ssl_certificates.SSLCertificateController
