@@ -254,9 +254,9 @@ class Service(common.DictSerializableModel):
         """
         result = common.DictSerializableModel.to_dict(self)
         # need to deserialize the nested object
-        # need to deserialize the nested rules object
         domain_obj_list = result['domains']
         result['domains'] = [d.to_dict() for d in domain_obj_list]
+        # could possibly need to add domain_certificate_status in here
 
         origin_obj_list = result['origins']
         result['origins'] = [o.to_dict() for o in origin_obj_list]
