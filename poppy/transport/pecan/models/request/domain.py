@@ -14,10 +14,22 @@
 # limitations under the License.
 
 from poppy.model.helpers import domain
+from poppy.model import ssl_certificate
 
 
 def load_from_json(json_data):
     domain_name = json_data.get('domain')
     protocol = json_data.get('protocol', 'http')
     certification_option = json_data.get('certificate', None)
-    return domain.Domain(domain_name, protocol, certification_option)
+    res_d = domain.Domain(domain_name, protocol, certification_option)
+    # Note(tonytan4ever):
+    # if the domain is in binding status, set the cert_info object
+    if json_data.get('cert_info') is not None:
+        cert_info = ssl_certificate.SSLCertificate(
+            json_data.get('cert_info').get('flavor_id'),
+            domain_name,
+            json_data.get('cert_info').get('cert_type'),
+            json_data.get('cert_info').get('cert_details', {})
+        )
+        setattr(res_d, 'cert_info', cert_info)
+    return res_d
