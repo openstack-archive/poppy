@@ -132,7 +132,7 @@ class ProviderDetail(common.DictSerializableModel):
 
     @domains_certificate_status.setter
     def domains_certificate_status(self, value):
-        self._domains_certificate_status = value
+        self._domains_certificate_status = DomainCertificatesStatus(value)
 
     @property
     def error_message(self):
@@ -156,6 +156,8 @@ class ProviderDetail(common.DictSerializableModel):
         result["access_urls"] = self.access_urls
         result["status"] = self.status
         result["name"] = self.name
+        result["domains_certificate_status"] = (
+            self.domains_certificate_status.to_dict())
         result["error_info"] = self.error_info
         result["error_message"] = self.error_message
         result["error_class"] = self.error_class
@@ -176,6 +178,8 @@ class ProviderDetail(common.DictSerializableModel):
                                              "unknown_id")
         o.access_urls = dict_obj.get("access_urls", [])
         o.status = dict_obj.get("status", u"deploy_in_progress")
+        o.domains_certificate_status = dict_obj.get(
+            "domains_certificate_status", {})
         o.name = dict_obj.get("name", None)
         o.error_info = dict_obj.get("error_info", None)
         o.error_message = dict_obj.get("error_message", None)
