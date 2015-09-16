@@ -23,6 +23,8 @@ import requests
 
 from poppy.openstack.common import log
 from poppy.provider.akamai import controllers
+from poppy.provider.akamai.mod_san_queue import zookeeper_queue
+from poppy.provider.akamai.san_info_storage import zookeeper_storage
 from poppy.provider import base
 
 LOG = log.getLogger(__name__)
@@ -89,6 +91,17 @@ AKAMAI_OPTIONS = [
     cfg.IntOpt('san_cert_hostname_limit', default=80,
                help='default limit on how many hostnames can'
                ' be held by a SAN cert'),
+
+    # related info for SPS && PAPI APIs
+    cfg.StrOpt(
+        'contract_id',
+        help='Operator contractID'),
+    cfg.StrOpt(
+        'group_id',
+        help='Operator groupID'),
+    cfg.StrOpt(
+        'property_id',
+        help='Operator propertyID')
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
@@ -139,8 +152,24 @@ class CDNProvider(base.Driver):
             access_token=self.akamai_conf.ccu_api_access_token
         )
 
+        self.akamai_sps_api_base_url = ''.join([
+            str(self.akamai_conf.policy_api_base_url),
+            'config-secure-provisioning-service/v1'
+            '/sps-requests/{spsId}?contractId=%s&groupId=%s' % (
+                self.akamai_conf.contract_id,
+                self.akamai_conf.group_id
+            )
+        ])
+
         self.san_cert_cnames = self.akamai_conf.san_cert_cnames
         self.san_cert_hostname_limit = self.akamai_conf.san_cert_hostname_limit
+
+        self.akamai_sps_api_client = self.akamai_policy_api_client
+
+        self.san_info_storage = (
+            zookeeper_storage.ZookeeperSanInfoStorage(self._conf))
+        self.mod_san_queue = (
+            zookeeper_queue.ZookeeperModSanQueue(self._conf))
 
     def is_alive(self):
 
