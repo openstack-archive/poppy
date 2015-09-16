@@ -46,6 +46,8 @@ def task_controllers(program, controller=None):
         return service_controller, service_controller.storage_controller
     if controller == 'dns':
         return service_controller, service_controller.dns_controller
+    if controller == 'providers':
+        return service_controller, bootstrap_obj.provider
     if controller == 'ssl_certificate':
         return service_controller, (
             bootstrap_obj.manager.ssl_certificate_controller)
