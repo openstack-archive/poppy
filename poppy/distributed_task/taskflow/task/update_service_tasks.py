@@ -195,11 +195,15 @@ class GatherProviderDetailsTask(task.Task):
         provider_details_dict = {}
         for responder in responders:
             for provider_name in responder:
+                domains_certificate_status = responder[provider_name].get(
+                    'domains_certificate_status', {})
                 if 'error' in responder[provider_name]:
                     error_flag = True
                     provider_details_dict[provider_name] = (
                         provider_details.ProviderDetail(
                             status='failed',
+                            domains_certificate_status=(
+                                domains_certificate_status),
                             error_message=responder[provider_name]['error'],
                             error_info=responder[provider_name]['error_detail']
                         ))
@@ -215,6 +219,8 @@ class GatherProviderDetailsTask(task.Task):
                         provider_details.ProviderDetail(
                             error_info=error_info,
                             status='failed',
+                            domains_certificate_status=(
+                                domains_certificate_status),
                             error_message=error_msg,
                             error_class=error_class))
                 else:
@@ -227,10 +233,8 @@ class GatherProviderDetailsTask(task.Task):
                     provider_details_dict[provider_name] = (
                         provider_details.ProviderDetail(
                             provider_service_id=responder[provider_name]['id'],
-                            access_urls=access_urls))
-                    provider_details_dict[provider_name] = (
-                        provider_details.ProviderDetail(
-                            provider_service_id=responder[provider_name]['id'],
+                            domains_certificate_status=(
+                                domains_certificate_status),
                             access_urls=access_urls))
                     if 'status' in responder[provider_name]:
                         provider_details_dict[provider_name].status = (
@@ -295,6 +299,12 @@ class UpdateProviderDetailsTask_Errors(task.Task):
         else:
             # update the provider details
             service_obj.provider_details = provider_details_dict
+
+            for domain in service_obj.domains:
+                if hasattr(domain, 'cert_info'):
+                    # we don't want store cert_info in database
+                    # just generate it on demand
+                    delattr(domain, 'cert_info')
 
         # update the service object
         LOG.info("Service to be updated to {0} "
