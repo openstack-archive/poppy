@@ -173,9 +173,20 @@ class TestBase(fixtures.BaseTestFixture):
                          expected_response['flavor_id'])
 
         for item in actual_response['domains']:
-            if (('certificate' in item) and
-                    (item['certificate'] == 'shared')):
-                item['domain'] = item['domain'].split('.')[0]
+            if item['protocol'] == 'https':
+                matched_domain_in_body = next(b_item for b_item
+                                              in expected_response['domains']
+                                              if (
+                                                  b_item['domain'] ==
+                                                  item['domain'])
+                                              or (b_item['certificate'] ==
+                                                  'shared' and
+                                                  item['domain'].split('.')[0]
+                                                  == b_item['domain']))
+                if item['certificate'] == 'shared':
+                    matched_domain_in_body['domain'] = item['domain']
+                matched_domain_in_body["certificate_status"] = (
+                    item["certificate_status"])
         self.assertEqual(sorted(actual_response['domains']),
                          sorted(expected_response['domains']))
 
