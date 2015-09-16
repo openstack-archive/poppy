@@ -13,16 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager.base import driver
-from poppy.manager.base import flavors
-from poppy.manager.base import home
-from poppy.manager.base import services
-from poppy.manager.base import ssl_certificate
+from poppy.model import ssl_certificate
 
 
-Driver = driver.ManagerDriverBase
+def load_from_json(json_data):
+    flavor_id = json_data.get("flavor_id")
+    domain_name = json_data.get("domain_name")
+    cert_type = json_data.get("cert_type")
 
-FlavorsController = flavors.FlavorsControllerBase
-ServicesController = services.ServicesControllerBase
-HomeController = home.HomeControllerBase
-SSLCertificateController = ssl_certificate.SSLCertificateController
+    return ssl_certificate.SSLCertificate(flavor_id, domain_name, cert_type)
