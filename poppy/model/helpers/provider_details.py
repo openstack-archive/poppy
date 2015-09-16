@@ -27,6 +27,11 @@ VALID_STATUSES = [
     u'delete_in_progress',
     u'failed']
 
+VALID_DOMAIN_CERTIFICATE_STATUSES = [
+    u'create_in_progress',
+    u'deployed',
+    u'failed']
+
 
 class ProviderDetail(common.DictSerializableModel):
 
@@ -34,6 +39,7 @@ class ProviderDetail(common.DictSerializableModel):
 
     def __init__(self, provider_service_id=None, access_urls=[],
                  status=u"deploy_in_progress", name=None, error_info=None,
+                 domains_certificate_status={},
                  error_message=None, error_class=None):
         self._provider_service_id = provider_service_id
         self._access_urls = access_urls
@@ -42,6 +48,10 @@ class ProviderDetail(common.DictSerializableModel):
         self._error_info = error_info
         self._error_message = error_message
         self._error_class = error_class
+
+        # Note(tonytan4ever): domains status is a dictionary recording each
+        # domain's certificate status
+        self._domains_certificate_status = domains_certificate_status
 
     @property
     def provider_service_id(self):
@@ -90,6 +100,29 @@ class ProviderDetail(common.DictSerializableModel):
     @error_info.setter
     def error_info(self, value):
         self._error_info = value
+
+    @property
+    def domains_certificate_status(self):
+        return self._domains_certificate_status
+
+    @domains_certificate_status.setter
+    def domains_certificate_status(self, value):
+        self._domains_certificate_status = value
+
+    def set_domain_certificate_status(self, domain, status):
+        """changes one domain's status"""
+        if status not in VALID_DOMAIN_CERTIFICATE_STATUSES:
+            raise ValueError(
+                u'Status {0} not in valid options: {1} for domain'' status'.
+                format(status, VALID_DOMAIN_CERTIFICATE_STATUSES)
+            )
+
+        prev_status = self.domains_certificate_status
+        prev_status[domain] = status
+        self.domains_certificate_status = prev_status
+
+    def get_domain_certificate_status(self, domain):
+        return self._domains_certificate_status.get(domain, "deployed")
 
     @property
     def error_message(self):
