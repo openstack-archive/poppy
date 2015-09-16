@@ -34,7 +34,10 @@ MAIL_NOTIFICATION_OPTIONS = [
     cfg.StrOpt('from_address', default='noreply@poppycdn.org',
                help='Sent from email address'),
     cfg.ListOpt('recipients',
-                help='A list of emails addresses to receive notification ')
+                help='A list of emails addresses to receive notification '),
+    cfg.StrOpt('notification_subject',
+               default='Poppy SSL Certificate Provisioned',
+               help='The subject of the email notification ')
 ]
 
 MAIL_NOTIFICATION_GROUP = 'drivers:notification:mailgun'
@@ -60,6 +63,8 @@ class MailNotificationDriver(base.Driver):
         self.sand_box = self.mail_notification_conf.sand_box
         self.from_address = self.mail_notification_conf.from_address
         self.recipients = self.mail_notification_conf.recipients
+        self.notification_subject = (
+            self.mail_notification_conf.notification_subject)
 
         # validate email addresses
         if not validate_email_address(self.from_address):
