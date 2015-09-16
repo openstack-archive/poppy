@@ -102,12 +102,16 @@ AKAMAI_OPTIONS = [
     cfg.StrOpt(
         'group_id',
         help='Operator groupID'),
-    cfg.StrOpt(
-        'property_id',
-        help='Operator propertyID')
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
+
+
+VALID_PROPERTY_SPEC = [
+    "akamai_http_config_number",
+    "akamai_https_shared_config_number",
+    "akamai_https_san_config_numbers",
+    "akamai_https_custom_config_numbers"]
 
 
 class CDNProvider(base.Driver):
@@ -164,10 +168,19 @@ class CDNProvider(base.Driver):
             )
         ])
 
-        self.akamai_sps_api_client = self.akamai_policy_api_client
+        self.akamai_papi_api_base_url = ''.join([
+            str(self.akamai_conf.policy_api_base_url),
+            'papi/v0/{middle_part}/'
+            '?contractId=ctr_%s&groupId=grp_%s' % (
+                self.akamai_conf.contract_id,
+                self.akamai_conf.group_id)
+        ])
 
         self.san_cert_cnames = self.akamai_conf.san_cert_cnames
         self.san_cert_hostname_limit = self.akamai_conf.san_cert_hostname_limit
+
+        self.akamai_sps_api_client = self.akamai_policy_api_client
+        self.akamai_papi_api_client = self.akamai_policy_api_client
 
         self.mod_san_queue = (
             zookeeper_queue.ZookeeperModSanQueue(self._conf))
@@ -228,6 +241,13 @@ class CDNProvider(base.Driver):
     @property
     def papi_api_client(self):
         return self.akamai_papi_api_client
+
+    def papi_property_id(self, property_spec):
+        if property_spec not in VALID_PROPERTY_SPEC:
+            raise ValueError('No a valid property spec: %s'
+                             ', valid property specs are: %s'
+                             % (property_spec, VALID_PROPERTY_SPEC))
+        return 'prp_%s' % self.akam_conf[property_spec]
 
     @property
     def service_controller(self):
