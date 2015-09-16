@@ -77,18 +77,6 @@ class Model(collections.OrderedDict):
         for provider_name in service_obj.provider_details:
             provider_detail = service_obj.provider_details[provider_name]
 
-            # add the access urls
-            access_urls = provider_detail.access_urls
-            for access_url in access_urls:
-                if 'operator_url' in access_url:
-                    self['links'].append(link.Model(
-                        access_url['operator_url'],
-                        'access_url'))
-                elif 'log_delivery' in access_url:
-                    self['links'].append(link.Model(
-                        access_url['log_delivery'][0]['publicURL'],
-                        'log_delivery'))
-
             # add any certificate_status for non shared ssl domains
             # Note(tonytan4ever): for right now we only consider one provider,
             # in case of multiple providers we really should consider all
@@ -100,6 +88,30 @@ class Model(collections.OrderedDict):
                         domains_certificate_status.
                         get_domain_certificate_status(
                             domain_d['domain']))
+
+            # add the access urls
+            access_urls = provider_detail.access_urls
+            for access_url in access_urls:
+                domain_info = next(d for d in self["domains"]
+                                   if d['domain'] == access_url['domain'])
+                # If the domain's status is not deployed,
+                # don't show the access url since the domain is not usable yet
+                if domain_info.get("protocol", "http") == "https":
+                    if (provider_detail.
+                        domains_certificate_status.
+                        get_domain_certificate_status(
+                            domain_d['domain']) in ['create_in_progress',
+                                                    'failed']):
+                        continue
+
+                if 'operator_url' in access_url:
+                    self['links'].append(link.Model(
+                        access_url['operator_url'],
+                        'access_url'))
+                elif 'log_delivery' in access_url:
+                    self['links'].append(link.Model(
+                        access_url['log_delivery'][0]['publicURL'],
+                        'log_delivery'))
 
             # add any errors
             error_message = provider_detail.error_message
