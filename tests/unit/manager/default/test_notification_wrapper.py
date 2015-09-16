@@ -31,5 +31,6 @@ class TestProviderWrapper(base.TestCase):
         self.notifications_wrapper_obj.send(mock_ext,
                                             "test_subject",
                                             "test_mail_content")
+
         mock_ext.obj.services_controller.send.assert_called_once_with(
             "test_subject", "test_mail_content")

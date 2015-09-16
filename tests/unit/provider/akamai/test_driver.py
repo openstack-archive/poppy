@@ -84,6 +84,17 @@ AKAMAI_OPTIONS = [
     cfg.IntOpt('san_cert_hostname_limit', default=80,
                help='default limit on how many hostnames can'
                ' be held by a SAN cert'),
+
+    # related info for SPS && PAPI APIs
+    cfg.StrOpt(
+        'contract_id',
+        help='Operator contractID'),
+    cfg.StrOpt(
+        'group_id',
+        help='Operator groupID'),
+    cfg.StrOpt(
+        'property_id',
+        help='Operator propertyID')
 ]
 
 
@@ -114,6 +125,12 @@ class TestDriver(base.TestCase):
         super(TestDriver, self).setUp()
 
         self.conf = cfg.ConfigOpts()
+
+        zookeeper_client_patcher = mock.patch(
+            'kazoo.client.KazooClient'
+        )
+        zookeeper_client_patcher.start()
+        self.addCleanup(zookeeper_client_patcher.stop)
 
     @mock.patch('akamai.edgegrid.EdgeGridAuth')
     @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
@@ -158,3 +175,10 @@ class TestDriver(base.TestCase):
         provider = driver.CDNProvider(self.conf)
         self.assertNotEqual(None, provider.policy_api_client)
         self.assertNotEqual(None, provider.ccu_api_client)
+
+    @mock.patch('akamai.edgegrid.EdgeGridAuth')
+    @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
+    def test_san_info_storage(self, mock_connect):
+        mock_connect.return_value = mock.Mock()
+        provider = driver.CDNProvider(self.conf)
+        self.assertNotEqual(None, provider.san_info_storage)
