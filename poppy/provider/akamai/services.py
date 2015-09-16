@@ -37,12 +37,25 @@ class ServiceController(base.ServiceBase):
     def ccu_api_client(self):
         return self.driver.ccu_api_client
 
+    @property
+    def sps_api_client(self):
+        return self.driver.akamai_sps_api_client
+
+    @property
+    def san_info_storage(self):
+        return self.driver.san_info_storage
+
+    @property
+    def mod_san_queue(self):
+        return self.driver.mod_san_queue
+
     def __init__(self, driver):
         super(ServiceController, self).__init__(driver)
 
         self.driver = driver
         self.policy_api_base_url = self.driver.akamai_policy_api_base_url
         self.ccu_api_base_url = self.driver.akamai_ccu_api_base_url
+        self.sps_api_base_url = self.driver.akamai_sps_api_base_url
         self.request_header = {'Content-type': 'application/json',
                                'Accept': 'text/plain'}
 
@@ -480,6 +493,72 @@ class ServiceController(base.ServiceBase):
                 LOG.exception("Failed to Purge/Invalidate Service - {0}".
                               format(provider_service_id))
                 return self.responder.failed(str(e))
+
+    def create_certificate(self, cert_obj):
+        if cert_obj.cert_type == 'san':
+            for san_cert_name in self.san_cert_cnames:
+                lastSpsId = (
+                    self.san_info_storage.get_cert_last_spsid(san_cert_name))
+                if lastSpsId not in [None, ""]:
+                    LOG.info('Latest spsId for %s is: %s' % (san_cert_name,
+                                                             lastSpsId))
+                    resp = self.sps_api_client.get(
+                        self.sps_api_base_url.format(spsId=lastSpsId),
+                    )
+                    if resp.status_code != 200:
+                        raise RuntimeError('SPS API Request Failed'
+                                           'Exception: %s' % resp.text)
+                    status = json.loads(resp.text)['requestList'][0]['status']
+                    # This SAN Cert is on pending status
+                    if status != 'SPS Request Complete':
+                        LOG.info("SPS Not completed for %s..." %
+                                 self.san_cert_name)
+                        continue
+                # issue modify san_cert sps request
+                cert_info = self.san_info_storage.get_cert_info(san_cert_name)
+                cert_info['add.sans'] = cert_obj.domain_name
+                string_post_data = '&'.join(
+                    ['%s=%s' % (k, v) for (k, v) in cert_info.items()])
+                LOG.info('Post modSan request with request data: %s' %
+                         string_post_data)
+                resp = self.sps_api_client.post(
+                    self.sps_api_base_url.format(spsId=""),
+                    data=string_post_data
+                )
+                if resp.status_code != 202:
+                    raise RuntimeError('SPS Request failed.'
+                                       'Exception: %s' % resp.text)
+                else:
+                    resp_dict = json.loads(resp.text)
+                    LOG.info('modSan request submitted. Response: %s' %
+                             str(resp_dict))
+                    this_sps_id = resp_dict['spsId']
+                    self.san_info_storage.save_cert_last_spsid(san_cert_name,
+                                                               this_sps_id)
+                    return self.responder.ssl_certificate_provisioned(
+                        san_cert_name, {
+                            'status': 'create_in_progress',
+                            'san cert': san_cert_name,
+                            'akamai_spsId': this_sps_id,
+                            'action': 'Waiting for customer domain '
+                                      'validation for %s' %
+                                      (cert_obj.domain_name)
+                        })
+            else:
+                self.mod_san_queue.enqueue_mod_san_request(
+                    json.dumps(cert_obj.to_dict()))
+                return self.responder.ssl_certificate_provisioned(None, {
+                    'status': 'failed',
+                    'san cert': None,
+                    'action': 'No available san cert for %s right now.'
+                              ' More provisioning might be needed' %
+                              (cert_obj.domain_name)
+                })
+        else:
+            return self.responder.ssl_certificate_provisioned(None, {
+                'status': 'failed',
+                'reason': 'Cert type : %s hasn\'t been implemented'
+            })
 
     @decorators.lazy_property(write=False)
     def current_customer(self):
