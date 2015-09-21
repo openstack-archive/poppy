@@ -316,6 +316,7 @@ class DefaultServicesController(base.ServicesController):
                 kwargs = {
                     'project_id': project_id,
                     'service_obj': json.dumps(service_obj.to_dict()),
+                    'time_seconds': self.determine_sleep_times()
                 }
                 try:
                     if action == 'delete':

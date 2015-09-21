@@ -14,7 +14,9 @@
 # limitations under the License.
 
 from oslo_config import cfg
+
 from taskflow.patterns import linear_flow
+from taskflow import retry
 
 from poppy.distributed_task.taskflow.task import update_service_state_tasks
 from poppy.openstack.common import log
@@ -30,7 +32,12 @@ conf(project='poppy', prog='poppy', args=[])
 def disable_service():
     flow = linear_flow.Flow('Disable service').add(
         update_service_state_tasks.UpdateServiceStateTask(),
-        update_service_state_tasks.BreakDNSChainTask()
+        linear_flow.Flow('Break DNS Chain',
+                         retry=retry.ParameterizedForEach(
+                             rebind=['time_seconds'],
+                             provides='retry_sleep_time')
+                         ).add(
+            update_service_state_tasks.BreakDNSChainTask())
     )
     return flow
 
@@ -38,6 +45,11 @@ def disable_service():
 def enable_service():
     flow = linear_flow.Flow('Enable service').add(
         update_service_state_tasks.UpdateServiceStateTask(),
-        update_service_state_tasks.FixDNSChainTask()
+        linear_flow.Flow('Break DNS Chain',
+                         retry=retry.ParameterizedForEach(
+                             rebind=['time_seconds'],
+                             provides='retry_sleep_time')
+                         ).add(
+            update_service_state_tasks.FixDNSChainTask())
     )
     return flow

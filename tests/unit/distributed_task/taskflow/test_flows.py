@@ -138,7 +138,9 @@ class TestFlowRuns(base.TestCase):
                                  storage_controller, dns_controller):
         storage_controller.update_state = mock.Mock()
         dns_controller.enable = mock.Mock()
+        dns_controller.enable._mock_return_value = []
         dns_controller.disable = mock.Mock()
+        dns_controller.disable._mock_return_value = []
 
     @mock.patch('pyrax.set_credentials')
     def test_create_flow_normal(self, mock_creds):
@@ -282,11 +284,16 @@ class TestFlowRuns(base.TestCase):
                                       origins=[current_origin],
                                       flavor_id='cdn')
 
-        kwargs = {
+        enable_kwargs = {
             'project_id': json.dumps(str(uuid.uuid4())),
             'state': 'enable',
-            'service_obj': json.dumps(service_obj.to_dict())
+            'service_obj': json.dumps(service_obj.to_dict()),
+            'time_seconds': [i * self.time_factor for
+                             i in range(self.total_retries)],
         }
+
+        disable_kwargs = enable_kwargs.copy()
+        disable_kwargs['state'] = 'disable'
 
         service_controller, storage_controller, dns_controller = \
             self.all_controllers()
@@ -299,8 +306,10 @@ class TestFlowRuns(base.TestCase):
             self.patch_service_state_flow(service_controller,
                                           storage_controller,
                                           dns_controller)
-            engines.run(update_service_state.enable_service(), store=kwargs)
-            engines.run(update_service_state.disable_service(), store=kwargs)
+            engines.run(update_service_state.enable_service(),
+                        store=enable_kwargs)
+            engines.run(update_service_state.disable_service(),
+                        store=disable_kwargs)
 
     @mock.patch('pyrax.set_credentials')
     def test_create_flow_dns_exception(self, mock_creds):
@@ -423,6 +432,60 @@ class TestFlowRuns(base.TestCase):
             }
 
             engines.run(delete_service.delete_service(), store=kwargs)
+
+    @mock.patch('pyrax.set_credentials')
+    def test_service_state_flow_dns_exception(self, mock_creds):
+        service_id = str(uuid.uuid4())
+        domains_old = domain.Domain(domain='cdn.poppy.org')
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = service.Service(service_id=service_id,
+                                      name='poppy cdn service',
+                                      domains=[domains_old],
+                                      origins=[current_origin],
+                                      flavor_id='cdn')
+
+        enable_kwargs = {
+            'project_id': json.dumps(str(uuid.uuid4())),
+            'state': 'enable',
+            'service_obj': json.dumps(service_obj.to_dict()),
+            'time_seconds': [i * self.time_factor for
+                             i in range(self.total_retries)],
+        }
+
+        disable_kwargs = enable_kwargs.copy()
+        disable_kwargs['state'] = 'disable'
+
+        service_controller, storage_controller, dns_controller = \
+            self.all_controllers()
+
+        with MonkeyPatchControllers(service_controller,
+                                    dns_controller,
+                                    storage_controller,
+                                    memoized_controllers.task_controllers):
+
+            self.patch_service_state_flow(service_controller,
+                                          storage_controller,
+                                          dns_controller)
+            dns_controller.enable = mock.Mock()
+            dns_controller.enable._mock_return_value = {
+                'cdn_provider': {
+                    'error': 'Whoops!',
+                    'error_class': 'tests.unit.distributed_task'
+                                   '.taskflow.test_flows.DNSException'
+                }
+            }
+            dns_controller.disable = mock.Mock()
+            dns_controller.disable._mock_return_value = {
+                'cdn_provider': {
+                    'error': 'Whoops!',
+                    'error_class': 'tests.unit.distributed_task'
+                                   '.taskflow.test_flows.DNSException'
+                }
+            }
+            engines.run(update_service_state.enable_service(),
+                        store=enable_kwargs)
+            engines.run(update_service_state.disable_service(),
+                        store=disable_kwargs)
 
     @mock.patch('pyrax.set_credentials')
     def test_update_flow_dns_exception_with_retry_and_succeed(self,
@@ -660,3 +723,98 @@ class TestFlowRuns(base.TestCase):
                                                        dns_responder in
                                                        dns_responder_returns)
             engines.run(delete_service.delete_service(), store=kwargs)
+
+    @mock.patch('pyrax.set_credentials')
+    def test_service_state_flow_dns_exception_retry_and_succeed(self,
+                                                                mock_creds):
+        service_id = str(uuid.uuid4())
+        domains_old = domain.Domain(domain='cdn.poppy.org')
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = service.Service(service_id=service_id,
+                                      name='poppy cdn service',
+                                      domains=[domains_old],
+                                      origins=[current_origin],
+                                      flavor_id='cdn')
+
+        enable_kwargs = {
+            'project_id': json.dumps(str(uuid.uuid4())),
+            'state': 'enable',
+            'service_obj': json.dumps(service_obj.to_dict()),
+            'time_seconds': [i * self.time_factor for
+                             i in range(self.total_retries)],
+        }
+
+        disable_kwargs = enable_kwargs.copy()
+        disable_kwargs['state'] = 'disable'
+
+        service_controller, storage_controller, dns_controller = \
+            self.all_controllers()
+
+        with MonkeyPatchControllers(service_controller,
+                                    dns_controller,
+                                    storage_controller,
+                                    memoized_controllers.task_controllers):
+
+            self.patch_service_state_flow(service_controller,
+                                          storage_controller,
+                                          dns_controller)
+            dns_responder_returns = self.dns_exceptions_and_succeed()
+
+            dns_controller.enable._mock_side_effect = (dns_responder for
+                                                       dns_responder in
+                                                       dns_responder_returns)
+            dns_controller.disable._mock_side_effect = (dns_responder for
+                                                        dns_responder in
+                                                        dns_responder_returns)
+
+            engines.run(update_service_state.enable_service(),
+                        store=enable_kwargs)
+            engines.run(update_service_state.disable_service(),
+                        store=disable_kwargs)
+
+    @mock.patch('pyrax.set_credentials')
+    def test_service_state_flow_dns_exception_retry_and_fail(self, mock_creds):
+        service_id = str(uuid.uuid4())
+        domains_old = domain.Domain(domain='cdn.poppy.org')
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = service.Service(service_id=service_id,
+                                      name='poppy cdn service',
+                                      domains=[domains_old],
+                                      origins=[current_origin],
+                                      flavor_id='cdn')
+
+        enable_kwargs = {
+            'project_id': json.dumps(str(uuid.uuid4())),
+            'state': 'enable',
+            'service_obj': json.dumps(service_obj.to_dict()),
+            'time_seconds': [i * self.time_factor for
+                             i in range(self.total_retries)],
+        }
+
+        disable_kwargs = enable_kwargs.copy()
+        disable_kwargs['state'] = 'disable'
+
+        service_controller, storage_controller, dns_controller = \
+            self.all_controllers()
+
+        with MonkeyPatchControllers(service_controller,
+                                    dns_controller,
+                                    storage_controller,
+                                    memoized_controllers.task_controllers):
+
+            self.patch_service_state_flow(service_controller,
+                                          storage_controller,
+                                          dns_controller)
+            dns_responder_returns = self.dns_exceptions_only()
+
+            dns_controller.enable._mock_side_effect = (dns_responder for
+                                                       dns_responder in
+                                                       dns_responder_returns)
+            dns_controller.disable._mock_side_effect = (dns_responder for
+                                                        dns_responder in
+                                                        dns_responder_returns)
+
+            engines.run(update_service_state.enable_service(),
+                        store=enable_kwargs)
+            engines.run(update_service_state.disable_service(),
+                        store=disable_kwargs)

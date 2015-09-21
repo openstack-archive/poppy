@@ -604,27 +604,51 @@ class ServicesController(base.ServicesBase):
 
     def enable(self, service_obj):
         dns_details = self.gather_cname_links(service_obj)
-        for provider_name in dns_details:
-            access_urls = dns_details[provider_name]['access_urls']
-            for access_url in access_urls:
-                provider_url = access_url['provider_url']
-                operator_url = access_url['operator_url']
-                shared_ssl_flag = access_url['shared_ssl_flag']
-                self._change_cname_record(operator_url,
-                                          provider_url,
-                                          shared_ssl_flag)
+        try:
+            for provider_name in dns_details:
+                access_urls = dns_details[provider_name]['access_urls']
+                for access_url in access_urls:
+                    provider_url = access_url['provider_url']
+                    operator_url = access_url['operator_url']
+                    shared_ssl_flag = access_url['shared_ssl_flag']
+                    self._change_cname_record(operator_url,
+                                              provider_url,
+                                              shared_ssl_flag)
+        except Exception as e:
+            error_msg = 'Rackspace DNS Exception: {0}'.format(e)
+            error_class = e.__class__
+            error = {
+                'error_msg': error_msg,
+                'error_class': error_class
+            }
+            LOG.error(error_msg)
+            return self.responder.failed(dns_details.keys(), error)
+        else:
+            return self.responder.updated(dns_details)
 
     def disable(self, service_obj):
         dns_details = self.gather_cname_links(service_obj)
-        provider_url = self._driver.rackdns_conf.url_404
-        for provider_name in dns_details:
-            access_urls = dns_details[provider_name]['access_urls']
-            for access_url in access_urls:
-                operator_url = access_url['operator_url']
-                shared_ssl_flag = access_url['shared_ssl_flag']
-                self._change_cname_record(operator_url,
-                                          provider_url,
-                                          shared_ssl_flag)
+        try:
+            provider_url = self._driver.rackdns_conf.url_404
+            for provider_name in dns_details:
+                access_urls = dns_details[provider_name]['access_urls']
+                for access_url in access_urls:
+                    operator_url = access_url['operator_url']
+                    shared_ssl_flag = access_url['shared_ssl_flag']
+                    self._change_cname_record(operator_url,
+                                              provider_url,
+                                              shared_ssl_flag)
+        except Exception as e:
+            error_msg = 'Rackspace DNS Exception: {0}'.format(e)
+            error_class = e.__class__
+            error = {
+                'error_msg': error_msg,
+                'error_class': error_class
+            }
+            LOG.error(error_msg)
+            return self.responder.failed(dns_details.keys(), error)
+        else:
+            return self.responder.updated(dns_details)
 
     def modify_cname(self, access_url, new_cert):
         self._change_cname_record(access_url=access_url,
