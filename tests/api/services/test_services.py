@@ -369,7 +369,9 @@ class TestServiceActions(base.TestBase):
         self.client.wait_for_service_status(
             location=self.service_url,
             status='deployed',
-            abort_on_status='failed')
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
     @attrib.attr('smoke')
     def test_delete_service(self):

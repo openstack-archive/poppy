@@ -371,7 +371,9 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
             current_time = int(time.time())
             if current_time > stop_time:
                 assert False, ('Timed out waiting for service status change'
-                               ' to {0}').format(status)
+                               ' to {0} after '
+                               'waiting {1} seconds').format(status,
+                                                             retry_timeout)
 
     def wait_for_service_delete(self, location,
                                 abort_on_status=None,
@@ -399,4 +401,6 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
             current_time = int(time.time())
             if current_time > stop_time:
-                assert False, ('Timed out waiting for service to be deleted')
+                assert False, ('Timed out waiting for service '
+                               'to be deleted, after '
+                               'waiting {0} seconds'.format(retry_timeout))

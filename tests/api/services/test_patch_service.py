@@ -304,6 +304,8 @@ class TestServicePatch(base.TestBase):
                                          request_body=add_duplicate_domain)
         self.assertEqual(resp.status_code, 400)
 
+        self.client.delete_service(location=service_url)
+
     def tearDown(self):
         self.client.delete_service(location=self.service_url)
         if self.test_config.generate_flavors:
