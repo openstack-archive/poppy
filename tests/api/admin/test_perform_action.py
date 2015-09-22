@@ -119,7 +119,10 @@ class TestHttpService(base.TestBase):
             expected_new_state = 'disabled'
 
         self.client.wait_for_service_status(
-            location=self.service_url, status=expected_new_state)
+            location=self.service_url,
+            status=expected_new_state,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         after_patch_body = resp.json()
@@ -303,7 +306,10 @@ class TestSharedCertService(base.TestBase):
             expected_new_state = 'disabled'
 
         self.client.wait_for_service_status(
-            location=self.service_url, status=expected_new_state)
+            location=self.service_url,
+            status=expected_new_state,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         after_patch_body = resp.json()
@@ -324,7 +330,10 @@ class TestSharedCertService(base.TestBase):
         self.assertEqual(resp.status_code, 202)
 
         self.client.wait_for_service_status(
-            location=self.service_url, status='disabled')
+            location=self.service_url,
+            status='disabled',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         updated_state = resp.json()['status']
@@ -337,7 +346,10 @@ class TestSharedCertService(base.TestBase):
         self.assertEqual(resp.status_code, 202)
 
         self.client.wait_for_service_status(
-            location=self.service_url, status='deployed')
+            location=self.service_url,
+            status='deployed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         updated_body = resp.json()
@@ -360,7 +372,10 @@ class TestSharedCertService(base.TestBase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(after_patch_state, 'delete_in_progress')
 
-        self.client.wait_for_service_delete(location=self.service_url)
+        self.client.wait_for_service_delete(
+            location=self.service_url,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
         resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 404)
 
@@ -469,7 +484,10 @@ class TestSanCertService(base.TestBase):
             expected_new_state = 'disabled'
 
         self.client.wait_for_service_status(
-            location=self.service_url, status=expected_new_state)
+            location=self.service_url,
+            status=expected_new_state,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         after_patch_body = resp.json()
@@ -496,7 +514,10 @@ class TestSanCertService(base.TestBase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(after_patch_state, 'delete_in_progress')
 
-        self.client.wait_for_service_delete(location=self.service_url)
+        self.client.wait_for_service_delete(
+            location=self.service_url,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
         resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 404)
 
@@ -506,7 +527,10 @@ class TestSanCertService(base.TestBase):
         self.assertEqual(resp.status_code, 202)
 
         self.client.wait_for_service_status(
-            location=self.service_url, status='disabled')
+            location=self.service_url,
+            status='disabled',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         updated_state = resp.json()['status']
@@ -519,7 +543,10 @@ class TestSanCertService(base.TestBase):
         self.assertEqual(resp.status_code, 202)
 
         self.client.wait_for_service_status(
-            location=self.service_url, status='deployed')
+            location=self.service_url,
+            status='deployed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         updated_body = resp.json()
@@ -635,7 +662,10 @@ class TestCustomCertService(base.TestBase):
             expected_new_state = 'disabled'
 
         self.client.wait_for_service_status(
-            location=self.service_url, status=expected_new_state)
+            location=self.service_url,
+            status=expected_new_state,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         after_patch_body = resp.json()
@@ -662,7 +692,10 @@ class TestCustomCertService(base.TestBase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(after_patch_state, 'delete_in_progress')
 
-        self.client.wait_for_service_delete(location=self.service_url)
+        self.client.wait_for_service_delete(
+            location=self.service_url,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
         resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 404)
 
@@ -672,7 +705,10 @@ class TestCustomCertService(base.TestBase):
         self.assertEqual(resp.status_code, 202)
 
         self.client.wait_for_service_status(
-            location=self.service_url, status='disabled')
+            location=self.service_url,
+            status='disabled',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         updated_state = resp.json()['status']
@@ -685,7 +721,10 @@ class TestCustomCertService(base.TestBase):
         self.assertEqual(resp.status_code, 202)
 
         self.client.wait_for_service_status(
-            location=self.service_url, status='deployed')
+            location=self.service_url,
+            status='deployed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         updated_body = resp.json()
@@ -805,7 +844,10 @@ class TestHttpServiceWithLogDelivery(base.TestBase):
             expected_new_state = 'disabled'
 
         self.client.wait_for_service_status(
-            location=self.service_url, status=expected_new_state)
+            location=self.service_url,
+            status=expected_new_state,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         after_patch_body = resp.json()
@@ -832,7 +874,10 @@ class TestHttpServiceWithLogDelivery(base.TestBase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(after_patch_state, 'delete_in_progress')
 
-        self.client.wait_for_service_delete(location=self.service_url)
+        self.client.wait_for_service_delete(
+            location=self.service_url,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
         resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 404)
 
@@ -842,7 +887,10 @@ class TestHttpServiceWithLogDelivery(base.TestBase):
         self.assertEqual(resp.status_code, 202)
 
         self.client.wait_for_service_status(
-            location=self.service_url, status='disabled')
+            location=self.service_url,
+            status='disabled',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         updated_state = resp.json()['status']
@@ -855,7 +903,10 @@ class TestHttpServiceWithLogDelivery(base.TestBase):
         self.assertEqual(resp.status_code, 202)
 
         self.client.wait_for_service_status(
-            location=self.service_url, status='deployed')
+            location=self.service_url,
+            status='deployed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
 
         resp = self.client.get_service(location=self.service_url)
         updated_body = resp.json()
