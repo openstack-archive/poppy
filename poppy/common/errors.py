@@ -51,3 +51,8 @@ class ServiceStatusDisabled(Exception):
 class InvalidServiceState(Exception):
 
     """Raised when a operator state is updated with an invalid status."""
+
+
+class ServicesOverLimit(Exception):
+
+    """Raised when number of services is above a permissible threshold."""
