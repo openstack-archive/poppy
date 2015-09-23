@@ -13,25 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
+
 from poppy.transport.validators import schema_base
 
 
-class ServiceActionSchema(schema_base.SchemaBase):
+class ServiceLimitSchema(schema_base.SchemaBase):
 
-    '''JSON Schmema validation for /admin/services/action.'''
+    '''JSON Schmema validation for /admin/limits/{project_id}.'''
 
     schema = {
-        'service_action': {
+        'service_limit': {
             'POST': {
                 'type': [{
                     'additionalProperties': False,
                     'properties': {
                         'project_id': {
                             'type': 'string',
+                            'pattern': re.compile(
+                                '([a-zA-Z0-9_\-\.]{1,256})'),
                             'required': True
                         },
-                        'action': {
-                            'enum': ['delete', 'enable', 'disable'],
+                        'limit': {
+                            'type': 'integer',
+                            'minimum': 0,
                             'required': True
                         }
                     }
