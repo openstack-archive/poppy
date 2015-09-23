@@ -19,7 +19,7 @@ import uuid
 from tests.functional.transport.pecan import base
 
 
-class Test(base.FunctionalTest):
+class TestServicesAction(base.FunctionalTest):
 
     def test_services_action_with_bad_input(self):
         # missing action field
@@ -34,11 +34,24 @@ class Test(base.FunctionalTest):
 
         self.assertEqual(response.status_code, 400)
 
-    def test_services_action(self):
+    def test_services_action_enable(self):
         response = self.app.post('/v1.0/admin/services/action',
                                  params=json.dumps({
                                      'project_id': str(uuid.uuid1()),
                                      'action': 'enable'
+                                 }),
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'X-Project-ID': str(uuid.uuid1())
+                                 })
+
+        self.assertEqual(response.status_code, 202)
+
+    def test_services_action_disable(self):
+        response = self.app.post('/v1.0/admin/services/action',
+                                 params=json.dumps({
+                                     'project_id': str(uuid.uuid1()),
+                                     'action': 'disable'
                                  }),
                                  headers={
                                      'Content-Type': 'application/json',
