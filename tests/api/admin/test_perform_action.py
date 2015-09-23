@@ -15,6 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import uuid
+
 import ddt
 
 from tests.api import base
@@ -107,6 +110,53 @@ class TestHttpService(base.TestBase):
         self.before_patch_body = resp.json()
         self.before_patch_state = resp.json()['status']
 
+    def _alt_create_test_service(self, resp_code=False):
+        service_name = str(uuid.uuid1())
+
+        domain_list = [{"domain": self.generate_random_string(
+            prefix='www.api-test-domain') + '.com'}]
+
+        origin_list = [{"origin": self.generate_random_string(
+            prefix='api-test-origin') + '.com', "port": 80, "ssl": False,
+            "hostheadertype": "custom", "hostheadervalue":
+            "www.customweb.com"}]
+
+        self.log_delivery = {"enabled": False}
+
+        resp = self.alt_user_client.create_service(
+            service_name=service_name,
+            domain_list=domain_list,
+            origin_list=origin_list,
+            caching_list=self.caching_list,
+            flavor_id=self.flavor_id,
+            log_delivery=self.log_delivery)
+
+        if resp_code:
+            return resp
+
+        self.assertEqual(resp.status_code, 202)
+        service_url = resp.headers["location"]
+
+        return service_url
+
+    def _alt_delete_services(self):
+        services = self.alt_user_client.list_services()
+        del_service_urls = []
+
+        services_content = json.loads(services.content)
+        total_services = services_content['services']
+        for service in total_services:
+            for link in service['links']:
+                if link['rel'] == 'self':
+                    del_service_urls.append(link['href'])
+
+        for service in del_service_urls:
+            self.alt_user_client.delete_service(location=service)
+            self.alt_user_client.wait_for_service_delete(
+                location=service,
+                retry_timeout=self.test_config.status_check_retry_timeout,
+                retry_interval=self.test_config.status_check_retry_interval)
+
     @ddt.data('enable', 'disable')
     def test_action(self, action):
         resp = self.operator_client.admin_service_action(
@@ -133,6 +183,54 @@ class TestHttpService(base.TestBase):
 
         self.assertEqual(
             sorted(after_patch_body), sorted(self.before_patch_body))
+
+    def test_action_limit_services(self):
+        action = 'limit_services'
+        invalid_limit = -5
+        valid_limit = 1000
+
+        # no limits, should result in a 400.
+        resp = self.operator_client.admin_service_action(
+            project_id=self.user_project_id, action=action)
+        self.assertEqual(resp.status_code, 400)
+
+        # invalid limits, should result in a 400.
+        resp = self.operator_client.admin_service_action(
+            project_id=self.user_project_id, action=action,
+            limit=invalid_limit)
+        self.assertEqual(resp.status_code, 400)
+
+        # valid limits, results in a 202
+        resp = self.operator_client.admin_service_action(
+            project_id=self.user_project_id, action=action,
+            limit=valid_limit)
+        self.assertEqual(resp.status_code, 202)
+
+    @ddt.data(1, 3, 5)
+    def test_action_check_imposed_limit_on_services(self, limit):
+
+        self._alt_delete_services()
+
+        project_id = self.alt_user_client.project_id
+        action = 'limit_services'
+
+        resp = self.operator_client.admin_service_action(
+            project_id=project_id, action=action, limit=limit)
+
+        self.assertEqual(resp.status_code, 202)
+
+        self.service_list = [self._alt_create_test_service()
+                             for _ in range(limit)]
+
+        resp = self._alt_create_test_service(resp_code=True)
+        self.assertEqual(resp.status_code, 403)
+
+        for service in self.service_list:
+            self.alt_user_client.delete_service(location=service)
+            self.alt_user_client.wait_for_service_delete(
+                location=service,
+                retry_timeout=self.test_config.status_check_retry_timeout,
+                retry_interval=self.test_config.status_check_retry_interval)
 
     def test_action_delete(self):
         resp = self.operator_client.admin_service_action(

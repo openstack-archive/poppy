@@ -165,6 +165,14 @@ class DefaultServicesController(base.ServicesController):
         schema = service_schema.ServiceSchema.get_schema("service", "POST")
         validators.is_valid_service_configuration(service_json, schema)
 
+        service_limit = self.storage_controller.get_service_limit(project_id)
+        service_count = self.storage_controller.get_service_count(project_id)
+
+        if service_count >= service_limit:
+            raise errors.ServicesOverLimit('Maximum Services '
+                                           'Limit of {0} '
+                                           'reached!'.format(service_limit))
+
         # deal with shared ssl domains
         for domain in service_obj.domains:
             if domain.protocol == 'https' and domain.certificate == 'shared':
@@ -297,7 +305,7 @@ class DefaultServicesController(base.ServicesController):
 
         return
 
-    def services_action(self, project_id, action):
+    def services_action(self, project_id, action, project_limit=None):
         """find services of a .
 
         :param project_id
@@ -305,6 +313,13 @@ class DefaultServicesController(base.ServicesController):
 
         :raises ValueError
         """
+
+        if action == 'limit_services':
+            self.storage_controller.set_service_limit(
+                project_id=project_id,
+                project_limit=project_limit)
+            return
+
         # list all the services of for this project_id
         # 10 per batch
         marker = None
