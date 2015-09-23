@@ -82,6 +82,21 @@ CQL_VERIFY_DOMAIN = '''
 
 CQL_SEARCH_BY_DOMAIN = CQL_VERIFY_DOMAIN
 
+CQL_GET_SERVICE_COUNT = '''
+    SELECT COUNT(*) FROM services
+    WHERE project_id = %(project_id)s
+'''
+
+CQL_SET_SERVICE_LIMIT = '''
+    UPDATE service_limits set project_limit = %(project_limit)s
+    WHERE project_id = %(project_id)s
+'''
+
+CQL_GET_SERVICE_LIMIT = '''
+    SELECT project_limit FROM service_limits
+    WHERE project_id = %(project_id)s
+'''
+
 CQL_CLAIM_DOMAIN = '''
     INSERT INTO domain_names (domain_name,
         project_id,
@@ -366,6 +381,112 @@ class ServicesController(base.ServicesController):
             return False
         else:
             return False
+
+    def get_service_count(self, project_id):
+        """get_service_count
+
+        Fetch Count of Services per project_id.
+        :param project_id
+        :returns count
+
+        """
+
+        LOG.info("Fetching number of services "
+                 "for project_id: {0}".format(project_id))
+
+        args = {
+            'project_id': project_id
+        }
+
+        stmt = query.SimpleStatement(
+            CQL_GET_SERVICE_COUNT,
+            consistency_level=self._driver.consistency_level)
+        results = self.session.execute(stmt, args)
+
+        result = results[0]
+
+        count = result.get('count', 0)
+
+        LOG.info("Fetched {0} number of services "
+                 "for project_id: {1}".format(count, project_id))
+        return count
+
+    def get_service_limit(self, project_id):
+        """get_service_limit
+
+        Fetch Current limit on number of services per project_id.
+
+        :param project_id
+        :raises ValueError
+        :returns limit, if limit exists else default.
+        """
+        max_services = self._driver.max_services_conf.max_services_per_project
+
+        try:
+            LOG.info("Checking if non-default service "
+                     "limit exists for "
+                     "project_id: {0} ".format(project_id))
+
+            args = {
+                'project_id': project_id,
+            }
+            stmt = query.SimpleStatement(
+                CQL_GET_SERVICE_LIMIT,
+                consistency_level=self._driver.consistency_level)
+            results = self.session.execute(stmt, args)
+
+            if results:
+                LOG.info("Checking for service limit for project_id: '{0}' "
+                         "existence yielded {1}".format(project_id,
+                                                        str(results)))
+                result = results[0]
+
+                project_limit = \
+                    result.get('project_limit',
+                               max_services)
+                return project_limit
+            else:
+                LOG.info("Checking for service limit for project_id: '{0}' "
+                         ""
+                         "did not yield results, "
+                         "therefore defaulting "
+                         "to {1}".format(project_id,
+                                         max_services))
+                return max_services
+
+        except ValueError as ex:
+                LOG.warn("Checking if non-default service"
+                         "limit exists for"
+                         "project_id: {0} failed!".format(project_id))
+                LOG.exception(ex)
+                return max_services
+
+    def set_service_limit(self, project_id, project_limit):
+        """set_service_limit
+
+        Set Current limit on number of services per project_id.
+
+        :param project_id
+        :param project_limit
+
+        """
+
+        LOG.info("Setting service"
+                 "limit for"
+                 "project_id: {0} to be {1}".format(project_id,
+                                                    project_limit))
+        args = {
+            'project_limit': project_limit,
+            'project_id': project_id,
+        }
+        stmt = query.SimpleStatement(
+            CQL_SET_SERVICE_LIMIT,
+            consistency_level=self._driver.consistency_level)
+        self.session.execute(stmt, args)
+
+        LOG.info("service limit for "
+                 "project_id: {0} set to be {1}".format(project_id,
+                                                        project_limit))
 
     def create(self, project_id, service_obj):
         """create.

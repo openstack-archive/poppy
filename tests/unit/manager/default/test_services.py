@@ -134,12 +134,19 @@ class DefaultManagerServiceTests(base.TestCase):
                 help='Default ttl to be set, when no caching '
                      'rules are specified'),
         ]
-
+        _MAX_SERVICE_OPTIONS = [
+            cfg.IntOpt('max_services_per_project', default=20,
+                       help='Default max service per project_id')
+        ]
         _DRIVER_DNS_GROUP = 'driver:dns'
         _PROVIDER_GROUP = 'drivers:provider'
+        _MAX_SERVICE_GROUP = 'drivers:storage'
 
         conf.register_opts(_PROVIDER_OPTIONS, group=_PROVIDER_GROUP)
         conf.register_opts(_DRIVER_DNS_OPTIONS, group=_DRIVER_DNS_GROUP)
+        conf.register_opts(_MAX_SERVICE_OPTIONS, group=_MAX_SERVICE_GROUP)
+        self.max_services_per_project = \
+            conf[_MAX_SERVICE_GROUP].max_services_per_project
         self.bootstrap_obj = mock_bootstrap(conf)
 
         # mock a stevedore provider extension
@@ -413,6 +420,12 @@ class DefaultManagerServiceTests(base.TestCase):
                 )
 
         providers.__getitem__.side_effect = get_provider_extension_by_name
+
+        self.sc.storage_controller.get_service_limit = mock.Mock(
+            return_value=self.max_services_per_project)
+
+        self.sc.storage_controller.get_service_count = mock.Mock(
+            return_value=1)
 
         service_obj = self.sc.create(self.project_id,
                                      self.auth_token,
