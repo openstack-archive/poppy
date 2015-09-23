@@ -35,13 +35,20 @@ LIMITS_OPTIONS = [
 
 LIMITS_GROUP = 'drivers:transport:limits'
 
+_MAX_SERVICE_OPTIONS = [
+    cfg.IntOpt('max_services', default=20,
+               help='Default max service per project_id')
+]
+
+_MAX_SERVICE_GROUP = 'drivers:storage'
+
 
 @ddt.ddt
 class ServiceControllerTest(base.FunctionalTest):
 
     def setUp(self):
         super(ServiceControllerTest, self).setUp()
-
+        self.conf.register_opts(_MAX_SERVICE_OPTIONS, group=_MAX_SERVICE_GROUP)
         self.project_id = str(uuid.uuid1())
         self.service_name = str(uuid.uuid1())
         self.flavor_id = str(uuid.uuid1())

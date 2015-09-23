@@ -23,18 +23,37 @@ class ServiceActionSchema(schema_base.SchemaBase):
     schema = {
         'service_action': {
             'POST': {
-                'type': 'object',
-                'additionalProperties': False,
-                'properties': {
-                    'project_id': {
-                        'type': 'string',
-                        'required': True
-                    },
-                    'action': {
-                        'enum': ['delete', 'enable', 'disable'],
-                        'required': True
+                'type': [{
+                    'additionalProperties': False,
+                    'properties': {
+                        'project_id': {
+                            'type': 'string',
+                            'required': True
+                        },
+                        'action': {
+                            'enum': ['delete', 'enable', 'disable'],
+                            'required': True
+                        }
                     }
-                }
+                },
+                    {
+                    'additionalProperties': False,
+                    'properties': {
+                        'project_id': {
+                            'type': 'string',
+                            'required': True
+                        },
+                        'action': {
+                            'enum': ['limit_services'],
+                            'required': True
+                        },
+                        'limit': {
+                            'type': 'integer',
+                            'required': True,
+                            'minimum': 0
+                        }
+                    }
+                }]
             }
         }
     }

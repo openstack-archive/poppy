@@ -30,6 +30,9 @@ class ServicesController(base.ServicesController):
         self.created_service_ids = []
         self.created_services = {}
         self.claimed_domains = []
+        self.projectid_service_limit = {}
+        self.default_max_service_limit = 20
+        self.service_count_per_project_id = {}
 
     @property
     def session(self):
@@ -66,6 +69,25 @@ class ServicesController(base.ServicesController):
         self.created_services[service_obj.service_id] = service_obj.to_dict()
         for domain_obj in service_obj.domains:
             self.claimed_domains.append(domain_obj.domain)
+        try:
+            self.service_count_per_project_id[project_id] += 1
+        except KeyError:
+            self.service_count_per_project_id[project_id] = 1
+
+    def set_service_limit(self, project_id, project_limit):
+        self.projectid_service_limit[project_id] = project_limit
+
+    def get_service_limit(self, project_id):
+        try:
+            return self.projectid_service_limit[project_id]
+        except KeyError:
+            return self.default_max_service_limit
+
+    def get_service_count(self, project_id):
+        try:
+            return self.service_count_per_project_id[project_id]
+        except KeyError:
+            return 0
 
     def update(self, project_id, service_id, service_json):
         # update configuration in storage

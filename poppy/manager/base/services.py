@@ -75,11 +75,12 @@ class ServicesControllerBase(controller.ManagerControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def services_action(self, project_id, action):
+    def services_action(self, project_id, action, limit=None):
         """services_action
 
         :param project_id
         :param action
+        :param limit
         :raises ValueError
         """
 
