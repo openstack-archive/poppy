@@ -214,7 +214,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         domain_url = '{0}/admin/domains/{1}'.format(self.url, domain)
         return self.request('GET', domain_url)
 
-    def admin_service_action(self, project_id, action,
+    def admin_service_action(self, project_id, action, limit=None,
                              requestslib_kwargs=None):
         """Update Tenant State
 
@@ -225,7 +225,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
         url = '{0}/admin/services/action'.format(self.url)
         request_object = requests.ServiceAction(
-            project_id=project_id, action=action)
+            project_id=project_id, action=action, limit=limit)
         return self.request('POST', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 

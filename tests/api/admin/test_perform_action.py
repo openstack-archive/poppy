@@ -134,6 +134,27 @@ class TestHttpService(base.TestBase):
         self.assertEqual(
             sorted(after_patch_body), sorted(self.before_patch_body))
 
+    def test_action_limit_services(self):
+        action = 'limit_services'
+        invalid_limit = -5
+        valid_limit = 1000
+
+        # no limits, should result in a 400.
+        resp = self.operator_client.admin_service_action(
+            project_id=self.user_project_id, action=action)
+        self.assertEqual(resp.status_code, 400)
+
+        # invalid limits, should result in a 400.
+        resp = self.operator_client.admin_service_action(
+            project_id=self.user_project_id, action=action, limit=invalid_limit)
+        self.assertEqual(resp.status_code, 400)
+
+        # valid limits, results in a 202
+        resp = self.operator_client.admin_service_action(
+            project_id=self.user_project_id, action=action, limit=valid_limit)
+        self.assertEqual(resp.status_code, 202)
+
+
     def test_action_delete(self):
         resp = self.operator_client.admin_service_action(
             project_id=self.user_project_id, action='delete')

@@ -61,15 +61,18 @@ class PatchService(base.AutoMarshallingModel):
 class ServiceAction(base.AutoMarshallingModel):
     """Marshalling for Action on Services requests."""
 
-    def __init__(self, project_id, action):
+    def __init__(self, project_id, action, limit=None):
         super(ServiceAction, self).__init__()
 
         self.project_id = project_id
         self.action = action
+        self.limit = limit
 
     def _obj_to_json(self):
         service_action_request = {
             "project_id": self.project_id, "action": self.action}
+        if self.limit:
+            service_action_request['limit'] = self.limit
         return json.dumps(service_action_request)
 
 
