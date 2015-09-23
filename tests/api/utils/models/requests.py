@@ -73,6 +73,20 @@ class ServiceAction(base.AutoMarshallingModel):
         return json.dumps(service_action_request)
 
 
+class ServiceLimit(base.AutoMarshallingModel):
+    """Marshalling for Service Limit requests."""
+
+    def __init__(self, limit=None):
+        super(ServiceLimit, self).__init__()
+        self.limit = limit
+
+    def _obj_to_json(self):
+        service_limit_request = {}
+        if self.limit:
+            service_limit_request["limit"] = self.limit
+        return json.dumps(service_limit_request)
+
+
 class MigrateDomain(base.AutoMarshallingModel):
     """Marshalling for Action on Services requests."""
 

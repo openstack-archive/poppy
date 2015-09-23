@@ -24,6 +24,7 @@ from poppy.transport.pecan.models.response import service as resp_service_model
 from poppy.transport.validators import helpers
 from poppy.transport.validators.schemas import domain_migration
 from poppy.transport.validators.schemas import service_action
+from poppy.transport.validators.schemas import service_limit
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import helpers as stoplight_helpers
 from poppy.transport.validators.stoplight import rule
@@ -107,7 +108,8 @@ class OperatorServiceActionController(base.Controller, hooks.HookController):
         services_controller = self._driver.manager.services_controller
 
         try:
-            services_controller.services_action(project_id, service_action)
+            services_controller.services_action(project_id,
+                                                service_action)
         except Exception as e:
             pecan.abort(404, detail=(
                         'Services action {0} on tenant: {1} failed, '
@@ -115,6 +117,58 @@ class OperatorServiceActionController(base.Controller, hooks.HookController):
                                              project_id, str(e))))
 
         return pecan.Response(None, 202)
+
+
+class OperatorServiceLimitController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    def __init__(self, driver):
+        super(OperatorServiceLimitController, self).__init__(driver)
+
+    @pecan.expose('json')
+    @decorators.validate(
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                service_limit.ServiceLimitSchema.get_schema(
+                    "service_limit", "PUT")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter),
+        project_id=rule.Rule(
+            helpers.is_valid_project_id(),
+            helpers.abort_with_message)
+    )
+    def put(self, project_id):
+
+        service_state_json = json.loads(pecan.request.body.decode('utf-8'))
+        project_limit = service_state_json.get('limit', None)
+
+        services_controller = self._driver.manager.services_controller
+
+        try:
+            services_controller.services_limit(project_id,
+                                               project_limit)
+        except Exception as e:
+            pecan.abort(404, detail=(
+                        'Services limit {0} on tenant: {1} failed, '
+                        'Reason: {2}'.format(project_limit,
+                                             project_id, str(e))))
+
+        return pecan.Response(None, 201)
+
+    @pecan.expose('json')
+    @decorators.validate(
+        project_id=rule.Rule(
+            helpers.is_valid_project_id(),
+            helpers.abort_with_message)
+    )
+    def get_one(self, project_id):
+        services_controller = self._driver.manager.services_controller
+
+        service_limits = services_controller.get_services_limit(
+            project_id)
+
+        return service_limits
 
 
 class AdminServiceController(base.Controller, hooks.HookController):
@@ -156,3 +210,4 @@ class AdminController(base.Controller, hooks.HookController):
         self.__class__.services = AdminServiceController(driver)
         self.__class__.provider = ProviderController(driver)
         self.__class__.domains = DomainController(driver)
+        self.__class__.limits = OperatorServiceLimitController(driver)
