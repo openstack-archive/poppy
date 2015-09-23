@@ -35,13 +35,21 @@ LIMITS_OPTIONS = [
 
 LIMITS_GROUP = 'drivers:transport:limits'
 
+_MAX_SERVICE_OPTIONS = [
+    cfg.IntOpt('max_services', default=20,
+               help='Default max service per project_id')
+]
+
+_MAX_SERVICE_GROUP = 'drivers:storage'
+
 
 @ddt.ddt
 class ServiceControllerTest(base.FunctionalTest):
 
     def setUp(self):
         super(ServiceControllerTest, self).setUp()
-
+        self.conf.register_opts(_MAX_SERVICE_OPTIONS, group=_MAX_SERVICE_GROUP)
+        self.max_services = self.conf[_MAX_SERVICE_GROUP].max_services
         self.project_id = str(uuid.uuid1())
         self.service_name = str(uuid.uuid1())
         self.flavor_id = str(uuid.uuid1())
@@ -184,6 +192,34 @@ class ServiceControllerTest(base.FunctionalTest):
                                      'Content-Type': 'application/json',
                                      'X-Project-ID': self.project_id})
         self.assertEqual(202, response.status_code)
+
+    @ddt.file_data("data_create_service.json")
+    def test_create_hit_service_limits(self, service_json):
+
+        # override the hardcoded flavor_id in the ddt file with
+        # a custom one defined in setUp()
+        service_json['flavor_id'] = self.flavor_id
+        project_id = str(uuid.uuid4())
+        service_urls = []
+        for _ in range(self.max_services):
+            # create with good data
+            response = self.app.post('/v1.0/services',
+                                     params=json.dumps(service_json),
+                                     headers={
+                                         'Content-Type': 'application/json',
+                                         'X-Project-ID': project_id})
+            service_urls.append(response.headers['Location'])
+            self.assertEqual(202, response.status_code)
+
+        # Now create another service, and receive a 403
+
+        response = self.app.post('/v1.0/services',
+                                 params=json.dumps(service_json),
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'X-Project-ID': project_id},
+                                 expect_errors=True)
+        self.assertEqual(403, response.status_code)
 
     def test_patch_shared_ssl_domain(self):
 

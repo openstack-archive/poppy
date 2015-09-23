@@ -16,41 +16,25 @@
 from poppy.transport.validators import schema_base
 
 
-class ServiceActionSchema(schema_base.SchemaBase):
+class ServiceLimitSchema(schema_base.SchemaBase):
 
-    '''JSON Schmema validation for /admin/services/action.'''
+    '''JSON Schmema validation for /admin/limits/{project_id}.'''
 
     schema = {
-        'service_action': {
+        'service_limit': {
             'POST': {
                 'type': [{
                     'additionalProperties': False,
                     'properties': {
                         'project_id': {
                             'type': 'string',
-                            'required': True
-                        },
-                        'action': {
-                            'enum': ['delete', 'enable', 'disable'],
-                            'required': True
-                        }
-                    }
-                },
-                    {
-                    'additionalProperties': False,
-                    'properties': {
-                        'project_id': {
-                            'type': 'string',
-                            'required': True
-                        },
-                        'action': {
-                            'enum': ['limit_services'],
+                            'pattern': '([a-zA-Z0-9_\-\.]{1,256})',
                             'required': True
                         },
                         'limit': {
                             'type': 'integer',
-                            'required': True,
-                            'minimum': 0
+                            'minimum': 0,
+                            'required': True
                         }
                     }
                 }]

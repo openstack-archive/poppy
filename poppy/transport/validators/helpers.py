@@ -178,6 +178,12 @@ def is_valid_origin(origin):
             is_valid_ip_address(origin.get('origin')))
 
 
+@decorators.validation_function
+def is_valid_project_id(project_id):
+    project_id_regex = '([a-zA-Z0-9_\-\.]{1,256})'
+    return re.match(project_id_regex, project_id) is not None
+
+
 def is_root_domain(domain):
     domain_name = domain.get('domain')
 
