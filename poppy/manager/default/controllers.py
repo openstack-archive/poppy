@@ -17,9 +17,11 @@ from poppy.manager.default import flavors
 from poppy.manager.default import health
 from poppy.manager.default import home
 from poppy.manager.default import services
+from poppy.manager.default import ssl_certificate
 
 
 Home = home.DefaultHomeController
 Flavors = flavors.DefaultFlavorsController
 Health = health.DefaultHealthController
 Services = services.DefaultServicesController
+SSLCertificate = ssl_certificate.DefaultSSLCertificateController
