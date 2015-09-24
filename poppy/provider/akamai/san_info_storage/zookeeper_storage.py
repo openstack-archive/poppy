@@ -34,7 +34,7 @@ AKAMAI_OPTIONS = [
         ' path for san cert info'),
 ]
 
-AKAMAI_GROUP = 'drivers:provider:akamai'
+AKAMAI_GROUP = 'drivers:provider:akamai:storage'
 
 
 class ZookeeperSanInfoStorage(base.BaseAkamaiSanInfoStorage):

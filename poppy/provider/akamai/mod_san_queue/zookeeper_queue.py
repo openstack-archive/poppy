@@ -35,7 +35,7 @@ AKAMAI_OPTIONS = [
         'for mod_san_queue'),
 ]
 
-AKAMAI_GROUP = 'drivers:provider:akamai'
+AKAMAI_GROUP = 'drivers:provider:akamai:queue'
 
 
 class ZookeeperModSanQueue(base.ModSanQueue):
