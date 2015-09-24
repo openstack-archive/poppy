@@ -1032,8 +1032,8 @@
     },
     "invalid_root_domain": {
         "service_name": "invalid_root_domain",
-        "domain_list": [{"domain": "www.mywebsite.com"},
-                        {"domain": "blog.mywebsite.com"}],
+        "domain_list": [{"domain": "mywebsite.com"},
+                        {"domain": "blog.com"}],
         "origin_list": [{"origin": "myorigin.com",
                          "port": 443,
                          "ssl": false}],
