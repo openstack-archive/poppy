@@ -45,6 +45,7 @@ class TestCreateService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
+            if item.get('certificate') != "shared":
                 item['domain'] = self.generate_random_string(
                     prefix='www.api-test-domain') + '.com'
         origin_list = test_data['origin_list']
@@ -82,6 +83,21 @@ class TestCreateService(providers.TestProviderBase):
         for item in domain_list:
             if 'protocol' not in item:
                 item['protocol'] = 'http'
+            elif item['protocol'] == 'https':
+                matched_domain_in_body = next(b_item for b_item
+                                              in body['domains']
+                                              if (
+                                                  b_item['domain'] ==
+                                                  item['domain'])
+                                              or (b_item.get('certificate') ==
+                                                  'shared' and
+                                                  item['domain'] ==
+                                                  b_item['domain']
+                                                  .split('.')[0]))
+                if item['certificate'] == 'shared':
+                    item['domain'] = matched_domain_in_body['domain']
+                item["certificate_status"] = (
+                    matched_domain_in_body["certificate_status"])
         self.assertEqual(body['domains'], domain_list)
 
         for item in origin_list:
@@ -137,33 +153,6 @@ class TestCreateService(providers.TestProviderBase):
                     msg='Restrictions Lists Not Correct for {0} service name '
                         '{1}'.format(provider, self.service_name))
 
-    @ddt.file_data('data_create_service_negative.json')
-    def test_create_service_negative(self, test_data):
-
-        service_name = test_data['service_name']
-        domain_list = test_data['domain_list']
-        for item in domain_list:
-            if len(item['domain']) > 2:
-                item['domain'] = str(uuid.uuid1()) + item['domain']
-
-        origin_list = test_data['origin_list']
-        caching_list = test_data['caching_list']
-        restrictions_list = test_data['restrictions_list']
-        if 'flavor_id' in test_data:
-            flavor_id = test_data['flavor_id']
-        else:
-            flavor_id = self.flavor_id
-
-        resp = self.client.create_service(service_name=service_name,
-                                          domain_list=domain_list,
-                                          origin_list=origin_list,
-                                          caching_list=caching_list,
-                                          restrictions_list=restrictions_list,
-                                          flavor_id=flavor_id)
-        if 'location' in resp.headers:
-            self.service_url = resp.headers['location']
-
-        self.assertEqual(resp.status_code, 400)
 
     def tearDown(self):
         if self.service_url != '':

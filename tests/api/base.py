@@ -179,7 +179,7 @@ class TestBase(fixtures.BaseTestFixture):
                                               if (
                                                   b_item['domain'] ==
                                                   item['domain'])
-                                              or (b_item['certificate'] ==
+                                              or (b_item.get('certificate') ==
                                                   'shared' and
                                                   item['domain'].split('.')[0]
                                                   == b_item['domain']))
