@@ -38,6 +38,12 @@ TASKFLOW_OPTIONS = [
                 help='default persistent backend server host'),
     cfg.IntOpt('persistent_backend_port', default=2181, help='default'
                ' default persistent backend server port (e.g: ampq)'),
+    cfg.StrOpt('poppy_service_worker_path',
+               default="/taskflow/jobs/poppy_service_jobs",
+               help='zookeeper path for servoce jobs'),
+    cfg.StrOpt('poppy_service_worker_jobboard',
+               default='poppy_service_jobs',
+               help='name of jobboard associated with service worker jobs'),
 ]
 
 TASKFLOW_GROUP = 'drivers:distributed_task:taskflow'
@@ -59,7 +65,7 @@ class TaskFlowDistributedTaskDriver(base.Driver):
             # This topic could become more complicated
             "board": self.distributed_task_conf.jobboard_backend_type,
             "hosts": job_backends_hosts,
-            "path": "/taskflow/jobs/poppy_service_jobs",
+            "path":  self.distributed_task_conf.poppy_service_worker_path,
         }
 
         persistence_backends_hosts = ','.join(['%s:%s' % (
@@ -82,7 +88,7 @@ class TaskFlowDistributedTaskDriver(base.Driver):
 
     def job_board(self, conf, persistence, **kwargs):
         return job_backends.backend(
-            'poppy_service_jobs',
+            self.distributed_task_conf.poppy_service_worker_jobboard,
             conf.copy(), persistence=persistence)
 
     @property
