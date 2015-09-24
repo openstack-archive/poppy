@@ -214,7 +214,6 @@ class TestPatchSSLService(base.TestBase):
         return self.generate_random_string(prefix='www.api-test-ssl') + '.com'
 
     @ddt.file_data('data_patch_service_ssl_domain.json')
-    @ddt.file_data('failed.json')
     def test_patch_ssl_domain(self, test_data):
 
         for item in test_data:
