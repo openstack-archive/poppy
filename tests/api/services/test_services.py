@@ -45,6 +45,7 @@ class TestCreateService(providers.TestProviderBase):
 
         domain_list = test_data['domain_list']
         for item in domain_list:
+            if item.get('certificate') != "shared":
                 item['domain'] = self.generate_random_string(
                     prefix='www.api-test-domain') + '.com'
         origin_list = test_data['origin_list']
@@ -82,6 +83,21 @@ class TestCreateService(providers.TestProviderBase):
         for item in domain_list:
             if 'protocol' not in item:
                 item['protocol'] = 'http'
+            elif item['protocol'] == 'https':
+                matched_domain_in_body = next(b_item for b_item
+                                              in body['domains']
+                                              if (
+                                                  b_item['domain'] ==
+                                                  item['domain'])
+                                              or (b_item.get('certificate') ==
+                                                  'shared' and
+                                                  item['domain'] ==
+                                                  b_item['domain']
+                                                  .split('.')[0]))
+                if item['certificate'] == 'shared':
+                    item['domain'] = matched_domain_in_body['domain']
+                item["certificate_status"] = (
+                    matched_domain_in_body["certificate_status"])
         self.assertEqual(body['domains'], domain_list)
 
         for item in origin_list:
