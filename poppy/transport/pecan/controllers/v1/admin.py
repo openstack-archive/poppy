@@ -103,11 +103,14 @@ class OperatorServiceActionController(base.Controller, hooks.HookController):
         service_state_json = json.loads(pecan.request.body.decode('utf-8'))
         service_action = service_state_json.get('action', None)
         project_id = service_state_json.get('project_id', None)
-
+        domain_name = service_state_json.get('domain', None)
         services_controller = self._driver.manager.services_controller
 
         try:
-            services_controller.services_action(project_id, service_action)
+            services_controller.services_action(project_id,
+                                                service_action,
+                                                domain_name)
+
         except Exception as e:
             pecan.abort(404, detail=(
                         'Services action {0} on tenant: {1} failed, '
