@@ -15,6 +15,7 @@
 
 from oslo_config import cfg
 
+from poppy.provider.akamai import driver
 from poppy.provider.akamai.san_info_storage import zookeeper_storage
 
 
@@ -24,7 +25,7 @@ CONF.register_cli_opts(zookeeper_storage.AKAMAI_OPTIONS,
 CONF.register_cli_opt(
     cfg.ListOpt('san_cert_cnames',
                 help='A list of san certs cnamehost names'),
-    group=zookeeper_storage.AKAMAI_GROUP)
+    group=driver.AKAMAI_GROUP)
 CONF(prog='akamai-config')
 
 
@@ -36,7 +37,7 @@ def main():
         'ipVersion': 'ipv4',
         'slot_deployment_klass': 'esslType',
         'jobId': None}
-    for san_cert_name in CONF[zookeeper_storage.AKAMAI_GROUP].san_cert_cnames:
+    for san_cert_name in CONF[driver.AKAMAI_GROUP].san_cert_cnames:
         print("Upsert SAN info for :%s" % (san_cert_name))
         for attr in san_attribute_default_list:
             user_input = None
@@ -62,8 +63,8 @@ def main():
 if __name__ == "__main__":
     '''example usage:
     python upsert_san_cert_info.py '
-    '--drivers:provider:akamai-storage_backend_type zookeeper'
-    '--drivers:provider:akamai-storage_backend_host 192.168.59.103'
+    '--drivers:provider:akamai:storage-storage_backend_type zookeeper'
+    '--drivers:provider:akamai:storage-storage_backend_host 192.168.59.103'
     '--drivers:provider:akamai-san_cert_cnames'
     secure1.san1.altcdn.com,secure2.san1.altcdn.com'''
     main()
