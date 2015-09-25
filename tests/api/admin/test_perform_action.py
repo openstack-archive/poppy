@@ -137,6 +137,47 @@ class TestHttpService(base.TestBase):
         self.assertEqual(
             sorted(after_patch_body), sorted(self.before_patch_body))
 
+    @ddt.data('enable', 'disable')
+    def test_action_with_domain(self, action):
+        domain = self.domain_list[0]["domain"]
+        resp = self.operator_client.admin_service_action(
+            action=action,
+            domain=domain)
+        self.assertEqual(resp.status_code, 202)
+
+        if action == 'enable':
+            expected_new_state = self.before_patch_state
+        else:
+            expected_new_state = 'disabled'
+
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status=expected_new_state,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        resp = self.client.get_service(location=self.service_url)
+        after_patch_body = resp.json()
+        after_patch_state = after_patch_body['status']
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(after_patch_state, expected_new_state)
+
+        del self.before_patch_body['status']
+        del after_patch_body['status']
+
+        self.assertEqual(
+            sorted(after_patch_body), sorted(self.before_patch_body))
+
+    @ddt.data('enable', 'disable')
+    def test_action_with_domain_negative_non_existing_domain(self, action):
+        domain = self.generate_random_string(
+            prefix='www.api-test-domain') + '.com'
+        resp = self.operator_client.admin_service_action(
+            action=action,
+            domain=domain)
+        self.assertEqual(resp.status_code, 404)
+
     def test_action_delete(self):
         resp = self.operator_client.admin_service_action(
             project_id=self.user_project_id, action='delete')
@@ -150,6 +191,27 @@ class TestHttpService(base.TestBase):
         self.assertEqual(after_patch_state, 'delete_in_progress')
 
         self.client.wait_for_service_delete(location=self.service_url)
+        resp = self.client.get_service(location=self.service_url)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_action_delete_with_domain(self):
+        domain = self.domain_list[0]["domain"]
+        resp = self.operator_client.admin_service_action(
+            project_id=self.user_project_id, action='delete',
+            domain=domain)
+        self.assertEqual(resp.status_code, 202)
+
+        resp = self.client.get_service(location=self.service_url)
+        after_patch_body = resp.json()
+        after_patch_state = after_patch_body['status']
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(after_patch_state, 'delete_in_progress')
+
+        self.client.wait_for_service_delete(
+            location=self.service_url,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
         resp = self.client.get_service(location=self.service_url)
         self.assertEqual(resp.status_code, 404)
 
@@ -324,6 +386,47 @@ class TestSharedCertService(base.TestBase):
         self.assertEqual(
             sorted(after_patch_body), sorted(self.before_patch_body))
 
+    @ddt.data('enable', 'disable')
+    def test_action_with_domain(self, action):
+        domain = self.domain_list[0]["domain"]
+        resp = self.operator_client.admin_service_action(
+            project_id=self.user_project_id, action=action,
+            domain=domain)
+        self.assertEqual(resp.status_code, 202)
+
+        if action == 'enable':
+            expected_new_state = self.before_patch_state
+        else:
+            expected_new_state = 'disabled'
+
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status=expected_new_state,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        resp = self.client.get_service(location=self.service_url)
+        after_patch_body = resp.json()
+        after_patch_state = after_patch_body['status']
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(after_patch_state, expected_new_state)
+
+        del self.before_patch_body['status']
+        del after_patch_body['status']
+
+        self.assertEqual(
+            sorted(after_patch_body), sorted(self.before_patch_body))
+
+    @ddt.data('enable', 'disable')
+    def test_action_with_domain_negative_non_existing_domain(self, action):
+        domain = self.generate_random_string(
+            prefix='www.api-test-domain') + '.com'
+        resp = self.operator_client.admin_service_action(
+            project_id=self.user_project_id, action=action,
+            domain=domain)
+        self.assertEqual(resp.status_code, 404)
+
     def test_action_disabled_to_enabled(self):
         resp = self.operator_client.admin_service_action(
             project_id=self.user_project_id, action='disable')
@@ -363,6 +466,27 @@ class TestSharedCertService(base.TestBase):
     def test_action_delete(self):
         resp = self.operator_client.admin_service_action(
             project_id=self.user_project_id, action='delete')
+        self.assertEqual(resp.status_code, 202)
+
+        resp = self.client.get_service(location=self.service_url)
+        after_patch_body = resp.json()
+        after_patch_state = after_patch_body['status']
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(after_patch_state, 'delete_in_progress')
+
+        self.client.wait_for_service_delete(
+            location=self.service_url,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+        resp = self.client.get_service(location=self.service_url)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_action_delete_with_domain(self):
+        domain = self.domain_list[0]["domain"]
+        resp = self.operator_client.admin_service_action(
+            action='delete',
+            domain=domain)
         self.assertEqual(resp.status_code, 202)
 
         resp = self.client.get_service(location=self.service_url)
@@ -502,9 +626,71 @@ class TestSanCertService(base.TestBase):
         self.assertEqual(
             sorted(after_patch_body), sorted(self.before_patch_body))
 
+    @ddt.data('enable', 'disable')
+    def test_action_with_domain(self, action):
+        domain = self.domain_list[0]["domain"]
+        resp = self.operator_client.admin_service_action(
+            project_id=self.user_project_id, action=action,
+            domain=domain)
+        self.assertEqual(resp.status_code, 202)
+
+        if action == 'enable':
+            expected_new_state = self.before_patch_state
+        else:
+            expected_new_state = 'disabled'
+
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status=expected_new_state,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        resp = self.client.get_service(location=self.service_url)
+        after_patch_body = resp.json()
+        after_patch_state = after_patch_body['status']
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(after_patch_state, expected_new_state)
+
+        del self.before_patch_body['status']
+        del after_patch_body['status']
+
+        self.assertEqual(
+            sorted(after_patch_body), sorted(self.before_patch_body))
+
+    @ddt.data('enable', 'disable')
+    def test_action_with_domain_negative_non_existing_domain(self, action):
+        domain = self.generate_random_string(
+            prefix='www.api-test-domain') + '.com'
+        resp = self.operator_client.admin_service_action(
+            action=action,
+            domain=domain)
+        self.assertEqual(resp.status_code, 404)
+
     def test_action_delete(self):
         resp = self.operator_client.admin_service_action(
             project_id=self.user_project_id, action='delete')
+        self.assertEqual(resp.status_code, 202)
+
+        resp = self.client.get_service(location=self.service_url)
+        after_patch_body = resp.json()
+        after_patch_state = after_patch_body['status']
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(after_patch_state, 'delete_in_progress')
+
+        self.client.wait_for_service_delete(
+            location=self.service_url,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+        resp = self.client.get_service(location=self.service_url)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_action_delete_with_domain(self):
+        domain = self.domain_list[0]["domain"]
+        resp = self.operator_client.admin_service_action(
+            action='delete',
+            domain=domain)
         self.assertEqual(resp.status_code, 202)
 
         resp = self.client.get_service(location=self.service_url)
@@ -680,9 +866,71 @@ class TestCustomCertService(base.TestBase):
         self.assertEqual(
             sorted(after_patch_body), sorted(self.before_patch_body))
 
+    @ddt.data('enable', 'disable')
+    def test_action_with_domain(self, action):
+        domain = self.domain_list[0]["domain"]
+        resp = self.operator_client.admin_service_action(
+            action=action,
+            domain=domain)
+        self.assertEqual(resp.status_code, 202)
+
+        if action == 'enable':
+            expected_new_state = self.before_patch_state
+        else:
+            expected_new_state = 'disabled'
+
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status=expected_new_state,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        resp = self.client.get_service(location=self.service_url)
+        after_patch_body = resp.json()
+        after_patch_state = after_patch_body['status']
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(after_patch_state, expected_new_state)
+
+        del self.before_patch_body['status']
+        del after_patch_body['status']
+
+        self.assertEqual(
+            sorted(after_patch_body), sorted(self.before_patch_body))
+
+    @ddt.data('enable', 'disable')
+    def test_action_with_domain_negative_non_existing_domain(self, action):
+        domain = self.generate_random_string(
+            prefix='www.api-test-domain') + '.com'
+        resp = self.operator_client.admin_service_action(
+            action=action,
+            domain=domain)
+        self.assertEqual(resp.status_code, 404)
+
     def test_action_delete(self):
         resp = self.operator_client.admin_service_action(
             project_id=self.user_project_id, action='delete')
+        self.assertEqual(resp.status_code, 202)
+
+        resp = self.client.get_service(location=self.service_url)
+        after_patch_body = resp.json()
+        after_patch_state = after_patch_body['status']
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(after_patch_state, 'delete_in_progress')
+
+        self.client.wait_for_service_delete(
+            location=self.service_url,
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+        resp = self.client.get_service(location=self.service_url)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_action_delete_with_domain(self):
+        domain = self.domain_list[0]["domain"]
+        resp = self.operator_client.admin_service_action(
+            action='delete',
+            domain=domain)
         self.assertEqual(resp.status_code, 202)
 
         resp = self.client.get_service(location=self.service_url)

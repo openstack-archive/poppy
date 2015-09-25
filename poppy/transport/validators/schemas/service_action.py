@@ -13,28 +13,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
+
 from poppy.transport.validators import schema_base
 
 
 class ServiceActionSchema(schema_base.SchemaBase):
 
-    '''JSON Schmema validation for /admin/services/action.'''
+    """JSON Schmema validation for /admin/services/action."""
 
     schema = {
         'service_action': {
             'POST': {
-                'type': 'object',
-                'additionalProperties': False,
-                'properties': {
-                    'project_id': {
-                        'type': 'string',
-                        'required': True
-                    },
-                    'action': {
-                        'enum': ['delete', 'enable', 'disable'],
-                        'required': True
+                'type': [{
+                    'additionalProperties': False,
+                    'properties': {
+                        'project_id': {
+                            'type': 'string',
+                            'required': True
+                        },
+                        'action': {
+                            'enum': ['delete', 'enable', 'disable'],
+                            'required': True
+                        }
                     }
-                }
+                },
+                    {
+                    'additionalProperties': False,
+                    'properties': {
+                        'action': {
+                            'enum': ['delete', 'enable', 'disable'],
+                            'required': True
+                        },
+                        'domain': {
+                            'type': 'string',
+                            'required': True,
+                            'pattern': re.compile('^((?=[a-z0-9-]'
+                                                  '{1,63}\.)[a-z0-9]+'
+                                                  '(-[a-z0-9]+)*\.)+'
+                                                  '[a-z]{2,63}$')
+                        }
+                    }
+                }]
             }
         }
     }

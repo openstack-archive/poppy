@@ -61,15 +61,21 @@ class PatchService(base.AutoMarshallingModel):
 class ServiceAction(base.AutoMarshallingModel):
     """Marshalling for Action on Services requests."""
 
-    def __init__(self, project_id, action):
+    def __init__(self, action, project_id=None, domain=None):
         super(ServiceAction, self).__init__()
 
         self.project_id = project_id
         self.action = action
+        self.domain = domain
 
     def _obj_to_json(self):
         service_action_request = {
-            "project_id": self.project_id, "action": self.action}
+            "action": self.action
+        }
+        if self.domain:
+            service_action_request["domain"] = self.domain
+        if self.project_id:
+            service_action_request["project_id"] = self.project_id
         return json.dumps(service_action_request)
 
 
