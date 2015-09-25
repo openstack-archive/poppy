@@ -297,53 +297,69 @@ class DefaultServicesController(base.ServicesController):
 
         return
 
-    def services_action(self, project_id, action):
+    def _action_per_service_obj(self, project_id, action, service_obj):
+
+        kwargs = {
+            'project_id': project_id,
+            'service_obj': json.dumps(service_obj.to_dict()),
+            'time_seconds': self.determine_sleep_times()
+        }
+
+        try:
+            if action == 'delete':
+                LOG.info('Deleting  service: %s, project_id: %s' % (
+                    service_obj.service_id, project_id))
+                self.delete(project_id, service_obj.service_id)
+            elif action == 'enable':
+                LOG.info('Enabling  service: %s, project_id: %s' % (
+                    service_obj.service_id, project_id))
+                kwargs['state'] = 'enabled'
+                self.distributed_task_controller.submit_task(
+                    update_service_state.enable_service, **kwargs)
+            elif action == 'disable':
+                LOG.info('Disabling  service: %s, project_id: %s' % (
+                    service_obj.service_id, project_id))
+                kwargs['state'] = 'disabled'
+                self.distributed_task_controller.submit_task(
+                    update_service_state.disable_service, **kwargs)
+        except Exception as e:
+            # If one service's action failed, we log it and not
+            # impact other services' action
+            LOG.warning('Perform action %s on service: %s,'
+                        ' project_id: %s failed, reason: %s' % (
+                            action,
+                            service_obj.service_id,
+                            project_id,
+                            str(e)))
+
+    def services_action(self, project_id, action, domain=None):
         """find services of a .
 
         :param project_id
-        :param state
+        :param action
+        :param domain
 
         :raises ValueError
         """
         # list all the services of for this project_id
         # 10 per batch
+
+        if domain:
+            service_obj = self.get_service_by_domain_name(domain_name=domain)
+            self._action_per_service_obj(project_id=project_id,
+                                         action=action,
+                                         service_obj=service_obj)
+            return
+
         marker = None
         service_batch = self.storage_controller.list(project_id, marker, 10)
         while len(service_batch) > 0:
             marker = service_batch[-1].service_id
             # process previous batch
             for service_obj in service_batch:
-                kwargs = {
-                    'project_id': project_id,
-                    'service_obj': json.dumps(service_obj.to_dict()),
-                    'time_seconds': self.determine_sleep_times()
-                }
-                try:
-                    if action == 'delete':
-                        LOG.info('Deleting  service: %s, project_id: %s' % (
-                            service_obj.service_id, project_id))
-                        self.delete(project_id, service_obj.service_id)
-                    elif action == 'enable':
-                        LOG.info('Enabling  service: %s, project_id: %s' % (
-                            service_obj.service_id, project_id))
-                        kwargs['state'] = 'enabled'
-                        self.distributed_task_controller.submit_task(
-                            update_service_state.enable_service, **kwargs)
-                    elif action == 'disable':
-                        LOG.info('Disabling  service: %s, project_id: %s' % (
-                            service_obj.service_id, project_id))
-                        kwargs['state'] = 'disabled'
-                        self.distributed_task_controller.submit_task(
-                            update_service_state.disable_service, **kwargs)
-                except Exception as e:
-                    # If one service's action failed, we log it and not
-                    # impact other services' action
-                    LOG.warning('Perform action %s on service: %s,'
-                                ' project_id: %s failed, reason: %s' % (
-                                    action,
-                                    service_obj.service_id,
-                                    project_id,
-                                    str(e)))
+                self._action_per_service_obj(project_id=project_id,
+                                             action=action,
+                                             service_obj=service_obj)
             service_batch = self.storage_controller.list(project_id, marker,
                                                          10)
 
