@@ -18,5 +18,9 @@
         "cert_type": "san",
         "domain_name": "www.abc.com",
         "flavor_id": "not_a_valid_flavor_id"
+    },
+    "too_short_domain": {
+        "cert_type": "san",
+        "domain_name": "ab"
     }
 }
