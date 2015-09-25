@@ -46,3 +46,30 @@ class Test(base.FunctionalTest):
                                  })
 
         self.assertEqual(response.status_code, 202)
+
+    def test_services_action_with_domain(self):
+        response = self.app.post('/v1.0/admin/services/action',
+                                 params=json.dumps({
+                                     'project_id': str(uuid.uuid1()),
+                                     'action': 'enable',
+                                     'domain': 'happy.strawberries.com'
+                                 }),
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'X-Project-ID': str(uuid.uuid1())
+                                 })
+
+        self.assertEqual(response.status_code, 202)
+
+    def test_services_action_with_domain_and_no_actions(self):
+        response = self.app.post('/v1.0/admin/services/action',
+                                 params=json.dumps({
+                                     'project_id': str(uuid.uuid1()),
+                                     'domain': 'sad.strawberries.com'
+                                 }),
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'X-Project-ID': str(uuid.uuid1())
+                                 })
+
+        self.assertEqual(response.status_code, 400)
