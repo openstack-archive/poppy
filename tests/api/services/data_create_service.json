@@ -372,37 +372,36 @@
                          }],
          "caching_list": []
      },
-    "multi_protocol_domains": {
-        "name": "multi_protocol_domains",
-        "domain_list": [{"domain": "sharedsslwebsite",
-                         "protocol": "https",
-                         "certificate": "shared"},
-                        {"domain": "http.domain.com"},
-                        {"domain": "san.domain.com",
-                         "protocol": "https", "certificate": "san"},
-                        {"domain": "custom.domain.com",
-                         "protocol": "https", "certificate": "custom"}],
-        "origin_list": [{"origin": "mywebsite1.com",
-                         "port": 443,
-                         "ssl": true,
-                         "rules": [{ "name" : "default", "request_url" : "/*"}],
-                         "hostheadertype": "custom",
-                         "hostheadervalue": "www.customweb.com"
-                         },
-                         {"origin": "myotherorigin.com"}],
-        "caching_list": [{"name": "default", "ttl": 3600},
-                         {"name": "home",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}],
-        "restrictions_list": [
-                        {"name": "test",
-                        "rules": [{"name": "only me",
-                        "referrer": "www.mywebsite.com",
-                        "request_url": "/click_me"}]}
+     "multi_protocol_domains": {
+         "name": "multi_protocol_domains",
+         "domain_list": [{"domain": "sharedsslwebsite",
+                          "protocol": "https",
+                          "certificate": "shared"},
+                         {"domain": "http.domain.com"},
+                         {"domain": "san.domain.com",
+                          "protocol": "https", "certificate": "san"},
+                         {"domain": "custom.domain.com",
+                          "protocol": "https", "certificate": "custom"}],
+         "origin_list": [{"origin": "myotherorigin.com",
+                          "port": 80,
+                          "ssl": false,
+                          "rules": [{ "name" : "default", "request_url" : "/*"}]
+                          }],
+         "caching_list": [{"name": "default", "ttl": 3600,
+                           "rules": [{"request_url": "/*", "name": "default"}]
+                          },
+                          {"name": "home",
+                           "ttl": 1200,
+                           "rules": [{"name" : "index",
+                                      "request_url" : "/index.htm"}]}],
+         "restrictions_list": [
+                          {"name": "test",
+                           "rules": [{"name": "only me",
+                           "referrer": "www.mywebsite.com",
+                           "request_url": "/click_me"}]}
         ],
         "log_delivery": {"enabled": true}
-    },
+     },
      "custom_hostheadertype": {
          "name": "custom_hostheadertype",
          "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"}],
