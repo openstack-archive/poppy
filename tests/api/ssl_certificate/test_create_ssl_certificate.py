@@ -58,5 +58,13 @@ class TestCreateSSLCertificate(base.TestBase):
             domain_name=domain_name,
             flavor_id=flavor_id
         )
-
         self.assertEqual(resp.status_code, 202)
+
+    def tearDown(self):
+        # @todo(malini): Add delete cert when the endpoint is ready.
+        # self.client.delete_ssl_certificate(
+        #     cert_type=cert_type,
+        #     domain_name=domain_name,
+        #     flavor_id=flavor_id
+        # )
+        super(TestCreateSSLCertificate, self).tearDown()
