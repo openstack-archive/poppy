@@ -29,7 +29,11 @@ domain_https = {
         'domain': {'type': 'string', 'format': 'uri'},
         'protocol': {'type': 'string', 'enum': ['https']},
         'certificate':
-            {'type': 'string', 'enum': ['shared', 'san', 'custom']}},
+            {'type': 'string', 'enum': ['shared', 'san', 'custom']},
+        'certificate_status':
+            {'type': 'string', 'enum': ['deployed',
+                                        'create_in_progress',
+                                        'failed']}},
     'required': ['domain', 'protocol', 'certificate'],
     'additionalProperties': False
 }

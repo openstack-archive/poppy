@@ -639,12 +639,15 @@ class ServicesController(base.ServicesController):
             provider_service_id = provider_detail_dict.get('id', None)
             access_urls = provider_detail_dict.get("access_urls", [])
             status = provider_detail_dict.get("status", u'creating')
+            domains_certificate_status = (
+                provider_detail_dict.get('domains_certificate_status', {}))
             error_info = provider_detail_dict.get("error_info", None)
             error_message = provider_detail_dict.get("error_message", None)
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
                 access_urls=access_urls,
                 status=status,
+                domains_certificate_status=domains_certificate_status,
                 error_info=error_info,
                 error_message=error_message)
             results[provider_name] = provider_detail_obj
@@ -681,7 +684,7 @@ class ServicesController(base.ServicesController):
         :param provider_details
         """
         provider_detail_dict = {}
-        for provider_name in provider_details:
+        for provider_name in sorted(provider_details.keys()):
             the_provider_detail_dict = collections.OrderedDict()
             the_provider_detail_dict["id"] = (
                 provider_details[provider_name].provider_service_id)
@@ -691,6 +694,9 @@ class ServicesController(base.ServicesController):
                 provider_details[provider_name].status)
             the_provider_detail_dict["name"] = (
                 provider_details[provider_name].name)
+            the_provider_detail_dict["domains_certificate_status"] = (
+                provider_details[provider_name].domains_certificate_status.
+                to_dict())
             the_provider_detail_dict["error_info"] = (
                 provider_details[provider_name].error_info)
             the_provider_detail_dict["error_message"] = (
@@ -814,11 +820,14 @@ class ServicesController(base.ServicesController):
             provider_service_id = provider_detail_dict.get('id', None)
             access_urls = provider_detail_dict.get('access_urls', [])
             status = provider_detail_dict.get('status', u'unknown')
+            domains_certificate_status = (
+                provider_detail_dict.get('domains_certificate_status', {}))
             error_message = provider_detail_dict.get('error_message', None)
 
             provider_detail_obj = provider_details.ProviderDetail(
                 provider_service_id=provider_service_id,
                 access_urls=access_urls,
+                domains_certificate_status=domains_certificate_status,
                 status=status,
                 error_message=error_message)
             provider_details_dict[provider_name] = provider_detail_obj

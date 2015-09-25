@@ -87,9 +87,21 @@ class TestCreateSSLService(base.TestBase):
         for item in domain_list:
             if 'protocol' not in item:
                 item['protocol'] = 'http'
-            elif item['certificate'] == 'shared':
-                body['domains'][0]['domain'] = \
-                    body['domains'][0]['domain'].split('.')[0]
+            elif item['protocol'] == 'https':
+                matched_domain_in_body = next(b_item for b_item
+                                              in body['domains']
+                                              if (
+                                                  b_item['domain'] ==
+                                                  item['domain'])
+                                              or (b_item['certificate'] ==
+                                                  'shared' and
+                                                  item['domain'] ==
+                                                  b_item['domain']
+                                                  .split('.')[0]))
+                if item['certificate'] == 'shared':
+                    item['domain'] = matched_domain_in_body['domain']
+                item["certificate_status"] = (
+                    matched_domain_in_body["certificate_status"])
         self.assertEqual(body['domains'], domain_list)
 
         for item in origin_list:
