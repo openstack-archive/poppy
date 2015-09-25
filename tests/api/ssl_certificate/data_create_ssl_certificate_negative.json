@@ -18,5 +18,21 @@
         "cert_type": "san",
         "domain_name": "www.abc.com",
         "flavor_id": "not_a_valid_flavor_id"
+    },
+    "too_short_domain": {
+        "cert_type": "san",
+        "domain_name": "ab"
+    },
+    "too_long_domain": {
+        "cert_type": "san",
+        "domain_name": "too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name"
+    },
+    "empty_domain_name": {
+        "cert_type": "san",
+        "domain_name": ""
+    },
+    "empty_cert": {
+        "cert_type": "",
+        "domain_name": "meowmeow.com"
     }
 }

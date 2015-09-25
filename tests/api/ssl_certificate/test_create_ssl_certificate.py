@@ -58,5 +58,12 @@ class TestCreateSSLCertificate(base.TestBase):
             domain_name=domain_name,
             flavor_id=flavor_id
         )
-
         self.assertEqual(resp.status_code, 202)
+
+    def tearDown(self):
+        # self.client.create_ssl_certificate(
+        #     cert_type=cert_type,
+        #     domain_name=domain_name,
+        #     flavor_id=flavor_id
+        # )
+        super(TestCreateSSLCertificate, self).tearDown()
