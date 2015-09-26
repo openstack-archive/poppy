@@ -20,11 +20,12 @@ import json
 from akamai import edgegrid
 from oslo_config import cfg
 import requests
+from stevedore import driver
 
+from poppy.common import decorators
 from poppy.openstack.common import log
 from poppy.provider.akamai import controllers
 from poppy.provider.akamai.mod_san_queue import zookeeper_queue
-from poppy.provider.akamai.san_info_storage import zookeeper_storage
 from poppy.provider import base
 
 LOG = log.getLogger(__name__)
@@ -91,6 +92,8 @@ AKAMAI_OPTIONS = [
     cfg.IntOpt('san_cert_hostname_limit', default=80,
                help='default limit on how many hostnames can'
                ' be held by a SAN cert'),
+    cfg.StrOpt('san_info_storage_type',
+               help='Storage type for storing san cert information'),
 
     # related info for SPS && PAPI APIs
     cfg.StrOpt(
@@ -161,15 +164,28 @@ class CDNProvider(base.Driver):
             )
         ])
 
+        self.akamai_sps_api_client = self.akamai_policy_api_client
+
         self.san_cert_cnames = self.akamai_conf.san_cert_cnames
         self.san_cert_hostname_limit = self.akamai_conf.san_cert_hostname_limit
 
-        self.akamai_sps_api_client = self.akamai_policy_api_client
-
-        self.san_info_storage = (
-            zookeeper_storage.ZookeeperSanInfoStorage(self._conf))
         self.mod_san_queue = (
             zookeeper_queue.ZookeeperModSanQueue(self._conf))
+
+    @decorators.lazy_property(write=False)
+    def san_info_storage(self):
+        storage_backend_type = 'poppy.provider.akamai.san_info_storage'
+        storage_backend_name = self.akamai_conf.san_info_storage_type
+
+        args = [self._conf]
+
+        san_info_storage = driver.DriverManager(
+            namespace=storage_backend_type,
+            name=storage_backend_name,
+            invoke_on_load=True,
+            invoke_args=args)
+
+        return san_info_storage.driver
 
     def is_alive(self):
 
