@@ -49,6 +49,10 @@ class ServiceController(base.ServiceBase):
     def mod_san_queue(self):
         return self.driver.mod_san_queue
 
+    @property
+    def san_cert_cnames(self):
+        return self.san_info_storage.list_all_san_cert_names()
+
     def __init__(self, driver):
         super(ServiceController, self).__init__(driver)
 
@@ -58,8 +62,6 @@ class ServiceController(base.ServiceBase):
         self.sps_api_base_url = self.driver.akamai_sps_api_base_url
         self.request_header = {'Content-type': 'application/json',
                                'Accept': 'text/plain'}
-
-        self.san_cert_cnames = self.driver.san_cert_cnames
         self.san_cert_hostname_limit = self.driver.san_cert_hostname_limit
 
     def create(self, service_obj):
@@ -551,7 +553,8 @@ class ServiceController(base.ServiceBase):
                 return self.responder.ssl_certificate_provisioned(None, {
                     'status': 'failed',
                     'san cert': None,
-                    'action': 'No available san cert for %s right now.'
+                    'action': 'No available san cert for %s right now,'
+                              ' or no san cert info available.'
                               ' More provisioning might be needed' %
                               (cert_obj.domain_name)
                 })
