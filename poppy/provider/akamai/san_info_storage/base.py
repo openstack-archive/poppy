@@ -27,11 +27,18 @@ class BaseAkamaiSanInfoStorage(object):
     def __init__(self, conf):
         self._conf = conf
 
+    @abc.abstractmethod
     def get_cert_info(self, san_cert_name):
         raise NotImplementedError
 
+    @abc.abstractmethod
     def save_cert_last_spsid(self, san_cert_name, sps_id_value):
         raise NotImplementedError
 
+    @abc.abstractmethod
     def get_cert_last_spsid(self, san_cert_name):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def list_all_san_cert_names(self):
         raise NotImplementedError
