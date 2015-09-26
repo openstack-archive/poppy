@@ -450,14 +450,15 @@ class TestServices(base.TestCase):
         self.assertTrue(restriction_rule_valid)
 
     def test_create_ssl_certificate_happy_path(self):
+        self.driver.san_cert_cnames = ["secure.san1.poppycdn.com",
+                                       "secure.san2.poppycdn.com"]
+
         controller = services.ServiceController(self.driver)
         data = {
             "cert_type": "san",
             "domain_name": "www.abc.com",
             "flavor_id": "premium"
         }
-        controller.san_cert_cnames = ["secure.san1.poppycdn.com",
-                                      "secure.san2.poppycdn.com"]
 
         lastSpsId = (
             controller.san_info_storage.get_cert_last_spsid(
