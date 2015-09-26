@@ -84,6 +84,9 @@ AKAMAI_OPTIONS = [
     cfg.IntOpt('san_cert_hostname_limit', default=80,
                help='default limit on how many hostnames can'
                ' be held by a SAN cert'),
+    cfg.StrOpt('san_info_storage_type',
+               default='zookeeper',
+               help='Storage type for storing san cert information'),
 
     # related info for SPS && PAPI APIs
     cfg.StrOpt(
