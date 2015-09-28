@@ -37,4 +37,10 @@ def main():
                          str(zk_storage.get_cert_info(san_cert_name))))
 
 if __name__ == "__main__":
+    """
+    example usage:
+    python san_cert_info/list_san_cert_info.py
+    --drivers:provider:akamai:storage-storage_backend_type zookeeper
+    --drivers:provider:akamai:storage-storage_backend_host 192.168.59.103
+    """
     main()
