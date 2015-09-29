@@ -50,7 +50,8 @@ class TestCreateSSLCertificate(base.TestBase):
                           ' be run when commanded')
 
         cert_type = test_data.get('cert_type')
-        domain_name = test_data.get('domain_name')
+        domain_name = self.generate_random_string(
+            prefix=test_data.get('domain_name'))
         flavor_id = test_data.get('flavor_id') or self.flavor_id
 
         resp = self.client.create_ssl_certificate(
