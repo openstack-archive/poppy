@@ -48,6 +48,12 @@ class TestCreateService(providers.TestProviderBase):
             if item.get('certificate') != "shared":
                 item['domain'] = self.generate_random_string(
                     prefix='www.api-test-domain') + '.com'
+            else:
+                # for shared ssl domain we generate a random
+                # string for domain, without dot in it.
+                item['domain'] = self.generate_random_string(
+                    prefix=""
+                )
         origin_list = test_data['origin_list']
         caching_list = test_data['caching_list']
         log_delivery = test_data.get('log_delivery')

@@ -30,7 +30,7 @@ def main():
     v_cassandra_storage = cassandra_storage.CassandraSanInfoStorage(CONF)
 
     san_attribute_default_list = {
-        'issuer': 'symentec',
+        'issuer': 'symantec',
         'ipVersion': 'ipv4',
         'slot_deployment_klass': 'esslType',
         'jobId': None}
