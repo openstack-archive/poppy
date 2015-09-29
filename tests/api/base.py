@@ -149,7 +149,7 @@ class TestBase(fixtures.BaseTestFixture):
             flavor_id=flavor_id,
             log_delivery=log_delivery)
 
-        self.assertEqual(resp.status_code, 202)
+        self.assertEqual(resp.status_code, 202, msg=resp.text)
         self.service_location = resp.headers['location']
         self.client.wait_for_service_status(
             location=self.service_location,

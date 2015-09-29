@@ -212,7 +212,9 @@ class TestCacheInvalidation(base.TestBase):
         # time.sleep(self.purge_config.purge_wait_time)
         self.poppy_client.wait_for_service_status(
             location=self.service_location, status='DEPLOYED')
-        time.sleep(10)
+        # Sleep of 60 sec is in accordance with Akamai's SLA for cache
+        # invalidation.
+        time.sleep(60)
         self.assertCacheStatus(
             cdn_url=cdn_jpg_url, edge_server=edge_server,
             status_list=['TCP_REFRESH_MISS'])
