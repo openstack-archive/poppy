@@ -22,6 +22,7 @@ class ServicesController(base.ServicesBase):
         super(ServicesController, self).__init__(driver)
 
         self.driver = driver
+        self.shared_ssl_shards = 5
 
     def update(self, service_old, service_updates, responders):
         """Default DNS update.
@@ -84,4 +85,5 @@ class ServicesController(base.ServicesBase):
         to be used with manager for shared ssl feature
 
         """
-        return 'scdn023.secure.defaultcdn.com'
+        for shard in range(self.shared_ssl_shards):
+            yield 'scdn{0}.secure.defaultcdn.com'.format(shard)

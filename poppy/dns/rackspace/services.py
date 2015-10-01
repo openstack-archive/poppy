@@ -192,11 +192,11 @@ class ServicesController(base.ServicesBase):
         """
         if num_shards == 0:
             # shard disabled, just use the suffix
-            return suffix
+            yield suffix
         else:
-            # shard enabled, randomly select a shard
-            shard_id = random.randint(1, num_shards)
-            return '{0}{1}.{2}'.format(shard_prefix, shard_id, suffix)
+            # shard enabled, iterate through shards
+            for shard_id in range(1, num_shards):
+                yield '{0}{1}.{2}'.format(shard_prefix, shard_id, suffix)
 
     def generate_shared_ssl_domain_suffix(self):
         """Rackespace DNS scheme to generate a shared ssl domain suffix,
@@ -205,10 +205,12 @@ class ServicesController(base.ServicesBase):
 
         :return A string of shared ssl domain name
         """
-        return self._generate_sharded_domain_name(
+        shared_ssl_domain_name = self._generate_sharded_domain_name(
             self._driver.rackdns_conf.shared_ssl_shard_prefix,
             self._driver.rackdns_conf.shared_ssl_num_shards,
             self._driver.rackdns_conf.shared_ssl_domain_suffix)
+
+        return shared_ssl_domain_name
 
     def create(self, responders):
         """Create CNAME record for a service.

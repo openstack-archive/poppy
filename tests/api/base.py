@@ -100,6 +100,7 @@ class TestBase(fixtures.BaseTestFixture):
                 deserialize_format='json')
 
             cls.dns_config = config.DNSConfig()
+            cls.shared_ssl_num_shards = cls.dns_config.shared_ssl_num_shards
             cls.dns_client = client.DNSClient(cls.dns_config.dns_username,
                                               cls.dns_config.dns_api_key)
 
