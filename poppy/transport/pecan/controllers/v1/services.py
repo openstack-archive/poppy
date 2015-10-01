@@ -188,6 +188,9 @@ class ServicesController(base.Controller, hooks.HookController):
                                                      self.auth_token,
                                                      service_json_dict)
             service_id = service_obj.service_id
+        except errors.SharedShardsExhausted as e:
+            # domain - shared domains exhausted
+            pecan.abort(400, detail=str(e))
         except LookupError as e:  # error handler for no flavor
             pecan.abort(400, detail=str(e))
         except ValueError as e:  # error handler for existing service name
@@ -244,6 +247,9 @@ class ServicesController(base.Controller, hooks.HookController):
         except errors.ServiceNotFound as e:
             pecan.abort(404, detail=str(e))
         except errors.ServiceStatusNeitherDeployedNorFailed as e:
+            pecan.abort(400, detail=str(e))
+        except errors.SharedShardsExhausted as e:
+            # domain - shared domains exhausted
             pecan.abort(400, detail=str(e))
         except Exception as e:
             pecan.abort(400, detail=util.help_escape(str(e)))

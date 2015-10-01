@@ -15,6 +15,7 @@
 
 import json
 import random
+import uuid
 
 import jsonpatch
 
@@ -165,20 +166,20 @@ class DefaultServicesController(base.ServicesController):
         schema = service_schema.ServiceSchema.get_schema("service", "POST")
         validators.is_valid_service_configuration(service_json, schema)
 
-        # deal with shared ssl domains
-        for domain in service_obj.domains:
-            if domain.protocol == 'https' and domain.certificate == 'shared':
-                domain.domain = self._generate_shared_ssl_domain(
-                    domain.domain
-                )
+        if any([domain for domain in service_obj.domains
+                if domain.certificate == "shared"]):
+            try:
+                store = str(uuid.uuid4()).replace('-', '_')
+                service_obj = self._shard_retry(project_id,
+                                                service_obj,
+                                                store=store)
+            except errors.SharedShardsExhausted as e:
+                raise e
+            except ValueError as e:
+                raise e
 
-        try:
-            self.storage_controller.create(
-                project_id,
-                service_obj)
-        # ValueError will be raised if the service has already existed
-        except ValueError as e:
-            raise e
+        self.storage_controller.create(project_id,
+                                       service_obj)
 
         providers = [p.provider_id for p in flavor.providers]
         kwargs = {
@@ -253,8 +254,9 @@ class DefaultServicesController(base.ServicesController):
         service_new_json['service_id'] = service_old.service_id
         service_new = service.Service.init_from_dict(project_id,
                                                      service_new_json)
-
+        store = str(uuid.uuid4()).replace('-', '_')
         # fixing the old and new shared ssl domains in service_new
+
         for domain in service_new.domains:
             if domain.protocol == 'https' and domain.certificate == 'shared':
                 customer_domain = domain.domain.split('.')[0]
@@ -262,12 +264,19 @@ class DefaultServicesController(base.ServicesController):
                 if customer_domain in existing_shared_domains:
                     domain.domain = existing_shared_domains[customer_domain]
                 else:
-                    domain.domain = self._generate_shared_ssl_domain(
-                        domain.domain
-                    )
+                    shared_ssl_domain = \
+                        self._generate_shared_ssl_domain(customer_domain,
+                                                         store)
+                    while self.storage_controller.domain_exists_elsewhere(
+                            shared_ssl_domain,
+                            service_new.service_id):
+                        shared_ssl_domain = \
+                            self._generate_shared_ssl_domain(customer_domain,
+                                                             store)
+                    domain.domain = shared_ssl_domain
 
         # check if the service domain names already exist
-        # existing ones doesnot count!
+        # existing ones does not count!
         for d in service_new.domains:
             if self.storage_controller.domain_exists_elsewhere(
                     d.domain,
@@ -421,10 +430,52 @@ class DefaultServicesController(base.ServicesController):
 
         return
 
-    def _generate_shared_ssl_domain(self, domain_name):
-        shared_ssl_domain_suffix = (
-            self.dns_controller.generate_shared_ssl_domain_suffix())
-        return '.'.join([domain_name, shared_ssl_domain_suffix])
+    def _generate_shared_ssl_domain(self, domain_name, store):
+        try:
+            if not hasattr(self, store):
+                gen_store = {
+                    domain_name:
+                        self.dns_controller.generate_shared_ssl_domain_suffix()
+                }
+                setattr(self, store, gen_store)
+            uuid_store = getattr(self, store)
+            if domain_name not in uuid_store:
+                uuid_store[domain_name] = \
+                    self.dns_controller.generate_shared_ssl_domain_suffix()
+                setattr(self, store, uuid_store)
+            return '.'.join([domain_name,
+                             next(uuid_store[domain_name])])
+        except StopIteration:
+            delattr(self, store)
+            raise errors.SharedShardsExhausted('Domain {0} '
+                                               'has already '
+                                               'been '
+                                               'taken'.format(domain_name))
+
+    def _shard_retry(self, project_id, service_obj, store=None):
+            # deal with shared ssl domains
+            for domain in service_obj.domains:
+                if domain.protocol == 'https' \
+                        and domain.certificate == 'shared':
+                    shared_domain = domain.domain.split('.')[0]
+                    shared_ssl_domain = self._generate_shared_ssl_domain(
+                        shared_domain,
+                        store)
+                    while self.storage_controller.domain_exists_elsewhere(
+                            shared_ssl_domain,
+                            service_obj.service_id):
+                        shared_ssl_domain = self._generate_shared_ssl_domain(
+                            shared_domain,
+                            store)
+                    domain.domain = shared_ssl_domain
+
+            try:
+                delattr(self, store)
+                return service_obj
+            # ValueError will be raised if the service has already existed
+            except ValueError as e:
+                    delattr(self, store)
+                    raise ValueError(str(e))
 
     def migrate_domain(self, project_id, service_id, domain_name, new_cert):
         dns_controller = self.dns_controller
