@@ -51,3 +51,7 @@ class ServiceStatusDisabled(Exception):
 class InvalidServiceState(Exception):
 
     """Raised when a operator state is updated with an invalid status."""
+
+class SharedShardsExhausted(Exception):
+
+    """Raised when all shared ssl shards are occupied for a given domain."""
