@@ -56,3 +56,8 @@ class InvalidServiceState(Exception):
 class ServicesOverLimit(Exception):
 
     """Raised when number of services is above a permissible threshold."""
+
+
+class SharedShardsExhausted(Exception):
+
+    """Raised when all shared ssl shards are occupied for a given domain."""

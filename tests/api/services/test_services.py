@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import six
 import time
 import urlparse
@@ -314,6 +315,115 @@ class TestListServices(base.TestBase):
             self.client.delete_flavor(flavor_id=self.flavor_id)
 
         super(TestListServices, self).tearDown()
+
+
+@ddt.ddt
+class TestSharedShardServices(base.TestBase):
+
+    """Tests for Shared Services with Shard Selection."""
+
+    def _create_shared_service(self, domain, wait_for_deploy=False):
+        service_name = str(uuid.uuid1())
+
+        self.domain_list = [{"domain": domain, "certificate": "shared",
+                             "protocol": "https"}]
+
+        self.origin_list = [{"origin": self.generate_random_string(
+            prefix='api-test-origin') + '.com', "port": 80, "ssl": False,
+            "hostheadertype": "custom", "hostheadervalue":
+            "www.customweb.com"}]
+
+        self.caching_list = [{"name": "default", "ttl": 3600},
+                             {"name": "home", "ttl": 1200,
+                              "rules": [{"name": "index",
+                                         "request_url": "/index.htm"}]}]
+        self.log_delivery = {"enabled": False}
+
+        resp = self.client.create_service(service_name=service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id,
+                                          log_delivery=self.log_delivery)
+
+        if wait_for_deploy:
+            self.client.wait_for_service_status(
+                location=resp.headers['Location'],
+                status='deployed',
+                abort_on_status='failed',
+                retry_interval=self.test_config.status_check_retry_interval,
+                retry_timeout=self.test_config.status_check_retry_timeout)
+        return resp
+
+    def setUp(self):
+        super(TestSharedShardServices, self).setUp()
+        self.service_list = []
+        self.flavor_id = self.test_flavor
+
+    def test_create_shared_services_beyond_shard_limit(self):
+        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
+        domain = self.generate_random_string(prefix="shared")
+        for _ in range(self.shared_ssl_num_shards):
+            resp = self._create_shared_service(domain=domain)
+            # self.assertEqual(resp.status_code, 202)
+            self.service_list.append(resp.headers['Location'])
+
+        resp = self._create_shared_service(domain=domain)
+        self.assertEqual(resp.status_code, 400)
+
+    def test_patch_add_shard_domains_beyond_shard_limit(self):
+        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
+        shared_domain = self.generate_random_string(prefix="sharedcheck")
+
+        patch_body = ([{
+            'op': 'add',
+            'path': '/domains/-',
+            'value': {
+                'domain': shared_domain,
+                'protocol': 'https',
+                'certificate': 'shared'
+            }
+        }])
+
+        for _ in range(self.shared_ssl_num_shards):
+            create_resp = self._create_shared_service(
+                domain=self.generate_random_string(prefix=""),
+                wait_for_deploy=True)
+            self.assertEqual(create_resp.status_code, 202)
+            self.service_list.append(create_resp.headers['Location'])
+
+            self.client.patch_service(
+                create_resp.headers['Location'],
+                request_body=patch_body)
+
+            self.client.wait_for_service_status(
+                location=create_resp.headers['Location'],
+                status='deployed',
+                abort_on_status='failed',
+                retry_interval=self.test_config.status_check_retry_interval,
+                retry_timeout=self.test_config.status_check_retry_timeout)
+
+        # NOTE(TheSriram): Now with shards exhausted, create a new service
+        # and patch it.
+        create_resp = self._create_shared_service(
+            domain=self.generate_random_string(prefix=""),
+            wait_for_deploy=True)
+        self.service_list.append(create_resp.headers['Location'])
+
+        patch_resp = self.client.patch_service(
+            create_resp.headers['location'],
+            request_body=json.dumps(patch_body))
+
+        self.assertEqual(patch_resp.status_code, 400)
+
+    def tearDown(self):
+        for service in self.service_list:
+            self.client.delete_service(location=service)
+
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
+
+        super(TestSharedShardServices, self).tearDown()
 
 
 @ddt.ddt
