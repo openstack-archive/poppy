@@ -193,15 +193,16 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         if self._conf.use_same_storage_driver:
             from poppy.storage.cassandra import driver
             self._conf.register_opts(driver.CASSANDRA_OPTIONS,
-                                     group=AKAMAI_CASSANDRA_STORAGE_GROUP)
+                                     group=driver.CASSANDRA_GROUP)
+            self.cassandra_conf = self._conf[driver.CASSANDRA_GROUP]
         else:
             self._conf.register_opts(CASSANDRA_OPTIONS,
                                      group=AKAMAI_CASSANDRA_STORAGE_GROUP)
-        self.cassandra_conf = self._conf[AKAMAI_CASSANDRA_STORAGE_GROUP]
+            self.cassandra_conf = self._conf[AKAMAI_CASSANDRA_STORAGE_GROUP]
         self.datacenter = conf.datacenter
         self.consistency_level = getattr(
             cassandra.ConsistencyLevel,
-            conf[AKAMAI_CASSANDRA_STORAGE_GROUP].consistency_level)
+            self.cassandra_conf.consistency_level)
 
     @decorators.lazy_property(write=False)
     def connection(self):
