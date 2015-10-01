@@ -69,7 +69,17 @@ class ServicesController(base.ServicesController):
 
     def update(self, project_id, service_id, service_json):
         # update configuration in storage
-        return ''
+        if service_json.service_id in self.created_service_ids \
+                and service_json.service_id == service_id:
+            if not any([domain_obj for domain_obj in service_json.domains
+                        if self.domain_exists_elsewhere(domain_obj,
+                                                        service_id)]):
+                self.created_services[service_id] = service_json.to_dict()
+                for domain_obj in service_json.domains:
+                    if domain_obj not in self.claimed_domains:
+                        self.claimed_domains.append(domain_obj.domain)
+            else:
+                raise ValueError("Domain has already been taken")
 
     def update_state(self, project_id, service_id, state):
         """update_state
