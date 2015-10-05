@@ -385,6 +385,53 @@
                             "client_ip": "2001:4802:7802:104:be76:4eff:fe20:4b5f",
                             "request_url": "/*"}]}}
    ],
+   "add_new_restricted_ipv4CIDR":[
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "website only",
+             "access": "whitelist",
+             "rules": [{"name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }, {"name": "myrestricted-ip",
+                            "client_ip": "1.2.3.4",
+                            "request_url": "/*"}]}},
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "website only",
+             "access": "whitelist",
+             "rules": [{"name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }, {"name": "myrestricted-ip",
+                            "client_ip": "173.203.4.162/32",
+                            "request_url": "/*"}]}}
+   ],
+   "add_new_restricted_ipv4_and_ipv6_CIDR":[
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "website only",
+             "access": "whitelist",
+             "rules": [{"name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }, {"name": "myrestricted-ip",
+                            "client_ip": "1.2.3.4",
+                            "request_url": "/*"}]}},
+        {"op": "replace",
+         "path": "/restrictions/0",
+          "value": {"name": "website only",
+             "access": "whitelist",
+             "rules": [{"name": "mywebsite.com",
+                        "referrer": "www.mywebsite.com",
+                        "request_url": "/*"
+                        }, {"name": "myrestricted-ipv4-CIDR",
+                            "client_ip": "173.203.4.162/32",
+                            "request_url": "/*"},
+                            {"name": "myrestricted-ipv6-CIDR",
+                            "client_ip": "1203:8fe0:fe80:b897:8990:8a7c:99bf:323d/123",
+                            "request_url": "/*"}]}}      
+   ],
    "replace_add_geo_restriction":[
         {"op": "replace",
          "path": "/restrictions/0",
