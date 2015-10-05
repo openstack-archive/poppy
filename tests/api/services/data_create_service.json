@@ -816,6 +816,104 @@
                         ]}
         ]
     },
+    "ip_restriction_ipv4_CIDR_3": {
+        "name": "my_service_name",
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{
+                         "origin": "myorigin.com",
+                         "port": 80,
+                         "ssl": false,
+                         "rules": [
+                            {
+                                "name" : "default",
+                                "request_url" : "/*"
+                            }]
+                        }],
+         "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600,
+                "rules": [
+                    {
+                        "name" : "default",
+                        "request_url" : "/*"
+                    }
+                ]
+            },
+            {
+                "name": "home",
+                "ttl": 1200,
+                "rules": [
+                    {
+                        "name" : "index",
+                        "request_url" : "/index.htm"
+                    }
+                ]
+            }
+         ],
+         "restrictions_list": [
+                        {
+                        "name": "test",
+                        "access": "whitelist",
+                        "rules": [
+                            {
+                                "name": "only this ipv4CIDR",
+                                "client_ip": "173.203.4.162/32",
+                                "request_url" : "/*"
+                            }
+                        ]}
+        ]
+     },
+     "ip_restriction_ipv6_CIDR": {
+        "name": "my_service_name",
+        "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
+                        {"domain": "blog.mywebsite.com", "protocol": "http"}],
+        "origin_list": [{
+                         "origin": "myorigin.com",
+                         "port": 80,
+                         "ssl": false,
+                         "rules": [
+                            {
+                                "name" : "default",
+                                "request_url" : "/*"
+                            }]
+                        }],
+         "caching_list": [
+            {
+                "name": "default",
+                "ttl": 3600,
+                "rules": [
+                    {
+                        "name" : "default",
+                        "request_url" : "/*"
+                    }
+                ]
+            },
+            {
+                "name": "home",
+                "ttl": 1200,
+                "rules": [
+                    {
+                        "name" : "index",
+                        "request_url" : "/index.htm"
+                    }
+                ]
+            }
+         ],
+         "restrictions_list": [
+                        {
+                        "name": "test",
+                        "access": "whitelist",
+                        "rules": [
+                            {
+                                "name": "only this ipv6CIDR",
+                                "client_ip": "1203:8fe0:fe80:b897:8990:8a7c:99bf:323d/123",
+                                "request_url" : "/*"
+                            }
+                        ]}
+        ]
+     },
      "non_root_domains": {
           "name": "non_root_domains",
           "domain_list": [{"domain": "www.mywebsite.com", "protocol": "http"},
