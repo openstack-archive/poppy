@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import subprocess
+
 import requests
 
 from tests.endtoend import base
@@ -42,8 +44,25 @@ class TestIpRestrictions(base.TestBase):
 
         self.service_location = ''
 
-    def get_ip_address(self):
+    def get_ipv4_address(self):
         return requests.get('https://api.ipify.org').text
+
+    def get_ipv6_address(self):
+        ifconfig_eth0 = subprocess.Popen(
+            ['ifconfig', 'eth0'], stdout=subprocess.PIPE)
+        ifconfig_eth0_global_scope = subprocess.Popen(
+            ['grep', 'Scope:Global'],
+            stdin=ifconfig_eth0.stdout,
+            stdout=subprocess.PIPE)
+        ifconfig_eth0_global_scope = ifconfig_eth0_global_scope.stdout.read()
+        if ifconfig_eth0_global_scope == '':
+            # assign an ipv6 address
+            ipv6 = 'FE80:0000:0000:0000:0202:B3FF:FE1E:8329'
+        else:
+            ipv6_substring = ifconfig_eth0_global_scope.split(
+                'inet6 addr: ')[1]
+            ipv6 = ipv6_substring.split('/64 Scope:Global\n')[0]
+        return ipv6
 
     def test_ip_blacklist(self):
         test_domain = "{0}.{1}".format(
@@ -64,13 +83,18 @@ class TestIpRestrictions(base.TestBase):
              "ttl": 3600,
              "rules": [{"name": "default", "request_url": "/*"}]}]
 
-        test_system_ip = self.get_ip_address()
+        test_system_ipv4 = self.get_ipv4_address()
+        test_system_ipv6 = self.get_ipv6_address()
         restrictions = [
             {"name": "test_ip_blacklist",
              "access": "blacklist",
-             "rules": [{"name": "blacklist",
-                        "client_ip": test_system_ip,
-                        "request_url": "/*"}]}]
+             "rules": [
+                 {"name": "blacklist",
+                  "client_ip": test_system_ipv4,
+                  "request_url": "/*"},
+                 {"name": "blacklist",
+                  "client_ip": test_system_ipv6,
+                  "request_url": "/*"}]}]
 
         resp = self.setup_service(
             service_name=self.service_name,
@@ -125,14 +149,18 @@ class TestIpRestrictions(base.TestBase):
              "ttl": 3600,
              "rules": [{"name": "default", "request_url": "/*"}]}]
 
-        test_system_ip = self.get_ip_address()
+        test_system_ipv4 = self.get_ipv4_address()
+        test_system_ipv6 = self.get_ipv6_address()
         restrictions = [
             {"name": "test_ip_whitelist",
              "access": "whitelist",
-             "rules": [{"name": "whitelist",
-                        "client_ip": test_system_ip,
-                        "request_url": "/*"}]}]
-
+             "rules": [
+                 {"name": "whitelist",
+                  "client_ip": test_system_ipv4,
+                  "request_url": "/*"},
+                 {"name": "blacklist",
+                  "client_ip": test_system_ipv6,
+                  "request_url": "/*"}]}]
         resp = self.setup_service(
             service_name=self.service_name,
             domain_list=domains,
