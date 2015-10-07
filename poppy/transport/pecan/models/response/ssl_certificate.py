@@ -29,3 +29,5 @@ class Model(collections.OrderedDict):
         self["flavor_id"] = ssl_certificate.flavor_id
         self['domain_name'] = util.help_escape(ssl_certificate.domain_name)
         self['cert_type'] = ssl_certificate.cert_type
+        self['cert_details'] = ssl_certificate.cert_details
+        self['status'] = ssl_certificate.get_cert_status()

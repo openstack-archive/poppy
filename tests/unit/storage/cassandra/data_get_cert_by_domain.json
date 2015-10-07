@@ -1,0 +1,73 @@
+[
+  [
+  [
+    {
+      "project_id": 12345,
+      "flavor_id": "flavor1",
+      "cert_type": "san",
+      "domain_name": "www.mydomain.com",
+      "cert_details": {
+        "provider": "{\"cert_domain\": \"abc\", \"extra_info\": { \"status\": \"deployed\", \"san_cert\": \"awesome_san\", \"action\": \"Ready\"}}"
+      }
+    },
+    {
+      "project_id": 12345,
+      "flavor_id": "flavor2",
+      "cert_type": "custom",
+      "domain_name": "www.mydomain.com",
+      "cert_details": {
+        "provider": "{\"cert_domain\": \"abc\", \"extra_info\": { \"status\": \"deployed\", \"san_cert\": \"awesome_custom\", \"action\": \"Ready\"}}"
+      }
+    }
+  ],
+  [
+    {
+      "project_id": 12345,
+      "flavor_id": "flavor1",
+      "cert_type": "custom",
+      "domain_name": "www.example.com",
+      "cert_details": {
+        "provider": "{\"cert_domain\": \"abc\", \"extra_info\": { \"status\": \"deployed\", \"san_cert\": \"awesome_custom\", \"action\": \"Ready\"}}"
+      }
+    },
+    {
+      "project_id": 12345,
+      "flavor_id": "flavor1",
+      "cert_type": "san",
+      "domain_name": "www.example.com",
+      "cert_details": {
+        "provider": "{\"cert_domain\": \"abc\", \"extra_info\": { \"status\": \"deployed\", \"san_cert\": \"awesome_san\", \"action\": \"Ready\"}}"
+      }
+    },
+    {
+      "project_id": 12346,
+      "flavor_id": "flavor2",
+      "cert_type": "san",
+      "domain_name": "www.mydomain2.com",
+      "cert_details": {
+        "provider": "{\"cert_domain\": \"abc\", \"extra_info\": { \"status\": \"deployed\", \"san_cert\": \"awesome_san\", \"action\": \"Ready\"}}"
+      }
+    }
+  ],
+  [
+    {
+      "project_id": 12345,
+      "flavor_id": "flavor1",
+      "cert_type": "san",
+      "domain_name": "www.mydomain.com",
+      "cert_details": {
+        "provider": "{\"cert_domain\": \"abc\", \"extra_info\": { \"status\": \"deployed\", \"san_cert\": \"awesome_san\", \"action\": \"Ready\"}}"
+      }
+    },
+    {
+      "project_id": 12346,
+      "flavor_id": "flavor2",
+      "cert_type": "san",
+      "domain_name": "www.mydomain2.com",
+      "cert_details": {
+        "provider": "{\"cert_domain\": \"abc\", \"extra_info\": { \"status\": \"deployed\", \"san_cert\": \"awesome_san\", \"action\": \"Ready\"}}"
+      }
+    }
+  ]
+  ]
+]
