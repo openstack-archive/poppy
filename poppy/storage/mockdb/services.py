@@ -33,6 +33,7 @@ class ServicesController(base.ServicesController):
         self.projectid_service_limit = {}
         self.default_max_service_limit = 20
         self.service_count_per_project_id = {}
+        self.certs = {}
 
     @property
     def session(self):
@@ -161,10 +162,26 @@ class ServicesController(base.ServicesController):
 
     def update_cert_info(self, domain_name, cert_type, flavor_id,
                          cert_details):
-        pass
+        key = (flavor_id, domain_name, cert_type)
+        if key in self.certs:
+            self.certs[key].cert_details = cert_details
 
     def create_cert(self, project_id, cert_obj):
-        pass
+        key = (cert_obj.flavor_id, cert_obj.domain_name, cert_obj.cert_type)
+        if key not in self.certs:
+            self.certs[key] = cert_obj
+        else:
+            raise ValueError
+
+    def get_certs_by_domain(self, domain_name, project_id=None):
+        certs = []
+        for cert in self.certs:
+            if domain_name in cert:
+                certs.append(self.certs[cert])
+        if project_id:
+            return [cert for cert in certs if cert.project_id == project_id]
+        else:
+            return certs
 
     def delete_cert(self, project_id, domain_name, cert_type):
         if "non_exist" in domain_name:

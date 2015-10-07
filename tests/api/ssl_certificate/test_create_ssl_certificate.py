@@ -12,6 +12,8 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
+
 import ddt
 
 from tests.api import base
@@ -50,7 +52,7 @@ class TestCreateSSLCertificate(base.TestBase):
             self.skipTest('Create ssl certificate needs to'
                           ' be run when commanded')
 
-        self.cert_type = test_data.get('cert_type')
+        cert_type = test_data.get('cert_type')
         rand_string = self.generate_random_string()
         domain_name = rand_string + test_data.get('domain_name')
         flavor_id = test_data.get('flavor_id') or self.flavor_id
@@ -62,6 +64,16 @@ class TestCreateSSLCertificate(base.TestBase):
             project_id=project_id
         )
         self.assertEqual(resp.status_code, 202)
+
+        resp = self.client.get_ssl_certificate(
+            domain_name=domain_name
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        for cert in json.loads(resp.content):
+            self.assertEqual(cert['domain_name'], domain_name)
+            self.assertEqual(cert['flavor_id'], flavor_id)
+            self.assertEqual(cert['cert_type'], cert_type)
 
     def tearDown(self):
         self.client.delete_ssl_certificate(
