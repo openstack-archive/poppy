@@ -69,6 +69,40 @@ class SSLCertificateControllerTest(base.FunctionalTest):
                                      'X-Project-ID': self.project_id})
         self.assertEqual(202, response.status_code)
 
+    def test_get_ssl_certificate_non_existing_domain(self):
+
+        # get non existing domain
+        domain = 'www.idontexist.com'
+        response = self.app.get('/v1.0/ssl_certificate/{0}'.format(domain),
+                                headers={
+                                    'Content-Type': 'application/json',
+                                    'X-Project-ID': self.project_id},
+                                expect_errors=True)
+        self.assertEqual(404, response.status_code)
+
+    def test_get_ssl_certificate_existing_domain_different_project_id(self):
+        domain = 'www.iexist.com'
+        ssl_certificate_json = {
+            "cert_type": "san",
+            "domain_name": domain,
+            "flavor_id": self.flavor_id
+        }
+        response = self.app.post('/v1.0/ssl_certificate',
+                                 params=json.dumps(ssl_certificate_json),
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'X-Project-ID': self.project_id})
+        self.assertEqual(202, response.status_code)
+
+        # get existing domain with different project_id
+
+        response = self.app.get('/v1.0/ssl_certificate/{0}'.format(domain),
+                                headers={
+                                    'Content-Type': 'application/json',
+                                    'X-Project-ID': str(uuid.uuid4())},
+                                expect_errors=True)
+        self.assertEqual(404, response.status_code)
+
     def test_create_with_invalid_json(self):
         # create with errorenous data: invalid json data
         response = self.app.post('/v1.0/ssl_certificate',
