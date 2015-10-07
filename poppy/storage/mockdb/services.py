@@ -156,6 +156,9 @@ class ServicesController(base.ServicesController):
     def create_cert(self, project_id, cert_obj):
         pass
 
+    def delete_cert(self, project_id, domain_name, cert_type):
+        pass
+
     @staticmethod
     def format_result(result):
         service_id = result.get('service_id')

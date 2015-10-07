@@ -36,7 +36,7 @@ MAIL_NOTIFICATION_OPTIONS = [
     cfg.ListOpt('recipients',
                 help='A list of emails addresses to receive notification '),
     cfg.StrOpt('notification_subject',
-               default='Poppy SSL Certificate Provisioned',
+               default='Poppy SSL Certificate Provisioned/Deleted',
                help='The subject of the email notification ')
 ]
 
