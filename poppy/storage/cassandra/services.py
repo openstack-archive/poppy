@@ -359,36 +359,16 @@ class ServicesController(base.ServicesController):
         :param cert_type
         :param comparing_project_id
 
-        :raises ValueError
         :returns Boolean if the cert with same type exists with another user.
         """
-        LOG.info("Check if cert on '{0}' exists".format(domain_name))
-        args = {
-            'domain_name': domain_name.lower()
-        }
-        stmt = query.SimpleStatement(
-            CQL_VERIFY_CERT,
-            consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
+        certs = self.get_certs_by_domain(domain_name=domain_name)
+        for cert in certs:
+            if cert['flavor_id'] == comparing_flavor_id and cert['cert_type'] == \
+                    comparing_cert_type:
+                return True
+            else:
+                return False
 
-        if results:
-            msg = None
-            for r in results:
-                if str(r.get('project_id')) != str(comparing_project_id):
-                    msg = "Domain '{0}' has already been created cert by {1}"\
-                        .format(domain_name, r.get('project_id'))
-                    LOG.warn(msg)
-                    raise ValueError(msg)
-                elif (str(r.get('flavor_id')) == str(comparing_flavor_id)
-                      and
-                      str(r.get('cert_type')) == str(comparing_cert_type)):
-                    msg = "{0} have already created cert of type {1} on {2}"\
-                        .format(str(comparing_project_id),
-                                comparing_cert_type,
-                                domain_name)
-                    LOG.warn(msg)
-                    raise ValueError(msg)
-            return False
         else:
             return False
 
@@ -499,13 +479,8 @@ class ServicesController(base.ServicesController):
                  "project_id: {0} set to be {1}".format(project_id,
                                                         project_limit))
 
-    def get_cert_by_domain(self, domain_name, cert_type,
-                           flavor_id,
-                           project_id):
-
-        LOG.info(("Search for cert on '{0}', type: {1}, flavor_id: {2}, "
-                  "project_id: {3}").format(domain_name, cert_type, flavor_id,
-                                            project_id))
+    def get_certs_by_domain(self, domain_name, project_id=None):
+        LOG.info("Check if cert on '{0}' exists".format(domain_name))
         args = {
             'domain_name': domain_name.lower()
         }
@@ -513,7 +488,7 @@ class ServicesController(base.ServicesController):
             CQL_SEARCH_CERT_BY_DOMAIN,
             consistency_level=self._driver.consistency_level)
         results = self.session.execute(stmt, args)
-
+        certs = []
         if results:
             for r in results:
                 r_project_id = str(r.get('project_id'))
@@ -525,18 +500,27 @@ class ServicesController(base.ServicesController):
                 # And the value of cert_details is a string dict
                 for key in cert_details:
                     r_cert_details[key] = json.loads(cert_details[key])
-                if r_project_id == str(project_id) and \
-                        r_flavor_id == str(flavor_id) and \
-                        r_cert_type == str(cert_type):
-                    res = ssl_certificate.SSLCertificate(r_flavor_id,
-                                                         domain_name,
-                                                         r_cert_type,
-                                                         r_cert_details)
-                    return res
-            else:
-                return None
+                LOG.info("Certificate for domain: {0} "
+                         "with flavor_id: {1}, "
+                         "cert_details : {2} and "
+                         "cert_type: {3} present "
+                         "on project_id: {4}".format(domain_name,
+                                                     r_flavor_id,
+                                                     r_cert_details,
+                                                     r_cert_type,
+                                                     r_project_id))
+                ssl_cert = ssl_certificate.SSLCertificate(
+                    domain_name=domain_name,
+                    flavor_id=r_flavor_id,
+                    cert_details=r_cert_details,
+                    cert_type=r_cert_type,
+                    project_id=r_project_id)
+
+                certs.append(ssl_cert)
+        if project_id:
+            return [cert for cert in certs if cert.project_id == project_id]
         else:
-            return None
+            return certs
 
 
     def create(self, project_id, service_obj):
@@ -755,12 +739,12 @@ class ServicesController(base.ServicesController):
                 self.session.execute(stmt, delete_args)
 
     def create_cert(self, project_id, cert_obj):
-
-        if not self.cert_already_exist(cert_obj.domain_name,
-                                       cert_obj.cert_type,
-                                       cert_obj.flavor_id,
-                                       project_id):
-            pass
+        if self.cert_already_exist(domain_name=cert_obj.domain_name,
+                                   comparing_cert_type=cert_obj.cert_type,
+                                   comparing_flavor_id=cert_obj.flavor_id,
+                                   comparing_project_id=project_id):
+            raise ValueError('Certificate already exists '
+                             'for {0} '.format(cert_obj.domain_name))
 
         args = {
             'project_id': project_id,

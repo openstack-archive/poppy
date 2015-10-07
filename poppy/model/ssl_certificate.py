@@ -32,11 +32,13 @@ class SSLCertificate(common.DictSerializableModel):
                  flavor_id,
                  domain_name,
                  cert_type,
+                 project_id=None,
                  cert_details={}):
         self._flavor_id = flavor_id
         self._domain_name = domain_name
         self._cert_type = cert_type
         self._cert_details = cert_details
+        self._project_id = project_id
 
     @property
     def flavor_id(self):
@@ -46,6 +48,15 @@ class SSLCertificate(common.DictSerializableModel):
     @flavor_id.setter
     def flavor_id(self, value):
         self._flavor_id = value
+
+    @property
+    def project_id(self):
+        """Get project id."""
+        return self._project_id
+
+    @project_id.setter
+    def project_id(self, value):
+        self._project_id = value
 
     @property
     def domain_name(self):
@@ -116,3 +127,19 @@ class SSLCertificate(common.DictSerializableModel):
                 return first_provider_cert_details.get('san cert', None)
         else:
             return None
+
+    @classmethod
+    def init_from_dict(cls, input_dict):
+        flavor_id = input_dict.get('flavor_id', None)
+        domain_name = input_dict.get('domain_name', None)
+        cert_type = input_dict.get('cert_type', None)
+        cert_details = input_dict.get('cert_details', {})
+        project_id = input_dict.get('project_id', None)
+
+        ssl_cert = cls(flavor_id=flavor_id,
+                       domain_name=domain_name,
+                       cert_type=cert_type,
+                       cert_details=cert_details,
+                       project_id=project_id)
+
+        return ssl_cert
