@@ -12,6 +12,8 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
+
 import ddt
 
 from tests.api import base
@@ -62,6 +64,16 @@ class TestCreateSSLCertificate(base.TestBase):
             project_id=project_id
         )
         self.assertEqual(resp.status_code, 202)
+
+        resp = self.client.get_ssl_certificate(
+            domain_name=domain_name
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        for cert in json.loads(resp.content):
+            self.assertEqual(cert['domain_name'], domain_name)
+            self.assertEqual(cert['flavor_id'], flavor_id)
+            self.assertEqual(cert['cert_type'], cert_type)
 
     def tearDown(self):
         # @todo(malini): Add delete cert when the endpoint is ready.
