@@ -26,6 +26,7 @@ import mock
 from oslo_config import cfg
 
 from poppy.model.helpers import provider_details
+from poppy.model import ssl_certificate
 from poppy.storage.cassandra import driver
 from poppy.storage.cassandra import services
 from poppy.transport.pecan.models.request import service as req_service
@@ -178,6 +179,35 @@ class CassandraStorageServiceTests(base.TestCase):
         self.assertTrue("Mock" in actual_response)
         self.assertTrue("CloudFront" in actual_response)
         self.assertTrue("Fastly" in actual_response)
+
+    @ddt.file_data('data_get_cert_by_domain.json')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_cert_by_domain(self, cert_details_json,
+                                mock_session, mock_execute):
+        # mock the response from cassandra
+        mock_execute.execute.return_value = cert_details_json[0]
+        actual_response = self.sc.get_certs_by_domain(
+            domain_name="www.mydomain.com")
+        self.assertEqual(len(actual_response), 2)
+        self.assertTrue(all([isinstance(ssl_cert,
+                                        ssl_certificate.SSLCertificate)
+                             for ssl_cert in actual_response]))
+        mock_execute.execute.return_value = cert_details_json[1]
+        actual_response = self.sc.get_certs_by_domain(
+            domain_name="www.example.com",
+            flavor_id="flavor1")
+        self.assertEqual(len(actual_response), 2)
+        self.assertTrue(all([isinstance(ssl_cert,
+                                        ssl_certificate.SSLCertificate)
+                             for ssl_cert in actual_response]))
+        mock_execute.execute.return_value = cert_details_json[2]
+        actual_response = self.sc.get_certs_by_domain(
+            domain_name="www.mydomain.com",
+            flavor_id="flavor1",
+            cert_type="san")
+        self.assertTrue(isinstance(actual_response,
+                                   ssl_certificate.SSLCertificate))
 
     @ddt.file_data('data_provider_details.json')
     @mock.patch.object(services.ServicesController, 'session')

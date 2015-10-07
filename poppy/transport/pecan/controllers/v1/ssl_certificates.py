@@ -21,6 +21,8 @@ from pecan import hooks
 from poppy.transport.pecan.controllers import base
 from poppy.transport.pecan import hooks as poppy_hooks
 from poppy.transport.pecan.models.request import ssl_certificate
+from poppy.transport.pecan.models.response import ssl_certificate \
+    as ssl_cert_model
 from poppy.transport.validators import helpers
 from poppy.transport.validators.schemas import ssl_certificate\
     as ssl_certificate_validation
@@ -50,6 +52,7 @@ class SSLCertificateController(base.Controller, hooks.HookController):
 
         try:
             cert_obj = ssl_certificate.load_from_json(certificate_info_dict)
+            cert_obj.project_id = self.project_id
             ssl_certificate_controller.create_ssl_certificate(self.project_id,
                                                               cert_obj)
         except LookupError as e:
@@ -60,3 +63,34 @@ class SSLCertificateController(base.Controller, hooks.HookController):
                         'Reason: %s' % str(e))
 
         return pecan.Response(None, 202)
+
+    @pecan.expose('json')
+    @decorators.validate(
+        domain_name=rule.Rule(
+            helpers.is_valid_domain_by_name(),
+            helpers.abort_with_message)
+    )
+    def get_one(self, domain_name):
+
+        certificate_controller = \
+            self._driver.manager.ssl_certificate_controller
+        total_cert_info = []
+
+        try:
+            certs_info = certificate_controller.get_certs_info_by_domain(
+                domain_name=domain_name,
+                project_id=self.project_id)
+        except ValueError:
+            pecan.abort(404, detail='certificate '
+                                    'could not be found '
+                                    'for domain : %s' %
+                        domain_name)
+        else:
+            # convert a cert model into a response cert model
+            try:
+                if iter(certs_info):
+                    for cert in certs_info:
+                        total_cert_info.append(ssl_cert_model.Model(cert))
+                    return total_cert_info
+            except TypeError:
+                return ssl_cert_model.Model(certs_info)
