@@ -30,7 +30,6 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
         self.flavor_controller = self._driver.storage.flavors_controller
 
     def create_ssl_certificate(self, project_id, cert_obj):
-
         try:
             flavor = self.flavor_controller.get(cert_obj.flavor_id)
         # raise a lookup error if the flavor is not found
@@ -55,3 +54,17 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             create_ssl_certificate.create_ssl_certificate,
             **kwargs)
         return kwargs
+
+    def get_certs_info_by_domain(self, domain_name, project_id):
+        try:
+            certs_info = self.storage_controller.get_certs_by_domain(
+                domain_name=domain_name,
+                project_id=project_id)
+            if not certs_info:
+                raise ValueError("certificate information"
+                                 "not found for {0} ".format(domain_name))
+
+            return certs_info
+
+        except ValueError as e:
+            raise e

@@ -126,7 +126,7 @@ class CreateFlavor(base.AutoMarshallingModel):
 
 
 class CreateSSLCertificate(base.AutoMarshallingModel):
-    """Marshalling for Create Flavor requests."""
+    """Marshalling for Create SSL Certificate requests."""
 
     def __init__(self, cert_type=None, domain_name=None, flavor_id=None):
         super(CreateSSLCertificate, self).__init__()
