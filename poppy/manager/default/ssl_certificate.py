@@ -55,3 +55,19 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             create_ssl_certificate.create_ssl_certificate,
             **kwargs)
         return kwargs
+
+    def get_cert_info_by_domain(self, domain_name, project_id):
+        try:
+
+            cert_info = self.storage_controller.get_cert_by_domain(
+                domain_name=domain_name,
+                project_id=project_id)
+            if not cert_info:
+                raise ValueError("certificate information"
+                                 "not found for {0} "
+                                 "under {1}".format(domain_name, project_id))
+            else:
+                return cert_info
+
+        except ValueError as e:
+            raise e

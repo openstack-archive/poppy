@@ -347,14 +347,7 @@ class ServicesController(base.ServicesController):
         :raises ValueError
         :returns Boolean if the cert with same type exists with another user.
         """
-        LOG.info("Check if cert on '{0}' exists".format(domain_name))
-        args = {
-            'domain_name': domain_name.lower()
-        }
-        stmt = query.SimpleStatement(
-            CQL_VERIFY_CERT,
-            consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
+        results = self.cert_info_by_domain(domain_name=domain_name)
 
         if results:
             msg = None
@@ -377,13 +370,15 @@ class ServicesController(base.ServicesController):
         else:
             return False
 
-    def get_cert_by_domain(self, domain_name, cert_type,
-                           flavor_id,
-                           project_id):
+    def get_cert_by_domain(self, domain_name,
+                           project_id,
+                           flavor_id=None,
+                           cert_type=None):
 
         LOG.info(("Search for cert on '{0}', type: {1}, flavor_id: {2}, "
                   "project_id: {3}").format(domain_name, cert_type, flavor_id,
                                             project_id))
+        LOG.info("Check if cert on '{0}' exists".format(domain_name))
         args = {
             'domain_name': domain_name.lower()
         }
@@ -392,6 +387,7 @@ class ServicesController(base.ServicesController):
             consistency_level=self._driver.consistency_level)
         results = self.session.execute(stmt, args)
 
+        certs = []
         if results:
             for r in results:
                 r_project_id = str(r.get('project_id'))
@@ -403,18 +399,26 @@ class ServicesController(base.ServicesController):
                 # And the value of cert_details is a string dict
                 for key in cert_details:
                     r_cert_details[key] = json.loads(cert_details[key])
-                if r_project_id == str(project_id) and \
-                        r_flavor_id == str(flavor_id) and \
-                        r_cert_type == str(cert_type):
-                    res = ssl_certificate.SSLCertificate(r_flavor_id,
-                                                         domain_name,
-                                                         r_cert_type,
-                                                         r_cert_details)
-                    return res
-            else:
-                return None
+                if cert_type:
+                    if r_project_id == str(project_id) and \
+                            r_flavor_id == str(flavor_id) and \
+                            r_cert_type == str(cert_type):
+                        res = ssl_certificate.SSLCertificate(r_flavor_id,
+                                                             domain_name,
+                                                             r_cert_type,
+                                                             r_cert_details)
+                        return res
+                else:
+                    if r_project_id == str(project_id):
+                        certs.append(ssl_certificate.SSLCertificate(
+                            r_flavor_id,
+                            domain_name,
+                            r_cert_type,
+                            r_cert_details))
         else:
             return None
+
+        return certs
 
     def create(self, project_id, service_obj):
         """create.
