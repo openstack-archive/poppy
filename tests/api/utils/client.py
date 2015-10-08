@@ -229,6 +229,32 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('POST', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
+    def admin_service_limit(self, project_id, limit=None,
+                            requestslib_kwargs=None):
+        """Update Tenant State Limit
+
+        :return: Response Object containing response code 201
+        POST
+        /admin/limits
+        """
+
+        url = '{0}/admin/limits/{1}'.format(self.url, project_id)
+        request_object = requests.ServiceLimit(limit=limit)
+        return self.request('PUT', url, request_entity=request_object,
+                            requestslib_kwargs=requestslib_kwargs)
+
+    def get_admin_service_limit(self, project_id,
+                                requestslib_kwargs=None):
+        """Get Tenant State Limit
+
+        :return: Response Object containing response code 200
+        GET
+        /admin/limits/{project_id}
+        """
+
+        url = '{0}/admin/limits/{1}'.format(self.url, project_id)
+        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
+
     def admin_migrate_domain(self, project_id, service_id, domain, new_cert,
                              requestslib_kwargs=None):
         """Update SAN domain

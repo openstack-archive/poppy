@@ -23,8 +23,12 @@ _LIMITS_OPTIONS = [
     cfg.IntOpt('default_services_paging', default=10,
                help='Default services pagination size')
 ]
-
+_MAX_SERVICE_OPTIONS = [
+    cfg.IntOpt('max_services_per_project', default=20,
+               help='Default max service per project_id')
+]
 _LIMITS_GROUP = 'limits:storage'
+_MAX_SERVICE_GROUP = 'drivers:storage'
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -44,7 +48,10 @@ class StorageDriverBase(object):
     def __init__(self, conf):
         self._conf = conf
         self._conf.register_opts(_LIMITS_OPTIONS, group=_LIMITS_GROUP)
+        self._conf.register_opts(_MAX_SERVICE_OPTIONS,
+                                 group=_MAX_SERVICE_GROUP)
         self.limits_conf = self._conf[_LIMITS_GROUP]
+        self.max_services_conf = self._conf[_MAX_SERVICE_GROUP]
 
     @abc.abstractmethod
     def is_alive(self):
