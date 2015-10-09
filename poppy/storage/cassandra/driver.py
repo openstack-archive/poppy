@@ -73,6 +73,8 @@ CASSANDRA_OPTIONS = [
     ),
     cfg.BoolOpt('archive_on_delete', default=True,
                 help='Archive services on delete?'),
+    cfg.BoolOpt('automatic_schema_migration', default=False,
+                help='Automatically migrate schema in request ?')
 ]
 
 CASSANDRA_GROUP = 'drivers:storage:cassandra'
@@ -121,10 +123,12 @@ def _connection(conf, datacenter, keyspace=None):
     except cassandra.InvalidRequest:
         _create_keyspace(session, keyspace, conf.replication_strategy)
 
-    migration_session = copy.copy(session)
-    migration_session.default_consistency_level = \
-        getattr(cassandra.ConsistencyLevel, conf.migrations_consistency_level)
-    _run_migrations(conf.migrations_path, migration_session)
+    if conf.automatic_schema_migration:
+        migration_session = copy.copy(session)
+        migration_session.default_consistency_level = \
+            getattr(cassandra.ConsistencyLevel,
+                    conf.migrations_consistency_level)
+        _run_migrations(conf.migrations_path, migration_session)
 
     session.row_factory = query.dict_factory
 

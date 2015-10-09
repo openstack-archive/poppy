@@ -75,6 +75,7 @@ installed and running in a Docker Container.
     cluster = <docker ip>
     keyspace = poppy
     migrations_path = /home/poppy/poppy/storage/cassandra/migrations
+	automatic_schema_migration = True     #True is recommended for local dev machine
 
 
 5. For logging, find the ``[DEFAULT]`` section in
