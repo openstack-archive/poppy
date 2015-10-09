@@ -29,9 +29,6 @@ class TestCreateSSLService(base.TestBase):
 
     def setUp(self):
         super(TestCreateSSLService, self).setUp()
-        if self.test_config.run_ssl_tests is False:
-            self.skipTest(
-                'SSL tests are currently disabled in configuration')
 
         self.service_url = ''
         self.service_name = self.generate_random_string(
@@ -132,9 +129,6 @@ class TestPatchSSLService(base.TestBase):
 
     def setUp(self):
         super(TestPatchSSLService, self).setUp()
-        if self.test_config.run_ssl_tests is False:
-            self.skipTest(
-                'SSL tests are currently disabled in configuration')
 
         self.service_name = self.generate_random_string(prefix='api-test')
         self.flavor_id = self.test_flavor
