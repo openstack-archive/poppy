@@ -63,6 +63,8 @@ CASSANDRA_OPTIONS = [
     ),
     cfg.BoolOpt('archive_on_delete', default=True,
                 help='Archive services on delete?'),
+    cfg.BoolOpt('automatic_migrate_schema', default=False,
+                help='Automatically migrate schema in request ?')
 ]
 
 
