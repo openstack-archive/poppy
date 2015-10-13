@@ -21,26 +21,16 @@ from tests.functional.transport.pecan import base
 
 class TestServicesLimit(base.FunctionalTest):
 
-    # def test_services_limit_missing_limits(self):
-    #     # missing limits field
-    #     response = self.app.put('/v1.0/admin/limits/{0}'.format(
-    #         str(uuid.uuid1())), headers={
-    #         'Content-Type': 'application/json',
-    #         'X-Project-ID': str(uuid.uuid4())
-    #         }, expect_errors=True)
-    #
-    #     self.assertEqual(response.status_code, 400)
-    #
-    # def test_services_limits_invalid_limits(self):
-    #     # invalid limits field
-    #     response = self.app.put('/v1.0/admin/limits/{0}'.format(
-    #         str(uuid.uuid1())),
-    #         params=json.dumps({'limit': -5}),
-    #         headers={'Content-Type': 'application/json',
-    #                  'X-Project-ID': str(uuid.uuid4())},
-    #         expect_errors=True)
-    #
-    #     self.assertEqual(response.status_code, 400)
+    def test_services_limits_invalid_limits(self):
+        # invalid limits field
+        response = self.app.put('/v1.0/admin/limits/{0}'.format(
+            str(uuid.uuid1())),
+            params=json.dumps({'limit': -5}),
+            headers={'Content-Type': 'application/json',
+                     'X-Project-ID': str(uuid.uuid4())},
+            expect_errors=True)
+
+        self.assertEqual(response.status_code, 400)
 
     def test_service_limits_invalid_projectid(self):
         # invalid projectid
@@ -52,13 +42,3 @@ class TestServicesLimit(base.FunctionalTest):
             expect_errors=True)
 
         self.assertEqual(response.status_code, 400)
-
-    # def test_services_limit_with_good_input(self):
-    #     # valid limits and project_id field
-    #     project_id = str(uuid.uuid1())
-    #     response = self.app.put('/v1.0/admin/limits/{0}'.format(
-    #         str(project_id)),
-    #         params=json.dumps({'limit': 10}),
-    #         headers={'Content-Type': 'application/json',
-    #                  'X-Project-ID': str(uuid.uuid4())})
-    #     self.assertEqual(response.status_code, 201)

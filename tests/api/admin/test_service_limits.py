@@ -55,7 +55,7 @@ class TestServiceLimits(base.TestBase):
         ]
         self.service_list = []
 
-    def _alt_create_test_service(self, resp_code=False):
+    def _service_limit_create_test_service(self, resp_code=False):
         service_name = str(uuid.uuid1())
 
         domain_list = [{"domain": self.generate_random_string(
@@ -68,7 +68,7 @@ class TestServiceLimits(base.TestBase):
 
         self.log_delivery = {"enabled": False}
 
-        resp = self.alt_user_client.create_service(
+        resp = self.service_limit_user_client.create_service(
             service_name=service_name,
             domain_list=domain_list,
             origin_list=origin_list,
@@ -96,27 +96,27 @@ class TestServiceLimits(base.TestBase):
     def test_check_imposed_limit_on_services(self, limit):
 
         resp = self.operator_client.admin_service_limit(
-            project_id=self.alt_user_client.project_id,
+            project_id=self.service_limit_user_client.project_id,
             limit=limit)
 
         self.assertEqual(resp.status_code, 201)
 
-        self.service_list = [self._alt_create_test_service()
+        self.service_list = [self._service_limit_create_test_service()
                              for _ in range(limit)]
 
-        resp = self._alt_create_test_service(resp_code=True)
+        resp = self._service_limit_create_test_service(resp_code=True)
         self.assertEqual(resp.status_code, 403)
 
         resp = self.operator_client.get_admin_service_limit(
-            project_id=self.alt_user_client.project_id
+            project_id=self.service_limit_user_client.project_id
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(json.loads(resp.content)['limit'], limit)
 
     def tearDown(self):
         for service in self.service_list:
-            self.alt_user_client.delete_service(location=service)
-            self.alt_user_client.wait_for_service_delete(
+            self.service_limit_user_client.delete_service(location=service)
+            self.service_limit_user_client.wait_for_service_delete(
                 location=service,
                 retry_timeout=self.test_config.status_check_retry_timeout,
                 retry_interval=self.test_config.status_check_retry_interval)
