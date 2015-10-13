@@ -82,6 +82,23 @@ class TestBase(fixtures.BaseTestFixture):
                 serialize_format='json',
                 deserialize_format='json')
 
+            service_limit_auth_token, service_limit_project_id = \
+                cls.auth_client.authenticate_user(
+                    cls.auth_config.base_url,
+                    cls.auth_config.service_limit_user_name,
+                    cls.auth_config.service_limit_api_key)
+            if cls.test_config.project_id_in_url:
+                service_limit_url = cls.config.base_url \
+                    + '/v1.0/' + service_limit_project_id
+            else:
+                service_limit_url = cls.config.base_url + '/v1.0'
+
+            cls.service_limit_user_client = client.PoppyClient(
+                service_limit_url, service_limit_auth_token,
+                service_limit_project_id,
+                serialize_format='json',
+                deserialize_format='json')
+
         if cls.test_config.run_operator_tests:
             operator_auth_token, operator_project_id = \
                 cls.auth_client.authenticate_user(

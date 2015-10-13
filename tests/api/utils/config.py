@@ -148,6 +148,16 @@ class AuthConfig(data_interfaces.ConfigSectionInterface):
         return self.get_raw('alt_api_key')
 
     @property
+    def service_limit_user_name(self):
+        """The name of the service limit user, if applicable."""
+        return self.get('service_limit_user_name')
+
+    @property
+    def service_limit_api_key(self):
+        """The service limit user's api key, if applicable."""
+        return self.get_raw('service_limit_api_key')
+
+    @property
     def operator_user_name(self):
         """The name of the user, if applicable."""
         return self.get('operator_user_name')
