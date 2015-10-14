@@ -107,6 +107,11 @@ class DNSConfig(data_interfaces.ConfigSectionInterface):
         """The url for customers to CNAME to."""
         return self.get('dns_url_suffix')
 
+    @property
+    def shared_ssl_num_shards(self):
+        """The number of shared ssl shards."""
+        return int(self.get('shared_ssl_num_shards'))
+
 
 class AuthConfig(data_interfaces.ConfigSectionInterface):
     """Defines the auth config values."""

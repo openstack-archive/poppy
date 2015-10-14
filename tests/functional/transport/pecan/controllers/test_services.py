@@ -25,6 +25,7 @@ import ddt
 from oslo_config import cfg
 import pecan
 
+from poppy.dns.default.services import ServicesController
 from poppy.transport.pecan.controllers import base as c_base
 from tests.functional.transport.pecan import base
 
@@ -231,7 +232,7 @@ class ServiceControllerTest(base.FunctionalTest):
                  'protocol': 'https',
                  'certificate': 'shared'}
             ],
-            "flavor_id": "mock",
+            "flavor_id": self.flavor_id,
             "origins": [
                 {
                     "origin": "mocksite.com",
@@ -249,15 +250,72 @@ class ServiceControllerTest(base.FunctionalTest):
                                  })
         self.assertEqual(202, response.status_code)
 
-        # This is mocksite2
+        # NOTE (TheSriram): One shard is already taken, since we have a
+        # service created with it. Create n-1 services with n being
+        # total number of shared shards
+
+        class MockDriver(object):
+            def __init__(self):
+                super(MockDriver, self).__init__()
+
+            def dns_name(self):
+                return 'mock_dns'
+
+        total_shards = ServicesController(
+            driver=MockDriver()).shared_ssl_shards
+
+        for shard_id in range(total_shards - 1):
+            service_json = {
+                "name": "mocksite.com",
+                "domains": [
+                    {"domain": "mocksiteshard{0}".format(shard_id),
+                     'protocol': 'https',
+                     'certificate': 'shared'}
+                ],
+                "flavor_id": self.flavor_id,
+                "origins": [
+                    {
+                        "origin": "mocksite.com",
+                        "port": 443,
+                        "ssl": True
+                    }
+                ]
+            }
+
+            response = self.app.post('/v1.0/services',
+                                     params=json.dumps(service_json),
+                                     headers={
+                                         'Content-Type': 'application/json',
+                                         'X-Project-ID': self.project_id
+                                     })
+            self.assertEqual(202, response.status_code)
+            response = self.app.patch(response.location,
+                                      params=json.dumps([{
+                                          "op": "add",
+                                          "path": "/domains/-",
+                                          "value": {
+                                                "domain": "mocksite",
+                                                "protocol": "https",
+                                                "certificate": "shared"}
+                                      }]),
+                                      headers={'Content-Type':
+                                               'application/json',
+                                               'X-Project-ID':
+                                               self.project_id
+                                               }, expect_errors=True)
+            self.assertEqual(202, response.status_code)
+
+        # NOTE(TheSriram): Now create another service, and patch it.
+        # with all shards Exhausted, this will result in a 400
+
         service_json = {
             "name": "mocksite.com",
             "domains": [
-                {"domain": "mocksite2",
+                {"domain": "mocksitefinal",
                  'protocol': 'https',
                  'certificate': 'shared'}
             ],
-            "flavor_id": "mock",
+            "flavor_id": self.flavor_id,
             "origins": [
                 {
                     "origin": "mocksite.com",
@@ -274,7 +332,6 @@ class ServiceControllerTest(base.FunctionalTest):
                                      'X-Project-ID': self.project_id
                                  })
         self.assertEqual(202, response.status_code)
-
         response = self.app.patch(response.location,
                                   params=json.dumps([{
                                       "op": "add",
