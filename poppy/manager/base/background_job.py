@@ -13,17 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager.default import background_job
-from poppy.manager.default import flavors
-from poppy.manager.default import health
-from poppy.manager.default import home
-from poppy.manager.default import services
-from poppy.manager.default import ssl_certificate
+import abc
+
+import six
+
+from poppy.manager.base import controller
 
 
-BackgroundJob = background_job.BackgroundJobController
-Home = home.DefaultHomeController
-Flavors = flavors.DefaultFlavorsController
-Health = health.DefaultHealthController
-Services = services.DefaultServicesController
-SSLCertificate = ssl_certificate.DefaultSSLCertificateController
+@six.add_metaclass(abc.ABCMeta)
+class BackgroundJobControllerBase(controller.ManagerControllerBase):
+    """Health controller base class."""
+
+    def __init__(self, manager):
+        super(BackgroundJobControllerBase, self).__init__(manager)
+
+    @abc.abstractmethod
+    def post_job(self, job_type, args):
+        """Returns the health of storage and providers
+
+        :raises: NotImplementedError
+        """
+        raise NotImplementedError

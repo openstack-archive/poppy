@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Rackspace, Inc.
+# Copyright (c) 2015 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.model import ssl_certificate
+import json
+import uuid
+
+import ddt
+
+from tests.functional.transport.pecan import base
 
 
-def load_from_json(json_data):
-    flavor_id = json_data.get("flavor_id")
-    domain_name = json_data.get("domain_name")
-    cert_type = json_data.get("cert_type")
-    cert_details = json_data.get("cert_details", {})
+@ddt.ddt
+class BackgroundJobControllerTest(base.FunctionalTest):
 
-    return ssl_certificate.SSLCertificate(flavor_id, domain_name,
-                                          cert_type, cert_details)
+    def setUp(self):
+        super(BackgroundJobControllerTest, self).setUp()
+
+        self.project_id = str(uuid.uuid1())
+        self.service_name = str(uuid.uuid1())
+        self.flavor_id = str(uuid.uuid1())
+
+    def test_post_background_job(self, ssl_certificate_json):
+        pass
