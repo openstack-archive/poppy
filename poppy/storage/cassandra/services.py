@@ -839,10 +839,13 @@ class ServicesController(base.ServicesController):
             CQL_SEARCH_BY_DOMAIN,
             consistency_level=self._driver.consistency_level)
         results = self.session.execute(stmt, args)
+        # If there is not service with this domain
+        # return None
+        details = None
         for r in results:
             proj_id = r.get('project_id')
             service = r.get('service_id')
-        details = self.get(proj_id, service)
+            details = self.get(proj_id, service)
         return details
 
     def update_provider_details(self, project_id, service_id,
