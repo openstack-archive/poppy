@@ -239,6 +239,14 @@ class DefaultServicesController(base.ServicesController):
                 existing_shared_domains[customer_domain] = domain.domain
                 domain.domain = customer_domain
 
+            # old domains need to bind as well
+            elif domain.certificate == 'san':
+                cert_for_domain = (
+                    self.storage_controller.get_cert_by_domain(
+                        domain.domain, domain.certificate,
+                        service_old.flavor_id, project_id))
+                domain.cert_info = cert_for_domain
+
         service_old_json = json.loads(json.dumps(service_old.to_dict()))
 
         # remove fields that cannot be part of PATCH
@@ -271,6 +279,7 @@ class DefaultServicesController(base.ServicesController):
         service_new_json['service_id'] = service_old.service_id
         service_new = service.Service.init_from_dict(project_id,
                                                      service_new_json)
+
         store = str(uuid.uuid4()).replace('-', '_')
         service_new.provider_details = service_old.provider_details
 
