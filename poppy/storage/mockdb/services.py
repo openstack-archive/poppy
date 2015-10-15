@@ -19,6 +19,7 @@ from poppy.model.helpers import domain
 from poppy.model.helpers import origin
 from poppy.model.helpers import provider_details
 from poppy.model import service
+from poppy.model import ssl_certificate
 from poppy.storage import base
 
 
@@ -161,6 +162,40 @@ class ServicesController(base.ServicesController):
 
     def update_cert_info(self, domain_name, cert_type, flavor_id,
                          cert_details):
+        pass
+
+    def get_cert_by_domain(self, domain_name, cert_type,
+                           flavor_id,
+                           project_id):
+        return ssl_certificate.SSLCertificate(
+            "premium",
+            "blog.testabc.com",
+            "san",
+            cert_details={
+                'Akamai': {
+                    u'cert_domain': u'secure2.san1.test_cdn.com',
+                    u'extra_info': {
+                        u'action': u'Waiting for customer domain '
+                                    'validation for blog.testabc.com',
+                        u'akamai_spsId': 22231,
+                        u'create_at': u'2015-09-29 16:09:12.429147',
+                        u'san cert': u'secure2.san1.test_cdn.com',
+                        u'status': u'create_in_progress'}
+                    },
+                'Fastly': {
+                    u'cert_domain': u'secure2.san1.fastlycdn.com',
+                    u'extra_info': {
+                        u'action': u'Waiting for customer domain '
+                                    'validation for blog.testabc.com',
+                        u'fastly_rest': 12412,
+                        u'create_at': u'2015-09-29 18:09:12.429147',
+                        u'san cert': u'secure2.san1.fastlycdn.com',
+                        u'status': u'create_in_progress'}
+                    }
+            }
+        )
+
+    def get_service_details_by_domain_name(self, domain_name):
         pass
 
     def create_cert(self, project_id, cert_obj):
