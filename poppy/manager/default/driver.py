@@ -45,5 +45,9 @@ class DefaultManagerDriver(base.Driver):
         return controllers.Health(self)
 
     @decorators.lazy_property(write=False)
+    def background_job_controller(self):
+        return controllers.BackgroundJob(self)
+
+    @decorators.lazy_property(write=False)
     def ssl_certificate_controller(self):
         return controllers.SSLCertificate(self)

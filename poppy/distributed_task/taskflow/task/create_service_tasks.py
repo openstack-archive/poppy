@@ -55,9 +55,14 @@ class CreateProviderServicesTask(task.Task):
             for domain in service_obj.domains:
                 if domain.certificate == 'san':
                     cert_for_domain = (
-                        self.storage_controller.get_cert_by_domain(
-                            domain.domain, domain.certificate,
-                            service_obj.flavor_id, project_id))
+                        self.storage_controller.get_certs_by_domain(
+                            domain.domain,
+                            project_id=project_id,
+                            flavor_id=service_obj.flavor_id,
+                            cert_type=domain.certificate
+                            ))
+                    if cert_for_domain == []:
+                        cert_for_domain = None
                     domain.cert_info = cert_for_domain
         except ValueError:
             msg = 'Creating service {0} from Poppy failed. ' \
