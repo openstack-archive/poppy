@@ -1,0 +1,14 @@
+{
+    "akamai_check_and_update_cert_status": {
+        "job_type": "akamai_check_and_update_cert_status",
+        "domain_name": "www.abc.com",
+        "flavor_id": "mock",
+        "cert_type": "san",
+        "project_id": "000"
+    },
+    "akamai_update_papi_property_for_mod_san": {
+        "job_type": "akamai_update_papi_property_for_mod_san",
+        "domain_name": "www.abc.com",
+        "san_cert_name": "secure1.test_san.com"
+    }
+}
