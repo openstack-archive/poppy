@@ -239,6 +239,18 @@ class DefaultServicesController(base.ServicesController):
                 existing_shared_domains[customer_domain] = domain.domain
                 domain.domain = customer_domain
 
+            # old domains need to bind as well
+            elif domain.certificate == 'san':
+                cert_for_domain = (
+                    self.storage_controller.get_certs_by_domain(
+                        domain.domain,
+                        project_id=project_id,
+                        flavor_id=service_old.flavor_id,
+                        cert_type=domain.certificate))
+                if cert_for_domain == []:
+                    cert_for_domain = None
+                domain.cert_info = cert_for_domain
+
         service_old_json = json.loads(json.dumps(service_old.to_dict()))
 
         # remove fields that cannot be part of PATCH
@@ -293,9 +305,13 @@ class DefaultServicesController(base.ServicesController):
 
                 elif domain.certificate == 'san':
                     cert_for_domain = (
-                        self.storage_controller.get_cert_by_domain(
-                            domain.domain, domain.certificate,
-                            service_new.flavor_id, project_id))
+                        self.storage_controller.get_certs_by_domain(
+                            domain.domain,
+                            project_id=project_id,
+                            flavor_id=service_new.flavor_id,
+                            cert_type=domain.certificate))
+                    if cert_for_domain == []:
+                        cert_for_domain = None
                     domain.cert_info = cert_for_domain
 
                     # retrofit the access url info into

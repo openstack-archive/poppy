@@ -180,11 +180,11 @@ class CassandraStorageServiceTests(base.TestCase):
         self.assertTrue("CloudFront" in actual_response)
         self.assertTrue("Fastly" in actual_response)
 
-    @ddt.file_data('data_get_cert_by_domain.json')
+    @ddt.file_data('data_get_certs_by_domain.json')
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_get_cert_by_domain(self, cert_details_json,
-                                mock_session, mock_execute):
+    def test_get_certs_by_domain(self, cert_details_json,
+                                 mock_session, mock_execute):
         # mock the response from cassandra
         mock_execute.execute.return_value = cert_details_json[0]
         actual_response = self.sc.get_certs_by_domain(
