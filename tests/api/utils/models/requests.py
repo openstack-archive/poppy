@@ -74,7 +74,7 @@ class ServiceAction(base.AutoMarshallingModel):
         }
         if self.domain:
             service_action_request["domain"] = self.domain
-        if self.project_id:
+        elif self.project_id:
             service_action_request["project_id"] = self.project_id
         return json.dumps(service_action_request)
 
