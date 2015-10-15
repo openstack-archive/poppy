@@ -215,6 +215,11 @@ CQL_SEARCH_CERT_BY_DOMAIN = '''
     WHERE domain_name = %(domain_name)s
 '''
 
+CQL_DELETE_CERT = '''
+    DELETE FROM certificate_info
+    WHERE domain_name = %(domain_name)s
+'''
+
 CQL_UPDATE_SERVICE = CQL_CREATE_SERVICE
 
 CQL_GET_PROVIDER_DETAILS = '''
@@ -536,6 +541,43 @@ class ServicesController(base.ServicesController):
                 return None
         else:
             return None
+
+    def delete_cert(self, project_id, domain_name, cert_type):
+        """delete_cert
+
+        Delete a certificate.
+
+        :param project_id
+        :param domain_name
+        :param cert_type
+
+        :raises ValueError
+        """
+        args = {
+            'domain_name': domain_name.lower()
+        }
+
+        stmt = query.SimpleStatement(
+            CQL_SEARCH_CERT_BY_DOMAIN,
+            consistency_level=self._driver.consistency_level)
+        results = self.session.execute(stmt, args)
+
+        if results:
+            for r in results:
+                r_project_id = str(r.get('project_id'))
+                r_cert_type = str(r.get('cert_type'))
+                if r_project_id == str(project_id) and \
+                        r_cert_type == str(cert_type):
+                    args = {
+                        'domain_name': str(r.get('domain_name'))
+                    }
+                    stmt = query.SimpleStatement(
+                        CQL_DELETE_CERT,
+                        consistency_level=self._driver.consistency_level)
+                    self.session.execute(stmt, args)
+        else:
+            raise ValueError("No certificate found for: %, type: %s" %
+                             (domain_name, cert_type))
 
     def create(self, project_id, service_obj):
         """create.
