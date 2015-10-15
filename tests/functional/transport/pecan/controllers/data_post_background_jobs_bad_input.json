@@ -1,0 +1,22 @@
+{
+    "invalid_job_type_name": {
+        "job_type": "nonsense",
+        "flavor_id": "mock"
+    },
+    "missing_cert_type": {
+        "job_type": "akamai_check_and_update_cert_status",
+        "domain_name": "www.abc.com",
+        "flavor_id": "mock",
+        "project_id": "000"
+    },
+    "missing_domain_name": {
+        "job_type": "akamai_check_and_update_cert_status",
+        "cert_type": "san",
+        "flavor_id": "mock",
+        "project_id": "000"
+    },
+    "missing_san_cert_name": {
+        "job_type": "akamai_check_and_update_cert_status",
+        "domain_name": "www.abc.com"
+    }
+}

@@ -22,6 +22,7 @@ from poppy.transport.pecan.controllers import base
 from poppy.transport.pecan import hooks as poppy_hooks
 from poppy.transport.pecan.models.response import service as resp_service_model
 from poppy.transport.validators import helpers
+from poppy.transport.validators.schemas import background_jobs
 from poppy.transport.validators.schemas import domain_migration
 from poppy.transport.validators.schemas import service_action
 from poppy.transport.validators.schemas import service_limit
@@ -73,10 +74,40 @@ class DomainMigrationController(base.Controller, hooks.HookController):
         return pecan.Response(None, 202)
 
 
+class BackgroundJobController(base.Controller, hooks.HookController):
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    def __init__(self, driver):
+        super(BackgroundJobController, self).__init__(driver)
+
+    @pecan.expose('json')
+    @decorators.validate(
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                background_jobs.BackgroundJobSchema.get_schema(
+                    "background_jobs", "POST")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter))
+    def post(self):
+        request_json = json.loads(pecan.request.body.decode('utf-8'))
+        job_type = request_json.pop('job_type')
+
+        try:
+            self._driver.manager.background_job_controller.post_job(
+                job_type,
+                request_json
+            )
+        except NotImplementedError as e:
+            pecan.abort(404, str(e))
+
+        return pecan.Response(None, 202)
+
+
 class AkamaiController(base.Controller, hooks.HookController):
     def __init__(self, driver):
         super(AkamaiController, self).__init__(driver)
         self.__class__.service = DomainMigrationController(driver)
+        self.__class__.background_job = BackgroundJobController(driver)
 
 
 class ProviderController(base.Controller, hooks.HookController):

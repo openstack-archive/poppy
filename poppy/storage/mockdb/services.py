@@ -14,11 +14,13 @@
 # limitations under the License.
 
 import json
+import random
 
 from poppy.model.helpers import domain
 from poppy.model.helpers import origin
 from poppy.model.helpers import provider_details
 from poppy.model import service
+from poppy.model import ssl_certificate
 from poppy.storage import base
 
 
@@ -166,6 +168,9 @@ class ServicesController(base.ServicesController):
         if key in self.certs:
             self.certs[key].cert_details = cert_details
 
+    def get_service_details_by_domain_name(self, domain_name):
+        pass
+
     def create_cert(self, project_id, cert_obj):
         key = (cert_obj.flavor_id, cert_obj.domain_name, cert_obj.cert_type)
         if key not in self.certs:
@@ -173,12 +178,33 @@ class ServicesController(base.ServicesController):
         else:
             raise ValueError
 
-    def get_certs_by_domain(self, domain_name, project_id=None):
+    def get_certs_by_domain(self, domain_name, project_id=None, flavor_id=None,
+                            cert_type=None):
         certs = []
         for cert in self.certs:
             if domain_name in cert:
                 certs.append(self.certs[cert])
         if project_id:
+            if flavor_id is not None and cert_type is not None:
+                return ssl_certificate.SSLCertificate(
+                    "premium",
+                    "blog.testabcd.com",
+                    "san",
+                    project_id=project_id,
+                    cert_details={
+                        'Akamai': {
+                            u'cert_domain': u'secure2.san1.test_123.com',
+                            u'extra_info': {
+                                u'action': u'Waiting for customer domain '
+                                            'validation for blog.testabc.com',
+                                u'akamai_spsId': str(random.randint(1, 100000)
+                                                     ),
+                                u'create_at': u'2015-09-29 16:09:12.429147',
+                                u'san cert': u'secure2.san1.test_123.com',
+                                u'status': u'create_in_progress'}
+                            }
+                    }
+                )
             return [cert for cert in certs if cert.project_id == project_id]
         else:
             return certs
