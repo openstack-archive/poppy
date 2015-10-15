@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.manager.base import background_job
 from poppy.manager.base import driver
 from poppy.manager.base import flavors
 from poppy.manager.base import home
@@ -22,6 +23,7 @@ from poppy.manager.base import ssl_certificate
 
 Driver = driver.ManagerDriverBase
 
+BackgroundJobController = background_job.BackgroundJobControllerBase
 FlavorsController = flavors.FlavorsControllerBase
 ServicesController = services.ServicesControllerBase
 HomeController = home.HomeControllerBase
