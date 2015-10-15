@@ -16,6 +16,7 @@
 import json
 
 from poppy.distributed_task.taskflow.flow import create_ssl_certificate
+from poppy.distributed_task.taskflow.flow import delete_ssl_certificate
 from poppy.manager import base
 
 
@@ -53,5 +54,17 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
         }
         self.distributed_task_controller.submit_task(
             create_ssl_certificate.create_ssl_certificate,
+            **kwargs)
+        return kwargs
+
+    def delete_ssl_certificate(self, project_id, domain_name,
+                               cert_type):
+        kwargs = {
+            'project_id': project_id,
+            'domain_name': domain_name,
+            'cert_type': cert_type
+        }
+        self.distributed_task_controller.submit_task(
+            delete_ssl_certificate.delete_ssl_certificate,
             **kwargs)
         return kwargs
