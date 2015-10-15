@@ -1,0 +1,9 @@
+Verified+2: Jenkins
+Code-Review+2: tonytan4ever <tony.tan@rackspace.com>
+Workflow+1: tonytan4ever <tony.tan@rackspace.com>
+Code-Review+1: Christopher Powell <powellchristoph@gmail.com>
+Submitted-by: Jenkins
+Submitted-at: Thu, 15 Oct 2015 17:14:33 +0000
+Reviewed-on: https://review.openstack.org/235474
+Project: stackforge/poppy
+Branch: refs/heads/master
