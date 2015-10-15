@@ -453,3 +453,17 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
         return self.request('POST', url, request_entity=requests_object,
                             requestslib_kwargs=requestslib_kwargs)
+
+    def delete_ssl_certificate(self, cert_type=None,
+                               domain_name=None, flavor_id=None,
+                               requestslib_kwargs=None,):
+        """Deletes SSL Certificate
+
+        :return: Response Object containing response code 202
+        GET
+        ssl_certificate
+        """
+        url = '{0}/ssl_certificate/{1}'.format(self.url, domain_name)
+
+        return self.request('DELETE', url,
+                            requestslib_kwargs=requestslib_kwargs)

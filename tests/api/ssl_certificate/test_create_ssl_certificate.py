@@ -33,7 +33,7 @@ class TestCreateSSLCertificate(base.TestBase):
         flavor_id = test_data.get('flavor_id') or self.flavor_id
         project_id = self.client.project_id
         if test_data.get("missing_flavor_id", False):
-            flavor_id = None
+            self.flavor_id = None
 
         resp = self.client.create_ssl_certificate(
             cert_type=cert_type,
@@ -50,13 +50,13 @@ class TestCreateSSLCertificate(base.TestBase):
             self.skipTest('Create ssl certificate needs to'
                           ' be run when commanded')
 
-        cert_type = test_data.get('cert_type')
+        self.cert_type = test_data.get('cert_type')
         rand_string = self.generate_random_string()
         domain_name = rand_string + test_data.get('domain_name')
         flavor_id = test_data.get('flavor_id') or self.flavor_id
         project_id = self.client.project_id
         resp = self.client.create_ssl_certificate(
-            cert_type=cert_type,
+            cert_type=self.cert_type,
             domain_name=domain_name,
             flavor_id=flavor_id,
             project_id=project_id
@@ -64,10 +64,9 @@ class TestCreateSSLCertificate(base.TestBase):
         self.assertEqual(resp.status_code, 202)
 
     def tearDown(self):
-        # @todo(malini): Add delete cert when the endpoint is ready.
-        # self.client.delete_ssl_certificate(
-        #     cert_type=cert_type,
-        #     domain_name=domain_name,
-        #     flavor_id=flavor_id
-        # )
+        self.client.delete_ssl_certificate(
+            cert_type=self.cert_type,
+            domain_name=self.domain_name,
+            flavor_id=self.flavor_id
+        )
         super(TestCreateSSLCertificate, self).tearDown()
