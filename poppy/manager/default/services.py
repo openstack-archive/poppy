@@ -271,6 +271,7 @@ class DefaultServicesController(base.ServicesController):
         service_new_json['service_id'] = service_old.service_id
         service_new = service.Service.init_from_dict(project_id,
                                                      service_new_json)
+
         store = str(uuid.uuid4()).replace('-', '_')
         service_new.provider_details = service_old.provider_details
 
@@ -348,6 +349,7 @@ class DefaultServicesController(base.ServicesController):
                                     providers[0].provider_id.title()]
                             )
                             domain.cert_info = new_cert_obj
+
         if hasattr(self, store):
             delattr(self, store)
 

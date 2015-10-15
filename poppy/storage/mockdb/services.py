@@ -166,6 +166,10 @@ class ServicesController(base.ServicesController):
     def create_cert(self, project_id, cert_obj):
         pass
 
+    def delete_cert(self, project_id, domain_name, cert_type):
+        if "non_exist" in domain_name:
+            raise ValueError("No certs on this domain")
+
     @staticmethod
     def format_result(result):
         service_id = result.get('service_id')

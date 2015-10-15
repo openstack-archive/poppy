@@ -89,5 +89,19 @@ class SSLCertificateControllerTest(base.FunctionalTest):
                                  expect_errors=True)
         self.assertEqual(400, response.status_code)
 
+    def test_delete_cert(self):
+        # create with errorenous data: invalid json data
+        response = self.app.delete('/v1.0/ssl_certificate/blog.test.com',
+                                   headers={'X-Project-ID': self.project_id}
+                                   )
+        self.assertEqual(202, response.status_code)
+
+    def test_delete_cert_non_exist(self):
+        # create with errorenous data: invalid json data
+        response = self.app.delete('/v1.0/ssl_certificate/blog.non_exist.com',
+                                   headers={'X-Project-ID': self.project_id},
+                                   expect_errors=True)
+        self.assertEqual(400, response.status_code)
+
     def tearDown(self):
         super(SSLCertificateControllerTest, self).tearDown()
