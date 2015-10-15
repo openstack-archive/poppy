@@ -108,6 +108,7 @@ class Model(collections.OrderedDict):
                             continue
                 except StopIteration:
                     pass
+
                 if 'operator_url' in access_url:
                     self['links'].append(link.Model(
                         access_url['operator_url'],
