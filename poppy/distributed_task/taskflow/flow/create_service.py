@@ -14,13 +14,12 @@
 # limitations under the License.
 
 from oslo_config import cfg
-from taskflow.patterns import graph_flow
+from oslo_log import log
 from taskflow.patterns import linear_flow
 from taskflow import retry
 
 from poppy.distributed_task.taskflow.task import common
 from poppy.distributed_task.taskflow.task import create_service_tasks
-from poppy.openstack.common import log
 
 
 LOG = log.getLogger(__name__)
@@ -31,8 +30,11 @@ conf(project='poppy', prog='poppy', args=[])
 
 
 def create_service():
-    flow = graph_flow.Flow('Creating poppy-service').add(
-        create_service_tasks.CreateProviderServicesTask(),
+    flow = linear_flow.Flow('Creating poppy-service').add(
+        linear_flow.Flow('Update Oslo Context').add(
+            common.ContextUpdateTask()),
+        linear_flow.Flow('Create Provider Services').add(
+            create_service_tasks.CreateProviderServicesTask()),
         linear_flow.Flow('Create Service DNS Mapping flow',
                          retry=retry.ParameterizedForEach(
                              rebind=['time_seconds'],

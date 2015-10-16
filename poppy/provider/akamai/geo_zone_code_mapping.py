@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from oslo_log import log
+
 from poppy.model.helpers import geo_zones
-from poppy.openstack.common import log
 
 # to use log inside worker, we need to directly use logging
 LOG = log.getLogger(__name__)

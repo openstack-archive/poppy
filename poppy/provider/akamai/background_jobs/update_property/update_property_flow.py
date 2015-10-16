@@ -17,7 +17,7 @@ from oslo_config import cfg
 from taskflow import engines
 from taskflow.patterns import linear_flow
 
-from poppy.openstack.common import log
+from oslo_log import log
 from poppy.provider.akamai.background_jobs.update_property import (
     update_property_tasks)
 

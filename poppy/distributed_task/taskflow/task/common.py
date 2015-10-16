@@ -17,11 +17,12 @@ import json
 import requests
 
 from oslo_config import cfg
+from oslo_context import context as context_utils
+from oslo_log import log
 from taskflow import task
 
 from poppy.distributed_task.utils import memoized_controllers
 from poppy.model.helpers import provider_details
-from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import (
     provider_details as req_provider_details
 )
@@ -142,6 +143,13 @@ def create_log_delivery_container(project_id, auth_token):
             return []
     else:
         return []
+
+
+class ContextUpdateTask(task.Task):
+
+    def execute(self, context_dict):
+        context = context_utils.RequestContext.from_dict(ctx=context_dict)
+        context.update_store()
 
 
 class UpdateProviderDetailTask(task.Task):

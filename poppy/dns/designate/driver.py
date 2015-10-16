@@ -15,12 +15,14 @@
 
 """DNS Provider implementation."""
 
+from oslo_log import log
+
 from poppy.dns import base
 from poppy.dns.designate import controllers
 from poppy.dns.designate.helpers import retry_exceptions
-from poppy.openstack.common import log as logging
 
-LOG = logging.getLogger(__name__)
+
+LOG = log.getLogger(__name__)
 
 
 class DNSProvider(base.Driver):

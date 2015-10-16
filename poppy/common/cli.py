@@ -20,11 +20,13 @@ import os
 import sys
 import termios
 
+from oslo_config import cfg
+from oslo_log import log
+
 from poppy.openstack.common.gettextutils import _
-from poppy.openstack.common import log as logging
 
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger(__name__)
 
 
 def _fail(returncode, ex):
@@ -72,7 +74,9 @@ def runnable(func):
         _enable_echo(True)
 
         try:
-            logging.setup('poppy')
+            conf = cfg.CONF
+            log.register_options(conf)
+            log.setup(conf, 'poppy')
             func()
         except KeyboardInterrupt:
             LOG.info(_(u'Terminating'))

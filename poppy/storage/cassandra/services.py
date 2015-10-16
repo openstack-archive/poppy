@@ -22,7 +22,11 @@ except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
 
 from cassandra import query
+
 import six
+
+from oslo_log import log
+
 
 if six.PY2:
     from itertools import ifilterfalse as filterfalse
@@ -37,10 +41,9 @@ from poppy.model.helpers import rule
 from poppy.model import log_delivery as ld
 from poppy.model import service
 from poppy.model import ssl_certificate
-from poppy.openstack.common import log as logging
 from poppy.storage import base
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger(__name__)
 
 
 CQL_LIST_SERVICES = '''

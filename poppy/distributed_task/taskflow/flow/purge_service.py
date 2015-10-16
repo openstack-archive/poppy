@@ -14,13 +14,12 @@
 # limitations under the License.
 
 from oslo_config import cfg
-from taskflow.patterns import graph_flow
+from oslo_log import log
 from taskflow.patterns import linear_flow
 
 
 from poppy.distributed_task.taskflow.task import common
 from poppy.distributed_task.taskflow.task import purge_service_tasks
-from poppy.openstack.common import log
 
 
 LOG = log.getLogger(__name__)
@@ -31,8 +30,11 @@ conf(project='poppy', prog='poppy', args=[])
 
 
 def purge_service():
-    flow = graph_flow.Flow('Purging poppy-service').add(
-        purge_service_tasks.PurgeProviderServicesTask(),
+    flow = linear_flow.Flow('Purging poppy-service').add(
+        linear_flow.Flow('Update Oslo Context').add(
+            common.ContextUpdateTask()),
+        linear_flow.Flow('Purging Provider Services').add(
+            purge_service_tasks.PurgeProviderServicesTask()),
         linear_flow.Flow('Purge provider details').add(
             common.UpdateProviderDetailErrorTask(
                 rebind=['responders'])),
