@@ -17,14 +17,14 @@
 
 import boto
 from oslo_config import cfg
+from oslo_log import log
 import requests
 
-from poppy.openstack.common import log as logging
 from poppy.provider import base
 from poppy.provider.cloudfront import controllers
 
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger(__name__)
 
 CLOUDFRONT_OPTIONS = [
     cfg.StrOpt('aws_access_key_id', help='CloudFront Access Key ID'),

@@ -15,6 +15,7 @@
 import os
 
 from oslo_config import cfg
+from oslo_log import log
 
 from poppy import bootstrap
 from poppy.common import cli
@@ -26,6 +27,7 @@ def run():
     # to pick up common options from openstack.common.log, since
     # that module uses the global CONF instance exclusively.
     conf = cfg.CONF
+    log.register_options(conf)
     conf(project='poppy', prog='poppy')
 
     server = bootstrap.Bootstrap(conf)

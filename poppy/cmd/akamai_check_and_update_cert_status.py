@@ -14,9 +14,9 @@
 # limitations under the License.
 
 from oslo_config import cfg
-
+from oslo_log import log
 from poppy.common import cli
-from poppy.openstack.common import log
+
 from poppy.provider.akamai.background_jobs.check_cert_status_and_update import \
     check_cert_status_and_update_flow
 

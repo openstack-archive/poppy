@@ -16,9 +16,9 @@
 import json
 
 from oslo_config import cfg
+from oslo_log import log
 
 from poppy.common import cli
-from poppy.openstack.common import log
 from poppy.provider.akamai.background_jobs.update_property import \
     update_property_flow
 

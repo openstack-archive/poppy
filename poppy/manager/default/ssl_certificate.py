@@ -15,6 +15,8 @@
 
 import json
 
+from oslo_context import context as context_utils
+
 from poppy.distributed_task.taskflow.flow import create_ssl_certificate
 from poppy.distributed_task.taskflow.flow import delete_ssl_certificate
 from poppy.manager import base
@@ -60,7 +62,8 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
         kwargs = {
             'providers_list_json': json.dumps(providers),
             'project_id': project_id,
-            'cert_obj_json': json.dumps(cert_obj.to_dict())
+            'cert_obj_json': json.dumps(cert_obj.to_dict()),
+            'context_dict': context_utils.get_current().to_dict()
         }
         self.distributed_task_controller.submit_task(
             create_ssl_certificate.create_ssl_certificate,
@@ -72,7 +75,8 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
         kwargs = {
             'project_id': project_id,
             'domain_name': domain_name,
-            'cert_type': cert_type
+            'cert_type': cert_type,
+            'context_dict': context_utils.get_current().to_dict()
         }
         self.distributed_task_controller.submit_task(
             delete_ssl_certificate.delete_ssl_certificate,

@@ -14,11 +14,11 @@
 # limitations under the License.
 
 from oslo_config import cfg
+from oslo_log import log
 from stevedore import driver
 from stevedore import named
 
 from poppy.common import decorators
-from poppy.openstack.common import log
 
 
 LOG = log.getLogger(__name__)
@@ -74,10 +74,14 @@ class Bootstrap(object):
         self.conf = conf
         self.conf.register_opts(_DEFAULT_OPTIONS)
         self.conf.register_opts(_DRIVER_OPTIONS, group=_DRIVER_GROUP)
+        try:
+            getattr(self.conf, 'log_config_append')
+        except cfg.NoSuchOptError:
+            log_config_append_opt = cfg.StrOpt('log_config_append')
+            self.conf.register_opt(log_config_append_opt)
         self.driver_conf = self.conf[_DRIVER_GROUP]
 
-        log.setup('poppy')
-
+        log.setup(self.conf, "poppy")
         LOG.debug("init bootstrap")
 
     @decorators.lazy_property(write=False)
