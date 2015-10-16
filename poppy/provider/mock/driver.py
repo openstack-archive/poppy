@@ -15,11 +15,12 @@
 
 """CDN Provider implementation."""
 
-from poppy.openstack.common import log as logging
+from oslo_log import log
+
 from poppy.provider import base
 from poppy.provider.mock import controllers
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger(__name__)
 
 
 class CDNProvider(base.Driver):

@@ -16,10 +16,11 @@
 import json
 
 from oslo_config import cfg
+from oslo_log import log
+
 from taskflow import task
 
 from poppy.distributed_task.utils import memoized_controllers
-from poppy.openstack.common import log
 
 
 LOG = log.getLogger(__name__)

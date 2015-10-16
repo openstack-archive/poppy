@@ -19,13 +19,13 @@ import json
 import time
 
 from oslo_config import cfg
+from oslo_log import log
 from taskflow import task
 
 from poppy.distributed_task.taskflow.task import common
 from poppy.distributed_task.utils import exc_loader
 from poppy.distributed_task.utils import memoized_controllers
 from poppy.model.helpers import provider_details
-from poppy.openstack.common import log
 from poppy.transport.pecan.models.request import service
 
 
