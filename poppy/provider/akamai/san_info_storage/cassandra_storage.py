@@ -25,9 +25,9 @@ from cassandra import policies
 from cassandra import query
 from cdeploy import migrator
 from oslo_config import cfg
+from oslo_log import log
 
 from poppy.common import decorators
-from poppy.openstack.common import log as logging
 from poppy.provider.akamai.san_info_storage import base
 
 
@@ -84,7 +84,7 @@ CASSANDRA_OPTIONS = [
 
 AKAMAI_CASSANDRA_STORAGE_GROUP = 'drivers:provider:akamai:storage'
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger(__name__)
 
 
 GET_PROVIDER_INFO = '''

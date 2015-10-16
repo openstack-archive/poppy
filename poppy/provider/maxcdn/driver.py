@@ -17,14 +17,14 @@
 
 import maxcdn
 from oslo_config import cfg
+from oslo_log import log
 import requests
 
-from poppy.openstack.common import log as logging
 from poppy.provider import base
 from poppy.provider.maxcdn import controllers
 
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger(__name__)
 
 MAXCDN_OPTIONS = [
     cfg.StrOpt('alias', help='MAXCDN API account alias'),
