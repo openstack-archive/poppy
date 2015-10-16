@@ -17,9 +17,9 @@ import os
 import socket
 
 from oslo_config import cfg
+from oslo_log import log
 
 from poppy import bootstrap
-from poppy.openstack.common import log
 
 
 LOG = log.getLogger(__name__)
@@ -27,7 +27,8 @@ LOG = log.getLogger(__name__)
 
 def run():
     conf = cfg.CONF
-    conf(project='poppy', prog='poppy', args=[])
-    conductor_name = '{0}-{1}'.format(socket.gethostname(), os.getpid())
+    log.register_options(conf)
+    conf(project='poppy', prog='poppy')
     b = bootstrap.Bootstrap(conf)
+    conductor_name = '{0}-{1}'.format(socket.gethostname(), os.getpid())
     b.distributed_task.services_controller.run_task_worker(name=conductor_name)

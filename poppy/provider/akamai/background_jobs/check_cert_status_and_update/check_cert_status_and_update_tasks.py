@@ -19,7 +19,7 @@ from oslo_config import cfg
 from taskflow import task
 
 from poppy.distributed_task.utils import memoized_controllers
-from poppy.openstack.common import log
+from oslo_log import log
 from poppy.transport.pecan.models.request import ssl_certificate
 
 

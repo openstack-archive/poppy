@@ -19,7 +19,7 @@ from oslo_config import cfg
 
 from poppy.manager import base
 from poppy.notification.mailgun import driver as n_driver
-from poppy.openstack.common import log
+from oslo_log import log
 from poppy.provider.akamai.background_jobs.check_cert_status_and_update import \
     check_cert_status_and_update_flow
 from poppy.provider.akamai.background_jobs.update_property import \

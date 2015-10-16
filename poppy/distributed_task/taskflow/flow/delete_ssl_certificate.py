@@ -19,7 +19,7 @@ from taskflow.patterns import linear_flow
 from taskflow import retry
 
 from poppy.distributed_task.taskflow.task import delete_ssl_certificate_tasks
-from poppy.openstack.common import log
+from oslo_log import log
 
 LOG = log.getLogger(__name__)
 

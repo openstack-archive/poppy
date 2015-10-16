@@ -17,7 +17,7 @@ from oslo_config import cfg
 from taskflow import engines
 from taskflow.patterns import linear_flow
 
-from poppy.openstack.common import log
+from oslo_log import log
 from poppy.provider.akamai.background_jobs.check_cert_status_and_update import \
     check_cert_status_and_update_tasks
 

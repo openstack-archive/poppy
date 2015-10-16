@@ -16,9 +16,9 @@
 from wsgiref import simple_server
 
 from oslo_config import cfg
+from oslo_log import log
 import pecan
 
-from poppy.openstack.common import log
 from poppy import transport
 from poppy.transport.pecan import controllers
 from poppy.transport.pecan.controllers import v1
