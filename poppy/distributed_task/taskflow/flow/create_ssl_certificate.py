@@ -14,12 +14,12 @@
 # limitations under the License.
 
 from oslo_config import cfg
+from oslo_log import log
 from taskflow.patterns import graph_flow
 from taskflow.patterns import linear_flow
 from taskflow import retry
 
 from poppy.distributed_task.taskflow.task import create_ssl_certificate_tasks
-from poppy.openstack.common import log
 
 
 LOG = log.getLogger(__name__)
