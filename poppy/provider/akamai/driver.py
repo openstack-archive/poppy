@@ -19,11 +19,11 @@ import json
 
 from akamai import edgegrid
 from oslo_config import cfg
+from oslo_log import log
 import requests
 from stevedore import driver
 
 from poppy.common import decorators
-from poppy.openstack.common import log
 from poppy.provider.akamai import controllers
 from poppy.provider.akamai.mod_san_queue import zookeeper_queue
 from poppy.provider import base

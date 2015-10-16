@@ -18,9 +18,10 @@ import datetime
 import json
 import traceback
 
+from oslo_log import log
+
 from poppy.common import decorators
 from poppy.common import util
-from poppy.openstack.common import log
 from poppy.provider.akamai import geo_zone_code_mapping
 from poppy.provider import base
 

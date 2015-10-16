@@ -17,13 +17,13 @@
 
 import fastly
 from oslo_config import cfg
+from oslo_log import log
 import requests
 
-from poppy.openstack.common import log as logging
 from poppy.provider import base
 from poppy.provider.fastly import controllers
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger(__name__)
 
 FASTLY_OPTIONS = [
     cfg.StrOpt('apikey', help='Fastly API Key'),
