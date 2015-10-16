@@ -27,13 +27,13 @@ from cassandra import policies
 from cassandra import query
 from cdeploy import migrator
 from oslo_config import cfg
+from oslo_log import log
 
-from poppy.openstack.common import log as logging
 from poppy.storage import base
 from poppy.storage.cassandra import controllers
 
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger(__name__)
 
 CASSANDRA_OPTIONS = [
     cfg.ListOpt('cluster', default=['127.0.0.1'],

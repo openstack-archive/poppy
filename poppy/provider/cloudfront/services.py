@@ -14,9 +14,9 @@
 # limitations under the License.
 
 from boto import cloudfront
+from oslo_log import log
 
 from poppy.common import decorators
-from poppy.openstack.common import log
 from poppy.provider import base
 
 LOG = log.getLogger(__name__)

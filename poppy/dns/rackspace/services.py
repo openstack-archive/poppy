@@ -19,10 +19,10 @@ try:
 except NameError:  # noqa  pragma: no cover
     from sets import Set as set  # noqa  pragma: no cover
 
+from oslo_log import log
 import pyrax.exceptions as exc
 
 from poppy.dns import base
-from poppy.openstack.common import log
 
 LOG = log.getLogger(__name__)
 

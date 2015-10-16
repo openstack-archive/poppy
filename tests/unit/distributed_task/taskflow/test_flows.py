@@ -16,6 +16,7 @@ import json
 import uuid
 
 import mock
+from oslo_context import context as context_utils
 from taskflow import engines
 
 from poppy.distributed_task.taskflow.flow import create_service
@@ -171,7 +172,8 @@ class TestFlowRuns(base.TestCase):
             'auth_token': json.dumps(str(uuid.uuid4())),
             'service_id': json.dumps(str(uuid.uuid4())),
             'time_seconds': [i * self.time_factor
-                             for i in range(self.total_retries)]
+                             for i in range(self.total_retries)],
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -212,7 +214,8 @@ class TestFlowRuns(base.TestCase):
             'time_seconds': [i * self.time_factor
                              for i in range(self.total_retries)],
             'service_old': json.dumps(service_old.to_dict()),
-            'service_obj': json.dumps(service_new.to_dict())
+            'service_obj': json.dumps(service_new.to_dict()),
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -246,7 +249,8 @@ class TestFlowRuns(base.TestCase):
                              i in range(self.total_retries)],
             'provider_details': json.dumps(
                 dict([(k, v.to_dict())
-                      for k, v in service_obj.provider_details.items()]))
+                      for k, v in service_obj.provider_details.items()])),
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -281,7 +285,8 @@ class TestFlowRuns(base.TestCase):
                       for k, v in service_obj.provider_details.items()])),
             'purge_url': 'cdn.poppy.org',
             'hard': json.dumps(True),
-            'service_obj': json.dumps(service_obj.to_dict())
+            'service_obj': json.dumps(service_obj.to_dict()),
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -315,6 +320,7 @@ class TestFlowRuns(base.TestCase):
             'service_obj': json.dumps(service_obj.to_dict()),
             'time_seconds': [i * self.time_factor for
                              i in range(self.total_retries)],
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         disable_kwargs = enable_kwargs.copy()
@@ -347,7 +353,8 @@ class TestFlowRuns(base.TestCase):
             'auth_token': json.dumps(str(uuid.uuid4())),
             'service_id': json.dumps(str(uuid.uuid4())),
             'time_seconds': [i * self.time_factor for
-                             i in range(self.total_retries)]
+                             i in range(self.total_retries)],
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -396,7 +403,8 @@ class TestFlowRuns(base.TestCase):
             'time_seconds': [i * self.time_factor for
                              i in range(self.total_retries)],
             'service_old': json.dumps(service_old.to_dict()),
-            'service_obj': json.dumps(service_new.to_dict())
+            'service_obj': json.dumps(service_new.to_dict()),
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -440,7 +448,8 @@ class TestFlowRuns(base.TestCase):
                              i in range(self.total_retries)],
             'provider_details': json.dumps(
                 dict([(k, v.to_dict())
-                      for k, v in service_obj.provider_details.items()]))
+                      for k, v in service_obj.provider_details.items()])),
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -481,6 +490,7 @@ class TestFlowRuns(base.TestCase):
             'service_obj': json.dumps(service_obj.to_dict()),
             'time_seconds': [i * self.time_factor for
                              i in range(self.total_retries)],
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         disable_kwargs = enable_kwargs.copy()
@@ -543,7 +553,8 @@ class TestFlowRuns(base.TestCase):
             'time_seconds': [i * self.time_factor for
                              i in range(self.total_retries)],
             'service_old': json.dumps(service_old.to_dict()),
-            'service_obj': json.dumps(service_new.to_dict())
+            'service_obj': json.dumps(service_new.to_dict()),
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -589,7 +600,8 @@ class TestFlowRuns(base.TestCase):
             'time_seconds': [i * self.time_factor for
                              i in range(self.total_retries)],
             'service_old': json.dumps(service_old.to_dict()),
-            'service_obj': json.dumps(service_new.to_dict())
+            'service_obj': json.dumps(service_new.to_dict()),
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -621,7 +633,8 @@ class TestFlowRuns(base.TestCase):
             'auth_token': json.dumps(str(uuid.uuid4())),
             'service_id': json.dumps(str(uuid.uuid4())),
             'time_seconds': [i * self.time_factor for
-                             i in range(self.total_retries)]
+                             i in range(self.total_retries)],
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -653,7 +666,8 @@ class TestFlowRuns(base.TestCase):
             'auth_token': json.dumps(str(uuid.uuid4())),
             'service_id': json.dumps(str(uuid.uuid4())),
             'time_seconds': [i * self.time_factor for
-                             i in range(self.total_retries)]
+                             i in range(self.total_retries)],
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -695,7 +709,8 @@ class TestFlowRuns(base.TestCase):
                              i in range(self.total_retries)],
             'provider_details': json.dumps(
                 dict([(k, v.to_dict())
-                      for k, v in service_obj.provider_details.items()]))
+                      for k, v in service_obj.provider_details.items()])),
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -734,7 +749,8 @@ class TestFlowRuns(base.TestCase):
                              i in range(self.total_retries)],
             'provider_details': json.dumps(
                 dict([(k, v.to_dict())
-                      for k, v in service_obj.provider_details.items()]))
+                      for k, v in service_obj.provider_details.items()])),
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -773,6 +789,7 @@ class TestFlowRuns(base.TestCase):
             'service_obj': json.dumps(service_obj.to_dict()),
             'time_seconds': [i * self.time_factor for
                              i in range(self.total_retries)],
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         disable_kwargs = enable_kwargs.copy()
@@ -820,6 +837,7 @@ class TestFlowRuns(base.TestCase):
             'service_obj': json.dumps(service_obj.to_dict()),
             'time_seconds': [i * self.time_factor for
                              i in range(self.total_retries)],
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         disable_kwargs = enable_kwargs.copy()
@@ -861,6 +879,7 @@ class TestFlowRuns(base.TestCase):
             'providers_list_json': json.dumps(providers),
             'project_id': json.dumps(str(uuid.uuid4())),
             'cert_obj_json': json.dumps(cert_obj_json.to_dict()),
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
@@ -886,6 +905,7 @@ class TestFlowRuns(base.TestCase):
             'cert_type': "san",
             'project_id': json.dumps(str(uuid.uuid4())),
             'domain_name': "san.san.com",
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         service_controller, storage_controller, dns_controller = \
