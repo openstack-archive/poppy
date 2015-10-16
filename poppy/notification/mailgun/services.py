@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from oslo_log import log
 import requests
 
 from poppy.notification import base
-from poppy.openstack.common import log
 
 LOG = log.getLogger(__name__)
 

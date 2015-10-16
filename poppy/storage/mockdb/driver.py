@@ -15,11 +15,12 @@
 
 """Storage driver implementation."""
 
-from poppy.openstack.common import log as logging
+from oslo_config import cfg
+from oslo_log import log as logging
+
 from poppy.storage import base
 from poppy.storage.mockdb import controllers
 
-from oslo_config import cfg
 
 LOG = logging.getLogger(__name__)
 

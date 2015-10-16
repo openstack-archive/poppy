@@ -17,9 +17,9 @@
 
 import fastly
 from oslo_config import cfg
+from oslo_log import log as logging
 import requests
 
-from poppy.openstack.common import log as logging
 from poppy.provider import base
 from poppy.provider.fastly import controllers
 

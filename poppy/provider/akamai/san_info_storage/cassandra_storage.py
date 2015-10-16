@@ -25,9 +25,9 @@ from cassandra import policies
 from cassandra import query
 from cdeploy import migrator
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from poppy.common import decorators
-from poppy.openstack.common import log as logging
 from poppy.provider.akamai.san_info_storage import base
 
 

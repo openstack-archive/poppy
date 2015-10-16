@@ -16,12 +16,12 @@
 """DNS Provider implementation."""
 
 from oslo_config import cfg
+from oslo_log import log as logging
 import pyrax
 
 from poppy.dns import base
 from poppy.dns.rackspace import controllers
 from poppy.dns.rackspace.helpers import retry_exceptions
-from poppy.openstack.common import log as logging
 
 
 RACKSPACE_OPTIONS = [

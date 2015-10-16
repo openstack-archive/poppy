@@ -15,13 +15,21 @@
 
 
 from oslo_config import cfg
+from oslo_log import log
 
 from poppy import bootstrap
-from poppy.openstack.common import log
 
 
 LOG = log.getLogger(__name__)
 conf = cfg.CONF
+
+try:
+    getattr(conf, 'log_config_append')
+except cfg.NoSuchOptError:
+    # NOTE(TheSriram): Only register options, if they
+    # havent already been registered.
+    log.register_options(conf)
+
 conf(project='poppy', prog='poppy', args=[])
 
 

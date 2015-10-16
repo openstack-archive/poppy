@@ -22,6 +22,7 @@ except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
 
 from cassandra import query
+from oslo_log import log as logging
 
 from poppy.model.helpers import cachingrule
 from poppy.model.helpers import domain
@@ -31,7 +32,6 @@ from poppy.model.helpers import restriction
 from poppy.model.helpers import rule
 from poppy.model import log_delivery as ld
 from poppy.model import service
-from poppy.openstack.common import log as logging
 from poppy.storage import base
 
 LOG = logging.getLogger(__name__)

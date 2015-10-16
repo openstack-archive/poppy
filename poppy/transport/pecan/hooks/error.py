@@ -16,12 +16,12 @@
 import json
 import logging
 
+from oslo_log import log
 from pecan import hooks
 import webob
 
-from poppy.openstack.common import log as oslo_log
 
-LOG = oslo_log.getLogger(__name__)
+LOG = log.getLogger(__name__)
 
 
 class ErrorHook(hooks.PecanHook):

@@ -15,10 +15,12 @@
 
 """DNS Provider implementation."""
 
+from oslo_log import log as logging
+
 from poppy.dns import base
 from poppy.dns.designate import controllers
 from poppy.dns.designate.helpers import retry_exceptions
-from poppy.openstack.common import log as logging
+
 
 LOG = logging.getLogger(__name__)
 

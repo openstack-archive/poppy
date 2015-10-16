@@ -18,6 +18,7 @@ import random
 import uuid
 
 import jsonpatch
+from oslo_log import log
 
 from poppy.common import errors
 from poppy.distributed_task.taskflow.flow import create_service
@@ -29,7 +30,6 @@ from poppy.manager import base
 from poppy.model.helpers import cachingrule
 from poppy.model.helpers import rule
 from poppy.model import service
-from poppy.openstack.common import log
 from poppy.transport.validators import helpers as validators
 from poppy.transport.validators.schemas import service as service_schema
 

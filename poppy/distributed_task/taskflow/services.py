@@ -14,6 +14,7 @@
 # limitations under the License.
 
 
+from oslo_log import log
 from oslo_utils import uuidutils
 from taskflow.conductors import single_threaded
 from taskflow import engines
@@ -22,7 +23,6 @@ from taskflow.persistence import logbook
 from taskflow.types.notifier import Notifier
 
 from poppy.distributed_task import base
-from poppy.openstack.common import log
 
 
 LOG = log.getLogger(__name__)

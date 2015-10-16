@@ -15,7 +15,8 @@
 
 """CDN Provider implementation."""
 
-from poppy.openstack.common import log as logging
+from oslo_log import log as logging
+
 from poppy.provider import base
 from poppy.provider.mock import controllers
 
