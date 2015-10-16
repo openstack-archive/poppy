@@ -354,6 +354,7 @@ class TestSharedCertService(base.TestBase):
             retry_interval=self.test_config.status_check_retry_interval,
             retry_timeout=self.test_config.status_check_retry_timeout)
         self.before_patch_body = resp.json()
+        self.my_domain = self.before_patch_body['domains'][0]['domain']
         self.before_patch_state = resp.json()['status']
 
     @ddt.data('enable', 'disable')
@@ -388,7 +389,7 @@ class TestSharedCertService(base.TestBase):
 
     @ddt.data('enable', 'disable')
     def test_action_with_domain(self, action):
-        domain = self.domain_list[0]["domain"]
+        domain = self.my_domain
         resp = self.operator_client.admin_service_action(
             project_id=self.user_project_id, action=action,
             domain=domain)
@@ -483,7 +484,7 @@ class TestSharedCertService(base.TestBase):
         self.assertEqual(resp.status_code, 404)
 
     def test_action_delete_with_domain(self):
-        domain = self.domain_list[0]["domain"]
+        domain = self.my_domain
         resp = self.operator_client.admin_service_action(
             action='delete',
             domain=domain)
