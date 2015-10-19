@@ -23,7 +23,7 @@ You must have `CassandraDB`_ installed and running.  We recommend using Docker (
 
     $ cd
     $ mkdir .poppy
-    $ git clone https://github.com/stackforge/poppy.git
+    $ git clone https://github.com/openstack/poppy.git
 
 2. Copy the Poppy config files to the directory ``~/.poppy``::
 
