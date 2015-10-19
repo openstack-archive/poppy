@@ -64,7 +64,7 @@ Check out the [[BugTriage|Bug Triage]] wiki for more information.
 Reviewing
 ~~~~~~~~~
 
-Every patch submitted to OpenStack gets reviewed before it can be approved and merged. We get a lot of contributions and everyone can - and is encouraged! [https://review.openstack.org/#/q/status:open+project:stackforge/poppy,n,z Review Poppy's existing patches]. Pick an open review and go through it. Test it if possible, and leave a comment with a +1 or -1 vote describing what you discovered. If you're planning to submit patches of your own, this is a great way to learn about what the community cares about and to learn about the code base.
+Every patch submitted to OpenStack gets reviewed before it can be approved and merged. We get a lot of contributions and everyone can - and is encouraged! [https://review.openstack.org/#/q/status:open+project:openstack/poppy,n,z Review Poppy's existing patches]. Pick an open review and go through it. Test it if possible, and leave a comment with a +1 or -1 vote describing what you discovered. If you're planning to submit patches of your own, this is a great way to learn about what the community cares about and to learn about the code base.
 
 Feature development
 ~~~~~~~~~~~~~~~~~~~

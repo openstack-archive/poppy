@@ -60,7 +60,7 @@ installed and running in a Docker Container.
 
     $ cd
     $ mkdir .poppy
-    $ git clone https://github.com/stackforge/poppy.git
+    $ git clone https://github.com/openstack/poppy.git
 
 2. Copy the Poppy config files to the directory ``~/.poppy``::
 
