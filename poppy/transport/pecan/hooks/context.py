@@ -14,10 +14,10 @@
 # limitations under the License.
 
 from oslo_config import cfg
+from oslo_context import context
 import pecan
 from pecan import hooks
 
-from poppy.openstack.common import context
 from poppy.openstack.common import local
 
 

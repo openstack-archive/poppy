@@ -15,10 +15,10 @@
 
 from oslo_config import cfg
 from oslo_log import log
-from taskflow.patterns import graph_flow
 from taskflow.patterns import linear_flow
 from taskflow import retry
 
+from poppy.distributed_task.taskflow.task import common
 from poppy.distributed_task.taskflow.task import update_service_tasks
 
 LOG = log.getLogger(__name__)
@@ -29,8 +29,11 @@ conf(project='poppy', prog='poppy', args=[])
 
 
 def update_service():
-    flow = graph_flow.Flow('Updating poppy-service').add(
-        update_service_tasks.UpdateProviderServicesTask(),
+    flow = linear_flow.Flow('Updating poppy-service').add(
+        linear_flow.Flow('Update Oslo Context').add(
+            common.ContextUpdateTask()),
+        linear_flow.Flow('Update Provider Services').add(
+            update_service_tasks.UpdateProviderServicesTask()),
         linear_flow.Flow('Update Service DNS Mapping flow',
                          retry=retry.ParameterizedForEach(
                              rebind=['time_seconds'],

@@ -19,6 +19,7 @@ import random
 import uuid
 
 import jsonpatch
+from oslo_context import context as context_utils
 from oslo_log import log
 
 from poppy.common import errors
@@ -200,7 +201,8 @@ class DefaultServicesController(base.ServicesController):
             'project_id': project_id,
             'auth_token': auth_token,
             'service_id': service_id,
-            'time_seconds': self.determine_sleep_times()
+            'time_seconds': self.determine_sleep_times(),
+            'context_dict': context_utils.get_current().to_dict()
         }
 
         self.distributed_task_controller.submit_task(
@@ -374,7 +376,8 @@ class DefaultServicesController(base.ServicesController):
             'auth_token': auth_token,
             'service_old': json.dumps(service_old.to_dict()),
             'service_obj': json.dumps(service_new.to_dict()),
-            'time_seconds': self.determine_sleep_times()
+            'time_seconds': self.determine_sleep_times(),
+            'context_dict': context_utils.get_current().to_dict()
         }
 
         self.distributed_task_controller.submit_task(
@@ -488,7 +491,8 @@ class DefaultServicesController(base.ServicesController):
                 dict([(k, v.to_dict()) for k, v in provider_details.items()])),
             "project_id": project_id,
             "service_id": service_id,
-            'time_seconds': self.determine_sleep_times()
+            'time_seconds': self.determine_sleep_times(),
+            'context_dict': context_utils.get_current().to_dict()
         }
 
         self.distributed_task_controller.submit_task(
@@ -528,7 +532,8 @@ class DefaultServicesController(base.ServicesController):
             'project_id': project_id,
             'hard': json.dumps(hard),
             'service_id': service_id,
-            'purge_url': str(purge_url)
+            'purge_url': str(purge_url),
+            'context_dict': context_utils.get_current().to_dict()
         }
 
         self.distributed_task_controller.submit_task(
