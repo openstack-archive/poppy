@@ -120,3 +120,11 @@ class Domain(common.DictSerializableModel):
         if o.protocol == 'https':
             o.certificate = dict_obj.get("certificate", None)
         return o
+
+    def to_dict(self):
+        res = super(Domain, self).to_dict()
+        # cert info is a temporary property when
+        # trying to create cert, so skip serialization
+        if 'cert_info' in res:
+            res['cert_info'] = res['cert_info'].to_dict()
+        return res
