@@ -92,18 +92,22 @@ class Model(collections.OrderedDict):
             # add the access urls
             access_urls = provider_detail.access_urls
             for access_url in access_urls:
-                domain_info = next(d for d in self["domains"]
-                                   if d['domain'] == access_url['domain'])
-                # If the domain's status is not deployed,
-                # don't show the access url since the domain is not usable yet
-                if domain_info.get("protocol", "http") == "https":
-                    if (provider_detail.
-                        domains_certificate_status.
-                        get_domain_certificate_status(
-                            domain_d['domain']) in ['create_in_progress',
-                                                    'failed']):
-                        continue
-
+                try:
+                    domain_info = next(d for d in self["domains"]
+                                       if d.get('domain') ==
+                                       access_url['domain'])
+                    # If the domain's status is not deployed,
+                    # don't show the access url since the domain
+                    # is not usable yet
+                    if domain_info.get("protocol", "http") == "https":
+                        if (provider_detail.
+                            domains_certificate_status.
+                            get_domain_certificate_status(
+                                domain_d['domain']) in ['create_in_progress',
+                                                        'failed']):
+                            continue
+                except StopIteration:
+                    pass
                 if 'operator_url' in access_url:
                     self['links'].append(link.Model(
                         access_url['operator_url'],
