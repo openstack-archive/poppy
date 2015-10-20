@@ -125,6 +125,6 @@ class Domain(common.DictSerializableModel):
         res = super(Domain, self).to_dict()
         # cert info is a temporary property when
         # trying to create cert, so skip serialization
-        if 'cert_info' in res:
+        if 'cert_info' in res and res['cert_info'] is not None:
             res['cert_info'] = res['cert_info'].to_dict()
         return res
