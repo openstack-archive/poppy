@@ -156,7 +156,7 @@ class ProviderDetail(common.DictSerializableModel):
         :param domain
         '''
         for access_url in self.access_urls:
-            if access_url['domain'] == domain:
+            if access_url.get('domain') == domain:
                 return access_url
         return None
 
