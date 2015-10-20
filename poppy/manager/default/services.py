@@ -607,7 +607,6 @@ class DefaultServicesController(base.ServicesController):
             raise errors.ServiceNotFound(e)
 
         for provider in provider_details:
-            domain_found = False
             for url in provider_details[provider].access_urls:
                 if url['domain'] == domain_name:
                     if 'operator_url' in url:
@@ -619,10 +618,21 @@ class DefaultServicesController(base.ServicesController):
                             service_id,
                             provider_details
                         )
-                        domain_found = True
                         break
-        if not domain_found:
-            LOG.warning('Migrating domain failed: Domain {0} could not '
-                        'be found.'.format(domain_name))
-            raise LookupError('Domain {0} could not be found.'.format(
-                domain_name))
+            else:
+                links = {}
+                link_key_tuple = (domain_name, 'san')
+                links[link_key_tuple] = new_cert
+                created_dns_link = dns_controller._create_cname_records(links)
+                new_url = {
+                    'domain': domain_name,
+                    'operator_url': (
+                        created_dns_link[link_key_tuple]['operator_url']),
+                    'provider_url': new_cert
+                }
+                provider_details[provider].access_urls.append(new_url)
+                storage_controller.update_provider_details(
+                    project_id,
+                    service_id,
+                    provider_details
+                )
