@@ -608,7 +608,7 @@ class DefaultServicesController(base.ServicesController):
 
         for provider in provider_details:
             for url in provider_details[provider].access_urls:
-                if url['domain'] == domain_name:
+                if url.get('domain') == domain_name:
                     if 'operator_url' in url:
                         access_url = url['operator_url']
                         dns_controller.modify_cname(access_url, new_cert)
