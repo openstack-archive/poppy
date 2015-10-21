@@ -519,5 +519,5 @@ class TestServices(base.TestCase):
             controller.sps_api_base_url.format(spsId=lastSpsId))
         controller.sps_api_client.post.assert_called_once_with(
             controller.sps_api_base_url.format(spsId=lastSpsId),
-            data=string_post_cert_info)
+            data=string_post_cert_info.encode('utf-8'))
         return

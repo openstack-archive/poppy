@@ -569,7 +569,7 @@ class ServiceController(base.ServiceBase):
                              string_post_data)
                     resp = self.sps_api_client.post(
                         self.sps_api_base_url.format(spsId=""),
-                        data=string_post_data
+                        data=string_post_data.encode('utf-8')
                     )
                     if resp.status_code != 202:
                         raise RuntimeError('SPS Request failed.'
