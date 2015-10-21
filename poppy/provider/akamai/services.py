@@ -604,6 +604,7 @@ class ServiceController(base.ServiceBase):
                                   (cert_obj.domain_name)
                     })
             except Exception as e:
+                LOG.exception(e)
                 return self.responder.ssl_certificate_provisioned(None, {
                     'status': 'failed',
                     'san cert': None,
