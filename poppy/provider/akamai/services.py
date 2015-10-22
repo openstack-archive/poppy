@@ -131,6 +131,8 @@ class ServiceController(base.ServiceBase):
                 if classified_domain.certificate == 'san':
                     cert_info = getattr(classified_domain, 'cert_info', None)
                     if cert_info is None:
+                        domains_certificate_status[
+                            classified_domain.domain] = "create_in_progress"
                         continue
                     else:
                         edge_host_name = (
@@ -302,6 +304,9 @@ class ServiceController(base.ServiceBase):
                             cert_info = getattr(classified_domain, 'cert_info',
                                                 None)
                             if cert_info is None:
+                                domains_certificate_status[
+                                    classified_domain.domain] = (
+                                        "create_in_progress")
                                 continue
                             else:
                                 edge_host_name = (
@@ -557,7 +562,7 @@ class ServiceController(base.ServiceBase):
                         # This SAN Cert is on pending status
                         if status != 'SPS Request Complete':
                             LOG.info("SPS Not completed for %s..." %
-                                     self.san_cert_name)
+                                     san_cert_name)
                             continue
                     # issue modify san_cert sps request
                     cert_info = self.san_info_storage.get_cert_info(
