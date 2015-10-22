@@ -1,19 +1,28 @@
 {
     "missing_domain_name": {
         "cert_type": "san",
-        "flavor_id": "mock"
+        "flavor_id": "mock",
+        "project_id": "00000"
     },
     "missing_cert_type": {
         "domain_name": "www.abc.com",
-        "flavor_id": "mock"
+        "flavor_id": "mock",
+        "project_id": "00000"
     },
     "non_existing_flavor_input": {
         "cert_type": "san",
         "domain_name": "www.abc.com",
-        "flavor_id": "non_exist"
+        "flavor_id": "non_exist",
+        "project_id": "00000"
     },
     "missing_flavor_id": {
         "cert_type": "san",
-        "domain_name": "www.abc.com"
+        "domain_name": "www.abc.com",
+        "project_id": "00000"
+    },
+    "missing_project_id": {
+        "cert_type": "san",
+        "domain_name": "www.abc.com",
+        "flavor_id": "mock"
     }
 }

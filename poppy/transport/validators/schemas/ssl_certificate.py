@@ -42,6 +42,10 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                         'required': True,
                         'minLength': 3,
                         'maxLength': 253
+                    },
+                    'project_id': {
+                        'type': 'string',
+                        'required': True,
                     }
                 }
             }

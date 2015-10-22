@@ -31,14 +31,15 @@ class TestCreateSSLCertificate(base.TestBase):
         cert_type = test_data.get('cert_type')
         domain_name = test_data.get('domain_name')
         flavor_id = test_data.get('flavor_id') or self.flavor_id
-
+        project_id = self.client.project_id
         if test_data.get("missing_flavor_id", False):
             flavor_id = None
 
         resp = self.client.create_ssl_certificate(
             cert_type=cert_type,
             domain_name=domain_name,
-            flavor_id=flavor_id
+            flavor_id=flavor_id,
+            project_id=project_id
         )
 
         self.assertEqual(resp.status_code, 400)
@@ -53,10 +54,12 @@ class TestCreateSSLCertificate(base.TestBase):
         rand_string = self.generate_random_string()
         domain_name = rand_string + test_data.get('domain_name')
         flavor_id = test_data.get('flavor_id') or self.flavor_id
+        project_id = self.client.project_id
         resp = self.client.create_ssl_certificate(
             cert_type=cert_type,
             domain_name=domain_name,
-            flavor_id=flavor_id
+            flavor_id=flavor_id,
+            project_id=project_id
         )
         self.assertEqual(resp.status_code, 202)
 
