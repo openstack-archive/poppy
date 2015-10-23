@@ -50,6 +50,7 @@ class DomainMigrationController(base.Controller, hooks.HookController):
         service_id = request_json.get('service_id', None)
         domain_name = request_json.get('domain_name', None)
         new_cert = request_json.get('new_cert', None)
+        cert_status = request_json.get('cert_status', 'deployed')
 
         if not helpers.is_valid_domain_name(domain_name):
             pecan.abort(400, detail='Domain {0} is not valid'.format(
@@ -61,7 +62,7 @@ class DomainMigrationController(base.Controller, hooks.HookController):
 
         try:
             self._driver.manager.services_controller.migrate_domain(
-                project_id, service_id, domain_name, new_cert)
+                project_id, service_id, domain_name, new_cert, cert_status)
         except errors.ServiceNotFound:
             pecan.abort(404, detail='Service {0} could not be found'.format(
                 service_id))
