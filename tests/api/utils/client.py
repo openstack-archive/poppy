@@ -256,7 +256,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
 
     def admin_migrate_domain(self, project_id, service_id, domain, new_cert,
-                             requestslib_kwargs=None):
+                             cert_status='deployed', requestslib_kwargs=None):
         """Update SAN domain
 
         :return: Response Object containing response code 202
@@ -267,7 +267,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         url = '{0}/admin/provider/akamai/service'.format(self.url)
         request_object = requests.MigrateDomain(
             project_id=project_id, service_id=service_id, domain=domain,
-            new_cert=new_cert)
+            new_cert=new_cert, cert_status=cert_status)
         return self.request('POST', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 

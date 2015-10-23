@@ -96,20 +96,22 @@ class ServiceLimit(base.AutoMarshallingModel):
 class MigrateDomain(base.AutoMarshallingModel):
     """Marshalling for Action on Services requests."""
 
-    def __init__(self, project_id, service_id, domain, new_cert):
+    def __init__(self, project_id, service_id, domain, new_cert, cert_status):
         super(MigrateDomain, self).__init__()
 
         self.project_id = project_id
         self.service_id = service_id
         self.domain = domain
         self.new_cert = new_cert
+        self.cert_status = cert_status
 
     def _obj_to_json(self):
         service_action_request = {
             "project_id": self.project_id,
             "service_id": self.service_id,
             "domain_name": self.domain,
-            "new_cert": self.new_cert
+            "new_cert": self.new_cert,
+            "cert_status": self.cert_status
         }
         return json.dumps(service_action_request)
 

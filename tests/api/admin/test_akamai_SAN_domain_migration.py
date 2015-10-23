@@ -137,6 +137,33 @@ class TestSanCertService(base.TestBase):
 
         self.assertEqual(data, new_cert)
 
+    def test_migrate_in_progress_cert(self):
+
+        new_certs = self.akamai_config.san_certs
+        new_certs_list = new_certs.split(',')
+        index = random.randint(0, len(new_certs_list) - 1)
+        new_cert = new_certs_list[index]
+
+        get_resp = self.client.get_service(location=self.service_url)
+        get_resp_body = get_resp.json()
+        domain = get_resp_body['domains'][0]['domain']
+        resp = self.operator_client.admin_migrate_domain(
+            project_id=self.user_project_id, service_id=get_resp_body['id'],
+            domain=domain, new_cert=new_cert, cert_status='in_progress')
+
+        self.assertEqual(resp.status_code, 202)
+
+        new_resp = self.client.get_service(location=self.service_url)
+        new_resp_body = new_resp.json()
+
+        access_url_present = False
+        for link in new_resp_body['links']:
+            if link['rel'] == 'access_url':
+                access_url_present = True
+
+        self.assertFalse(
+            access_url_present, 'Access url returned for in_progress san cert')
+
     def test_migrate_negative_invalid_projectid(self):
 
         new_certs = self.akamai_config.san_certs
