@@ -82,6 +82,11 @@ class DefaultServicesController(base.ServicesController):
         try:
             service_details = self.storage_controller\
                 .get_service_details_by_domain_name(domain_name)
+            if service_details is None:
+                # as per latest change, get_service_details_by_domain_name
+                # will return None if the service_details can not be found
+                # for this domain
+                raise LookupError
         except Exception:
             raise LookupError(u'Domain {0} does not exist'.format(
                 domain_name))

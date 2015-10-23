@@ -27,19 +27,23 @@ class TestCreateSSLCertificate(base.TestBase):
     def setUp(self):
         super(TestCreateSSLCertificate, self).setUp()
         self.flavor_id = self.test_flavor
+        self.cert_type = None
+        self.domain_name = None
+        self.negative_test = False
 
     @ddt.file_data('data_create_ssl_certificate_negative.json')
     def test_create_ssl_certificate_negative(self, test_data):
-        cert_type = test_data.get('cert_type')
-        domain_name = test_data.get('domain_name')
+        self.negative_test = True
+        self.cert_type = test_data.get('cert_type')
+        self.domain_name = test_data.get('domain_name')
         flavor_id = test_data.get('flavor_id') or self.flavor_id
         project_id = self.client.project_id
         if test_data.get("missing_flavor_id", False):
-            self.flavor_id = None
+            flavor_id = None
 
         resp = self.client.create_ssl_certificate(
-            cert_type=cert_type,
-            domain_name=domain_name,
+            cert_type=self.cert_type,
+            domain_name=self.domain_name,
             flavor_id=flavor_id,
             project_id=project_id
         )
@@ -52,33 +56,35 @@ class TestCreateSSLCertificate(base.TestBase):
             self.skipTest('Create ssl certificate needs to'
                           ' be run when commanded')
 
-        cert_type = test_data.get('cert_type')
+        self.cert_type = test_data.get('cert_type')
         rand_string = self.generate_random_string()
-        domain_name = rand_string + test_data.get('domain_name')
+        self.domain_name = rand_string + test_data.get('domain_name')
         flavor_id = test_data.get('flavor_id') or self.flavor_id
         project_id = self.client.project_id
         resp = self.client.create_ssl_certificate(
             cert_type=self.cert_type,
-            domain_name=domain_name,
+            domain_name=self.domain_name,
             flavor_id=flavor_id,
             project_id=project_id
         )
         self.assertEqual(resp.status_code, 202)
 
         resp = self.client.get_ssl_certificate(
-            domain_name=domain_name
+            domain_name=self.domain_name
         )
         self.assertEqual(resp.status_code, 200)
 
         for cert in json.loads(resp.content):
-            self.assertEqual(cert['domain_name'], domain_name)
+            self.assertEqual(cert['domain_name'], self.domain_name)
             self.assertEqual(cert['flavor_id'], flavor_id)
-            self.assertEqual(cert['cert_type'], cert_type)
+            self.assertEqual(cert['cert_type'], self.cert_type)
 
     def tearDown(self):
-        self.client.delete_ssl_certificate(
-            cert_type=self.cert_type,
-            domain_name=self.domain_name,
-            flavor_id=self.flavor_id
-        )
+        # Do not call delete cert for negative test
+        if not self.negative_test:
+            self.client.delete_ssl_certificate(
+                cert_type=self.cert_type,
+                domain_name=self.domain_name,
+                flavor_id=self.flavor_id
+            )
         super(TestCreateSSLCertificate, self).tearDown()
