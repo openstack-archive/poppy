@@ -134,16 +134,20 @@ class CreateFlavor(base.AutoMarshallingModel):
 class CreateSSLCertificate(base.AutoMarshallingModel):
     """Marshalling for Create Flavor requests."""
 
-    def __init__(self, cert_type=None, domain_name=None, flavor_id=None):
+    def __init__(self, cert_type=None, domain_name=None, flavor_id=None,
+                 project_id=None):
         super(CreateSSLCertificate, self).__init__()
 
         self.cert_type = cert_type
         self.domain_name = domain_name
         self.flavor_id = flavor_id
+        self.project_id = project_id
 
     def _obj_to_json(self):
         create_ssl_certificate_request = {
             "cert_type": self.cert_type,
             "domain_name": self.domain_name,
-            "flavor_id": self.flavor_id}
+            "flavor_id": self.flavor_id,
+            "project_id": self.project_id
+        }
         return json.dumps(create_ssl_certificate_request)

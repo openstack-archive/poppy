@@ -433,7 +433,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
     def create_ssl_certificate(self, cert_type=None,
                                domain_name=None, flavor_id=None,
-                               requestslib_kwargs=None,):
+                               project_id=None,
+                               requestslib_kwargs=None):
         """Creates SSL Certificate
 
         :return: Response Object containing response code 200 and body with
@@ -446,7 +447,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         requests_object = requests.CreateSSLCertificate(
             cert_type=cert_type,
             domain_name=domain_name,
-            flavor_id=flavor_id
+            flavor_id=flavor_id,
+            project_id=project_id
         )
 
         return self.request('POST', url, request_entity=requests_object,

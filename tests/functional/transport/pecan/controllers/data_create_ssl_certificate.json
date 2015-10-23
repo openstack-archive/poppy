@@ -2,7 +2,8 @@
       "all_fields": {
         "cert_type": "san",
         "domain_name": "www.abc.com",
-        "flavor_id": "mock"
+        "flavor_id": "mock",
+        "project_id": "00000"
     }
 }
 

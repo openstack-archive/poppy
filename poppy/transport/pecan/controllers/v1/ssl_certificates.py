@@ -49,8 +49,9 @@ class SSLCertificateController(base.Controller, hooks.HookController):
         certificate_info_dict = json.loads(pecan.request.body.decode('utf-8'))
 
         try:
+            project_id = certificate_info_dict.get('project_id')
             cert_obj = ssl_certificate.load_from_json(certificate_info_dict)
-            ssl_certificate_controller.create_ssl_certificate(self.project_id,
+            ssl_certificate_controller.create_ssl_certificate(project_id,
                                                               cert_obj)
         except LookupError as e:
             pecan.abort(400, detail='Provisioning ssl certificate failed. '
