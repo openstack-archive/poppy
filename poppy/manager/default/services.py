@@ -592,7 +592,8 @@ class DefaultServicesController(base.ServicesController):
                 delattr(self, store)
             raise ValueError(str(e))
 
-    def migrate_domain(self, project_id, service_id, domain_name, new_cert):
+    def migrate_domain(self, project_id, service_id, domain_name, new_cert,
+                       cert_status='deployed'):
         dns_controller = self.dns_controller
         storage_controller = self.storage_controller
 
@@ -631,6 +632,8 @@ class DefaultServicesController(base.ServicesController):
                     'provider_url': new_cert
                 }
                 provider_details[provider].access_urls.append(new_url)
+                provider_details[provider].domains_certificate_status.\
+                    set_domain_certificate_status(domain_name, cert_status)
                 storage_controller.update_provider_details(
                     project_id,
                     service_id,

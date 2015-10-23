@@ -43,6 +43,11 @@ class DomainMigrationServiceSchema(schema_base.SchemaBase):
                     'new_cert': {
                         'type': 'string',
                         'required': True
+                    },
+                    'cert_status': {
+                        'type': 'string',
+                        'required': False,
+                        'enum': ['create_in_progress', 'deployed']
                     }
                 }
             }
