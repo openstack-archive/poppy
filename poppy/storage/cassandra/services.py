@@ -899,7 +899,11 @@ class ServicesController(base.ServicesController):
             proj_id = r.get('project_id')
             service = r.get('service_id')
             details = self.get(proj_id, service)
-        return details
+        if not details:
+            raise ValueError('No service details '
+                             'found for domain: %s' % domain_name)
+        else:
+            return details
 
     def update_provider_details(self, project_id, service_id,
                                 provider_details):
