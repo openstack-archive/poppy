@@ -75,8 +75,8 @@ class CheckCertStatusTask(task.Task):
 
             # This SAN Cert is on pending status
             if status != 'SPS Request Complete':
-                LOG.info("SPS Not completed for %s..." %
-                         self.cert)
+                LOG.info("SPS Not completed for %s ..." %
+                         cert_obj.get_san_edge_name())
                 return ""
             else:
                 LOG.info("SPS completed for %s..." %
