@@ -126,13 +126,11 @@ class SSLCertificateControllerTest(base.FunctionalTest):
         self.assertEqual(202, response.status_code)
 
         # get existing domain with different project_id
-
         response = self.app.get('/v1.0/ssl_certificate/{0}'.format(domain),
                                 headers={
                                     'Content-Type': 'application/json',
-                                    'X-Project-ID': str(uuid.uuid4())},
-                                expect_errors=True)
-        self.assertEqual(404, response.status_code)
+                                    'X-Project-ID': str(uuid.uuid4())})
+        self.assertEqual(200, response.status_code)
 
     def test_create_with_invalid_json(self):
         # create with errorenous data: invalid json data

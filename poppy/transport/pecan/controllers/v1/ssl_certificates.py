@@ -100,9 +100,10 @@ class SSLCertificateController(base.Controller, hooks.HookController):
         total_cert_info = []
 
         try:
+            # NOTE(TheSriram): we can also enforce project_id constraints
             certs_info = certificate_controller.get_certs_info_by_domain(
                 domain_name=domain_name,
-                project_id=self.project_id)
+                project_id=None)
         except ValueError:
             pecan.abort(404, detail='certificate '
                                     'could not be found '
