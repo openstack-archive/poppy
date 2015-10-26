@@ -33,6 +33,7 @@ def main():
         'issuer': 'symantec',
         'ipVersion': 'ipv4',
         'slot_deployment_klass': 'esslType',
+        'spsId': None,
         'jobId': None}
 
     san_info_dict = {
@@ -48,10 +49,15 @@ def main():
                                        'default value: %s'
                                        ' (if default is None, '
                                        'that means a real value has to'
-                                       ' be input): ' %
+                                       ' be input, except spsId): ' %
                                        (attr,
                                         san_cert_name,
                                         san_attribute_default_list[attr]))
+                # We allow not inputing spsId, however if it is in
+                # transitioning from the old manual SAN process we NEED
+                # to put in spsId
+                if user_input in ["", None] and attr == "spsId":
+                    break
                 if san_attribute_default_list[attr] is None:
                     continue
                 else:
