@@ -35,38 +35,38 @@ class TestProviderDetails(base.TestCase):
         self.assertTrue(self.my_provider_detail.error_class is None)
         self.assertTrue(self.my_provider_detail.error_message is None)
 
-    @ddt.data(u'deployed', u'create_in_progress', u'failed')
-    def test_set_domain_certificate_status(self, status):
-        self.my_provider_detail.domains_certificate_status.\
-            set_domain_certificate_status("www.ab.com", status)
+    # @ddt.data(u'deployed', u'create_in_progress', u'failed')
+    # def test_set_domain_certificate_status(self, status):
+    #     self.my_provider_detail.domains_certificate_status.\
+    #         set_domain_certificate_status("www.ab.com", status)
 
-        self.assertTrue(
-            self.my_provider_detail.domains_certificate_status.
-            get_domain_certificate_status("www.ab.com") ==
-            status)
+    #     self.assertTrue(
+    #         self.my_provider_detail.domains_certificate_status.
+    #         get_domain_certificate_status("www.ab.com") ==
+    #         status)
 
-    @ddt.data(u'invalid_status')
-    def test_set_domain_certificate_status_invalid(self, status):
-        self.assertRaises(
-            ValueError,
-            self.my_provider_detail.domains_certificate_status.
-            set_domain_certificate_status,
-            "www.ab.com",
-            status)
+    # @ddt.data(u'invalid_status')
+    # def test_set_domain_certificate_status_invalid(self, status):
+    #    self.assertRaises(
+    #         ValueError,
+    #         self.my_provider_detail.domains_certificate_status.
+    #         set_domain_certificate_status,
+    #         "www.ab.com",
+    #         status)
 
-    @ddt.data(u'deployed', u'create_in_progress', u'failed')
-    def test_get_domain_certificate_status(self, status):
-        current_status = (
-            self.my_provider_detail.domains_certificate_status.
-            get_domain_certificate_status("www.ab.com")
-        )
-        self.assertTrue(
-            current_status, 'deployed')
+    # @ddt.data(u'deployed', u'create_in_progress', u'failed')
+    # def test_get_domain_certificate_status(self, status):
+    #     current_status = (
+    #         self.my_provider_detail.domains_certificate_status.
+    #         get_domain_certificate_status("www.ab.com")
+    #    )
+    #     self.assertTrue(
+    #          current_status, 'deployed')
 
-        self.my_provider_detail.domains_certificate_status.\
-            set_domain_certificate_status("www.ab.com", status)
+    #     self.my_provider_detail.domains_certificate_status.\
+    #         set_domain_certificate_status("www.ab.com", status)
 
-        self.assertTrue(
-            self.my_provider_detail.domains_certificate_status.
-            get_domain_certificate_status("www.ab.com")
-            == status)
+    #     self.assertTrue(
+    #        self.my_provider_detail.domains_certificate_status.
+    #         get_domain_certificate_status("www.ab.com")
+    #         == status)

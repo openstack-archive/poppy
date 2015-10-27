@@ -203,8 +203,8 @@ class TestBase(fixtures.BaseTestFixture):
                                                   == b_item['domain']))
                 if item['certificate'] == 'shared':
                     matched_domain_in_body['domain'] = item['domain']
-                matched_domain_in_body["certificate_status"] = (
-                    item["certificate_status"])
+                # matched_domain_in_body["certificate_status"] = (
+                #     item["certificate_status"])
         self.assertEqual(sorted(actual_response['domains']),
                          sorted(expected_response['domains']))
 

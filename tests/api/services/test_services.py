@@ -103,8 +103,8 @@ class TestCreateService(providers.TestProviderBase):
                                                   .split('.')[0]))
                 if item['certificate'] == 'shared':
                     item['domain'] = matched_domain_in_body['domain']
-                item["certificate_status"] = (
-                    matched_domain_in_body["certificate_status"])
+                # item["certificate_status"] = (
+                #     matched_domain_in_body["certificate_status"])
         self.assertEqual(body['domains'], domain_list)
 
         for item in origin_list:
