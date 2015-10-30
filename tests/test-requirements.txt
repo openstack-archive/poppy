@@ -1,5 +1,5 @@
 coverage
-ddt
+ddt==1.0.0
 dnspython
 fixtures
 hacking
