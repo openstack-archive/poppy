@@ -20,6 +20,9 @@ import ddt
 import fastly
 import mock
 
+from poppy.model.helpers import domain
+from poppy.model.helpers import origin
+from poppy.model.service import Service
 from poppy.provider.fastly import services
 from poppy.transport.pecan.models.request import service
 from tests.unit import base
@@ -298,9 +301,21 @@ class TestServices(base.TestCase):
         controller.client.get_service_by_name.return_value = service
 
         # test exception
+        controller.client.delete_service.side_effect = None
+        service_id = str(uuid.uuid4())
+        current_domain = str(uuid.uuid1())
+        domains_old = domain.Domain(domain=current_domain)
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = Service(service_id=service_id,
+                              name='poppy cdn service',
+                              domains=[domains_old],
+                              origins=[current_origin],
+                              flavor_id='cdn',
+                              project_id=str(uuid.uuid4()))
+        resp = controller.delete(service_obj, provider_service_id)
         exception = fastly.FastlyError(Exception('ding'))
         controller.client.delete_service.side_effect = exception
-        resp = controller.delete(provider_service_id)
+        resp = controller.delete(service_obj, provider_service_id)
 
         self.assertIn('error', resp[self.driver.provider_name])
 
@@ -312,8 +327,17 @@ class TestServices(base.TestCase):
 
         # clear run
         controller.client.delete_service.side_effect = None
-
-        resp = controller.delete(provider_service_id)
+        service_id = str(uuid.uuid4())
+        current_domain = str(uuid.uuid1())
+        domains_old = domain.Domain(domain=current_domain)
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = Service(service_id=service_id,
+                              name='poppy cdn service',
+                              domains=[domains_old],
+                              origins=[current_origin],
+                              flavor_id='cdn',
+                              project_id=str(uuid.uuid4()))
+        resp = controller.delete(service_obj, provider_service_id)
         controller.client.delete_service.assert_called_once_with(
             provider_service_id)
         self.assertIn('id', resp[self.driver.provider_name])

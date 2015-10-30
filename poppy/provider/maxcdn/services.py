@@ -94,7 +94,7 @@ class ServiceController(base.ServiceBase):
             # this exception branch will most likely for a network failure
             return self.responder.failed(str(e))
 
-    def delete(self, pullzone_id):
+    def delete(self, service_obj, pullzone_id):
         '''MaxCDN create.
 
          manager needs to pass in a service name to delete.
