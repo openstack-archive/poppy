@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import datetime
 import json
 import traceback
@@ -186,230 +185,126 @@ class ServiceController(base.ServiceBase):
             ids = []
             links = []
             domains_certificate_status = {}
-            if len(service_obj.domains) > 0:
-                # in this case we need to copy
-                # and tweak the content of one old policy
-                # and creates new policy for the new domains,
-                # old policies ought to be deleted.
-                try:
-                    configuration_number = self._get_configuration_number(
-                        util.dict2obj(policies[0]))
-                    resp = self.policy_api_client.get(
-                        self.policy_api_base_url.format(
-                            configuration_number=configuration_number,
-                            policy_name=policies[0]['policy_name']),
-                        headers=self.request_header)
-                    # if the policy is not found with provider, create it
-                    if resp.status_code == 404:
-                        LOG.info('akamai response code: %s' % resp.status_code)
-                        LOG.info('upserting service with'
-                                 'akamai: %s' % service_obj.service_id)
-                        return self.create(service_obj)
-                    elif resp.status_code != 200:
-                        raise RuntimeError(resp.text)
-                except Exception as e:
-                    return self.responder.failed(str(e))
-                else:
-                    policy_content = json.loads(resp.text)
-                # Update origin if necessary
-                if len(service_obj.origins) > 0:
-                    policy_content['rules'] = []
-                    for origin in service_obj.origins:
-                        self._process_new_origin(
-                            origin, policy_content['rules'])
-
-                # implementing caching-rules for akamai
-                # we need deep copy since caching rules will be used in late
-                # upadate objects
-                # caching_rules = copy.deepcopy(service_obj.caching)
-                # Traverse existing rules list to add caching rules necessarys
-                self._process_caching_rules(
-                    service_obj.caching, policy_content['rules'])
-                self._process_restriction_rules(
-                    service_obj.restrictions, policy_content['rules'])
-                if invalidate:
-                    self._process_cache_invalidation_rules(
-                        invalidate_url, policy_content['rules'])
-                # Update domain if necessary (by adjust digital property)
-                classified_domains = self._classify_domains(
-                    service_obj.domains)
-
-                try:
-                    for classified_domain in classified_domains:
-                        # assign the content realm to be the
-                        # digital property field of each group
-                        dp = self._process_new_domain(classified_domain,
-                                                      policy_content['rules'])
-
-                        configuration_number = self._get_configuration_number(
-                            classified_domain)
-
-                        # verify the same policy
-                        policy_names = [policy['policy_name'] for policy
-                                        in policies]
-
-                        # Only if a same domain with a same protocol
-                        # do we need to update a existing policy
-                        if dp in policy_names and (
-                            policies[policy_names.index(dp)]['protocol'] == (
-                                classified_domain.protocol)):
-                            # in this case we should update existing policy
-                            # instead of create a new policy
-                            LOG.info('Start to update policy %s' % dp)
-                            LOG.info("Updating Akamai Policy: %s",
-                                     json.dumps(policy_content))
-
-                            # TODO(tonytan4ever): also classify domains based
-                            # on their protocols. http and https domains needs
-                            # to be created  with separate base urls.
-                            resp = self.policy_api_client.put(
-                                self.policy_api_base_url.format(
-                                    configuration_number=(
-                                        configuration_number),
-                                    policy_name=dp),
-                                data=json.dumps(policy_content),
-                                headers=self.request_header)
-
-                            for policy in policies:
-                                # policies are based on domain_name
-                                # will be unique within a provider
-                                if policy['policy_name'] == dp:
-                                    dp_obj = policy
-                                    break
-
-                            policies.remove(dp_obj)
-                        else:
-                            LOG.info('Start to create new policy %s' % dp)
-                            resp = self.policy_api_client.put(
-                                self.policy_api_base_url.format(
-                                    configuration_number=(
-                                        configuration_number),
-                                    policy_name=dp),
-                                data=json.dumps(policy_content),
-                                headers=self.request_header)
-                        LOG.info('akamai response code: %s' % resp.status_code)
-                        LOG.info('akamai response text: %s' % resp.text)
-                        if resp.status_code != 200:
-                            raise RuntimeError(resp.text)
-                        dp_obj = {'policy_name': dp,
-                                  'protocol': classified_domain.protocol,
-                                  'certificate': classified_domain.certificate}
-                        ids.append(dp_obj)
-                        # TODO(tonytan4ever): leave empty links for now
-                        # may need to work with dns integration
-                        LOG.info('Creating/Updating policy %s on domain %s '
-                                 'complete' % (dp, classified_domain.domain))
-                        edge_host_name = None
-                        if classified_domain.certificate == 'san':
-                            cert_info = getattr(classified_domain, 'cert_info',
-                                                None)
-                            if cert_info is None:
-                                domains_certificate_status[
-                                    classified_domain.domain] = (
-                                        "create_in_progress")
-                                continue
-                            else:
-                                edge_host_name = (
-                                    classified_domain.cert_info.
-                                    get_san_edge_name())
-                                if edge_host_name is None:
-                                    continue
-                            domains_certificate_status[classified_domain.domain] \
-                                = (
-                                classified_domain.cert_info.get_cert_status())
-                        provider_access_url = self._get_provider_access_url(
-                            classified_domain, dp, edge_host_name)
-                        links.append({'href': provider_access_url,
-                                      'rel': 'access_url',
-                                      'domain': dp,
-                                      'certificate':
-                                      classified_domain.certificate
-                                      })
-                except Exception:
-                    LOG.exception("Failed to Update Service - {0}".
-                                  format(provider_service_id))
-                    return self.responder.failed("failed to update service")
-
-                try:
-                    for policy in policies:
-                        configuration_number = self._get_configuration_number(
-                            util.dict2obj(policy))
-
-                        LOG.info('Starting to delete old policy %s' %
-                                 policy['policy_name'])
-                        resp = self.policy_api_client.delete(
-                            self.policy_api_base_url.format(
-                                configuration_number=configuration_number,
-                                policy_name=policy['policy_name']))
-                        LOG.info('akamai response code: %s' % resp.status_code)
-                        LOG.info('akamai response text: %s' % resp.text)
-                        if resp.status_code != 200:
-                            raise RuntimeError(resp.text)
-                        LOG.info('Delete old policy %s complete' %
-                                 policy['policy_name'])
-                except Exception:
-                    LOG.exception("Failed to Update Service - {0}".
-                                  format(provider_service_id))
-                    return self.responder.failed("failed to update service")
-
+            # in this case we need to copy
+            # and tweak the content of one old policy
+            # and creates new policy for the new domains,
+            # old policies ought to be deleted.
+            try:
+                configuration_number = self._get_configuration_number(
+                    util.dict2obj(policies[0]))
+                resp = self.policy_api_client.get(
+                    self.policy_api_base_url.format(
+                        configuration_number=configuration_number,
+                        policy_name=policies[0]['policy_name']),
+                    headers=self.request_header)
+                # if the policy is not found with provider, create it
+                if resp.status_code == 404:
+                    LOG.info('akamai response code: %s' % resp.status_code)
+                    LOG.info('upserting service with'
+                             'akamai: %s' % service_obj.service_id)
+                    return self.create(service_obj)
+                elif resp.status_code != 200:
+                    raise RuntimeError(resp.text)
+            except Exception as e:
+                return self.responder.failed(str(e))
             else:
-                # in this case we only need to adjust the existing policies
-                for policy in policies:
-                    try:
-                        configuration_number = self._get_configuration_number(
-                            util.dict2obj(policy))
+                policy_content = json.loads(resp.text)
+            # Update origin if necessary
+            if len(service_obj.origins) > 0:
+                policy_content['rules'] = []
+                for origin in service_obj.origins:
+                    self._process_new_origin(
+                        origin, policy_content['rules'])
 
-                        resp = self.policy_api_client.get(
-                            self.policy_api_base_url.format(
-                                configuration_number=configuration_number,
-                                policy_name=policy['policy_name']),
-                            headers=self.request_header)
-                        if resp.status_code != 200:
-                            raise RuntimeError(resp.text)
-                    except Exception as e:
-                        return self.responder.failed(str(e))
-                    else:
-                        policy_content = json.loads(resp.text)
+            # implementing caching-rules for akamai
+            # we need deep copy since caching rules will be used in late
+            # upadate objects
+            # caching_rules = copy.deepcopy(service_obj.caching)
+            # Traverse existing rules list to add caching rules necessarys
+            self._process_caching_rules(
+                service_obj.caching, policy_content['rules'])
+            self._process_restriction_rules(
+                service_obj.restrictions, policy_content['rules'])
+            if invalidate:
+                self._process_cache_invalidation_rules(
+                    invalidate_url, policy_content['rules'])
+            # Update domain if necessary (by adjust digital property)
+            classified_domains = self._classify_domains(
+                service_obj.domains)
 
-                    if len(service_obj.origins) > 0:
-                        policy_content['rules'] = []
-                        for origin in service_obj.origins:
-                            self._process_new_origin(origin,
-                                                     policy_content['rules'])
+            try:
+                for classified_domain in classified_domains:
+                    # assign the content realm to be the
+                    # digital property field of each group
+                    dp = self._process_new_domain(classified_domain,
+                                                  policy_content['rules'])
 
-                    # implementing caching-rules for akamai
-                    caching_rules = copy.deepcopy(service_obj.caching)
-                    # Traverse existing rules list to add caching rules
-                    # necessarys
-                    self._process_caching_rules(caching_rules,
-                                                policy_content['rules'])
-                    self._process_restriction_rules(
-                        service_obj.restrictions, policy_content['rules'])
+                    configuration_number = self._get_configuration_number(
+                        classified_domain)
 
-                    # post new policies back with Akamai Policy API
-                    try:
-                        LOG.info('Start to update policy %s ' % policy)
+                    # verify the same policy
+                    policy_names = [policy['policy_name'] for policy
+                                    in policies]
+
+                    # Only if a same domain with a same protocol
+                    # do we need to update a existing policy
+                    if dp in policy_names and (
+                        policies[policy_names.index(dp)]['protocol'] == (
+                            classified_domain.protocol)):
+                        # in this case we should update existing policy
+                        # instead of create a new policy
+                        LOG.info('Start to update policy %s' % dp)
+                        LOG.info("Updating Akamai Policy: %s",
+                                 json.dumps(policy_content))
+
+                        # TODO(tonytan4ever): also classify domains based
+                        # on their protocols. http and https domains needs
+                        # to be created  with separate base urls.
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
-                                configuration_number=configuration_number,
-                                policy_name=policy['policy_name']),
+                                configuration_number=(
+                                    configuration_number),
+                                policy_name=dp),
                             data=json.dumps(policy_content),
                             headers=self.request_header)
-                        LOG.info('akamai response code: %s' % resp.status_code)
-                        LOG.info('akamai response text: %s' % resp.text)
-                        LOG.info('Update policy %s complete' %
-                                 policy['policy_name'])
-                    except Exception:
-                        LOG.exception("Failed to Update Service - {0}".
-                                      format(provider_service_id))
-                        return self.responder.failed(
-                            "failed to update service")
 
-                    # This part may need to revisit
+                        for policy in policies:
+                            # policies are based on domain_name
+                            # will be unique within a provider
+                            if policy['policy_name'] == dp:
+                                dp_obj = policy
+                                break
+
+                        policies.remove(dp_obj)
+                    else:
+                        LOG.info('Start to create new policy %s' % dp)
+                        resp = self.policy_api_client.put(
+                            self.policy_api_base_url.format(
+                                configuration_number=(
+                                    configuration_number),
+                                policy_name=dp),
+                            data=json.dumps(policy_content),
+                            headers=self.request_header)
+                    LOG.info('akamai response code: %s' % resp.status_code)
+                    LOG.info('akamai response text: %s' % resp.text)
+                    if resp.status_code != 200:
+                        raise RuntimeError(resp.text)
+                    dp_obj = {'policy_name': dp,
+                              'protocol': classified_domain.protocol,
+                              'certificate': classified_domain.certificate}
+                    ids.append(dp_obj)
+                    # TODO(tonytan4ever): leave empty links for now
+                    # may need to work with dns integration
+                    LOG.info('Creating/Updating policy %s on domain %s '
+                             'complete' % (dp, classified_domain.domain))
                     edge_host_name = None
-                    if policy['certificate'] == 'san':
-                        cert_info = policy.get('cert_info', None)
+                    if classified_domain.certificate == 'san':
+                        cert_info = getattr(classified_domain, 'cert_info',
+                                            None)
                         if cert_info is None:
+                            domains_certificate_status[
+                                classified_domain.domain] = (
+                                    "create_in_progress")
                             continue
                         else:
                             edge_host_name = (
@@ -417,18 +312,43 @@ class ServiceController(base.ServiceBase):
                                 get_san_edge_name())
                             if edge_host_name is None:
                                 continue
-                        domains_certificate_status[policy['policy_name']] \
+                        domains_certificate_status[classified_domain.domain] \
                             = (
                             classified_domain.cert_info.get_cert_status())
                     provider_access_url = self._get_provider_access_url(
-                        util.dict2obj(policy), policy['policy_name'],
-                        edge_host_name)
+                        classified_domain, dp, edge_host_name)
                     links.append({'href': provider_access_url,
                                   'rel': 'access_url',
-                                  'domain': policy['policy_name'],
-                                  'certificate': policy['certificate']
+                                  'domain': dp,
+                                  'certificate':
+                                  classified_domain.certificate
                                   })
-                ids = policies
+            except Exception:
+                LOG.exception("Failed to Update Service - {0}".
+                              format(provider_service_id))
+                return self.responder.failed("failed to update service")
+
+            try:
+                for policy in policies:
+                    configuration_number = self._get_configuration_number(
+                        util.dict2obj(policy))
+
+                    LOG.info('Starting to delete old policy %s' %
+                             policy['policy_name'])
+                    resp = self.policy_api_client.delete(
+                        self.policy_api_base_url.format(
+                            configuration_number=configuration_number,
+                            policy_name=policy['policy_name']))
+                    LOG.info('akamai response code: %s' % resp.status_code)
+                    LOG.info('akamai response text: %s' % resp.text)
+                    if resp.status_code != 200:
+                        raise RuntimeError(resp.text)
+                    LOG.info('Delete old policy %s complete' %
+                             policy['policy_name'])
+            except Exception:
+                LOG.exception("Failed to Update Service - {0}".
+                              format(provider_service_id))
+                return self.responder.failed("failed to update service")
             return self.responder.updated(
                 json.dumps(ids), links,
                 domains_certificate_status=domains_certificate_status)
