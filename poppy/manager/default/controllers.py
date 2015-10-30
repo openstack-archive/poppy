@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.manager.default import analytics
 from poppy.manager.default import background_job
 from poppy.manager.default import flavors
 from poppy.manager.default import health
@@ -21,6 +22,7 @@ from poppy.manager.default import services
 from poppy.manager.default import ssl_certificate
 
 
+Analytics = analytics.AnalyticsController
 BackgroundJob = background_job.BackgroundJobController
 Home = home.DefaultHomeController
 Flavors = flavors.DefaultFlavorsController
