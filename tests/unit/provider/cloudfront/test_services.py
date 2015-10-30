@@ -19,6 +19,9 @@ from boto import cloudfront
 import ddt
 import mock
 
+from poppy.model.helpers import domain
+from poppy.model.helpers import origin
+from poppy.model.service import Service
 from poppy.provider.cloudfront import services
 from poppy.transport.pecan.models.request import service
 from tests.unit import base
@@ -107,11 +110,33 @@ class TestServices(base.TestCase):
         # delete_distribution: Exception
         self.controller.client.delete_distribution.side_effect = Exception(
             'Deleting service failed.')
-        resp = self.controller.delete(self.service_name)
+        service_id = str(uuid.uuid4())
+        current_domain = str(uuid.uuid1())
+        domains_old = domain.Domain(domain=current_domain)
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = Service(service_id=service_id,
+                              name='poppy cdn service',
+                              domains=[domains_old],
+                              origins=[current_origin],
+                              flavor_id='cdn',
+                              project_id=str(uuid.uuid4()))
+        resp = self.controller.delete(project_id=service_obj.project_id,
+                                      service_name=self.service_name)
         self.assertIn('error', resp[self.driver.provider_name])
 
     def test_delete(self):
-        resp = self.controller.delete(self.service_name)
+        service_id = str(uuid.uuid4())
+        current_domain = str(uuid.uuid1())
+        domains_old = domain.Domain(domain=current_domain)
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = Service(service_id=service_id,
+                              name='poppy cdn service',
+                              domains=[domains_old],
+                              origins=[current_origin],
+                              flavor_id='cdn',
+                              project_id=str(uuid.uuid4()))
+        resp = self.controller.delete(project_id=service_obj.project_id,
+                                      service_name=self.service_name)
         self.assertIn('id', resp[self.driver.provider_name])
 
     def test_purge_exceptions(self):

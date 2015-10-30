@@ -168,7 +168,7 @@ class ServiceController(base.ServiceBase):
         except Exception as e:
             return self.responder.failed(str(e))
 
-    def delete(self, provider_service_id):
+    def delete(self, project_id, provider_service_id):
         try:
             # Delete the service
             fastly_service = self.client.get_service_details(

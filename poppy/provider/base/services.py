@@ -49,9 +49,10 @@ class ServicesControllerBase(controller.ProviderControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self, provider_service_id):
+    def delete(self, project_id, provider_service_id):
         """delete.
 
+        :param project_id
         :param provider_service_id
         :raises NotImplementedError
         """

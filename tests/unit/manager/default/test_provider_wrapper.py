@@ -55,14 +55,19 @@ class TestProviderWrapper(base.TestCase):
             provider_name="no_existent_provider"))
         self.assertRaises(errors.BadProviderDetail,
                           self.provider_wrapper_obj.delete,
-                          mock_ext, self.fake_provider_details)
+                          mock_ext, self.fake_provider_details,
+                          str(uuid.uuid4()))
 
     def test_delete(self):
         mock_ext = mock.Mock(obj=mock.Mock(provider_name="Fastly"))
         fastly_provider_detail = self.fake_provider_details["Fastly"]
-        self.provider_wrapper_obj.delete(mock_ext, self.fake_provider_details)
+        fake_project_id = str(uuid.uuid4())
+        self.provider_wrapper_obj.delete(mock_ext,
+                                         self.fake_provider_details,
+                                         fake_project_id)
         mock_ext.obj.service_controller.delete.assert_called_once_with(
-            fastly_provider_detail.provider_service_id)
+            fake_project_id,
+            fastly_provider_detail.provider_service_id,)
 
     def test_purge_with_keyerror(self):
         mock_ext = mock.Mock(provider_name="no_existent_provider")
