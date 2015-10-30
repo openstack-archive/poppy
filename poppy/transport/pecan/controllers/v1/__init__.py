@@ -25,13 +25,13 @@ from poppy.transport.pecan.controllers.v1 import ssl_certificates
 
 
 # Hoist into package namespace
-Home = home.HomeController
-Services = services.ServicesController
-Flavors = flavors.FlavorsController
-Ping = ping.PingController
-Health = health.HealthController
-DNSHealth = health.DNSHealthController
-StorageHealth = health.StorageHealthController
-ProviderHealth = health.ProviderHealthController
 Admin = admin.AdminController
+DNSHealth = health.DNSHealthController
+Flavors = flavors.FlavorsController
+Health = health.HealthController
+Home = home.HomeController
+Ping = ping.PingController
+ProviderHealth = health.ProviderHealthController
+Services = services.ServicesController
 SSLCertificate = ssl_certificates.SSLCertificateController
+StorageHealth = health.StorageHealthController

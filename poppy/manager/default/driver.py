@@ -29,6 +29,10 @@ class DefaultManagerDriver(base.Driver):
             conf, storage, providers, dns, distributed_task, notification)
 
     @decorators.lazy_property(write=True)
+    def analytics_controller(self):
+        return controllers.Analytics(self)
+
+    @decorators.lazy_property(write=True)
     def services_controller(self):
         return controllers.Services(self)
 
