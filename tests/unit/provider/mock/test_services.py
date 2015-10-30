@@ -19,6 +19,9 @@ import uuid
 import ddt
 import mock
 
+from poppy.model.helpers import domain
+from poppy.model.helpers import origin
+from poppy.model.service import Service
 from poppy.provider.mock import services
 from poppy.transport.pecan.models.request import service
 from tests.unit import base
@@ -43,7 +46,18 @@ class MockProviderServicesTest(base.TestCase):
         self.assertTrue(response is not None)
 
     def test_delete(self):
-        response = self.sc.delete(self.test_provider_service_id)
+        service_id = str(uuid.uuid4())
+        current_domain = str(uuid.uuid1())
+        domains_old = domain.Domain(domain=current_domain)
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = Service(service_id=service_id,
+                              name='poppy cdn service',
+                              domains=[domains_old],
+                              origins=[current_origin],
+                              flavor_id='cdn',
+                              project_id=str(uuid.uuid4()))
+        response = self.sc.delete(service_obj,
+                                  self.test_provider_service_id)
         self.assertTrue(response is not None)
 
     def test_get(self):

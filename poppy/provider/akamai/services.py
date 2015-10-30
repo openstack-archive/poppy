@@ -47,6 +47,10 @@ class ServiceController(base.ServiceBase):
         return self.driver.akamai_sps_api_client
 
     @property
+    def subcustomer_api_client(self):
+        return self.driver.akamai_sub_customer_api_client
+
+    @property
     def san_info_storage(self):
         return self.driver.san_info_storage
 
@@ -63,6 +67,8 @@ class ServiceController(base.ServiceBase):
 
         self.driver = driver
         self.policy_api_base_url = self.driver.akamai_policy_api_base_url
+        self.akamai_subcustomer_api_base_url = \
+            self.driver.akamai_subcustomer_api_base_url
         self.ccu_api_base_url = self.driver.akamai_ccu_api_base_url
         self.sps_api_base_url = self.driver.akamai_sps_api_base_url
         self.request_header = {'Content-type': 'application/json',
@@ -112,12 +118,34 @@ class ServiceController(base.ServiceBase):
 
                 configuration_number = self._get_configuration_number(
                     classified_domain)
+                headers = self.request_header.copy()
+                try:
+                    region, subcustomer_id = self._get_subcustomer_id_region(
+                        configuration_number=configuration_number,
+                        project_id=service_obj.project_id,
+                        domain=classified_domain.domain)
+                except RuntimeError:
+                    LOG.info("Creating subcustomer id for customer: %s, "
+                             "domain: %s" % (service_obj.project_id,
+                                             classified_domain.domain))
+                    self._put_subcustomer_id_region(configuration_number,
+                                                    service_obj.project_id,
+                                                    classified_domain.domain)
+                    LOG.info("Getting subcustomer id for customer: %s, "
+                             "domain: %s" % (service_obj.project_id,
+                                             classified_domain.domain))
+                    region, subcustomer_id = self._get_subcustomer_id_region(
+                        configuration_number=configuration_number,
+                        project_id=service_obj.project_id,
+                        domain=classified_domain.domain)
+
+                headers['X-Customer-ID'] = subcustomer_id
                 resp = self.policy_api_client.put(
                     self.policy_api_base_url.format(
                         configuration_number=configuration_number,
                         policy_name=dp),
                     data=json.dumps(post_data),
-                    headers=self.request_header)
+                    headers=headers)
                 LOG.info('akamai response code: %s' % resp.status_code)
                 LOG.info('akamai response text: %s' % resp.text)
                 if resp.status_code != 200:
@@ -275,13 +303,41 @@ class ServiceController(base.ServiceBase):
                         # TODO(tonytan4ever): also classify domains based
                         # on their protocols. http and https domains needs
                         # to be created  with separate base urls.
+                        headers = self.request_header.copy()
+                        try:
+                            region, subcustomer_id = \
+                                self._get_subcustomer_id_region(
+                                    configuration_number=configuration_number,
+                                    project_id=service_obj.project_id,
+                                    domain=classified_domain.domain)
+                        except RuntimeError:
+                            # If no sub_customer_id exist, create one.
+                            LOG.info("Creating subcustomer id for customer: "
+                                     "%s, domain: %s" %
+                                     (service_obj.project_id,
+                                      classified_domain.domain))
+                            self._put_subcustomer_id_region(
+                                configuration_number,
+                                service_obj.project_id,
+                                classified_domain.domain)
+                            LOG.info("Getting subcustomer id for customer: "
+                                     "%s, domain: %s" %
+                                     (service_obj.project_id,
+                                      classified_domain.domain))
+                            region, subcustomer_id = (
+                                self._get_subcustomer_id_region(
+                                    configuration_number=configuration_number,
+                                    project_id=service_obj.project_id,
+                                    domain=classified_domain.domain))
+
+                        headers['X-Customer-ID'] = subcustomer_id
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
                                 configuration_number=(
                                     configuration_number),
                                 policy_name=dp),
                             data=json.dumps(policy_content),
-                            headers=self.request_header)
+                            headers=headers)
 
                         for policy in policies:
                             # policies are based on domain_name
@@ -293,6 +349,33 @@ class ServiceController(base.ServiceBase):
                         policies.remove(dp_obj)
                     else:
                         LOG.info('Start to create new policy %s' % dp)
+                        headers = self.request_header.copy()
+                        try:
+                            region, subcustomer_id = \
+                                self._get_subcustomer_id_region(
+                                    configuration_number=configuration_number,
+                                    project_id=service_obj.project_id,
+                                    domain=classified_domain.domain)
+                        except RuntimeError:
+                            # If no sub_customer_id exist, create one.
+                            LOG.info("Creating subcustomer id for customer: "
+                                     "%s, domain: %s" %
+                                     (service_obj.project_id,
+                                      classified_domain.domain))
+                            self._put_subcustomer_id_region(
+                                configuration_number,
+                                service_obj.project_id,
+                                classified_domain.domain)
+                            LOG.info("Getting subcustomer id for customer: "
+                                     "%s, domain: %s" %
+                                     (service_obj.project_id,
+                                      classified_domain.domain))
+                            region, subcustomer_id = (
+                                self._get_subcustomer_id_region(
+                                    configuration_number=configuration_number,
+                                    project_id=service_obj.project_id,
+                                    domain=classified_domain.domain))
+                        headers['X-Customer-ID'] = subcustomer_id
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
                                 configuration_number=(
@@ -383,7 +466,7 @@ class ServiceController(base.ServiceBase):
             return self.responder.failed(
                 "failed to update service - %s" % str(e))
 
-    def delete(self, provider_service_id):
+    def delete(self, project_id, provider_service_id):
         # delete needs to provide a list of policy id/domains
         # then delete them accordingly
         try:
@@ -583,6 +666,80 @@ class ServiceController(base.ServiceBase):
                 'status': 'failed',
                 'reason': 'Cert type : %s hasn\'t been implemented'
             })
+
+    def get_subcustomer_id(self, project_id, domain):
+        # subcustomer_id now just set for project_id
+        return ''.join([project_id])
+
+    def _get_subcustomer_id_region(self, configuration_number,
+                                   project_id, domain):
+        LOG.info("Starting to get "
+                 "Sub-Customer ID "
+                 "region for domain: {0}".format(domain))
+
+        resp = self.subcustomer_api_client.get(
+            self.akamai_subcustomer_api_base_url.format(
+                configuration_number=configuration_number,
+                subcustomer_id=self.get_subcustomer_id(project_id,
+                                                       domain)))
+
+        if resp.ok:
+            region = json.loads(resp.content)["geo"]
+            LOG.info("Sub-Customer ID region: {0} for domain: {1}".format(
+                region, domain))
+            return (region, self.get_subcustomer_id(project_id,
+                                                    domain))
+        else:
+            LOG.info("Sub-Customer ID region retrieval for "
+                     "domain: {0} failed!".format(domain))
+            LOG.info("Response Code: {0}".format(resp.status_code))
+            msg = "Response Text: {0}".format(resp.text)
+            LOG.info(msg)
+            raise RuntimeError(msg)
+
+    def _put_subcustomer_id_region(self, configuration_number,
+                                   project_id, domain, region='US'):
+
+        LOG.info("Starting to put Sub-Customer ID "
+                 "region for domain: {0}".format(domain))
+
+        resp = self.subcustomer_api_client.put(
+            self.akamai_subcustomer_api_base_url.format(
+                configuration_number=configuration_number,
+                subcustomer_id=self.get_subcustomer_id(project_id, domain)),
+            data=json.dumps({"geo": region}))
+
+        if resp.ok:
+            LOG.info("Sub-Customer ID region "
+                     "set to : {0} "
+                     "for domain: {1}".format(region,
+                                              domain))
+        else:
+            msg = "Setting Sub-Customer ID region for " \
+                  "domain: {0} failed!".format(domain)
+            LOG.info(msg)
+            raise RuntimeError(msg)
+
+    def _delete_subcustomer_id_region(self, configuration_number,
+                                      project_id, domain):
+
+        LOG.info("Starting to delete "
+                 "Sub-Customer ID for "
+                 "domain: {0}".format(domain))
+
+        resp = self.subcustomer_api_client.delete(
+            self.akamai_subcustomer_api_base_url.format(
+                configuration_number=configuration_number,
+                subcustomer_id=self.get_subcustomer_id(project_id, domain)))
+
+        if resp.ok:
+            LOG.info("Sub-Customer ID deleted for domain: {0}".format(
+                domain))
+        else:
+            msg = "Deleting Sub-Customer ID for " \
+                  "domain: {0} failed!".format(domain)
+            LOG.info(msg)
+            raise RuntimeError(msg)
 
     @decorators.lazy_property(write=False)
     def current_customer(self):
