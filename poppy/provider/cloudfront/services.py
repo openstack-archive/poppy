@@ -74,7 +74,7 @@ class ServiceController(base.ServiceBase):
                  'successfull...' % service_obj.name)
         return self.responder.created(distribution.id, links, status=status)
 
-    def delete(self, service_name):
+    def delete(self, service_obj, service_name):
         # NOTE(obulpathi): distribution_id is the equivalent of service_name
         distribution_id = service_name
         try:
