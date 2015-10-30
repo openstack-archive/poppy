@@ -70,7 +70,10 @@ class TestServices(base.TestCase):
         # ASSERTIONS
         # create_service
         service_obj = service.load_from_json(service_json)
-
+        self.controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
         self.controller.policy_api_client.put.side_effect = (
             RuntimeError('Creating service failed.'))
         resp = self.controller.create(service_obj)
@@ -79,7 +82,10 @@ class TestServices(base.TestCase):
     @ddt.file_data('data_service.json')
     def test_create_with_4xx_return(self, service_json):
         service_obj = service.load_from_json(service_json)
-
+        self.controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
         # test exception
         self.controller.policy_api_client.put.return_value = mock.Mock(
             status_code=400,
@@ -92,6 +98,10 @@ class TestServices(base.TestCase):
     @ddt.file_data('data_service.json')
     def test_create_with_multiple_domains(self, service_json):
         service_obj = service.load_from_json(service_json)
+        self.controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
         self.controller.policy_api_client.put.return_value = mock.Mock(
             status_code=200,
             text='Put successful'
@@ -103,20 +113,36 @@ class TestServices(base.TestCase):
             num_of_links = len(provider_response['links'])
             # make sure we have same number of domains and links
             self.assertEqual(num_of_domains, num_of_links)
-
-        self.controller.policy_api_client.put.assert_called_once()
+            self.assertIn('id', provider_responses[provider_name])
 
     @ddt.file_data('data_service.json')
     def test_create(self, service_json):
-        service_obj = service.load_from_json(service_json)
-        self.controller.policy_api_client.put.return_value = mock.Mock(
+        controller = services.ServiceController(self.driver)
+        controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+
+        controller.policy_api_client.put.return_value = mock.Mock(
             status_code=200,
             text='Put successful'
         )
-        self.controller.create(service_obj)
-        self.controller.policy_api_client.put.assert_called_once()
+
+        service_obj = service.load_from_json(service_json)
+        resp = controller.create(service_obj)
+        self.assertIn('id', resp[self.driver.provider_name])
 
     def test_delete_with_exception(self):
+        service_id = str(uuid.uuid4())
+        current_domain = str(uuid.uuid1())
+        domains_old = domain.Domain(domain=current_domain)
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = Service(service_id=service_id,
+                              name='poppy cdn service',
+                              domains=[domains_old],
+                              origins=[current_origin],
+                              flavor_id='cdn',
+                              project_id=str(uuid.uuid4()))
         provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
                                            'protocol': 'http',
                                            'certificate': None}])
@@ -124,43 +150,150 @@ class TestServices(base.TestCase):
         # test exception
         exception = RuntimeError('ding')
         self.controller.policy_api_client.delete.side_effect = exception
-        resp = self.controller.delete(provider_service_id)
+        resp = self.controller.delete(service_obj, provider_service_id)
 
         self.assertIn('error', resp[self.driver.provider_name])
 
     def test_delete_with_service_id_json_load_error(self):
         # This should trigger a json.loads error
+        service_id = str(uuid.uuid4())
+        current_domain = str(uuid.uuid1())
+        domains_old = domain.Domain(domain=current_domain)
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = Service(service_id=service_id,
+                              name='poppy cdn service',
+                              domains=[domains_old],
+                              origins=[current_origin],
+                              flavor_id='cdn',
+                              project_id=str(uuid.uuid4()))
+
         provider_service_id = None
-        resp = self.controller.delete(provider_service_id)
+        controller = services.ServiceController(self.driver)
+
+        controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+
+        controller.subcustomer_api_client.delete.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True)
+
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            text='Get successful'
+        )
+        controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
+        controller.policy_api_client.delete.return_value = mock.Mock(
+            status_code=200,
+            text='Delete successful'
+        )
+
+        resp = controller.delete(service_obj, provider_service_id)
         self.assertIn('error', resp[self.driver.provider_name])
 
     def test_delete_with_4xx_return(self):
-        provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
+        service_id = str(uuid.uuid4())
+        current_domain = str(uuid.uuid1())
+        domains_old = domain.Domain(domain=current_domain)
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = Service(service_id=service_id,
+                              name='poppy cdn service',
+                              domains=[domains_old],
+                              origins=[current_origin],
+                              flavor_id='cdn',
+                              project_id=str(uuid.uuid4()))
+
+        provider_service_id = json.dumps([{'policy_name': current_domain,
                                            'protocol': 'http',
                                            'certificate': None}])
+        controller = services.ServiceController(self.driver)
 
-        # test exception
-        self.controller.policy_api_client.delete.return_value = mock.Mock(
-            status_code=400,
-            text='Some error happened'
+        controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+
+        controller.subcustomer_api_client.delete.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True)
+
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            text='Get successful'
         )
-        resp = self.controller.delete(provider_service_id)
+        controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
+        controller.policy_api_client.delete.return_value = mock.Mock(
+            status_code=400,
+            text='error happened'
+        )
 
+        resp = controller.delete(service_obj, provider_service_id)
         self.assertIn('error', resp[self.driver.provider_name])
 
     def test_delete(self):
-        provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
+        service_id = str(uuid.uuid4())
+        current_domain = str(uuid.uuid1())
+        domains_old = domain.Domain(domain=current_domain)
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = Service(service_id=service_id,
+                              name='poppy cdn service',
+                              domains=[domains_old],
+                              origins=[current_origin],
+                              flavor_id='cdn',
+                              project_id=str(uuid.uuid4()))
+
+        provider_service_id = json.dumps([{'policy_name': current_domain,
                                            'protocol': 'http',
                                            'certificate': None}])
+        controller = services.ServiceController(self.driver)
 
-        self.controller.delete(provider_service_id)
-        self.controller.policy_api_client.delete.assert_called_once()
+        controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+
+        controller.subcustomer_api_client.delete.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True)
+
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            text='Get successful'
+        )
+        controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
+        controller.policy_api_client.delete.return_value = mock.Mock(
+            status_code=200,
+            text='Delete successful'
+        )
+
+        resp = controller.delete(service_obj, provider_service_id)
+        self.assertIn('id', resp[self.driver.provider_name])
 
     @ddt.file_data('data_update_service.json')
     def test_update_with_get_error(self, service_json):
         provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
                                            'protocol': 'http'}])
         controller = services.ServiceController(self.driver)
+
+        controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+
+        controller.subcustomer_api_client.delete.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True)
+
         controller.policy_api_client.get.return_value = mock.Mock(
             status_code=400,
             text='Some get error happened'
@@ -193,6 +326,15 @@ class TestServices(base.TestCase):
                                            'protocol': 'http',
                                            'certificate': None}])
         controller = services.ServiceController(self.driver)
+        controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+
+        controller.subcustomer_api_client.delete.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True)
+
         controller.policy_api_client.get.return_value = mock.Mock(
             status_code=200,
             text=json.dumps(dict(rules=[]))
@@ -216,6 +358,16 @@ class TestServices(base.TestCase):
                                            'protocol': 'http',
                                            'certificate': None}])
         controller = services.ServiceController(self.driver)
+
+        controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+
+        controller.subcustomer_api_client.delete.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True)
+
         controller.policy_api_client.get.return_value = mock.Mock(
             status_code=200,
             text=json.dumps(dict(rules=[]))
@@ -239,6 +391,16 @@ class TestServices(base.TestCase):
                                            'protocol': 'http',
                                            'certificate': None}])
         controller = services.ServiceController(self.driver)
+
+        controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+
+        controller.subcustomer_api_client.delete.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True)
+
         controller.policy_api_client.get.return_value = mock.Mock(
             status_code=404,
             text='Service not found'
@@ -318,6 +480,16 @@ class TestServices(base.TestCase):
                                            'protocol': 'https',
                                            'certificate': 'shared'}])
         controller = services.ServiceController(self.driver)
+
+        controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+
+        controller.subcustomer_api_client.delete.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True)
+
         controller.policy_api_client.get.return_value = mock.Mock(
             status_code=200,
             text=json.dumps(dict(rules=[]))

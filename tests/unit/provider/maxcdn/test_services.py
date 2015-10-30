@@ -20,6 +20,9 @@ import ddt
 import mock
 from oslo_config import cfg
 
+from poppy.model.helpers import domain
+from poppy.model.helpers import origin
+from poppy.model.service import Service
 from poppy.provider.maxcdn import driver
 from poppy.provider.maxcdn import services
 from poppy.transport.pecan.models.request import service
@@ -200,7 +203,17 @@ class TestServices(base.TestCase):
         controller = services.ServiceController(new_driver)
         # test create, everything goes through successfully
         service_name = 'test_service_name'
-        resp = controller.delete(service_name)
+        service_id = str(uuid.uuid4())
+        current_domain = str(uuid.uuid1())
+        domains_old = domain.Domain(domain=current_domain)
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = Service(service_id=service_id,
+                              name='poppy cdn service',
+                              domains=[domains_old],
+                              origins=[current_origin],
+                              flavor_id='cdn',
+                              project_id=str(uuid.uuid4()))
+        resp = controller.delete(service_obj, service_name)
         self.assertIn('id', resp[new_driver.provider_name])
 
     @mock.patch('poppy.provider.maxcdn.driver.CDNProvider.client')
@@ -220,7 +233,19 @@ class TestServices(base.TestCase):
         controller_with_delete_exception.client.configure_mock(**{
             'delete.side_effect':
             RuntimeError('Deleting service mysteriously failed.')})
-        resp = controller_with_delete_exception.delete(service_name)
+        service_name = 'test_service_name'
+        service_id = str(uuid.uuid4())
+        current_domain = str(uuid.uuid1())
+        domains_old = domain.Domain(domain=current_domain)
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = Service(service_id=service_id,
+                              name='poppy cdn service',
+                              domains=[domains_old],
+                              origins=[current_origin],
+                              flavor_id='cdn',
+                              project_id=str(uuid.uuid4()))
+        resp = controller_with_delete_exception.delete(service_obj,
+                                                       service_name)
         self.assertEqual(resp[driver.provider_name]['error'],
                          'Deleting service mysteriously failed.')
 

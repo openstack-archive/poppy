@@ -40,7 +40,7 @@ class ServiceController(base.ServiceBase):
             "domain": "www.mydomain.com",
             'rel': "access_url"}])
 
-    def delete(self, provider_service_id):
+    def delete(self, service_obj, provider_service_id):
         return self.responder.deleted(provider_service_id)
 
     def purge(self, provider_service_id, hard=True, purge_url='/*'):
