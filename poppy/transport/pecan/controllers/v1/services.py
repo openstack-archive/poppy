@@ -95,6 +95,31 @@ class ServiceAssetsController(base.Controller, hooks.HookController):
         return pecan.Response(None, 202, headers={"Location": service_url})
 
 
+class ServicesAnalyticsController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    @pecan.expose('json')
+    @decorators.validate(
+        service_id=rule.Rule(
+            helpers.is_valid_service_id(),
+            helpers.abort_with_message),
+        request=rule.Rule(
+            helpers.is_valid_analytics_request(),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter)
+    )
+    def get(self, service_id):
+        '''Get Analytics By Domain Data'''
+        # analytics_controller = \
+        #     self._driver.manager.ssl_certificate_controller
+        call_args = getattr(pecan.request.context,
+                            "call_args")
+        print call_args
+
+        return pecan.Response("Success", 200)
+
+
 class ServicesController(base.Controller, hooks.HookController):
 
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
@@ -111,6 +136,7 @@ class ServicesController(base.Controller, hooks.HookController):
         # so added it in __init__ method.
         # see more in: http://pecan.readthedocs.org/en/latest/rest.html
         self.__class__.assets = ServiceAssetsController(driver)
+        self.__class__.analytics = ServicesAnalyticsController(driver)
 
     @pecan.expose('json')
     def get_all(self):
