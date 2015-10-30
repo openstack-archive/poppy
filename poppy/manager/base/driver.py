@@ -67,6 +67,14 @@ class ManagerDriverBase(object):
         return self._notification
 
     @abc.abstractproperty
+    def analytics_controller(self):
+        """Returns the driver's analytics controller
+
+        :raises NotImplementedError
+        """
+        raise NotImplementedError
+
+    @abc.abstractproperty
     def services_controller(self):
         """Returns the driver's services controller
 

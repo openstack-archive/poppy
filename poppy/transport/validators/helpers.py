@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import functools
 import json
 import re
@@ -480,6 +481,59 @@ def is_valid_flavor_configuration(flavor, schema):
 @decorators.validation_function
 def is_valid_flavor_id(flavor_id):
     pass
+
+
+@decorators.validation_function
+def is_valid_analytics_request(request):
+    default_end_time = datetime.datetime.utcnow()
+    default_start_time = (datetime.datetime.utcnow()
+                          - datetime.timedelta(days=1))
+    domain = request.GET.get('domain', "")
+    startTime = request.GET.get('startTime',
+                                default_start_time.strftime(
+                                    "%Y-%m-%dT%H:%M:%S"))
+    endTime = request.GET.get('endTime',
+                              default_end_time.strftime("%Y-%m-%dT%H:%M:%S"))
+    # Default metric type will be all metrics
+    metricType = request.GET.get('metricType', None)
+
+    if not is_valid_domain_name(domain):
+        raise exceptions.ValidationFailed("domain %s is not valid."
+                                          % domain)
+
+    try:
+        start_time = datetime.datetime.strptime(startTime,
+                                                "%Y-%m-%dT%H:%M:%S")
+        end_time = datetime.datetime.strptime(endTime,
+                                              "%Y-%m-%dT%H:%M:%S")
+    except Exception as e:
+        raise exceptions.ValidationFailed('startTime or endTime is not in '
+                                          'valid format. details: %s.'
+                                          'Valid time stamp format is: '
+                                          'YY-MM-DDTHH:MM:SS' % str(e))
+    else:
+        if start_time > end_time:
+            raise exceptions.ValidationFailed('startTime cannot be later than'
+                                              ' endTime')
+
+    # Leave these 3 metric types for now.
+    valid_metric_types = [
+        'requestCount',
+        'bandwithOut',
+        'httpResponseCode'
+    ]
+    if metricType not in valid_metric_types:
+        raise exceptions.ValidationFailed('Must provide an metric name....'
+                                          'Valid metric types are: %s' %
+                                          valid_metric_types)
+
+    # Update context so the decorated function can get all this parameters
+    request.context.call_args = {
+        'domain': domain,
+        'startTime': start_time,
+        'endTime': end_time,
+        'metricType': metricType
+    }
 
 
 def abort_with_message(error_info):

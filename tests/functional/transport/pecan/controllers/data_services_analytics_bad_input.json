@@ -1,0 +1,19 @@
+{
+    "missing_domain": {
+    },
+    "missing_metric": {
+        "domain": "www.abc.com"
+    },
+    "improper_datetime_format": {
+        "domain": "www.abc.com",
+        "metricType": "requestCount",
+        "startTime": "November 14th, 2015 12:00",
+        "endTime": "November 14th, 2015 14:00"
+    },
+    "start_later_than_end": {
+        "domain": "www.abc.com",
+        "metricType": "requestCount",
+        "startTime": "2015-11-04T12:00",
+        "endTime": "2015-11-04T10:00"
+    }
+}
