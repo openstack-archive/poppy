@@ -124,8 +124,13 @@ class CDNProvider(base.Driver):
         self.akamai_conf = self._conf[AKAMAI_GROUP]
         self.akamai_policy_api_base_url = ''.join([
             str(self.akamai_conf.policy_api_base_url),
-            'partner-api/v1/network/production/properties/',
+            'partner-api/v2/network/production/properties/',
             '{configuration_number}/sub-properties/{policy_name}/policy'
+        ])
+        self.akamai_subcustomer_api_base_url = ''.join([
+            str(self.akamai_conf.policy_api_base_url),
+            'partner-api/v2/network/production/properties/',
+            '{configuration_number}/customers/{subcustomer_id}'
         ])
         self.akamai_ccu_api_base_url = ''.join([
             str(self.akamai_conf.ccu_api_base_url),
