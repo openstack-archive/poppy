@@ -27,6 +27,7 @@ from poppy.openstack.common import log
 from poppy.provider.akamai import controllers
 from poppy.provider.akamai.mod_san_queue import zookeeper_queue
 from poppy.provider import base
+import uuid
 
 LOG = log.getLogger(__name__)
 
@@ -201,21 +202,31 @@ class CDNProvider(base.Driver):
         return san_info_storage.driver
 
     def is_alive(self):
-
+        unique_id = str(uuid.uuid4())
         request_headers = {
             'Content-type': 'application/json',
             'Accept': 'text/plain'
-        }
+            }
 
         resp = self.policy_api_client.put(
-            self.akamai_policy_api_base_url.format(
-                configuration_number=self.http_conf_number,
-                policy_name='healthcheck'),
-            data=json.dumps({'rules': []}),
-            headers=request_headers)
+                self.akamai_policy_api_base_url.format(
+                    configuration_number=self.http_conf_number,
+                    policy_name=unique_id),
+                    data=json.dumps({'rules': []}),
+                    headers=request_headers)
 
         if resp.ok:
+            try:
+                LOG.info('Policy with {0} created'.format(unique_id))
+                LOG.info('Akamai Health Check Succeded')
+                self.policy_api_client.delete(
+                    self.akamai_policy_api_base_url.format(
+                    configuration_number=self.http_conf_number,
+                    policy_name=unique_id))
+            except Exception as e:
+                LOG.warn('Akamai Health Check Succeded but failed to delete policy')
             return True
+
         else:
             LOG.warn("Akamai Health Check Failed")
             LOG.warn("Response Status Code : {0}".format(resp.status_code))
