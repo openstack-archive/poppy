@@ -357,6 +357,7 @@ class DefaultServicesController(base.ServicesController):
                                 service_new.flavor_id,
                                 domain.domain,
                                 'san',
+                                project_id,
                                 new_cert_detail
                             )
                             self.storage_controller.create_cert(
