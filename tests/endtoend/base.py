@@ -47,6 +47,9 @@ class TestBase(fixtures.BaseTestFixture):
 
         super(TestBase, cls).setUpClass()
 
+        import requests.packages.urllib3
+        requests.packages.urllib3.disable_warnings()
+
         # use http_client.get (not requests.get) to have requests logged
         cls.http_client = cafe_client.HTTPClient()
 
