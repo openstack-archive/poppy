@@ -29,6 +29,7 @@ def load_from_json(json_data):
             json_data.get('cert_info').get('flavor_id'),
             domain_name,
             json_data.get('cert_info').get('cert_type'),
+            json_data.get('cert_info').get('project_id'),
             json_data.get('cert_info').get('cert_details', {})
         )
         setattr(res_d, 'cert_info', cert_info)

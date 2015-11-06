@@ -503,7 +503,8 @@ class ServicesController(base.ServicesController):
                 r_flavor_id = str(r.get('flavor_id'))
                 r_cert_type = str(r.get('cert_type'))
                 r_cert_details = {}
-                cert_details = r.get('cert_details', {})
+                # incase cert_details is {}
+                cert_details = r.get('cert_details', {}) or {}
                 # Need to convert cassandra dict into real dict
                 # And the value of cert_details is a string dict
                 for key in cert_details:
