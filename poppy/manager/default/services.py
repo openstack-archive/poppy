@@ -307,7 +307,6 @@ class DefaultServicesController(base.ServicesController):
                             customer_domain,
                             service_new.service_id,
                             store)
-
                 elif domain.certificate == 'san':
                     cert_for_domain = (
                         self.storage_controller.get_certs_by_domain(
@@ -357,6 +356,7 @@ class DefaultServicesController(base.ServicesController):
                                 service_new.flavor_id,
                                 domain.domain,
                                 'san',
+                                project_id,
                                 new_cert_detail
                             )
                             self.storage_controller.create_cert(
