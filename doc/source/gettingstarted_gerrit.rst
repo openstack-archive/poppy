@@ -17,7 +17,7 @@ Using Gerrit
 Before you begin
 ~~~~~~~~~~~~~~~~
 
-To familiarize yourself with Poppy, try it out using the information in our [https://github.com/stackforge/poppy repo]. When you are ready to start contributing, you will need to execute an [http://docs.openstack.org/infra/manual/developers.html#account-setup OpenStack CLA]. This is required before you can submit reviews to our [https://git.openstack.org/cgit/stackforge/poppy Poppy StackForge Repo]. For information about how prepare for contribution, please consult the [http://docs.openstack.org/infra/manual/developers.html developer guide]].
+To familiarize yourself with Poppy, try it out using the information in our [https://github.com/openstack/poppy repo]. When you are ready to start contributing, you will need to execute an [http://docs.openstack.org/infra/manual/developers.html#account-setup OpenStack CLA]. This is required before you can submit reviews to our [https://git.openstack.org/cgit/openstack/poppy Poppy StackForge Repo]. For information about how prepare for contribution, please consult the [http://docs.openstack.org/infra/manual/developers.html developer guide]].
 
 Learn about Gerrit
 ------------------
@@ -51,7 +51,7 @@ Set up your local branch
 
 Use the following commands to set up your local branch:
 
-  git clone git://git.openstack.org/stackforge/poppy
+  git clone git://git.openstack.org/openstack/poppy
   cd poppy
   git checkout -b [branch name]
   git review -s
