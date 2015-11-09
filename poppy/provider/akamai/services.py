@@ -557,10 +557,22 @@ class ServiceController(base.ServiceBase):
                         if resp.status_code != 200:
                             raise RuntimeError('SPS API Request Failed'
                                                'Exception: %s' % resp.text)
-                        status = json.loads(resp.text)['requestList'][0][
-                            'status']
-                        # This SAN Cert is on pending status
-                        if status != 'SPS Request Complete':
+                        sps_request_info = json.loads(resp.text)[
+                            'requestList'][0]
+                        status = sps_request_info['status']
+                        workFlowProgress = sps_request_info['workflowProgress']
+                        if status == 'edge host already created or pending':
+                            if workFlowProgress is not None and \
+                                    'error' in workFlowProgress.lower():
+                                LOG.info("SPS Pending with Error:" %
+                                         workFlowProgress)
+                                continue
+                            else:
+                                pass
+                        # Not sure about this status yet, comment it out now
+                        # elif status == 'CPS Cancelled':
+                        #    pass
+                        elif status != 'SPS Request Complete':
                             LOG.info("SPS Not completed for %s..." %
                                      san_cert_name)
                             continue
