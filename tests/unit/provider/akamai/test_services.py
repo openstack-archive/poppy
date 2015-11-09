@@ -497,6 +497,7 @@ class TestServices(base.TestCase):
                      "lastStatusChange": "2015-03-19T21:47:10Z",
                         "spsId": 1789,
                         "status": "SPS Request Complete",
+                        "workflowProgress": None,
                         "jobId": 44306}]})
         )
         controller.sps_api_client.post.return_value = mock.Mock(
