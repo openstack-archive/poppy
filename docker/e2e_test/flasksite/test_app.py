@@ -26,7 +26,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return 'Test Flask Site'
+    return 'Flask Site served from {0}'.format(request.headers['Host'])
 
 
 @app.route('/test/host-header/', strict_slashes=False)
