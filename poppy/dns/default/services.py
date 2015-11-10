@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import random
 
 from poppy.dns import base
 
@@ -85,5 +86,7 @@ class ServicesController(base.ServicesBase):
         to be used with manager for shared ssl feature
 
         """
-        for shard in range(self.shared_ssl_shards):
+        shard_ids = [i for i in range(self.shared_ssl_shards)]
+        random.shuffle(shard_ids)
+        for shard in shard_ids:
             yield 'scdn{0}.secure.defaultcdn.com'.format(shard)

@@ -42,7 +42,7 @@ class ServicesController(base.ServicesBase):
         """
 
         try:
-            LOG.debug("Fetching DNS Record - {0}".format(subdomain_name))
+            LOG.info("Fetching DNS Record - {0}".format(subdomain_name))
             subdomain = self.client.find(name=subdomain_name)
         except exc.NotFound:
             subdomain = self.client.create(
@@ -94,7 +94,7 @@ class ServicesController(base.ServicesBase):
             }
 
             if certificate == "shared":
-                LOG.debug("Creating Shared SSL DNS Record - {0}".format(name))
+                LOG.info("Creating Shared SSL DNS Record - {0}".format(name))
                 shared_ssl_subdomain = self._get_subdomain(
                     shared_ssl_subdomain_name)
                 shared_ssl_subdomain.add_records([cname_record])
@@ -102,7 +102,7 @@ class ServicesController(base.ServicesBase):
                 cname_records.append(cname_record)
         # add the cname records
         if cname_records != []:
-            LOG.debug("Creating DNS Record - {0}".format(cname_records))
+            LOG.info("Creating DNS Record - {0}".format(cname_records))
             subdomain.add_records(cname_records)
         return dns_links
 
@@ -130,7 +130,7 @@ class ServicesController(base.ServicesBase):
         # get subdomain
         subdomain = self.client.find(name=subdomain_name)
         # search and find the CNAME record
-        LOG.debug('Searching DNS records for : {0}'.format(subdomain))
+        LOG.info('Searching DNS records for : {0}'.format(subdomain))
 
         name = access_url
         record_type = 'CNAME'
@@ -157,7 +157,7 @@ class ServicesController(base.ServicesBase):
             LOG.error(error_msg)
             return error_msg
         elif len(records) == 1:
-            LOG.debug('Deleting DNS records for : {0}'.format(access_url))
+            LOG.info('Deleting DNS records for : {0}'.format(access_url))
             records[0].delete()
         return
 
@@ -177,9 +177,9 @@ class ServicesController(base.ServicesBase):
         elif len(records) > 1:
             LOG.error('Multiple DNS records found: {0}'.format(access_url))
         elif len(records) == 1:
-            LOG.debug('Updating DNS record for : {0}'.format(access_url))
+            LOG.info('Updating DNS record for : {0}'.format(access_url))
             records[0].update(data=target_url)
-            LOG.debug('Updated DNS record for : {0}'.format(access_url))
+            LOG.info('Updated DNS record for : {0}'.format(access_url))
 
         return
 
@@ -194,8 +194,11 @@ class ServicesController(base.ServicesBase):
             # shard disabled, just use the suffix
             yield suffix
         else:
-            # shard enabled, iterate through shards
-            for shard_id in range(1, num_shards):
+            # shard enabled, iterate through shards after
+            #  randomly shuffling them
+            shard_ids = [i for i in range(1, num_shards)]
+            random.shuffle(shard_ids)
+            for shard_id in shard_ids:
                 yield '{0}{1}.{2}'.format(shard_prefix, shard_id, suffix)
 
     def generate_shared_ssl_domain_suffix(self):
