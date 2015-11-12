@@ -706,17 +706,6 @@ class ServicesController(base.ServicesController):
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
 
-        # relinquish old domains
-        stmt = query.SimpleStatement(
-            CQL_RELINQUISH_DOMAINS,
-            consistency_level=self._driver.consistency_level)
-        domain_list = [json.loads(d).get('domain')
-                       for d in result.get('domains', []) or []]
-        args = {
-            'domain_list': query.ValueSequence(domain_list)
-        }
-        self.session.execute(stmt, args)
-
         # claim new domains
         batch_claim = query.BatchStatement(
             consistency_level=self._driver.consistency_level)
@@ -729,6 +718,25 @@ class ServicesController(base.ServicesController):
             batch_claim.add(query.SimpleStatement(CQL_CLAIM_DOMAIN),
                             domain_args)
         self.session.execute(batch_claim)
+
+        domains_old = [json.loads(d) for d in result.get('domains', []) or []]
+        domains_new = [json.loads(d) for d in domains or []]
+
+        if len(domains_old) > len(domains_new):
+            for domains in domains_new:
+                domains_old.remove(domains)
+            if domains_old:
+                domains_delete = [d.get('domain') for d in domains_old or []]
+                args = {
+                    'domain_list': query.ValueSequence(domains_delete)
+                }
+                self.session.execute(stmt, args)
+                # delete domains that no longer exist
+                # relinquish old domains
+                stmt = query.SimpleStatement(
+                    CQL_RELINQUISH_DOMAINS,
+                    consistency_level=self._driver.consistency_level)
+                self.session.execute(stmt, args)
 
     def update_state(self, project_id, service_id, state):
         """update_state
