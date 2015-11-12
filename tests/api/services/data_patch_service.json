@@ -43,6 +43,11 @@
          "path": "/domains",
          "value": [{"domain": "www.replaceme.com", "protocol": "http"}]}
     ],
+    "replace_domain_list": [
+        {"op": "replace",
+         "path": "/domains",
+         "value": [{"domain": "www.ishallreplaceyou.com", "protocol": "http"}, {"domain": "www.ishallreplaceyouaswell.com", "protocol": "http"}]}
+    ],
     "replace_service_name": [
         {"op": "replace",
          "path": "/name",
