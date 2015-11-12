@@ -706,17 +706,6 @@ class ServicesController(base.ServicesController):
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
 
-        # relinquish old domains
-        stmt = query.SimpleStatement(
-            CQL_RELINQUISH_DOMAINS,
-            consistency_level=self._driver.consistency_level)
-        domain_list = [json.loads(d).get('domain')
-                       for d in result.get('domains', []) or []]
-        args = {
-            'domain_list': query.ValueSequence(domain_list)
-        }
-        self.session.execute(stmt, args)
-
         # claim new domains
         batch_claim = query.BatchStatement(
             consistency_level=self._driver.consistency_level)
@@ -729,6 +718,42 @@ class ServicesController(base.ServicesController):
             batch_claim.add(query.SimpleStatement(CQL_CLAIM_DOMAIN),
                             domain_args)
         self.session.execute(batch_claim)
+        # NOTE(TheSriram): We claim (CQL_CLAIM_DOMAIN) all the domains,
+        # that got passed in.
+        # IMPORTANT:
+        # There are a few cases here:
+        # 1. Delete domains:
+        # If we have deleted domains, then len(domains_old) will be greater
+        # than len(domains_new), and we go ahead and delete domains
+        # that haven't been claimed in previous statement (CQL_CLAIM_DOMAIN).
+        # 2. Add domains:
+        # If we have added domains, then len(domains_new) will be greater than
+        # len(domains_old), so we don't need to delete any domains.
+        # 3. Replace domains:
+        # If we have replaced all domains, then len(domains_new) will be equal
+        # to len(domains_old), then we delete domains that were not claimed
+        # in previous statement (CQL_CLAIM_DOMAIN).
+        domains_old = [json.loads(d) for d in result.get('domains', []) or []]
+        domains_new = [json.loads(d) for d in domains or []]
+
+        if len(domains_old) >= len(domains_new):
+            for domains in domains_new:
+                domain_remove = domains.get('domain')
+                remove = [domain_old for domain_old in domains_old
+                          if domain_old.get('domain') == domain_remove]
+                for rm in remove:
+                    domains_old.remove(rm)
+            if domains_old:
+                domains_delete = [d.get('domain') for d in domains_old or []]
+                args = {
+                    'domain_list': query.ValueSequence(domains_delete)
+                }
+                # delete domains that no longer exist
+                # relinquish old domains
+                stmt = query.SimpleStatement(
+                    CQL_RELINQUISH_DOMAINS,
+                    consistency_level=self._driver.consistency_level)
+                self.session.execute(stmt, args)
 
     def update_state(self, project_id, service_id, state):
         """update_state
