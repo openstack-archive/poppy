@@ -220,13 +220,13 @@ class MultipleOriginConfig(data_interfaces.ConfigSectionInterface):
     SECTION_NAME = 'multiple_origin'
 
     @property
-    def images_origin(self):
-        return self.get('images_origin')
+    def second_origin(self):
+        return self.get('second_origin')
 
     @property
-    def image_path(self):
-        """The uri at which the images_origin serves an image."""
-        return self.get('image_path')
+    def request_url(self):
+        """The uri which should be directed to second origin."""
+        return self.get('request_url')
 
 
 class HostHeaderConfig(data_interfaces.ConfigSectionInterface):

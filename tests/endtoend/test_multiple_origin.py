@@ -24,29 +24,29 @@ class TestMultipleOrigin(base.TestBase):
         super(TestMultipleOrigin, cls).setUpClass()
         cls.multiorigin_config = config.MultipleOriginConfig()
 
-        cls.images_origin = cls.multiorigin_config.images_origin
-        cls.image_path = cls.multiorigin_config.image_path
+        cls.second_origin = cls.multiorigin_config.second_origin
+        cls.request_url = cls.multiorigin_config.request_url
 
         cls.check_preconditions()
 
     @classmethod
     def check_preconditions(cls):
         """Ensure our environment meets our needs to ensure a valid test."""
-        assert cls.default_origin != cls.images_origin
+        assert cls.default_origin != cls.second_origin
         default_root = cls.http_client.get("http://" + cls.default_origin)
-        image_root = cls.http_client.get("http://" + cls.images_origin)
+        second_root = cls.http_client.get("http://" + cls.second_origin)
 
         assert default_root.status_code == 200
-        assert image_root.status_code == 200
-        assert default_root.text != image_root.text
+        assert second_root.status_code == 200
 
-        blank = cls.http_client.get(
-            "http://" + cls.default_origin + cls.image_path)
-        image = cls.http_client.get(
-            "http://" + cls.images_origin + cls.image_path)
+        origin_path = cls.http_client.get(
+            "http://" + cls.default_origin + cls.request_url)
+        second_path = cls.http_client.get(
+            "http://" + cls.second_origin + cls.request_url)
 
-        assert blank.status_code == 404
-        assert image.status_code == 200
+        assert origin_path.status_code == 200
+        assert second_path.status_code == 200
+        assert origin_path.text != second_path.text
 
     def setUp(self):
         super(TestMultipleOrigin, self).setUp()
@@ -65,15 +65,17 @@ class TestMultipleOrigin(base.TestBase):
             "rules": [{
                 "name": "default",
                 "request_url": "/*",
-            }]
+            }],
+            "hostheadertype": "origin"
         }, {
-            "origin": self.images_origin,
+            "origin": self.second_origin,
             "port": 80,
             "ssl": False,
             "rules": [{
-                "name": "image",
-                "request_url": self.image_path,
-            }]
+                "name": "Second Origin",
+                "request_url": self.request_url,
+            }],
+            "hostheadertype": "origin"
         }]
 
         resp = self.setup_service(
@@ -93,41 +95,37 @@ class TestMultipleOrigin(base.TestBase):
         if rec:
             self.cname_rec.append(rec[0])
 
+        # Requests to path pointed by the request_url will be fetched from the
+        # second origin
+        cdn_url = "http://{0}{1}".format(self.test_domain, self.request_url)
+        response = self.http_client.get(cdn_url)
+        self.assertIn(self.second_origin, response.text)
+
         # Check that the CDN provider is grabbing other content from the
-        # default origin, not the images origin
+        # default origin, not the second origin
         self.assertSameContent(origin_url="http://" + self.default_origin,
                                cdn_url="http://" + self.test_domain)
-
-        cdn_url = "http://{0}{1}".format(self.test_domain, self.image_path)
-        origin_url = "http://{0}{1}".format(self.images_origin,
-                                            self.image_path)
-        response = self.http_client.get(cdn_url)
-
-        # On a 200, the image exists. The CDN provider fetch from the images
-        # origin which is what we want.
-        msg = ("Expected {0} to load the image at {1} but got {2} status code"
-               .format(cdn_url, origin_url, response.status_code))
-        self.assertEqual(response.status_code, 200, msg)
 
     def test_multiple_origin_default_last(self):
         domains = [{'domain': self.test_domain}]
         origins = [{
-            "origin": self.images_origin,
+            "origin": self.second_origin,
             "port": 80,
             "ssl": False,
             "rules": [{
                 "name": "image",
-                "request_url": self.image_path,
-            }]
-        }, {
-            "origin": self.default_origin,
-            "port": 80,
-            "ssl": False,
-            "rules": [{
-                "name": "default",
-                "request_url": "/*",
-            }]
-        }]
+                "request_url": self.request_url,
+            }],
+            "hostheadertype": "origin"},
+            {"origin": self.default_origin,
+             "port": 80,
+             "ssl": False,
+             "rules": [{
+                 "name": "default",
+                 "request_url": "/*",
+             }],
+             "hostheadertype": "origin"}
+        ]
 
         self.setup_service(
             service_name=self.service_name,
@@ -150,13 +148,12 @@ class TestMultipleOrigin(base.TestBase):
         self.assertSameContent(origin_url="http://" + self.default_origin,
                                cdn_url="http://" + self.test_domain)
 
-        cdn_url = "http://{0}{1}".format(self.test_domain, self.image_path)
-        origin_url = "http://{0}{1}".format(self.images_origin,
-                                            self.image_path)
+        # More strict rules should come after less strict rules.
+        # Hence requests to the path pointed by request_url will also be
+        # routed to the default origin, based on how we setup the origin rules.
+        cdn_url = "http://{0}{1}".format(self.test_domain, self.request_url)
         response = self.http_client.get(cdn_url)
-        msg = ("Expected {0} to 404 on the image at {1} but got a {2} status"
-               .format(cdn_url, origin_url, response.status_code))
-        self.assertEqual(response.status_code, 404, msg)
+        self.assertIn(self.default_origin, response.text)
 
     def tearDown(self):
         self.poppy_client.delete_service(location=self.service_location)
