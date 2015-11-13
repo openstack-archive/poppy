@@ -259,7 +259,6 @@ class TestServicePatch(base.TestBase):
 
     def test_patch_service_add_duplicate_domain(self):
 
-        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
         # create second service
         service_name = str(uuid.uuid1())
         duplicate_domain = 'www.' + str(uuid.uuid1()) + '.com'

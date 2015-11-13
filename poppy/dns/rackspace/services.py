@@ -196,7 +196,7 @@ class ServicesController(base.ServicesBase):
         else:
             # shard enabled, iterate through shards after
             #  randomly shuffling them
-            shard_ids = [i for i in range(1, num_shards)]
+            shard_ids = [i for i in range(1, num_shards + 1)]
             random.shuffle(shard_ids)
             for shard_id in shard_ids:
                 yield '{0}{1}.{2}'.format(shard_prefix, shard_id, suffix)
