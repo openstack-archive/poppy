@@ -706,17 +706,6 @@ class ServicesController(base.ServicesController):
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
 
-        # relinquish old domains
-        stmt = query.SimpleStatement(
-            CQL_RELINQUISH_DOMAINS,
-            consistency_level=self._driver.consistency_level)
-        domain_list = [json.loads(d).get('domain')
-                       for d in result.get('domains', []) or []]
-        args = {
-            'domain_list': query.ValueSequence(domain_list)
-        }
-        self.session.execute(stmt, args)
-
         # claim new domains
         batch_claim = query.BatchStatement(
             consistency_level=self._driver.consistency_level)
@@ -729,6 +718,28 @@ class ServicesController(base.ServicesController):
             batch_claim.add(query.SimpleStatement(CQL_CLAIM_DOMAIN),
                             domain_args)
         self.session.execute(batch_claim)
+
+        # NOTE(TheSriram): We claim (CQL_CLAIM_DOMAIN) all the domains,
+        # that got passed in. Now we create a set out of domains_new
+        # (current domains present) and domains_old (domains present before
+        # we made the current call). The set difference between old and new,
+        # are the domains we need to delete (CQL_RELINQUISH_DOMAINS).
+
+        domains_old = set([d for d in result.get('domains', []) or []])
+        domains_new = set([json.loads(d).get('domain') for d in domains or []])
+
+        # delete domains that no longer exist
+        # relinquish old domains
+
+        domains_delete = domains_old.difference(domains_new)
+        if domains_delete:
+            args = {
+                'domain_list': query.ValueSequence(domains_delete)
+            }
+            stmt = query.SimpleStatement(
+                CQL_RELINQUISH_DOMAINS,
+                consistency_level=self._driver.consistency_level)
+            self.session.execute(stmt, args)
 
     def update_state(self, project_id, service_id, state):
         """update_state
