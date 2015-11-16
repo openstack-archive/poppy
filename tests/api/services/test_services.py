@@ -361,7 +361,6 @@ class TestSharedShardServices(base.TestBase):
         self.flavor_id = self.test_flavor
 
     def test_create_shared_services_beyond_shard_limit(self):
-        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
         domain = self.generate_random_string(prefix="shared")
         for _ in range(self.shared_ssl_num_shards):
             resp = self._create_shared_service(domain=domain)
@@ -372,7 +371,6 @@ class TestSharedShardServices(base.TestBase):
         self.assertEqual(resp.status_code, 400)
 
     def test_patch_add_shard_domains_beyond_shard_limit(self):
-        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
         shared_domain = self.generate_random_string(prefix="sharedcheck")
 
         patch_body = ([{

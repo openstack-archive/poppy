@@ -86,7 +86,7 @@ class ServicesController(base.ServicesBase):
         to be used with manager for shared ssl feature
 
         """
-        shard_ids = [i for i in range(self.shared_ssl_shards)]
+        shard_ids = [i for i in range(1, self.shared_ssl_shards + 1)]
         random.shuffle(shard_ids)
         for shard in shard_ids:
             yield 'scdn{0}.secure.defaultcdn.com'.format(shard)

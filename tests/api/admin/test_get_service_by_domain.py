@@ -115,7 +115,6 @@ class TestGetServiceByDomain(base.TestBase):
             retry_timeout=self.test_config.status_check_retry_timeout)
 
     def test_get_service_by_domain(self):
-        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
         resp = self.operator_client.admin_get_service_by_domain_name(
             self.domain_list[0]['domain'])
 
@@ -143,7 +142,6 @@ class TestGetServiceByDomain(base.TestBase):
         self.assertEqual(body['project_id'], self.user_project_id)
 
     def test_get_service_by_multiple_domains(self):
-        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
         api_resp = self.operator_client.admin_get_service_by_domain_name(
             self.domain_list[0]['domain'])
         self.assertEqual(api_resp.status_code, 200)
@@ -279,7 +277,6 @@ class TestGetServiceBySharedDomain(base.TestBase):
             retry_timeout=self.test_config.status_check_retry_timeout)
 
     def test_get_service_by_domain(self):
-        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
         get_resp = self.client.get_service(self.service_url)
         resp_body = get_resp.json()
         domain = resp_body['domains'][0]['domain']
@@ -393,7 +390,6 @@ class TestGetServiceBySANCertDomain(base.TestBase):
             retry_timeout=self.test_config.status_check_retry_timeout)
 
     def test_get_service_by_domain(self):
-        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
         get_resp = self.client.get_service(self.service_url)
         resp_body = get_resp.json()
         domain = resp_body['domains'][0]['domain']
@@ -509,7 +505,6 @@ class TestGetServiceByCustomCertDomain(base.TestBase):
             retry_timeout=self.test_config.status_check_retry_timeout)
 
     def test_get_service_by_domain(self):
-        self.skipTest('See https://bugs.launchpad.net/poppy/+bug/1486103')
         get_resp = self.client.get_service(self.service_url)
         resp_body = get_resp.json()
         domain = resp_body['domains'][0]['domain']
