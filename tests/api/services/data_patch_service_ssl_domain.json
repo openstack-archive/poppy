@@ -12,7 +12,7 @@
    "add_san_ssl_domain": [
         {"op": "add",
          "path": "/domains/-",
-         "value": {"domain": "newsan.com", "protocol": "https", "certificate": "custom"}}
+         "value": {"domain": "newsan.com", "protocol": "https", "certificate": "san"}}
     ],
    "replace_with_custom_ssl_domain": [
         {"op": "replace",

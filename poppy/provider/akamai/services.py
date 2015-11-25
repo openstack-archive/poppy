@@ -177,8 +177,10 @@ class ServiceController(base.ServiceBase):
             except Exception:
                 # raise a more meaningful error for debugging info
                 try:
-                    raise RuntimeError('Mal-formed Akamai policy ids: %s' %
-                                       provider_service_id)
+                    msg = 'Mal-formed Akamai ' \
+                          'policy ids: {0}'.format(provider_service_id)
+                    LOG.exception(msg)
+                    raise RuntimeError(msg)
                 except Exception as e:
                     return self.responder.failed(str(e))
 
@@ -369,8 +371,10 @@ class ServiceController(base.ServiceBase):
         except Exception:
             # raise a more meaningful error for debugging info
             try:
-                raise RuntimeError('Mal-formed Akamai policy ids: %s' %
-                                   provider_service_id)
+                msg = 'Mal-formed Akamai ' \
+                      'policy ids: {0}'.format(provider_service_id)
+                LOG.exception(msg)
+                raise RuntimeError(msg)
             except Exception as e:
                 return self.responder.failed(str(e))
         try:
@@ -419,9 +423,10 @@ class ServiceController(base.ServiceBase):
                     except Exception:
                         # raise a more meaningful error for debugging info
                         try:
-                            raise RuntimeError('Mal-formed Akamai '
-                                               'policy ids: %s'
-                                               % provider_service_id)
+                            msg = 'Mal-formed Akamai ' \
+                                  'policy ids: {0}'.format(provider_service_id)
+                            LOG.exception(msg)
+                            raise RuntimeError(msg)
                         except Exception as e:
                             return self.responder.failed(str(e))
 
