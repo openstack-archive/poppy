@@ -725,7 +725,8 @@ class ServicesController(base.ServicesController):
         # we made the current call). The set difference between old and new,
         # are the domains we need to delete (CQL_RELINQUISH_DOMAINS).
 
-        domains_old = set([d for d in result.get('domains', []) or []])
+        domains_old = set([json.loads(d).get('domain')
+                           for d in result.get('domains', []) or []])
         domains_new = set([json.loads(d).get('domain') for d in domains or []])
 
         # delete domains that no longer exist
