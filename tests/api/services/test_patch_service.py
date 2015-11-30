@@ -164,6 +164,69 @@ class TestServicePatch(base.TestBase):
 
         self.assert_patch_service_details(body, expected_service_details)
 
+    def test_repatch_add_domain_service_after_domain_deletion(self):
+
+        def _patch_add_domain():
+            additional_domain = self.generate_random_string(
+                prefix='www.api-test-domain') + '.com'
+
+            patch_add_domain = [
+                {
+                    "op": "add",
+                    "path": "/domains/-",
+                    "value": {
+                        "domain": additional_domain, "protocol": "http"
+                    }
+                }
+            ]
+
+            resp = self.client.patch_service(location=self.service_url,
+                                             request_body=patch_add_domain)
+            self.assertEqual(resp.status_code, 202)
+
+            self.client.wait_for_service_status(
+                location=self.service_url,
+                status='deployed',
+                abort_on_status='failed',
+                retry_interval=self.test_config.status_check_retry_interval,
+                retry_timeout=self.test_config.status_check_retry_timeout)
+
+            resp = self.client.get_service(location=self.service_url)
+            body = resp.json()
+            self.assertEqual(body['status'], 'deployed')
+
+        # NOTE(TheSriram): Patch and add a domain.
+        _patch_add_domain()
+
+        # NOTE(TheSriram): Delete the domain, that was just added.
+        delete_domain = [
+            {
+                "op": "remove",
+                "path": "/domains/1"
+            }
+        ]
+
+        resp = self.client.patch_service(location=self.service_url,
+                                         request_body=delete_domain)
+        self.assertEqual(resp.status_code, 202)
+
+        self.client.wait_for_service_status(
+            location=self.service_url,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        resp = self.client.get_service(location=self.service_url)
+        body = resp.json()
+        self.assertEqual(body['status'], 'deployed')
+
+        # NOTE(TheSriram): Re-add the deleted domain, this should go through
+        # as the corresponding entry for that domain, should have been removed
+        # from the storage layer.
+
+        _patch_add_domain()
+
     @ddt.file_data('data_patch_service_negative.json')
     def test_patch_service_HTTP_400(self, test_data):
 
