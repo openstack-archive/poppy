@@ -303,15 +303,15 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_GET_SERVICE,
             consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
-
-        if len(results) != 1:
+        resultset = self.session.execute(stmt, args)
+        complete_result = list(resultset)
+        if len(complete_result) != 1:
             raise ValueError('No service found: %s'
                              % service_id)
 
         # at this point, it is certain that there's exactly 1 result in
         # results.
-        result = results[0]
+        result = complete_result[0]
 
         return self.format_result(result)
 
@@ -400,8 +400,8 @@ class ServicesController(base.ServicesController):
             CQL_GET_SERVICE_COUNT,
             consistency_level=self._driver.consistency_level)
         results = self.session.execute(stmt, args)
-
-        result = results[0]
+        complete_result_set = list(results)
+        result = complete_result_set[0]
 
         count = result.get('count', 0)
 
@@ -431,13 +431,14 @@ class ServicesController(base.ServicesController):
             stmt = query.SimpleStatement(
                 CQL_GET_SERVICE_LIMIT,
                 consistency_level=self._driver.consistency_level)
-            results = self.session.execute(stmt, args)
-
-            if results:
+            resultset = self.session.execute(stmt, args)
+            complete_results = list(resultset)
+            if complete_results:
                 LOG.info("Checking for service limit for project_id: '{0}' "
                          "existence yielded {1}".format(project_id,
-                                                        str(results)))
-                result = results[0]
+                                                        str(complete_results)))
+
+                result = complete_results[0]
 
                 project_limit = \
                     result.get('project_limit',
@@ -495,10 +496,11 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_SEARCH_CERT_BY_DOMAIN,
             consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
+        resultset = self.session.execute(stmt, args)
+        complete_results = list(resultset)
         certs = []
-        if results:
-            for r in results:
+        if complete_results:
+            for r in complete_results:
                 r_project_id = str(r.get('project_id'))
                 r_flavor_id = str(r.get('flavor_id'))
                 r_cert_type = str(r.get('cert_type'))
@@ -572,10 +574,10 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_SEARCH_CERT_BY_DOMAIN,
             consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
-
-        if results:
-            for r in results:
+        resultset = self.session.execute(stmt, args)
+        complete_results = list(resultset)
+        if complete_results:
+            for r in complete_results:
                 r_project_id = str(r.get('project_id'))
                 r_cert_type = str(r.get('cert_type'))
                 if r_project_id == str(project_id) and \
@@ -683,8 +685,10 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_GET_SERVICE,
             consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
-        result = results[0]
+
+        resultset = self.session.execute(stmt, args)
+        complete_results = list(resultset)
+        result = complete_results[0]
 
         # updates an existing service
         args = {
@@ -774,10 +778,12 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_GET_SERVICE,
             consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
-        result = results[0]
+        resultset = self.session.execute(stmt, args)
+        complete_result = list(resultset)
 
-        if (result):
+        result = complete_result[0]
+
+        if result:
             domains_list = [json.loads(d).get('domain')
                             for d in result.get('domains', []) or []]
             # NOTE(obulpathi): Convert a OrderedMapSerializedKey to a Dict
@@ -860,13 +866,13 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_GET_PROVIDER_DETAILS,
             consistency_level=self._driver.consistency_level)
-        exec_results = self.session.execute(stmt, args)
-
-        if len(exec_results) != 1:
+        exec_results_set = self.session.execute(stmt, args)
+        complete_results = list(exec_results_set)
+        if len(complete_results) != 1:
             raise ValueError('No service found: %s'
                              % service_id)
 
-        provider_details_result = exec_results[0]['provider_details'] or {}
+        provider_details_result = complete_results[0]['provider_details'] or {}
         results = {}
         for provider_name in provider_details_result:
             provider_detail_dict = json.loads(
@@ -903,11 +909,12 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_SEARCH_BY_DOMAIN,
             consistency_level=self._driver.consistency_level)
-        results = self.session.execute(stmt, args)
+        resultset = self.session.execute(stmt, args)
+        complete_results = list(resultset)
         # If there is not service with this domain
         # return None
         details = None
-        for r in results:
+        for r in complete_results:
             proj_id = r.get('project_id')
             service = r.get('service_id')
             details = self.get(proj_id, service)
