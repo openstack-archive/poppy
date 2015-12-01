@@ -141,6 +141,7 @@ class CassandraStorageServiceTests(base.TestCase):
     @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_delete_service(self, mock_session, mock_execute):
         # mock the response from cassandra
+        mock_execute.execute.return_value = iter([{}])
         actual_response = self.sc.delete(self.project_id, self.service_id)
 
         # Expect the response to be None as there are no providers passed
@@ -154,8 +155,9 @@ class CassandraStorageServiceTests(base.TestCase):
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_update_service(self, service_json,
-                            mock_check, mock_session, mock_execute):
+                            mock_execute, mock_session, mock_check):
         mock_check.return_value = False
+        mock_session.execute.return_value = iter([{}])
         service_obj = req_service.load_from_json(service_json)
         actual_response = self.sc.update(self.project_id,
                                          self.service_id,
