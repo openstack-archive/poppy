@@ -52,13 +52,13 @@ class ServicesController(base.ServicesBase):
         return
 
     def _send_mail_notification_via_mailgun(self, subject, mail_content):
-        '''Send a mail via mail gun'''
+        """Send a mail via mail gun"""
 
         request_url = self.mailgun_request_url.format(self.sand_box)
-        response_status_code = None
+        response_status = False
         attempt = 1
 
-        while response_status_code != 200 and self.retry_send != attempt:
+        while not response_status or self.retry_send != attempt:
             LOG.info("Sending email notification attempt: %s" % str(attempt))
             response = requests.post(
                 request_url,
@@ -70,10 +70,15 @@ class ServicesController(base.ServicesBase):
                     'text': mail_content
                 }
             )
+            response_status = response.ok
             response_status_code = response.status_code
+            response_text = response.text
+            LOG.info("Email attempt status code: %s" %
+                     str(response_status_code))
+            LOG.info("Email attempt status code: %s" % str(response_text))
             attempt += 1
 
-        if response_status_code != 200:
+        if not response_status:
             LOG.warning("Send email notification failed. Details:"
                         "From: %s"
                         "To: %s"
