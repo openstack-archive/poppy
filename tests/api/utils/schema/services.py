@@ -30,10 +30,10 @@ domain_https = {
         'protocol': {'type': 'string', 'enum': ['https']},
         'certificate':
             {'type': 'string', 'enum': ['shared', 'san', 'custom']},
-        # 'certificate_status':
-        #     {'type': 'string', 'enum': ['deployed',
-        #                                 'create_in_progress',
-        #                                 'failed']}
+        'certificate_status':
+            {'type': 'string', 'enum': ['deployed',
+                                        'create_in_progress',
+                                        'failed']}
     },
     'required': ['domain', 'protocol', 'certificate'],
     'additionalProperties': False

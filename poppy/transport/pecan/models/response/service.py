@@ -43,9 +43,9 @@ class Model(collections.OrderedDict):
         # Note(tonytan4ever): with out this piece of code
         # there will be a short period of time domain without certificate
         # status
-        # for domain_d in self["domains"]:
-        #     if domain_d.get("protocol", "http") == "https":
-        #         domain_d["certificate_status"] = 'create_in_progress'
+        for domain_d in self["domains"]:
+            if domain_d.get("protocol", "http") == "https":
+                domain_d["certificate_status"] = 'create_in_progress'
 
         self["origins"] = [origin.Model(o) for o in service_obj.origins]
         self["restrictions"] = [restriction.Model(r) for r in
@@ -81,33 +81,30 @@ class Model(collections.OrderedDict):
             # Note(tonytan4ever): for right now we only consider one provider,
             # in case of multiple providers we really should consider all
             # provider's domain certificate status
-            # for domain_d in self["domains"]:
-            #    if domain_d.get("protocol", "http") == "https":
-            #        domain_d["certificate_status"] = (
-            #            provider_detail.
-            #            domains_certificate_status.
-            #            get_domain_certificate_status(
-            #                domain_d['domain']))
+            for domain_d in self["domains"]:
+                if domain_d.get("protocol", "http") == "https":
+                    domain_d["certificate_status"] = (
+                        provider_detail.
+                        domains_certificate_status.
+                        get_domain_certificate_status(domain_d['domain']))
 
             # add the access urls
             access_urls = provider_detail.access_urls
             for access_url in access_urls:
-                # try:
-                #     domain_info = next(d for d in self["domains"]
-                #                        if d.get('domain') ==
-                #                        access_url.get('domain'))
-                #    # If the domain's status is not deployed,
-                #    # don't show the access url since the domain
-                #    # is not usable yet
-                #    if domain_info.get("protocol", "http") == "https":
-                #        if (provider_detail.
-                #            domains_certificate_status.
-                #            get_domain_certificate_status(
-                #                domain_d['domain']) in ['create_in_progress',
-                #                                        'failed']):
-                #            continue
-                # except StopIteration:
-                #    pass
+                try:
+                    domain_info = next(d for d in self["domains"]
+                                       if d.get('domain') ==
+                                       access_url.get('domain'))
+
+                    if domain_info.get("protocol", "http") == "https":
+                        if (provider_detail.
+                            domains_certificate_status.
+                            get_domain_certificate_status(
+                                domain_info.get('domain'))
+                                in ['create_in_progress', 'failed']):
+                            continue
+                except StopIteration:
+                    pass
 
                 if 'operator_url' in access_url:
                     self['links'].append(link.Model(
