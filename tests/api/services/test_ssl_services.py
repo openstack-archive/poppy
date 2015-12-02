@@ -92,11 +92,11 @@ class TestCreateSSLService(base.TestBase):
                         item['domain'] == b_item['domain'].split('.')[0]))
                 if item['certificate'] == 'shared':
                     item['domain'] = matched_domain_in_body['domain']
-                # if item['certificate'] == 'san':
-                #     item['certificate_status'] = 'create_in_progress'
-                # else:
-                #     item['certificate_status'] = (
-                #         matched_domain_in_body['certificate_status'])
+                if item['certificate'] == 'san':
+                    item['certificate_status'] = 'create_in_progress'
+                else:
+                    item['certificate_status'] = (
+                        matched_domain_in_body['certificate_status'])
         self.assertEqual(body['domains'], domain_list)
 
         for item in origin_list:
