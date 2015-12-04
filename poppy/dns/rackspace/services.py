@@ -472,6 +472,8 @@ class ServicesController(base.ServicesBase):
         # get old domains
         old_domains = set()
         old_access_urls_map = {}
+        project_id = service_old.project_id
+        service_id = service_old.service_id
         provider_details = service_old.provider_details
         for provider_name in provider_details:
             provider_detail = provider_details[provider_name]
@@ -508,6 +510,18 @@ class ServicesController(base.ServicesBase):
         removed_domains = old_domains.difference(new_domains)
         common_domains = new_domains.intersection(old_domains)
 
+        LOG.info("Added Domains : {0} on service_id : {1} "
+                 "for project_id: {2}".format(added_domains,
+                                              service_id,
+                                              project_id))
+        LOG.info("Removed Domains : {0} on service_id : {1} "
+                 "for project_id: {2}".format(removed_domains,
+                                              service_id,
+                                              project_id))
+        LOG.info("Common Domains : {0} on service_id : {1} "
+                 "for project_id: {2}".format(common_domains,
+                                              service_id,
+                                              project_id))
         # add new domains
         dns_links = self._update_added_domains(responders, added_domains)
 
