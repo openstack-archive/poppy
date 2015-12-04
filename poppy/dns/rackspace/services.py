@@ -508,6 +508,9 @@ class ServicesController(base.ServicesBase):
         removed_domains = old_domains.difference(new_domains)
         common_domains = new_domains.intersection(old_domains)
 
+        LOG.info("Added Domains : {0}".format(added_domains))
+        LOG.info("Removed Domains : {0}".format(removed_domains))
+        LOG.info("Common Domains : {0}".format(common_domains))
         # add new domains
         dns_links = self._update_added_domains(responders, added_domains)
 

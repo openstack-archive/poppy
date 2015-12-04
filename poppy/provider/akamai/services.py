@@ -154,6 +154,12 @@ class ServiceController(base.ServiceBase):
             return self.responder.failed(
                 "failed to create service - %s" % str(e))
         else:
+            LOG.info("ids : {0} for service_id {1}".format(json.dumps(ids)),
+                     service_obj.service_id)
+            LOG.info("links : {0} for service_id {1}".format(links,
+                     service_obj.service_id))
+            LOG.info("domain certificate status : {0} for service_id {1}".format(
+                domains_certificate_status, service_obj.service_id))
             return self.responder.created(
                 json.dumps(ids), links,
                 domains_certificate_status=domains_certificate_status)
@@ -351,6 +357,12 @@ class ServiceController(base.ServiceBase):
                 LOG.exception("Failed to Update Service - {0}".
                               format(provider_service_id))
                 return self.responder.failed("failed to update service")
+            LOG.info("ids : {0} for service_id {1}".format(json.dumps(ids)),
+                     service_obj.service_id)
+            LOG.info("links : {0} for service_id {1}".format(links,
+                     service_obj.service_id))
+            LOG.info("domain certificate status : {0} for service_id {1}".format(
+                domains_certificate_status, service_obj.service_id))
             return self.responder.updated(
                 json.dumps(ids), links,
                 domains_certificate_status=domains_certificate_status)
