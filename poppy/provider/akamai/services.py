@@ -136,10 +136,10 @@ class ServiceController(base.ServiceBase):
                     else:
                         edge_host_name = (
                             classified_domain.cert_info.get_san_edge_name())
-                        if edge_host_name is None:
-                            continue
                         domains_certificate_status[classified_domain.domain] \
                             = (classified_domain.cert_info.get_cert_status())
+                        if edge_host_name is None:
+                            continue
                 provider_access_url = self._get_provider_access_url(
                     classified_domain, dp, edge_host_name)
                 links.append({'href': provider_access_url,
@@ -312,11 +312,11 @@ class ServiceController(base.ServiceBase):
                             edge_host_name = (
                                 classified_domain.cert_info.
                                 get_san_edge_name())
+                            domains_certificate_status[
+                                classified_domain.domain] = (
+                                classified_domain.cert_info.get_cert_status())
                             if edge_host_name is None:
                                 continue
-                        domains_certificate_status[classified_domain.domain] \
-                            = (
-                            classified_domain.cert_info.get_cert_status())
                     provider_access_url = self._get_provider_access_url(
                         classified_domain, dp, edge_host_name)
                     links.append({'href': provider_access_url,
