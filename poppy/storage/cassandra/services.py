@@ -590,8 +590,8 @@ class ServicesController(base.ServicesController):
                         consistency_level=self._driver.consistency_level)
                     self.session.execute(stmt, args)
         else:
-            raise ValueError("No certificate found for: %, type: %s" %
-                             (domain_name, cert_type))
+            raise ValueError("No certificate found for: {0},"
+                             "type: {1}".format(domain_name, cert_type))
 
     def create(self, project_id, service_obj):
         """create.
