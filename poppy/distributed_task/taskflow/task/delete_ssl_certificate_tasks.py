@@ -28,7 +28,7 @@ conf(project='poppy', prog='poppy', args=[])
 class DeleteProviderSSLCertificateTask(task.Task):
     default_provides = "responders"
 
-    def execute(self, providers_list_json, cert_obj_json):
+    def execute(self):
         # Note(tonytan4ever): For right now there is no
         # way to code the process of deleting a certificate object
         # from Akamai
