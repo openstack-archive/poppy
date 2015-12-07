@@ -28,7 +28,7 @@ conf(project='poppy', prog='poppy', args=[])
 class DeleteProviderSSLCertificateTask(task.Task):
     default_provides = "responders"
 
-    def execute(self, providers_list_json, cert_obj_json):
+    def execute(self):
         # Note(tonytan4ever): For right now there is no
         # way to code the process of deleting a certificate object
         # from Akamai
@@ -59,7 +59,12 @@ class DeleteStorageSSLCertificateTask(task.Task):
     def execute(self, project_id, domain_name, cert_type):
         service_controller, self.storage_controller = \
             memoized_controllers.task_controllers('poppy', 'storage')
-        self.storage_controller.delete_cert(project_id, domain_name, cert_type)
+        try:
+            self.storage_controller.delete_cert(project_id,
+                                                domain_name,
+                                                cert_type)
+        except ValueError as e:
+            LOG.exception(e)
 
     def revert(self, *args, **kwargs):
         try:

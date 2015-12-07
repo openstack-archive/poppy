@@ -21,6 +21,7 @@ from taskflow import engines
 from poppy.distributed_task.taskflow.flow import create_service
 from poppy.distributed_task.taskflow.flow import create_ssl_certificate
 from poppy.distributed_task.taskflow.flow import delete_service
+from poppy.distributed_task.taskflow.flow import delete_ssl_certificate
 from poppy.distributed_task.taskflow.flow import purge_service
 from poppy.distributed_task.taskflow.flow import update_service
 from poppy.distributed_task.taskflow.flow import update_service_state
@@ -874,4 +875,29 @@ class TestFlowRuns(base.TestCase):
                                                    storage_controller,
                                                    dns_controller)
             engines.run(create_ssl_certificate.create_ssl_certificate(),
+                        store=kwargs)
+
+    # Keep create credentials for now
+    @mock.patch('pyrax.cloud_dns')
+    @mock.patch('pyrax.set_credentials')
+    def test_delete_ssl_certificate_normal(self, mock_creds, mock_dns_client):
+
+        kwargs = {
+            'cert_type': "san",
+            'project_id': json.dumps(str(uuid.uuid4())),
+            'domain_name': "san.san.com",
+        }
+
+        service_controller, storage_controller, dns_controller = \
+            self.all_controllers()
+
+        with MonkeyPatchControllers(service_controller,
+                                    dns_controller,
+                                    storage_controller,
+                                    memoized_controllers.task_controllers):
+
+            self.patch_create_ssl_certificate_flow(service_controller,
+                                                   storage_controller,
+                                                   dns_controller)
+            engines.run(delete_ssl_certificate.delete_ssl_certificate(),
                         store=kwargs)
