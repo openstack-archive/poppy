@@ -94,17 +94,20 @@ class SSLCertificate(common.DictSerializableModel):
         self._cert_type = value
 
     def get_cert_status(self):
-        if self.cert_details is None or self.cert_details == {}:
+        if self.cert_details is None:
             return "deployed"
+        if self.cert_details == {}:
+            return "create_in_progress"
         # Note(tonytan4ever): Right now we assume there is only one
         # provider per flavor (that is akamai), so the first one
         # value of this dictionary is akamai cert_details
         first_provider_cert_details = (
             list(self.cert_details.values())[0].get("extra_info", None))
         if first_provider_cert_details is None:
-            return "deployed"
+            return "create_in_progress"
         else:
-            result = first_provider_cert_details.get('status', "deployed")
+            result = first_provider_cert_details.get('status',
+                                                     "create_in_progress")
             if result not in VALID_STATUS_IN_CERT_DETAIL:
                 raise ValueError(
                     u'Status in cert_details: {0} not in valid options: {1}'.
