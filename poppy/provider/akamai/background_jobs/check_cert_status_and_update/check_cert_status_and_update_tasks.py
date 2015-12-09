@@ -57,9 +57,11 @@ class CheckCertStatusTask(task.Task):
                                                       )
             latest_sps_id = cert_obj.cert_details['Akamai']['extra_info'].get(
                 'akamai_spsId')
+            current_status = cert_obj.cert_details['Akamai']['extra_info'].get(
+                'status')
 
             if latest_sps_id is None:
-                return ""
+                return current_status
 
             resp = self.akamai_driver.akamai_sps_api_client.get(
                 self.akamai_driver.akamai_sps_api_base_url.format(
@@ -71,17 +73,30 @@ class CheckCertStatusTask(task.Task):
                 raise RuntimeError('SPS API Request Failed'
                                    'Exception: %s' % resp.text)
 
-            status = json.loads(resp.text)['requestList'][0]['status']
+            sps_request_info = json.loads(resp.text)['requestList'][0]
+            status = sps_request_info['status']
+            workFlowProgress = sps_request_info.get(
+                'workflowProgress')
 
             # This SAN Cert is on pending status
-            if status != 'SPS Request Complete':
-                LOG.info("SPS Not completed for %s ..." %
-                         cert_obj.get_san_edge_name())
-                return ""
-            else:
+            if status == 'SPS Request Complete':
                 LOG.info("SPS completed for %s..." %
                          cert_obj.get_san_edge_name())
                 return "deployed"
+            elif status == 'edge host already created or pending':
+                if workFlowProgress is not None and \
+                        'error' in workFlowProgress.lower():
+                    LOG.info("SPS Pending with Error:" %
+                             workFlowProgress)
+                    return "failed"
+                else:
+                    return "deployed"
+            elif status == 'CPS cancelled':
+                return "cancelled"
+            else:
+                LOG.info("SPS Not completed for %s ..." %
+                         cert_obj.get_san_edge_name())
+                return ""
 
 
 class UpdateCertStatusTask(task.Task):
@@ -97,8 +112,9 @@ class UpdateCertStatusTask(task.Task):
                                                       )
             cert_details = cert_obj.cert_details
 
-            if status_change_to == "deployed":
-                cert_details['Akamai']['extra_info']['status'] = 'deployed'
+            if status_change_to != "":
+                cert_details['Akamai']['extra_info']['status'] = (
+                    status_change_to)
                 cert_details['Akamai'] = json.dumps(cert_details['Akamai'])
                 self.storage_controller.update_cert_info(cert_obj.domain_name,
                                                          cert_obj.cert_type,
@@ -114,7 +130,7 @@ class UpdateCertStatusTask(task.Task):
                     service_obj.provider_details['Akamai'].\
                         domains_certificate_status.\
                         set_domain_certificate_status(cert_obj.domain_name,
-                                                      'deployed')
+                                                      status_change_to)
                     self.storage_controller.update_provider_details(
                         project_id,
                         service_obj.service_id,

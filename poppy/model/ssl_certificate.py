@@ -20,7 +20,8 @@ VALID_CERT_TYPES = [u'san', u'custom']
 VALID_STATUS_IN_CERT_DETAIL = [
     u'deployed',
     u'create_in_progress',
-    u'failed'
+    u'failed',
+    u'cancelled'
 ]
 
 
