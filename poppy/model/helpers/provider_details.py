@@ -30,7 +30,8 @@ VALID_STATUSES = [
 VALID_DOMAIN_CERTIFICATE_STATUSES = [
     u'create_in_progress',
     u'deployed',
-    u'failed']
+    u'failed',
+    u'cancelled']
 
 
 class DomainCertificatesStatus(common.DictSerializableModel):

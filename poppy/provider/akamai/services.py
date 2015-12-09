@@ -508,7 +508,7 @@ class ServiceController(base.ServiceBase):
                                 continue
                             else:
                                 pass
-                        elif status == 'CPS Cancelled':
+                        elif status == 'CPS cancelled':
                             pass
                         elif status != 'SPS Request Complete':
                             LOG.info("SPS Not completed for %s..." %

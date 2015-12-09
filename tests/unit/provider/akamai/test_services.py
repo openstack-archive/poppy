@@ -451,7 +451,7 @@ class TestServices(base.TestCase):
 
     @ddt.data(("SPS Request Complete", ""),
               ("edge host already created or pending", None),
-              ("CPS Cancelled", None),
+              ("CPS cancelled", None),
               ("edge host already created or pending", "Some progress info"))
     def test_create_ssl_certificate_happy_path(
             self,
