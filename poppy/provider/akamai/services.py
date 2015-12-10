@@ -551,10 +551,12 @@ class ServiceController(base.ServiceBase):
                     self.mod_san_queue.enqueue_mod_san_request(
                         json.dumps(cert_obj.to_dict()))
                     return self.responder.ssl_certificate_provisioned(None, {
-                        'status': 'failed',
+                        'status': 'create_in_progress',
                         'san cert': None,
                         'action': 'No available san cert for %s right now,'
-                                  ' or no san cert info available.'
+                                  ' or no san cert info available. Support:'
+                                  'Please write down the domain and keep an'
+                                  ' eye on next availabe freed-up SAN certs.'
                                   ' More provisioning might be needed' %
                                   (cert_obj.domain_name)
                     })

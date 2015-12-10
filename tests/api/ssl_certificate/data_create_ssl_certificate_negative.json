@@ -34,5 +34,9 @@
     "empty_cert": {
         "cert_type": "",
         "domain_name": "meowmeow.com"
+    },
+    "root_domain": {
+        "cert_type": "san",
+        "domain_name": "abc.com"
     }
 }
