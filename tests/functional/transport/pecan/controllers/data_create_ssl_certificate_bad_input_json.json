@@ -24,5 +24,10 @@
         "cert_type": "san",
         "domain_name": "www.abc.com",
         "flavor_id": "mock"
+    },
+    "with_root_domain": {
+        "cert_type": "san",
+        "domain_name": "abc.com",
+        "flavor_id": "mock"
     }
 }
