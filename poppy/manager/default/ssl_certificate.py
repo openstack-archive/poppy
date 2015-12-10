@@ -18,6 +18,8 @@ import json
 from poppy.distributed_task.taskflow.flow import create_ssl_certificate
 from poppy.distributed_task.taskflow.flow import delete_ssl_certificate
 from poppy.manager import base
+from poppy.model.helpers import domain
+from poppy.transport.validators import helpers as validators
 
 
 class DefaultSSLCertificateController(base.SSLCertificateController):
@@ -31,6 +33,15 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
         self.flavor_controller = self._driver.storage.flavors_controller
 
     def create_ssl_certificate(self, project_id, cert_obj):
+
+        if (not validators.is_valid_domain_name(cert_obj.domain_name)) or \
+                (validators.is_root_domain(
+                    domain.Domain(cert_obj.domain_name).to_dict())):
+            # here created a http domain object but it does not matter http or
+            # https
+            raise ValueError('%s must be a valid non-root domain' %
+                             cert_obj.domain_name)
+
         try:
             flavor = self.flavor_controller.get(cert_obj.flavor_id)
         # raise a lookup error if the flavor is not found
