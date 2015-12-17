@@ -69,3 +69,9 @@ class TestModSanQueue(base.TestCase):
         calls = [mock.call(), mock.call()]
         self.zk_queue.mod_san_queue_backend.get.assert_has_calls(calls)
         self.zk_queue.mod_san_queue_backend.consume.assert_called_once_with()
+
+    def test_traverse_queue(self):
+        self.zk_queue.mod_san_queue_backend.__len__ = mock.Mock()
+        self.zk_queue.mod_san_queue_backend.__len__.return_value = 0
+        res = self.zk_queue.traverse_queue()
+        self.assertTrue(len(res) == 0)
