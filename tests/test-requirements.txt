@@ -11,3 +11,5 @@ testrepository
 testtools
 python-heatclient
 beautifulsoup4
+# used for testing zookeeper
+zake>=0.1.6
