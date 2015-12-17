@@ -58,6 +58,15 @@ class ZookeeperModSanQueue(base.ModSanQueue):
     def enqueue_mod_san_request(self, cert_obj_json):
         self.mod_san_queue_backend.put(cert_obj_json)
 
+    def traverse_queue(self):
+        res = []
+        while len(self.mod_san_queue_backend) > 0:
+            item = self.mod_san_queue_backend.get()
+            self.mod_san_queue_backend.consume()
+            res.append(item)
+        self.mod_san_queue_backend.put_all(res)
+        return res
+
     def dequeue_mod_san_request(self, consume=True):
         res = self.mod_san_queue_backend.get()
         if consume:
