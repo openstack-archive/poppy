@@ -92,3 +92,12 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
 
         except ValueError as e:
             raise e
+
+    def get_akamai_san_retry_list(self):
+        akamai_driver = self._driver.providers['akamai'].obj
+        res = akamai_driver.mod_san_queue.traverse_queue()
+        res = [json.loads(r) for r in res]
+        return [
+            (r['domain_name'], r['project_id'])
+            for r in res
+        ]
