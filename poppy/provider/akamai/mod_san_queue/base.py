@@ -39,5 +39,9 @@ class ModSanQueue(object):
     def dequeue_mod_san_request(self):
         raise NotImplementedError
 
+    def traverse_queue(self):
+        '''Travese queue and resturn all items on the queue in a list'''
+        raise NotImplementedError
+
     def move_request_to_top(self):
         raise NotImplementedError
