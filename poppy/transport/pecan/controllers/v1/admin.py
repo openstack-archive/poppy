@@ -103,11 +103,38 @@ class BackgroundJobController(base.Controller, hooks.HookController):
         return pecan.Response(None, 202)
 
 
+class AkamaiRetryListController(base.Controller, hooks.HookController):
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    def __init__(self, driver):
+        super(AkamaiRetryListController, self).__init__(driver)
+
+    @pecan.expose('json')
+    def get_all(self):
+        try:
+            res = (
+                self._driver.manager.ssl_certificate_controller.
+                get_akamai_san_retry_list())
+        except Exception as e:
+            pecan.abort(404, str(e))
+
+        return res
+
+
+class AkamaiSSLCertificateController(base.Controller, hooks.HookController):
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    def __init__(self, driver):
+        super(AkamaiSSLCertificateController, self).__init__(driver)
+        self.__class__.retry_list = AkamaiRetryListController(driver)
+
+
 class AkamaiController(base.Controller, hooks.HookController):
     def __init__(self, driver):
         super(AkamaiController, self).__init__(driver)
         self.__class__.service = DomainMigrationController(driver)
         self.__class__.background_job = BackgroundJobController(driver)
+        self.__class__.ssl_certificate = AkamaiSSLCertificateController(driver)
 
 
 class ProviderController(base.Controller, hooks.HookController):
