@@ -26,6 +26,7 @@ from poppy.transport.validators.schemas import background_jobs
 from poppy.transport.validators.schemas import domain_migration
 from poppy.transport.validators.schemas import service_action
 from poppy.transport.validators.schemas import service_limit
+from poppy.transport.validators.schemas import ssl_certificate
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import helpers as stoplight_helpers
 from poppy.transport.validators.stoplight import rule
@@ -115,6 +116,32 @@ class AkamaiRetryListController(base.Controller, hooks.HookController):
             res = (
                 self._driver.manager.ssl_certificate_controller.
                 get_akamai_san_retry_list())
+        except Exception as e:
+            pecan.abort(404, str(e))
+
+        return res
+
+    @pecan.expose('json')
+    @decorators.validate(
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                ssl_certificate.SSLCertificateSchema.get_schema(
+                    "retry_list", "PUT")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter))
+    def put(self):
+        """The input of the queue data must be a list of:
+
+        [
+          [<domain_name>, <project_id>, <flavor_id>]
+        ]
+
+        """
+        try:
+            queue_data = json.loads(pecan.request.body.decode('utf-8'))
+            res = (
+                self._driver.manager.ssl_certificate_controller.
+                update_akamai_san_retry_list(queue_data))
         except Exception as e:
             pecan.abort(404, str(e))
 

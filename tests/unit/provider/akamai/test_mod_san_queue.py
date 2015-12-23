@@ -75,3 +75,9 @@ class TestModSanQueue(base.TestCase):
         self.zk_queue.mod_san_queue_backend.__len__.return_value = 0
         res = self.zk_queue.traverse_queue()
         self.assertTrue(len(res) == 0)
+
+    def test_put_queue_data(self):
+        self.zk_queue.mod_san_queue_backend.__len__ = mock.Mock()
+        self.zk_queue.mod_san_queue_backend.__len__.return_value = 0
+        res = self.zk_queue.put_queue_data([])
+        self.assertTrue(len(res) == 0)
