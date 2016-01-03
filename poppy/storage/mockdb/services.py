@@ -19,6 +19,8 @@ import random
 from poppy.model.helpers import domain
 from poppy.model.helpers import origin
 from poppy.model.helpers import provider_details
+from poppy.model.helpers import restriction
+from poppy.model.helpers import rule
 from poppy.model import service
 from poppy.model import ssl_certificate
 from poppy.storage import base
@@ -227,8 +229,20 @@ class ServicesController(base.ServicesController):
                    for o in origins]
         domains = [domain.Domain(d['domain'], d['protocol'], d['certificate'])
                    for d in domains]
+        restrictions = [restriction.Restriction(
+            r.get('name'),
+            r.get('access', 'whitelist'),
+            [rule.Rule(r_rule.get('name'),
+                       referrer=r_rule.get('referrer'),
+                       client_ip=r_rule.get('client_ip'),
+                       geography=r_rule.get('geography'),
+                       request_url=r_rule.get('request_url', "/*") or "/*")
+             for r_rule in r['rules']])
+            for r in result.get('restrictions', [])]
+
         flavor_id = result.get('flavor_id')
-        s = service.Service(service_id, name, domains, origins, flavor_id)
+        s = service.Service(service_id, name, domains, origins, flavor_id,
+                            restrictions=restrictions)
         provider_detail_results = result.get('provider_details') or {}
         provider_details_dict = {}
         for provider_name in provider_detail_results:

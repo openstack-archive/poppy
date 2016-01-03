@@ -395,7 +395,7 @@ def is_valid_service_configuration(service, schema):
                                 request_url]:
                         raise exceptions.ValidationFailed(
                             'Cannot blacklist and whitelist [%s] on %s'
-                            ' at the same time' % key, request_url)
+                            ' at the same time' % (key, request_url))
                     if request_url not in whitelist_restriction_entities:
                         whitelist_restriction_entities[request_url] = []
                     whitelist_restriction_entities[request_url].append(entity)

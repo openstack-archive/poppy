@@ -347,6 +347,61 @@ class ServiceControllerTest(base.FunctionalTest):
         self.assertEqual(400, response.status_code)
         self.assertTrue('has already been taken' in response)
 
+    def test_patch_blacklist_on_whitelist(self):
+        service_json = {
+            "name": "mocksite.com",
+            "domains": [
+                {"domain": "blog.mocksite.com"}
+            ],
+            "flavor_id": self.flavor_id,
+            "origins": [
+                {
+                    "origin": "mocksite.com",
+                    "port": 443,
+                    "ssl": True
+                }
+            ],
+            "restrictions": [
+                {
+                    "name": "website only",
+                    "access": "whitelist",
+                    "rules": [
+                        {
+                            "name": "mocksite.com",
+                            "geography": "USA"
+                        }
+                    ]
+                }
+            ]
+        }
+
+        response = self.app.post('/v1.0/services',
+                                 params=json.dumps(service_json),
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'X-Project-ID': self.project_id
+                                 })
+        self.assertEqual(202, response.status_code)
+
+        response = self.app.patch(response.location,
+                                  params=json.dumps([{
+                                      "op": "add",
+                                      "path": "/restrictions/-",
+                                      "value": {
+                                            "name": "Restriction 6",
+                                            "access": "blacklist",
+                                            "rules": [{
+                                                "name": "rule2",
+                                                "geography": "North America"
+                                            }]
+                                      }
+                                  }]),
+                                  headers={'Content-Type': 'application/json',
+                                           'X-Project-ID': self.project_id
+                                           }, expect_errors=True)
+        self.assertEqual(400, response.status_code)
+        self.assertTrue('Cannot blacklist and whitelist' in response)
+
     def test_create_with_invalid_json(self):
         # create with errorenous data: invalid json data
         response = self.app.post('/v1.0/services',
