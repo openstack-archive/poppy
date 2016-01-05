@@ -170,7 +170,7 @@ COUNTRY_CODE_MAPPING = {
     'Ecuador': 'EC',
     'Falkland Islands': 'FK',
     'French Guiana': 'GF',
-    'Guyana': 'GA',
+    'Guyana': 'GY',
     'Paraguay': 'PY',
     'Peru': 'PE',
     'South Georgia and South Sandwich': 'GS',

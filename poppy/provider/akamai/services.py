@@ -852,9 +852,14 @@ class ServiceController(base.ServiceBase):
                             rule_entry.geography])
                 else:
                     zones_list.append(rule_entry.geography)
-            return ' '.join(
+            # NOTE(tonytan4ever):Too many country code to check and maybe more
+            # countries in the future, so put in checking duplicates logic here
+            res = ' '.join(
                 ['%s' % geo_zone_code_mapping.COUNTRY_CODE_MAPPING.get(
-                    zone, '') for zone in zones_list])
+                  zone, '') for zone in zones_list])
+            if len(res) > len(set(res)):
+                raise ValueError("Duplicated country code in %s" % str(res))
+            return res
 
     def _process_caching_rules(self, caching_rules, rules_list):
         # akamai requires all caching rules to start with '/'
