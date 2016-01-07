@@ -171,7 +171,13 @@ class ServicesController(base.ServicesController):
             self.certs[key].cert_details = cert_details
 
     def get_service_details_by_domain_name(self, domain_name):
-        pass
+        for service_id in self.created_services:
+            service_dict_in_cache = self.created_services[service_id]
+            if domain_name in [d['domain']
+                               for d in service_dict_in_cache['domains']]:
+                service_result = self.format_result(service_dict_in_cache)
+                service_result._status = 'deployed'
+                return service_result
 
     def create_cert(self, project_id, cert_obj):
         key = (cert_obj.flavor_id, cert_obj.domain_name, cert_obj.cert_type)
@@ -181,7 +187,7 @@ class ServicesController(base.ServicesController):
             raise ValueError
 
     def get_certs_by_domain(self, domain_name, project_id=None, flavor_id=None,
-                            cert_type=None):
+                            cert_type=None, status=u'create_in_progress'):
         certs = []
         for cert in self.certs:
             if domain_name in cert:
@@ -203,7 +209,7 @@ class ServicesController(base.ServicesController):
                                                      ),
                                 u'create_at': u'2015-09-29 16:09:12.429147',
                                 u'san cert': u'secure2.san1.test_123.com',
-                                u'status': u'create_in_progress'}
+                                u'status': status}
                             }
                     }
                 )

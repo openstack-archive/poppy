@@ -44,6 +44,11 @@ class BaseFunctionalTest(base.TestCase):
         b_obj.distributed_task.job_board = mock.Mock()
         b_obj.distributed_task.job_board.return_value = (
             mock_persistence.copy())
+        # Note(tonytan4ever):Need this hack to preserve mockdb storage
+        # controller's service cache
+        b_obj.manager.ssl_certificate_controller.storage_controller = (
+            b_obj.manager.services_controller.storage_controller
+        )
         poppy_wsgi = b_obj.transport.app
 
         self.app = webtest.app.TestApp(poppy_wsgi)
