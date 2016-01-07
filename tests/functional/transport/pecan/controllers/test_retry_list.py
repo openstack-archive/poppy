@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import uuid
 
 import ddt
@@ -33,4 +34,37 @@ class RetryListTest(base.FunctionalTest):
                                 'ssl_certificate/retry_list',
                                 headers={
                                     'X-Project-ID': self.project_id})
+        self.assertEqual(200, response.status_code)
+
+    @ddt.file_data("data_put_retry_list_bad.json")
+    def test_put_retry_list_negative(self, put_data):
+        response = self.app.put('/v1.0/admin/provider/akamai/'
+                                'ssl_certificate/retry_list',
+                                params=json.dumps(put_data),
+                                headers={
+                                    'Content-Type': 'application/json',
+                                    'X-Project-ID': self.project_id},
+                                expect_errors=True)
+        self.assertEqual(400, response.status_code)
+
+    def test_put_retry_list_positive(self):
+        put_data = [
+            {
+                "domain_name": "test_san1.cnamecdn.com",
+                "project_id": "000",
+                "flavor_id": "premium"
+            },
+            {
+                "domain_name": "test_san2.cnamecdn.com",
+                "project_id": "000",
+                "flavor_id": "premium"
+            }
+        ]
+        response = self.app.put('/v1.0/admin/provider/akamai/'
+                                'ssl_certificate/retry_list',
+                                params=json.dumps(put_data),
+                                headers={
+                                    'Content-Type': 'application/json',
+                                    'X-Project-ID': self.project_id},
+                                )
         self.assertEqual(200, response.status_code)

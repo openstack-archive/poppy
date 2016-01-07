@@ -1,0 +1,36 @@
+{
+    "missing_domain_name": [
+       {
+         "project_id": "000",
+         "flavor_id": "premium"
+       },
+	   {
+         "domain_name": "abc2.cnamecdn.com",
+         "project_id": "000",
+         "flavor_id": "premium"
+        }
+    ],
+
+    "missing_project_id": [
+      {
+         "domain_name": "abc1.cnamecdn.com",
+         "flavor_id": "premium"
+      },
+      {
+         "domain_name": "abc2.cnamecdn.com",
+         "project_id": "000",
+         "flavor_id": "premium"
+      }
+    ],
+
+    "missing_everything": [
+      {
+      },
+      {
+        "domain_name": "abc2.cnamecdn.com",
+        "project_id": "000",
+        "flavor_id": "premium"
+      }
+    ]
+
+}
