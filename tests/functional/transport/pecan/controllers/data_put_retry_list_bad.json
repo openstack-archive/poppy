@@ -1,0 +1,36 @@
+{
+	"missing_domain_name": [
+	  [
+	    "000",
+	    "premium"
+	  ],
+	  [
+	    "abc2.cnamecdn.com",
+	    "000",
+	    "premium"
+	  ]
+	],
+	
+	"missing_project_id": [
+	  [
+	    "abc1.cnamecdn.com",
+	    "premium"
+	  ],
+	  [
+	    "abc2.cnamecdn.com",
+	    "000",
+	    "premium"
+	  ]
+	],
+	
+	"missing_everything": [
+	  [
+	  ],
+	  [
+	    "abc2.cnamecdn.com",
+	    "000",
+	    "premium"
+	  ]
+	]	
+
+}

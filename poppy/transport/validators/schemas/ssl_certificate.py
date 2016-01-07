@@ -49,5 +49,26 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                     }
                 }
             }
+        },
+
+        'retry_list': {
+            'PUT': {
+                'type': 'array',
+                "uniqueItems": True,
+                'items': {
+                    'type': 'array',
+                    "minItems": 3,
+                    "maxItems": 3,
+                    'items': [
+                            {
+                                "type": "string"
+                            }, {
+                                "type": "string"
+                            }, {
+                                "type": "string",
+                            },
+                    ]
+                }
+            }
         }
     }

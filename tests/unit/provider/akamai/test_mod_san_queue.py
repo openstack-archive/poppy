@@ -111,3 +111,22 @@ class TestModSanQueue(base.TestCase):
         self.assertTrue(len(res) == 10)
         res = [json.loads(r.decode('utf-8')) for r in res]
         self.assertTrue(res == cert_obj_list)
+
+    def test_put_queue_data(self):
+        res = self.zk_queue.put_queue_data([])
+        self.assertTrue(len(res) == 0)
+
+        cert_obj_list = []
+        for i in range(10):
+            cert_obj = {
+                "cert_type": "san",
+                "domain_name": "www.abc%s.com" % str(i),
+                "flavor_id": "premium"
+            }
+            cert_obj_list.append(cert_obj)
+        self.zk_queue.put_queue_data(
+            [json.dumps(o).encode('utf-8') for o in cert_obj_list])
+        self.assertTrue(len(self.zk_queue.mod_san_queue_backend) == 10)
+        res = self.zk_queue.traverse_queue()
+        res = [json.loads(r.decode('utf-8')) for r in res]
+        self.assertTrue(res == cert_obj_list)

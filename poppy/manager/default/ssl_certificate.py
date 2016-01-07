@@ -19,6 +19,7 @@ from poppy.distributed_task.taskflow.flow import create_ssl_certificate
 from poppy.distributed_task.taskflow.flow import delete_ssl_certificate
 from poppy.manager import base
 from poppy.model.helpers import domain
+from poppy.model import ssl_certificate
 from poppy.transport.validators import helpers as validators
 
 
@@ -105,3 +106,18 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             (r['domain_name'], r['project_id'])
             for r in res
         ]
+
+    def update_akamai_san_retry_list(self, queue_data_tuple_list):
+        new_queue_data = [
+            json.dumps(ssl_certificate.SSLCertificate(
+                r[2],
+                r[0],
+                'san',
+                r[1]).to_dict())
+            for r in queue_data_tuple_list
+        ]
+        res = []
+        if 'akamai' in self._driver.providers:
+            akamai_driver = self._driver.providers['akamai'].obj
+            res = akamai_driver.mod_san_queue.put_queue_data(new_queue_data)
+        return res
