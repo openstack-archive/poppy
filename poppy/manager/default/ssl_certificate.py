@@ -113,3 +113,28 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
              "force_retry": r.get('force_retry', True)}
             for r in res
         ]
+
+    def update_san_retry_list(self, queue_data_list):
+        for r in queue_data_list:
+            service_obj = self.storage_controller\
+                .get_service_details_by_domain_name(r['domain_name'])
+            if service_obj is None and not r.get('force_retry', True):
+                raise LookupError(u'Domain {0} does not exist, are you sure '
+                                  'you want to put request, {1}? '
+                                  'set force_retry to true to still retry this'
+                                  'san-retry request'.
+                                  format(r['domain_name'], r))
+
+        new_queue_data = [
+            {'flavor_id':   r['flavor_id'],  # flavor_id
+             'domain_name': r['domain_name'],    # domain_name
+             'project_id': r['project_id'],
+             'force_retry': r.get('force_retry', True)}
+            for r in queue_data_list
+        ]
+        res = []
+        if 'akamai' in self._driver.providers:
+            akamai_driver = self._driver.providers['akamai'].obj
+            res = akamai_driver.mod_san_queue.put_queue_data(new_queue_data)
+        # other provider's retry-list implementaiton goes here
+        return res
