@@ -67,6 +67,17 @@ class ZookeeperModSanQueue(base.ModSanQueue):
         self.mod_san_queue_backend.put_all(res)
         return res
 
+    def put_queue_data(self, queue_data):
+        # put queue data will replace all existing
+        # queue data with the incoming new queue_data
+        # dequeue all the existing data
+        while len(self.mod_san_queue_backend) > 0:
+            self.mod_san_queue_backend.get()
+            self.mod_san_queue_backend.consume()
+        # put in all the new data
+        self.mod_san_queue_backend.put_all(queue_data)
+        return queue_data
+
     def dequeue_mod_san_request(self, consume=True):
         res = self.mod_san_queue_backend.get()
         if consume:
