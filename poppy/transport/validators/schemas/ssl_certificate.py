@@ -49,5 +49,37 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                     }
                 }
             }
+        },
+
+        'retry_list': {
+            'PUT': {
+                'type': 'array',
+                "uniqueItems": True,
+                'items': {
+                    'type': 'object',
+                    'additionalProperties': False,
+                    'properties': {
+                        'flavor_id': {
+                            'type': 'string',
+                            'required': True,
+                            'minLength': 1,
+                            'maxLength': 256
+                        },
+                        'domain_name': {
+                            'type': 'string',
+                            'required': True,
+                            'minLength': 3,
+                            'maxLength': 253
+                        },
+                        'project_id': {
+                            'type': 'string',
+                            'required': True,
+                        },
+                        'force_retry': {
+                            'type': 'boolean'
+                        }
+                    }
+                }
+            }
         }
     }

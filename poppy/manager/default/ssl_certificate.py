@@ -113,3 +113,42 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
              "force_retry": r.get('force_retry', True)}
             for r in res
         ]
+
+    def update_san_retry_list(self, queue_data_list):
+        for r in queue_data_list:
+            service_obj = self.storage_controller\
+                .get_service_details_by_domain_name(r['domain_name'])
+            if service_obj is None and not r.get('force_retry', True):
+                raise LookupError(u'Domain {0} does not exist on any service, '
+                                  'are you sure you want to proceed request, '
+                                  '{1}? You can set force_retry to true to '
+                                  'retry this san-retry request forcefully'.
+                                  format(r['domain_name'], r))
+
+            cert_for_domain = self.storage_controller.get_certs_by_domain(
+                r['domain_name'])
+            if cert_for_domain != []:
+                if cert_for_domain.get_cert_status() == "deployed":
+                    raise ValueError(u'Cert on {0} has already been '
+                                     'provisioned successfully. Are you sure'
+                                     ' you still need provision?'.
+                                     format(r['domain_name']))
+
+        new_queue_data = [
+            json.dumps({'flavor_id':   r['flavor_id'],  # flavor_id
+                        'domain_name': r['domain_name'],    # domain_name
+                        'project_id': r['project_id'],
+                        'force_retry': r.get('force_retry', True)})
+            for r in queue_data_list
+        ]
+        res, diff = [], []
+        if 'akamai' in self._driver.providers:
+            akamai_driver = self._driver.providers['akamai'].obj
+            orig = [json.loads(r) for r in
+                    akamai_driver.mod_san_queue.traverse_queue()]
+            res = [json.loads(r) for r in
+                   akamai_driver.mod_san_queue.put_queue_data(new_queue_data)]
+
+            diff = tuple(x for x in res if x not in orig)
+        # other provider's retry-list implementaiton goes here
+        return res, diff
