@@ -43,5 +43,9 @@ class ModSanQueue(object):
         '''Travese queue and resturn all items on the queue in a list'''
         raise NotImplementedError
 
+    def put_queue_data(self, queue_data_list):
+        '''Juggling and put new queue data list in the queue'''
+        raise NotImplementedError
+
     def move_request_to_top(self):
         raise NotImplementedError
