@@ -26,6 +26,7 @@ from poppy.transport.validators.schemas import background_jobs
 from poppy.transport.validators.schemas import domain_migration
 from poppy.transport.validators.schemas import service_action
 from poppy.transport.validators.schemas import service_limit
+from poppy.transport.validators.schemas import ssl_certificate
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import helpers as stoplight_helpers
 from poppy.transport.validators.stoplight import rule
@@ -119,6 +120,37 @@ class AkamaiRetryListController(base.Controller, hooks.HookController):
             pecan.abort(404, str(e))
 
         return res
+
+    @pecan.expose('json')
+    @decorators.validate(
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                ssl_certificate.SSLCertificateSchema.get_schema(
+                    "retry_list", "PUT")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter))
+    def put(self):
+        """The input of the queue data must be a list of dictionaries:
+
+        (after json loaded)
+        [
+          { "domain_name": <domain_name>,
+            "project_id": <project_id>,
+            "flavor_id": <flavor_id> }
+        ]
+
+        """
+        try:
+            queue_data = json.loads(pecan.request.body.decode('utf-8'))
+            res, diff = (
+                self._driver.manager.ssl_certificate_controller.
+                update_san_retry_list(queue_data))
+        except Exception as e:
+            pecan.abort(400, str(e))
+
+        # result is the new queue, and difference is the difference between the
+        # new queue and the original one
+        return {"result": res,  "difference": diff}
 
 
 class AkamaiSSLCertificateController(base.Controller, hooks.HookController):
