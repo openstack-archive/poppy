@@ -76,6 +76,15 @@ class ServicesControllerBase(controller.ProviderControllerBase):
         """
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def get_provider_service_id(self, service_obj):
+        """Get the provider side service id for the service object.
+
+        :param service_obj
+        :raises NotImplementedError
+        """
+        raise NotImplementedError
+
     def _map_service_name(self, service_name):
         """Map poppy service name to provider's specific service name.
 

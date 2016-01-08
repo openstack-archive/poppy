@@ -96,6 +96,9 @@ class ServiceController(base.ServiceBase):
         except Exception as e:
             return self.responder.failed(str(e))
 
+    def get_provider_service_id(self, service_obj):
+        return service_obj.name
+
     @decorators.lazy_property(write=False)
     def current_customer(self):
         # TODO(tonytan4ever/obulpathi): Implement cloudfront's current_customer

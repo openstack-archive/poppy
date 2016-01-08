@@ -134,6 +134,9 @@ class ServiceController(base.ServiceBase):
         else:
             return hashlib.sha1(service_name.encode("utf-8")).hexdigest()[:30]
 
+    def get_provider_service_id(self, service_obj):
+        return self._map_service_name(service_obj.name)
+
     @decorators.lazy_property(write=False)
     def current_customer(self):
         # This returns the current customer account info

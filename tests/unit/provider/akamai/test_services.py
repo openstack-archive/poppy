@@ -412,6 +412,14 @@ class TestServices(base.TestCase):
 
         self.assertTrue(origin_rule_valid)
 
+    def get_provider_service_id(self):
+        controller = services.ServiceController(self.driver)
+        provide_service_id = controller.get(self.service_obj)
+        self.assertTrue(provide_service_id is not None)
+        self.assertTrue(isinstance(provide_service_id, str))
+        for domain_obj in self.service_obj.domains:
+            self.assertTrue(domain_obj.domain in provide_service_id)
+
     def test_process_restriction_rules(self):
         controller = services.ServiceController(self.driver)
         rule_entry = rule.Rule('index',

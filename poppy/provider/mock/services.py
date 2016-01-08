@@ -50,6 +50,9 @@ class ServiceController(base.ServiceBase):
     def get(self, service_name):
         return self.responder.get([], [], [])
 
+    def get_provider_service_id(self, service_obj):
+        return []
+
     @decorators.lazy_property(write=False)
     def current_customer(self):
         '''return current_customer for Mock. We can return a None.'''

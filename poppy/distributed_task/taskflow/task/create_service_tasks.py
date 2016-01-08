@@ -98,6 +98,7 @@ class CreateServiceDNSMappingTask(task.Task):
     def execute(self, responders, retry_sleep_time, project_id, service_id):
         service_controller, dns = \
             memoized_controllers.task_controllers('poppy', 'dns')
+
         dns_responder = dns.create(responders)
         for provider_name in dns_responder:
             if 'error' in dns_responder[provider_name]:
@@ -145,10 +146,30 @@ class CreateServiceDNSMappingTask(task.Task):
                          'to failed'.format(service_id, project_id))
                 provider_details_dict = {}
                 result = kwargs['result']
+
+                service_controller, self.storage_controller = \
+                    memoized_controllers.task_controllers('poppy', 'storage')
+
+                try:
+                    service_obj = self.storage_controller.get(project_id,
+                                                              service_id)
+                    self.storage_controller._driver.close_connection()
+                except ValueError:
+                    msg = 'Creating service {0} from Poppy failed. ' \
+                          'No such service exists'.format(service_id)
+                    LOG.info(msg)
+                    raise Exception(msg)
+
                 for responder in responders:
                     for provider_name in responder:
+                        provider_service_id = (
+                            service_controller._driver.
+                            providers[provider_name.lower()].obj.
+                            service_controller.
+                            get_provider_service_id(service_obj))
                         provider_details_dict[provider_name] = (
                             provider_details.ProviderDetail(
+                                provider_service_id=provider_service_id,
                                 error_info=result.traceback_str,
                                 status='failed',
                                 error_message='Failed after '

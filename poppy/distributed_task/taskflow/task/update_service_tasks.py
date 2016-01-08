@@ -113,6 +113,7 @@ class UpdateServiceDNSMappingTask(task.Task):
         return dns_responder
 
     def revert(self, responders, retry_sleep_time,
+               service_old, service_obj,
                project_id, service_id, **kwargs):
         if self.name in kwargs['flow_failures'].keys():
             retries = conf[DNS_GROUP].retries
@@ -133,10 +134,22 @@ class UpdateServiceDNSMappingTask(task.Task):
                          'to failed'.format(service_id, project_id))
                 provider_details_dict = {}
                 result = kwargs['result']
+
+                service_controller, self.storage_controller = \
+                    memoized_controllers.task_controllers('poppy', 'storage')
+                service_obj_json = json.loads(service_obj)
+                service_obj = service.load_from_json(service_obj_json)
+
                 for responder in responders:
                     for provider_name in responder:
+                        provider_service_id = (
+                            service_controller._driver.
+                            providers[provider_name.lower()].obj.
+                            service_controller.
+                            get_provider_service_id(service_obj))
                         provider_details_dict[provider_name] = (
                             provider_details.ProviderDetail(
+                                provider_service_id=provider_service_id,
                                 error_info=result.traceback_str,
                                 status='failed',
                                 error_message='Failed after '
