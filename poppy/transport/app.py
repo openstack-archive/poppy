@@ -25,6 +25,7 @@ to put config files in the standard paths. There's
 no common way to specify / pass configuration files
 to the WSGI app when it is called from other apps.
 """
+import os
 
 from oslo_config import cfg
 
@@ -33,6 +34,7 @@ from poppy import bootstrap
 
 conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
-
+if os.environ.get('POPPY_CONFIG_FILE') is not None:
+    conf.default_config_files.insert(os.environ.get('POPPY_CONFIG_FILE'), 0)
 
 app = bootstrap.Bootstrap(conf).transport.app
