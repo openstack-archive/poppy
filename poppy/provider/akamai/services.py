@@ -993,3 +993,12 @@ class ServiceController(base.ServiceBase):
             datetime.datetime.today().weekday() % len(self.san_cert_cnames))
 
         return self.san_cert_cnames[find_idx]
+
+    def get_provider_service_id(self, service_obj):
+        id_list = []
+        for domain in service_obj.domains:
+            dp_obj = {'policy_name': domain.domain,
+                      'protocol': domain.protocol,
+                      'certificate': domain.certificate}
+            id_list.append(dp_obj)
+        return json.dumps(id_list)

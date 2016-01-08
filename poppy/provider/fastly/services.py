@@ -245,3 +245,6 @@ class ServiceController(base.ServiceBase):
     @decorators.lazy_property(write=False)
     def current_customer(self):
         return self.client.get_current_customer()
+
+    def get_provider_service_id(self, service_obj):
+        return service_obj.service_id
