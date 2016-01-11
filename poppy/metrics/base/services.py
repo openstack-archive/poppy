@@ -17,23 +17,20 @@ import abc
 
 import six
 
-from poppy.manager.base import controller
+from poppy.metrics.base import controller
 
 
 @six.add_metaclass(abc.ABCMeta)
-class AnalyticsController(controller.ManagerControllerBase):
-    """Home controller base class."""
+class ServicesControllerBase(controller.MetricsControllerBase):
 
-    def __init__(self, manager):
-        super(AnalyticsController, self).__init__(manager)
-        self.manager = manager
+    """Services Controller Base class."""
 
-    @abc.abstractmethod
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
-        """create_ssl_certificate
+    def __init__(self, driver):
+        super(ServicesControllerBase, self).__init__(driver)
 
-       :param project_id
-       :param domain_name
-       :raises: NotImplementedError
-       """
+    def read(self, metric_name, from_timestamp, to_timestamp, resolution):
+        """read metrics from cache.
+
+        :raises NotImplementedError
+        """
         raise NotImplementedError

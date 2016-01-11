@@ -57,6 +57,8 @@ _DRIVER_OPTIONS = [
                help='DNS driver to use'),
     cfg.StrOpt('distributed_task', default='taskflow',
                help='distributed_task driver to use'),
+    cfg.StrOpt('metrics', default='blueflood',
+               help='metrics driver to use'),
 ]
 
 _DRIVER_GROUP = 'drivers'
@@ -178,7 +180,7 @@ class Bootstrap(object):
         manager_name = self.driver_conf.manager
 
         args = [self.conf, self.storage, self.provider, self.dns,
-                self.distributed_task, self.notification]
+                self.distributed_task, self.notification, self.metrics]
 
         try:
             mgr = driver.DriverManager(namespace=manager_type,
@@ -234,6 +236,32 @@ class Bootstrap(object):
         try:
             mgr = driver.DriverManager(namespace=distributed_task_type,
                                        name=distributed_task_name,
+                                       invoke_on_load=True,
+                                       invoke_args=args)
+            return mgr.driver
+        except RuntimeError as exc:
+            LOG.exception(exc)
+
+    @decorators.lazy_property(write=False)
+    def metrics(self):
+        """metrics driver.
+
+        :returns metrics driver
+        """
+        LOG.debug("loading metrics driver")
+
+        # create the driver manager to load the appropriate drivers
+        metrics_driver_type = 'poppy.metrics'
+        metrics_driver_name = self.driver_conf.metrics
+
+        args = [self.conf]
+
+        LOG.debug((u'Loading metrics driver: %s'),
+                  metrics_driver_name)
+
+        try:
+            mgr = driver.DriverManager(namespace=metrics_driver_type,
+                                       name=metrics_driver_name,
                                        invoke_on_load=True,
                                        invoke_args=args)
             return mgr.driver

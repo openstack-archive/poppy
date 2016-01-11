@@ -17,23 +17,15 @@ import abc
 
 import six
 
-from poppy.manager.base import controller
-
 
 @six.add_metaclass(abc.ABCMeta)
-class AnalyticsController(controller.ManagerControllerBase):
-    """Home controller base class."""
+class MetricsControllerBase(object):
 
-    def __init__(self, manager):
-        super(AnalyticsController, self).__init__(manager)
-        self.manager = manager
+    """Top-level class for controllers.
 
-    @abc.abstractmethod
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
-        """create_ssl_certificate
+    :param driver: Instance of the driver
+        instantiating this controller.
+    """
 
-       :param project_id
-       :param domain_name
-       :raises: NotImplementedError
-       """
-        raise NotImplementedError
+    def __init__(self, driver):
+        self._driver = driver

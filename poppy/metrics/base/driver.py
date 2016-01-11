@@ -17,23 +17,21 @@ import abc
 
 import six
 
-from poppy.manager.base import controller
-
 
 @six.add_metaclass(abc.ABCMeta)
-class AnalyticsController(controller.ManagerControllerBase):
-    """Home controller base class."""
+class MetricsDriverBase(object):
+    """Interface definition for Metrics driver.
 
-    def __init__(self, manager):
-        super(AnalyticsController, self).__init__(manager)
-        self.manager = manager
+    :param conf: Configuration containing options for this driver.
+    :type conf: `oslo_config.ConfigOpts`
+    """
+    def __init__(self, conf):
+        self._conf = conf
 
-    @abc.abstractmethod
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
-        """create_ssl_certificate
+    @property
+    def conf(self):
+        """conf
 
-       :param project_id
-       :param domain_name
-       :raises: NotImplementedError
-       """
-        raise NotImplementedError
+        :returns conf
+        """
+        return self._conf

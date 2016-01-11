@@ -13,27 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import abc
-
-import six
-
-from poppy.manager.base import controller
+from poppy.metrics.base import driver
+from poppy.metrics.base import services
 
 
-@six.add_metaclass(abc.ABCMeta)
-class AnalyticsController(controller.ManagerControllerBase):
-    """Home controller base class."""
-
-    def __init__(self, manager):
-        super(AnalyticsController, self).__init__(manager)
-        self.manager = manager
-
-    @abc.abstractmethod
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
-        """create_ssl_certificate
-
-       :param project_id
-       :param domain_name
-       :raises: NotImplementedError
-       """
-        raise NotImplementedError
+Driver = driver.MetricsDriverBase
+ServicesController = services.ServicesControllerBase
