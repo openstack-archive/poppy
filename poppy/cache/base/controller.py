@@ -13,11 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager import base
+import abc
+
+import six
 
 
-class AnalyticsController(base.AnalyticsController):
+@six.add_metaclass(abc.ABCMeta)
+class CacheControllerBase(object):
 
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
-        # TODO(TheSriram): Insert call to caching driver
-        return "Success"
+    """Top-level class for controllers.
+
+    :param driver: Instance of the driver
+        instantiating this controller.
+    """
+
+    def __init__(self, driver):
+        self._driver = driver
