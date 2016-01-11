@@ -11,3 +11,4 @@ testrepository
 testtools
 python-heatclient
 beautifulsoup4
+hypothesis

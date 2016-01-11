@@ -22,13 +22,14 @@ import six
 class ManagerDriverBase(object):
     """Base class for driver manager."""
     def __init__(self, conf, storage, providers, dns, distributed_task,
-                 notification):
+                 notification, metrics):
         self._conf = conf
         self._storage = storage
         self._providers = providers
         self._dns = dns
         self._distributed_task = distributed_task
         self._notification = notification
+        self._metrics = metrics
 
     @property
     def conf(self):
@@ -65,6 +66,10 @@ class ManagerDriverBase(object):
     @property
     def notification(self):
         return self._notification
+
+    @property
+    def metrics(self):
+        return self._metrics
 
     @abc.abstractproperty
     def analytics_controller(self):

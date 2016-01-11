@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
 
 from poppy.manager import base
 
@@ -19,4 +20,25 @@ from poppy.manager import base
 class AnalyticsController(base.AnalyticsController):
 
     def get_metrics_by_domain(self, project_id, domain_name, **extras):
-        return "Success"
+        # TODO(TheSriram): Insert call to metrics driver
+        self.metrics_controller = self._driver.metrics.services_controller
+        # NOTE(TheSriram): Returning Stubbed return value
+        metrics_response = {
+            "domain": "example.com",
+            "StatusCodes_2XX": [
+                {
+                    "US": {
+                        "1453136297": 24,
+                        "1453049897": 45
+                    }
+                },
+                {
+                    "EMEA": {
+                        "1453136297": 123,
+                        "1453049897": 11
+                    }
+                }
+            ]
+        }
+
+        return json.dumps(metrics_response)
