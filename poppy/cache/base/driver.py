@@ -13,11 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager import base
+import abc
+
+import six
 
 
-class AnalyticsController(base.AnalyticsController):
+@six.add_metaclass(abc.ABCMeta)
+class CacheDriverBase(object):
+    """Interface definition for Cache driver.
 
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
-        # TODO(TheSriram): Insert call to caching driver
-        return "Success"
+    :param conf: Configuration containing options for this driver.
+    :type conf: `oslo_config.ConfigOpts`
+    """
+    def __init__(self, conf):
+        self._conf = conf
+
+    @property
+    def conf(self):
+        """conf
+
+        :returns conf
+        """
+        return self._conf

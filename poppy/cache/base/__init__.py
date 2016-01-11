@@ -13,11 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager import base
+from poppy.cache.base import driver
+from poppy.cache.base import services
 
 
-class AnalyticsController(base.AnalyticsController):
-
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
-        # TODO(TheSriram): Insert call to caching driver
-        return "Success"
+Driver = driver.CacheDriverBase
+ServicesController = services.ServicesControllerBase

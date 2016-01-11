@@ -13,11 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager import base
+import abc
+
+import six
+
+from poppy.cache.base import controller
 
 
-class AnalyticsController(base.AnalyticsController):
+@six.add_metaclass(abc.ABCMeta)
+class ServicesControllerBase(controller.CacheControllerBase):
 
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
-        # TODO(TheSriram): Insert call to caching driver
-        return "Success"
+    """Services Controller Base class."""
+
+    def __init__(self, driver):
+        super(ServicesControllerBase, self).__init__(driver)
+
+    def read(self, metric_name, from_timestamp, to_timestamp, resolution):
+        """read metrics from cache.
+
+        :raises NotImplementedError
+        """
+        raise NotImplementedError
