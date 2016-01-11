@@ -13,11 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager import base
+"""Cloud Metrics Cache driver for CDN"""
 
+from poppy.cache.cloud_metrics import driver
 
-class AnalyticsController(base.AnalyticsController):
-
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
-        # TODO(TheSriram): Insert call to caching driver
-        return "Success"
+# Hoist classes into package namespace
+Driver = driver.CloudMetricsCacheDriver

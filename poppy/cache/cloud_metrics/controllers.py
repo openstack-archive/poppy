@@ -13,11 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from poppy.manager import base
 
+"""Exports TaskFlow distributed task controllers.
 
-class AnalyticsController(base.AnalyticsController):
+Field Mappings:
+    In order to reduce the disk / memory space used,
+    fields name will be, most of the time, the first
+    letter of their long name. Fields mapping will be
+    updated and documented in each controller class.
+"""
 
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
-        # TODO(TheSriram): Insert call to caching driver
-        return "Success"
+from poppy.cache.cloud_metrics import services
+
+ServicesController = services.ServicesController
