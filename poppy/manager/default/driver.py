@@ -24,9 +24,10 @@ class DefaultManagerDriver(base.Driver):
     """Default Manager Driver."""
 
     def __init__(self, conf, storage, providers, dns, distributed_task,
-                 notification):
+                 notification, metrics):
         super(DefaultManagerDriver, self).__init__(
-            conf, storage, providers, dns, distributed_task, notification)
+            conf, storage, providers, dns, distributed_task, notification,
+            metrics)
 
     @decorators.lazy_property(write=True)
     def analytics_controller(self):
