@@ -57,6 +57,8 @@ _DRIVER_OPTIONS = [
                help='DNS driver to use'),
     cfg.StrOpt('distributed_task', default='taskflow',
                help='distributed_task driver to use'),
+    cfg.StrOpt('cache', default='cloud_metrics',
+               help='metrics cache driver to use'),
 ]
 
 _DRIVER_GROUP = 'drivers'
@@ -234,6 +236,32 @@ class Bootstrap(object):
         try:
             mgr = driver.DriverManager(namespace=distributed_task_type,
                                        name=distributed_task_name,
+                                       invoke_on_load=True,
+                                       invoke_args=args)
+            return mgr.driver
+        except RuntimeError as exc:
+            LOG.exception(exc)
+
+    @decorators.lazy_property(write=False)
+    def cache(self):
+        """metrics cache driver.
+
+        :returns metrics cache driver
+        """
+        LOG.debug("loading metrics cache driver")
+
+        # create the driver manager to load the appropriate drivers
+        cache_type = 'poppy.cache'
+        cache_name = self.driver_conf.cache
+
+        args = [self.conf]
+
+        LOG.debug((u'Loading metrics cache driver: %s'),
+                  cache_name)
+
+        try:
+            mgr = driver.DriverManager(namespace=cache_type,
+                                       name=cache_name,
                                        invoke_on_load=True,
                                        invoke_args=args)
             return mgr.driver
