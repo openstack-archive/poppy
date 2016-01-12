@@ -34,3 +34,10 @@ class TestRetryList(base.FunctionalTest):
                                 headers={
                                     'X-Project-ID': self.project_id})
         self.assertEqual(200, response.status_code)
+
+    def test_post_retry_list(self):
+        response = self.app.post('/v1.0/admin/provider/akamai/'
+                                 'ssl_certificate/retry_list',
+                                 headers={
+                                     'X-Project-ID': self.project_id})
+        self.assertEqual(202, response.status_code)
