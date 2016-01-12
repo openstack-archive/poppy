@@ -24,6 +24,7 @@ from poppy.distributed_task.taskflow.flow import create_ssl_certificate
 from poppy.distributed_task.taskflow.flow import delete_service
 from poppy.distributed_task.taskflow.flow import delete_ssl_certificate
 from poppy.distributed_task.taskflow.flow import purge_service
+from poppy.distributed_task.taskflow.flow import recreate_ssl_certificate
 from poppy.distributed_task.taskflow.flow import update_service
 from poppy.distributed_task.taskflow.flow import update_service_state
 from poppy.distributed_task.taskflow.task import common
@@ -149,6 +150,22 @@ class TestFlowRuns(base.TestCase):
 
     def patch_create_ssl_certificate_flow(self, service_controller,
                                           storage_controller, dns_controller):
+        storage_controller.get = mock.Mock()
+        storage_controller.update = mock.Mock()
+        storage_controller._driver.close_connection = mock.Mock()
+        service_controller.provider_wrapper.create_certificate = mock.Mock()
+        service_controller.provider_wrapper.create_certificate.\
+            _mock_return_value = []
+        service_controller._driver = mock.Mock()
+        service_controller._driver.providers.__getitem__ = mock.Mock()
+        service_controller._driver.notification = [mock.Mock()]
+        dns_controller.create = mock.Mock()
+        dns_controller.create._mock_return_value = []
+        common.create_log_delivery_container = mock.Mock()
+
+    def patch_recreate_ssl_certificate_flow(
+            self,
+            service_controller, storage_controller, dns_controller):
         storage_controller.get = mock.Mock()
         storage_controller.update = mock.Mock()
         storage_controller._driver.close_connection = mock.Mock()
@@ -894,6 +911,35 @@ class TestFlowRuns(base.TestCase):
                                                    storage_controller,
                                                    dns_controller)
             engines.run(create_ssl_certificate.create_ssl_certificate(),
+                        store=kwargs)
+
+    @mock.patch('pyrax.cloud_dns')
+    @mock.patch('pyrax.set_credentials')
+    def test_recreate_ssl_certificate(self, mock_creds, mock_dns_client):
+        providers = ['cdn_provider']
+        cert_obj_json = ssl_certificate.SSLCertificate('cdn',
+                                                       'mytestsite.com',
+                                                       'san')
+        kwargs = {
+            'providers_list_json': json.dumps(providers),
+            'project_id': json.dumps(str(uuid.uuid4())),
+            'domain_name': 'mytestsite.com',
+            'cert_type': 'san',
+            'cert_obj_json': json.dumps(cert_obj_json.to_dict()),
+        }
+
+        service_controller, storage_controller, dns_controller = \
+            self.all_controllers()
+
+        with MonkeyPatchControllers(service_controller,
+                                    dns_controller,
+                                    storage_controller,
+                                    memoized_controllers.task_controllers):
+
+            self.patch_recreate_ssl_certificate_flow(service_controller,
+                                                     storage_controller,
+                                                     dns_controller)
+            engines.run(recreate_ssl_certificate.recreate_ssl_certificate(),
                         store=kwargs)
 
     # Keep create credentials for now
