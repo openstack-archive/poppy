@@ -92,3 +92,26 @@ class UpdateCertInfoTask(task.Task):
                                                  cert_details)
 
         return
+
+
+class CreateStorageSSLCertificateTask(task.Task):
+    '''This task is meant to be used in san rerun flow.'''
+
+    def execute(self, project_id, cert_obj_json):
+        cert_obj = ssl_certificate.load_from_json(json.loads(cert_obj_json))
+
+        service_controller, self.storage_controller = \
+            memoized_controllers.task_controllers('poppy', 'storage')
+        try:
+            self.storage_controller.create_cert(project_id, cert_obj)
+        except ValueError as e:
+            LOG.exception(e)
+
+    def revert(self, *args, **kwargs):
+        try:
+            if getattr(self, 'storage_controller') \
+                    and self.storage_controller._driver.session:
+                self.storage_controller._driver.close_connection()
+                LOG.info('Cassandra session being shutdown')
+        except AttributeError:
+            LOG.info('Cassandra session already shutdown')
