@@ -553,6 +553,8 @@ class ServiceController(base.ServiceBase):
                     return self.responder.ssl_certificate_provisioned(None, {
                         'status': 'create_in_progress',
                         'san cert': None,
+                        # Add logging so it is easier for testing
+                        'create_at': str(datetime.datetime.now()),
                         'action': 'No available san cert for %s right now,'
                                   ' or no san cert info available. Support:'
                                   'Please write down the domain and keep an'

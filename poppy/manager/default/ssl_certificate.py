@@ -13,13 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import itertools
 import json
+
+from oslo_config import cfg
 
 from poppy.distributed_task.taskflow.flow import create_ssl_certificate
 from poppy.distributed_task.taskflow.flow import delete_ssl_certificate
+from poppy.distributed_task.taskflow.flow import recreate_ssl_certificate
 from poppy.manager import base
 from poppy.model.helpers import domain
+from poppy.model import ssl_certificate
+from poppy.openstack.common import log
 from poppy.transport.validators import helpers as validators
+
+conf = cfg.CONF
+conf(project='poppy', prog='poppy', args=[])
+LOG = log.getLogger(__name__)
 
 
 class DefaultSSLCertificateController(base.SSLCertificateController):
@@ -108,3 +118,79 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
              "flavor_id":   r['flavor_id']}
             for r in res
         ]
+
+    def rerun_san_retry_list(self):
+        if 'akamai' in self._driver.providers:
+            akamai_driver = self._driver.providers['akamai'].obj
+            retry_list = []
+            while len(akamai_driver.mod_san_queue.mod_san_queue_backend) > 0:
+                res = akamai_driver.mod_san_queue.dequeue_mod_san_request()
+                retry_list.append(json.loads(res.decode('utf-8')))
+
+            # remove duplicates
+            # see http://bit.ly/1mX2Vcb for details
+            def remove_duplicates(data):
+                '''Remove duplicates from the data (normally a list).
+
+                The data must be sortable and have an equality operator
+                '''
+                data = sorted(data)
+                return [k for k, _ in itertools.groupby(data)]
+            retry_list = remove_duplicates(retry_list)
+
+            for cert_obj_dict in retry_list:
+                try:
+                    cert_obj = ssl_certificate.SSLCertificate(
+                        cert_obj_dict['flavor_id'],
+                        cert_obj_dict['domain_name'],
+                        'san',
+                        project_id=cert_obj_dict['project_id']
+                    )
+
+                    cert_for_domain = (
+                        self.storage_controller.get_certs_by_domain(
+                            cert_obj.domain_name,
+                            project_id=cert_obj.project_id,
+                            flavor_id=cert_obj.flavor_id,
+                            cert_type=cert_obj.cert_type))
+                    if cert_for_domain == []:
+                        pass
+                    else:
+                        # If this certs has been deployed thru manual process
+                        # we ignore the rerun process for this entry
+                        if cert_for_domain.get_cert_status() == 'deployed':
+                            continue
+                    # rerun the san process
+                    try:
+                        flavor = self.flavor_controller.get(cert_obj.flavor_id)
+                    # raise a lookup error if the flavor is not found
+                    except LookupError as e:
+                        raise e
+
+                    providers = [p.provider_id for p in flavor.providers]
+                    kwargs = {
+                        'project_id': cert_obj.project_id,
+                        'domain_name': cert_obj.domain_name,
+                        'cert_type': 'san',
+                        'providers_list_json': json.dumps(providers),
+                        'cert_obj_json': json.dumps(cert_obj.to_dict())
+                    }
+                    self.distributed_task_controller.submit_task(
+                        recreate_ssl_certificate.recreate_ssl_certificate,
+                        **kwargs)
+                except Exception as e:
+                    # When exception happens we log it and re-queue this
+                    # request
+                    LOG.exception(e)
+                    akamai_driver.mod_san_queue.enqueue_mod_san_request(
+                        json.dumps(cert_obj_dict)
+                    )
+        # For other providers post san_retry_list implementaion goes here
+        else:
+            # if not using akamai driver just return None
+            pass
+            # raise NotImplementedError('Rerun san retry list not '
+            #                          'implemented for: %s' %
+            #                          (self._driver.providers.names()))
+
+        return None
