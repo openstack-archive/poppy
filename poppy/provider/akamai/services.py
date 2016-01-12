@@ -543,7 +543,7 @@ class ServiceController(base.ServiceBase):
                                 'status': 'create_in_progress',
                                 'san cert': san_cert_name,
                                 'akamai_spsId': this_sps_id,
-                                'create_at': str(datetime.datetime.now()),
+                                'created_at': str(datetime.datetime.now()),
                                 'action': 'Waiting for customer domain '
                                           'validation for %s' %
                                           (cert_obj.domain_name)
@@ -554,6 +554,8 @@ class ServiceController(base.ServiceBase):
                     return self.responder.ssl_certificate_provisioned(None, {
                         'status': 'create_in_progress',
                         'san cert': None,
+                        # Add logging so it is easier for testing
+                        'created_at': str(datetime.datetime.now()),
                         'action': 'No available san cert for %s right now,'
                                   ' or no san cert info available. Support:'
                                   'Please write down the domain and keep an'
@@ -566,6 +568,7 @@ class ServiceController(base.ServiceBase):
                 return self.responder.ssl_certificate_provisioned(None, {
                     'status': 'failed',
                     'san cert': None,
+                    'created_at': str(datetime.datetime.now()),
                     'action': 'Waiting for action... '
                               'Provision san cert failed for %s failed.' %
                               cert_obj.domain_name
