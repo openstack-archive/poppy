@@ -39,6 +39,8 @@ class BackgroundJobController(base.BackgroundJobController):
             self._driver.distributed_task.services_controller)
         self.akamai_san_cert_suffix = (
             conf[a_driver.AKAMAI_GROUP].akamai_https_access_url_suffix)
+        self.akamai_san_cert_cname_list = (
+            conf[a_driver.AKAMAI_GROUP].san_cert_cnames)
         self.notify_email_list = (
             conf[n_driver.MAIL_NOTIFICATION_GROUP].recipients)
 
@@ -65,6 +67,18 @@ class BackgroundJobController(base.BackgroundJobController):
                 kwargs.get("san_cert_name"),
                 kwargs.get("property_spec", 'akamai_https_san_config_numbers')
             ))
+
+            # Note(tonytan4ever): Put this check here so erroneous
+            # san cert params will not pass. Support occassionally put in
+            # the ending "edgekey.net"
+            # (e.g: secure1.san1.altcdn.com.edgekey.net), this check will
+            # effectively error that out
+            if kwargs.get("san_cert_name") not in \
+                    self.akamai_san_cert_cname_list:
+                raise ValueError("Not A valid san cert cname: %s, "
+                                 "valid san cert cnames are: %s" %
+                                 (kwargs.get("san_cert_name"),
+                                  self.akamai_san_cert_cname_list))
 
             t_kwargs = {}
 

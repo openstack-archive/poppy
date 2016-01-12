@@ -18,5 +18,10 @@
     "missing_san_cert_name": {
         "job_type": "akamai_check_and_update_cert_status",
         "domain_name": "www.abc.com"
+    },
+    "papi_non_existent_san_cert_cname": {
+        "job_type": "akamai_update_papi_property_for_mod_san",
+        "domain_name": "www.abc.com",
+        "san_cert_name": "secure_noexist.test_san.com"
     }
 }
