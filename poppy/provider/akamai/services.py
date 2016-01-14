@@ -854,11 +854,16 @@ class ServiceController(base.ServiceBase):
                     zones_list.append(rule_entry.geography)
             # NOTE(tonytan4ever):Too many country code to check and maybe more
             # countries in the future, so put in checking duplicates logic here
-            res = ' '.join(
-                ['%s' % geo_zone_code_mapping.COUNTRY_CODE_MAPPING.get(
-                  zone, '') for zone in zones_list])
-            if len(res) > len(set(res)):
-                raise ValueError("Duplicated country code in %s" % str(res))
+            country_code_list = [
+                '%s' %
+                geo_zone_code_mapping.COUNTRY_CODE_MAPPING.get(zone, '')
+                for zone in zones_list
+                if geo_zone_code_mapping.COUNTRY_CODE_MAPPING.get(zone, '')
+                != '']
+            if len(country_code_list) > len(set(country_code_list)):
+                raise ValueError("Duplicated country code in %s" %
+                                 str(country_code_list))
+            res = ' '.join(country_code_list)
             return res
 
     def _process_caching_rules(self, caching_rules, rules_list):
