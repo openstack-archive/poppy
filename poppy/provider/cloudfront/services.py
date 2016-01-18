@@ -99,6 +99,10 @@ class ServiceController(base.ServiceBase):
     def get_provider_service_id(self, service_obj):
         return service_obj.name
 
+    def get_metrics_by_domain(self, project_id, domain_name, **extras):
+        '''Use CloudFronts's API to get the metrics by domain.'''
+        return []
+
     @decorators.lazy_property(write=False)
     def current_customer(self):
         # TODO(tonytan4ever/obulpathi): Implement cloudfront's current_customer

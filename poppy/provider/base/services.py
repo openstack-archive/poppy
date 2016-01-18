@@ -77,6 +77,15 @@ class ServicesControllerBase(controller.ProviderControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def get_metrics_by_domain(self, project_id, domain_name, **extras):
+        """get analytics metrics by domain from provider
+
+        :param service_name
+        :raises NotImplementedError
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def get_provider_service_id(self, service_obj):
         """Get the provider side service id for the service object.
 

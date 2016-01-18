@@ -1007,3 +1007,7 @@ class ServiceController(base.ServiceBase):
                       'certificate': domain.certificate}
             id_list.append(dp_obj)
         return json.dumps(id_list)
+
+    def get_metrics_by_domain(self, project_id, domain_name, **extras):
+        '''Use Akamai's report API to get the metrics by domain.'''
+        return []
