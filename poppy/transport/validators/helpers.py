@@ -281,8 +281,7 @@ def is_valid_service_configuration(service, schema):
     if 'domains' in service:
         domains = []
         for domain in service['domains']:
-            domain_value = u"{0}://{1}".format(
-                domain.get('protocol', 'http'), domain.get('domain'))
+            domain_value = domain.get('domain')
             if domain_value in domains:
                 raise exceptions.ValidationFailed(
                     'The domain {0} already exists on another service'.

@@ -41,6 +41,22 @@
                                      "request_url" : "/index.htm"}]}],
         "restrictions_list": []
     },
+    "same_domain_different_protocol": {
+        "service_name": "ab",
+        "domain_list": [{"domain": "www.mywebsite.com"},
+                        {"domain": "www.mywebsite.com",
+                         "protocol": "https",
+                         "certificate": "san"}],
+        "origin_list": [{"origin": "myorigin.com",
+                         "port": 443,
+                         "ssl": false}],
+        "caching_list": [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}],
+        "restrictions_list": []
+    },
     "too_long_name": {
         "service_name": "too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name_too_long_name",
         "domain_list": [{"domain": "www.mywebsite.com"},
