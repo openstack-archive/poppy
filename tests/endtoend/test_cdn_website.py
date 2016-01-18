@@ -28,7 +28,7 @@ class TestWebsiteCDN(base.TestBase):
         sub_domain = base.random_string(prefix='test-cdn-')
         self.test_domain = sub_domain + '.' + self.dns_config.test_domain
 
-        self.origin = self.test_config.alternate_origin
+        self.origin = self.test_config.default_origin
         self.cname_rec = []
 
     def test_enable_cdn(self):
