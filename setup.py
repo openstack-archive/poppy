@@ -41,5 +41,5 @@ requirements = list(requirements)
 
 setuptools.setup(
     install_requires=requirements,
-    setup_requires=['pbr==0.11.0'],
+    setup_requires=['pbr==0.11.0', 'virtualenv<14.0.0'],
     pbr=True)
