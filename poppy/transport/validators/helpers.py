@@ -520,7 +520,11 @@ def is_valid_analytics_request(request):
     valid_metric_types = [
         'requestCount',
         'bandwithOut',
-        'httpResponseCode'
+        'httpResponseCode_1XX',
+        'httpResponseCode_2XX',
+        'httpResponseCode_3XX',
+        'httpResponseCode_4XX'
+        'httpResponseCode_5XX'
     ]
     if metricType not in valid_metric_types:
         raise exceptions.ValidationFailed('Must provide an metric name....'

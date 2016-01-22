@@ -13,24 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import abc
 
-import six
-
-from poppy.metrics.base import controller
-
-
-@six.add_metaclass(abc.ABCMeta)
-class ServicesControllerBase(controller.MetricsControllerBase):
-
-    """Services Controller Base class."""
-
-    def __init__(self, driver):
-        super(ServicesControllerBase, self).__init__(driver)
-
-    def read(self, metric_names, from_timestamp, to_timestamp, resolution):
-        """read metrics from cache.
-
-        :raises NotImplementedError
-        """
-        raise NotImplementedError
+class BlueFloodApiSchemaError(Exception):
+    pass
