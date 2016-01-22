@@ -898,7 +898,7 @@ class ServicesController(base.ServicesController):
             results[provider_name] = provider_detail_obj
         return results
 
-    def get_service_details_by_domain_name(self, domain_name):
+    def get_service_details_by_domain_name(self, domain_name, project_id=None):
         """get_provider_details_by_domain_name.
 
         :param domain_name
@@ -920,6 +920,12 @@ class ServicesController(base.ServicesController):
         details = None
         for r in complete_results:
             proj_id = r.get('project_id')
+            if project_id:
+                if proj_id != project_id:
+                    raise ValueError("Domain: {0} not "
+                                     "present under "
+                                     "project_id: {1}".format(domain_name,
+                                                              project_id))
             service = r.get('service_id')
             details = self.get(proj_id, service)
         return details

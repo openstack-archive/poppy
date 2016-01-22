@@ -14,7 +14,15 @@
 # limitations under the License.
 
 
+from oslo_context import context as context_utils
+from oslo_log import log
+
 from poppy.metrics import base
+from poppy.metrics.blueflood.utils import client
+from poppy.metrics.blueflood.utils import errors
+from poppy.metrics.blueflood.utils import helper
+
+LOG = log.getLogger(__name__)
 
 
 class ServicesController(base.ServicesController):
@@ -24,8 +32,78 @@ class ServicesController(base.ServicesController):
 
         self.driver = driver
 
-    def read(self, metric_name, from_timestamp, to_timestamp, resolution):
+    def _result_formatter(self, response):
+
+        resp_dict = dict()
+
+        if not response.ok:
+            LOG.warn("BlueFlood Metrics Response status Code:{0} "
+                     "Response Text: {1} "
+                     "Request URL: {2}".format(response.status_code,
+                                               response.text,
+                                               response.url))
+            return resp_dict
+        else:
+
+            serialized_response = response.json()
+            try:
+                time_series = serialized_response['values']
+                for timerange in time_series:
+                    resp_dict[timerange['timestamp']] = timerange['sum']
+            except KeyError:
+                msg = 'content from {0} not conforming ' \
+                      'to API contracts'.format(response.url)
+                LOG.warn(msg)
+                raise errors.BlueFloodApiSchemaError(msg)
+
+            return resp_dict
+
+    def read(self, metric_names, from_timestamp, to_timestamp, resolution):
         """read metrics from metrics driver.
 
         """
-        pass
+        curr_resolution = \
+            helper.resolution_converter_seconds_to_enum(resolution)
+        context_dict = context_utils.get_current().to_dict()
+
+        project_id = context_dict['tenant']
+        auth_token = None
+        if self.driver.metrics_conf.use_keystone_auth:
+            auth_token = context_dict['auth_token']
+
+        tenanted_blueflood_url = \
+            self.driver.metrics_conf.blueflood_url.format(
+                project_id=project_id
+            )
+        from_timestamp = int(helper.datetime_to_epoch(from_timestamp))
+        to_timestamp = int(helper.datetime_to_epoch(to_timestamp))
+        urls = []
+        params = {
+            'to': to_timestamp,
+            'from': from_timestamp,
+            'resolution': curr_resolution
+        }
+        for metric_name in metric_names:
+            tenanted_blueflood_url_with_metric = helper.join_url(
+                tenanted_blueflood_url, metric_name)
+            urls.append(helper.set_qs_on_url(
+                        tenanted_blueflood_url_with_metric,
+                        **params))
+        executors = self.driver.metrics_conf.no_of_executors
+        blueflood_client = client.BlueFloodMetricsClient(token=auth_token,
+                                                         project_id=project_id,
+                                                         executors=executors)
+        results = blueflood_client.async_requests(urls)
+        reordered_metric_names = []
+        for result in results:
+            metric_name = helper.retrieve_last_relative_url(result.url)
+            reordered_metric_names.append(metric_name)
+
+        formatted_results = []
+        for metric_name, result in zip(reordered_metric_names, results):
+            formatted_result = self._result_formatter(result)
+            # NOTE(TheSriram): Tuple to pass the associated metric name, along
+            # with the formatted result
+            formatted_results.append((metric_name, formatted_result))
+
+        return formatted_results
