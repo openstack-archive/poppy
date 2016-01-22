@@ -61,3 +61,8 @@ class ServicesOverLimit(Exception):
 class SharedShardsExhausted(Exception):
 
     """Raised when all shared ssl shards are occupied for a given domain."""
+
+
+class ServiceProviderDetailsNotFound(Exception):
+
+    """Raised when provider details for a service is None."""
