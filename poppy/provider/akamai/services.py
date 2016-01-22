@@ -1009,6 +1009,20 @@ class ServiceController(base.ServiceBase):
             id_list.append(dp_obj)
         return json.dumps(id_list)
 
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
+    def get_metrics_by_domain(self, project_id, domain_name, regions,
+                              **extras):
         '''Use Akamai's report API to get the metrics by domain.'''
-        return []
+
+        metric_buckets = []
+        metricType = extras['metricType']
+        startTime = extras['startTime']
+        endTime = extras['endTime']
+        metrics_controller = extras['metrics_controller']
+        resolution = self.driver.metrics_resolution
+        for region in regions:
+            metric_buckets.append('_'.join([metricType, domain_name, region]))
+
+        return metrics_controller.read(metric_names=metric_buckets,
+                                       from_timestamp=startTime,
+                                       to_timestamp=endTime,
+                                       resolution=resolution)
