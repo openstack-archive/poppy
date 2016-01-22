@@ -170,7 +170,8 @@ class ServicesController(base.ServicesController):
         if key in self.certs:
             self.certs[key].cert_details = cert_details
 
-    def get_service_details_by_domain_name(self, domain_name):
+    def get_service_details_by_domain_name(self, domain_name,
+                                           project_id=None):
         for service_id in self.created_services:
             service_dict_in_cache = self.created_services[service_id]
             if domain_name in [d['domain']

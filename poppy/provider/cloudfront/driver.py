@@ -45,6 +45,7 @@ class CDNProvider(base.Driver):
         self.cloudfront_client = boto.connect_cloudfront(
             aws_access_key_id=self.cloudfront_conf.aws_access_key_id,
             aws_secret_access_key=self.cloudfront_conf.aws_secret_access_key)
+        self.regions = []
 
     def is_alive(self):
         """is_alive.

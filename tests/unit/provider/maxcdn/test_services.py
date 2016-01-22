@@ -302,3 +302,12 @@ class TestServices(base.TestCase):
             controller.current_customer
         except RuntimeError as e:
             self.assertTrue(str(e) == "Get maxcdn current customer failed...")
+
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider.client')
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider')
+    def test_regions(self, mock_controllerclient, mock_driver):
+        driver = mock_driver()
+        driver.regions = []
+        driver.attach_mock(mock_controllerclient, 'client')
+        controller = services.ServiceController(driver)
+        self.assertEqual(controller.driver.regions, [])

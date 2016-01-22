@@ -38,6 +38,7 @@ class TestServices(base.TestCase):
         super(TestServices, self).setUp()
         self.driver = mock_driver()
         self.driver.provider_name = 'Fastly'
+        self.driver.regions = []
         self.mock_service = mock_service
         self.mock_version = mock_version
 
@@ -445,3 +446,9 @@ class TestProviderValidation(base.TestCase):
         resp = self.controller.get('magic-service')
 
         self.assertIn('error', resp[self.driver.provider_name])
+
+    def test_regions(self):
+        driver = mock.Mock()
+        driver.regions = []
+        controller = services.ServiceController(driver)
+        self.assertEqual(controller.driver.regions, [])
