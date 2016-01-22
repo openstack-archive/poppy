@@ -14,10 +14,14 @@
 # limitations under the License.
 
 import datetime
+import json
+import mock
 import uuid
 
 import ddt
 import six
+
+from poppy.manager.default.analytics import AnalyticsController
 
 from tests.functional.transport.pecan import base
 
@@ -39,6 +43,8 @@ class TestServicesAnalytics(base.FunctionalTest):
         self.startTime = self.endTime - datetime.timedelta(hours=3)
 
     def test_services_analytics_happy_path_with_default_timewindow(self):
+        AnalyticsController.get_metrics_by_domain = \
+            mock.Mock(return_value=json.dumps({}))
         response = self.app.get('/v1.0/services/%s/analytics' %
                                 self.service_id,
                                 params=urllib.urlencode({
@@ -52,6 +58,8 @@ class TestServicesAnalytics(base.FunctionalTest):
         self.assertEqual(response.status_code, 200)
 
     def test_services_analytics_happy_path(self):
+        AnalyticsController.get_metrics_by_domain = mock.Mock(
+            return_value=json.dumps({}))
         response = self.app.get('/v1.0/services/%s/analytics' %
                                 self.service_id,
                                 params=urllib.urlencode({
