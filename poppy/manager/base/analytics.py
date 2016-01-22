@@ -29,7 +29,7 @@ class AnalyticsController(controller.ManagerControllerBase):
 
     @abc.abstractmethod
     def get_metrics_by_domain(self, project_id, domain_name, **extras):
-        """create_ssl_certificate
+        """get analytics metrics by domain
 
        :param project_id
        :param domain_name
