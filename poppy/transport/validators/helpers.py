@@ -493,7 +493,8 @@ def is_valid_analytics_request(request):
                                     "%Y-%m-%dT%H:%M:%S"))
     endTime = request.GET.get('endTime',
                               default_end_time.strftime("%Y-%m-%dT%H:%M:%S"))
-    # Default metric type will be all metrics
+
+    # NOTE(TheSriram): metricType is a required entity
     metricType = request.GET.get('metricType', None)
 
     if not is_valid_domain_name(domain):
@@ -515,11 +516,16 @@ def is_valid_analytics_request(request):
             raise exceptions.ValidationFailed('startTime cannot be later than'
                                               ' endTime')
 
-    # Leave these 3 metric types for now.
+    # NOTE(TheSriram): The metrics listed below are the currently supported
+    # metric types
     valid_metric_types = [
         'requestCount',
-        'bandwithOut',
-        'httpResponseCode'
+        'bandwidthOut',
+        'httpResponseCode_1XX',
+        'httpResponseCode_2XX',
+        'httpResponseCode_3XX',
+        'httpResponseCode_4XX'
+        'httpResponseCode_5XX'
     ]
     if metricType not in valid_metric_types:
         raise exceptions.ValidationFailed('Must provide an metric name....'

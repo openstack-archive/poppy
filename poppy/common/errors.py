@@ -29,6 +29,10 @@ class BadProviderDetail(Exception):
     """Raised when attempted a non existent operation."""
 
 
+class ProviderNotFound(Exception):
+    """Raised when domain is not associated with a known Provider"""
+
+
 class ServiceNotFound(Exception):
     """Raised when service is not found."""
 
@@ -61,3 +65,8 @@ class ServicesOverLimit(Exception):
 class SharedShardsExhausted(Exception):
 
     """Raised when all shared ssl shards are occupied for a given domain."""
+
+
+class ServiceProviderDetailsNotFound(Exception):
+
+    """Raised when provider details for a service is None."""
