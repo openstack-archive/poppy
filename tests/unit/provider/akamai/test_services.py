@@ -15,6 +15,7 @@
 
 import datetime
 import json
+import time
 import uuid
 
 import ddt
@@ -26,6 +27,7 @@ from poppy.model.helpers import origin
 from poppy.model.helpers import restriction
 from poppy.model.helpers import rule
 from poppy.model.service import Service
+from poppy.provider.akamai import geo_zone_code_mapping
 from poppy.provider.akamai import services
 from poppy.transport.pecan.models.request import service
 from poppy.transport.pecan.models.request import ssl_certificate
@@ -48,6 +50,8 @@ class TestServices(base.TestCase):
         self.driver.akamai_https_access_url_suffix = str(uuid.uuid1())
         self.san_cert_cnames = [str(x) for x in range(7)]
         self.driver.san_cert_cnames = self.san_cert_cnames
+        self.driver.regions = geo_zone_code_mapping.REGIONS
+        self.driver.metrics_resolution = 86400
         self.controller = services.ServiceController(self.driver)
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
@@ -611,3 +615,104 @@ class TestServices(base.TestCase):
             controller.sps_api_base_url.format(spsId=lastSpsId))
         self.assertFalse(controller.sps_api_client.post.called)
         return
+
+    def test_regions(self):
+        controller = services.ServiceController(self.driver)
+        self.assertEqual(controller.driver.regions,
+                         geo_zone_code_mapping.REGIONS)
+
+    @ddt.data('requestCount', 'bandwidthOut', 'httpResponseCode_1XX',
+              'httpResponseCode_2XX', 'httpResponseCode_3XX',
+              'httpResponseCode_4XX', 'httpResponseCode_5XX')
+    def test_get_metrics_by_domain_metrics_controller(self, metrictype):
+        controller = services.ServiceController(self.driver)
+        project_id = str(uuid.uuid4())
+        domain_name = 'www.' + str(uuid.uuid4()) + '.com'
+        regions = controller.driver.regions
+        end_time = datetime.datetime.utcnow()
+        start_time = (datetime.datetime.utcnow() - datetime.timedelta(days=1))
+        startTime = start_time.strftime("%Y-%m-%dT%H:%M:%S")
+        endTime = end_time.strftime("%Y-%m-%dT%H:%M:%S")
+
+        metrics_controller = mock.Mock()
+        # NOTE(TheSriram): We mock a empty return value, to just test
+        # what the call args were for the metrics_controller
+        metrics_controller.read = mock.Mock(return_value=[])
+
+        extras = {
+            'metricType': metrictype,
+            'startTime': startTime,
+            'endTime': endTime,
+            'metrics_controller': metrics_controller
+        }
+
+        controller.get_metrics_by_domain(project_id, domain_name,
+                                         regions, **extras)
+
+        call_args = metrics_controller.read.call_args[1]
+        self.assertEqual(call_args['resolution'],
+                         self.driver.metrics_resolution)
+        self.assertEqual(call_args['to_timestamp'], endTime)
+        self.assertEqual(call_args['from_timestamp'], startTime)
+        metric_names = call_args['metric_names']
+        for metric_name in metric_names:
+            metric_split = metric_name.split('_')
+            if len(metric_split) == 3:
+                self.assertEqual(metric_split[0], metrictype)
+                self.assertEqual(metric_split[1], domain_name)
+                self.assertIn(metric_split[2], regions)
+            else:
+                self.assertEqual(metric_split[0], 'requestCount')
+                self.assertEqual(metric_split[1], domain_name)
+                self.assertIn(metric_split[2], regions)
+                self.assertIn(metric_split[3], metrictype.split('_')[1])
+
+    @ddt.data('requestCount', 'bandwidthOut', 'httpResponseCode_1XX',
+              'httpResponseCode_2XX', 'httpResponseCode_3XX',
+              'httpResponseCode_4XX', 'httpResponseCode_5XX')
+    def test_get_metrics_by_domain_metrics_controller_return(self, metrictype):
+        controller = services.ServiceController(self.driver)
+        project_id = str(uuid.uuid4())
+        domain_name = 'www.' + str(uuid.uuid4()) + '.com'
+        regions = controller.driver.regions
+        end_time = datetime.datetime.utcnow()
+        start_time = (datetime.datetime.utcnow() - datetime.timedelta(days=1))
+        startTime = start_time.strftime("%Y-%m-%dT%H:%M:%S")
+        endTime = end_time.strftime("%Y-%m-%dT%H:%M:%S")
+
+        metrics_controller = mock.Mock()
+        metric_buckets = []
+
+        if 'httpResponseCode' in metrictype:
+            http_series = metrictype.split('_')[1]
+            for region in regions:
+                metric_buckets.append('_'.join(['requestCount', domain_name,
+                                                region,
+                                                http_series]))
+        else:
+            for region in regions:
+                metric_buckets.append('_'.join([metrictype, domain_name,
+                                                region]))
+
+        timestamp = str(int(time.time()))
+        value = 55
+        metrics_response = [(metric_bucket, {timestamp: value})
+                            for metric_bucket in metric_buckets]
+        metrics_controller.read = mock.Mock(return_value=metrics_response)
+        extras = {
+            'metricType': metrictype,
+            'startTime': startTime,
+            'endTime': endTime,
+            'metrics_controller': metrics_controller
+        }
+
+        formatted_results = controller.get_metrics_by_domain(project_id,
+                                                             domain_name,
+                                                             regions,
+                                                             **extras)
+
+        self.assertEqual(formatted_results['domain'], domain_name)
+        self.assertEqual(sorted(formatted_results[metrictype].keys()),
+                         sorted(regions))
+        for timestamp_counter in formatted_results[metrictype].values():
+            self.assertEqual(timestamp_counter[0][timestamp], value)
