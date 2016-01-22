@@ -14,10 +14,15 @@
 # limitations under the License.
 
 import datetime
+import json
+import mock
 import uuid
 
 import ddt
 import six
+
+from poppy.common import errors
+from poppy.manager.default.analytics import AnalyticsController
 
 from tests.functional.transport.pecan import base
 
@@ -39,6 +44,8 @@ class TestServicesAnalytics(base.FunctionalTest):
         self.startTime = self.endTime - datetime.timedelta(hours=3)
 
     def test_services_analytics_happy_path_with_default_timewindow(self):
+        AnalyticsController.get_metrics_by_domain = \
+            mock.Mock(return_value=json.dumps({}))
         response = self.app.get('/v1.0/services/%s/analytics' %
                                 self.service_id,
                                 params=urllib.urlencode({
@@ -52,6 +59,8 @@ class TestServicesAnalytics(base.FunctionalTest):
         self.assertEqual(response.status_code, 200)
 
     def test_services_analytics_happy_path(self):
+        AnalyticsController.get_metrics_by_domain = mock.Mock(
+            return_value=json.dumps({}))
         response = self.app.get('/v1.0/services/%s/analytics' %
                                 self.service_id,
                                 params=urllib.urlencode({
@@ -79,3 +88,63 @@ class TestServicesAnalytics(base.FunctionalTest):
                                 expect_errors=True)
 
         self.assertEqual(response.status_code, 400)
+
+    def test_services_analytics_exceptions_no_service(self):
+        AnalyticsController.get_metrics_by_domain = mock.Mock(
+            side_effect=errors.ServiceNotFound)
+        response = self.app.get('/v1.0/services/%s/analytics' %
+                                self.service_id,
+                                params=urllib.urlencode({
+                                    'domain': 'abc.com',
+                                    'metricType': 'requestCount',
+                                    'startTime': datetime.datetime.strftime(
+                                        self.startTime, "%Y-%m-%dT%H:%M:%S"),
+                                    'endTime': datetime.datetime.strftime(
+                                        self.endTime, "%Y-%m-%dT%H:%M:%S")
+                                }),
+                                headers={
+                                    'X-Project-ID': self.project_id
+                                },
+                                expect_errors=True)
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_services_analytics_exceptions_provider_details(self):
+        AnalyticsController.get_metrics_by_domain = mock.Mock(
+            side_effect=errors.ServiceProviderDetailsNotFound)
+        response = self.app.get('/v1.0/services/%s/analytics' %
+                                self.service_id,
+                                params=urllib.urlencode({
+                                    'domain': 'abc.com',
+                                    'metricType': 'requestCount',
+                                    'startTime': datetime.datetime.strftime(
+                                        self.startTime, "%Y-%m-%dT%H:%M:%S"),
+                                    'endTime': datetime.datetime.strftime(
+                                        self.endTime, "%Y-%m-%dT%H:%M:%S")
+                                }),
+                                headers={
+                                    'X-Project-ID': self.project_id
+                                },
+                                expect_errors=True)
+
+        self.assertEqual(response.status_code, 500)
+
+    def test_services_analytics_negative_exceptions_no_provider(self):
+        AnalyticsController.get_metrics_by_domain = mock.Mock(
+            side_effect=errors.ProviderNotFound)
+        response = self.app.get('/v1.0/services/%s/analytics' %
+                                self.service_id,
+                                params=urllib.urlencode({
+                                    'domain': 'abc.com',
+                                    'metricType': 'requestCount',
+                                    'startTime': datetime.datetime.strftime(
+                                        self.startTime, "%Y-%m-%dT%H:%M:%S"),
+                                    'endTime': datetime.datetime.strftime(
+                                        self.endTime, "%Y-%m-%dT%H:%M:%S")
+                                }),
+                                headers={
+                                    'X-Project-ID': self.project_id
+                                },
+                                expect_errors=True)
+
+        self.assertEqual(response.status_code, 500)

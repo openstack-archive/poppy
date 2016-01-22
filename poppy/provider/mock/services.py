@@ -54,7 +54,8 @@ class ServiceController(base.ServiceBase):
     def get_provider_service_id(self, service_obj):
         return []
 
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
+    def get_metrics_by_domain(self, project_id, domain_name, regions,
+                              **extras):
         return []
 
     @decorators.lazy_property(write=False)
