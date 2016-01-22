@@ -1009,6 +1009,42 @@ class ServiceController(base.ServiceBase):
             id_list.append(dp_obj)
         return json.dumps(id_list)
 
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
+    def get_metrics_by_domain(self, project_id, domain_name, regions,
+                              **extras):
         '''Use Akamai's report API to get the metrics by domain.'''
-        return []
+
+        formatted_results = dict()
+        metric_buckets = []
+        metricType = extras['metricType']
+        startTime = extras['startTime']
+        endTime = extras['endTime']
+        metrics_controller = extras['metrics_controller']
+        resolution = self.driver.metrics_resolution
+        if 'httpResponseCode' in metricType:
+            http_series = metricType.split('_')[1]
+            for region in regions:
+                metric_buckets.append('_'.join(['requestCount', domain_name,
+                                                region,
+                                                http_series]))
+        else:
+            for region in regions:
+                metric_buckets.append('_'.join([metricType, domain_name,
+                                                region]))
+
+        metrics_results = metrics_controller.read(metric_names=metric_buckets,
+                                                  from_timestamp=startTime,
+                                                  to_timestamp=endTime,
+                                                  resolution=resolution)
+
+        formatted_results['domain'] = domain_name
+        formatted_results[metricType] = dict()
+        metric_names, metrics_responses = metrics_results
+        for region in regions:
+            formatted_results[metricType][region] = []
+            for metrics_response in metrics_responses:
+                if region.lower() == metricType.split('_')[2].lower():
+                    formatted_results[metricType][region].append(
+                        metrics_response
+                    )
+
+        return formatted_results

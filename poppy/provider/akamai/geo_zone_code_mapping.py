@@ -17,8 +17,9 @@ from oslo_log import log
 
 from poppy.model.helpers import geo_zones
 
-# to use log inside worker, we need to directly use logging
 LOG = log.getLogger(__name__)
+
+REGIONS = ['North America', 'South America', 'EMEA', 'Japan', 'India', 'APAC']
 
 REGION_COUNTRY_MAPPING = {
     'North America': [

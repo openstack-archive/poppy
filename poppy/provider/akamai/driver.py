@@ -25,6 +25,7 @@ from stevedore import driver
 
 from poppy.common import decorators
 from poppy.provider.akamai import controllers
+from poppy.provider.akamai import geo_zone_code_mapping
 from poppy.provider.akamai.mod_san_queue import zookeeper_queue
 from poppy.provider import base
 import uuid
@@ -103,6 +104,11 @@ AKAMAI_OPTIONS = [
     cfg.StrOpt(
         'group_id',
         help='Operator groupID'),
+
+    # Metrics related configs
+    cfg.IntOpt('metrics_resolution',
+               help='Resolution in seconds for retrieving metrics',
+               default=86400)
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
@@ -132,7 +138,7 @@ class CDNProvider(base.Driver):
             str(self.akamai_conf.ccu_api_base_url),
             'ccu/v2/queues/default'
         ])
-
+        self.regions = geo_zone_code_mapping.REGIONS
         self.http_conf_number = self.akamai_conf.akamai_http_config_number
         self.https_shared_conf_number = (
             self.akamai_conf.akamai_https_shared_config_number)
@@ -185,6 +191,8 @@ class CDNProvider(base.Driver):
 
         self.mod_san_queue = (
             zookeeper_queue.ZookeeperModSanQueue(self._conf))
+
+        self.metrics_resolution = self.akamai_conf.metrics_resolution
 
     @decorators.lazy_property(write=False)
     def san_info_storage(self):
