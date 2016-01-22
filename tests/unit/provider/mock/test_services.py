@@ -31,6 +31,7 @@ class MockProviderServicesTest(base.TestCase):
     def setUp(self, mock_driver):
         super(MockProviderServicesTest, self).setUp()
         self.driver = mock_driver()
+        self.driver.regions = []
         self.test_provider_service_id = uuid.uuid1()
         self.sc = services.ServiceController(self.driver)
 
@@ -66,3 +67,6 @@ class MockProviderServicesTest(base.TestCase):
 
     def test_current_customer(self):
         self.assertTrue(self.sc.current_customer is None)
+
+    def test_regions(self):
+        self.assertEqual(self.sc._driver.regions, [])

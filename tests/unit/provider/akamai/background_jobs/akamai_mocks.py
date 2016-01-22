@@ -111,7 +111,8 @@ class MockStorageController(mock.Mock):
             }
         )
 
-    def get_service_details_by_domain_name(self, domain_name):
+    def get_service_details_by_domain_name(self, domain_name,
+                                           project_id=None):
         r = service.Service(
             str(uuid.uuid4()),
             str(uuid.uuid4()),
