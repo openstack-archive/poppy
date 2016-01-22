@@ -55,6 +55,7 @@ class CDNProvider(base.Driver):
         setattr(obj, fastly_scheme, self.fastly_conf.scheme)
 
         self.fastly_client = fastly.connect(self.fastly_conf.apikey)
+        self.regions = []
 
     def is_alive(self):
         """is_alive.

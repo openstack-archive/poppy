@@ -117,14 +117,16 @@ class ServicesAnalyticsController(base.Controller, hooks.HookController):
         domain = call_args.pop('domain')
         analytics_controller = \
             self._driver.manager.analytics_controller
-
-        res = analytics_controller.get_metrics_by_domain(
-            self.project_id,
-            domain,
-            **call_args
-        )
-
-        return pecan.Response(res, 200)
+        try:
+            res = analytics_controller.get_metrics_by_domain(
+                self.project_id,
+                domain,
+                **call_args
+            )
+        except Exception:
+            return pecan.Response(404)
+        else:
+            return pecan.Response(json_body=res, status=200)
 
 
 class ServicesController(base.Controller, hooks.HookController):
