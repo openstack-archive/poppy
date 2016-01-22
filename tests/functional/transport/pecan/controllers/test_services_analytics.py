@@ -14,10 +14,15 @@
 # limitations under the License.
 
 import datetime
+import json
+import mock
 import uuid
 
 import ddt
 import six
+
+from poppy.common import errors
+from poppy.manager.default.analytics import AnalyticsController
 
 from tests.functional.transport.pecan import base
 
@@ -37,36 +42,47 @@ class TestServicesAnalytics(base.FunctionalTest):
         self.service_id = str(uuid.uuid1())
         self.endTime = datetime.datetime.now()
         self.startTime = self.endTime - datetime.timedelta(hours=3)
+        self.start_time = datetime.datetime.strftime(
+            self.startTime,
+            "%Y-%m-%dT%H:%M:%S")
+        self.end_time = datetime.datetime.strftime(
+            self.endTime,
+            "%Y-%m-%dT%H:%M:%S")
 
     def test_services_analytics_happy_path_with_default_timewindow(self):
-        response = self.app.get('/v1.0/services/%s/analytics' %
-                                self.service_id,
-                                params=urllib.urlencode({
-                                    'domain': 'abc.com',
-                                    'metricType': 'requestCount',
-                                }),
-                                headers={
-                                    'X-Project-ID': self.project_id
-                                })
+        with mock.patch.object(AnalyticsController,
+                               'get_metrics_by_domain') as mock_get:
+            mock_get.return_value = json.dumps({})
+            response = self.app.get('/v1.0/services/%s/analytics' %
+                                    self.service_id,
+                                    params=urllib.urlencode({
+                                        'domain': 'abc.com',
+                                        'metricType': 'requestCount',
+                                    }),
+                                    headers={
+                                        'X-Project-ID': self.project_id
+                                    })
 
-        self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
 
     def test_services_analytics_happy_path(self):
-        response = self.app.get('/v1.0/services/%s/analytics' %
-                                self.service_id,
-                                params=urllib.urlencode({
-                                    'domain': 'abc.com',
-                                    'metricType': 'requestCount',
-                                    'startTime': datetime.datetime.strftime(
-                                        self.startTime, "%Y-%m-%dT%H:%M:%S"),
-                                    'endTime': datetime.datetime.strftime(
-                                        self.endTime, "%Y-%m-%dT%H:%M:%S")
-                                }),
-                                headers={
-                                    'X-Project-ID': self.project_id
-                                })
+        with mock.patch.object(AnalyticsController,
+                               'get_metrics_by_domain') as mock_get:
+            mock_get.return_value = json.dumps({})
 
-        self.assertEqual(response.status_code, 200)
+            response = self.app.get('/v1.0/services/%s/analytics' %
+                                    self.service_id,
+                                    params=urllib.urlencode({
+                                        'domain': 'abc.com',
+                                        'metricType': 'requestCount',
+                                        'startTime': self.start_time,
+                                        'endTime': self.end_time
+                                    }),
+                                    headers={
+                                        'X-Project-ID': self.project_id
+                                    })
+
+            self.assertEqual(response.status_code, 200)
 
     @ddt.file_data("data_services_analytics_bad_input.json")
     def test_services_analytics_negative(self, get_params):
@@ -79,3 +95,61 @@ class TestServicesAnalytics(base.FunctionalTest):
                                 expect_errors=True)
 
         self.assertEqual(response.status_code, 400)
+
+    def test_services_analytics_exceptions_no_service(self):
+        with mock.patch.object(AnalyticsController,
+                               'get_metrics_by_domain') as mock_get:
+
+            mock_get.side_effect = errors.ServiceNotFound
+            response = self.app.get('/v1.0/services/%s/analytics' %
+                                    self.service_id,
+                                    params=urllib.urlencode({
+                                        'domain': 'abc.com',
+                                        'metricType': 'requestCount',
+                                        'startTime': self.start_time,
+                                        'endTime': self.end_time
+                                    }),
+                                    headers={
+                                        'X-Project-ID': self.project_id
+                                    },
+                                    expect_errors=True)
+
+            self.assertEqual(response.status_code, 404)
+
+    def test_services_analytics_exceptions_provider_details(self):
+        with mock.patch.object(AnalyticsController,
+                               'get_metrics_by_domain') as mock_get:
+            mock_get.side_effect = errors.ServiceProviderDetailsNotFound
+            response = self.app.get('/v1.0/services/%s/analytics' %
+                                    self.service_id,
+                                    params=urllib.urlencode({
+                                        'domain': 'abc.com',
+                                        'metricType': 'requestCount',
+                                        'startTime': self.start_time,
+                                        'endTime': self.end_time
+                                    }),
+                                    headers={
+                                        'X-Project-ID': self.project_id
+                                    },
+                                    expect_errors=True)
+
+            self.assertEqual(response.status_code, 500)
+
+    def test_services_analytics_negative_exceptions_no_provider(self):
+        with mock.patch.object(AnalyticsController,
+                               'get_metrics_by_domain') as mock_get:
+            mock_get.side_effect = errors.ProviderNotFound
+            response = self.app.get('/v1.0/services/%s/analytics' %
+                                    self.service_id,
+                                    params=urllib.urlencode({
+                                        'domain': 'abc.com',
+                                        'metricType': 'requestCount',
+                                        'startTime': self.start_time,
+                                        'endTime': self.end_time
+                                    }),
+                                    headers={
+                                        'X-Project-ID': self.project_id
+                                    },
+                                    expect_errors=True)
+
+            self.assertEqual(response.status_code, 500)

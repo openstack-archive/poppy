@@ -97,7 +97,13 @@ AKAMAI_OPTIONS = [
         help='Operator groupID'),
     cfg.StrOpt(
         'property_id',
-        help='Operator propertyID')
+        help='Operator propertyID'),
+
+
+    # Metrics related configs
+    cfg.IntOpt('metrics_resolution',
+               help='Resolution in seconds for retrieving metrics',
+               default=86400)
 ]
 
 
