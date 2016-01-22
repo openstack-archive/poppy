@@ -26,6 +26,7 @@ from stevedore import driver
 from poppy.common import decorators
 from poppy.provider.akamai import controllers
 from poppy.provider.akamai.mod_san_queue import zookeeper_queue
+from poppy.provider.akamai import geo_zone_code_mapping
 from poppy.provider import base
 import uuid
 
@@ -132,7 +133,7 @@ class CDNProvider(base.Driver):
             str(self.akamai_conf.ccu_api_base_url),
             'ccu/v2/queues/default'
         ])
-
+        self.regions = geo_zone_code_mapping.REGIONS
         self.http_conf_number = self.akamai_conf.akamai_http_config_number
         self.https_shared_conf_number = (
             self.akamai_conf.akamai_https_shared_config_number)

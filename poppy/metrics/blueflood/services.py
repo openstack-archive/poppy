@@ -14,8 +14,11 @@
 # limitations under the License.
 
 
-from poppy.metrics import base
+from oslo_context import context as context_utils
 
+from poppy.metrics import base
+from poppy.metrics.blueflood.utils import client
+from poppy.metrics.blueflood.utils import helper
 
 class ServicesController(base.ServicesController):
 
@@ -24,8 +27,36 @@ class ServicesController(base.ServicesController):
 
         self.driver = driver
 
-    def read(self, metric_name, from_timestamp, to_timestamp, resolution):
+    def read(self, metric_names, from_timestamp, to_timestamp, resolution):
         """read metrics from metrics driver.
 
         """
-        pass
+        context_dict = context_utils.get_current().to_dict()
+        project_id = context_dict['project_id']
+        auth_token = None
+        if self.driver.metrics_conf.use_keystone_auth:
+            auth_token = context_dict['auth_token']
+        tenanted_blueflood_url = self.driver.metrics_conf.blueflood_url.format(
+            project_id=project_id
+        )
+        from_timestamp = int(helper.datetime_to_epoch(from_timestamp))
+        to_timestamp = int(helper.datetime_to_epoch(to_timestamp))
+        urls = []
+        params = {
+            'to': to_timestamp,
+            'from': from_timestamp,
+            'resolution': resolution
+        }
+        for metric_name in metric_names:
+            tenanted_blueflood_url_with_metric = helper.join_url(
+                tenanted_blueflood_url, metric_name)
+            urls.append(helper.set_qs_on_url(
+                        tenanted_blueflood_url_with_metric,
+                        **params))
+
+        blueflood_client = client.BlueFloodMetricsClient(token=auth_token,
+                                                         project_id=project_id)
+        results = blueflood_client.async_requests(urls)
+
+        # TODO(TheSriram): Reformat results from blueflood
+        return results

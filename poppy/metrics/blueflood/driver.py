@@ -21,8 +21,11 @@ from poppy.metrics.blueflood import controllers
 
 BLUEFLOOD_OPTIONS = [
     cfg.StrOpt('blueflood_url',
-               default='https://www.metrics.com',
+               default='https://www.metrics.com/{project_id}/views',
                help='Metrics url for retrieving cached content'),
+    cfg.BoolOpt('use_keystone_auth',
+               default=True,
+               help='Use Keystone Authentication?'),
 ]
 
 BLUEFLOOD_GROUP = 'drivers:metrics:blueflood'

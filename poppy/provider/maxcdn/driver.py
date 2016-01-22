@@ -36,7 +36,7 @@ MAXCDN_GROUP = 'drivers:provider:maxcdn'
 
 
 class CDNProvider(base.Driver):
-    """MaxCND Provider."""
+    """MaxCDN Provider."""
 
     def __init__(self, conf):
         """Init constructor."""
@@ -49,7 +49,7 @@ class CDNProvider(base.Driver):
         self.maxcdn_client = maxcdn.MaxCDN(self.maxcdn_conf.alias,
                                            self.maxcdn_conf.consumer_key,
                                            self.maxcdn_conf.consumer_secret)
-
+        self.regions = []
     def is_alive(self):
         """is_alive.
 

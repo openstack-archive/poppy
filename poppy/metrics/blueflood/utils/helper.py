@@ -13,24 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import abc
+import datetime
+import time
 
-import six
+try:  # pragma: no cover
+    import six.moves.urllib.parse as parse
+except ImportError:  # pragma: no cover
+    import urllib.parse as parse
 
-from poppy.metrics.base import controller
+def set_qs_on_url(url, **params):
 
+    url_parts = list(parse.urlparse(url))
+    query = dict(parse.parse_qsl(url_parts[4]))
+    query.update(params)
 
-@six.add_metaclass(abc.ABCMeta)
-class ServicesControllerBase(controller.MetricsControllerBase):
+    url_parts[4] = parse.urlencode(query)
 
-    """Services Controller Base class."""
+    return parse.urlunparse(url_parts)
 
-    def __init__(self, driver):
-        super(ServicesControllerBase, self).__init__(driver)
+def join_url(base_url, url):
+    return parse.urljoin(base_url, url)
 
-    def read(self, metric_names, from_timestamp, to_timestamp, resolution):
-        """read metrics from cache.
-
-        :raises NotImplementedError
-        """
-        raise NotImplementedError
+def datetime_to_epoch(datetimeobj):
+    return time.mktime(datetime.datetime.now().timetuple()) * 1000
