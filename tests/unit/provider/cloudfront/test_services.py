@@ -36,6 +36,7 @@ class TestServices(base.TestCase):
         self.provider_service_id = uuid.uuid1()
         self.mock_get_client = mock_get_client
         self.driver = MockDriver()
+        self.driver.regions = []
         self.controller = services.ServiceController(self.driver)
 
     def test_get(self):
@@ -131,3 +132,6 @@ class TestServices(base.TestCase):
         # TODO(tonytan4ever/obulpathi): fill in once correct
         # current_customer logic is done
         self.assertTrue(self.controller.current_customer is None)
+
+    def test_regions(self):
+        self.assertEqual(self.controller.driver.regions, [])
