@@ -228,6 +228,26 @@ class TestServicePatch(base.TestBase):
 
         _patch_add_domain(domain=additional_domain)
 
+    def test_repatch_add_same_domain_with_different_protocol(self):
+
+        additional_domain = self.domain_list[0]['domain']
+
+        patch_add_domain = [
+            {
+                "op": "add",
+                "path": "/domains/-",
+                "value": {
+                    "domain": additional_domain,
+                    "protocol": "https",
+                    "certificate": "san"
+                }
+            }
+        ]
+
+        resp = self.client.patch_service(location=self.service_url,
+                                         request_body=patch_add_domain)
+        self.assertEqual(resp.status_code, 400)
+
     @ddt.file_data('data_patch_service_negative.json')
     def test_patch_service_HTTP_400(self, test_data):
 
