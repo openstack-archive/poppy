@@ -97,8 +97,10 @@ class BackgroundJobController(base.Controller, hooks.HookController):
                 job_type,
                 request_json
             )
+        except ValueError as e:
+            pecan.abort(400, str(e))
         except NotImplementedError as e:
-            pecan.abort(404, str(e))
+            pecan.abort(400, str(e))
 
         return pecan.Response(None, 202)
 
