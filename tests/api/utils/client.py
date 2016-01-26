@@ -485,3 +485,52 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         url = '{0}/ssl_certificate/{1}'.format(self.url, domain_name)
 
         return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
+
+    def admin_get_san_retry_list(self, requestslib_kwargs=None):
+        """Get Retry List for SAN certs
+
+        :return: Response Object containing response code 200 and body with
+        details of SAN retry list
+        GET
+        admin/provider/akamai/ssl_certificate/retry_list
+        """
+
+        san_retry_list_url = \
+            '{0}/admin/provider/akamai/ssl_certificate/retry_list'.format(
+                self.url)
+        return self.request(
+            'GET', san_retry_list_url, requestslib_kwargs=requestslib_kwargs)
+
+    def admin_post_san_retry_list(self, requestslib_kwargs=None):
+        """Post Retry List for SAN certs to Akamai
+
+        WARNING: Use sparingly
+        :return: Response Object containing response code 202
+        POST
+        admin/provider/akamai/ssl_certificate/retry_list
+        """
+
+        san_retry_list_url = \
+            '{0}/admin/provider/akamai/ssl_certificate/retry_list'.format(
+                self.url)
+        return self.request(
+            'POST', san_retry_list_url, requestslib_kwargs=requestslib_kwargs)
+
+    def admin_put_san_retry_list(self, san_list, requestslib_kwargs=None):
+        """Create Retry List for SAN certs
+
+        :return: Response Object containing response code 202
+        PUT
+        admin/provider/akamai/ssl_certificate/retry_list
+        """
+
+        san_retry_list_url = \
+            '{0}/admin/provider/akamai/ssl_certificate/retry_list'.format(
+                self.url)
+        requests_object = requests.PutSanList(
+            san_list=san_list
+        )
+
+        return self.request(
+            'PUT', san_retry_list_url, request_entity=requests_object,
+            requestslib_kwargs=requestslib_kwargs)

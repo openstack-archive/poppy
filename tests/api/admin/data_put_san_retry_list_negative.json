@@ -1,0 +1,10 @@
+{
+    "root_domain":{},
+    "domain_belongs_to_another_user": {},
+    "domain_does_not_exist": {},
+    "invalid_flavor_id": {},
+    "missing_project_id": {},
+    "missing_domain": {},
+    "missing_flavor_id": {},
+    "multiple_items_one_invalid": {}
+}
