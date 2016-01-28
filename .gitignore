@@ -32,6 +32,9 @@ nosetests.xml
 tests/cover
 tests/logs
 
+# Hypothesis
+.hypothesis/
+
 # Translations
 *.mo
 
