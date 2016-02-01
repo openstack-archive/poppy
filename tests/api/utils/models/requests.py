@@ -151,3 +151,15 @@ class CreateSSLCertificate(base.AutoMarshallingModel):
             "project_id": self.project_id
         }
         return json.dumps(create_ssl_certificate_request)
+
+
+class CreateSanRetryList(base.AutoMarshallingModel):
+    """Marshalling for Create SAN Retry List requests."""
+
+    def __init__(self, san_list):
+        super(CreateSanRetryList, self).__init__()
+
+        self.san_list = san_list
+
+    def _obj_to_json(self):
+        return json.dumps(self.san_list)
