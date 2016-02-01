@@ -413,6 +413,12 @@ class DefaultServicesController(base.ServicesController):
             project_id=project_id,
             project_limit=limit)
 
+    def set_service_provider_details(self, project_id, service_id, status):
+        self.storage_controller.set_service_provider_details(
+            project_id,
+            service_id,
+            status)
+
     def get_services_limit(self, project_id):
         limit = self.storage_controller.get_service_limit(
             project_id=project_id)

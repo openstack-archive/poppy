@@ -490,6 +490,34 @@ class ServicesController(base.ServicesController):
                  "project_id: {0} set to be {1}".format(project_id,
                                                         project_limit))
 
+    def set_service_provider_details(self, project_id, service_id, status):
+        """set_service_provider_details
+
+        Set current status on service_id under project_id.
+
+        :param project_id
+        :param service_id
+
+        """
+
+        LOG.info("Setting service"
+                 "status for"
+                 "service_id : {0}, "
+                 "project_id: {1} to be {2}".format(service_id,
+                                                    project_id,
+                                                    status))
+
+        provider_details_dict = self.get_provider_details(
+            project_id=project_id,
+            service_id=service_id)
+
+        for provider_name in sorted(provider_details_dict.keys()):
+            provider_details_dict[provider_name].status = status
+
+        self.update_provider_details(project_id=project_id,
+                                     service_id=service_id,
+                                     provider_details=provider_details_dict)
+
     def get_certs_by_domain(self, domain_name, project_id=None, flavor_id=None,
                             cert_type=None):
         LOG.info("Check if cert on '{0}' exists".format(domain_name))
