@@ -157,6 +157,9 @@ class ServicesController(base.ServicesController):
                     provider_service_id="73242",
                     access_urls=['my_service_name.mock.com'])}
 
+    def set_service_provider_details(self, project_id, service_id, status):
+        pass
+
     def update_provider_details(self, project_id, service_name,
                                 provider_details):
         pass
