@@ -26,6 +26,7 @@ from poppy.transport.validators.schemas import background_jobs
 from poppy.transport.validators.schemas import domain_migration
 from poppy.transport.validators.schemas import service_action
 from poppy.transport.validators.schemas import service_limit
+from poppy.transport.validators.schemas import service_status
 from poppy.transport.validators.schemas import ssl_certificate
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import helpers as stoplight_helpers
@@ -266,10 +267,51 @@ class OperatorServiceLimitController(base.Controller, hooks.HookController):
         return service_limits
 
 
+class ServiceStatusController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    def __init__(self, driver):
+        super(ServiceStatusController, self).__init__(driver)
+
+    @pecan.expose('json')
+    @decorators.validate(
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                service_status.ServiceStatusSchema.get_schema(
+                    "service_status", "POST")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter)
+    )
+    def post(self):
+
+        service_state_json = json.loads(pecan.request.body.decode('utf-8'))
+        project_id = service_state_json['project_id']
+        service_id = service_state_json['service_id']
+        status = service_state_json['status']
+        services_controller = self._driver.manager.services_controller
+
+        try:
+            services_controller.set_service_provider_details(project_id,
+                                                             service_id,
+                                                             status)
+        except Exception as e:
+            pecan.abort(404, detail=(
+                        'Setting state of service {0} on tenant: {1} '
+                        'to {2} has failed, '
+                        'Reason: {3}'.format(service_id,
+                                             project_id,
+                                             status,
+                                             str(e))))
+
+        return pecan.Response(None, 201)
+
+
 class AdminServiceController(base.Controller, hooks.HookController):
     def __init__(self, driver):
         super(AdminServiceController, self).__init__(driver)
         self.__class__.action = OperatorServiceActionController(driver)
+        self.__class__.status = ServiceStatusController(driver)
 
 
 class DomainController(base.Controller, hooks.HookController):

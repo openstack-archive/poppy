@@ -79,6 +79,26 @@ class ServiceAction(base.AutoMarshallingModel):
         return json.dumps(service_action_request)
 
 
+class ServiceStatus(base.AutoMarshallingModel):
+    """Marshalling for Action on Services status requests."""
+
+    def __init__(self, status, project_id, service_id):
+        super(ServiceStatus, self).__init__()
+
+        self.status = status
+        self.project_id = project_id
+        self.service_id = service_id
+
+    def _obj_to_json(self):
+        service_status_request = {
+            "status": self.status,
+            "project_id": self.project_id,
+            "service_id": self.service_id
+        }
+
+        return json.dumps(service_status_request)
+
+
 class ServiceLimit(base.AutoMarshallingModel):
     """Marshalling for Service Limit requests."""
 
