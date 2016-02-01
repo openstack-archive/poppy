@@ -1,0 +1,9 @@
+{
+    "root_domain": [{"project_id": "12345", "domain_name": "root.com", "flavor_id": "yumm"}],
+    "domain_belongs_to_another_user": [{}],
+    "domain_does_not_exist": [{"project_id": "12345", "domain_name": "can.not.be.true.com", "flavor_id": "yumm"}],
+    "invalid_flavor_id": [{"project_id": "12345", "domain_name": "not.root.com", "flavor_id": "yumm"}],
+    "missing_project_id": [{"domain_name": "not.root.com", "flavor_id": "yumm"}],
+    "missing_domain": [{"project_id": "12345", "flavor_id": "yumm"}],
+    "missing_flavor_id": [{"project_id": "12345", "domain_name": "not.root.com"}]
+}
