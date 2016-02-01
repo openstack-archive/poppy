@@ -413,6 +413,12 @@ class DefaultServicesController(base.ServicesController):
             project_id=project_id,
             project_limit=limit)
 
+    def set_service_provider_details(self, project_id, service_id, status):
+        self.storage_controller.set_service_provider_details(
+            project_id,
+            service_id,
+            status)
+
     def get_services_limit(self, project_id):
         limit = self.storage_controller.get_service_limit(
             project_id=project_id)
@@ -426,7 +432,8 @@ class DefaultServicesController(base.ServicesController):
         kwargs = {
             'project_id': project_id,
             'service_obj': json.dumps(service_obj.to_dict()),
-            'time_seconds': self.determine_sleep_times()
+            'time_seconds': self.determine_sleep_times(),
+            'context_dict': context_utils.get_current().to_dict()
         }
 
         try:
