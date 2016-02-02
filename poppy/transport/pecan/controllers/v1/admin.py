@@ -154,7 +154,7 @@ class AkamaiRetryListController(base.Controller, hooks.HookController):
         """
         try:
             queue_data = json.loads(pecan.request.body.decode('utf-8'))
-            res, diff = (
+            res, deleted = (
                 self._driver.manager.ssl_certificate_controller.
                 update_san_retry_list(queue_data))
         except Exception as e:
@@ -162,7 +162,7 @@ class AkamaiRetryListController(base.Controller, hooks.HookController):
 
         # result is the new queue, and difference is the difference between the
         # new queue and the original one
-        return {"result": res,  "difference": diff}
+        return {"queue": res,  "deleted": deleted}
 
 
 class AkamaiSSLCertificateController(base.Controller, hooks.HookController):

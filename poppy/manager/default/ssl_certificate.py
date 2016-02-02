@@ -145,7 +145,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                         'validate_service': r.get('validate_service', True)})
             for r in queue_data_list
         ]
-        res, diff = [], []
+        res, deleted = [], []
         if 'akamai' in self._driver.providers:
             akamai_driver = self._driver.providers['akamai'].obj
             orig = [json.loads(r) for r in
@@ -153,9 +153,9 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             res = [json.loads(r) for r in
                    akamai_driver.mod_san_queue.put_queue_data(new_queue_data)]
 
-            diff = tuple(x for x in res if x not in orig)
+            deleted = tuple(x for x in orig if x not in res)
         # other provider's retry-list implementaiton goes here
-        return res, diff
+        return res, deleted
 
     def rerun_san_retry_list(self):
         if 'akamai' in self._driver.providers:
