@@ -73,6 +73,7 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                         },
                         'project_id': {
                             'type': 'string',
+                            'minLength': 1,
                             'required': True,
                         },
                         'validate_service': {
