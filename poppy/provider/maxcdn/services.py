@@ -137,7 +137,8 @@ class ServiceController(base.ServiceBase):
     def get_provider_service_id(self, service_obj):
         return self._map_service_name(service_obj.name)
 
-    def get_metrics_by_domain(self, project_id, domain_name, **extras):
+    def get_metrics_by_domain(self, project_id, domain_name, region,
+                              **extras):
         '''Use MaxCDN's API to get the metrics by domain.'''
         return []
 

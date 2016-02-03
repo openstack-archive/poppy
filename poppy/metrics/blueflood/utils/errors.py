@@ -13,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""BlueFlood Metrics driver for Poppy"""
 
-from poppy.metrics.blueflood import driver
-
-# Hoist classes into package namespace
-Driver = driver.BlueFloodMetricsDriver
+class BlueFloodApiSchemaError(Exception):
+    pass

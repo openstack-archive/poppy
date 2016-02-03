@@ -28,6 +28,7 @@ class CDNProvider(base.Driver):
 
     def __init__(self, conf):
         super(CDNProvider, self).__init__(conf)
+        self.regions = []
 
     def is_alive(self):
         """is_alive.

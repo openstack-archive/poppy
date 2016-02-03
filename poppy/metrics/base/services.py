@@ -28,7 +28,7 @@ class ServicesControllerBase(controller.MetricsControllerBase):
     def __init__(self, driver):
         super(ServicesControllerBase, self).__init__(driver)
 
-    def read(self, metric_name, from_timestamp, to_timestamp, resolution):
+    def read(self, metric_names, from_timestamp, to_timestamp, resolution):
         """read metrics from cache.
 
         :raises NotImplementedError

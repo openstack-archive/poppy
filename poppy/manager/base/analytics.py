@@ -25,7 +25,20 @@ class AnalyticsController(controller.ManagerControllerBase):
     """Home controller base class."""
 
     def __init__(self, manager):
+        self.manager = manager
         super(AnalyticsController, self).__init__(manager)
+
+    @property
+    def storage_controller(self):
+        return self.manager.storage.services_controller
+
+    @property
+    def providers(self):
+        return self.manager.providers
+
+    @property
+    def metrics_controller(self):
+        return self.manager.metrics.services_controller
 
     @abc.abstractmethod
     def get_metrics_by_domain(self, project_id, domain_name, **extras):
