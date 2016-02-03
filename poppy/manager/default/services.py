@@ -426,7 +426,8 @@ class DefaultServicesController(base.ServicesController):
         kwargs = {
             'project_id': project_id,
             'service_obj': json.dumps(service_obj.to_dict()),
-            'time_seconds': self.determine_sleep_times()
+            'time_seconds': self.determine_sleep_times(),
+            'context_dict': context_utils.get_current().to_dict()
         }
 
         try:
