@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
+
 from poppy.transport.validators import schema_base
 
 
@@ -73,6 +75,9 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                         },
                         'project_id': {
                             'type': 'string',
+                            'minLength': 1,
+                            'pattern': re.compile('^([a-zA-Z0-9_\-\.]'
+                                                  '{1,256})$'),
                             'required': True,
                         },
                         'validate_service': {
