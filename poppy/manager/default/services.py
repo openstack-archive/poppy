@@ -93,6 +93,13 @@ class DefaultServicesController(base.ServicesController):
                 domain_name))
         return service_details
 
+    def get_services_by_status(self, status):
+
+        services_project_ids = \
+            self.storage_controller.get_services_by_status(status)
+
+        return services_project_ids
+
     def _append_defaults(self, service_json, operation='create'):
         # default origin rule
         for origin in service_json.get('origins', []):
