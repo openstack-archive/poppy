@@ -19,7 +19,6 @@ from tests.api.utils.schema.services import project_id
 from tests.api.utils.schema.services import service_id
 
 get_service_project_status = {
-    'type': 'array',
     'items': [
         {
             'type': 'object',
