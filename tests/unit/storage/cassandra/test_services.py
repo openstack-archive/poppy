@@ -231,6 +231,7 @@ class CassandraStorageServiceTests(base.TestCase):
 
         # this is for update_provider_details unittest code coverage
         arg_provider_details_dict = {}
+        status = None
         for provider_name in provider_details_dict:
             the_provider_detail_dict = collections.OrderedDict()
             the_provider_detail_dict["id"] = (
@@ -239,6 +240,7 @@ class CassandraStorageServiceTests(base.TestCase):
                 provider_details_dict[provider_name].access_urls)
             the_provider_detail_dict["status"] = (
                 provider_details_dict[provider_name].status)
+            status = the_provider_detail_dict["status"]
             the_provider_detail_dict["name"] = (
                 provider_details_dict[provider_name].name)
             the_provider_detail_dict["domains_certificate_status"] = (
@@ -251,17 +253,25 @@ class CassandraStorageServiceTests(base.TestCase):
             arg_provider_details_dict[provider_name] = json.dumps(
                 the_provider_detail_dict)
 
-        call_args = {
+        provider_details_args = {
             'project_id': self.project_id,
             'service_id': self.service_id,
             'provider_details': arg_provider_details_dict
         }
-
+        status_args = {
+            'status': status,
+            'project_id': self.project_id,
+            'service_id': self.service_id
+        }
         # This is to verify mock has been called with the correct arguments
+
         def assert_mock_execute_args(*args):
-            self.assertEqual(args[0].query_string,
-                             services.CQL_UPDATE_PROVIDER_DETAILS)
-            self.assertEqual(args[1], call_args)
+
+            if args[0].query_string == services.CQL_UPDATE_PROVIDER_DETAILS:
+                self.assertEqual(args[1], provider_details_args)
+            elif args[0].query_string == services.CQL_SET_SERVICE_STATUS:
+                self.assertEqual(args[1], status_args)
+
         mock_execute.execute.side_effect = assert_mock_execute_args
 
         self.sc.update_provider_details(

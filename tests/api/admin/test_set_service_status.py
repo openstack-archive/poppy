@@ -121,6 +121,12 @@ class TestServiceStatus(base.TestBase):
         resp_status = resp_body['status']
         self.assertEqual(resp_status, status)
 
+        get_service_resp = self.operator_client.get_by_service_status(
+            status=status)
+
+        self.assertIn(service_id, get_service_resp.content)
+        self.assertIn(project_id, get_service_resp.content)
+
     def tearDown(self):
         self.client.delete_service(location=self.service_url)
         if self.test_config.generate_flavors:
