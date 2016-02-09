@@ -220,7 +220,7 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         stmt = query.SimpleStatement(
             GET_PROVIDER_INFO,
             consistency_level=self.consistency_level)
-        results = self.session.execute(stmt, args)
+        results = list(self.session.execute(stmt, args))
 
         if len(results) != 1:
             raise ValueError('No akamai providers info found.')
@@ -262,6 +262,11 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
                 if i is None]):
             raise ValueError("San info error: %s" % res)
 
+        return res
+
+    def get_cert_config(self, san_cert_name):
+        res = self.get_cert_info(san_cert_name)
+        res['spsId'] = self.get_cert_last_spsid(san_cert_name)
         return res
 
     def save_cert_last_spsid(self, san_cert_name, sps_id_value):

@@ -250,3 +250,18 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             pass
 
         return None
+
+    def get_san_cert_configuration(self, san_cert_name):
+        if 'akamai' in self._driver.providers:
+            akamai_driver = self._driver.providers['akamai'].obj
+            if san_cert_name not in akamai_driver.san_cert_cnames:
+                raise ValueError(
+                    "%s is not a valid san cert, valid san certs are: %s" %
+                    (san_cert_name, akamai_driver.san_cert_cnames))
+            akamai_driver = self._driver.providers['akamai'].obj
+            res = akamai_driver.san_info_storage.get_cert_config(san_cert_name)
+        else:
+            # if not using akamai driver just return an empty list
+            res = {}
+
+        return res
