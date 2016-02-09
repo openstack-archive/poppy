@@ -541,6 +541,30 @@ def is_valid_analytics_request(request):
     }
 
 
+@decorators.validation_function
+def is_valid_service_status(request):
+    status = request.GET.get('status', "")
+
+    # NOTE(TheSriram): The statuses listed below are the currently
+    # supported statuses
+
+    VALID_STATUSES = [
+        u'deploy_in_progress',
+        u'deployed',
+        u'update_in_progress',
+        u'delete_in_progress',
+        u'failed']
+    if status not in VALID_STATUSES:
+        raise exceptions.ValidationFailed('Unknown status type present, '
+                                          'Valid status types are: %s' %
+                                          VALID_STATUSES)
+
+    # Update context so the decorated function can get all this parameters
+    request.context.call_args = {
+        'status': status
+    }
+
+
 def abort_with_message(error_info):
     pecan.abort(400, detail=util.help_escape(
                 getattr(error_info, "message", "")),
