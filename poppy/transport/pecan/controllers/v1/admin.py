@@ -318,10 +318,33 @@ class ServiceStatusController(base.Controller, hooks.HookController):
 
 
 class AdminServiceController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
     def __init__(self, driver):
         super(AdminServiceController, self).__init__(driver)
         self.__class__.action = OperatorServiceActionController(driver)
         self.__class__.status = ServiceStatusController(driver)
+
+    @pecan.expose('json')
+    @pecan.expose('json')
+    @decorators.validate(
+        request=rule.Rule(
+            helpers.is_valid_service_status(),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter)
+    )
+    def get(self):
+        services_controller = self._driver.manager.services_controller
+
+        call_args = getattr(pecan.request.context,
+                            "call_args")
+        status = call_args.pop('status')
+        service_projectids = services_controller.get_services_by_status(
+            status)
+
+        return pecan.Response(json_body=service_projectids,
+                              status=200)
 
 
 class DomainController(base.Controller, hooks.HookController):
