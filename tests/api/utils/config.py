@@ -187,6 +187,16 @@ class AkamaiConfig(data_interfaces.ConfigSectionInterface):
         """A list of SAN certificates from Akamai"""
         return self.get('san_certs')
 
+    @property
+    def san_certs_name_positive(self):
+        """SAN cert name used to test get san info (positive case)"""
+        return self.get('get_san_certs_name_positive')
+
+    @property
+    def san_certs_name_negative(self):
+        """SAN cert name used to test get san info (positive case)"""
+        return self.get('get_san_certs_name_negative')
+
 
 class FastlyConfig(data_interfaces.ConfigSectionInterface):
     """Defines the fastly config values."""
