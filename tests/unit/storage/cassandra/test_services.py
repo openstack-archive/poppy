@@ -154,18 +154,32 @@ class CassandraStorageServiceTests(base.TestCase):
                        return_value=False)
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
+    @mock.patch.object(services.ServicesController,
+                       'set_service_provider_details')
     def test_update_service(self, service_json,
+                            mock_set_service_provider_details,
                             mock_execute, mock_session, mock_check):
-        mock_check.return_value = False
-        mock_session.execute.return_value = iter([{}])
-        service_obj = req_service.load_from_json(service_json)
-        actual_response = self.sc.update(self.project_id,
-                                         self.service_id,
-                                         service_obj)
+            with mock.patch.object(
+                    services.ServicesController,
+                    'get_provider_details') as mock_provider_det:
 
-        # Expect the response to be None as there are no providers passed
-        # into the driver to respond to this call
-        self.assertEqual(actual_response, None)
+                mock_provider_det.return_value = {
+                    "MaxCDN": "{\"id\": 11942, \"access_urls\": "
+                              "[{\"provider_url\": \"maxcdn.provider.com\", "
+                              "\"domain\": \"xk.cd\"}], "
+                              "\"domains_certificate_status\":"
+                              "{\"mypullzone.com\": "
+                              "\"failed\"} }",
+                }
+                mock_session.execute.return_value = iter([{}])
+                service_obj = req_service.load_from_json(service_json)
+                actual_response = self.sc.update(self.project_id,
+                                                 self.service_id,
+                                                 service_obj)
+
+                # Expect the response to be None as there are no
+                # providers passed into the driver to respond to this call
+                self.assertEqual(actual_response, None)
 
     @ddt.file_data('data_provider_details.json')
     @mock.patch.object(services.ServicesController, 'session')
@@ -237,6 +251,7 @@ class CassandraStorageServiceTests(base.TestCase):
         provider_details_dict = {}
         for k, v in provider_details_json.items():
             provider_detail_dict = json.loads(v)
+
             provider_details_dict[k] = provider_details.ProviderDetail(
                 provider_service_id=(
                     provider_detail_dict["id"]),
