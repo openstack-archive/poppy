@@ -16,7 +16,6 @@
 # limitations under the License.
 
 import json
-import uuid
 
 import ddt
 
@@ -34,55 +33,7 @@ class TestServiceLimits(base.TestBase):
                 'Test Operator Functions is disabled in configuration')
 
         self.flavor_id = self.test_flavor
-
-        self.caching_list = [
-            {
-                u"name": u"default",
-                u"ttl": 3600,
-                u"rules": [{
-                    u"name": "default",
-                    u"request_url": "/*"
-                }]
-            },
-            {
-                u"name": u"home",
-                u"ttl": 1200,
-                u"rules": [{
-                    u"name": u"index",
-                    u"request_url": u"/index.htm"
-                }]
-            }
-        ]
         self.service_list = []
-
-    def _service_limit_create_test_service(self, resp_code=False):
-        service_name = str(uuid.uuid1())
-
-        domain_list = [{"domain": self.generate_random_string(
-            prefix='www.api-test-domain') + '.com'}]
-
-        origin_list = [{"origin": self.generate_random_string(
-            prefix='api-test-origin') + '.com', "port": 80, "ssl": False,
-            "hostheadertype": "custom", "hostheadervalue":
-            "www.customweb.com"}]
-
-        self.log_delivery = {"enabled": False}
-
-        resp = self.service_limit_user_client.create_service(
-            service_name=service_name,
-            domain_list=domain_list,
-            origin_list=origin_list,
-            caching_list=self.caching_list,
-            flavor_id=self.flavor_id,
-            log_delivery=self.log_delivery)
-
-        if resp_code:
-            return resp
-
-        self.assertEqual(resp.status_code, 202)
-        service_url = resp.headers["location"]
-
-        return service_url
 
     @ddt.data(-1, -10000000000, 'invalid', '学校', '', None)
     def test_service_limit_parameters_invalid(self, limit):
@@ -101,10 +52,13 @@ class TestServiceLimits(base.TestBase):
 
         self.assertEqual(resp.status_code, 201)
 
-        self.service_list = [self._service_limit_create_test_service()
-                             for _ in range(limit)]
+        self.service_list = [self._service_limit_create_test_service(
+            client=self.service_limit_user_client)
+            for _ in range(limit)]
 
-        resp = self._service_limit_create_test_service(resp_code=True)
+        resp = self._service_limit_create_test_service(
+            client=self.service_limit_user_client,
+            resp_code=True)
         self.assertEqual(resp.status_code, 403)
 
         resp = self.operator_client.get_admin_service_limit(
