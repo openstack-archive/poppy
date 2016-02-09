@@ -165,12 +165,29 @@ class AkamaiRetryListController(base.Controller, hooks.HookController):
         return {"queue": res,  "deleted": deleted}
 
 
+class AkamaiSanCertConfigController(base.Controller, hooks.HookController):
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    @pecan.expose('json')
+    def get_one(self, san_cert_name):
+
+        try:
+            res = (
+                self._driver.manager.ssl_certificate_controller.
+                get_san_cert_configuration(san_cert_name))
+        except Exception as e:
+            pecan.abort(400, str(e))
+
+        return res
+
+
 class AkamaiSSLCertificateController(base.Controller, hooks.HookController):
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
     def __init__(self, driver):
         super(AkamaiSSLCertificateController, self).__init__(driver)
         self.__class__.retry_list = AkamaiRetryListController(driver)
+        self.__class__.config = AkamaiSanCertConfigController(driver)
 
 
 class AkamaiController(base.Controller, hooks.HookController):
