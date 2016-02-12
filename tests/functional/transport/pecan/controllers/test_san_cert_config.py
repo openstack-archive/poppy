@@ -13,11 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import uuid
+
+import ddt
 
 from tests.functional.transport.pecan import base
 
 
+@ddt.ddt
 class TestSanCertConfigController(base.FunctionalTest):
 
     def setUp(self):
@@ -29,7 +33,36 @@ class TestSanCertConfigController(base.FunctionalTest):
         # create with errorenous data: invalid json data
         response = self.app.get('/v1.0/admin/provider/akamai/'
                                 'ssl_certificate/config/'
-                                'secure1.test_san.com',
+                                'secure1.test-san.com',
                                 headers={'X-Project-ID': self.project_id}
                                 )
+        self.assertEqual(200, response.status_code)
+
+    @ddt.file_data("data_update_san_cert_config_bad.json")
+    def test_update_san_cert_config_negative(self, config_data):
+        # create with errorenous data: invalid json data
+        response = self.app.post('/v1.0/admin/provider/akamai/'
+                                 'ssl_certificate/config/'
+                                 'secure1.test-san.com',
+                                 params=json.dumps(config_data),
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'X-Project-ID': self.project_id
+                                 },
+                                 expect_errors=True)
+        self.assertEqual(400, response.status_code)
+
+    def test_update_san_cert_config_positive(self):
+        config_data = {
+            'spsId': 1345
+        }
+        # create with errorenous data: invalid json data
+        response = self.app.post('/v1.0/admin/provider/akamai/'
+                                 'ssl_certificate/config/'
+                                 'secure1.test-san.com',
+                                 params=json.dumps(config_data),
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'X-Project-ID': self.project_id
+                                 })
         self.assertEqual(200, response.status_code)
