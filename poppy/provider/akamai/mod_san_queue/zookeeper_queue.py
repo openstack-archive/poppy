@@ -47,7 +47,9 @@ class ZookeeperModSanQueue(base.ModSanQueue):
                                  group=AKAMAI_GROUP)
         self.akamai_conf = self._conf[AKAMAI_GROUP]
 
-        self.mod_san_queue_backend = queue.LockingQueue(
+    @decorators.lazy_property(write=False)
+    def mod_san_queue_backend(self):
+        return queue.LockingQueue(
             self.zk_client,
             self.akamai_conf.mod_san_queue_path)
 
