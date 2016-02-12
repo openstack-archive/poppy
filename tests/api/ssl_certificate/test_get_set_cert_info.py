@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import random
+
 from tests.api import base
 
 
@@ -40,6 +42,19 @@ class TestGetSetSanCertInfo(base.TestBase):
     def test_get_san_cert_positive(self):
         resp = self.client.view_certificate_info(
             self.san_cert_name_poisitve
+        )
+
+        self.assertTrue('spsId' in resp.json())
+        self.assertEqual(resp.status_code, 200)
+
+    def test_update_san_cert(self):
+        if self.test_config.run_ssl_tests is False:
+            self.skipTest('Update san cert info needs to'
+                          ' be run when commanded')
+
+        resp = self.client.update_certificate_info(
+            self.san_cert_name_poisitve,
+            spsId=random.randint(1000, 2000)
         )
 
         self.assertTrue('spsId' in resp.json())
