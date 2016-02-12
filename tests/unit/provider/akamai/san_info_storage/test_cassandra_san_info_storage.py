@@ -48,10 +48,10 @@ class TestCassandraSANInfoStorage(base.TestCase):
 
         self.get_returned_value = [{'info': {
             'san_info':
-                '{"secure2.san1.test_cdn.com": '
+                '{"secure2.san1.test-cdn.com": '
                 '    {"ipVersion": "ipv4", "issuer": "symentec", '
                 '     "slot_deployment_klass": "esslType", "jobId": "4312"},'
-                '"secure1.san1.test_cdn.com": '
+                '"secure1.san1.test-cdn.com": '
                 '{"ipVersion": "ipv4", "issuer": "symentec", '
                 '"slot_deployment_klass": "esslType", '
                 '"jobId": "1432", "spsId": 1423}}'}}]
@@ -84,7 +84,7 @@ class TestCassandraSANInfoStorage(base.TestCase):
             keys()
         )
 
-    @ddt.data("secure1.san1.test_cdn.com", "secure2.san1.test_cdn.com")
+    @ddt.data("secure1.san1.test-cdn.com", "secure2.san1.test-cdn.com")
     def test_save_cert_last_spsid(self, san_cert_name):
         mock_execute = self.cassa_storage.session.execute
         mock_execute.return_value = self.get_returned_value
@@ -98,7 +98,7 @@ class TestCassandraSANInfoStorage(base.TestCase):
     def test_get_cert_last_spsid(self):
         mock_execute = self.cassa_storage.session.execute
         mock_execute.return_value = self.get_returned_value
-        cert_name = "secure1.san1.test_cdn.com"
+        cert_name = "secure1.san1.test-cdn.com"
 
         res = self.cassa_storage.get_cert_last_spsid(
             cert_name
@@ -117,14 +117,25 @@ class TestCassandraSANInfoStorage(base.TestCase):
     def test_get_cert_config(self):
         mock_execute = self.cassa_storage.session.execute
         mock_execute.return_value = self.get_returned_value
-        cert_name = "secure1.san1.test_cdn.com"
+        cert_name = "secure1.san1.test-cdn.com"
 
         res = self.cassa_storage.get_cert_config(
             cert_name
         )
         mock_execute.assert_called()
         self.assertTrue(
-            res['spsId'] == json.loads(
+            res['spsId'] == str(json.loads(
                 self.get_returned_value[0]['info']['san_info']
-                )[cert_name]['spsId']
+                )[cert_name]['spsId'])
         )
+
+    def test_update_cert_config(self):
+        mock_execute = self.cassa_storage.session.execute
+        mock_execute.return_value = self.get_returned_value
+        cert_name = "secure1.san1.test-cdn.com"
+        new_spsId = 3456
+
+        self.cassa_storage.update_cert_config(
+            cert_name, new_spsId
+        )
+        mock_execute.assert_called()

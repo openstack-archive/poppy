@@ -1,0 +1,7 @@
+{
+	"missing_spsId": {
+    },
+    "invalid_spsId": {
+        "spsId": "1abc"
+    }
+}

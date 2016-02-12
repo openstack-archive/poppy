@@ -169,12 +169,40 @@ class AkamaiSanCertConfigController(base.Controller, hooks.HookController):
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
     @pecan.expose('json')
+    @decorators.validate(
+        san_cert_name=rule.Rule(
+            helpers.is_valid_domain_by_name(),
+            helpers.abort_with_message))
     def get_one(self, san_cert_name):
 
         try:
             res = (
                 self._driver.manager.ssl_certificate_controller.
                 get_san_cert_configuration(san_cert_name))
+        except Exception as e:
+            pecan.abort(400, str(e))
+
+        return res
+
+    @pecan.expose('json')
+    @decorators.validate(
+        san_cert_name=rule.Rule(
+            helpers.is_valid_domain_by_name(),
+            helpers.abort_with_message),
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                ssl_certificate.SSLCertificateSchema.get_schema(
+                    "config", "POST")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter))
+    def post(self, san_cert_name):
+        config_json = json.loads(pecan.request.body.decode('utf-8'))
+        new_spsId = config_json['spsId']
+
+        try:
+            res = (
+                self._driver.manager.ssl_certificate_controller.
+                update_san_cert_configuration(san_cert_name, new_spsId))
         except Exception as e:
             pecan.abort(400, str(e))
 
