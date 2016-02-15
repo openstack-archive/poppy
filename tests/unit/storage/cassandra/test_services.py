@@ -211,6 +211,24 @@ class CassandraStorageServiceTests(base.TestCase):
         self.assertTrue(isinstance(actual_response,
                                    ssl_certificate.SSLCertificate))
 
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_certs_by_status(self, mock_session, mock_execute):
+        # mock the response from cassandra
+        mock_execute.execute.return_value = \
+            [{"domain_name": "www.example.com"}]
+        actual_response = self.sc.get_certs_by_status(
+            status="deployed")
+        self.assertEqual(actual_response,
+                         [{"domain_name": "www.example.com"}])
+
+        mock_execute.execute.return_value = \
+            [{"domain_name": "www.example1.com"}]
+        actual_response = self.sc.get_certs_by_status(
+            status="failed")
+        self.assertEqual(actual_response,
+                         [{"domain_name": "www.example1.com"}])
+
     @ddt.file_data('data_provider_details.json')
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
