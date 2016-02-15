@@ -228,6 +228,25 @@ CQL_DELETE_CERT = '''
     WHERE domain_name = %(domain_name)s
 '''
 
+CQL_INSERT_CERT_STATUS = '''
+    INSERT INTO cert_status (domain_name,
+        status
+        )
+    VALUES (%(domain_name)s,
+        %(status)s)
+'''
+
+CQL_DELETE_CERT_STATUS = '''
+    DELETE FROM cert_status
+    WHERE domain_name = %(domain_name)s
+'''
+
+
+CQL_GET_CERTS_BY_STATUS = '''
+    SELECT domain_name
+    FROM cert_status WHERE status = %(status)s
+'''
+
 CQL_UPDATE_SERVICE = CQL_CREATE_SERVICE
 
 CQL_GET_PROVIDER_DETAILS = '''
@@ -575,6 +594,21 @@ class ServicesController(base.ServicesController):
                                      service_id=service_id,
                                      provider_details=provider_details_dict)
 
+    def get_certs_by_status(self, status):
+
+        LOG.info("Getting domains which have "
+                 "certificate in status : {0}".format(status))
+        args = {
+            'status': status
+        }
+        stmt = query.SimpleStatement(
+            CQL_GET_CERTS_BY_STATUS,
+            consistency_level=self._driver.consistency_level)
+        resultset = self.session.execute(stmt, args)
+        complete_results = list(resultset)
+
+        return complete_results
+
     def get_certs_by_domain(self, domain_name, project_id=None, flavor_id=None,
                             cert_type=None):
         LOG.info("Check if cert on '{0}' exists".format(domain_name))
@@ -675,6 +709,10 @@ class ServicesController(base.ServicesController):
                     }
                     stmt = query.SimpleStatement(
                         CQL_DELETE_CERT,
+                        consistency_level=self._driver.consistency_level)
+                    self.session.execute(stmt, args)
+                    stmt = query.SimpleStatement(
+                        CQL_DELETE_CERT_STATUS,
                         consistency_level=self._driver.consistency_level)
                     self.session.execute(stmt, args)
         else:
@@ -1110,6 +1148,24 @@ class ServicesController(base.ServicesController):
             CQL_UPDATE_CERT_DETAILS,
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
+
+        try:
+            provider_status = json.loads(cert_details.values()[0])
+            cert_status = provider_status['extra_info']['status']
+        except (IndexError, IndexError, ValueError) as e:
+            LOG.error("Certificate details "
+                      "in inconsistent "
+                      "state: {0}".format(cert_details))
+            LOG.error(e)
+        else:
+            cert_args = {
+                'domain_name': domain_name,
+                'status': cert_status
+            }
+            stmt = query.SimpleStatement(
+                CQL_INSERT_CERT_STATUS,
+                consistency_level=self._driver.consistency_level)
+            self.session.execute(stmt, cert_args)
 
     @staticmethod
     def format_result(result):
