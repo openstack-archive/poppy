@@ -566,6 +566,31 @@ def is_valid_service_status(request):
     }
 
 
+@decorators.validation_function
+def is_valid_certificate_status(request):
+    status = request.GET.get('status', "")
+
+    # NOTE(TheSriram): The statuses listed below are the currently
+    # supported statuses
+
+    VALID_CERT_STATUSES = [
+        u'create_in_progress',
+        u'deployed',
+        u'failed',
+        u'cancelled']
+    if status not in VALID_CERT_STATUSES:
+        raise exceptions.ValidationFailed('Unknown status type {0} present, '
+                                          'Valid status types '
+                                          'are: '
+                                          '{1}'.format(status,
+                                                       VALID_CERT_STATUSES))
+
+    # Update context so the decorated function can get all this parameters
+    request.context.call_args = {
+        'status': status
+    }
+
+
 def abort_with_message(error_info):
     pecan.abort(400, detail=util.help_escape(
                 getattr(error_info, "message", "")),

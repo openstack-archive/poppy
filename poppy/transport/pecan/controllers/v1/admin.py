@@ -317,6 +317,34 @@ class ServiceStatusController(base.Controller, hooks.HookController):
         return pecan.Response(None, 201)
 
 
+class AdminCertController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    def __init__(self, driver):
+        super(AdminCertController, self).__init__(driver)
+
+    @pecan.expose('json')
+    @pecan.expose('json')
+    @decorators.validate(
+        request=rule.Rule(
+            helpers.is_valid_certificate_status(),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter)
+    )
+    def get(self):
+        services_controller = self._driver.manager.services_controller
+
+        call_args = getattr(pecan.request.context,
+                            "call_args")
+        status = call_args.pop('status')
+        cert_domains = services_controller.get_certs_by_status(
+            status)
+
+        return pecan.Response(json_body=cert_domains,
+                              status=200)
+
+
 class AdminServiceController(base.Controller, hooks.HookController):
 
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
@@ -378,6 +406,7 @@ class AdminController(base.Controller, hooks.HookController):
     def __init__(self, driver):
         super(AdminController, self).__init__(driver)
         self.__class__.services = AdminServiceController(driver)
+        self.__class__.certificates = AdminCertController(driver)
         self.__class__.provider = ProviderController(driver)
         self.__class__.domains = DomainController(driver)
         self.__class__.limits = OperatorServiceLimitController(driver)
