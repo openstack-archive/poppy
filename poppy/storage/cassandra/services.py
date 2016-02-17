@@ -278,6 +278,23 @@ CQL_SET_SERVICE_STATUS = '''
         %(status)s)
 '''
 
+CQL_SET_PROVIDER_URL = '''
+    INSERT INTO provider_url_domain(provider_url,
+    domain_name)
+    VALUES (%(provider_url)s, %(domain_name)s)
+'''
+
+CQL_DELETE_PROVIDER_URL = '''
+    DELETE FROM provider_url_domain
+    WHERE provider_url = %(provider_url)s
+    AND domain_name = %(domain_name)s
+'''
+
+CQL_GET_BY_PROVIDER_URL = '''
+    SELECT domain_name FROM provider_url_domain
+    WHERE provider_url = %(provider_url)s
+'''
+
 CQL_GET_SERVICE_STATUS = '''
     SELECT project_id,
         service_id
@@ -488,6 +505,39 @@ class ServicesController(base.ServicesController):
 
         self.session.execute(stmt, args)
 
+    def get_domains_by_provider_url(self, provider_url):
+
+        LOG.info("Getting domains by provider_url: {0}".format(provider_url))
+
+        get_domain_provider_url_args = {
+            'provider_url': provider_url,
+        }
+
+        stmt = query.SimpleStatement(
+            CQL_GET_BY_PROVIDER_URL,
+            consistency_level=self._driver.consistency_level)
+
+        resultset = self.session.execute(stmt, get_domain_provider_url_args)
+
+        return list(resultset)
+
+    def delete_provider_url(self, provider_url, domain_name):
+
+        LOG.info("Deleting provider_url: {0} and "
+                 "domain_name: {1} from provider_url_domain "
+                 "column family".format(provider_url, domain_name))
+
+        del_provider_url_args = {
+            'provider_url': provider_url,
+            'domain_name': domain_name
+        }
+
+        stmt = query.SimpleStatement(
+            CQL_DELETE_PROVIDER_URL,
+            consistency_level=self._driver.consistency_level)
+
+        self.session.execute(stmt, del_provider_url_args)
+
     def get_service_limit(self, project_id):
         """get_service_limit
 
@@ -576,12 +626,22 @@ class ServicesController(base.ServicesController):
 
         """
 
-        LOG.info("Setting service"
-                 "status for"
+        LOG.info("Setting service "
+                 "status for "
                  "service_id : {0}, "
                  "project_id: {1} to be {2}".format(service_id,
                                                     project_id,
                                                     status))
+        status_args = {
+            'service_id': uuid.UUID(str(service_id)),
+            'project_id': project_id,
+            'status': status
+        }
+
+        stmt = query.SimpleStatement(
+            CQL_SET_SERVICE_STATUS,
+            consistency_level=self._driver.consistency_level)
+        self.session.execute(stmt, status_args)
 
         provider_details_dict = self.get_provider_details(
             project_id=project_id,
@@ -838,6 +898,7 @@ class ServicesController(base.ServicesController):
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
 
+        self.set_service_provider_details(project_id, service_id, status)
         # claim new domains
         batch_claim = query.BatchStatement(
             consistency_level=self._driver.consistency_level)
@@ -873,17 +934,6 @@ class ServicesController(base.ServicesController):
                 CQL_RELINQUISH_DOMAINS,
                 consistency_level=self._driver.consistency_level)
             self.session.execute(stmt, args)
-
-        status_args = {
-            'service_id': uuid.UUID(str(service_id)),
-            'project_id': project_id,
-            'status': status
-        }
-
-        stmt = query.SimpleStatement(
-            CQL_SET_SERVICE_STATUS,
-            consistency_level=self._driver.consistency_level)
-        self.session.execute(stmt, status_args)
 
     def update_state(self, project_id, service_id, state):
         """update_state
@@ -930,10 +980,23 @@ class ServicesController(base.ServicesController):
             pds = result.get('provider_details', {}) or {}
             pds = {key: value for key, value in pds.items()}
             status = None
+            provider_urls_domain = []
+
             for provider in pds:
                 pds_provider_dict = json.loads(pds.get(provider, {}))
                 status = pds_provider_dict.get('status', '')
+                access_urls = pds_provider_dict.get('access_urls', [])
+                for access_url in access_urls:
+                    provider_url = access_url.get('provider_url', None)
+                    domain = access_url.get('domain', None)
+                    if provider_url and domain:
+                        provider_urls_domain.append((provider_url, domain))
+
             self.delete_services_by_status(project_id, service_id, status)
+
+            for provider_url_domain in provider_urls_domain:
+                provider_url, domain = provider_url_domain
+                self.delete_provider_url(provider_url, domain)
 
             if self._driver.archive_on_delete:
                 archive_args = {
@@ -1081,12 +1144,19 @@ class ServicesController(base.ServicesController):
 
         provider_detail_dict = {}
         status = None
+        domain_names_provider_urls = []
         for provider_name in sorted(provider_details.keys()):
             the_provider_detail_dict = collections.OrderedDict()
             the_provider_detail_dict["id"] = (
                 provider_details[provider_name].provider_service_id)
             the_provider_detail_dict["access_urls"] = (
                 provider_details[provider_name].access_urls)
+            for access_url in the_provider_detail_dict["access_urls"]:
+                domain_name = access_url.get("domain", None)
+                provider_url = access_url.get("provider_url", None)
+                if domain_name and provider_url:
+                    domain_names_provider_urls.append((domain_name,
+                                                       provider_url))
             the_provider_detail_dict["status"] = (
                 provider_details[provider_name].status)
             status = the_provider_detail_dict["status"]
@@ -1117,7 +1187,7 @@ class ServicesController(base.ServicesController):
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
 
-        args = {
+        service_args = {
             'project_id': project_id,
             'service_id': uuid.UUID(str(service_id)),
             'status': status
@@ -1126,7 +1196,19 @@ class ServicesController(base.ServicesController):
         stmt = query.SimpleStatement(
             CQL_SET_SERVICE_STATUS,
             consistency_level=self._driver.consistency_level)
-        self.session.execute(stmt, args)
+        self.session.execute(stmt, service_args)
+
+        if domain_names_provider_urls:
+            for domain_name, provider_url in domain_names_provider_urls:
+                provider_url_args = {
+                    'domain_name': domain_name,
+                    'provider_url': provider_url
+                }
+
+                stmt = query.SimpleStatement(
+                    CQL_SET_PROVIDER_URL,
+                    consistency_level=self._driver.consistency_level)
+                self.session.execute(stmt, provider_url_args)
 
     def update_cert_info(self, domain_name, cert_type, flavor_id,
                          cert_details):
