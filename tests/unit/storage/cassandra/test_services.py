@@ -26,7 +26,6 @@ import mock
 from oslo_config import cfg
 
 from poppy.model.helpers import provider_details
-from poppy.model import ssl_certificate
 from poppy.storage.cassandra import driver
 from poppy.storage.cassandra import services
 from poppy.transport.pecan.models.request import service as req_service
@@ -170,73 +169,12 @@ class CassandraStorageServiceTests(base.TestCase):
     @ddt.file_data('data_provider_details.json')
     @mock.patch.object(services.ServicesController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_get_provider_details(self, provider_details_json,
-                                  mock_session, mock_execute):
-        # mock the response from cassandra
-        mock_execute.execute.return_value = [{'provider_details':
-                                              provider_details_json}]
-        actual_response = self.sc.get_provider_details(self.project_id,
-                                                       self.service_id)
-        self.assertTrue("MaxCDN" in actual_response)
-        self.assertTrue("Mock" in actual_response)
-        self.assertTrue("CloudFront" in actual_response)
-        self.assertTrue("Fastly" in actual_response)
-
-    @ddt.file_data('data_get_certs_by_domain.json')
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_get_certs_by_domain(self, cert_details_json,
-                                 mock_session, mock_execute):
-        # mock the response from cassandra
-        mock_execute.execute.return_value = cert_details_json[0]
-        actual_response = self.sc.get_certs_by_domain(
-            domain_name="www.mydomain.com")
-        self.assertEqual(len(actual_response), 2)
-        self.assertTrue(all([isinstance(ssl_cert,
-                                        ssl_certificate.SSLCertificate)
-                             for ssl_cert in actual_response]))
-        mock_execute.execute.return_value = cert_details_json[1]
-        actual_response = self.sc.get_certs_by_domain(
-            domain_name="www.example.com",
-            flavor_id="flavor1")
-        self.assertEqual(len(actual_response), 2)
-        self.assertTrue(all([isinstance(ssl_cert,
-                                        ssl_certificate.SSLCertificate)
-                             for ssl_cert in actual_response]))
-        mock_execute.execute.return_value = cert_details_json[2]
-        actual_response = self.sc.get_certs_by_domain(
-            domain_name="www.mydomain.com",
-            flavor_id="flavor1",
-            cert_type="san")
-        self.assertTrue(isinstance(actual_response,
-                                   ssl_certificate.SSLCertificate))
-
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_get_certs_by_status(self, mock_session, mock_execute):
-        # mock the response from cassandra
-        mock_execute.execute.return_value = \
-            [{"domain_name": "www.example.com"}]
-        actual_response = self.sc.get_certs_by_status(
-            status="deployed")
-        self.assertEqual(actual_response,
-                         [{"domain_name": "www.example.com"}])
-
-        mock_execute.execute.return_value = \
-            [{"domain_name": "www.example1.com"}]
-        actual_response = self.sc.get_certs_by_status(
-            status="failed")
-        self.assertEqual(actual_response,
-                         [{"domain_name": "www.example1.com"}])
-
-    @ddt.file_data('data_provider_details.json')
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_update_provider_details(self, provider_details_json,
                                      mock_session, mock_execute):
         provider_details_dict = {}
         for k, v in provider_details_json.items():
             provider_detail_dict = json.loads(v)
+
             provider_details_dict[k] = provider_details.ProviderDetail(
                 provider_service_id=(
                     provider_detail_dict["id"]),
