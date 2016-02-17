@@ -237,6 +237,7 @@ class CassandraStorageServiceTests(base.TestCase):
         provider_details_dict = {}
         for k, v in provider_details_json.items():
             provider_detail_dict = json.loads(v)
+
             provider_details_dict[k] = provider_details.ProviderDetail(
                 provider_service_id=(
                     provider_detail_dict["id"]),

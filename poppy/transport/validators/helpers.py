@@ -460,6 +460,30 @@ def is_valid_domain_by_name(domain_name):
                 u'Domain {0} is not valid'.format(domain_name))
 
 
+@decorators.validation_function
+def is_valid_provider_url(request):
+
+    provider_url = request.GET.get("provider_url", "")
+    provider_url_regex_1 = ('^([A-Za-z0-9-]){1,255}\.([A-Za-z0-9-]){1,255}\.'
+                            '([A-Za-z0-9-]){1,255}\.([A-Za-z0-9-]){1,255}\.'
+                            '([A-Za-z0-9-]){1,255}$')
+    provider_url_regex_2 = ('^([A-Za-z0-9-]){1,255}\.([A-Za-z0-9-])'
+                            '{1,255}\.([A-Za-z0-9-]){1,255}$')
+    provider_url_regex_3 = ('^([A-Za-z0-9-]){1,255}\.([A-Za-z0-9-])'
+                            '{1,255}\.([A-Za-z0-9-])'
+                            '{1,255}\.([A-Za-z0-9-]){1,255}$')
+    if not re.match(provider_url_regex_1, provider_url):
+        if not re.match(provider_url_regex_2, provider_url):
+            if not re.match(provider_url_regex_3, provider_url):
+                raise exceptions.ValidationFailed(
+                    u'Provider url {0} is not valid'.format(provider_url))
+
+    # Update context so the decorated function can get all this parameters
+    request.context.call_args = {
+        'provider_url': provider_url,
+    }
+
+
 def is_valid_flavor_configuration(flavor, schema):
     if schema is not None:
         errors_list = list(
