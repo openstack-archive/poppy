@@ -221,11 +221,11 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
             GET_PROVIDER_INFO,
             consistency_level=self.consistency_level)
         results = self.session.execute(stmt, args)
-
-        if len(results) != 1:
+        complete_results = list(results)
+        if len(complete_results) != 1:
             raise ValueError('No akamai providers info found.')
 
-        result = results[0]
+        result = complete_results[0]
 
         return result
 
