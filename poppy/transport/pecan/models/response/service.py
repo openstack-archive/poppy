@@ -95,22 +95,6 @@ class Model(collections.OrderedDict):
             # add the access urls
             access_urls = provider_detail.access_urls
             for access_url in access_urls:
-                try:
-                    domain_info = next(d for d in self["domains"]
-                                       if d.get('domain') ==
-                                       access_url.get('domain'))
-
-                    if domain_info.get("protocol", "http") == "https":
-                        if domain_info.get("certificate") != "shared":
-                            if (provider_detail.
-                                domains_certificate_status.
-                                get_domain_certificate_status(
-                                    domain_info.get('domain'))
-                                    in ['create_in_progress', 'failed']):
-                                continue
-                except StopIteration:
-                    pass
-
                 if 'operator_url' in access_url:
                     self['links'].append(link.Model(
                         access_url['operator_url'],
