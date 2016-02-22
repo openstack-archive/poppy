@@ -255,7 +255,8 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
             'issuer': issuer,
             'createType': 'modSan',
             'ipVersion': ipVersion,
-            'slot-deployment.class': slot_deployment_klass
+            'slot-deployment.class': slot_deployment_klass,
+            'product': 'ion_premier'
         }
 
         if any([i for i in [jobId, issuer, ipVersion, slot_deployment_klass]
