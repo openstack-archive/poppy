@@ -265,6 +265,11 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
 
         return res
 
+    def get_cert_config(self, san_cert_name):
+        res = self.get_cert_info(san_cert_name)
+        res['spsId'] = self.get_cert_last_spsid(san_cert_name)
+        return res
+
     def save_cert_last_spsid(self, san_cert_name, sps_id_value):
         san_info = self._get_akamai_san_certs_info()
         the_san_cert_info = san_info.get(

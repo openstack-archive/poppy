@@ -48,10 +48,10 @@ class TestCassandraSANInfoStorage(base.TestCase):
 
         self.get_returned_value = [{'info': {
             'san_info':
-                '{"secure2.san1.altcdn.com": '
+                '{"secure2.san1.test_cdn.com": '
                 '    {"ipVersion": "ipv4", "issuer": "symentec", '
                 '     "slot_deployment_klass": "esslType", "jobId": "4312"},'
-                '"secure1.san1.altcdn.com": '
+                '"secure1.san1.test_cdn.com": '
                 '{"ipVersion": "ipv4", "issuer": "symentec", '
                 '"slot_deployment_klass": "esslType", '
                 '"jobId": "1432", "spsId": 1423}}'}}]
@@ -84,7 +84,7 @@ class TestCassandraSANInfoStorage(base.TestCase):
             keys()
         )
 
-    @ddt.data("secure1.san1.altcdn.com", "secure2.san1.altcdn.com")
+    @ddt.data("secure1.san1.test_cdn.com", "secure2.san1.test_cdn.com")
     def test_save_cert_last_spsid(self, san_cert_name):
         mock_execute = self.cassa_storage.session.execute
         mock_execute.return_value = self.get_returned_value
@@ -98,7 +98,7 @@ class TestCassandraSANInfoStorage(base.TestCase):
     def test_get_cert_last_spsid(self):
         mock_execute = self.cassa_storage.session.execute
         mock_execute.return_value = self.get_returned_value
-        cert_name = "secure1.san1.altcdn.com"
+        cert_name = "secure1.san1.test_cdn.com"
 
         res = self.cassa_storage.get_cert_last_spsid(
             cert_name
@@ -113,3 +113,18 @@ class TestCassandraSANInfoStorage(base.TestCase):
         mock_execute = self.cassa_storage.session.execute
         self.cassa_storage.update_san_info({})
         mock_execute.assert_called()
+
+    def test_get_cert_config(self):
+        mock_execute = self.cassa_storage.session.execute
+        mock_execute.return_value = self.get_returned_value
+        cert_name = "secure1.san1.test_cdn.com"
+
+        res = self.cassa_storage.get_cert_config(
+            cert_name
+        )
+        mock_execute.assert_called()
+        self.assertTrue(
+            res['spsId'] == json.loads(
+                self.get_returned_value[0]['info']['san_info']
+                )[cert_name]['spsId']
+        )

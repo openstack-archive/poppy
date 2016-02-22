@@ -504,3 +504,20 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         url = '{0}/ssl_certificate/{1}'.format(self.url, domain_name)
 
         return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
+
+    def view_certificate_info(self,
+                              san_cert_name,
+                              requestslib_kwargs=None):
+        """GET SSL Certificate Info
+
+        :return: Response Object containing response code 200 and body with
+                details of certificate request
+
+        GET
+        ssl_certificate
+        """
+
+        url = '{0}/admin/provider/akamai/ssl_certificate/config/{1}'.format(
+            self.url, san_cert_name)
+
+        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
