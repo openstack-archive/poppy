@@ -77,7 +77,8 @@ class ZookeeperSanInfoStorage(base.BaseAkamaiSanInfoStorage):
             'issuer': issuer,
             'createType': 'modSan',
             'ipVersion': ipVersion,
-            'slot-deployment.class': slot_deployment_klass
+            'slot-deployment.class': slot_deployment_klass,
+            'product': 'ion_premier'
         }
 
     def save_cert_last_spsid(self, san_cert_name, sps_id_value):
