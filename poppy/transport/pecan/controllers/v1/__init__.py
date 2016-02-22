@@ -27,6 +27,7 @@ from poppy.transport.pecan.controllers.v1 import ssl_certificates
 # Hoist into package namespace
 Admin = admin.AdminController
 DNSHealth = health.DNSHealthController
+Distributed_Task_Health = health.DistributedTaskHealthController
 Flavors = flavors.FlavorsController
 Health = health.HealthController
 Home = home.HomeController

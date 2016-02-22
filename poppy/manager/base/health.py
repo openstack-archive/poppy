@@ -30,6 +30,7 @@ class HealthControllerBase(controller.ManagerControllerBase):
         self._dns = self.driver.dns
         self._storage = self.driver.storage
         self._providers = self.driver.providers
+        self._distributed_task = self.driver.distributed_task
 
     @abc.abstractmethod
     def health(self):
@@ -44,6 +45,15 @@ class HealthControllerBase(controller.ManagerControllerBase):
         """Returns the health of provider
 
         :param provider_name
+        :raises: NotImplementedError
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def is_distributed_task_alive(self, distributed_task_name):
+        """Returns the health of distributed_task
+
+        :param distributed_task_name
         :raises: NotImplementedError
         """
         raise NotImplementedError

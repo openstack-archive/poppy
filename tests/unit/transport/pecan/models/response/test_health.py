@@ -79,6 +79,11 @@ class TestHealthModel(base.TestCase):
         dns_name = health_map['dns']['dns_name']
         self.assertEqual('true',
                          health_model['dns'][dns_name]['online'])
+        distributed_task_name = \
+            health_map['distributed_task']['distributed_task_name']
+        status = \
+            health_model['distributed_task'][distributed_task_name]['online']
+        self.assertEqual('true', status)
 
     @ddt.file_data('health_map_dns_not_available.json')
     def test_health_dns_not_available(self, health_map):
@@ -107,3 +112,11 @@ class TestHealthModel(base.TestCase):
                 self.assertEqual('true', provider_model['online'])
             else:
                 self.assertEqual('false', provider_model['online'])
+
+    @ddt.file_data('health_map_distributed_task_not_available.json')
+    def test_health_distributed_task_not_available(self, health_map):
+        health_model = health.HealthModel(self.mock_controller, health_map)
+        distributed_task = health_map['distributed_task']
+        distributed_task_name = distributed_task['distributed_task_name']
+        status = health_model['distributed_task'][distributed_task_name]
+        self.assertEqual('false', status['online'])
