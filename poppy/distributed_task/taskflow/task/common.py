@@ -148,7 +148,7 @@ def create_log_delivery_container(project_id, auth_token):
 class ContextUpdateTask(task.Task):
 
     def execute(self, context_dict):
-        context = context_utils.RequestContext.from_dict(ctx=context_dict)
+        context = context_utils.RequestContext.from_dict(context_dict)
         context.update_store()
 
 

@@ -81,3 +81,25 @@ class HealthControllerTest(base.FunctionalTest):
                                 headers={'X-Project-ID': self.project_id},
                                 expect_errors=True)
         self.assertEqual(404, response.status_code)
+
+    @mock.patch('requests.get')
+    def test_health_distributed_task(self, mock_requests):
+        response_object = util.dict2obj(
+            {'content': '', 'status_code': 200})
+        mock_requests.return_value = response_object
+
+        response = self.app.get('/v1.0/health',
+                                headers={'X-Project-ID': self.project_id})
+        for name in response.json['distributed_task']:
+            endpoint = '/v1.0/health/distributed_task/{0}'.format(
+                name)
+            response = self.app.get(endpoint,
+                                    headers={'X-Project-ID': self.project_id})
+            self.assertEqual(200, response.status_code)
+            self.assertIn('true', str(response.body))
+
+    def test_get_unknown_distributed_task(self):
+        response = self.app.get('/v1.0/health/distributed_task/unknown',
+                                headers={'X-Project-ID': self.project_id},
+                                expect_errors=True)
+        self.assertEqual(404, response.status_code)

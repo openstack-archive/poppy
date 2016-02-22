@@ -32,6 +32,16 @@ class DefaultHealthController(health.HealthControllerBase):
 
         dns_name = self._dns.dns_name.lower()
         dns_alive = self._dns.is_alive()
+        distributed_task_name = self._distributed_task.vendor_name.lower()
+        distributed_task_alive = self.is_distributed_task_alive(
+            distributed_task_name)
+        health_distributed_task = {
+            'distributed_task_name': distributed_task_name,
+            'is_alive': distributed_task_alive
+        }
+        health_map['distributed_task'] = health_distributed_task
+        if not distributed_task_alive:
+            is_alive = False
         health_dns = {'dns_name': dns_name,
                       'is_alive': dns_alive}
         health_map['dns'] = health_dns
@@ -63,6 +73,14 @@ class DefaultHealthController(health.HealthControllerBase):
         """Returns the health of provider."""
 
         return self._providers[provider_name].obj.is_alive()
+
+    def is_distributed_task_alive(self, distributed_task_name):
+        """Returns the health of distributed_task."""
+
+        if distributed_task_name == self._distributed_task.vendor_name.lower():
+            return self._distributed_task.is_alive()
+        else:
+            raise KeyError
 
     def is_storage_alive(self, storage_name):
         """Returns the health of storage."""

@@ -71,6 +71,32 @@ class StorageHealthController(base.Controller, hooks.HookController):
             pecan.response.status = 404
 
 
+class DistributedTaskHealthController(base.Controller, hooks.HookController):
+
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    """Distributed Task Health Controller."""
+
+    @pecan.expose('json')
+    def get(self, distributed_task_name):
+        """GET.
+
+        Returns the health of distributed task manager
+
+        :param distributed_task_name
+        :returns JSON storage model or HTTP 404
+        """
+
+        health_controller = self._driver.manager.health_controller
+
+        try:
+            is_alive = health_controller.is_distributed_task_alive(
+                distributed_task_name)
+            return health_response.DistributedTaskModel(is_alive)
+        except KeyError:
+            pecan.response.status = 404
+
+
 class ProviderHealthController(base.Controller, hooks.HookController):
 
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]

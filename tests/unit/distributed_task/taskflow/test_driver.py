@@ -15,6 +15,8 @@
 
 """Unittests for TaskFlow distributed_task driver implementation."""
 
+import mock
+
 from oslo_config import cfg
 
 from poppy.distributed_task.taskflow import driver
@@ -37,7 +39,10 @@ class TestDriver(base.TestCase):
         self.assertEqual('TaskFlow', self.distributed_task_driver.vendor_name)
 
     def test_is_alive(self):
-        self.assertEqual(True, self.distributed_task_driver.is_alive())
+        with mock.patch.object(driver.TaskFlowDistributedTaskDriver,
+                               'is_alive') as mock_alive:
+            mock_alive.return_value = True
+            self.assertEqual(True, self.distributed_task_driver.is_alive())
 
     def test_service_contoller(self):
         self.assertTrue(self.distributed_task_driver.services_controller
