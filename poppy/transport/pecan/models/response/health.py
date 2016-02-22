@@ -41,6 +41,16 @@ class StorageModel(collections.OrderedDict):
             self['online'] = 'false'
 
 
+class DistributedTaskModel(collections.OrderedDict):
+    def __init__(self, is_alive):
+        super(DistributedTaskModel, self).__init__()
+
+        if is_alive:
+            self['online'] = 'true'
+        else:
+            self['online'] = 'false'
+
+
 class ProviderModel(collections.OrderedDict):
     def __init__(self, is_alive):
         super(ProviderModel, self).__init__()
@@ -83,6 +93,22 @@ class HealthModel(collections.OrderedDict):
 
         self['storage'] = {
             health_map['storage']['storage_name']: health_storage}
+
+        health_distributed_task = collections.OrderedDict()
+        if health_map['distributed_task']['is_alive']:
+            health_distributed_task['online'] = 'true'
+        else:
+            health_distributed_task['online'] = 'false'
+
+        health_distributed_task['links'] = link.Model(
+            u'{0}/health/distributed_task/{1}'.format(
+                controller.base_url,
+                health_map['distributed_task']['distributed_task_name']),
+            'self')
+
+        self['distributed_task'] = {
+            health_map['distributed_task']['distributed_task_name']:
+                health_distributed_task}
 
         self['providers'] = {}
         for provider in health_map['providers']:

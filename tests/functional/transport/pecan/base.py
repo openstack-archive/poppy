@@ -44,6 +44,7 @@ class BaseFunctionalTest(base.TestCase):
         b_obj.distributed_task.job_board = mock.Mock()
         b_obj.distributed_task.job_board.return_value = (
             mock_persistence.copy())
+        b_obj.distributed_task.is_alive = mock.Mock(return_value=True)
         # Note(tonytan4ever):Need this hack to preserve mockdb storage
         # controller's service cache
         b_obj.manager.ssl_certificate_controller.storage_controller = (

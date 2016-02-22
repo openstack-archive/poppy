@@ -60,6 +60,8 @@ class PecanTransportDriver(transport.Driver):
         health_controller.add_controller('dns', v1.DNSHealth(self))
         health_controller.add_controller('storage', v1.StorageHealth(self))
         health_controller.add_controller('provider', v1.ProviderHealth(self))
+        health_controller.add_controller('distributed_task',
+                                         v1.Distributed_Task_Health(self))
         home_controller.add_controller('services', v1.Services(self))
         home_controller.add_controller('flavors', v1.Flavors(self))
         home_controller.add_controller('admin', v1.Admin(self))

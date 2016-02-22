@@ -79,7 +79,21 @@ class TaskFlowDistributedTaskDriver(base.Driver):
 
     def is_alive(self):
         """Health check for TaskFlow worker."""
-        return True
+        is_alive = False
+        try:
+            with self.persistence() as persistence:
+                with self.job_board(
+                        self.jobboard_backend_conf.copy(),
+                        persistence=persistence) as board:
+                    if board.connected:
+                        is_alive = True
+        except Exception as e:
+            LOG.error("{0} connection cannot be established to {1}".format(
+                self.vendor_name,
+                self.distributed_task_conf.jobboard_backend_type))
+            LOG.exception(str(e))
+
+        return is_alive
 
     def persistence(self):
         return persistence_backends.backend(
