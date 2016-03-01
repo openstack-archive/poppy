@@ -484,9 +484,21 @@ class ServiceController(base.ServiceBase):
                               format(provider_service_id))
                 return self.responder.failed(str(e))
 
-    def create_certificate(self, cert_obj):
+    def create_certificate(self, cert_obj, enqueue=True):
         if cert_obj.cert_type == 'san':
             try:
+                if enqueue:
+                    self.mod_san_queue.enqueue_mod_san_request(
+                        json.dumps(cert_obj.to_dict()))
+                    return self.responder.ssl_certificate_provisioned(None, {
+                        'status': 'create_in_progress',
+                        'san cert': None,
+                        # Add logging so it is easier for testing
+                        'created_at': str(datetime.datetime.now()),
+                        'action': 'San cert request for %s has been enqueued' %
+                                  (cert_obj.domain_name)
+                    })
+
                 for san_cert_name in self.san_cert_cnames:
                     lastSpsId = (
                         self.san_info_storage.get_cert_last_spsid(
