@@ -31,7 +31,7 @@ conf(project='poppy', prog='poppy', args=[])
 class CreateProviderSSLCertificateTask(task.Task):
     default_provides = "responders"
 
-    def execute(self, providers_list_json, cert_obj_json):
+    def execute(self, providers_list_json, cert_obj_json, enqueue=True):
         service_controller = memoized_controllers.task_controllers('poppy')
 
         # call provider create_ssl_certificate function
@@ -46,7 +46,8 @@ class CreateProviderSSLCertificateTask(task.Task):
             LOG.info('from {0}'.format(provider))
             responder = service_controller.provider_wrapper.create_certificate(
                 service_controller._driver.providers[provider],
-                cert_obj
+                cert_obj,
+                enqueue
             )
             responders.append(responder)
 

@@ -534,7 +534,8 @@ class TestServices(base.TestCase):
                             "jobID": 44434}
                     }]}})
         )
-        controller.create_certificate(ssl_certificate.load_from_json(data))
+        controller.create_certificate(ssl_certificate.load_from_json(data),
+                                      False)
         controller.sps_api_client.get.assert_called_once_with(
             controller.sps_api_base_url.format(spsId=lastSpsId))
         controller.sps_api_client.post.assert_called_once_with(
@@ -610,7 +611,8 @@ class TestServices(base.TestCase):
                             "jobID": 44434}
                     }]}})
         )
-        controller.create_certificate(ssl_certificate.load_from_json(data))
+        controller.create_certificate(ssl_certificate.load_from_json(data),
+                                      False)
         controller.sps_api_client.get.assert_called_once_with(
             controller.sps_api_base_url.format(spsId=lastSpsId))
         self.assertFalse(controller.sps_api_client.post.called)

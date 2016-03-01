@@ -232,7 +232,8 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                         'domain_name': cert_obj.domain_name,
                         'cert_type': 'san',
                         'providers_list_json': json.dumps(providers),
-                        'cert_obj_json': json.dumps(cert_obj.to_dict())
+                        'cert_obj_json': json.dumps(cert_obj.to_dict()),
+                        'enqueue': False,
                     }
                     self.distributed_task_controller.submit_task(
                         recreate_ssl_certificate.recreate_ssl_certificate,
