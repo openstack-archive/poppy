@@ -477,6 +477,10 @@ class ServiceController(base.ServiceBase):
                                                         ))
                         if resp.status_code != 201:
                             raise RuntimeError(resp.text)
+                        LOG.info("purge response: %s for project id: %s, "
+                                 "on: %s, purge_url: %s"
+                                 % (resp.text, service_obj.project_id,
+                                    provider_service_id, purge_url))
                     return self.responder.purged(provider_service_id,
                                                  purge_url=purge_url)
             except Exception as e:
