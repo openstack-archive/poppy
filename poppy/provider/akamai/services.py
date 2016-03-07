@@ -16,6 +16,7 @@
 import datetime
 import json
 import traceback
+from openstackclient.tests.identity.v2_0.fakes import project_id
 
 try:  # pragma: no cover
     import six.moves.urllib.parse as parse
@@ -477,6 +478,9 @@ class ServiceController(base.ServiceBase):
                                                         ))
                         if resp.status_code != 201:
                             raise RuntimeError(resp.text)
+                        LOG.info("purge response: %s for project id: %s, "
+                                 "on: %s" % (resp.text,
+                                             project_id, provider_service_id))
                     return self.responder.purged(provider_service_id,
                                                  purge_url=purge_url)
             except Exception as e:
