@@ -31,6 +31,7 @@ def load_from_json(json_data):
     domains = json_data.get("domains", [])
     flavor_id = json_data.get("flavor_id")
     restrictions = json_data.get("restrictions", [])
+    project_id = json_data.get("project_id")
     pd = json_data.get("provider_details", {})
     log_delivery = json_data.get("log_delivery", {})
 
@@ -51,7 +52,8 @@ def load_from_json(json_data):
                         flavor_id=flavor_id,
                         caching=caching,
                         restrictions=restrictions,
-                        log_delivery=log_delivery)
+                        log_delivery=log_delivery,
+                        project_id=project_id)
 
     r.provider_details = dict([(k, provider_details.load_from_json(v))
                                for k, v in pd.items()])

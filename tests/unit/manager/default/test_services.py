@@ -245,7 +245,7 @@ class DefaultManagerServiceTests(base.TestCase):
         provider_details = json.dumps(
             dict([(k, v.to_dict()) for k, v
                   in self.provider_details.items()]))
-        responders = delete_provider.execute(provider_details)
+        responders = delete_provider.execute(provider_details, self.project_id)
         delete_dns = delete_service_tasks.DeleteServiceDNSMappingTask()
         dns_responders = delete_dns.execute(provider_details, 0, responders,
                                             self.project_id, self.service_id)

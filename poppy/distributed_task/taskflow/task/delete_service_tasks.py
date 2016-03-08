@@ -48,7 +48,7 @@ conf.register_opts(DNS_OPTIONS, group=DNS_GROUP)
 class DeleteProviderServicesTask(task.Task):
     default_provides = "responders"
 
-    def execute(self, provider_details):
+    def execute(self, provider_details, project_id):
         service_controller = memoized_controllers.task_controllers('poppy')
         provider_details = json.loads(provider_details)
 
@@ -62,7 +62,8 @@ class DeleteProviderServicesTask(task.Task):
             LOG.info('Starting to delete service from {0}'.format(provider))
             responder = service_controller.provider_wrapper.delete(
                 service_controller._driver.providers[provider.lower()],
-                provider_details)
+                provider_details,
+                project_id)
             responders.append(responder)
             LOG.info('Deleting service from {0} complete...'.format(provider))
         return responders
