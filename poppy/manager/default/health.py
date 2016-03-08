@@ -27,33 +27,16 @@ class DefaultHealthController(health.HealthControllerBase):
 
         :returns is_alive, health_map
         """
-        health_map = {}
-        is_alive = True
+
+        health_map, is_alive = self.ping_check()
 
         dns_name = self._dns.dns_name.lower()
         dns_alive = self._dns.is_alive()
-        distributed_task_name = self._distributed_task.vendor_name.lower()
-        distributed_task_alive = self.is_distributed_task_alive(
-            distributed_task_name)
-        health_distributed_task = {
-            'distributed_task_name': distributed_task_name,
-            'is_alive': distributed_task_alive
-        }
-        health_map['distributed_task'] = health_distributed_task
-        if not distributed_task_alive:
-            is_alive = False
+
         health_dns = {'dns_name': dns_name,
                       'is_alive': dns_alive}
         health_map['dns'] = health_dns
         if not dns_alive:
-            is_alive = False
-
-        storage_name = self._storage.storage_name.lower()
-        storage_alive = self._storage.is_alive()
-        health_storage = {'storage_name': storage_name,
-                          'is_alive': storage_alive}
-        health_map['storage'] = health_storage
-        if not storage_alive:
             is_alive = False
 
         health_map['providers'] = []
@@ -68,6 +51,31 @@ class DefaultHealthController(health.HealthControllerBase):
                 is_alive = False
 
         return is_alive, health_map
+
+    def ping_check(self):
+        health_map = {}
+        is_alive = True
+
+        storage_name = self._storage.storage_name.lower()
+        storage_alive = self._storage.is_alive()
+        health_storage = {'storage_name': storage_name,
+                          'is_alive': storage_alive}
+        health_map['storage'] = health_storage
+        if not storage_alive:
+            is_alive = False
+
+        distributed_task_name = self._distributed_task.vendor_name.lower()
+        distributed_task_alive = self.is_distributed_task_alive(
+            distributed_task_name)
+        health_distributed_task = {
+            'distributed_task_name': distributed_task_name,
+            'is_alive': distributed_task_alive
+        }
+        health_map['distributed_task'] = health_distributed_task
+        if not distributed_task_alive:
+            is_alive = False
+
+        return health_map, is_alive
 
     def is_provider_alive(self, provider_name):
         """Returns the health of provider."""

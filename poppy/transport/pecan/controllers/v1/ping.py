@@ -28,4 +28,9 @@ class PingController(base.Controller, hooks.HookController):
 
     @pecan.expose('json')
     def get(self):
-        return pecan.Response(None, 204)
+        health_controller = self._driver.manager.health_controller
+        health_map, is_alive = health_controller.ping_check()
+        if is_alive:
+            return pecan.Response(None, 204)
+        else:
+            return pecan.Response(None, 503)
