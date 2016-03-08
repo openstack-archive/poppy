@@ -57,7 +57,7 @@ def run():
     conf.register_cli_opts(CLI_OPT)
     conf(prog='akamai-papi-update')
 
-    LOG.info("%s: %s to %s, on property: %s" % (
+    LOG.info('{0}: {1} to {2}, on property: {3}'.format(
         conf.action,
         conf.domain_name,
         conf.san_cert_name,

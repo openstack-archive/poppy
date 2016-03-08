@@ -205,8 +205,8 @@ class ServicesController(base.Controller, hooks.HookController):
             service_obj = services_controller.get(
                 self.project_id, service_id)
         except ValueError:
-            pecan.abort(404, detail='service %s could not be found' %
-                        service_id)
+            pecan.abort(404, detail='service {0} could not be found'.
+                        format(service_id))
         # convert a service model into a response service model
         return resp_service_model.Model(service_obj, self)
 

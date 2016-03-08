@@ -322,7 +322,7 @@ def get_available_languages(domain):
     if domain in _AVAILABLE_LANGUAGES:
         return copy.copy(_AVAILABLE_LANGUAGES[domain])
 
-    localedir = '%s_LOCALEDIR' % domain.upper()
+    localedir = '{0}_LOCALEDIR'.format(domain.upper())
     find = lambda x: gettext.find(domain,
                                   localedir=os.environ.get(localedir),
                                   languages=[x])
@@ -473,7 +473,8 @@ class TranslationHandler(handlers.MemoryHandler):
 
         # In addition to translating the message, we also need to translate
         # arguments that were passed to the log method that were not part
-        # of the main message e.g., log.info(_('Some message %s'), this_one))
+        # of the main message e.g., 
+        # log.info(_('Some message {0}'.format(this_one)))
         record.args = _translate_args(record.args, self.locale)
 
         self.target.emit(record)

@@ -71,7 +71,7 @@ class CheckCertStatusTask(task.Task):
 
             if resp.status_code != 200:
                 raise RuntimeError('SPS API Request Failed'
-                                   'Exception: %s' % resp.text)
+                                   'Exception: {0}'.format(resp.text))
 
             sps_request_info = json.loads(resp.text)['requestList'][0]
             status = sps_request_info['status']
@@ -80,22 +80,22 @@ class CheckCertStatusTask(task.Task):
 
             # This SAN Cert is on pending status
             if status == 'SPS Request Complete':
-                LOG.info("SPS completed for %s..." %
-                         cert_obj.get_san_edge_name())
+                LOG.info("SPS completed for {0}...".
+                         format(cert_obj.get_san_edge_name()))
                 return "deployed"
             elif status == 'edge host already created or pending':
                 if workFlowProgress is not None and \
                         'error' in workFlowProgress.lower():
-                    LOG.info("SPS Pending with Error:" %
-                             workFlowProgress)
+                    LOG.info("SPS Pending with Error:".
+                             format(workFlowProgress))
                     return "failed"
                 else:
                     return "deployed"
             elif status == 'CPS cancelled':
                 return "cancelled"
             else:
-                LOG.info("SPS Not completed for %s ..." %
-                         cert_obj.get_san_edge_name())
+                LOG.info("SPS Not completed for {0} ...".
+                         format(cert_obj.get_san_edge_name()))
                 return ""
 
 

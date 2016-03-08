@@ -56,10 +56,10 @@ class TaskFlowDistributedTaskDriver(base.Driver):
         conf.register_opts(TASKFLOW_OPTIONS, group=TASKFLOW_GROUP)
         self.distributed_task_conf = conf[TASKFLOW_GROUP]
 
-        job_backends_hosts = ','.join(['%s:%s' % (
+        job_backends_hosts = (','.join(['{0}:{1}'.format(
             host, self.distributed_task_conf.jobboard_backend_port)
             for host in
-            self.distributed_task_conf.jobboard_backend_host])
+            self.distributed_task_conf.jobboard_backend_host]))
         self.jobboard_backend_conf = {
             # This topic could become more complicated
             "board": self.distributed_task_conf.jobboard_backend_type,
@@ -67,7 +67,7 @@ class TaskFlowDistributedTaskDriver(base.Driver):
             "path":  self.distributed_task_conf.poppy_service_worker_path,
         }
 
-        persistence_backends_hosts = ','.join(['%s:%s' % (
+        persistence_backends_hosts = ','.join(['{0}:{1}'.format(
             host, self.distributed_task_conf.jobboard_backend_port)
             for host in
             self.distributed_task_conf.jobboard_backend_host])

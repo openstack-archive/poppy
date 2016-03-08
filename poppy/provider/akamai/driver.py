@@ -169,7 +169,7 @@ class CDNProvider(base.Driver):
         self.akamai_sps_api_base_url = ''.join([
             str(self.akamai_conf.policy_api_base_url),
             'config-secure-provisioning-service/v1'
-            '/sps-requests/{spsId}?contractId=%s&groupId=%s' % (
+            '/sps-requests/{spsId}?contractId={0}&groupId={1}'.format(
                 self.akamai_conf.contract_id,
                 self.akamai_conf.group_id
             )
@@ -178,7 +178,7 @@ class CDNProvider(base.Driver):
         self.akamai_papi_api_base_url = ''.join([
             str(self.akamai_conf.policy_api_base_url),
             'papi/v0/{middle_part}/'
-            '?contractId=ctr_%s&groupId=grp_%s' % (
+            '?contractId=ctr_{0}&groupId=grp_{1}'.format(
                 self.akamai_conf.contract_id,
                 self.akamai_conf.group_id)
         ])
@@ -265,13 +265,13 @@ class CDNProvider(base.Driver):
 
     def papi_property_id(self, property_spec):
         if property_spec not in VALID_PROPERTY_SPEC:
-            raise ValueError('No a valid property spec: %s'
-                             ', valid property specs are: %s'
-                             % (property_spec, VALID_PROPERTY_SPEC))
+            raise ValueError('No a valid property spec: {0}'
+                             ', valid property specs are: {1}'.
+                             format(property_spec, VALID_PROPERTY_SPEC))
         prp_number = self.akamai_conf[property_spec]
         if isinstance(prp_number, list):
             prp_number = prp_number[0]
-        return 'prp_%s' % self.akamai_conf[property_spec][0]
+        return 'prp_{0}'.format(self.akamai_conf[property_spec][0])
 
     @property
     def service_controller(self):

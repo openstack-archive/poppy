@@ -209,7 +209,7 @@ class Bootstrap(object):
 
         args = [self.conf, self.manager]
 
-        LOG.debug((u'Loading transport driver: %s'), transport_name)
+        LOG.debug((u'Loading transport driver: {0}').format(transport_name))
 
         try:
             mgr = driver.DriverManager(namespace=transport_type,
@@ -234,8 +234,8 @@ class Bootstrap(object):
 
         args = [self.conf]
 
-        LOG.debug((u'Loading distributed_task driver: %s'),
-                  distributed_task_name)
+        LOG.debug(u'Loading distributed_task driver: {0}'.
+                  format(distributed_task_name))
 
         try:
             mgr = driver.DriverManager(namespace=distributed_task_type,
@@ -260,8 +260,8 @@ class Bootstrap(object):
 
         args = [self.conf]
 
-        LOG.debug((u'Loading metrics driver: %s'),
-                  metrics_driver_name)
+        LOG.debug(u'Loading metrics driver: {0}'.
+                  format(metrics_driver_name))
 
         try:
             mgr = driver.DriverManager(namespace=metrics_driver_type,

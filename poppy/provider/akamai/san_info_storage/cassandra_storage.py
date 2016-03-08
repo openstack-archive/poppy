@@ -178,7 +178,7 @@ def _create_keyspace(session, keyspace, replication_strategy):
 
 
 def _run_migrations(keyspace, migrations_path, session):
-    LOG.debug('Running schema migration(s) on keyspace: %s' % keyspace)
+    LOG.debug('Running schema migration(s) on keyspace: {0}'.format(keyspace))
 
     schema_migrator = migrator.Migrator(migrations_path, session)
     schema_migrator.run_migrations()
@@ -241,7 +241,8 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         )
 
         if the_san_cert_info is None:
-            raise ValueError('No san cert info found for %s.' % san_cert_name)
+            raise ValueError('No san cert info found for {0}.'.
+                             format(san_cert_name))
 
         jobId = the_san_cert_info.get("jobId")
         issuer = the_san_cert_info.get("issuer")
@@ -261,7 +262,7 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
 
         if any([i for i in [jobId, issuer, ipVersion, slot_deployment_klass]
                 if i is None]):
-            raise ValueError("San info error: %s" % res)
+            raise ValueError("San info error: {0}".format(res))
 
         return res
 
@@ -277,7 +278,8 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         )
 
         if the_san_cert_info is None:
-            raise ValueError('No san cert info found for %s.' % san_cert_name)
+            raise ValueError('No san cert info found for {0}.'.
+                             format(san_cert_name))
 
         the_san_cert_info['spsId'] = sps_id_value
         san_info[san_cert_name] = the_san_cert_info
@@ -302,7 +304,8 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         )
 
         if the_san_cert_info is None:
-            raise ValueError('No san cert info found for %s.' % san_cert_name)
+            raise ValueError('No san cert info found for {0}.'.
+                             format(san_cert_name))
 
         spsId = the_san_cert_info.get('spsId')
         return spsId

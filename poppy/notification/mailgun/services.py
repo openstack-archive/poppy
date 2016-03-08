@@ -44,10 +44,10 @@ class ServicesController(base.ServicesBase):
         """
         res = self._send_mail_notification_via_mailgun(subject, mail_content)
         if res:
-            LOG.info("Send email notification successful."
-                     "Subject: %s"
-                     "Content: %s" % (subject,
-                                      mail_content))
+            LOG.info('Send email notification successful.'
+                     'Subject: {0}'
+                     'Content: {1}'.format(subject,
+                                           mail_content))
 
         return
 
@@ -59,7 +59,8 @@ class ServicesController(base.ServicesBase):
         attempt = 1
 
         while not response_status or self.retry_send != attempt:
-            LOG.info("Sending email notification attempt: %s" % str(attempt))
+            LOG.info('Sending email notification attempt: {0}'.format(
+                     str(attempt)))
             response = requests.post(
                 request_url,
                 auth=('api', self.mailgun_api_key),
@@ -73,21 +74,21 @@ class ServicesController(base.ServicesBase):
             response_status = response.ok
             response_status_code = response.status_code
             response_text = response.text
-            LOG.info("Email attempt {0} "
-                     "status code: {1}".format(attempt, response_status_code))
-            LOG.info("Email attempt {0} "
-                     "response text: {1}".format(attempt, response_text))
+            LOG.info('Email attempt {0}'
+                     ' status code: {1}'.format(attempt, response_status_code))
+            LOG.info('Email attempt {0}'
+                     ' response text: {1}'.format(attempt, response_text))
             attempt += 1
 
         if not response_status:
-            LOG.warning("Send email notification failed. Details:"
-                        "From: %s"
-                        "To: %s"
-                        "Subject: %s"
-                        "Content: %s" % (self.from_address,
-                                         self.recipients,
-                                         subject,
-                                         mail_content))
+            LOG.warning('Send email notification failed. Details:'
+                        'From: {0}'
+                        'To: {1}'
+                        'Subject: {2}'
+                        'Content: {3}'.format(self.from_address,
+                                              self.recipients,
+                                              subject,
+                                              mail_content))
             return False
         else:
             return True

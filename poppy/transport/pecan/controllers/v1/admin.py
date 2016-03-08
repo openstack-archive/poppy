@@ -361,8 +361,8 @@ class DomainController(base.Controller, hooks.HookController):
             service_obj = services_controller.get_service_by_domain_name(
                 domain_name)
         except LookupError:
-            pecan.abort(404, detail='Domain %s cannot be found' %
-                        domain_name)
+            pecan.abort(404, detail='Domain {0} cannot be found'.
+                        format(domain_name))
         # convert a service model into a response service model
         return resp_service_model.Model(service_obj, self)
 

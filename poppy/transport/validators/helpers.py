@@ -227,8 +227,8 @@ def is_valid_service_configuration(service, schema):
     if len(errors_list) > 0:
         details = dict(errors=[{
             'message': '-'.join([
-                "[%s]" % "][".join(repr(p) for p in error.path),
-                str(getattr(error, "message", error))
+                '[{0}]'.format(']['.join(repr(p) for p in error.path),
+                               str(getattr(error, 'message', error)))
             ])}
             for error in errors_list])
         raise exceptions.ValidationFailed(json.dumps(details))
@@ -428,8 +428,8 @@ def is_valid_service_configuration(service, schema):
                     referrer = rule.get("referrer")
                     if not is_valid_domain_name(referrer):
                         raise exceptions.ValidationFailed(
-                            u'Referrer {0} is not a valid domain'
-                            .format(referrer))
+                            u'Referrer {0} is not a valid domain'.
+                            format(referrer))
 
     return
 
@@ -475,8 +475,8 @@ def is_valid_flavor_configuration(flavor, schema):
     if len(errors_list) > 0:
         details = dict(errors=[{
             'message': '-'.join([
-                "[%s]" % "][".join(repr(p) for p in error.path),
-                str(getattr(error, "message", error))
+                "[{0}]".format("][".join(repr(p) for p in error.path),
+                               str(getattr(error, "message", error)))
             ])}
             for error in errors_list])
         raise exceptions.ValidationFailed(json.dumps(details))
@@ -505,8 +505,8 @@ def is_valid_analytics_request(request):
     metricType = request.GET.get('metricType', None)
 
     if not is_valid_domain_name(domain):
-        raise exceptions.ValidationFailed("domain %s is not valid."
-                                          % domain)
+        raise exceptions.ValidationFailed('domain {0} is not valid.'.
+                                          format(domain))
 
     try:
         start_time = datetime.datetime.strptime(startTime,
@@ -515,9 +515,9 @@ def is_valid_analytics_request(request):
                                               "%Y-%m-%dT%H:%M:%S")
     except Exception as e:
         raise exceptions.ValidationFailed('startTime or endTime is not in '
-                                          'valid format. details: %s.'
+                                          'valid format. details: {0}.'
                                           'Valid time stamp format is: '
-                                          'YY-MM-DDTHH:MM:SS' % str(e))
+                                          'YY-MM-DDTHH:MM:SS'.format(str(e)))
     else:
         if start_time > end_time:
             raise exceptions.ValidationFailed('startTime cannot be later than'
@@ -536,8 +536,8 @@ def is_valid_analytics_request(request):
     ]
     if metricType not in valid_metric_types:
         raise exceptions.ValidationFailed('Must provide an metric name....'
-                                          'Valid metric types are: %s' %
-                                          valid_metric_types)
+                                          'Valid metric types are: {0}'.
+                                          format(valid_metric_types))
 
     # Update context so the decorated function can get all this parameters
     request.context.call_args = {

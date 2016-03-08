@@ -42,8 +42,8 @@ class Rule(common.DictSerializableModel):
                 geography not in geo_zones.GEO_COUNTRY_ZONES and \
                     geography not in geo_zones.GEO_REGION_ZONES:
                 raise ValueError(util.help_escape(
-                                 'Country/Area %s is not supported in '
-                                 'geo zones' % geography))
+                                 'Country/Area {0} is not supported in '
+                                 'geo zones'.format(geography)))
             self._geography = geography
         if request_url:
             self._request_url = request_url
@@ -105,7 +105,7 @@ class Rule(common.DictSerializableModel):
             value not in geo_zones.GEO_COUNTRY_ZONES and \
                 value not in geo_zones.GEO_REGION_ZONES:
                 raise ValueError(util.help_escape(
-                                 'Country/Area %s is not supported in '
-                                 'geo zones' % value))
+                                 'Country/Area {0} is not supported in '
+                                 'geo zones'.format(value)))
 
         self._geography = value

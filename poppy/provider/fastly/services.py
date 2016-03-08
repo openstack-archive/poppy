@@ -76,11 +76,11 @@ class ServiceController(base.ServiceBase):
         # if any item is not None
         if any(referrer_restriction_list):
             host_pattern_statement = ' || '.join(
-                ['req.http.referer' ' !~ "%s"' % referrer
+                ['req.http.referer' ' !~ "{0}"'.format(referrer
                  for referrer in referrer_restriction_list
-                 if referrer is not None])
-            condition_stmt = ('req.http.referer && (%s)'
-                              % host_pattern_statement)
+                 if referrer is not None)])
+            condition_stmt = ('req.http.referer && ({0})'.
+                              format(host_pattern_statement))
             # create a fastly condition for referer restriction
             request_condition = self.client.create_condition(
                 service.id,
@@ -114,13 +114,13 @@ class ServiceController(base.ServiceBase):
             else:
                 # create condition first
                 url_matching_stament = ' || '.join(
-                    ['req.url' ' ~ "^%s"' % rule.request_url
-                     for rule in caching_rule.rules])
+                    ['req.url' ' ~ "^{0}"'.format(rule.request_url
+                     for rule in caching_rule.rules)])
                 # create a fastly condition for referer restriction
                 cachingrule_request_condition = self.client.create_condition(
                     service.id,
                     service_version.number,
-                    'CachingRules condition for %s' % caching_rule.name,
+                    'CachingRules condition for {0}'.format(caching_rule.name),
                     fastly.FastlyConditionType.CACHE,
                     url_matching_stament,
                     priority=10

@@ -46,7 +46,8 @@ class ServiceController(base.ServiceBase):
     def create(self, service_obj):
         # TODO(obulpathi): create a single distribution for multiple origins
         origin = service_obj.origins[0]
-        LOG.info('Start creating cloudfront config for %s' % service_obj.name)
+        LOG.info('Start creating cloudfront config for {0}'.
+                 format(service_obj.name))
         try:
             # Create the origin for this domain:
             aws_origin = cloudfront.origin.CustomOrigin(
@@ -70,8 +71,8 @@ class ServiceController(base.ServiceBase):
 
         links = [{'href': distribution.domain_name, 'rel': 'access_url'}]
         # extra information should be passed in here.
-        LOG.info('Creating cloudfront config for %s'
-                 'successfull...' % service_obj.name)
+        LOG.info('Creating cloudfront config for {0}'
+                 'successfull...'.format(service_obj.name))
         return self.responder.created(distribution.id, links, status=status)
 
     def delete(self, service_name):

@@ -43,15 +43,15 @@ class PropertyGetLatestVersionTask(task.Task):
         """Get/Create a new Akamai property update version if necessary"""
         self.property_id = self.akamai_driver.papi_property_id(property_spec)
 
-        LOG.info('Starting to get next version for property: %s'
-                 % self.property_id)
+        LOG.info('Starting to get next version for property: {0}'.
+                 format(self.property_id))
         resp = self.akamai_driver.akamai_papi_api_client.get(
             self.akamai_driver.akamai_papi_api_base_url.format(
-                middle_part='properties/%s' % self.property_id)
+                middle_part='properties/{0}'.format(self.property_id))
         )
         if resp.status_code != 200:
             raise RuntimeError('PAPI API request failed.'
-                               'Exception: %s' % resp.text)
+                               'Exception: {0}'.format(resp.text))
         else:
             a_property = json.loads(resp.text)['properties']['items'][0]
             latestVersion = a_property['latestVersion'] or 0
@@ -64,24 +64,25 @@ class PropertyGetLatestVersionTask(task.Task):
             if production_version == -1 and staging_version == -1:
                 # if the max version has not been activated yet
                 # we just reuse the max version
-                LOG.info("New version for : %s is %s" % (self.property_id,
-                                                         str(max_version)))
+                LOG.info("New version for : {0} is {1}".format(
+                         self.property_id,
+                         str(max_version)))
                 return max_version
             else:
                 # else now we need to create a new version (bump up a version)
                 resp = self.akamai_driver.akamai_papi_api_client.get(
                     self.akamai_driver.akamai_papi_api_base_url.format(
-                        middle_part='properties/%s/versions/%s' % (
+                        middle_part='properties/{0}/versions/{1}'.format(
                             self.property_id, str(max_version)))
                 )
                 if resp.status_code != 200:
                     raise RuntimeError('PAPI API request failed.'
-                                       'Exception: %s' % resp.text)
+                                       'Exception: {0}'.format(resp.text))
                 etag = json.loads(resp.text)['versions']['items'][0]['etag']
                 # create a new version
                 resp = self.akamai_driver.akamai_papi_api_client.post(
                     self.akamai_driver.akamai_papi_api_base_url.format(
-                        middle_part='properties/%s/versions' % (
+                        middle_part='properties/{0}/versions'.format(
                             self.property_id)),
                     data=json.dumps({
                         'createFromVersion': max_version,
@@ -92,9 +93,10 @@ class PropertyGetLatestVersionTask(task.Task):
 
                 if resp.status_code != 201:
                     raise RuntimeError('PAPI API request failed.'
-                                       'Exception: %s' % resp.text)
-                LOG.info("New version for : %s is %s" % (self.property_id,
-                                                         str(max_version+1)))
+                                       'Exception: {0}'.format(resp.text))
+                LOG.info("New version for : {0} is {1}".format(
+                         self.property_id,
+                         str(max_version+1)))
                 return max_version + 1
 
 
@@ -126,13 +128,14 @@ class PropertyUpdateTask(task.Task):
                     LOG.info("Getting Hostnames...")
                     resp = self.akamai_driver.akamai_papi_api_client.get(
                         self.akamai_driver.akamai_papi_api_base_url.format(
-                            middle_part='properties/%s/versions/%s/hostnames' %
-                            (self.property_id,
-                             str(new_version_number)))
+                            middle_part='properties/{0}/versions/{1}/'
+                                        'hostnames'.
+                                        format(self.property_id,
+                                               str(new_version_number)))
                     )
                     if resp.status_code != 200:
                         raise RuntimeError('PAPI API request failed.'
-                                           'Exception: %s' % resp.text)
+                                           'Exception: {0}'.format(resp.text))
                     self.existing_hosts = json.loads(resp.text)['hostnames'][
                         'items']
                 # message should be a list assembled hosts dictionary
@@ -152,7 +155,8 @@ class PropertyUpdateTask(task.Task):
 
                             if resp.status_code != 200:
                                 raise RuntimeError('PAPI API request failed.'
-                                                   'Exception: %s' % resp.text)
+                                                   'Exception: {0}'.
+                                                   format(resp.text))
                             self.existing_edgehostnames = (
                                 json.loads(resp.text)['edgeHostnames']['items']
                             )
@@ -165,8 +169,9 @@ class PropertyUpdateTask(task.Task):
                                     edgehostname['edgeHostnameId'])
 
                         self.existing_hosts.append(host_info)
-                        update_detail = "Add cnameFrom: %s to cnameTo %s" % (
-                            host_info['cnameFrom'], host_info['cnameTo'])
+                        update_detail = ('Add cnameFrom: {0} to cnameTo {1}'.
+                                         format(host_info['cnameFrom'],
+                                                host_info['cnameTo']))
                     # remove a hosts
                     elif action == 'remove':
                         for idx, existing_host_info in enumerate(
@@ -175,26 +180,27 @@ class PropertyUpdateTask(task.Task):
                                     host_info['cnameFrom']):
                                 del self.existing_hosts[idx]
                                 break
-                        update_detail = ("Remove cnameFrom: %s to cnameTo %s"
-                                         % (host_info['cnameFrom'],
-                                            host_info['cnameTo']))
+                        update_detail = ('Remove cnameFrom: {0}'
+                                         ' to cnameTo {1}'.
+                                         format(host_info['cnameFrom'],
+                                                host_info['cnameTo']))
 
-                LOG.info('Start Updating Hostnames: %s' %
-                         str(self.existing_hosts))
+                LOG.info('Start Updating Hostnames: {0}'.format(
+                         str(self.existing_hosts)))
                 resp = self.akamai_driver.akamai_papi_api_client.put(
                     self.akamai_driver.akamai_papi_api_base_url.format(
-                        middle_part='properties/%s/versions/%s/hostnames' % (
-                            self.property_id,
-                            str(new_version_number))),
+                        middle_part=('properties/{0}/versions/{1}/hostnames'.
+                                     format(self.property_id,
+                                            str(new_version_number)))),
                     data=json.dumps(self.existing_hosts),
                     headers={'Content-type': 'application/json'}
                 )
 
                 if resp.status_code != 200:
-                    LOG.info("Updating property hostnames response code: %s" %
-                             str(resp.status_code))
-                    LOG.info("Updating property hostnames response text: %s" %
-                             str(resp.text))
+                    LOG.info("Updating property hostnames response code: {0}".
+                             format(str(resp.status_code)))
+                    LOG.info("Updating property hostnames response text: {0}".
+                             format(str(resp.text)))
                 else:
                     LOG.info("Update property hostnames successful...")
         # Handle secureEdgeHost addition
@@ -223,20 +229,20 @@ class PropertyActivateTask(task.Task):
         self.property_id = self.akamai_driver.papi_property_id(property_spec)
 
         # This request needs json
-        LOG.info('Starting activating version: %s for property: %s' %
-                 (new_version_number,
-                  self.property_id))
+        LOG.info('Starting activating version: {0} for property: {1}'.format(
+                 new_version_number,
+                 self.property_id))
         data = {
             'propertyVersion': new_version_number,
             'network': 'PRODUCTION',
-            'note': 'Updating configuration for property %s: %s' % (
+            'note': 'Updating configuration for property {0}: {1}'.format(
                 self.property_id, update_detail),
             'notifyEmails': notify_email_list,
         }
         resp = self.akamai_driver.akamai_papi_api_client.post(
             self.akamai_driver.akamai_papi_api_base_url.format(
-                middle_part='properties/%s/activations' %
-                self.property_id),
+                middle_part='properties/{0}/activations'.format(
+                            self.property_id)),
             data=json.dumps(data),
             headers={'Content-type': 'application/json'}
         )
@@ -245,33 +251,33 @@ class PropertyActivateTask(task.Task):
         # an exception
         if resp.status_code != 201 and resp.status_code != 400:
             raise RuntimeError('PAPI API request failed.'
-                               'Exception: %s' % resp.text)
+                               'Exception: {0}'.format(resp.text))
         # else extract out all the warnings
         # acknowledgementWarning
         if resp.status_code == 400:
-            LOG.info("response text: %s" % resp.text)
+            LOG.info("response text: {0}".format(resp.text))
             warnings = [warning['messageId'] for warning in
                         json.loads(resp.text)['warnings']]
             data['acknowledgeWarnings'] = warnings
             resp = self.akamai_driver.akamai_papi_api_client.post(
                 self.akamai_driver.akamai_papi_api_base_url.format(
-                    middle_part='properties/%s/activations/' %
-                    self.property_id),
+                    middle_part='properties/{0}/activations/'.format(
+                                self.property_id)),
                 data=json.dumps(data),
                 headers={'Content-type': 'application/json'}
             )
             if resp.status_code != 201:
                 raise RuntimeError('PAPI API request failed.'
-                                   'Exception: %s' % resp.text)
+                                   'Exception: {0}'.format(resp.text))
 
         # first get the activation id
         # activation id is inside of activation link itself
         activation_link = json.loads(resp.text)['activationLink']
-        LOG.info("Activation link: %s" % activation_link)
+        LOG.info("Activation link: {0}".format(activation_link))
 
         return {
             "activation_link": activation_link
         }
 
     def revert(self, property_spec, new_version_number, **kwargs):
-        LOG.info('retrying task: %s ...' % self.name)
+        LOG.info('retrying task: {0} ...'.format(self.name))

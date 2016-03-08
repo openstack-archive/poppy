@@ -62,8 +62,8 @@ class SendNotificationTask(task.Task):
         for responder in responders:
             for provider in responder:
                 notification_content += (
-                    "Project ID: %s, Provider: %s, Detail: %s" %
-                    (project_id, provider, str(responder[provider])))
+                    'Project ID: {0}, Provider: {1}, Detail: {2}'.
+                    format(project_id, provider, str(responder[provider])))
 
         for n_driver in service_controller._driver.notification:
             service_controller.notification_wrapper.send(

@@ -309,8 +309,7 @@ class ServicesController(base.ServicesController):
         resultset = self.session.execute(stmt, args)
         complete_result = list(resultset)
         if len(complete_result) != 1:
-            raise ValueError('No service found: %s'
-                             % service_id)
+            raise ValueError('No service found: {0}'.format(service_id))
 
         # at this point, it is certain that there's exactly 1 result in
         # results.
@@ -346,8 +345,8 @@ class ServicesController(base.ServicesController):
                 for r in results:
                     if str(r.get('service_id')) != str(service_id):
                         LOG.info(
-                            "Domain '{0}' has already been taken."
-                            .format(domain_name))
+                            "Domain '{0}' has already been taken.".
+                            format(domain_name))
                         return True
                 return False
             else:
@@ -639,7 +638,7 @@ class ServicesController(base.ServicesController):
                     d.domain,
                     service_obj.service_id) is True:
                 raise ValueError(
-                    "Domain %s has already been taken" % d.domain)
+                    "Domain {0} has already been taken".format(d.domain))
 
         # create the service in storage
         service_id = service_obj.service_id
@@ -901,8 +900,7 @@ class ServicesController(base.ServicesController):
         exec_results_set = self.session.execute(stmt, args)
         complete_results = list(exec_results_set)
         if len(complete_results) != 1:
-            raise ValueError('No service found: %s'
-                             % service_id)
+            raise ValueError('No service found: {0}'.format(service_id))
 
         provider_details_result = complete_results[0]['provider_details'] or {}
         results = {}

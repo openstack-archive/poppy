@@ -47,10 +47,9 @@ class BackgroundJobController(base.BackgroundJobController):
     def post_job(self, job_type, kwargs):
         kwargs = kwargs
         if job_type == "akamai_check_and_update_cert_status":
-            LOG.info('Starting to check status on domain: %s,'
-                     'for project_id: %s'
-                     'flavor_id: %s, cert_type: %s' %
-                     (
+            LOG.info('Starting to check status on domain: {0},'
+                     'for project_id: {1}'
+                     'flavor_id: {2}, cert_type: {3}'.format(
                          kwargs.get("domain_name"),
                          kwargs.get("project_id"),
                          kwargs.get("flavor_id"),
@@ -61,7 +60,7 @@ class BackgroundJobController(base.BackgroundJobController):
                 check_cert_status_and_update_flow,
                 **kwargs)
         elif job_type == "akamai_update_papi_property_for_mod_san":
-            LOG.info("%s: %s to %s, on property: %s" % (
+            LOG.info('{0}: {1} to {2}, on property: {3}'.format(
                 kwargs.get("action", 'add'),
                 kwargs.get("domain_name"),
                 kwargs.get("san_cert_name"),
@@ -75,10 +74,10 @@ class BackgroundJobController(base.BackgroundJobController):
             # effectively error that out
             if kwargs.get("san_cert_name") not in \
                     self.akamai_san_cert_cname_list:
-                raise ValueError("Not A valid san cert cname: %s, "
-                                 "valid san cert cnames are: %s" %
-                                 (kwargs.get("san_cert_name"),
-                                  self.akamai_san_cert_cname_list))
+                raise ValueError('Not A valid san cert cname: {0}, '
+                                 'valid san cert cnames are: {1}'.format(
+                                     kwargs.get("san_cert_name"),
+                                     self.akamai_san_cert_cname_list))
 
             t_kwargs = {}
 
@@ -106,4 +105,6 @@ class BackgroundJobController(base.BackgroundJobController):
                 update_property_flow.update_property_flow,
                 **t_kwargs)
         else:
-            raise NotImplementedError('job type: %s has not been implemented')
+            raise NotImplementedError(
+                'job type: {0} has not been implemented').format(
+                job_type)

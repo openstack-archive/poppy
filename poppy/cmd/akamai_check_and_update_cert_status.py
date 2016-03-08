@@ -47,9 +47,8 @@ def run():
     conf.register_cli_opts(CLI_OPT)
     conf(prog='akamai-cert-check')
 
-    LOG.info('Starting to check status on domain: %s, for project_id: %s'
-             'flavor_id: %s, cert_type: %s' %
-             (
+    LOG.info('Starting to check status on domain: {0}, for project_id: {1}'
+             'flavor_id: {2}, cert_type: {3}'.format(
                  conf.domain_name,
                  conf.project_id,
                  conf.flavor_id,

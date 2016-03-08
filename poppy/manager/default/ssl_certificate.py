@@ -47,8 +47,8 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                     domain.Domain(cert_obj.domain_name).to_dict())):
             # here created a http domain object but it does not matter http or
             # https
-            raise ValueError('%s must be a valid non-root domain' %
-                             cert_obj.domain_name)
+            raise ValueError('{0} must be a valid non-root domain'.
+                             format(cert_obj.domain_name))
 
         try:
             flavor = self.flavor_controller.get(cert_obj.flavor_id)
@@ -95,8 +95,8 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                 domain_name=domain_name,
                 project_id=project_id)
             if not certs_info:
-                raise ValueError("certificate information"
-                                 "not found for {0} ".format(domain_name))
+                raise ValueError('certificate information'
+                                 'not found for {0}'.format(domain_name))
 
             return certs_info
 
@@ -256,8 +256,8 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             akamai_driver = self._driver.providers['akamai'].obj
             if san_cert_name not in akamai_driver.san_cert_cnames:
                 raise ValueError(
-                    "%s is not a valid san cert, valid san certs are: %s" %
-                    (san_cert_name, akamai_driver.san_cert_cnames))
+                    '{0} is not a valid san cert, valid san certs are: {1}'.
+                    format(san_cert_name, akamai_driver.san_cert_cnames))
             akamai_driver = self._driver.providers['akamai'].obj
             res = akamai_driver.san_info_storage.get_cert_config(san_cert_name)
         else:

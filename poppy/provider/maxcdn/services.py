@@ -44,8 +44,8 @@ class ServiceController(base.ServiceBase):
         try:
             # TODO(tonytan4ever): correctly convert and update service_obj
             # to a dictionary passed into maxcdn call.
-            update_response = self.client.put('/zones/pull.json/%s'
-                                              % pullzone_id,
+            update_response = self.client.put('/zones/pull.json/{0}'.
+                                              format(pullzone_id),
                                               params=service_obj.to_dict())
             if update_response['code'] != 200:
                 return self.responder.failed(update_response.text)
@@ -84,8 +84,8 @@ class ServiceController(base.ServiceBase):
             links = []
             for domain in service_obj.domains:
                 self.client.post(
-                    '/zones/pull/%s/customdomains.json'
-                    % created_zone_info['id'],
+                    '/zones/pull/{0}/customdomains.json'.
+                    format(created_zone_info['id']),
                     {'custom_domain': domain.domain})
                 links.append({'href': domain.domain, "rel": "access_url"})
             # TODO(tonytan4ever): What if it fails during add domains ?
@@ -100,8 +100,8 @@ class ServiceController(base.ServiceBase):
          manager needs to pass in a service name to delete.
         '''
         try:
-            delete_response = self.client.delete('/zones/pull.json/%s'
-                                                 % pullzone_id)
+            delete_response = self.client.delete('/zones/pull.json/{0}'.
+                                                 format(pullzone_id))
             if delete_response['code'] != 200:
                 return self.responder.failed(delete_response.text)
             return self.responder.deleted(pullzone_id)

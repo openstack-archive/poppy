@@ -51,8 +51,8 @@ class DefaultFlavorsController(base.FlavorsController):
         for provider in new_flavor.providers:
             if provider.provider_id not in provider_list:
                 raise LookupError(
-                    "{0} is not a valid Provider.  Please choose from {1}"
-                    .format(provider.provider_id, provider_list))
+                    "{0} is not a valid Provider.  Please choose from {1}".
+                    format(provider.provider_id, provider_list))
 
         # made it to here, so create it.
         return self.storage.add(new_flavor)

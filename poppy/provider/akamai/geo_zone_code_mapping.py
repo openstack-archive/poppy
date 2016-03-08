@@ -365,7 +365,8 @@ for region in REGION_COUNTRY_MAPPING:
         try:
             raise ValueError('Unsupported region config')
         except ValueError:
-            LOG.warn('Unsupported region: %s in GEO zone mapping' % region)
+            LOG.warn('Unsupported region: {0} in GEO zone mapping'.
+                     format(region))
 
 # validate COUNTRY_CODE_MAPPING keys are in GEO_ZONES'
 for country in COUNTRY_CODE_MAPPING:
@@ -373,4 +374,5 @@ for country in COUNTRY_CODE_MAPPING:
         try:
             raise ValueError('Unsupported country config')
         except ValueError:
-            LOG.warn('Unsupported country: %s in GEO zone mapping' % country)
+            LOG.warn('Unsupported country: {0} in GEO zone mapping'.
+                     format(country))

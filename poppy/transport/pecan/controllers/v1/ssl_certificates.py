@@ -58,10 +58,10 @@ class SSLCertificateController(base.Controller, hooks.HookController):
                                                               cert_obj)
         except LookupError as e:
             pecan.abort(400, detail='Provisioning ssl certificate failed. '
-                        'Reason: %s' % str(e))
+                        'Reason: {0}'.format(str(e)))
         except ValueError as e:
             pecan.abort(400, detail='Provisioning ssl certificate failed. '
-                        'Reason: %s' % str(e))
+                        'Reason: {0}'.format(str(e)))
 
         return pecan.Response(None, 202)
 
@@ -83,7 +83,7 @@ class SSLCertificateController(base.Controller, hooks.HookController):
             )
         except ValueError as e:
             pecan.abort(400, detail='Delete ssl certificate failed. '
-                        'Reason: %s' % str(e))
+                        'Reason: {0}'.format(str(e)))
 
         return pecan.Response(None, 202)
 
@@ -107,8 +107,8 @@ class SSLCertificateController(base.Controller, hooks.HookController):
         except ValueError:
             pecan.abort(404, detail='certificate '
                                     'could not be found '
-                                    'for domain : %s' %
-                        domain_name)
+                                    'for domain : {0}'.
+                                    format(domain_name))
         else:
             # convert a cert model into a response cert model
             try:

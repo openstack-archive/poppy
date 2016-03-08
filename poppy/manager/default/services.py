@@ -438,26 +438,26 @@ class DefaultServicesController(base.ServicesController):
 
         try:
             if action == 'delete':
-                LOG.info('Deleting  service: %s, project_id: %s' % (
-                    service_obj.service_id, project_id))
+                LOG.info('Deleting  service: {0}, project_id: {1}'.format(
+                         service_obj.service_id, project_id))
                 self.delete(project_id, service_obj.service_id)
             elif action == 'enable':
-                LOG.info('Enabling  service: %s, project_id: %s' % (
-                    service_obj.service_id, project_id))
+                LOG.info('Enabling  service: {0}, project_id: {1}'.format(
+                         service_obj.service_id, project_id))
                 kwargs['state'] = 'enabled'
                 self.distributed_task_controller.submit_task(
                     update_service_state.enable_service, **kwargs)
             elif action == 'disable':
-                LOG.info('Disabling  service: %s, project_id: %s' % (
-                    service_obj.service_id, project_id))
+                LOG.info('Disabling  service: {0}, project_id: {1}'.format(
+                         service_obj.service_id, project_id))
                 kwargs['state'] = 'disabled'
                 self.distributed_task_controller.submit_task(
                     update_service_state.disable_service, **kwargs)
         except Exception as e:
             # If one service's action failed, we log it and not
             # impact other services' action
-            LOG.warning('Perform action %s on service: %s,'
-                        ' project_id: %s failed, reason: %s' % (
+            LOG.warning('Perform action {0} on service: {1},'
+                        ' project_id: {2} failed, reason: {3}'.format(
                             action,
                             service_obj.service_id,
                             project_id,

@@ -109,11 +109,10 @@ def bool_from_string(subject, strict=False, default=False):
     elif lowered in FALSE_STRINGS:
         return False
     elif strict:
-        acceptable = ', '.join(
-            "'%s'" % s for s in sorted(TRUE_STRINGS + FALSE_STRINGS))
-        msg = _("Unrecognized value '%(val)s', acceptable values are:"
-                " %(acceptable)s") % {'val': subject,
-                                      'acceptable': acceptable}
+        acceptable = ", ".join("'{0}'".
+                     format(s) for s in sorted(TRUE_STRINGS + FALSE_STRINGS))
+        msg = _("Unrecognized value '{0}', acceptable values are: {1}".
+                format(subject,acceptable))
         raise ValueError(msg)
     else:
         return default
@@ -131,7 +130,7 @@ def safe_decode(text, incoming=None, errors='strict'):
     :raises TypeError: If text is not an instance of str
     """
     if not isinstance(text, (six.string_types, six.binary_type)):
-        raise TypeError("%s can't be decoded" % type(text))
+        raise TypeError("{0} can't be decoded".format(type(text)))
 
     if isinstance(text, six.text_type):
         return text
@@ -174,7 +173,7 @@ def safe_encode(text, incoming=None,
     :raises TypeError: If text is not an instance of str
     """
     if not isinstance(text, (six.string_types, six.binary_type)):
-        raise TypeError("%s can't be encoded" % type(text))
+        raise TypeError("{0} can't be encoded".format(type(text)))
 
     if not incoming:
         incoming = (sys.stdin.encoding or
@@ -216,7 +215,7 @@ def string_to_bytes(text, unit_system='IEC', return_int=False):
     try:
         base, reg_ex = UNIT_SYSTEM_INFO[unit_system]
     except KeyError:
-        msg = _('Invalid unit system: "%s"') % unit_system
+        msg = _('Invalid unit system: "{0}"').format(unit_system)
         raise ValueError(msg)
     match = reg_ex.match(text)
     if match:
@@ -225,7 +224,7 @@ def string_to_bytes(text, unit_system='IEC', return_int=False):
         if match.group(3) in ['b', 'bit']:
             magnitude /= 8
     else:
-        msg = _('Invalid string format: %s') % text
+        msg = _('Invalid string format: {0}').format(text)
         raise ValueError(msg)
     if not unit_prefix:
         res = magnitude

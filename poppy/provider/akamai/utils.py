@@ -76,7 +76,7 @@ def get_ssl_number_of_hosts(remote_host):
 
 def connect_to_zookeeper_storage_backend(conf):
     """Connect to a zookeeper cluster"""
-    storage_backend_hosts = ','.join(['%s:%s' % (
+    storage_backend_hosts = ','.join(['{0}:{1}'.format(
         host, conf.storage_backend_port)
         for host in
         conf.storage_backend_host])
@@ -87,7 +87,7 @@ def connect_to_zookeeper_storage_backend(conf):
 
 def connect_to_zookeeper_queue_backend(conf):
     """Connect to a zookeeper cluster"""
-    storage_backend_hosts = ','.join(['%s:%s' % (
+    storage_backend_hosts = ','.join(['{0}:{1}'.format(
         host, conf.queue_backend_port)
         for host in
         conf.queue_backend_host])
@@ -98,7 +98,8 @@ def connect_to_zookeeper_queue_backend(conf):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print('Usage: %s <remote_host_you_want_get_cert_on>' % sys.argv[0])
+        print('Usage: {0} <remote_host_you_want_get_cert_on>'.
+              format(sys.argv[0]))
         sys.exit(0)
-    print("There are %s DNS names for SAN Cert on %s" % (
+    print("There are {0} DNS names for SAN Cert on {1}".format(
         get_ssl_number_of_hosts(sys.argv[1]), sys.argv[1]))

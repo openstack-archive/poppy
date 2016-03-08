@@ -42,8 +42,8 @@ class SendNotificationTask(task.Task):
         service_controller = memoized_controllers.task_controllers('poppy')
 
         notification_content = (
-            "Project ID: %s, Domain Name: %s, Cert type: %s" %
-            (project_id, domain_name, cert_type))
+            'Project ID: {0}, Domain Name: {1}, Cert type: {2}'.
+            format(project_id, domain_name, cert_type))
 
         for n_driver in service_controller._driver.notification:
             service_controller.notification_wrapper.send(

@@ -28,8 +28,8 @@ def import_class(import_str):
     try:
         return getattr(sys.modules[mod_str], class_str)
     except AttributeError:
-        raise ImportError('Class %s cannot be found (%s)' %
-                          (class_str,
+        raise ImportError('Class {0} cannot be found ({1})'.format(
+                           class_str,
                            traceback.format_exception(*sys.exc_info())))
 
 
@@ -45,7 +45,7 @@ def import_object_ns(name_space, import_str, *args, **kwargs):
     to find the class in a default namespace, then failing back to
     a full path if not found in the default namespace.
     """
-    import_value = "%s.%s" % (name_space, import_str)
+    import_value = "{0}.{1}".format(name_space, import_str)
     try:
         return import_class(import_value)(*args, **kwargs)
     except ImportError:
@@ -59,7 +59,7 @@ def import_module(import_str):
 
 
 def import_versioned_module(version, submodule=None):
-    module = 'poppy.v%s' % version
+    module = 'poppy.v{0}'.format(version)
     if submodule:
         module = '.'.join((module, submodule))
     return import_module(module)

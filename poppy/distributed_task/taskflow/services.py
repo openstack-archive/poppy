@@ -89,7 +89,7 @@ class ServicesController(base.ServicesController):
                 job = board.post(job_name,
                                  book=job_logbook,
                                  details=job_details)
-                LOG.info("%s posted" % (job))
+                LOG.info('{0} posted'.format(job))
 
     def run_task_worker(self, name):
         """Run a task flow worker (conductor).

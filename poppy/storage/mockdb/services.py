@@ -67,8 +67,8 @@ class ServicesController(base.ServicesController):
 
     def create(self, project_id, service_obj):
         if service_obj.service_id in self.created_service_ids:
-            raise ValueError("Service %s already exists." %
-                             service_obj.service_id)
+            raise ValueError('Service {0} already exists.'.
+                             format(service_obj.service_id))
 
         self.created_service_ids.append(service_obj.service_id)
         self.created_services[service_obj.service_id] = service_obj.to_dict()

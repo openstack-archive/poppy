@@ -108,7 +108,8 @@ class ServiceController(base.ServiceBase):
                 # TODO(tonytan4ever): also classify domains based on their
                 # protocols. http and https domains needs to be created
                 # with separate base urls.
-                LOG.info("Creating Akamai Policy: %s", json.dumps(post_data))
+                LOG.info("Creating Akamai Policy: {0}".
+                         format(json.dumps(post_data)))
 
                 configuration_number = self._get_configuration_number(
                     classified_domain)
@@ -118,8 +119,8 @@ class ServiceController(base.ServiceBase):
                         policy_name=dp),
                     data=json.dumps(post_data),
                     headers=self.request_header)
-                LOG.info('akamai response code: %s' % resp.status_code)
-                LOG.info('akamai response text: %s' % resp.text)
+                LOG.info('akamai response code: {0}'.format(resp.status_code))
+                LOG.info('akamai response text: {0}'.format(resp.text))
                 if resp.status_code != 200:
                     raise RuntimeError(resp.text)
 
@@ -129,8 +130,8 @@ class ServiceController(base.ServiceBase):
                 ids.append(dp_obj)
                 # TODO(tonytan4ever): leave empty links for now
                 # may need to work with dns integration
-                LOG.info('Creating policy %s on domain %s complete' %
-                         (dp, classified_domain.domain))
+                LOG.info('Creating policy {0} on domain {1} complete'.
+                         format(dp, classified_domain.domain))
                 # pick a san cert for this domain
                 edge_host_name = None
                 if classified_domain.certificate == 'san':
@@ -154,18 +155,20 @@ class ServiceController(base.ServiceBase):
                               'certificate': classified_domain.certificate
                               })
         except Exception as e:
-            LOG.exception('Creating policy failed: %s' %
-                          traceback.format_exc())
+            LOG.exception('Creating policy failed: '.
+                          format(traceback.format_exc()))
 
             return self.responder.failed(
-                "failed to create service - %s" % str(e))
+                'failed to create service - {0}'.format(str(e)))
         else:
-            LOG.info("ids : {0} for service_id {1}".format(json.dumps(ids),
+            LOG.info('ids : {0} for service_id {1}'.format(
+                     json.dumps(ids),
                      service_obj.service_id))
-            LOG.info("links : {0} for service_id {1}".format(links,
+            LOG.info('links : {0} for service_id {1}'.format(
+                     links,
                      service_obj.service_id))
-            LOG.info("domain certificate status : {0} "
-                     "for service_id {1}".format(domains_certificate_status,
+            LOG.info('domain certificate status : {0} '
+                     'for service_id {1}'.format(domains_certificate_status,
                                                  service_obj.service_id))
             return self.responder.created(
                 json.dumps(ids), links,
@@ -214,9 +217,10 @@ class ServiceController(base.ServiceBase):
                     headers=self.request_header)
                 # if the policy is not found with provider, create it
                 if resp.status_code == 404:
-                    LOG.info('akamai response code: %s' % resp.status_code)
-                    LOG.info('upserting service with'
-                             'akamai: %s' % service_obj.service_id)
+                    LOG.info('akamai response code: {0}'.
+                             format(resp.status_code))
+                    LOG.info('upserting service with akamai: {0}'.
+                             format(service_obj.service_id))
                     return self.create(service_obj)
                 elif resp.status_code != 200:
                     raise RuntimeError(resp.text)
@@ -268,9 +272,9 @@ class ServiceController(base.ServiceBase):
                             classified_domain.protocol)):
                         # in this case we should update existing policy
                         # instead of create a new policy
-                        LOG.info('Start to update policy %s' % dp)
-                        LOG.info("Updating Akamai Policy: %s",
-                                 json.dumps(policy_content))
+                        LOG.info('Start to update policy {0}'.format(dp))
+                        LOG.info('Updating Akamai Policy: {0}'.format(
+                                 json.dumps(policy_content)))
 
                         # TODO(tonytan4ever): also classify domains based
                         # on their protocols. http and https domains needs
@@ -292,7 +296,7 @@ class ServiceController(base.ServiceBase):
 
                         policies.remove(dp_obj)
                     else:
-                        LOG.info('Start to create new policy %s' % dp)
+                        LOG.info('Start to create new policy {0}'.format(dp))
                         resp = self.policy_api_client.put(
                             self.policy_api_base_url.format(
                                 configuration_number=(
@@ -300,8 +304,10 @@ class ServiceController(base.ServiceBase):
                                 policy_name=dp),
                             data=json.dumps(policy_content),
                             headers=self.request_header)
-                    LOG.info('akamai response code: %s' % resp.status_code)
-                    LOG.info('akamai response text: %s' % resp.text)
+                    LOG.info('akamai response code: {0}'.
+                             format(resp.status_code))
+                    LOG.info('akamai response text: {0}'.
+                             format(resp.text))
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
                     dp_obj = {'policy_name': dp,
@@ -310,8 +316,8 @@ class ServiceController(base.ServiceBase):
                     ids.append(dp_obj)
                     # TODO(tonytan4ever): leave empty links for now
                     # may need to work with dns integration
-                    LOG.info('Creating/Updating policy %s on domain %s '
-                             'complete' % (dp, classified_domain.domain))
+                    LOG.info('Creating/Updating policy {0} on domain {1}'
+                             ' complete'.format(dp, classified_domain.domain))
                     edge_host_name = None
                     if classified_domain.certificate == 'san':
                         cert_info = getattr(classified_domain, 'cert_info',
@@ -348,18 +354,20 @@ class ServiceController(base.ServiceBase):
                     configuration_number = self._get_configuration_number(
                         util.dict2obj(policy))
 
-                    LOG.info('Starting to delete old policy %s' %
-                             policy['policy_name'])
+                    LOG.info('Starting to delete old policy {0}'.
+                             format(policy['policy_name']))
                     resp = self.policy_api_client.delete(
-                        self.policy_api_base_url.format(
+                        self.policy_api_base_url(
                             configuration_number=configuration_number,
                             policy_name=policy['policy_name']))
-                    LOG.info('akamai response code: %s' % resp.status_code)
-                    LOG.info('akamai response text: %s' % resp.text)
+                    LOG.info('akamai response code: {0}'.
+                             format(resp.status_code))
+                    LOG.info('akamai response text: {0}'.
+                             format(resp.text))
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
-                    LOG.info('Delete old policy %s complete' %
-                             policy['policy_name'])
+                    LOG.info('Delete old policy {0} complete'.
+                             format(policy['policy_name']))
             except Exception:
                 LOG.exception("Failed to Update Service - {0}".
                               format(provider_service_id))
@@ -378,10 +386,11 @@ class ServiceController(base.ServiceBase):
         except Exception as e:
             LOG.exception("Failed to Update Service - {0}".
                           format(provider_service_id))
-            LOG.exception('Updating policy failed: %s', traceback.format_exc())
+            LOG.exception('Updating policy failed: {0}'.
+                          format(traceback.format_exc()))
 
             return self.responder.failed(
-                "failed to update service - %s" % str(e))
+                "failed to update service - {0}".format(str(e)))
 
     def delete(self, provider_service_id):
         # delete needs to provide a list of policy id/domains
@@ -399,7 +408,7 @@ class ServiceController(base.ServiceBase):
                 return self.responder.failed(str(e))
         try:
             for policy in policies:
-                LOG.info('Starting to delete policy %s' % policy)
+                LOG.info('Starting to delete policy {0}'.format(policy))
                 # TODO(tonytan4ever): needs to look at if service
                 # domain is an https domain, if it is then a different
                 # base url is needed
@@ -410,8 +419,8 @@ class ServiceController(base.ServiceBase):
                     self.policy_api_base_url.format(
                         configuration_number=configuration_number,
                         policy_name=policy['policy_name']))
-                LOG.info('akamai response code: %s' % resp.status_code)
-                LOG.info('akamai response text: %s' % resp.text)
+                LOG.info('akamai response code: {0}'.format(resp.status_code))
+                LOG.info('akamai response text: {0}'.format(resp.text))
                 if resp.status_code != 200:
                     raise RuntimeError(resp.text)
         except Exception as e:
@@ -494,14 +503,16 @@ class ServiceController(base.ServiceBase):
                         )
                     )
                     if lastSpsId not in [None, ""]:
-                        LOG.info('Latest spsId for %s is: %s' % (san_cert_name,
-                                                                 lastSpsId))
+                        LOG.info('Latest spsId for {0} is: {1}'.format(
+                                 san_cert_name,
+                                 lastSpsId))
                         resp = self.sps_api_client.get(
                             self.sps_api_base_url.format(spsId=lastSpsId),
                         )
                         if resp.status_code != 200:
                             raise RuntimeError('SPS API Request Failed'
-                                               'Exception: %s' % resp.text)
+                                               'Exception: {0}'.
+                                               format(resp.text))
                         sps_request_info = json.loads(resp.text)[
                             'requestList'][0]
                         status = sps_request_info['status']
@@ -509,36 +520,36 @@ class ServiceController(base.ServiceBase):
                         if status == 'edge host already created or pending':
                             if workFlowProgress is not None and \
                                     'error' in workFlowProgress.lower():
-                                LOG.info("SPS Pending with Error:" %
-                                         workFlowProgress)
+                                LOG.info("SPS Pending with Error: {0}".
+                                         format(workFlowProgress))
                                 continue
                             else:
                                 pass
                         elif status == 'CPS cancelled':
                             pass
                         elif status != 'SPS Request Complete':
-                            LOG.info("SPS Not completed for %s..." %
-                                     san_cert_name)
+                            LOG.info("SPS Not completed for {0}...".format(
+                                     san_cert_name))
                             continue
                     # issue modify san_cert sps request
                     cert_info = self.san_info_storage.get_cert_info(
                         san_cert_name)
                     cert_info['add.sans'] = cert_obj.domain_name
-                    string_post_data = '&'.join(
-                        ['%s=%s' % (k, v) for (k, v) in cert_info.items()])
-                    LOG.info('Post modSan request with request data: %s' %
-                             string_post_data)
+                    string_post_data = ('&'.join(['{0}={1}'.format(
+                        (k, v) for (k, v) in cert_info.items())]))
+                    LOG.info('Post modSan request with request data: {0}'.
+                             format(string_post_data))
                     resp = self.sps_api_client.post(
                         self.sps_api_base_url.format(spsId=""),
                         data=string_post_data.encode('utf-8')
                     )
                     if resp.status_code != 202:
                         raise RuntimeError('SPS Request failed.'
-                                           'Exception: %s' % resp.text)
+                                           'Exception: {0}'.format(resp.text))
                     else:
                         resp_dict = json.loads(resp.text)
-                        LOG.info('modSan request submitted. Response: %s' %
-                                 str(resp_dict))
+                        LOG.info('modSan request submitted. Response: {0}'.
+                                 format(str(resp_dict)))
                         this_sps_id = resp_dict['spsId']
                         self.san_info_storage.save_cert_last_spsid(
                             san_cert_name,
@@ -550,8 +561,8 @@ class ServiceController(base.ServiceBase):
                                 'akamai_spsId': this_sps_id,
                                 'created_at': str(datetime.datetime.now()),
                                 'action': 'Waiting for customer domain '
-                                          'validation for %s' %
-                                          (cert_obj.domain_name)
+                                          'validation for {0}'.
+                                          format(cert_obj.domain_name)
                             })
                 else:
                     self.mod_san_queue.enqueue_mod_san_request(
@@ -561,12 +572,12 @@ class ServiceController(base.ServiceBase):
                         'san cert': None,
                         # Add logging so it is easier for testing
                         'created_at': str(datetime.datetime.now()),
-                        'action': 'No available san cert for %s right now,'
+                        'action': 'No available san cert for {0} right now,'
                                   ' or no san cert info available. Support:'
                                   'Please write down the domain and keep an'
                                   ' eye on next availabe freed-up SAN certs.'
-                                  ' More provisioning might be needed' %
-                                  (cert_obj.domain_name)
+                                  ' More provisioning might be needed'.
+                                  format(cert_obj.domain_name)
                     })
             except Exception as e:
                 LOG.exception(e)
@@ -575,13 +586,14 @@ class ServiceController(base.ServiceBase):
                     'san cert': None,
                     'created_at': str(datetime.datetime.now()),
                     'action': 'Waiting for action... '
-                              'Provision san cert failed for %s failed.' %
-                              cert_obj.domain_name
+                              'Provision san cert failed for {0} failed.'.
+                              format(cert_obj.domain_name)
                 })
         else:
             return self.responder.ssl_certificate_provisioned(None, {
                 'status': 'failed',
-                'reason': 'Cert type : %s hasn\'t been implemented'
+                'reason': 'Cert type : {0} hasn\'t been implemented'.
+                          format(cert_obj.cert_type)
             })
 
     @decorators.lazy_property(write=False)
@@ -838,7 +850,7 @@ class ServiceController(base.ServiceBase):
     def _get_behavior_value(self, entity, rule_entries):
         if entity == 'referrer':
             return ' '.join(
-                ['*%s*' % referrer
+                ['*{0}*'.format(referrer)
                  for rule_entry
                  in rule_entries
                  for referrer
@@ -846,7 +858,7 @@ class ServiceController(base.ServiceBase):
                  ])
         elif entity == 'client_ip':
             return ' '.join(
-                ['%s' % rule_entry.client_ip
+                ['{0}'.format(rule_entry.client_ip)
                  for rule_entry
                  in rule_entries
                  ])
@@ -863,15 +875,14 @@ class ServiceController(base.ServiceBase):
                     zones_list.append(rule_entry.geography)
             # NOTE(tonytan4ever):Too many country code to check and maybe more
             # countries in the future, so put in checking duplicates logic here
-            country_code_list = [
-                '%s' %
-                geo_zone_code_mapping.COUNTRY_CODE_MAPPING.get(zone, '')
-                for zone in zones_list
-                if geo_zone_code_mapping.COUNTRY_CODE_MAPPING.get(zone, '')
-                != '']
+            country_code_list = ([
+                '{0}'.format(geo_zone_code_mapping.COUNTRY_CODE_MAPPING.
+                             get(zone, '') for zone in zones_list
+                             if geo_zone_code_mapping.
+                             COUNTRY_CODE_MAPPING.get(zone, '') != '')])
             if len(country_code_list) > len(set(country_code_list)):
-                raise ValueError("Duplicated country code in %s" %
-                                 str(country_code_list))
+                raise ValueError("Duplicated country code in {0}".
+                                 format(str(country_code_list)))
             res = ' '.join(country_code_list)
             return res
 
@@ -903,7 +914,7 @@ class ServiceController(base.ServiceBase):
                                 rule['behaviors'].append({
                                     'name': 'caching',
                                     'type': 'no-store',
-                                    'value': '%ss' % caching_rule.ttl
+                                    'value': '{0}s'.format(caching_rule.ttl)
                                 })
                             else:
                                 rule['behaviors'].append({
@@ -911,7 +922,7 @@ class ServiceController(base.ServiceBase):
                                     'type': 'fixed',
                                     # assuming the input number to caching rule
                                     # ttl is in second
-                                    'value': '%ss' % caching_rule.ttl
+                                    'value': '{0}s'.format(caching_rule.ttl)
                                 })
 
                 # if there is no matches entry yet for this rule
@@ -936,7 +947,7 @@ class ServiceController(base.ServiceBase):
                         rule_dict_template['behaviors'].append({
                             'name': 'caching',
                             'type': 'no-store',
-                            'value': '%ss' % caching_rule.ttl
+                            'value': '{0}s'.format(caching_rule.ttl)
                         })
                     else:
                         rule_dict_template['behaviors'].append({
@@ -944,7 +955,7 @@ class ServiceController(base.ServiceBase):
                             'type': 'fixed',
                             # assuming the input number to caching rule
                             # ttl is in second
-                            'value': '%ss' % caching_rule.ttl
+                            'value': '{0}s'.format(caching_rule.ttl)
                         })
                     rules_list.append(rule_dict_template)
             # end loop - caching_rule.rules
@@ -965,8 +976,8 @@ class ServiceController(base.ServiceBase):
             elif domain_obj.certificate == 'custom':
                 configuration_number = self.driver.https_custom_conf_number
             else:
-                raise ValueError("Unknown certificate type: %s" %
-                                 domain_obj.certificate)
+                raise ValueError("Unknown certificate type: {0}".format(
+                                 domain_obj.certificate))
         return configuration_number
 
     def _get_provider_access_url(self, domain_obj, dp, edge_host_name=None):
@@ -994,8 +1005,8 @@ class ServiceController(base.ServiceBase):
                 provider_access_url = '.'.join(
                     [dp, self.driver.akamai_https_access_url_suffix])
             else:
-                raise ValueError("Unknown certificate type: %s" %
-                                 domain_obj.certificate)
+                raise ValueError("Unknown certificate type: {0}".
+                                 format(domain_obj.certificate))
         return provider_access_url
 
     def _pick_san_edgename(self):
