@@ -64,6 +64,10 @@ class TestSSLCertificate(base.TestCase):
         cert_details_two = cert_details.copy()
         cert_details_two['mock']['extra_info'] = 'maybe'
         ssl_cert.cert_details = cert_details_two
+        self.assertEqual(ssl_cert.cert_details, cert_details_two)
+        # check cert type here, the model was incorrectly modifying
+        # cert_type in the cert_details setter
+        self.assertEqual('custom', ssl_cert.cert_type)
 
         # get cert status
         cert_details['mock']['extra_info'] = {

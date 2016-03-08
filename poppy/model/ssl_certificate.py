@@ -92,7 +92,7 @@ class SSLCertificate(common.DictSerializableModel):
     @cert_details.setter
     def cert_details(self, value):
         """Set cert details."""
-        self._cert_type = value
+        self._cert_details = value
 
     def get_cert_status(self):
         if self.cert_details is None:
