@@ -511,13 +511,36 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         """GET SSL Certificate Info
 
         :return: Response Object containing response code 200 and body with
-                details of certificate request
+                details of updated certificate info
 
         GET
-        ssl_certificate
+        admin/provider/akamai/ssl_certificate/config/
         """
 
         url = '{0}/admin/provider/akamai/ssl_certificate/config/{1}'.format(
             self.url, san_cert_name)
 
         return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
+
+    def update_certificate_info(self,
+                                san_cert_name,
+                                spsId=None,
+                                requestslib_kwargs=None):
+        """Update SSL Certificate Info
+
+        :return: Response Object containing response code 200 and body with
+                details of updated certificate info
+
+        GET
+        admin/provider/akamai/ssl_certificate/config/
+        """
+
+        url = '{0}/admin/provider/akamai/ssl_certificate/config/{1}'.format(
+            self.url, san_cert_name)
+
+        request_object = requests.PutSanCertConfigInfo(
+            spsId=spsId)
+
+        return self.request('POST', url,
+                            request_entity=request_object,
+                            requestslib_kwargs=requestslib_kwargs)

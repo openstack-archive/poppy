@@ -86,5 +86,20 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                     }
                 }
             }
+        },
+
+        'config': {
+            'POST': {
+                'type': 'object',
+                'additionalProperties': False,
+                'properties': {
+                    'spsId': {
+                        'type': 'integer',
+                        # we cannot have 0 or negative spsId
+                        'minimum': 1,
+                        'required': True
+                    }
+                }
+            }
         }
     }
