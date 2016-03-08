@@ -34,12 +34,12 @@ class SSLCertificate(common.DictSerializableModel):
                  domain_name,
                  cert_type,
                  project_id=None,
-                 cert_details={}):
-        self._flavor_id = flavor_id
-        self._domain_name = domain_name
-        self._cert_type = cert_type
-        self._cert_details = cert_details
-        self._project_id = project_id
+                 cert_details=None):
+        self.flavor_id = flavor_id
+        self.domain_name = domain_name
+        self.cert_type = cert_type
+        self.cert_details = cert_details
+        self.project_id = project_id
 
     @property
     def flavor_id(self):
@@ -92,11 +92,12 @@ class SSLCertificate(common.DictSerializableModel):
     @cert_details.setter
     def cert_details(self, value):
         """Set cert details."""
-        self._cert_type = value
+        if value is None:
+            self._cert_details = {}
+        else:
+            self._cert_details = value
 
     def get_cert_status(self):
-        if self.cert_details is None:
-            return "deployed"
         if self.cert_details == {}:
             return "create_in_progress"
         # Note(tonytan4ever): Right now we assume there is only one
