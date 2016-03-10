@@ -382,7 +382,7 @@ class ServiceController(base.ServiceBase):
                                     configuration_number),
                                 policy_name=dp),
                             data=json.dumps(policy_content),
-                            headers=self.request_header)
+                            headers=headers)
                     LOG.info('akamai response code: %s' % resp.status_code)
                     LOG.info('akamai response text: %s' % resp.text)
                     if resp.status_code != 200:
