@@ -32,12 +32,12 @@ class AnalyticsController(base.AnalyticsController):
         except ValueError:
             msg = "Domain: {0} was not found for project_id: {1}".format(
                 domain_name, project_id)
-            LOG.warn(msg)
+            LOG.warning(msg)
             raise errors.ServiceNotFound(msg)
         if not result:
             msg = "Domain: {0} was not found for project_id: {1}".format(
                 domain_name, project_id)
-            LOG.warn(msg)
+            LOG.warning(msg)
             raise errors.ServiceNotFound(msg)
 
         if not result.provider_details:
@@ -45,7 +45,7 @@ class AnalyticsController(base.AnalyticsController):
                   "for the service_id: {0} " \
                   "corresponding to project_id: {1}".format(result.service_id,
                                                             project_id)
-            LOG.warn(msg)
+            LOG.warning(msg)
             raise errors.ServiceProviderDetailsNotFound(msg)
 
         provider_details_dict = result.provider_details
@@ -58,7 +58,7 @@ class AnalyticsController(base.AnalyticsController):
 
         if not provider_for_domain:
             msg = "Provider not found for Domain : {0}".format(domain_name)
-            LOG.warn(msg)
+            LOG.warning(msg)
             raise errors.ProviderNotFound(msg)
 
         provider_obj = self.providers[provider_for_domain.lower()].obj

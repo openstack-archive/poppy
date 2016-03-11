@@ -237,15 +237,15 @@ class CDNProvider(base.Driver):
                         configuration_number=self.http_conf_number,
                         policy_name=unique_id))
             except Exception as e:
-                LOG.warn(
+                LOG.warning(
                     'Akamai Health Check Succeeded but \
                      failed to delete policy:{0}'.format(e))
             return True
 
         else:
-            LOG.warn("Akamai Health Check Failed")
-            LOG.warn("Response Status Code : {0}".format(resp.status_code))
-            LOG.warn("Response Text : {0}".format(resp.text))
+            LOG.warning("Akamai Health Check Failed")
+            LOG.warning("Response Status Code : {0}".format(resp.status_code))
+            LOG.warning("Response Text : {0}".format(resp.text))
             return False
 
     @property

@@ -125,11 +125,13 @@ class DeleteServiceDNSMappingTask(task.Task):
                 self.retry_progress = current_progress
                 self.retry_index = 1
             if self.retry_progress == 1.0:
-                LOG.warn('Maximum retry attempts of '
-                         '{0} reached for Task {1}'.format(retries, self.name))
-                LOG.warn('Setting of state of service_id: '
-                         '{0} and project_id: {1} '
-                         'to failed'.format(service_id, project_id))
+                LOG.warning(
+                    'Maximum retry attempts of '
+                    '{0} reached for Task {1}'.format(retries, self.name))
+                LOG.warning(
+                    'Setting of state of service_id: '
+                    '{0} and project_id: {1} '
+                    'to failed'.format(service_id, project_id))
                 provider_details_dict = {}
                 result = kwargs['result']
                 for responder in responders:
@@ -153,8 +155,8 @@ class DeleteServiceDNSMappingTask(task.Task):
                                                 project_id,
                                                 service_id)
             else:
-                LOG.warn('Sleeping for {0} seconds and '
-                         'retrying'.format(retry_sleep_time))
+                LOG.warning('Sleeping for {0} seconds and '
+                            'retrying'.format(retry_sleep_time))
                 if retry_sleep_time is not None:
                     time.sleep(retry_sleep_time)
 
