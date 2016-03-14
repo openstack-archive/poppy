@@ -274,6 +274,19 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('POST', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
+    def get_by_service_status(self, status,
+                              requestslib_kwargs=None):
+        """GET Services by Status
+
+        :return: Response Object containing response code 200
+
+        GET
+        /admin/services?status
+        """
+
+        url = '{0}/admin/services?status={1}'.format(self.url, status)
+        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
+
     def admin_migrate_domain(self, project_id, service_id, domain, new_cert,
                              requestslib_kwargs=None):
         """Update SAN domain

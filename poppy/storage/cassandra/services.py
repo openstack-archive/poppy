@@ -249,6 +249,28 @@ CQL_UPDATE_CERT_DETAILS = '''
     IF cert_type = %(cert_type)s AND flavor_id = %(flavor_id)s
 '''
 
+CQL_SET_SERVICE_STATUS = '''
+    INSERT INTO service_status (service_id,
+        project_id,
+        status
+        )
+    VALUES (%(service_id)s,
+        %(project_id)s,
+        %(status)s)
+'''
+
+CQL_GET_SERVICE_STATUS = '''
+    SELECT project_id,
+        service_id
+    FROM service_status
+    WHERE status = %(status)s
+'''
+
+CQL_DELETE_SERVICE_STATUS = '''
+    DELETE FROM service_status
+    WHERE service_id = %(service_id)s
+'''
+
 
 class ServicesController(base.ServicesController):
 
@@ -411,6 +433,42 @@ class ServicesController(base.ServicesController):
         LOG.info("Fetched {0} number of services "
                  "for project_id: {1}".format(count, project_id))
         return count
+
+    def get_services_by_status(self, status):
+
+        LOG.info("Fetching service_ids and "
+                 "project_ids with status: {0}".format(status))
+
+        args = {
+            'status': status
+        }
+
+        stmt = query.SimpleStatement(
+            CQL_GET_SERVICE_STATUS,
+            consistency_level=self._driver.consistency_level)
+
+        resultset = self.session.execute(stmt, args)
+        complete_results = list(resultset)
+        for result in complete_results:
+            result['service_id'] = str(result['service_id'])
+
+        return complete_results
+
+    def delete_services_status(self, project_id, service_id):
+
+        LOG.info("Deleting service_id: {0} "
+                 "with project_id: {1} from service_status "
+                 "column family".format(service_id, project_id))
+
+        args = {
+            'service_id': uuid.UUID(str(service_id))
+        }
+
+        stmt = query.SimpleStatement(
+            CQL_DELETE_SERVICE_STATUS,
+            consistency_level=self._driver.consistency_level)
+
+        self.session.execute(stmt, args)
 
     def get_service_limit(self, project_id):
         """get_service_limit
@@ -706,7 +764,9 @@ class ServicesController(base.ServicesController):
         pds = {provider:
                json.dumps(service_obj.provider_details[provider].to_dict())
                for provider in service_obj.provider_details}
-
+        status = None
+        for provider in service_obj.provider_details:
+            status = service_obj.provider_details[provider].status
         log_delivery = json.dumps(service_obj.log_delivery.to_dict())
         # fetch current domains
         args = {
@@ -777,6 +837,17 @@ class ServicesController(base.ServicesController):
                 consistency_level=self._driver.consistency_level)
             self.session.execute(stmt, args)
 
+        status_args = {
+            'service_id': uuid.UUID(str(service_id)),
+            'project_id': project_id,
+            'status': status
+        }
+
+        stmt = query.SimpleStatement(
+            CQL_SET_SERVICE_STATUS,
+            consistency_level=self._driver.consistency_level)
+        self.session.execute(stmt, status_args)
+
     def update_state(self, project_id, service_id, state):
         """update_state
 
@@ -821,6 +892,8 @@ class ServicesController(base.ServicesController):
             # NOTE(obulpathi): Convert a OrderedMapSerializedKey to a Dict
             pds = result.get('provider_details', {}) or {}
             pds = {key: value for key, value in pds.items()}
+
+            self.delete_services_status(project_id, service_id)
 
             if self._driver.archive_on_delete:
                 archive_args = {
@@ -965,7 +1038,9 @@ class ServicesController(base.ServicesController):
         :param service_id
         :param provider_details
         """
+
         provider_detail_dict = {}
+        status = None
         for provider_name in sorted(provider_details.keys()):
             the_provider_detail_dict = collections.OrderedDict()
             the_provider_detail_dict["id"] = (
@@ -974,6 +1049,7 @@ class ServicesController(base.ServicesController):
                 provider_details[provider_name].access_urls)
             the_provider_detail_dict["status"] = (
                 provider_details[provider_name].status)
+            status = the_provider_detail_dict["status"]
             the_provider_detail_dict["name"] = (
                 provider_details[provider_name].name)
             the_provider_detail_dict["domains_certificate_status"] = (
@@ -998,6 +1074,17 @@ class ServicesController(base.ServicesController):
         # returns the dictionary
         stmt = query.SimpleStatement(
             CQL_UPDATE_PROVIDER_DETAILS,
+            consistency_level=self._driver.consistency_level)
+        self.session.execute(stmt, args)
+
+        args = {
+            'project_id': project_id,
+            'service_id': uuid.UUID(str(service_id)),
+            'status': status
+        }
+
+        stmt = query.SimpleStatement(
+            CQL_SET_SERVICE_STATUS,
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
 

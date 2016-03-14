@@ -178,6 +178,58 @@ class TestBase(fixtures.BaseTestFixture):
 
         return resp
 
+    def _service_limit_create_test_service(self, client, resp_code=False):
+        service_name = str(uuid.uuid1())
+
+        domain_list = [{"domain": self.generate_random_string(
+            prefix='www.api-test-domain') + '.com'}]
+
+        origin_list = [{"origin": self.generate_random_string(
+            prefix='api-test-origin') + '.com', "port": 80, "ssl": False,
+            "hostheadertype": "custom", "hostheadervalue":
+            "www.customweb.com"}]
+        caching_list = [
+            {
+                u"name": u"default",
+                u"ttl": 3600,
+                u"rules": [{
+                    u"name": "default",
+                    u"request_url": "/*"
+                }]
+            },
+            {
+                u"name": u"home",
+                u"ttl": 1200,
+                u"rules": [{
+                    u"name": u"index",
+                    u"request_url": u"/index.htm"
+                }]
+            }
+        ]
+        log_delivery = {"enabled": False}
+
+        resp = client.create_service(
+            service_name=service_name,
+            domain_list=domain_list,
+            origin_list=origin_list,
+            caching_list=caching_list,
+            flavor_id=self.flavor_id,
+            log_delivery=log_delivery)
+
+        if resp_code:
+            return resp
+
+        self.assertEqual(resp.status_code, 202)
+        service_url = resp.headers["location"]
+        client.wait_for_service_status(
+            location=service_url,
+            status='DEPLOYED',
+            abort_on_status='FAILED',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
+        return service_url
+
     def assert_patch_service_details(self, actual_response, expected_response):
         self.assertEqual(actual_response['name'],
                          expected_response['name'])
