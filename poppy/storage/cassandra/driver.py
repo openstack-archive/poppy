@@ -191,10 +191,8 @@ class CassandraStorageDriver(base.Driver):
         """Health check for Cassandra."""
 
         try:
-            session = _connection(self.cassandra_conf, self.datacenter)
-            session.execute(
+            self.session.execute(
                 "SELECT cluster_name, data_center FROM system.local;")
-            session.shutdown()
         except Exception:
             return False
         return True
