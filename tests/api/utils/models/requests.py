@@ -176,13 +176,15 @@ class CreateSSLCertificate(base.AutoMarshallingModel):
 class PutSanCertConfigInfo(base.AutoMarshallingModel):
     """Marshalling for Create SSL Certificate requests."""
 
-    def __init__(self, spsId=None):
+    def __init__(self, spsId=None, enabled=True):
         super(PutSanCertConfigInfo, self).__init__()
 
         self.spsId = spsId
+        self.enabled = enabled
 
     def _obj_to_json(self):
         put_san_cert_info_request = {
-            "spsId": self.spsId
+            "spsId": self.spsId,
+            "enabled": self.enabled
         }
         return json.dumps(put_san_cert_info_request)

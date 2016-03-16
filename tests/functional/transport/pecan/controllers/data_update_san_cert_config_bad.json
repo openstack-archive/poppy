@@ -1,5 +1,8 @@
 {
-	"missing_spsId": {
+	"extra_parameter": {
+		"spsId": 1234,
+		"enabled": false,
+		"unsupported_config": "some value"
     },
     "invalid_spsId": {
         "spsId": "1abc"
