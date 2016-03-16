@@ -247,6 +247,7 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         issuer = the_san_cert_info.get("issuer")
         ipVersion = the_san_cert_info.get("ipVersion")
         slot_deployment_klass = the_san_cert_info.get("slot_deployment_klass")
+        enabled = the_san_cert_info.get("enabled", True)
 
         res = {
             # This will always be the san cert name
@@ -256,6 +257,7 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
             'createType': 'modSan',
             'ipVersion': ipVersion,
             'slot-deployment.class': slot_deployment_klass,
+            'enabled': enabled,
             'product': 'ion_premier'
         }
 
@@ -270,9 +272,35 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         res['spsId'] = str(self.get_cert_last_spsid(san_cert_name))
         return res
 
-    def update_cert_config(self, san_cert_name, new_spsId):
-        self.save_cert_last_spsid(san_cert_name, new_spsId)
+    def update_cert_config(self, san_cert_name, new_cert_config):
+        self.save_cert_config(san_cert_name, new_cert_config)
         return self.get_cert_config(san_cert_name)
+
+    def save_cert_config(self, san_cert_name, new_cert_config):
+        san_info = self._get_akamai_san_certs_info()
+        the_san_cert_info = san_info.get(
+            san_cert_name
+        )
+
+        if the_san_cert_info is None:
+            raise ValueError('No san cert info found for %s.' % san_cert_name)
+
+        the_san_cert_info.update(new_cert_config)
+        san_info[san_cert_name] = the_san_cert_info
+        # Change the previous san info in the overall provider_info dictionary
+        provider_info = dict(self._get_akamai_provider_info()['info'])
+        provider_info['san_info'] = json.dumps(san_info)
+
+        stmt = query.SimpleStatement(
+            UPDATE_PROVIDER_INFO,
+            consistency_level=self.consistency_level)
+
+        args = {
+            'provider_name': 'akamai',
+            'info': provider_info
+        }
+
+        self.session.execute(stmt, args)
 
     def save_cert_last_spsid(self, san_cert_name, sps_id_value):
         san_info = self._get_akamai_san_certs_info()
@@ -310,6 +338,17 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
 
         spsId = the_san_cert_info.get('spsId')
         return spsId
+
+    def get_enabled_status(self, san_cert_name):
+        the_san_cert_info = self._get_akamai_san_certs_info().get(
+            san_cert_name
+        )
+
+        if the_san_cert_info is None:
+            raise ValueError('No san cert info found for %s.' % san_cert_name)
+
+        enabled = the_san_cert_info.get('enabled', True)
+        return enabled
 
     def update_san_info(self, san_info_dict):
         provider_info = {}
