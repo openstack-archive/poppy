@@ -34,7 +34,7 @@ class TestGetSetSanCertInfo(base.TestBase):
 
     def test_get_san_cert_negative(self):
         resp = self.client.view_certificate_info(
-            self.san_cert_name_negative
+            self.san_cert_name_negativec
         )
 
         self.assertEqual(resp.status_code, 400)
@@ -54,8 +54,10 @@ class TestGetSetSanCertInfo(base.TestBase):
 
         resp = self.client.update_certificate_info(
             self.san_cert_name_poisitve,
-            spsId=random.randint(1000, 2000)
+            spsId=random.randint(1000, 2000),
+            enabled=True
         )
 
         self.assertTrue('spsId' in resp.json())
+        self.assertTrue('enabled' in resp.json())
         self.assertEqual(resp.status_code, 200)

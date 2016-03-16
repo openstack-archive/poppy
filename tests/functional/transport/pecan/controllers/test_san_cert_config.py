@@ -53,7 +53,8 @@ class TestSanCertConfigController(base.FunctionalTest):
 
     def test_update_san_cert_config_positive(self):
         config_data = {
-            'spsId': 1345
+            'spsId': 1345,
+            'enabled': False
         }
         response = self.app.post('/v1.0/admin/provider/akamai/'
                                  'ssl_certificate/config/'

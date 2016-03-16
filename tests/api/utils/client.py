@@ -538,6 +538,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
     def update_certificate_info(self,
                                 san_cert_name,
                                 spsId=None,
+                                enabled=True,
                                 requestslib_kwargs=None):
         """Update SSL Certificate Info
 

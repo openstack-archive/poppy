@@ -583,6 +583,13 @@ class ServiceController(base.ServiceBase):
                     })
 
                 for san_cert_name in self.san_cert_cnames:
+                    enabled = (
+                        self.san_info_storage.get_enabled_status(
+                            san_cert_name
+                        )
+                    )
+                    if not enabled:
+                        continue
                     lastSpsId = (
                         self.san_info_storage.get_cert_last_spsid(
                             san_cert_name
