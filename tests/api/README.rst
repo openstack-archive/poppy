@@ -11,9 +11,16 @@ The API tests
 To run the tests
 ================
 
-1. Install the dependencies::
+1. Create a new virtualenv and install the dependencies::
 
-    $ pip install -r requirements.txt
+    NOTE: At the time of this writing opencafe is not compatible with python 3.
+          So you will need to create virtualenv with python 2.
+
+    $ pip install -r requirements/requirements.txt
+    $ pip install -r tests/test-requirements.txt
+    $ pip install -r tests/api/requirements.txt
+    $ cafe-config init
+    $ cafe-config plugins install http
 
 2. Set the following environment variables::
 
@@ -31,16 +38,27 @@ To run the tests
     export NOSE_OPENSTACK_STDOUT=1
 
 
-4. The API tests require a running database (eg cassandra) and zookeeper, in order to
-run via tox.
+4. 
+
+a) If you intend to run the tests against a local poppy server,
+start server with the following command.
 
     $ ./run_poppy.sh
 
-5. Copy the api.conf file to the path set by CAFE_CONFIG_FILE_PATH::
+b) If you intend to run the tests against a remote poppy server (say test or production env),
+grab the url. The url will be in the format
+    http://remote.poppy-server.com/v1.0
+
+5. Make a directory ~/.poppy
+    mkdir ~/.poppy
+
+6. Copy the api.conf file to the path set by CAFE_CONFIG_FILE_PATH::
 
     $ cp tests/etc/api.conf ~/.poppy/tests.conf
 
-6. Once you are ready to run the tests::
+7. Update the config file in ~/.poppy/tests.conf with the appropriate values
+
+8. Once you are ready to run the tests::
 
     $ nosetests api
 
@@ -72,4 +90,3 @@ and to get around having to create accounts with a certain provider.
 Mimic helps accomplish this goal for testing.
 
 1.  Run the mimic docker container (via ./run_poppy.sh) and point any remote api url in your test.conf file to your http://dockerhost:8900/mimic_service_name
-
