@@ -55,11 +55,15 @@ class TestAkamaiBJFlowRuns(base.TestCase):
             "update_info_list": json.dumps([
                 (
                     "add",
-                    {
+                    [{
+                        "cnameFrome": "blog.testabc.com",
+                        "cnameTo": 'secure1.san1.test_cdn.com',
+                        "cnameType": "EDGE_HOSTNAME"
+                    }, {
                         "cnameFrome": "blog.testabc.com",
                         "cnameTo": 'secure2.san1.test_cdn.com',
                         "cnameType": "EDGE_HOSTNAME"
-                    }
+                    }]
                 )])
         }
         engines.run(update_property_flow.update_property_flow(),

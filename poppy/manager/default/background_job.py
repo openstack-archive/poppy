@@ -20,8 +20,8 @@ from oslo_log import log
 
 from poppy.manager import base
 from poppy.notification.mailgun import driver as n_driver
-from poppy.provider.akamai.background_jobs.check_cert_status_and_update import \
-    check_cert_status_and_update_flow
+from poppy.provider.akamai.background_jobs.check_cert_status_and_update \
+    import check_cert_status_and_update_flow
 from poppy.provider.akamai.background_jobs.update_property import \
     update_property_flow
 from poppy.provider.akamai import driver as a_driver
@@ -61,37 +61,45 @@ class BackgroundJobController(base.BackgroundJobController):
                 check_cert_status_and_update_flow,
                 **kwargs)
         elif job_type == "akamai_update_papi_property_for_mod_san":
-            LOG.info("%s: %s to %s, on property: %s" % (
-                kwargs.get("action", 'add'),
-                kwargs.get("domain_name"),
-                kwargs.get("san_cert_name"),
-                kwargs.get("property_spec", 'akamai_https_san_config_numbers')
-            ))
+            update_cname_host_mapping_info = kwargs.get(
+                "update_cname_host_mapping_info"
+            )
 
-            # Note(tonytan4ever): Put this check here so erroneous
-            # san cert params will not pass. Support occassionally put in
-            # the ending "edgekey.net"
-            # (e.g: securexxx.san1.abc.com.edgekey.net), this check will
-            # effectively error that out
-            if kwargs.get("san_cert_name") not in \
-                    self.akamai_san_cert_cname_list:
-                raise ValueError("Not A valid san cert cname: %s, "
-                                 "valid san cert cnames are: %s" %
-                                 (kwargs.get("san_cert_name"),
-                                  self.akamai_san_cert_cname_list))
+            cnam_host_info_list = []
+            for domain_san_cert_cname_pair in update_cname_host_mapping_info:
+                LOG.info("%s: %s to %s, on property: %s" % (
+                    kwargs.get("action", 'add'),
+                    domain_san_cert_cname_pair["domain_name"],
+                    domain_san_cert_cname_pair["san_cert_name"],
+                    kwargs.get("property_spec",
+                               'akamai_https_san_config_numbers')
+                ))
+
+                # Note(tonytan4ever): Put this check here so erroneous
+                # san cert params will not pass. Support occassionally put in
+                # the ending "edgekey.net"
+                # (e.g: securexxx.san1.abc.com.edgekey.net), this check will
+                # effectively error that out
+                if domain_san_cert_cname_pair["san_cert_name"] not in \
+                        self.akamai_san_cert_cname_list:
+                    raise ValueError("Not A valid san cert cname: %s, "
+                                     "valid san cert cnames are: %s" %
+                                     (kwargs.get("san_cert_name"),
+                                      self.akamai_san_cert_cname_list))
+                cnam_host_info_list.append({
+                    "cnameFrom": domain_san_cert_cname_pair["domain_name"],
+                    "cnameTo": '.'.join([domain_san_cert_cname_pair[
+                                         "san_cert_name"],
+                                         kwargs.get("san_cert_domain_suffix",
+                                         self.akamai_san_cert_suffix)]),
+                    "cnameType": "EDGE_HOSTNAME"
+                })
 
             t_kwargs = {}
 
             update_info_list = json.dumps([
-                (kwargs.get("property_spec", 'add'),
-                    {
-                        "cnameFrom": kwargs.get("domain_name"),
-                        "cnameTo": '.'.join([kwargs.get("san_cert_name"),
-                                             kwargs.get(
-                                            "san_cert_domain_suffix",
-                                            self.akamai_san_cert_suffix)]),
-                        "cnameType": "EDGE_HOSTNAME"
-                    })
+                (kwargs.get("action", 'add'),
+                    cnam_host_info_list)
             ])
 
             t_kwargs = {
