@@ -58,13 +58,19 @@ class BackgroundJobSchema(schema_base.SchemaBase):
                             'required': True,
                             'enum': ['akamai_update_papi_property_for_mod_san']
                         },
-                        'domain_name': {
-                            'type': 'string',
-                            'required': True
-                        },
-                        'san_cert_name': {
-                            'type': 'string',
-                            'required': True
+                        'update_cname_host_mapping_info': {
+                            'type': 'array',
+                            'properties': {
+                                'domain_name': {
+                                    'type': 'string',
+                                    'required': True
+                                },
+                                'san_cert_name': {
+                                    'type': 'string',
+                                    'required': True
+                                },
+                            },
+                            'minItems': 1,
                         },
                         'update_type': {
                             'type': 'string',
