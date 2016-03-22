@@ -107,3 +107,31 @@ class BackgroundJobController(base.BackgroundJobController):
                 **t_kwargs)
         else:
             raise NotImplementedError('job type: %s has not been implemented')
+
+    def get_san_mapping_list(self):
+        res = []
+        if 'akamai' in self._driver.providers:
+            akamai_driver = self._driver.providers['akamai'].obj
+            res = akamai_driver.san_mapping_queue.traverse_queue()
+        # other provider's san_mapping_list implementation goes here
+
+        res = [json.loads(r) for r in res]
+        return res
+
+    def put_san_mapping_list(self, san_mapping_list):
+        new_queue_data = [json.dumps(r) for r in san_mapping_list]
+        res, deleted = [], []
+        if 'akamai' in self._driver.providers:
+            akamai_driver = self._driver.providers['akamai'].obj
+            orig = [
+                json.loads(r) for r in
+                akamai_driver.san_mapping_queue.traverse_queue()
+            ]
+            res = [
+                json.loads(r) for r in
+                akamai_driver.san_mapping_queue.put_queue_data(new_queue_data)
+            ]
+
+            deleted = tuple(x for x in orig if x not in res)
+        # other provider's san_mapping_list implementation goes here
+        return res, deleted
