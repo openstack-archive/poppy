@@ -59,6 +59,10 @@ class ServiceController(base.ServiceBase):
         return self.driver.mod_san_queue
 
     @property
+    def san_mapping_queue(self):
+        return self.driver.san_mapping_queue
+
+    @property
     def san_cert_cnames(self):
         return self.driver.san_cert_cnames
 
@@ -92,7 +96,7 @@ class ServiceController(base.ServiceBase):
             # we do not have to use copy here, since caching is only used once
             # caching_rules = copy.deepcopy(service_obj.caching)
 
-            # Traverse existing rules list to add caching rules necessarys
+            # Traverse existing rules list to add caching rules as necessary
             self._process_caching_rules(
                 service_obj.caching, post_data['rules'])
             self._process_restriction_rules(
@@ -261,9 +265,9 @@ class ServiceController(base.ServiceBase):
 
             # implementing caching-rules for akamai
             # we need deep copy since caching rules will be used in late
-            # upadate objects
+            # update objects
             # caching_rules = copy.deepcopy(service_obj.caching)
-            # Traverse existing rules list to add caching rules necessarys
+            # Traverse existing rules list to add caching rules as necessary
             self._process_caching_rules(
                 service_obj.caching, policy_content['rules'])
             self._process_restriction_rules(
@@ -502,7 +506,7 @@ class ServiceController(base.ServiceBase):
                           format(provider_service_id))
             return self.responder.failed(str(e))
         else:
-            LOG.info("Sucessfully Deleted Service - {0}".
+            LOG.info("Successfully Deleted Service - {0}".
                      format(provider_service_id))
             return self.responder.deleted(provider_service_id)
 
@@ -638,6 +642,12 @@ class ServiceController(base.ServiceBase):
                         self.san_info_storage.save_cert_last_spsid(
                             san_cert_name,
                             this_sps_id)
+                        self.san_mapping_queue.enqueue_san_mapping(
+                            {
+                                'san_cert_domain': san_cert_name,
+                                'domain_name': cert_obj.domain_name,
+                            }
+                        )
                         return self.responder.ssl_certificate_provisioned(
                             san_cert_name, {
                                 'status': 'create_in_progress',
@@ -659,7 +669,7 @@ class ServiceController(base.ServiceBase):
                         'action': 'No available san cert for %s right now,'
                                   ' or no san cert info available. Support:'
                                   'Please write down the domain and keep an'
-                                  ' eye on next availabe freed-up SAN certs.'
+                                  ' eye on next available freed-up SAN certs.'
                                   ' More provisioning might be needed' %
                                   (cert_obj.domain_name)
                     })
