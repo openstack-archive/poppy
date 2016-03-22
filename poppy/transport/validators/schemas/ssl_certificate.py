@@ -20,7 +20,7 @@ from poppy.transport.validators import schema_base
 
 class SSLCertificateSchema(schema_base.SchemaBase):
 
-    '''JSON Schmema validation for /ssl_certificate.'''
+    '''JSON Schema validation for /ssl_certificate.'''
 
     schema = {
         'ssl_certificate': {
@@ -101,5 +101,30 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                     }
                 }
             }
-        }
+        },
+
+        'san_mapping_list': {
+            'PUT': {
+                'type': 'array',
+                "uniqueItems": True,
+                'items': {
+                    'type': 'object',
+                    'additionalProperties': False,
+                    'properties': {
+                        'domain_name': {
+                            'type': 'string',
+                            'required': True,
+                            'minLength': 3,
+                            'maxLength': 253
+                        },
+                        'san_cert_name': {
+                            'type': 'string',
+                            'required': True,
+                            'minLength': 3,
+                            'maxLength': 253
+                        }
+                    }
+                }
+            }
+        },
     }
