@@ -107,7 +107,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
         if 'akamai' in self._driver.providers:
             akamai_driver = self._driver.providers['akamai'].obj
             res = akamai_driver.mod_san_queue.traverse_queue()
-        # For other providers san_retry_list implementaion goes here
+        # For other providers san_retry_list implementation goes here
         else:
             # if not using akamai driver just return an empty list
             return []

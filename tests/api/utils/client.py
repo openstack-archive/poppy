@@ -559,3 +559,37 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('POST', url,
                             request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
+
+    def get_san_mapping_list(self, requestslib_kwargs=None):
+        """GET SAN cert name - domain name mapping.
+
+        :return: Response Object containing response code 200 and body with
+                details of updated certificate info
+
+        GET admin/provider/akamai/background_job/san_mapping
+        """
+
+        url = '{0}/admin/provider/akamai/background_job/san_mapping'.format(
+            self.url
+        )
+
+        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
+
+    def put_san_mapping_list(self, san_mapping_list, requestslib_kwargs=None):
+        """PUT SAN cert name - domain name mapping.
+
+        :return: Response Object containing response code 200 and body with
+                details of updated certificate info
+
+        PUT admin/provider/akamai/background_job/san_mapping
+        """
+
+        url = '{0}/admin/provider/akamai/background_job/san_mapping'.format(
+            self.url
+        )
+
+        return self.request(
+            'PUT', url,
+            data=json.dumps(san_mapping_list),
+            requestslib_kwargs=requestslib_kwargs
+        )

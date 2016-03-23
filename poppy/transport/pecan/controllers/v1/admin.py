@@ -81,6 +81,7 @@ class BackgroundJobController(base.Controller, hooks.HookController):
 
     def __init__(self, driver):
         super(BackgroundJobController, self).__init__(driver)
+        self.__class__.san_mapping = AkamaiSanMappingListController(driver)
 
     @pecan.expose('json')
     @decorators.validate(
@@ -105,6 +106,51 @@ class BackgroundJobController(base.Controller, hooks.HookController):
             pecan.abort(400, str(e))
 
         return pecan.Response(None, 202)
+
+
+class AkamaiSanMappingListController(base.Controller, hooks.HookController):
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    def __init__(self, driver):
+        super(AkamaiSanMappingListController, self).__init__(driver)
+
+        self.manager = self._driver.manager
+
+    @pecan.expose('json')
+    def get_all(self):
+        try:
+            return (
+                self.manager.background_job_controller.get_san_mapping_list())
+        except Exception as e:
+            pecan.abort(404, str(e))
+
+    @pecan.expose('json')
+    @decorators.validate(
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                ssl_certificate.SSLCertificateSchema.get_schema(
+                    "san_mapping_list", "PUT")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter))
+    def put(self):
+        """The input of the queue data must be a list of dictionaries:
+
+        (after json loaded)
+        [
+          { "domain_name": <domain_name>,
+            "san_cert_name": <san_cert_name>
+          }
+        ]
+        """
+        try:
+            san_mapping_list = json.loads(pecan.request.body.decode('utf-8'))
+            res, deleted = (
+                self.manager.background_job_controller.
+                put_san_mapping_list(san_mapping_list))
+            # queue is the new queue, and deleted is deleted items
+            return {"queue": res,  "deleted": deleted}
+        except Exception as e:
+            pecan.abort(400, str(e))
 
 
 class AkamaiRetryListController(base.Controller, hooks.HookController):
