@@ -245,7 +245,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                     akamai_driver.mod_san_queue.enqueue_mod_san_request(
                         json.dumps(cert_obj_dict)
                     )
-        # For other providers post san_retry_list implementaion goes here
+        # For other providers post san_retry_list implementation goes here
         else:
             # if not using akamai driver just return None
             pass

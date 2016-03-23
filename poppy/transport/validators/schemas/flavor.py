@@ -18,7 +18,7 @@ from poppy.transport.validators import schema_base
 
 class FlavorSchema(schema_base.SchemaBase):
 
-    """JSON Schmema validation for /flavor."""
+    """JSON Schema validation for /flavor."""
 
     schema = {
         "flavor": {

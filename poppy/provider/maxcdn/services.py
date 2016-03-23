@@ -66,7 +66,7 @@ class ServiceController(base.ServiceBase):
             origin = service_obj.origins[0]
             # for now we only support http and https origin in MaxCDN
             origin_prefix = 'https://' if origin.port == 443 else 'http://'
-            # TODO(tonytan4ever): Implement MaxCDN referer restriction
+            # TODO(tonytan4ever): Implement MaxCDN referrer restriction
             create_response = self.client.post('/zones/pull.json', data={
                 'name': self._map_service_name(service_obj.name),
                 # TODO(tonytan4ever): maxcdn takes origin with

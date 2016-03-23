@@ -18,7 +18,7 @@ from poppy.transport.validators import schema_base
 
 class DomainMigrationServiceSchema(schema_base.SchemaBase):
 
-    '''JSON Schmema validation for /admin/provider/akamai/service'''
+    '''JSON Schema validation for /admin/provider/akamai/service'''
 
     schema = {
         'domain_migration': {

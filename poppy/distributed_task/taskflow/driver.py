@@ -39,7 +39,7 @@ TASKFLOW_OPTIONS = [
                ' default persistent backend server port (e.g: ampq)'),
     cfg.StrOpt('poppy_service_worker_path',
                default="/taskflow/jobs/poppy_service_jobs",
-               help='zookeeper path for servoce jobs'),
+               help='zookeeper path for service jobs'),
     cfg.StrOpt('poppy_service_worker_jobboard',
                default='poppy_service_jobs',
                help='name of jobboard associated with service worker jobs'),

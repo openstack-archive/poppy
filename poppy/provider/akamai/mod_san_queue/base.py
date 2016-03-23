@@ -40,7 +40,7 @@ class ModSanQueue(object):
         raise NotImplementedError
 
     def traverse_queue(self):
-        '''Travese queue and resturn all items on the queue in a list'''
+        '''Travese queue and return all items on the queue in a list'''
         raise NotImplementedError
 
     def put_queue_data(self, queue_data_list):

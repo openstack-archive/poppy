@@ -18,7 +18,7 @@ from poppy.transport.validators import schema_base
 
 class BackgroundJobSchema(schema_base.SchemaBase):
 
-    '''JSON Schmema validation for /admin/provider/akamai/background_jobs'''
+    '''JSON Schema validation for /admin/provider/akamai/background_jobs'''
 
     schema = {
         'background_jobs': {

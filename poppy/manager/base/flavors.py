@@ -50,7 +50,7 @@ class FlavorsControllerBase(controller.ManagerControllerBase):
     def list(self):
         """list
 
-        :raises: NotImplentedError
+        :raises: NotImplementedError
         """
         raise NotImplementedError
 
@@ -59,7 +59,7 @@ class FlavorsControllerBase(controller.ManagerControllerBase):
         """GET
 
         :param flavor_id
-        :raises: NotImplentedError
+        :raises: NotImplementedError
         """
         raise NotImplementedError
 
@@ -68,7 +68,7 @@ class FlavorsControllerBase(controller.ManagerControllerBase):
         """POST
 
         :param flavor
-        :raises: NotImplentedError
+        :raises: NotImplementedError
         """
         raise NotImplementedError
 
@@ -78,6 +78,6 @@ class FlavorsControllerBase(controller.ManagerControllerBase):
 
         :param flavor_id
         :param provider_id
-        :raises: NotImplentedError
+        :raises: NotImplementedError
         """
         raise NotImplementedError

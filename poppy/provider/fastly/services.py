@@ -45,7 +45,7 @@ class ServiceController(base.ServiceBase):
         # TODO(tonytan4ever): what if check_domains fail ?
         # For right now we fail the who create process.
         # But do we want to fail the whole service create ? probably not.
-        # we need to carefully divise our try_catch here.
+        # we need to carefully devise our try_catch here.
         domain_checks = self.client.check_domains(service.id,
                                                   service_version.number)
         links = [{"href": '.'.join([domain_check.domain.name,

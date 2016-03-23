@@ -55,7 +55,7 @@ class ServiceController(base.ServiceBase):
                 # cannot specify ssl like this yet, CF takes a port #
                 # https_port=origin.ssl,
                 origin_protocol_policy='match-viewer')
-            # TODO(tonytan4ever): Implement CF referer restriction
+            # TODO(tonytan4ever): Implement CF referrer restriction
             distribution = self.client.create_distribution(
                 origin=aws_origin,
                 enabled=True)
@@ -71,7 +71,7 @@ class ServiceController(base.ServiceBase):
         links = [{'href': distribution.domain_name, 'rel': 'access_url'}]
         # extra information should be passed in here.
         LOG.info('Creating cloudfront config for %s'
-                 'successfull...' % service_obj.name)
+                 'successful...' % service_obj.name)
         return self.responder.created(distribution.id, links, status=status)
 
     def delete(self, project_id, service_name):
