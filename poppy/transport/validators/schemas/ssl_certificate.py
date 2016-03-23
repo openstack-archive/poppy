@@ -96,8 +96,10 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                     'spsId': {
                         'type': 'integer',
                         # we cannot have 0 or negative spsId
-                        'minimum': 1,
-                        'required': True
+                        'minimum': 1
+                    },
+                    'enabled': {
+                        'type': 'boolean'
                     }
                 }
             }

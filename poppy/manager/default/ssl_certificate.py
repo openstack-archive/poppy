@@ -267,7 +267,8 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
 
         return res
 
-    def update_san_cert_configuration(self, san_cert_name, new_spsId):
+    def update_san_cert_configuration(self, san_cert_name,
+                                      new_cert_config):
         if 'akamai' in self._driver.providers:
             akamai_driver = self._driver.providers['akamai'].obj
             if san_cert_name not in akamai_driver.san_cert_cnames:
@@ -276,7 +277,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                     (san_cert_name, akamai_driver.san_cert_cnames))
             akamai_driver = self._driver.providers['akamai'].obj
             res = akamai_driver.san_info_storage.update_cert_config(
-                san_cert_name, new_spsId)
+                san_cert_name, new_cert_config)
         else:
             # if not using akamai driver just return an empty list
             res = {}

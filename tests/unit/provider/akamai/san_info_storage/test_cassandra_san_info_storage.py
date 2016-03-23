@@ -136,6 +136,6 @@ class TestCassandraSANInfoStorage(base.TestCase):
         new_spsId = 3456
 
         self.cassa_storage.update_cert_config(
-            cert_name, new_spsId
+            cert_name, {'spsId': new_spsId}
         )
         mock_execute.assert_called()

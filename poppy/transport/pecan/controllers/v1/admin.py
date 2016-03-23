@@ -197,12 +197,11 @@ class AkamaiSanCertConfigController(base.Controller, hooks.HookController):
             stoplight_helpers.pecan_getter))
     def post(self, san_cert_name):
         config_json = json.loads(pecan.request.body.decode('utf-8'))
-        new_spsId = config_json['spsId']
 
         try:
             res = (
                 self._driver.manager.ssl_certificate_controller.
-                update_san_cert_configuration(san_cert_name, new_spsId))
+                update_san_cert_configuration(san_cert_name, config_json))
         except Exception as e:
             pecan.abort(400, str(e))
 
