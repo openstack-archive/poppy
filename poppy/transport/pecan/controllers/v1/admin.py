@@ -414,7 +414,6 @@ class AdminCertController(base.Controller, hooks.HookController):
         super(AdminCertController, self).__init__(driver)
 
     @pecan.expose('json')
-    @pecan.expose('json')
     @decorators.validate(
         request=rule.Rule(
             helpers.is_valid_certificate_status(),
@@ -443,7 +442,6 @@ class AdminServiceController(base.Controller, hooks.HookController):
         self.__class__.action = OperatorServiceActionController(driver)
         self.__class__.status = ServiceStatusController(driver)
 
-    @pecan.expose('json')
     @pecan.expose('json')
     @decorators.validate(
         request=rule.Rule(
@@ -489,6 +487,25 @@ class DomainController(base.Controller, hooks.HookController):
                         domain_name)
         # convert a service model into a response service model
         return resp_service_model.Model(service_obj, self)
+
+    @pecan.expose('json')
+    @decorators.validate(
+        request=rule.Rule(
+            helpers.is_valid_provider_url(),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter)
+    )
+    def get(self):
+        services_controller = self._driver.manager.services_controller
+
+        call_args = getattr(pecan.request.context,
+                            "call_args")
+        provider_url = call_args.pop('provider_url')
+        domains = services_controller.get_domains_by_provider_url(
+            provider_url)
+
+        return pecan.Response(json_body=domains,
+                              status=200)
 
 
 class AdminController(base.Controller, hooks.HookController):
