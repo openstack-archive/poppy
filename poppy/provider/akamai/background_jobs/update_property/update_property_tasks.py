@@ -136,48 +136,64 @@ class PropertyUpdateTask(task.Task):
                     self.existing_hosts = json.loads(resp.text)['hostnames'][
                         'items']
                 # message should be a list assembled hosts dictionary
-                for action, host_info in update_info_list:
+                for action, update_cname_host_mapping_info in update_info_list:
+                    update_detail_list = []
                     # add new hosts
                     if action == 'add':
-                        cnameToEdgeHostname = host_info['cnameTo']
-                        # avoid loading edgehostnames multiple times
-                        if self.existing_edgehostnames == []:
-                            LOG.info("Getting EdgeHostnames...")
-                            resp = self.akamai_driver.akamai_papi_api_client.\
-                                get(
-                                    self.akamai_driver.
-                                    akamai_papi_api_base_url.format(
-                                        middle_part='edgehostnames')
+                        for host_info in update_cname_host_mapping_info:
+                            cnameToEdgeHostname = host_info['cnameTo']
+                            # avoid loading edgehostnames multiple times
+                            # we caching it to a class variable
+                            if self.existing_edgehostnames == []:
+                                LOG.info("Getting EdgeHostnames...")
+                                resp = (
+                                    self.akamai_driver.akamai_papi_api_client.
+                                    get(
+                                        self.akamai_driver.
+                                        akamai_papi_api_base_url.format(
+                                            middle_part='edgehostnames')
+                                    ))
+
+                                if resp.status_code != 200:
+                                    raise RuntimeError('PAPI API request '
+                                                       'failed.'
+                                                       'Exception: %s' %
+                                                       resp.text)
+                                self.existing_edgehostnames = (
+                                    json.loads(resp.text)['edgeHostnames'][
+                                        'items']
                                 )
 
-                            if resp.status_code != 200:
-                                raise RuntimeError('PAPI API request failed.'
-                                                   'Exception: %s' % resp.text)
-                            self.existing_edgehostnames = (
-                                json.loads(resp.text)['edgeHostnames']['items']
+                            for edgehostname in self.existing_edgehostnames:
+                                if (edgehostname['domainPrefix'] ==
+                                    cnameToEdgeHostname.replace(
+                                        edgehostname['domainSuffix'], "")
+                                        [:-1]):
+                                    host_info['edgeHostnameId'] = (
+                                        edgehostname['edgeHostnameId'])
+
+                            self.existing_hosts.append(host_info)
+                            update_detail_list.append(
+                                "Add cnameFrom: %s to cnameTo %s" % (
+                                    host_info['cnameFrom'],
+                                    host_info['cnameTo'])
                             )
-
-                        for edgehostname in self.existing_edgehostnames:
-                            if (edgehostname['domainPrefix'] ==
-                                cnameToEdgeHostname.replace(
-                                    edgehostname['domainSuffix'], "")[:-1]):
-                                host_info['edgeHostnameId'] = (
-                                    edgehostname['edgeHostnameId'])
-
-                        self.existing_hosts.append(host_info)
-                        update_detail = "Add cnameFrom: %s to cnameTo %s" % (
-                            host_info['cnameFrom'], host_info['cnameTo'])
+                        update_detail = ';'.join(update_detail_list)
                     # remove a hosts
                     elif action == 'remove':
-                        for idx, existing_host_info in enumerate(
-                                self.existing_hosts):
-                            if existing_host_info['cnameFrom'] == (
-                                    host_info['cnameFrom']):
-                                del self.existing_hosts[idx]
-                                break
-                        update_detail = ("Remove cnameFrom: %s to cnameTo %s"
-                                         % (host_info['cnameFrom'],
-                                            host_info['cnameTo']))
+                        update_detail_list = []
+                        for host_info in update_cname_host_mapping_info:
+                            for idx, existing_host_info in enumerate(
+                                    self.existing_hosts):
+                                if existing_host_info['cnameFrom'] == (
+                                        host_info['cnameFrom']):
+                                    del self.existing_hosts[idx]
+                                    break
+                            update_detail_list.append(
+                                "Remove cnameFrom: %s to cnameTo %s"
+                                % (host_info['cnameFrom'],
+                                   host_info['cnameTo']))
+                        update_detail = ';'.join(update_detail_list)
 
                 LOG.info('Start Updating Hostnames: %s' %
                          str(self.existing_hosts))
