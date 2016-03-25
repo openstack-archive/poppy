@@ -34,20 +34,29 @@ class AuthClient(client.HTTPClient):
         self.default_headers['Content-Type'] = 'application/json'
         self.default_headers['Accept'] = 'application/json'
 
-    def authenticate_user(self, auth_url, user_name, api_key):
-        """Get Auth Token & Project ID using api_key
+    def authenticate_user(self, auth_url, user_name, api_key=None,
+                          password=None):
+        """Get Auth Token & Project ID using api_key"""
 
-        TODO (malini-kamalambal): Support getting token with password (or)
-                                  api key.
-        """
-        request_body = {
-            "auth": {
-                "RAX-KSKEY:apiKeyCredentials": {
-                    "username": user_name,
-                    "apiKey": api_key
+        if api_key:
+            request_body = {
+                "auth": {
+                    "RAX-KSKEY:apiKeyCredentials": {
+                        "username": user_name,
+                        "apiKey": api_key
+                    },
                 },
-            },
-        }
+            }
+        elif password:
+            request_body = {
+                "auth": {
+                    "passwordCredentials": {
+                        "username": user_name,
+                        "password": password
+                    },
+                },
+            }
+
         request_body = json.dumps(request_body)
         url = auth_url + '/tokens'
 
