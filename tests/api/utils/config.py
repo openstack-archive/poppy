@@ -138,6 +138,11 @@ class AuthConfig(data_interfaces.ConfigSectionInterface):
         return self.get_raw('api_key')
 
     @property
+    def password(self):
+        """The user's password, if applicable."""
+        return self.get_raw('password')
+
+    @property
     def multi_user(self):
         """Flag to indicate if the tests need multiple accounts."""
         return self.get_boolean('multi_user')

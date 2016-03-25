@@ -58,7 +58,8 @@ class TestBase(fixtures.BaseTestFixture):
         auth_token, project_id = cls.auth_client.authenticate_user(
             cls.auth_config.base_url,
             cls.auth_config.user_name,
-            cls.auth_config.api_key)
+            cls.auth_config.api_key,
+            cls.auth_config.password)
 
         cls.test_config = config.TestConfig()
         cls.default_origin = cls.test_config.default_origin

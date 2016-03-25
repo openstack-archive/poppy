@@ -48,7 +48,8 @@ class TestBase(fixtures.BaseTestFixture):
                 cls.auth_client.authenticate_user(
                     cls.auth_config.base_url,
                     cls.auth_config.user_name,
-                    cls.auth_config.api_key)
+                    cls.auth_config.api_key,
+                    cls.auth_config.password)
         else:
             auth_token = str(uuid.uuid4())
             cls.user_project_id = str(uuid.uuid4())
