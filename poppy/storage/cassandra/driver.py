@@ -191,9 +191,12 @@ class CassandraStorageDriver(base.Driver):
         """Health check for Cassandra."""
 
         try:
-            self.session.execute(
+            self.database.execute(
                 "SELECT cluster_name, data_center FROM system.local;")
-        except Exception:
+        except Exception as ex:
+            LOG.exception("Cassandra storage health check failed: {0}".format(
+                str(ex))
+            )
             return False
         return True
 
