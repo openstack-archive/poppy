@@ -580,7 +580,7 @@ def is_valid_service_status(request):
     # supported statuses
 
     VALID_STATUSES = [
-        u'deploy_in_progress',
+        u'create_in_progress',
         u'deployed',
         u'update_in_progress',
         u'delete_in_progress',

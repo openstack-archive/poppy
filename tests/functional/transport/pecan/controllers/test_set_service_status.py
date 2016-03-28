@@ -14,6 +14,10 @@
 # limitations under the License.
 
 import json
+try:
+    import urllib.parse as urlparse
+except ImportError:
+    import urlparse
 import uuid
 
 import ddt
@@ -30,7 +34,78 @@ class TestServicesState(base.FunctionalTest):
         super(TestServicesState, self).setUp()
 
         self.project_id = str(uuid.uuid4())
-        self.service_id = str(uuid.uuid4())
+        self.service_name = str(uuid.uuid1())
+        self.flavor_id = str(uuid.uuid1())
+
+        # create a mock flavor to be used by new service creations
+        flavor_json = {
+            "id": self.flavor_id,
+            "providers": [
+                {
+                    "provider": "mock",
+                    "links": [
+                        {
+                            "href": "http://mock.cdn",
+                            "rel": "provider_url"
+                        }
+                    ]
+                }
+            ]
+        }
+        response = self.app.post('/v1.0/flavors',
+                                 params=json.dumps(flavor_json),
+                                 headers={
+                                     "Content-Type": "application/json",
+                                     "X-Project-ID": self.project_id})
+
+        self.assertEqual(201, response.status_code)
+
+        # create an initial service to be used by the tests
+        self.service_json = {
+            "name": self.service_name,
+            "domains": [
+                {"domain": "test.mocksite.com"},
+                {"domain": "blog.mocksite.com"}
+            ],
+            "origins": [
+                {
+                    "origin": "mocksite.com",
+                    "port": 80,
+                    "ssl": False
+                }
+            ],
+            "flavor_id": self.flavor_id,
+            "caching": [
+                {
+                    "name": "default",
+                    "ttl": 3600
+                }
+            ],
+            "restrictions": [
+                {
+                    "name": "website only",
+                    "type": "whitelist",
+                    "rules": [
+                        {
+                            "name": "mocksite.com",
+                            "referrer": "www.mocksite.com"
+                        }
+                    ]
+                }
+            ]
+        }
+
+        response = self.app.post('/v1.0/services',
+                                 params=json.dumps(self.service_json),
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'X-Project-ID': self.project_id})
+        self.assertEqual(202, response.status_code)
+        self.assertTrue('Location' in response.headers)
+
+        self.service_id = (response.headers['Location']
+                           [response.headers['Location'].rfind('/') + 1:])
+
         self.req_body = {
             'project_id': self.project_id,
             'service_id': self.service_id,
@@ -38,6 +113,13 @@ class TestServicesState(base.FunctionalTest):
 
     @ddt.data(u'deployed', u'failed')
     def test_services_state_valid_states(self, status):
+        response = self.app.get(
+            '/v1.0/services/{0}'.format(self.service_id),
+            headers={'X-Project-ID': self.project_id}
+        )
+
+        self.assertEqual(200, response.status_code)
+
         self.req_body['status'] = status
         response = self.app.post(
             '/v1.0/admin/services/status',
