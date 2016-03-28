@@ -53,9 +53,9 @@ class TestGetServiceStatus(base.FunctionalTest):
 
             self.assertEqual(response.status_code, 400)
 
-    @ddt.data('deploy_in_progress', 'deployed', 'update_in_progress',
+    @ddt.data('create_in_progress', 'deployed', 'update_in_progress',
               'delete_in_progress', 'failed')
-    def test_get_service_status_valid_queryparam(self, status):
+    def test_get_service_status_valid_query_param(self, status):
         # valid status
         with mock.patch.object(DefaultServicesController,
                                'get_services_by_status'):

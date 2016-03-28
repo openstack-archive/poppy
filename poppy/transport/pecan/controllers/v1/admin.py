@@ -390,10 +390,14 @@ class ServiceStatusController(base.Controller, hooks.HookController):
         status = service_state_json['status']
         services_controller = self._driver.manager.services_controller
 
+        status_code = None
         try:
-            services_controller.set_service_provider_details(project_id,
-                                                             service_id,
-                                                             status)
+            status_code = services_controller.set_service_provider_details(
+                project_id,
+                service_id,
+                self.auth_token,
+                status
+            )
         except Exception as e:
             pecan.abort(404, detail=(
                         'Setting state of service {0} on tenant: {1} '
@@ -403,7 +407,7 @@ class ServiceStatusController(base.Controller, hooks.HookController):
                                              status,
                                              str(e))))
 
-        return pecan.Response(None, 201)
+        return pecan.Response(None, status_code)
 
 
 class AdminCertController(base.Controller, hooks.HookController):
