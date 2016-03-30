@@ -80,11 +80,28 @@ class TestSANInfoStorage(base.TestCase):
             '/san_info/secure.san1.poppycdn.com/spsId', str(1789))
 
     def test_save_cert_last_spsid(self):
-        self.zk_storage.save_cert_last_spsid('secure.san1.poppycdn.com', 1789)
+        self.zk_storage.save_cert_last_ids('secure.san1.poppycdn.com', 1789)
         self.zk_storage.zookeeper_client.ensure_path.assert_called_once_with(
             '/san_info/secure.san1.poppycdn.com/spsId')
         self.zk_storage.zookeeper_client.set.assert_called_once_with(
             '/san_info/secure.san1.poppycdn.com/spsId', str(1789))
+
+    def test_save_cert_last_spsid_with_job_id(self):
+        self.zk_storage.save_cert_last_ids(
+            'secure.san1.poppycdn.com',
+            1789,
+            job_id_value=7777
+        )
+        self.zk_storage.zookeeper_client.ensure_path.assert_has_calls(
+            [
+                mock.call('/san_info/secure.san1.poppycdn.com/spsId'),
+                mock.call('/san_info/secure.san1.poppycdn.com/jobId')
+            ]
+        )
+        self.zk_storage.zookeeper_client.set.assert_has_calls(
+            [mock.call('/san_info/secure.san1.poppycdn.com/spsId', str(1789)),
+             mock.call('/san_info/secure.san1.poppycdn.com/jobId', str(7777))]
+        )
 
     def test_get_cert_last_spsid(self):
         self.zk_storage.get_cert_last_spsid('secure.san1.poppycdn.com')

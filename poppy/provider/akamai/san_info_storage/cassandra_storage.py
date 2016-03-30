@@ -302,7 +302,8 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
 
         self.session.execute(stmt, args)
 
-    def save_cert_last_spsid(self, san_cert_name, sps_id_value):
+    def save_cert_last_ids(self, san_cert_name,
+                           sps_id_value, job_id_value=None):
         san_info = self._get_akamai_san_certs_info()
         the_san_cert_info = san_info.get(
             san_cert_name
@@ -312,6 +313,9 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
             raise ValueError('No san cert info found for %s.' % san_cert_name)
 
         the_san_cert_info['spsId'] = sps_id_value
+        if job_id_value is not None:
+            the_san_cert_info['jobId'] = job_id_value
+
         san_info[san_cert_name] = the_san_cert_info
         # Change the previous san info in the overall provider_info dictionary
         provider_info = dict(self._get_akamai_provider_info()['info'])

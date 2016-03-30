@@ -32,7 +32,8 @@ class BaseAkamaiSanInfoStorage(object):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def save_cert_last_spsid(self, san_cert_name, sps_id_value):
+    def save_cert_last_ids(self, san_cert_name,
+                           sps_id_value, job_id_value=None):
         raise NotImplementedError
 
     @abc.abstractmethod

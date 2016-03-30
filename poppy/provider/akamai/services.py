@@ -619,8 +619,8 @@ class ServiceController(base.ServiceBase):
                         if status == 'edge host already created or pending':
                             if workFlowProgress is not None and \
                                     'error' in workFlowProgress.lower():
-                                LOG.info("SPS Pending with Error:" %
-                                         workFlowProgress)
+                                LOG.info("SPS Pending with Error: {0}".format(
+                                    workFlowProgress))
                                 continue
                             else:
                                 pass
@@ -650,9 +650,14 @@ class ServiceController(base.ServiceBase):
                         LOG.info('modSan request submitted. Response: %s' %
                                  str(resp_dict))
                         this_sps_id = resp_dict['spsId']
-                        self.san_info_storage.save_cert_last_spsid(
+                        # get last item in results array and use its jobID
+                        results = resp_dict['Results']['data']
+                        this_job_id = results[0]['results']['jobID']
+                        self.san_info_storage.save_cert_last_ids(
                             san_cert_name,
-                            this_sps_id)
+                            this_sps_id,
+                            this_job_id
+                        )
                         self.san_mapping_queue.enqueue_san_mapping(
                             {
                                 'san_cert_domain': san_cert_name,
