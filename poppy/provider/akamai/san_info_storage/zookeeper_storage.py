@@ -81,9 +81,13 @@ class ZookeeperSanInfoStorage(base.BaseAkamaiSanInfoStorage):
             'product': 'ion_premier'
         }
 
-    def save_cert_last_spsid(self, san_cert_name, sps_id_value):
+    def save_cert_last_ids(self, san_cert_name,
+                           sps_id_value, job_id_value=None):
         self._save_cert_property_value(san_cert_name,
                                        'spsId', sps_id_value)
+        if job_id_value is not None:
+            self._save_cert_property_value(
+                san_cert_name, 'jobId', job_id_value)
 
     def get_cert_last_spsid(self, san_cert_name):
         my_sps_id_path = self._zk_path(san_cert_name, 'spsId')

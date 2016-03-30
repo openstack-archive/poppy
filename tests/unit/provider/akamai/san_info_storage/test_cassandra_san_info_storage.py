@@ -89,9 +89,21 @@ class TestCassandraSANInfoStorage(base.TestCase):
         mock_execute = self.cassa_storage.session.execute
         mock_execute.return_value = self.get_returned_value
 
-        self.cassa_storage.save_cert_last_spsid(
+        self.cassa_storage.save_cert_last_ids(
             san_cert_name,
             '1234'
+        )
+        self.assertTrue(mock_execute.call_count == 3)
+
+    @ddt.data("secure1.san1.test-cdn.com", "secure2.san1.test-cdn.com")
+    def test_save_cert_last_spsid_with_job_id(self, san_cert_name):
+        mock_execute = self.cassa_storage.session.execute
+        mock_execute.return_value = self.get_returned_value
+
+        self.cassa_storage.save_cert_last_ids(
+            san_cert_name,
+            '1234',
+            job_id_value=7777
         )
         self.assertTrue(mock_execute.call_count == 3)
 
