@@ -650,9 +650,12 @@ class ServiceController(base.ServiceBase):
                         LOG.info('modSan request submitted. Response: %s' %
                                  str(resp_dict))
                         this_sps_id = resp_dict['spsId']
-                        self.san_info_storage.save_cert_last_spsid(
+                        this_job_id = resp_dict['jobId']
+                        self.san_info_storage.save_cert_last_ids(
                             san_cert_name,
-                            this_sps_id)
+                            this_sps_id,
+                            this_job_id
+                        )
                         self.san_mapping_queue.enqueue_san_mapping(
                             {
                                 'san_cert_domain': san_cert_name,

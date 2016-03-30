@@ -98,6 +98,10 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                         # we cannot have 0 or negative spsId
                         'minimum': 1
                     },
+                    'jobId': {
+                        'type': 'integer',
+                        'minimum': 1
+                    },
                     'enabled': {
                         'type': 'boolean'
                     }
