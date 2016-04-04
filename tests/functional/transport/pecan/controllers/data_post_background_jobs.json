@@ -8,7 +8,12 @@
     },
     "akamai_update_papi_property_for_mod_san": {
         "job_type": "akamai_update_papi_property_for_mod_san",
-        "domain_name": "www.abc.com",
-        "san_cert_name": "secure1.test_san.com"
+        "update_cname_host_mapping_info": [
+            {
+                "domain_name": "www.abc.com",
+                "san_cert_name": "secure1.test_san.com"
+            }
+        ],
+        "san_cert_domain_suffix": "test_san.com"
     }
 }
