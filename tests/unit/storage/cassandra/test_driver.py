@@ -233,10 +233,10 @@ class CassandraStorageDriverTests(base.TestCase):
         self.assertTrue(self.cassandra_driver.database is None)
         self.assertFalse(self.cassandra_driver.is_alive())
 
-    @mock.patch.object(cassandra.cluster.Cluster, 'connect')
+    @mock.patch('cassandra.cluster.Cluster')
     def test_connection(self, mock_cluster):
         self.cassandra_driver.connection()
-        mock_cluster.assert_called_with()
+        mock_cluster.return_value.connect.assert_called_with()
 
     def test_connect(self):
         self.cassandra_driver.session = None
@@ -267,7 +267,7 @@ class CassandraStorageDriverTests(base.TestCase):
             isinstance(sc, flavors.FlavorsController),
             True)
 
-    @mock.patch.object(cassandra.cluster.Cluster, 'connect')
+    @mock.patch('cassandra.cluster.Cluster')
     def test_database(self, mock_cluster):
         self.cassandra_driver.database
-        mock_cluster.assert_called_with()
+        mock_cluster.return_value.connect.assert_called_with()

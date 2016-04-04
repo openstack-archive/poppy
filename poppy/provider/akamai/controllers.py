@@ -22,6 +22,8 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
+from poppy.provider.akamai import certificates
 from poppy.provider.akamai import services
 
+CertificateController = certificates.CertificateController
 ServiceController = services.ServiceController
