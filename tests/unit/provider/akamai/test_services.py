@@ -513,13 +513,6 @@ class TestServices(base.TestCase):
                                 hard=False, purge_url=purge_url)
         self.assertIn('id', resp[self.driver.provider_name])
 
-    def test_pick_san_edgename(self):
-        controller = services.ServiceController(self.driver)
-        picked_san_cert = controller._pick_san_edgename()
-        picked_idx = (
-            datetime.datetime.today().weekday() % len(self.san_cert_cnames))
-        self.assertTrue(picked_san_cert == self.san_cert_cnames[picked_idx])
-
     def test_process_caching_rules(self):
         controller = services.ServiceController(self.driver)
         caching_rule_entry = rule.Rule('index', request_url='*.jpg')
