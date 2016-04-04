@@ -49,7 +49,7 @@ class ProviderDriverBase(object):
 
     @abc.abstractmethod
     def is_alive(self):
-        """Check whether the storage is ready.
+        """Check if provider is alive and return bool indicating the status.
 
         :raises NotImplementedError
         """
@@ -57,7 +57,7 @@ class ProviderDriverBase(object):
 
     @abc.abstractproperty
     def provider_name(self):
-        """provider name.
+        """Provider name.
 
         :raises NotImplementedError
         """
@@ -65,7 +65,15 @@ class ProviderDriverBase(object):
 
     @abc.abstractproperty
     def service_controller(self):
-        """Returns the driver's hostname controller.
+        """Returns the driver's service controller.
+
+        :raises NotImplementedError
+        """
+        raise NotImplementedError
+
+    @abc.abstractproperty
+    def certificate_controller(self):
+        """Returns the driver's certificate controller.
 
         :raises NotImplementedError
         """

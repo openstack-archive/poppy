@@ -76,11 +76,12 @@ class ProviderWrapper(object):
             purge_url)
 
     def create_certificate(self, ext, cert_obj, enqueue):
-        """Create a provider
+        """Create a certificate
 
         :param ext
-        :param service_obj
+        :param cert_obj
+        :param enqueue
         :returns: ext.obj.service_controller.create(service_obj)
         """
 
-        return ext.obj.service_controller.create_certificate(cert_obj, enqueue)
+        return ext.obj.certificate_controller.create(cert_obj, enqueue)

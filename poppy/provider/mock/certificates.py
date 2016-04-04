@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Red Hat, Inc.
+# Copyright (c) 2014 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,17 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Exports Sample CDN controllers.
+from poppy.provider import base
 
-Field Mappings:
-    In order to reduce the disk / memory space used,
-    fields name will be, most of the time, the first
-    letter of their long name. Fields mapping will be
-    updated and documented in each controller class.
-"""
 
-from poppy.provider.mock import certificates
-from poppy.provider.mock import services
+class CertificateController(base.CertificateBase):
 
-CertificateController = certificates.CertificateController
-ServiceController = services.ServiceController
+    def __init__(self, driver):
+        super(CertificateController, self).__init__(driver)
+
+    def create(self, cert_obj, enqueue=True):
+        return None
