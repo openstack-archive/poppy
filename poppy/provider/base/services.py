@@ -63,6 +63,7 @@ class ServicesControllerBase(controller.ProviderControllerBase):
         """purge.
 
         :param provider_service_id
+        :param hard
         :param purge_url
         :raises NotImplementedError
         """
@@ -83,7 +84,7 @@ class ServicesControllerBase(controller.ProviderControllerBase):
 
         :param project_id
         :param domain_name
-        :param regions
+        :param region
         :raises NotImplementedError
         """
         raise NotImplementedError

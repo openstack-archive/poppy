@@ -43,24 +43,8 @@ class ServiceController(base.ServiceBase):
         return self.driver.ccu_api_client
 
     @property
-    def sps_api_client(self):
-        return self.driver.akamai_sps_api_client
-
-    @property
     def subcustomer_api_client(self):
         return self.driver.akamai_sub_customer_api_client
-
-    @property
-    def san_info_storage(self):
-        return self.driver.san_info_storage
-
-    @property
-    def mod_san_queue(self):
-        return self.driver.mod_san_queue
-
-    @property
-    def san_mapping_queue(self):
-        return self.driver.san_mapping_queue
 
     @property
     def san_cert_cnames(self):
@@ -74,7 +58,6 @@ class ServiceController(base.ServiceBase):
         self.akamai_subcustomer_api_base_url = \
             self.driver.akamai_subcustomer_api_base_url
         self.ccu_api_base_url = self.driver.akamai_ccu_api_base_url
-        self.sps_api_base_url = self.driver.akamai_sps_api_base_url
         self.request_header = {'Content-type': 'application/json',
                                'Accept': 'text/plain'}
         self.san_cert_hostname_limit = self.driver.san_cert_hostname_limit

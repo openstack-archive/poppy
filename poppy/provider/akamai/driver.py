@@ -284,5 +284,10 @@ class CDNProvider(base.Driver):
 
     @property
     def service_controller(self):
-        """Returns the driver's hostname controller."""
+        """Returns the driver's service controller."""
         return controllers.ServiceController(self)
+
+    @property
+    def certificate_controller(self):
+        """Returns the driver's certificate controller."""
+        return controllers.CertificateController(self)
