@@ -36,7 +36,8 @@ class BackgroundJobControllerTest(base.FunctionalTest):
         ]
 
         background_job_controller_patcher = mock.patch(
-            'poppy.provider.akamai.services.ServiceController.san_cert_cnames',
+            'poppy.provider.akamai.certificates.'
+            'CertificateController.san_cert_cnames',
             new=san_cert_cnames_caller(),
         )
         background_job_controller_patcher.start()
