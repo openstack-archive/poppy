@@ -83,7 +83,7 @@ class ServicesControllerBase(controller.ProviderControllerBase):
 
         :param project_id
         :param domain_name
-        :param regions
+        :param region
         :raises NotImplementedError
         """
         raise NotImplementedError

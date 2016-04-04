@@ -21,7 +21,8 @@ Field Mappings:
     letter of their long name. Fields mapping will be
     updated and documented in each controller class.
 """
-
+from poppy.provider.maxcdn import certificates
 from poppy.provider.maxcdn import services
 
+CertificateController = certificates.CertificateController
 ServiceController = services.ServiceController
