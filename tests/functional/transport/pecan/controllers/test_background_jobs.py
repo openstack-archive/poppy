@@ -17,7 +17,6 @@ import json
 import uuid
 
 import ddt
-import mock
 
 from tests.functional.transport.pecan import base
 
@@ -26,21 +25,6 @@ from tests.functional.transport.pecan import base
 class BackgroundJobControllerTest(base.FunctionalTest):
 
     def setUp(self):
-
-        class san_cert_cnames_caller(mock.Mock):
-            pass
-
-        san_cert_cnames_caller.return_value = [
-            "secure1.test_san.com",
-            "secure2.test_san.com"
-        ]
-
-        background_job_controller_patcher = mock.patch(
-            'poppy.provider.akamai.services.ServiceController.san_cert_cnames',
-            new=san_cert_cnames_caller(),
-        )
-        background_job_controller_patcher.start()
-        self.addCleanup(background_job_controller_patcher.stop)
 
         super(BackgroundJobControllerTest, self).setUp()
 

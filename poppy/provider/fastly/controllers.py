@@ -22,6 +22,8 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
+from poppy.provider.fastly import certificates
 from poppy.provider.fastly import services
 
+CertificateController = certificates.CertificateController
 ServiceController = services.ServiceController

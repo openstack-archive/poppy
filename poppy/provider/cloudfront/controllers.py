@@ -22,6 +22,8 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
+from poppy.provider.cloudfront import certificates
 from poppy.provider.cloudfront import services
 
+CertificateController = certificates.CertificateController
 ServiceController = services.ServiceController
