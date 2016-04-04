@@ -84,3 +84,11 @@ class CDNProvider(base.Driver):
         :return service controller
         """
         return controllers.ServiceController(self)
+
+    @property
+    def certificate_controller(self):
+        """Hook for certificate controller.
+
+        :return certificate controller
+        """
+        return controllers.CertificateController(self)

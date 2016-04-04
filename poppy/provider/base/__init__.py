@@ -13,9 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.provider.base import certificates
 from poppy.provider.base import driver
 from poppy.provider.base import services
 
 
+CertificateBase = certificates.CertificatesControllerBase
 Driver = driver.ProviderDriverBase
 ServiceBase = services.ServicesControllerBase
