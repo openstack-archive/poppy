@@ -58,7 +58,7 @@ class ServicesController(base.ServicesBase):
         response_status = False
         attempt = 1
 
-        while not response_status or self.retry_send != attempt:
+        while not response_status and attempt <= self.retry_send:
             LOG.info("Sending email notification attempt: %s" % str(attempt))
             response = requests.post(
                 request_url,
@@ -73,8 +73,11 @@ class ServicesController(base.ServicesBase):
             response_status = response.ok
             response_status_code = response.status_code
             response_text = response.text
-            LOG.info("Email attempt {0} "
-                     "status code: {1}".format(attempt, response_status_code))
+            LOG.info(
+                "Email attempt {0}, status code: {1}, response.ok: {2}".format(
+                    attempt, response_status_code, response_status
+                )
+            )
             LOG.info("Email attempt {0} "
                      "response text: {1}".format(attempt, response_text))
             attempt += 1
