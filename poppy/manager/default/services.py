@@ -174,7 +174,8 @@ class DefaultServicesController(base.ServicesController):
         """create.
 
         :param project_id
-        :param service_obj
+        :param auth_token
+        :param service_json
         :raises LookupError, ValueError
         """
         try:
@@ -236,12 +237,15 @@ class DefaultServicesController(base.ServicesController):
 
         return service_obj
 
-    def update(self, project_id, service_id, auth_token, service_updates):
+    def update(self, project_id, service_id,
+               auth_token, service_updates, force_update=False):
         """update.
 
         :param project_id
         :param service_id
+        :param auth_token
         :param service_updates
+        :param force_update
         :raises LookupError, ValueError
         """
         # get the current service object
@@ -254,7 +258,10 @@ class DefaultServicesController(base.ServicesController):
             raise errors.ServiceStatusDisabled(
                 u'Service {0} is disabled'.format(service_id))
 
-        if service_old.status not in [u'deployed', u'failed']:
+        if (
+            service_old.status not in [u'deployed', u'failed'] and
+            force_update is False
+        ):
             raise errors.ServiceStatusNeitherDeployedNorFailed(
                 u'Service {0} neither deployed nor failed'.format(service_id))
 
@@ -434,11 +441,23 @@ class DefaultServicesController(base.ServicesController):
             project_id=project_id,
             project_limit=limit)
 
-    def set_service_provider_details(self, project_id, service_id, status):
+    def set_service_provider_details(self, project_id, service_id,
+                                     auth_token, status):
+        old_service = self.storage_controller.get(project_id, service_id)
+
+        if (
+            old_service.status == 'create_in_progress' and
+            old_service.provider_details == {}
+        ):
+            self.update(
+                project_id, service_id, auth_token, [], force_update=True)
+            return 202
         self.storage_controller.set_service_provider_details(
             project_id,
             service_id,
-            status)
+            status
+        )
+        return 201
 
     def get_services_limit(self, project_id):
         limit = self.storage_controller.get_service_limit(

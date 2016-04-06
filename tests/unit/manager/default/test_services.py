@@ -20,6 +20,7 @@ import uuid
 import ddt
 import mock
 from oslo_config import cfg
+from oslo_context import context
 import requests
 import six
 
@@ -103,8 +104,8 @@ class DefaultManagerServiceTests(base.TestCase):
     @mock.patch('poppy.storage.base.driver.StorageDriverBase')
     @mock.patch('poppy.distributed_task.base.driver.DistributedTaskDriverBase')
     @mock.patch('poppy.metrics.base.driver.MetricsDriverBase')
-    def setUp(self, mock_distributed_task, mock_storage,
-              mock_dns, mock_notification, mock_bootstrap, mock_metrics):
+    def setUp(self, mock_metrics, mock_distributed_task, mock_storage,
+              mock_dns, mock_notification, mock_bootstrap):
         # NOTE(TheSriram): the mock.patch decorator applies mocks
         # in the reverse order of the arguments present
         super(DefaultManagerServiceTests, self).setUp()
@@ -215,6 +216,9 @@ class DefaultManagerServiceTests(base.TestCase):
         }
 
         self.service_obj = service.load_from_json(self.service_json)
+
+        self.mock_storage = mock_storage
+        self.mock_distributed_task = mock_distributed_task
 
     @mock.patch('poppy.bootstrap.Bootstrap')
     def mock_purge_service(self, mock_bootstrap, hard=False):
@@ -1005,3 +1009,58 @@ class DefaultManagerServiceTests(base.TestCase):
                                     memoized_controllers.task_controllers):
             self.mock_purge_service(hard=True)
             self.mock_purge_service(hard=False)
+
+    def test_set_service_provider_details_missing_provider_details(self):
+        context.RequestContext(overwrite=True)
+        mock_service_obj = mock.Mock()
+        mock_service_obj.to_dict.return_value = {
+            'name': 'name',
+            'flavor_id': 'flavor_id',
+            'service_id': 'service_id',
+            'status': 'status',
+            'operator_status': 'operator_status',
+            'provider_details': 'provider_details',
+            'domains': [
+                {'domain': 'www.test.com'}
+            ],
+            'origins': [
+                {
+                    "origin": "www.tester.com",
+                    "port": 80,
+                    "ssl": False,
+                    "rules": [
+                        {
+                            "name": "default",
+                            "request_url": "/*"
+                        }
+                    ],
+                    "hostheadertype": "domain"
+                }
+            ]
+        }
+
+        type(mock_service_obj).service_id = mock.PropertyMock(
+            return_value='service_id'
+        )
+        type(mock_service_obj).status = mock.PropertyMock(
+            return_value="create_in_progress"
+        )
+        type(mock_service_obj).provider_details = mock.PropertyMock(
+            return_value=dict()
+        )
+        type(mock_service_obj).domains = mock.PropertyMock(
+            return_value=list()
+        )
+
+        self.mock_storage.services_controller.get.return_value = (
+            mock_service_obj
+        )
+
+        self.sc.set_service_provider_details(
+            "project_id", "service_id", "auth_token", "deployed"
+        )
+        self.assertTrue(self.mock_storage.services_controller.get.called)
+        self.assertTrue(self.mock_storage.services_controller.update.called)
+        self.assertTrue(
+            self.mock_distributed_task.services_controller.submit_task.called
+        )
