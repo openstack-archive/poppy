@@ -20,7 +20,7 @@ import six
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseAkamaiSanInfoStorage(object):
-    """Interface definition for Akamai San Info Storage.
+    """Interface definition for Akamai Certificate Info Storage.
 
     """
 
