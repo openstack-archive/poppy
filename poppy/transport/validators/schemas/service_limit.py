@@ -18,7 +18,7 @@ from poppy.transport.validators import schema_base
 
 class ServiceLimitSchema(schema_base.SchemaBase):
 
-    '''JSON Schmema validation for /admin/limits/{project_id}.'''
+    '''JSON Schema validation for /admin/limits/{project_id}.'''
 
     schema = {
         'service_limit': {

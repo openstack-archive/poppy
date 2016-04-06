@@ -16,7 +16,7 @@
 
 # Root domains can not be used as a service domains, as most of the DNS
 # providers does not allow setting a CNAME on a root domain. This file contains
-# regualr expressions used for checking if a domain is a root domain or not.
+# regular expressions used for checking if a domain is a root domain or not.
 
 # regex for a generic country code based root domain
 generic_cc_tld = r'''([^.]+\.(ac|biz|co|com|edu|gov|id|int|ltd|me|mil|mod|

@@ -20,7 +20,7 @@ from poppy.transport.validators import schema_base
 
 class ServiceStatusSchema(schema_base.SchemaBase):
 
-    """JSON Schmema validation for /admin/services/{service_id}/status."""
+    """JSON Schema validation for /admin/services/{service_id}/status."""
 
     schema = {
         'service_status': {

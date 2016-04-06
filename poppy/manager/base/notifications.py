@@ -18,7 +18,7 @@ class NotificationWrapper(object):
     """"ProviderWrapper class."""
 
     def send(self, ext, subject, mail_content):
-        """Send notfications with subject and mail_content
+        """Send notifications with subject and mail_content
 
         :param ext
         :param subject

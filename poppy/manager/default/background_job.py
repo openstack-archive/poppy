@@ -76,7 +76,7 @@ class BackgroundJobController(base.BackgroundJobController):
                 ))
 
                 # Note(tonytan4ever): Put this check here so erroneous
-                # san cert params will not pass. Support occassionally put in
+                # san cert params will not pass. Support occasionally put in
                 # the ending "edgekey.net"
                 # (e.g: securexxx.san1.abc.com.edgekey.net), this check will
                 # effectively error that out
