@@ -109,6 +109,11 @@ class AuthConfig(data_interfaces.ConfigSectionInterface):
         """The user's api key, if applicable."""
         return self.get_raw('api_key')
 
+    @property
+    def password(self):
+        """The user's password, if applicable."""
+        return self.get_raw('password')
+
 
 class WebPageTestConfig(data_interfaces.ConfigSectionInterface):
     """Defines the webpage test config values."""
