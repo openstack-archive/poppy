@@ -116,30 +116,34 @@ class FixDNSChainTask(task.Task):
                 self.retry_progress = current_progress
                 self.retry_index = 1
             if self.retry_progress == 1.0:
-                LOG.warn('Maximum retry attempts of '
-                         '{0} reached for Task {1}'.format(retries, self.name))
+                LOG.warning(
+                    'Maximum retry attempts of '
+                    '{0} reached for Task {1}'.format(retries, self.name))
                 service_obj_json = json.loads(service_obj)
                 service_obj = service.load_from_json(service_obj_json)
-                LOG.warn('DNS enabling on service_id: '
-                         '{0} and project_id: {1} '
-                         ' failed'.format(service_obj.service_id, project_id))
+                LOG.warning(
+                    'DNS enabling on service_id: '
+                    '{0} and project_id: {1} '
+                    ' failed'.format(service_obj.service_id, project_id))
                 result = kwargs['result']
                 exc_class = str(result.exc_info[0])
                 exc_traceback = result.traceback_str
-                LOG.warn('Error Class : {0} for '
-                         'service_id: {1} '
-                         'and project_id: {2}'.format(exc_class,
-                                                      service_obj.service_id,
-                                                      project_id))
-                LOG.warn('Error Traceback : {0} for '
-                         'service_id: {1} '
-                         'and project_id: {2}'.format(exc_traceback,
-                                                      service_obj.service_id,
-                                                      project_id))
+                LOG.warning(
+                    'Error Class : {0} for '
+                    'service_id: {1} '
+                    'and project_id: {2}'.format(exc_class,
+                                                 service_obj.service_id,
+                                                 project_id))
+                LOG.warning(
+                    'Error Traceback : {0} for '
+                    'service_id: {1} '
+                    'and project_id: {2}'.format(exc_traceback,
+                                                 service_obj.service_id,
+                                                 project_id))
 
             else:
-                LOG.warn('Sleeping for {0} seconds and '
-                         'retrying'.format(retry_sleep_time))
+                LOG.warning('Sleeping for {0} seconds and '
+                            'retrying'.format(retry_sleep_time))
                 if retry_sleep_time is not None:
                     time.sleep(retry_sleep_time)
 
@@ -205,29 +209,33 @@ class BreakDNSChainTask(task.Task):
                 self.retry_progress = current_progress
                 self.retry_index = 1
             if self.retry_progress == 1.0:
-                LOG.warn('Maximum retry attempts of '
-                         '{0} reached for Task {1}'.format(retries, self.name))
+                LOG.warning(
+                    'Maximum retry attempts of '
+                    '{0} reached for Task {1}'.format(retries, self.name))
                 service_obj_json = json.loads(service_obj)
                 service_obj = service.load_from_json(service_obj_json)
-                LOG.warn('DNS enabling on service_id: '
-                         '{0} and project_id: {1} '
-                         ' failed'.format(service_obj.service_id, project_id))
+                LOG.warning(
+                    'DNS enabling on service_id: '
+                    '{0} and project_id: {1} '
+                    ' failed'.format(service_obj.service_id, project_id))
                 result = kwargs['result']
                 exc_class = str(result.exc_info[0])
                 exc_traceback = result.traceback_str
-                LOG.warn('Error Class : {0} for '
-                         'service_id: {1} '
-                         'and project_id: {2}'.format(exc_class,
-                                                      service_obj.service_id,
-                                                      project_id))
-                LOG.warn('Error Traceback : {0} for '
-                         'service_id: {1} '
-                         'and project_id: {2}'.format(exc_traceback,
-                                                      service_obj.service_id,
-                                                      project_id))
+                LOG.warning(
+                    'Error Class : {0} for '
+                    'service_id: {1} '
+                    'and project_id: {2}'.format(exc_class,
+                                                 service_obj.service_id,
+                                                 project_id))
+                LOG.warning(
+                    'Error Traceback : {0} for '
+                    'service_id: {1} '
+                    'and project_id: {2}'.format(exc_traceback,
+                                                 service_obj.service_id,
+                                                 project_id))
 
             else:
-                LOG.warn('Sleeping for {0} seconds and '
-                         'retrying'.format(retry_sleep_time))
+                LOG.warning('Sleeping for {0} seconds and '
+                            'retrying'.format(retry_sleep_time))
                 if retry_sleep_time is not None:
                     time.sleep(retry_sleep_time)

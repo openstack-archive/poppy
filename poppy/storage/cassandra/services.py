@@ -413,8 +413,8 @@ class ServicesController(base.ServicesController):
                          "yielded no results".format(domain_name))
                 return False
         except ValueError as ex:
-                LOG.warn("Checking for domain '{0}'"
-                         "failed!".format(domain_name))
+                LOG.warning("Checking for domain '{0}'"
+                            "failed!".format(domain_name))
                 LOG.exception(ex)
                 return False
 
@@ -584,9 +584,9 @@ class ServicesController(base.ServicesController):
                 return max_services
 
         except ValueError as ex:
-                LOG.warn("Checking if non-default service"
-                         "limit exists for"
-                         "project_id: {0} failed!".format(project_id))
+                LOG.warning("Checking if non-default service"
+                            "limit exists for"
+                            "project_id: {0} failed!".format(project_id))
                 LOG.exception(ex)
                 return max_services
 

@@ -37,11 +37,11 @@ class ServicesController(base.ServicesController):
         resp_dict = dict()
 
         if not response.ok:
-            LOG.warn("BlueFlood Metrics Response status Code:{0} "
-                     "Response Text: {1} "
-                     "Request URL: {2}".format(response.status_code,
-                                               response.text,
-                                               response.url))
+            LOG.warning("BlueFlood Metrics Response status Code:{0} "
+                        "Response Text: {1} "
+                        "Request URL: {2}".format(response.status_code,
+                                                  response.text,
+                                                  response.url))
             return resp_dict
         else:
 
@@ -53,7 +53,7 @@ class ServicesController(base.ServicesController):
             except KeyError:
                 msg = 'content from {0} not conforming ' \
                       'to API contracts'.format(response.url)
-                LOG.warn(msg)
+                LOG.warning(msg)
                 raise errors.BlueFloodApiSchemaError(msg)
 
             return resp_dict
