@@ -245,7 +245,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                     akamai_driver.mod_san_queue.enqueue_mod_san_request(
                         json.dumps(cert_obj_dict)
                     )
-        # For other providers post san_retry_list implementaion goes here
+        # For other providers post san_retry_list implementation goes here
         else:
             # if not using akamai driver just return None
             pass
@@ -276,6 +276,25 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                     "%s is not a valid san cert, valid san certs are: %s" %
                     (san_cert_name, akamai_driver.san_cert_cnames))
             akamai_driver = self._driver.providers['akamai'].obj
+            # given the spsId, determine the most recent jobId
+            # and persist the jobId
+            if new_cert_config.get('spsId') is not None:
+                resp = akamai_driver.sps_api_client.get(
+                    akamai_driver.sps_api_base_url.format(
+                        spsId=new_cert_config['spsId']
+                    ),
+                )
+                if resp.status_code != 200:
+                    raise RuntimeError(
+                        'SPS GET Request failed. Exception: {0}'.format(
+                            resp.text
+                        )
+                    )
+                else:
+                    resp_dict = json.loads(resp.text)
+                    new_cert_config['jobId'] = (
+                        resp_dict['requestList'][0]['jobId']
+                    )
             res = akamai_driver.san_info_storage.update_cert_config(
                 san_cert_name, new_cert_config)
         else:
