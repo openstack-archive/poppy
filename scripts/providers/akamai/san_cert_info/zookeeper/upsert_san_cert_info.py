@@ -15,8 +15,8 @@
 
 from oslo_config import cfg
 
+from poppy.provider.akamai.cert_info_storage import zookeeper_storage
 from poppy.provider.akamai import driver
-from poppy.provider.akamai.san_info_storage import zookeeper_storage
 
 
 CONF = cfg.CONF

@@ -16,7 +16,7 @@
 import mock
 from oslo_config import cfg
 
-from poppy.provider.akamai.san_info_storage import zookeeper_storage
+from poppy.provider.akamai.cert_info_storage import zookeeper_storage
 from tests.unit import base
 
 AKAMAI_OPTIONS = [
@@ -29,8 +29,11 @@ AKAMAI_OPTIONS = [
     cfg.IntOpt('storage_backend_port', default=2181, help='default'
                ' default san info storage backend server port (e.g: 2181)'),
     cfg.StrOpt(
-        'san_info_storage_path', default='/san_info', help='zookeeper backend'
-        ' path for san cert info'),
+        'cert_info_storage_path',
+        default='/cert_info',
+        help='zookeeper backend'
+        ' path for san cert info'
+    ),
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai'
@@ -66,25 +69,25 @@ class TestSANInfoStorage(base.TestCase):
 
     def test__zk_path(self):
         path1 = self.zk_storage._zk_path('secure.san1.poppycdn.com', 'jobId')
-        self.assertTrue(path1 == '/san_info/secure.san1.poppycdn.com/jobId')
+        self.assertTrue(path1 == '/cert_info/secure.san1.poppycdn.com/jobId')
 
         path2 = self.zk_storage._zk_path('secure.san1.poppycdn.com', None)
-        self.assertTrue(path2 == '/san_info/secure.san1.poppycdn.com')
+        self.assertTrue(path2 == '/cert_info/secure.san1.poppycdn.com')
 
     def test__save_cert_property_value(self):
         self.zk_storage._save_cert_property_value('secure.san1.poppycdn.com',
                                                   'spsId', str(1789))
         self.zk_storage.zookeeper_client.ensure_path.assert_called_once_with(
-            '/san_info/secure.san1.poppycdn.com/spsId')
+            '/cert_info/secure.san1.poppycdn.com/spsId')
         self.zk_storage.zookeeper_client.set.assert_called_once_with(
-            '/san_info/secure.san1.poppycdn.com/spsId', str(1789))
+            '/cert_info/secure.san1.poppycdn.com/spsId', str(1789))
 
     def test_save_cert_last_spsid(self):
         self.zk_storage.save_cert_last_ids('secure.san1.poppycdn.com', 1789)
         self.zk_storage.zookeeper_client.ensure_path.assert_called_once_with(
-            '/san_info/secure.san1.poppycdn.com/spsId')
+            '/cert_info/secure.san1.poppycdn.com/spsId')
         self.zk_storage.zookeeper_client.set.assert_called_once_with(
-            '/san_info/secure.san1.poppycdn.com/spsId', str(1789))
+            '/cert_info/secure.san1.poppycdn.com/spsId', str(1789))
 
     def test_save_cert_last_spsid_with_job_id(self):
         self.zk_storage.save_cert_last_ids(
@@ -94,37 +97,37 @@ class TestSANInfoStorage(base.TestCase):
         )
         self.zk_storage.zookeeper_client.ensure_path.assert_has_calls(
             [
-                mock.call('/san_info/secure.san1.poppycdn.com/spsId'),
-                mock.call('/san_info/secure.san1.poppycdn.com/jobId')
+                mock.call('/cert_info/secure.san1.poppycdn.com/spsId'),
+                mock.call('/cert_info/secure.san1.poppycdn.com/jobId')
             ]
         )
         self.zk_storage.zookeeper_client.set.assert_has_calls(
-            [mock.call('/san_info/secure.san1.poppycdn.com/spsId', str(1789)),
-             mock.call('/san_info/secure.san1.poppycdn.com/jobId', str(7777))]
+            [mock.call('/cert_info/secure.san1.poppycdn.com/spsId', str(1789)),
+             mock.call('/cert_info/secure.san1.poppycdn.com/jobId', str(7777))]
         )
 
     def test_get_cert_last_spsid(self):
         self.zk_storage.get_cert_last_spsid('secure.san1.poppycdn.com')
         self.zk_storage.zookeeper_client.ensure_path.assert_called_once_with(
-            '/san_info/secure.san1.poppycdn.com/spsId')
+            '/cert_info/secure.san1.poppycdn.com/spsId')
         self.zk_storage.zookeeper_client.get.assert_called_once_with(
-            '/san_info/secure.san1.poppycdn.com/spsId')
+            '/cert_info/secure.san1.poppycdn.com/spsId')
 
     def list_all_san_cert_names(self):
         self.zk_storage.list_all_san_cert_names()
         self.zk_storage.zookeeper_client.get_children.assert_create_once_with(
-            '/san_info/secure.san1.poppycdn.com'
+            '/cert_info/secure.san1.poppycdn.com'
         )
 
     def test_get_cert_info(self):
         res = self.zk_storage.get_cert_info('secure.san1.poppycdn.com')
         self.zk_storage.zookeeper_client.ensure_path.assert_called_once_with(
-            '/san_info/secure.san1.poppycdn.com'
+            '/cert_info/secure.san1.poppycdn.com'
         )
-        calls = [mock.call('/san_info/secure.san1.poppycdn.com/jobId'),
-                 mock.call('/san_info/secure.san1.poppycdn.com/issuer'),
-                 mock.call('/san_info/secure.san1.poppycdn.com/ipVersion'),
+        calls = [mock.call('/cert_info/secure.san1.poppycdn.com/jobId'),
+                 mock.call('/cert_info/secure.san1.poppycdn.com/issuer'),
+                 mock.call('/cert_info/secure.san1.poppycdn.com/ipVersion'),
                  mock.call(
-            '/san_info/secure.san1.poppycdn.com/slot_deployment_klass')]
+            '/cert_info/secure.san1.poppycdn.com/slot_deployment_klass')]
         self.zk_storage.zookeeper_client.get.assert_has_calls(calls)
         self.assertTrue(isinstance(res, dict))

@@ -173,6 +173,10 @@ class CassandraStorageDriver(base.Driver):
         self.archive_on_delete = self.cassandra_conf.archive_on_delete
         self.lock = multiprocessing.Lock()
 
+    def change_config_group(self, options, group):
+        self.conf.register_opts(options, group=group)
+        self.cassandra_conf = self.conf[group]
+
     def change_namespace(self, namespace):
         """change_namespace.
 
