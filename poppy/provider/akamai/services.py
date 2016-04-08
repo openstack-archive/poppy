@@ -1193,16 +1193,6 @@ class ServiceController(base.ServiceBase):
                                  domain_obj.certificate)
         return provider_access_url
 
-    def _pick_san_edgename(self):
-        """Inspect && Pick a SAN cert cnameHostname for this user.
-
-        Based on what the date is it current date, pick a san cert
-        """
-        find_idx = (
-            datetime.datetime.today().weekday() % len(self.san_cert_cnames))
-
-        return self.san_cert_cnames[find_idx]
-
     def get_provider_service_id(self, service_obj):
         id_list = []
         for domain in service_obj.domains:
