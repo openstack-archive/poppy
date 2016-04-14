@@ -267,8 +267,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
 
         return res
 
-    def update_san_cert_configuration(self, san_cert_name,
-                                      new_cert_config):
+    def update_san_cert_configuration(self, san_cert_name, new_cert_config):
         if 'akamai' in self._driver.providers:
             akamai_driver = self._driver.providers['akamai'].obj
             if san_cert_name not in akamai_driver.san_cert_cnames:
@@ -280,7 +279,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             # and persist the jobId
             if new_cert_config.get('spsId') is not None:
                 resp = akamai_driver.sps_api_client.get(
-                    akamai_driver.sps_api_base_url.format(
+                    akamai_driver.akamai_sps_api_base_url.format(
                         spsId=new_cert_config['spsId']
                     ),
                 )
@@ -291,9 +290,9 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                         )
                     )
                 else:
-                    resp_dict = json.loads(resp.text)
+                    resp_json = resp.json()
                     new_cert_config['jobId'] = (
-                        resp_dict['requestList'][0]['jobId']
+                        resp_json['requestList'][0]['jobId']
                     )
             res = akamai_driver.san_info_storage.update_cert_config(
                 san_cert_name, new_cert_config)
