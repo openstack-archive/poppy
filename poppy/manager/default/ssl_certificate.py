@@ -280,7 +280,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             # and persist the jobId
             if new_cert_config.get('spsId') is not None:
                 resp = akamai_driver.sps_api_client.get(
-                    akamai_driver.sps_api_base_url.format(
+                    akamai_driver.akamai_sps_api_base_url.format(
                         spsId=new_cert_config['spsId']
                     ),
                 )
