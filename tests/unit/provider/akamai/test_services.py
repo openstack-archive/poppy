@@ -42,11 +42,12 @@ class TestServices(base.TestCase):
     @mock.patch(
         'poppy.provider.akamai.services.ServiceController.ccu_api_client')
     @mock.patch('poppy.provider.akamai.driver.CDNProvider')
-    def setUp(self, mock_controller_policy_api_client,
+    def setUp(self, mock_driver,
               mock_controller_ccu_api_client,
-              mock_driver):
+              mock_controller_policy_api_client):
         super(TestServices, self).setUp()
         self.driver = mock_driver()
+        self.driver.provider_name = 'Akamai'
         self.driver.akamai_https_access_url_suffix = str(uuid.uuid1())
         self.san_cert_cnames = [str(x) for x in range(7)]
         self.driver.san_cert_cnames = self.san_cert_cnames
@@ -388,6 +389,76 @@ class TestServices(base.TestCase):
         resp = controller.update(
             provider_service_id, service_obj)
         self.assertIn('id', resp[self.driver.provider_name])
+
+    @ddt.file_data('access_url_goes_missing.json')
+    def test_update_missing_access_url(self, service_json):
+        provider_service_id = json.dumps([
+            {
+                "protocol": "https",
+                "certificate": "san",
+                "policy_name": "msl.mycardcare.com"
+            }, {
+                "protocol": "https",
+                "certificate": "shared",
+                "policy_name": "mslmycardcare.scdn3.secure.raxcdn.com"
+            }
+        ])
+
+        controller = services.ServiceController(self.driver)
+
+        controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+
+        controller.subcustomer_api_client.delete.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True)
+
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            text=json.dumps(dict(rules=[]))
+        )
+        controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
+        controller.policy_api_client.delete.return_value = mock.Mock(
+            status_code=200,
+            text='Delete successful'
+        )
+        service_obj = service.load_from_json(service_json)
+        resp = controller.update(
+            provider_service_id, service_obj)
+        # import pdb; pdb.set_trace()
+        self.assertIn('id', resp[self.driver.provider_name])
+        self.assertEqual(
+            provider_service_id,
+            resp[self.driver.provider_name]['id']
+        )
+        expected_links = [
+            {
+                'domain': u'msl.mycardcare.com',
+                'href': u'secure1.san1.raxcdn.com.edgekey.net',
+                'certificate': u'san',
+                'rel': 'access_url'
+            },
+            {
+                'domain': u'mslmycardcare.scdn3.secure.raxcdn.com',
+                'href': u'scdn3.secure.raxcdn.com.edgekey.net',
+                'certificate': u'shared',
+                'rel': 'access_url'
+            }
+        ]
+        expected_links = [link['href'] for link in expected_links]
+        actual_links = [
+            link['href'] for link in
+            resp[self.driver.provider_name]['links']
+        ]
+        self.assertEqual(
+            set(expected_links),
+            set(actual_links)
+        )
 
     @ddt.file_data('data_upsert_service.json')
     def test_upsert(self, service_json):

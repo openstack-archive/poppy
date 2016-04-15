@@ -1,0 +1,72 @@
+{
+	"service_obj": {
+		"caching": [],
+		"domains": [{
+			"cert_info": {
+				"cert_details": {
+					"Akamai": {
+						"event_resource_id": "ad99c90f-0dd0-45ea-9af0-1d62825e2f4f",
+						"cert_domain": "msl.mycardcare.com",
+						"extra_info": {
+							"status": "deployed",
+							"action": "Not required"
+						}
+					}
+				},
+				"cert_type": "san",
+				"domain_name": "msl.mycardcare.com",
+				"flavor_id": "cdn",
+				"project_id": "841420"
+			},
+			"certificate": "san",
+			"domain": "msl.mycardcare.com",
+			"protocol": "https"
+		}, {
+			"certificate": "shared",
+			"domain": "mslmycardcare.scdn3.secure.raxcdn.com",
+			"protocol": "https"
+		}],
+		"flavor_id": "cdn",
+		"log_delivery": {
+			"enabled": false
+		},
+		"name": "MyCardCare",
+		"operator_status": "enabled",
+		"origins": [{
+			"hostheadertype": "domain",
+			"hostheadervalue": null,
+			"origin": "msl.origin.mycardcare.com",
+			"port": 443,
+			"rules": [{
+				"name": "Default Origin",
+				"request_url": "/*"
+			}],
+			"ssl": true
+		}],
+		"project_id": "841420",
+		"provider_details": {
+			"Akamai": {
+				"id": "[{\"protocol\": \"https\", \"certificate\": \"san\", \"policy_name\": \"msl.mycardcare.com\"}, {\"protocol\": \"https\", \"certificate\": \"shared\", \"policy_name\": \"mslmycardcare.scdn3.secure.raxcdn.com\"}]",
+				"access_urls": [{
+					"provider_url": "secure1.san1.raxcdn.com.edgekey.net",
+					"domain": "msl.mycardcare.com",
+					"operator_url": "msl.mycardcare.com.cdn275.raxcdn.com"
+				}, {
+					"provider_url": "scdn3.secure.raxcdn.com.edgekey.net",
+					"domain": "mslmycardcare.scdn3.secure.raxcdn.com",
+					"shared_ssl_flag": true,
+					"operator_url": "mslmycardcare.scdn3.secure.raxcdn.com"
+				}],
+				"status": "update_in_progress",
+				"name": null,
+				"domains_certificate_status": {},
+				"error_info": null,
+				"error_message": null,
+				"error_class": null
+			}
+		},
+		"restrictions": [],
+		"service_id": "6c5940c9-306a-4812-83d8-0cf1d2efc487",
+		"status": "update_in_progress"
+	}
+}
