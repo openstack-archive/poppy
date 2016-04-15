@@ -92,6 +92,8 @@ class Bootstrap(object):
 
         args = [self.conf]
 
+        LOG.debug(u'Loading dns driver: {0}'.format(dns_name))
+
         try:
             mgr = driver.DriverManager(namespace=dns_type,
                                        name=dns_name,

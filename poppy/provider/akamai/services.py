@@ -231,6 +231,23 @@ class ServiceController(base.ServiceBase):
 
             ids = []
             links = []
+
+            provider_details = service_obj.provider_details.get(
+                self.driver.provider_name
+            )
+            access_urls = (
+                provider_details.access_urls
+                if provider_details is not None else []
+            )
+            for access_url in access_urls:
+                links.append(
+                    {
+                        'href': access_url['provider_url'],
+                        'rel': 'access_url',
+                        'domain': access_url['domain']
+                    }
+                )
+
             domains_certificate_status = {}
             # in this case we need to copy
             # and tweak the content of one old policy
@@ -283,8 +300,8 @@ class ServiceController(base.ServiceBase):
                 for classified_domain in classified_domains:
                     # assign the content realm to be the
                     # digital property field of each group
-                    dp = self._process_new_domain(classified_domain,
-                                                  policy_content['rules'])
+                    digital_property = self._process_new_domain(
+                        classified_domain, policy_content['rules'])
 
                     configuration_number = self._get_configuration_number(
                         classified_domain)
@@ -295,14 +312,17 @@ class ServiceController(base.ServiceBase):
 
                     # Only if a same domain with a same protocol
                     # do we need to update a existing policy
-                    if dp in policy_names and (
-                        policies[policy_names.index(dp)]['protocol'] == (
-                            classified_domain.protocol)):
+                    if digital_property in policy_names and (
+                        policies[policy_names.index(
+                            digital_property)]['protocol'] == (
+                            classified_domain.protocol)
+                    ):
                         # in this case we should update existing policy
                         # instead of create a new policy
-                        LOG.info('Start to update policy %s' % dp)
-                        LOG.info("Updating Akamai Policy: %s",
-                                 json.dumps(policy_content))
+                        LOG.info('Start to update policy {0}'.format(
+                            digital_property))
+                        LOG.info("Updating Akamai Policy: {0}".format(
+                                 json.dumps(policy_content)))
 
                         # TODO(tonytan4ever): also classify domains based
                         # on their protocols. http and https domains needs
@@ -339,20 +359,21 @@ class ServiceController(base.ServiceBase):
                             self.policy_api_base_url.format(
                                 configuration_number=(
                                     configuration_number),
-                                policy_name=dp),
+                                policy_name=digital_property),
                             data=json.dumps(policy_content),
                             headers=headers)
 
                         for policy in policies:
                             # policies are based on domain_name
                             # will be unique within a provider
-                            if policy['policy_name'] == dp:
+                            if policy['policy_name'] == digital_property:
                                 dp_obj = policy
                                 break
 
                         policies.remove(dp_obj)
                     else:
-                        LOG.info('Start to create new policy %s' % dp)
+                        LOG.info('Start to create new policy {0}'.format(
+                            digital_property))
                         headers = self.request_header.copy()
                         try:
                             region, subcustomer_id = \
@@ -384,47 +405,29 @@ class ServiceController(base.ServiceBase):
                             self.policy_api_base_url.format(
                                 configuration_number=(
                                     configuration_number),
-                                policy_name=dp),
+                                policy_name=digital_property),
                             data=json.dumps(policy_content),
                             headers=headers)
                     LOG.info('akamai response code: %s' % resp.status_code)
                     LOG.info('akamai response text: %s' % resp.text)
                     if resp.status_code != 200:
                         raise RuntimeError(resp.text)
-                    dp_obj = {'policy_name': dp,
+                    dp_obj = {'policy_name': digital_property,
                               'protocol': classified_domain.protocol,
                               'certificate': classified_domain.certificate}
                     ids.append(dp_obj)
                     # TODO(tonytan4ever): leave empty links for now
                     # may need to work with dns integration
-                    LOG.info('Creating/Updating policy %s on domain %s '
-                             'complete' % (dp, classified_domain.domain))
-                    edge_host_name = None
-                    if classified_domain.certificate == 'san':
-                        cert_info = getattr(classified_domain, 'cert_info',
-                                            None)
-                        if cert_info is None:
-                            domains_certificate_status[
-                                classified_domain.domain] = (
-                                    "create_in_progress")
-                            continue
-                        else:
-                            edge_host_name = (
-                                classified_domain.cert_info.
-                                get_san_edge_name())
-                            domains_certificate_status[
-                                classified_domain.domain] = (
-                                classified_domain.cert_info.get_cert_status())
-                            if edge_host_name is None:
-                                continue
-                    provider_access_url = self._get_provider_access_url(
-                        classified_domain, dp, edge_host_name)
-                    links.append({'href': provider_access_url,
-                                  'rel': 'access_url',
-                                  'domain': dp,
-                                  'certificate':
-                                  classified_domain.certificate
-                                  })
+                    LOG.info(
+                        'Creating/Updating policy {0} on domain {1} '
+                        'complete'.format(
+                            digital_property,
+                            classified_domain.domain
+                        )
+                    )
+                    for link in links:
+                        if classified_domain.domain == link['domain']:
+                            link['certificate'] = classified_domain.certificate
             except Exception:
                 LOG.exception("Failed to Update Service - {0}".
                               format(provider_service_id))
