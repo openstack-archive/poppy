@@ -42,11 +42,12 @@ class TestServices(base.TestCase):
     @mock.patch(
         'poppy.provider.akamai.services.ServiceController.ccu_api_client')
     @mock.patch('poppy.provider.akamai.driver.CDNProvider')
-    def setUp(self, mock_controller_policy_api_client,
+    def setUp(self, mock_driver,
               mock_controller_ccu_api_client,
-              mock_driver):
+              mock_controller_policy_api_client):
         super(TestServices, self).setUp()
         self.driver = mock_driver()
+        self.driver.provider_name = 'Akamai'
         self.driver.akamai_https_access_url_suffix = str(uuid.uuid1())
         self.san_cert_cnames = [str(x) for x in range(7)]
         self.driver.san_cert_cnames = self.san_cert_cnames
