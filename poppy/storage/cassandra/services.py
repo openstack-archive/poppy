@@ -427,7 +427,8 @@ class ServicesController(base.ServicesController):
         created, or if the domain has been taken by other customers
 
         :param domain_name
-        :param cert_type
+        :param comparing_cert_type
+        :param comparing_flavor_id
         :param comparing_project_id
 
         :returns Boolean if the cert with same type exists with another user.
@@ -688,7 +689,7 @@ class ServicesController(base.ServicesController):
                 r_flavor_id = str(r.get('flavor_id'))
                 r_cert_type = str(r.get('cert_type'))
                 r_cert_details = {}
-                # incase cert_details is None
+                # in case cert_details is None
                 cert_details = r.get('cert_details', {}) or {}
                 # Need to convert cassandra dict into real dict
                 # And the value of cert_details is a string dict
