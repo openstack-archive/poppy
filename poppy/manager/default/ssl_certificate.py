@@ -215,8 +215,8 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                     if cert_for_domain == []:
                         pass
                     else:
-                        # If this certs has been deployed thru manual process
-                        # we ignore the rerun process for this entry
+                        # If this cert has been deployed through manual
+                        # process we ignore the rerun process for this entry
                         if cert_for_domain.get_cert_status() == 'deployed':
                             continue
                     # rerun the san process

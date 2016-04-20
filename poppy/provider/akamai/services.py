@@ -586,8 +586,10 @@ class ServiceController(base.ServiceBase):
                         'san cert': None,
                         # Add logging so it is easier for testing
                         'created_at': str(datetime.datetime.now()),
-                        'action': 'San cert request for %s has been enqueued' %
-                                  (cert_obj.domain_name)
+                        'action': (
+                            'San cert request for {0} has been '
+                            'enqueued.'.format(cert_obj.domain_name)
+                        )
                     })
 
                 for san_cert_name in self.san_cert_cnames:
@@ -690,15 +692,38 @@ class ServiceController(base.ServiceBase):
                                   (cert_obj.domain_name)
                     })
             except Exception as e:
-                LOG.exception(e)
-                return self.responder.ssl_certificate_provisioned(None, {
-                    'status': 'failed',
-                    'san cert': None,
-                    'created_at': str(datetime.datetime.now()),
-                    'action': 'Waiting for action... '
-                              'Provision san cert failed for %s failed.' %
-                              cert_obj.domain_name
-                })
+                LOG.exception(
+                    "Error {0} during certificate creation for {1} "
+                    "sending the request sent back to the queue.".format(
+                        e, cert_obj.domain_name
+                    )
+                )
+                try:
+                    self.mod_san_queue.enqueue_mod_san_request(
+                        json.dumps(cert_obj.to_dict()))
+                    return self.responder.ssl_certificate_provisioned(None, {
+                        'status': 'create_in_progress',
+                        'san cert': None,
+                        # Add logging so it is easier for testing
+                        'created_at': str(datetime.datetime.now()),
+                        'action': (
+                            'San cert request for {0} has been '
+                            'enqueued.'.format(cert_obj.domain_name)
+                        )
+                    })
+                except Exception as exc:
+                    LOG.exception("Unable to enqueue {0}, Error: {1}".format(
+                        cert_obj.domain_name,
+                        exc
+                    ))
+                    return self.responder.ssl_certificate_provisioned(None, {
+                        'status': 'failed',
+                        'san cert': None,
+                        'created_at': str(datetime.datetime.now()),
+                        'action': 'Waiting for action... Provision '
+                                  'san cert failed for {0} failed.'.format(
+                                  cert_obj.domain_name)
+                    })
         else:
             return self.responder.ssl_certificate_provisioned(None, {
                 'status': 'failed',

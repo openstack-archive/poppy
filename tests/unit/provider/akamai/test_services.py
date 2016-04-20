@@ -42,11 +42,15 @@ class TestServices(base.TestCase):
     @mock.patch(
         'poppy.provider.akamai.services.ServiceController.ccu_api_client')
     @mock.patch('poppy.provider.akamai.driver.CDNProvider')
-    def setUp(self, mock_controller_policy_api_client,
-              mock_controller_ccu_api_client,
-              mock_driver):
+    def setUp(
+        self,
+        mock_driver,
+        mock_controller_ccu_api_client,
+        mock_controller_policy_api_client
+    ):
         super(TestServices, self).setUp()
         self.driver = mock_driver()
+        self.driver.provider_name = 'Akamai'
         self.driver.akamai_https_access_url_suffix = str(uuid.uuid1())
         self.san_cert_cnames = [str(x) for x in range(7)]
         self.driver.san_cert_cnames = self.san_cert_cnames
@@ -782,6 +786,142 @@ class TestServices(base.TestCase):
             controller.sps_api_base_url.format(spsId=lastSpsId))
         self.assertFalse(controller.sps_api_client.post.called)
         return
+
+    def test_create_ssl_certificate_sps_api_get_failure(self):
+        self.driver.san_cert_cnames = ["secure.san1.poppycdn.com",
+                                       "secure.san2.poppycdn.com"]
+
+        controller = services.ServiceController(self.driver)
+        data = {
+            "cert_type": "san",
+            "domain_name": "www.abc.com",
+            "flavor_id": "premium"
+        }
+
+        lastSpsId = (
+            controller.san_info_storage.get_cert_last_spsid(
+                "secure.san1.poppycdn.com"))
+
+        controller.san_info_storage.get_cert_info.return_value = {
+            'cnameHostname': "secure.san1.poppycdn.com",
+            'jobId': "secure.san1.poppycdn.com",
+            'issuer': 1789,
+            'createType': 'modSan',
+            'ipVersion': 'ipv4',
+            'slot-deployment.class': 'esslType'
+        }
+
+        cert_info = controller.san_info_storage.get_cert_info(
+            "secure.san1.poppycdn.com")
+        cert_info['add.sans'] = "www.abc.com"
+
+        controller.sps_api_client.get.return_value = mock.Mock(
+            status_code=404,
+            # Mock an SPS request
+            text='SPS ID NOT FOUND'
+        )
+
+        responder = controller.create_certificate(
+            ssl_certificate.load_from_json(data),
+            False
+        )
+
+        controller.sps_api_client.get.assert_called_once_with(
+            controller.sps_api_base_url.format(spsId=lastSpsId))
+
+        self.assertIsNone(responder['Akamai']['cert_domain'])
+        self.assertEqual(
+            'create_in_progress',
+            responder['Akamai']['extra_info']['status']
+        )
+        self.assertEqual(
+            'San cert request for www.abc.com has been enqueued.',
+            responder['Akamai']['extra_info']['action']
+        )
+        mod_san_q = self.driver.mod_san_queue
+
+        mod_san_q.enqueue_mod_san_request.assert_called_once_with(
+            json.dumps(ssl_certificate.load_from_json(data).to_dict())
+        )
+
+    def test_create_ssl_certificate_sps_api_post_failure(self):
+        self.driver.san_cert_cnames = ["secure.san1.poppycdn.com",
+                                       "secure.san2.poppycdn.com"]
+
+        controller = services.ServiceController(self.driver)
+        data = {
+            "cert_type": "san",
+            "domain_name": "www.abc.com",
+            "flavor_id": "premium"
+        }
+
+        lastSpsId = (
+            controller.san_info_storage.get_cert_last_spsid(
+                "secure.san1.poppycdn.com"))
+
+        controller.san_info_storage.get_cert_info.return_value = {
+            'cnameHostname': "secure.san1.poppycdn.com",
+            'jobId': "secure.san1.poppycdn.com",
+            'issuer': 1789,
+            'createType': 'modSan',
+            'ipVersion': 'ipv4',
+            'slot-deployment.class': 'esslType'
+        }
+
+        cert_info = controller.san_info_storage.get_cert_info(
+            "secure.san1.poppycdn.com")
+        cert_info['add.sans'] = "www.abc.com"
+
+        controller.sps_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            # Mock an SPS request
+            text=json.dumps({
+                "requestList":
+                    [{"resourceUrl": "/config-secure-provisioning-service/"
+                                     "v1/sps-requests/1849",
+                        "parameters": [{
+                            "name": "cnameHostname",
+                            "value": "secure.san1.poppycdn.com"
+                            }, {"name": "createType", "value": "modSan"},
+                            {"name": "csr.cn",
+                             "value": "secure.san3.poppycdn.com"},
+                            {"name": "add.sans",
+                             "value": "www.abc.com"}],
+                     "lastStatusChange": "2015-03-19T21:47:10Z",
+                        "spsId": 1789,
+                        "status": "SPS Request Complete",
+                        "workflowProgress": "",
+                        "jobId": 44306}]})
+        )
+
+        controller.sps_api_client.post.return_value = mock.Mock(
+            status_code=500,
+            text='INTERNAL SERVER ERROR'
+        )
+
+        responder = controller.create_certificate(
+            ssl_certificate.load_from_json(data),
+            False
+        )
+
+        controller.sps_api_client.get.assert_called_once_with(
+            controller.sps_api_base_url.format(spsId=lastSpsId))
+
+        self.assertIsNone(responder['Akamai']['cert_domain'])
+        self.assertEqual(
+            'create_in_progress',
+            responder['Akamai']['extra_info']['status']
+        )
+        self.assertEqual(
+            'San cert request for www.abc.com has been enqueued.',
+            responder['Akamai']['extra_info']['action']
+        )
+
+        mod_san_q = self.driver.mod_san_queue
+
+        mod_san_q.enqueue_mod_san_request.assert_called_once_with(
+            json.dumps(ssl_certificate.load_from_json(data).to_dict())
+        )
 
     def test_regions(self):
         controller = services.ServiceController(self.driver)
