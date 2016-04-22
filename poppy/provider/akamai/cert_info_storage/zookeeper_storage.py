@@ -15,7 +15,7 @@
 
 from oslo_config import cfg
 
-from poppy.provider.akamai.san_info_storage import base
+from poppy.provider.akamai.cert_info_storage import base
 from poppy.provider.akamai import utils
 
 
@@ -30,8 +30,11 @@ AKAMAI_OPTIONS = [
     cfg.IntOpt('storage_backend_port', default=2181, help='default'
                ' default san info storage backend server port (e.g: 2181)'),
     cfg.StrOpt(
-        'san_info_storage_path', default='/san_info', help='zookeeper backend'
-        ' path for san cert info'),
+        'cert_info_storage_path',
+        default='/cert_info',
+        help='zookeeper backend'
+        ' path for san cert info'
+    ),
 ]
 
 AKAMAI_GROUP = 'drivers:provider:akamai:storage'
@@ -45,20 +48,20 @@ class ZookeeperSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         self._conf.register_opts(AKAMAI_OPTIONS,
                                  group=AKAMAI_GROUP)
         self.akamai_conf = self._conf[AKAMAI_GROUP]
-        self.san_info_storage_path = self.akamai_conf.san_info_storage_path
+        self.cert_info_storage_path = self.akamai_conf.cert_info_storage_path
 
         self.zookeeper_client = utils.connect_to_zookeeper_storage_backend(
             self.akamai_conf)
 
     def _zk_path(self, san_cert_name, property_name=None):
-        path_names_list = [self.san_info_storage_path, san_cert_name,
+        path_names_list = [self.cert_info_storage_path, san_cert_name,
                            property_name] if property_name else (
-            [self.san_info_storage_path, san_cert_name])
+            [self.cert_info_storage_path, san_cert_name])
         return '/'.join(path_names_list)
 
     def list_all_san_cert_names(self):
-        self.zookeeper_client.ensure_path(self.san_info_storage_path)
-        return self.zookeeper_client.get_children(self.san_info_storage_path)
+        self.zookeeper_client.ensure_path(self.cert_info_storage_path)
+        return self.zookeeper_client.get_children(self.cert_info_storage_path)
 
     def get_cert_info(self, san_cert_name):
         self.zookeeper_client.ensure_path(self._zk_path(san_cert_name, None))

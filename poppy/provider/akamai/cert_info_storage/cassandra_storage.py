@@ -13,22 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import json
 import os
-import ssl
 
 import cassandra
-from cassandra import auth
-from cassandra import cluster
-from cassandra import policies
 from cassandra import query
-from cdeploy import migrator
 from oslo_config import cfg
 from oslo_log import log
 
-from poppy.common import decorators
-from poppy.provider.akamai.san_info_storage import base
+from poppy.provider.akamai.cert_info_storage import base
+from poppy.storage.cassandra import driver
 
 
 _DEFAULT_OPTIONS = [
@@ -108,109 +102,25 @@ CREATE_PROVIDER_INFO = '''
 '''
 
 
-def _connection(conf, datacenter, keyspace=None):
-    """connection.
-
-    :param datacenter
-    :returns session
-    """
-    ssl_options = None
-    if conf.ssl_enabled:
-        ssl_options = {
-            'ca_certs': conf.ssl_ca_certs,
-            'ssl_version': ssl.PROTOCOL_TLSv1
-        }
-
-    auth_provider = None
-    if conf.auth_enabled:
-        auth_provider = auth.PlainTextAuthProvider(
-            username=conf.username,
-            password=conf.password
-        )
-
-    load_balancing_policy_class = getattr(policies, conf.load_balance_strategy)
-    if load_balancing_policy_class is policies.DCAwareRoundRobinPolicy:
-        load_balancing_policy = load_balancing_policy_class(datacenter)
-    else:
-        load_balancing_policy = load_balancing_policy_class()
-
-    cluster_connection = cluster.Cluster(
-        conf.cluster,
-        auth_provider=auth_provider,
-        load_balancing_policy=load_balancing_policy,
-        port=conf.port,
-        ssl_options=ssl_options,
-        max_schema_agreement_wait=conf.max_schema_agreement_wait
-    )
-
-    session = cluster_connection.connect()
-    if not keyspace:
-        keyspace = conf.keyspace
-    try:
-        session.set_keyspace(keyspace)
-    except cassandra.InvalidRequest:
-        _create_keyspace(session, keyspace, conf.replication_strategy)
-
-    migration_session = copy.copy(session)
-    migration_session.default_consistency_level = \
-        getattr(cassandra.ConsistencyLevel, conf.migrations_consistency_level)
-    _run_migrations(keyspace, conf.migrations_path, migration_session)
-
-    session.row_factory = query.dict_factory
-
-    return session
-
-
-def _create_keyspace(session, keyspace, replication_strategy):
-    """create_keyspace.
-
-    :param keyspace
-    :param replication_strategy
-    """
-    LOG.debug('Creating keyspace: ' + keyspace)
-
-    # replication factor will come in as a string with quotes already
-    session.execute(
-        "CREATE KEYSPACE " + keyspace + " " +
-        "WITH REPLICATION = " + str(replication_strategy) + ";"
-    )
-    session.set_keyspace(keyspace)
-
-
-def _run_migrations(keyspace, migrations_path, session):
-    LOG.debug('Running schema migration(s) on keyspace: %s' % keyspace)
-
-    schema_migrator = migrator.Migrator(migrations_path, session)
-    schema_migrator.run_migrations()
-
-
 class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
 
     def __init__(self, conf):
         super(CassandraSanInfoStorage, self).__init__(conf)
 
         self._conf.register_opts(_DEFAULT_OPTIONS)
-        if self._conf.use_same_storage_driver:
-            from poppy.storage.cassandra import driver
-            self._conf.register_opts(driver.CASSANDRA_OPTIONS,
-                                     group=driver.CASSANDRA_GROUP)
-            self.cassandra_conf = self._conf[driver.CASSANDRA_GROUP]
-        else:
-            self._conf.register_opts(CASSANDRA_OPTIONS,
-                                     group=AKAMAI_CASSANDRA_STORAGE_GROUP)
-            self.cassandra_conf = self._conf[AKAMAI_CASSANDRA_STORAGE_GROUP]
-        self.datacenter = conf.datacenter
+        self.storage = driver.CassandraStorageDriver(self._conf)
+
+        if self._conf.use_same_storage_driver is False:
+            self.storage.change_config_opts(
+                CASSANDRA_OPTIONS,
+                AKAMAI_CASSANDRA_STORAGE_GROUP
+            )
+
+        self.session = self.storage.database
         self.consistency_level = getattr(
             cassandra.ConsistencyLevel,
-            self.cassandra_conf.consistency_level)
-
-    @decorators.lazy_property(write=False)
-    def connection(self):
-        return _connection(self.cassandra_conf, self.datacenter)
-
-    @property
-    def session(self):
-        return self.connection
+            self.storage.cassandra_conf.consistency_level
+        )
 
     def _get_akamai_provider_info(self):
         args = {

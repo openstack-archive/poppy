@@ -15,7 +15,7 @@
 
 from oslo_config import cfg
 
-from poppy.provider.akamai.san_info_storage import cassandra_storage
+from poppy.provider.akamai.cert_info_storage import cassandra_storage
 
 
 CONF = cfg.CONF
