@@ -659,10 +659,10 @@ class ServiceController(base.ServiceBase):
                             this_job_id
                         )
                         self.san_mapping_queue.enqueue_san_mapping(
-                            {
+                            json.dumps({
                                 'san_cert_domain': san_cert_name,
                                 'domain_name': cert_obj.domain_name,
-                            }
+                            })
                         )
                         return self.responder.ssl_certificate_provisioned(
                             san_cert_name, {
