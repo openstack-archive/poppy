@@ -51,8 +51,8 @@ class ServiceController(base.ServiceBase):
         return self.driver.akamai_sub_customer_api_client
 
     @property
-    def san_info_storage(self):
-        return self.driver.san_info_storage
+    def cert_info_storage(self):
+        return self.driver.cert_info_storage
 
     @property
     def mod_san_queue(self):
@@ -592,14 +592,14 @@ class ServiceController(base.ServiceBase):
 
                 for san_cert_name in self.san_cert_cnames:
                     enabled = (
-                        self.san_info_storage.get_enabled_status(
+                        self.cert_info_storage.get_enabled_status(
                             san_cert_name
                         )
                     )
                     if not enabled:
                         continue
                     lastSpsId = (
-                        self.san_info_storage.get_cert_last_spsid(
+                        self.cert_info_storage.get_cert_last_spsid(
                             san_cert_name
                         )
                     )
@@ -631,7 +631,7 @@ class ServiceController(base.ServiceBase):
                                      san_cert_name)
                             continue
                     # issue modify san_cert sps request
-                    cert_info = self.san_info_storage.get_cert_info(
+                    cert_info = self.cert_info_storage.get_cert_info(
                         san_cert_name)
                     cert_info['add.sans'] = cert_obj.domain_name
                     string_post_data = '&'.join(
@@ -653,7 +653,7 @@ class ServiceController(base.ServiceBase):
                         # get last item in results array and use its jobID
                         results = resp_dict['Results']['data']
                         this_job_id = results[0]['results']['jobID']
-                        self.san_info_storage.save_cert_last_ids(
+                        self.cert_info_storage.save_cert_last_ids(
                             san_cert_name,
                             this_sps_id,
                             this_job_id
