@@ -29,6 +29,7 @@ def run():
     conf = cfg.CONF
     log.register_options(conf)
     conf(project='poppy', prog='poppy')
+    log.setup(conf, 'poppy')
     b = bootstrap.Bootstrap(conf)
     conductor_name = '{0}-{1}'.format(socket.gethostname(), os.getpid())
     b.distributed_task.services_controller.run_task_worker(name=conductor_name)
