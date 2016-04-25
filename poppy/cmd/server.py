@@ -29,7 +29,7 @@ def run():
     conf = cfg.CONF
     log.register_options(conf)
     conf(project='poppy', prog='poppy')
-
+    log.setup(conf, 'poppy')
     server = bootstrap.Bootstrap(conf)
 
     # The following code is to daemonize poppy-server to avoid
