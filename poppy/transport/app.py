@@ -28,13 +28,19 @@ to the WSGI app when it is called from other apps.
 import os
 
 from oslo_config import cfg
+from oslo_log import log
 
 from poppy import bootstrap
 
 
 conf = cfg.CONF
+
+log.register_options(conf)
+
 conf(project='poppy', prog='poppy', args=[])
 if os.environ.get('POPPY_CONFIG_FILE') is not None:
     conf.default_config_files.insert(os.environ.get('POPPY_CONFIG_FILE'), 0)
+
+log.setup(conf, "poppy")
 
 app = bootstrap.Bootstrap(conf).transport.app
