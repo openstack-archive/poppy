@@ -32,9 +32,11 @@ class GetCertInfoTask(task.Task):
     default_provides = "cert_obj_json"
 
     def execute(self, domain_name, cert_type, flavor_id, project_id):
-        service_controller, self.storage_controller = \
-            memoized_controllers.task_controllers('poppy', 'storage')
-        res = self.storage_controller.get_certs_by_domain(
+        service_controller, self.ssl_certificate_manager = \
+            memoized_controllers.task_controllers('poppy', 'ssl_certificate')
+        self.storage = self.ssl_certificate_manager.storage
+
+        res = self.storage.get_certs_by_domain(
             domain_name, project_id=project_id,
             flavor_id=flavor_id, cert_type=cert_type)
         if res is None:
@@ -103,26 +105,33 @@ class UpdateCertStatusTask(task.Task):
 
     def __init__(self):
         super(UpdateCertStatusTask, self).__init__()
-        service_controller, self.storage_controller = \
-            memoized_controllers.task_controllers('poppy', 'storage')
+        service_controller, self.ssl_certificate_manager = \
+            memoized_controllers.task_controllers('poppy', 'ssl_certificate')
+        self.storage_controller = (
+            self.ssl_certificate_manager.storage
+        )
+        self.service_storage = service_controller.storage_controller
 
     def execute(self, project_id, cert_obj_json, status_change_to):
         if cert_obj_json != "":
-            cert_obj = ssl_certificate.load_from_json(json.loads(cert_obj_json)
-                                                      )
+            cert_obj = ssl_certificate.load_from_json(
+                json.loads(cert_obj_json)
+            )
             cert_details = cert_obj.cert_details
 
             if status_change_to != "":
                 cert_details['Akamai']['extra_info']['status'] = (
                     status_change_to)
                 cert_details['Akamai'] = json.dumps(cert_details['Akamai'])
-                self.storage_controller.update_cert_info(cert_obj.domain_name,
-                                                         cert_obj.cert_type,
-                                                         cert_obj.flavor_id,
-                                                         cert_details)
+                self.storage_controller.update_certificate(
+                    cert_obj.domain_name,
+                    cert_obj.cert_type,
+                    cert_obj.flavor_id,
+                    cert_details
+                )
 
                 service_obj = (
-                    self.storage_controller.
+                    self.service_storage.
                     get_service_details_by_domain_name(cert_obj.domain_name)
                 )
                 # Update provider details
@@ -131,7 +140,7 @@ class UpdateCertStatusTask(task.Task):
                         domains_certificate_status.\
                         set_domain_certificate_status(cert_obj.domain_name,
                                                       status_change_to)
-                    self.storage_controller.update_provider_details(
+                    self.service_storage.update_provider_details(
                         project_id,
                         service_obj.service_id,
                         service_obj.provider_details

@@ -59,12 +59,16 @@ class MockDBStorageDriver(base.Driver):
         return _connection()
 
     @property
-    def services_controller(self):
-        return controllers.ServicesController(self)
+    def certificates_controller(self):
+        return controllers.CertificatesController(self)
 
     @property
     def flavors_controller(self):
         return controllers.FlavorsController(self)
+
+    @property
+    def services_controller(self):
+        return controllers.ServicesController(self)
 
     @property
     def database(self):
