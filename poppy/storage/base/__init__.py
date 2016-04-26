@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.storage.base import certificates
 from poppy.storage.base import driver
 from poppy.storage.base import flavors
 from poppy.storage.base import services
@@ -20,5 +21,6 @@ from poppy.storage.base import services
 
 Driver = driver.StorageDriverBase
 
+CertificatesController = certificates.CertificatesControllerBase
 FlavorsController = flavors.FlavorsControllerBase
 ServicesController = services.ServicesControllerBase

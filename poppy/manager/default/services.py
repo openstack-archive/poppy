@@ -50,6 +50,9 @@ class DefaultServicesController(base.ServicesController):
         super(DefaultServicesController, self).__init__(manager)
 
         self.storage_controller = self._driver.storage.services_controller
+        self.ssl_certificate_storage = (
+            self._driver.storage.certificates_controller
+        )
         self.flavor_controller = self._driver.storage.flavors_controller
         self.dns_controller = self._driver.dns.services_controller
         self.distributed_task_controller = (
@@ -100,13 +103,6 @@ class DefaultServicesController(base.ServicesController):
 
         return services_project_ids
 
-    def get_certs_by_status(self, status):
-
-        services_project_ids = \
-            self.storage_controller.get_certs_by_status(status)
-
-        return services_project_ids
-
     def get_domains_by_provider_url(self, provider_url):
 
         domains = \
@@ -151,26 +147,26 @@ class DefaultServicesController(base.ServicesController):
                     request_url='/*')
                 caching_entry['rules'].append(default_rule.to_dict())
 
-    def list(self, project_id, marker=None, limit=None):
-        """list.
+    def get_services(self, project_id, marker=None, limit=None):
+        """Get a list of services.
 
         :param project_id
         :param marker
         :param limit
         :return list
         """
-        return self.storage_controller.list(project_id, marker, limit)
+        return self.storage_controller.get_services(project_id, marker, limit)
 
-    def get(self, project_id, service_id):
+    def get_service(self, project_id, service_id):
         """get.
 
         :param project_id
         :param service_id
         :return controller
         """
-        return self.storage_controller.get(project_id, service_id)
+        return self.storage_controller.get_service(project_id, service_id)
 
-    def create(self, project_id, auth_token, service_json):
+    def create_service(self, project_id, auth_token, service_json):
         """create.
 
         :param project_id
@@ -217,8 +213,7 @@ class DefaultServicesController(base.ServicesController):
                 raise e
 
         try:
-            self.storage_controller.create(project_id,
-                                           service_obj)
+            self.storage_controller.create_service(project_id, service_obj)
         except ValueError as e:
             raise e
 
@@ -237,8 +232,8 @@ class DefaultServicesController(base.ServicesController):
 
         return service_obj
 
-    def update(self, project_id, service_id,
-               auth_token, service_updates, force_update=False):
+    def update_service(self, project_id, service_id,
+                       auth_token, service_updates, force_update=False):
         """update.
 
         :param project_id
@@ -250,7 +245,10 @@ class DefaultServicesController(base.ServicesController):
         """
         # get the current service object
         try:
-            service_old = self.storage_controller.get(project_id, service_id)
+            service_old = self.storage_controller.get_service(
+                project_id,
+                service_id
+            )
         except ValueError:
             raise errors.ServiceNotFound("Service not found")
 
@@ -277,7 +275,7 @@ class DefaultServicesController(base.ServicesController):
             # old domains need to bind as well
             elif domain.certificate == 'san':
                 cert_for_domain = (
-                    self.storage_controller.get_certs_by_domain(
+                    self.ssl_certificate_storage.get_certs_by_domain(
                         domain.domain,
                         project_id=project_id,
                         flavor_id=service_old.flavor_id,
@@ -339,7 +337,7 @@ class DefaultServicesController(base.ServicesController):
                             store)
                 elif domain.certificate == 'san':
                     cert_for_domain = (
-                        self.storage_controller.get_certs_by_domain(
+                        self.ssl_certificate_storage.get_certs_by_domain(
                             domain.domain,
                             project_id=project_id,
                             flavor_id=service_new.flavor_id,
@@ -389,7 +387,7 @@ class DefaultServicesController(base.ServicesController):
                                 project_id,
                                 new_cert_detail
                             )
-                            self.storage_controller.create_cert(
+                            self.ssl_certificate_storage.create_certificate(
                                 project_id,
                                 new_cert_obj
                             )
@@ -419,7 +417,11 @@ class DefaultServicesController(base.ServicesController):
         for provider in provider_details:
             provider_details[provider].status = u'update_in_progress'
         service_new.provider_details = provider_details
-        self.storage_controller.update(project_id, service_id, service_new)
+        self.storage_controller.update_service(
+            project_id,
+            service_id,
+            service_new
+        )
 
         kwargs = {
             'project_id': project_id,
@@ -443,13 +445,16 @@ class DefaultServicesController(base.ServicesController):
 
     def set_service_provider_details(self, project_id, service_id,
                                      auth_token, status):
-        old_service = self.storage_controller.get(project_id, service_id)
+        old_service = self.storage_controller.get_service(
+            project_id,
+            service_id
+        )
 
         if (
             old_service.status == 'create_in_progress' and
             old_service.provider_details == {}
         ):
-            self.update(
+            self.update_service(
                 project_id, service_id, auth_token, [], force_update=True)
             return 202
         self.storage_controller.set_service_provider_details(
@@ -480,7 +485,7 @@ class DefaultServicesController(base.ServicesController):
             if action == 'delete':
                 LOG.info('Deleting  service: %s, project_id: %s' % (
                     service_obj.service_id, project_id))
-                self.delete(project_id, service_obj.service_id)
+                self.delete_service(project_id, service_obj.service_id)
             elif action == 'enable':
                 LOG.info('Enabling  service: %s, project_id: %s' % (
                     service_obj.service_id, project_id))
@@ -524,7 +529,11 @@ class DefaultServicesController(base.ServicesController):
             return
 
         marker = None
-        service_batch = self.storage_controller.list(project_id, marker, 10)
+        service_batch = self.storage_controller.get_services(
+            project_id,
+            marker,
+            10
+        )
         while len(service_batch) > 0:
             marker = service_batch[-1].service_id
             # process previous batch
@@ -532,19 +541,23 @@ class DefaultServicesController(base.ServicesController):
                 self._action_per_service_obj(project_id=project_id,
                                              action=action,
                                              service_obj=service_obj)
-            service_batch = self.storage_controller.list(project_id, marker,
-                                                         10)
+            service_batch = self.storage_controller.get_services(
+                project_id,
+                marker,
+                10
+            )
 
         return
 
-    def delete(self, project_id, service_id):
+    def delete_service(self, project_id, service_id):
         """delete.
 
         :param project_id
         :param service_id
         :raises LookupError
         """
-        service_obj = self.storage_controller.get(project_id, service_id)
+        service_obj = self.storage_controller.get_service(
+            project_id, service_id)
 
         # get provider details for this service
         provider_details = self._get_provider_details(project_id, service_id)
@@ -554,7 +567,11 @@ class DefaultServicesController(base.ServicesController):
             service_obj.provider_details[provider].status = (
                 u'delete_in_progress')
 
-        self.storage_controller.update(project_id, service_id, service_obj)
+        self.storage_controller.update_service(
+            project_id,
+            service_id,
+            service_obj
+        )
 
         kwargs = {
             "provider_details": json.dumps(
@@ -573,7 +590,10 @@ class DefaultServicesController(base.ServicesController):
     def purge(self, project_id, service_id, hard=False, purge_url=None):
         """If purge_url is none, all content of this service will be purge."""
         try:
-            service_obj = self.storage_controller.get(project_id, service_id)
+            service_obj = self.storage_controller.get_service(
+                project_id,
+                service_id
+            )
         except ValueError as e:
             # This except is hit when service object does not exist
             raise LookupError(str(e))
@@ -592,7 +612,11 @@ class DefaultServicesController(base.ServicesController):
                 service_obj.provider_details[provider].status = (
                     u'update_in_progress')
 
-        self.storage_controller.update(project_id, service_id, service_obj)
+        self.storage_controller.update_service(
+            project_id,
+            service_id,
+            service_obj
+        )
 
         # possible validation of purge url here...
         kwargs = {

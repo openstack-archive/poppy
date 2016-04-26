@@ -76,10 +76,11 @@ class MonkeyPatchControllers(object):
 
     def __init__(self, service_controller,
                  dns_controller,
-                 storage_controller, func):
+                 storage_controller, ssl_cert_controller, func):
         self.service_controller = service_controller
         self.dns_controller = dns_controller
         self.storage_controller = storage_controller
+        self.ssl_cert_controller = ssl_cert_controller
         self.func = func
 
     def __enter__(self):
@@ -89,6 +90,8 @@ class MonkeyPatchControllers(object):
                 return self.service_controller, self.storage_controller
             if controller == 'dns':
                 return self.service_controller, self.dns_controller
+            if controller == 'ssl_certificate':
+                return self.service_controller, self.ssl_cert_controller
             else:
                 return self.service_controller
 
@@ -437,14 +440,17 @@ class DefaultManagerServiceTests(base.TestCase):
         self.sc.storage_controller.get_service_count = mock.Mock(
             return_value=1)
 
-        service_obj = self.sc.create(self.project_id,
-                                     self.auth_token,
-                                     self.service_json)
+        service_obj = self.sc.create_service(
+            self.project_id,
+            self.auth_token,
+            self.service_json
+        )
 
         # ensure the manager calls the storage driver with the appropriate data
-        self.sc.storage_controller.create.assert_called_once_with(
+        self.sc.storage_controller.create_service.assert_called_once_with(
             self.project_id,
-            service_obj)
+            service_obj
+        )
 
     @ddt.file_data('data_provider_details.json')
     def test_create_service_worker(self, provider_details_json):
@@ -518,6 +524,7 @@ class DefaultManagerServiceTests(base.TestCase):
         with MonkeyPatchControllers(self.sc,
                                     self.sc.dns_controller,
                                     self.sc.storage_controller,
+                                    self.sc.ssl_certificate_storage,
                                     memoized_controllers.task_controllers):
             self.mock_create_service(provider_details_json)
 
@@ -621,6 +628,7 @@ class DefaultManagerServiceTests(base.TestCase):
         with MonkeyPatchControllers(self.sc,
                                     self.sc.dns_controller,
                                     self.sc.storage_controller,
+                                    self.sc.ssl_certificate_storage,
                                     memoized_controllers.task_controllers):
 
             # NOTE(TheSriram): Successful update
@@ -675,7 +683,7 @@ class DefaultManagerServiceTests(base.TestCase):
 
         service_obj = service.load_from_json(self.service_json)
         service_obj.status = u'deployed'
-        self.sc.storage_controller.get.return_value = service_obj
+        self.sc.storage_controller.get_service.return_value = service_obj
         service_updates = json.dumps([
             {
                 "op": "replace",
@@ -684,10 +692,12 @@ class DefaultManagerServiceTests(base.TestCase):
             }
         ])
 
-        self.sc.update(self.project_id,
-                       self.service_id,
-                       self.auth_token,
-                       service_updates)
+        self.sc.update_service(
+            self.project_id,
+            self.service_id,
+            self.auth_token,
+            service_updates
+        )
 
         # ensure the manager calls the storage driver with the appropriate data
         self.sc.storage_controller.update.assert_called_once()
@@ -710,16 +720,21 @@ class DefaultManagerServiceTests(base.TestCase):
 
         self.service_obj.provider_details = self.provider_details
         sc = self.sc.storage_controller
-        sc.get.return_value = self.service_obj
+        sc.get_service.return_value = self.service_obj
 
-        self.sc.delete(self.project_id, self.service_id)
+        self.sc.delete_service(self.project_id, self.service_id)
 
         # ensure the manager calls the storage driver with the appropriate data
 
-        sc.get.assert_called_once_with(self.project_id, self.service_id)
-        sc.update.assert_called_once_with(self.project_id,
-                                          self.service_id,
-                                          self.service_obj)
+        sc.get_service.assert_called_once_with(
+            self.project_id,
+            self.service_id
+        )
+        sc.update_service.assert_called_once_with(
+            self.project_id,
+            self.service_id,
+            self.service_obj
+        )
 
         # break into 2 lines.
         sc = self.sc.storage_controller
@@ -791,6 +806,7 @@ class DefaultManagerServiceTests(base.TestCase):
         with MonkeyPatchControllers(self.sc,
                                     self.sc.dns_controller,
                                     self.sc.storage_controller,
+                                    self.sc.ssl_certificate_storage,
                                     memoized_controllers.task_controllers):
             self.mock_delete_service()
 
@@ -854,6 +870,7 @@ class DefaultManagerServiceTests(base.TestCase):
         with MonkeyPatchControllers(self.sc,
                                     self.sc.dns_controller,
                                     self.sc.storage_controller,
+                                    self.sc.ssl_certificate_storage,
                                     memoized_controllers.task_controllers):
             self.mock_delete_service()
 
@@ -878,7 +895,7 @@ class DefaultManagerServiceTests(base.TestCase):
         )
 
         self.service_obj.provider_details = self.provider_details
-        self.sc.storage_controller.get.return_value = (
+        self.sc.storage_controller.get_service.return_value = (
             self.service_obj
         )
 
@@ -952,6 +969,7 @@ class DefaultManagerServiceTests(base.TestCase):
         with MonkeyPatchControllers(self.sc,
                                     self.sc.dns_controller,
                                     self.sc.storage_controller,
+                                    self.sc.ssl_certificate_storage,
                                     memoized_controllers.task_controllers):
             self.mock_purge_service(hard=True)
             self.mock_purge_service(hard=False)
@@ -1005,6 +1023,7 @@ class DefaultManagerServiceTests(base.TestCase):
         with MonkeyPatchControllers(self.sc,
                                     self.sc.dns_controller,
                                     self.sc.storage_controller,
+                                    self.sc.ssl_certificate_storage,
                                     memoized_controllers.task_controllers):
             self.mock_purge_service(hard=True)
             self.mock_purge_service(hard=False)
@@ -1051,15 +1070,19 @@ class DefaultManagerServiceTests(base.TestCase):
             return_value=list()
         )
 
-        self.mock_storage.services_controller.get.return_value = (
+        self.mock_storage.services_controller.get_service.return_value = (
             mock_service_obj
         )
 
         self.sc.set_service_provider_details(
             "project_id", "service_id", "auth_token", "deployed"
         )
-        self.assertTrue(self.mock_storage.services_controller.get.called)
-        self.assertTrue(self.mock_storage.services_controller.update.called)
+        self.assertTrue(
+            self.mock_storage.services_controller.get_service.called
+        )
+        self.assertTrue(
+            self.mock_storage.services_controller.update_service.called
+        )
         self.assertTrue(
             self.mock_distributed_task.services_controller.submit_task.called
         )

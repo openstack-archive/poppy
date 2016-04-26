@@ -23,8 +23,10 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
+from poppy.storage.cassandra import certificates
 from poppy.storage.cassandra import flavors
 from poppy.storage.cassandra import services
 
-ServicesController = services.ServicesController
+CertificatesController = certificates.CertificatesController
 FlavorsController = flavors.FlavorsController
+ServicesController = services.ServicesController

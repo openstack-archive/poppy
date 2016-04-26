@@ -36,8 +36,10 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
         super(DefaultSSLCertificateController, self).__init__(manager)
 
         self.distributed_task_controller = (
-            self._driver.distributed_task.services_controller)
-        self.storage_controller = self._driver.storage.services_controller
+            self._driver.distributed_task.services_controller
+        )
+        self.storage = self._driver.storage.certificates_controller
+        self.service_storage = self._driver.storage.services_controller
         self.flavor_controller = self._driver.storage.flavors_controller
 
     def create_ssl_certificate(self, project_id, cert_obj):
@@ -57,9 +59,10 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             raise e
 
         try:
-            self.storage_controller.create_cert(
+            self.storage.create_certificate(
                 project_id,
-                cert_obj)
+                cert_obj
+            )
         # ValueError will be raised if the cert_info has already existed
         except ValueError as e:
             raise e
@@ -76,8 +79,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             **kwargs)
         return kwargs
 
-    def delete_ssl_certificate(self, project_id, domain_name,
-                               cert_type):
+    def delete_ssl_certificate(self, project_id, domain_name, cert_type):
         kwargs = {
             'project_id': project_id,
             'domain_name': domain_name,
@@ -91,7 +93,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
 
     def get_certs_info_by_domain(self, domain_name, project_id):
         try:
-            certs_info = self.storage_controller.get_certs_by_domain(
+            certs_info = self.storage.get_certs_by_domain(
                 domain_name=domain_name,
                 project_id=project_id)
             if not certs_info:
@@ -122,7 +124,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
 
     def update_san_retry_list(self, queue_data_list):
         for r in queue_data_list:
-            service_obj = self.storage_controller\
+            service_obj = self.service_storage\
                 .get_service_details_by_domain_name(r['domain_name'])
             if service_obj is None and r.get('validate_service', True):
                 raise LookupError(u'Domain {0} does not exist on any service, '
@@ -131,7 +133,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                                   'to retry this san-retry request forcefully'.
                                   format(r['domain_name'], r))
 
-            cert_for_domain = self.storage_controller.get_certs_by_domain(
+            cert_for_domain = self.storage.get_certs_by_domain(
                 r['domain_name'])
             if cert_for_domain != []:
                 if cert_for_domain.get_cert_status() == "deployed":
@@ -154,7 +156,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                    akamai_driver.mod_san_queue.put_queue_data(new_queue_data)]
 
             deleted = tuple(x for x in orig if x not in res)
-        # other provider's retry-list implementaiton goes here
+        # other provider's retry-list implementation goes here
         return res, deleted
 
     def rerun_san_retry_list(self):
@@ -168,10 +170,10 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             # remove duplicates
             # see http://bit.ly/1mX2Vcb for details
             def remove_duplicates(data):
-                '''Remove duplicates from the data (normally a list).
+                """Remove duplicates from the data (normally a list).
 
                 The data must be sortable and have an equality operator
-                '''
+                """
                 data = sorted(data)
                 return [k for k, _ in itertools.groupby(data)]
             retry_list = remove_duplicates(retry_list)
@@ -179,7 +181,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             # double check in POST. This check should really be first done in
             # PUT
             for r in retry_list:
-                service_obj = self.storage_controller\
+                service_obj = self.service_storage\
                     .get_service_details_by_domain_name(r['domain_name'])
                 if service_obj is None and r.get('validate_service', True):
                     raise LookupError(u'Domain {0} does not exist on any '
@@ -189,7 +191,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                                       ' san-retry request forcefully'.
                                       format(r['domain_name'], r))
 
-                cert_for_domain = self.storage_controller.get_certs_by_domain(
+                cert_for_domain = self.storage.get_certs_by_domain(
                     r['domain_name'])
                 if cert_for_domain != []:
                     if cert_for_domain.get_cert_status() == "deployed":
@@ -207,7 +209,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                     )
 
                     cert_for_domain = (
-                        self.storage_controller.get_certs_by_domain(
+                        self.storage.get_certs_by_domain(
                             cert_obj.domain_name,
                             project_id=cert_obj.project_id,
                             flavor_id=cert_obj.flavor_id,
@@ -303,3 +305,8 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             res = {}
 
         return res
+
+    def get_certs_by_status(self, status):
+        services_project_ids = self.storage.get_certs_by_status(status)
+
+        return services_project_ids

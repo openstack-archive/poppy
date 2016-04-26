@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import json
-import random
 
 from poppy.model.helpers import domain
 from poppy.model.helpers import origin
@@ -22,8 +21,13 @@ from poppy.model.helpers import provider_details
 from poppy.model.helpers import restriction
 from poppy.model.helpers import rule
 from poppy.model import service
-from poppy.model import ssl_certificate
 from poppy.storage import base
+
+created_services = {}
+created_service_ids = []
+claimed_domains = []
+project_id_service_limit = {}
+service_count_per_project_id = {}
 
 
 class ServicesController(base.ServicesController):
@@ -31,19 +35,18 @@ class ServicesController(base.ServicesController):
     def __init__(self, driver):
         super(ServicesController, self).__init__(driver)
 
-        self.created_service_ids = []
-        self.created_services = {}
-        self.claimed_domains = []
-        self.projectid_service_limit = {}
+        self.created_service_ids = created_service_ids
+        self.created_services = created_services
+        self.claimed_domains = claimed_domains
+        self.project_id_service_limit = project_id_service_limit
         self.default_max_service_limit = 20
-        self.service_count_per_project_id = {}
-        self.certs = {}
+        self.service_count_per_project_id = service_count_per_project_id
 
     @property
     def session(self):
         return self._driver.database
 
-    def list(self, project_id, marker=None, limit=None):
+    def get_services(self, project_id, marker=None, limit=None):
         services = []
         for service_id in self.created_services:
             services.append(self.created_services[service_id])
@@ -55,7 +58,7 @@ class ServicesController(base.ServicesController):
 
         return services_result
 
-    def get(self, project_id, service_id):
+    def get_service(self, project_id, service_id):
         # get the requested service from storage
         if service_id not in self.created_service_ids:
             raise ValueError("service {0} does not exist".format(service_id))
@@ -65,7 +68,7 @@ class ServicesController(base.ServicesController):
             service_result._status = 'deployed'
             return service_result
 
-    def create(self, project_id, service_obj):
+    def create_service(self, project_id, service_obj):
         if service_obj.service_id in self.created_service_ids:
             raise ValueError("Service %s already exists." %
                              service_obj.service_id)
@@ -80,11 +83,11 @@ class ServicesController(base.ServicesController):
             self.service_count_per_project_id[project_id] = 1
 
     def set_service_limit(self, project_id, project_limit):
-        self.projectid_service_limit[project_id] = project_limit
+        self.project_id_service_limit[project_id] = project_limit
 
     def get_service_limit(self, project_id):
         try:
-            return self.projectid_service_limit[project_id]
+            return self.project_id_service_limit[project_id]
         except KeyError:
             return self.default_max_service_limit
 
@@ -94,7 +97,7 @@ class ServicesController(base.ServicesController):
         except KeyError:
             return 0
 
-    def update(self, project_id, service_id, service_json):
+    def update_service(self, project_id, service_id, service_json):
         # update configuration in storage
         if service_json.service_id in self.created_service_ids \
                 and service_json.service_id == service_id:
@@ -120,14 +123,14 @@ class ServicesController(base.ServicesController):
         :returns service_obj
         """
 
-        service_obj = self.get(project_id, service_id)
+        service_obj = self.get_service(project_id, service_id)
         service_obj.operator_status = state
-        self.update(project_id, service_id, service_obj)
+        self.update_service(project_id, service_id, service_obj)
 
-        return self.get(project_id, service_id)
+        return self.get_service(project_id, service_id)
 
-    def delete(self, project_id, service_id):
-        if (service_id in self.created_service_ids):
+    def delete_service(self, project_id, service_id):
+        if service_id in self.created_service_ids:
             self.created_service_ids.remove(service_id)
         try:
             self.service_count_per_project_id[project_id] -= 1
@@ -167,12 +170,6 @@ class ServicesController(base.ServicesController):
     def domain_exists_elsewhere(self, domain_name, service_id):
         return domain_name in self.claimed_domains
 
-    def update_cert_info(self, domain_name, cert_type, flavor_id,
-                         cert_details):
-        key = (flavor_id, domain_name, cert_type)
-        if key in self.certs:
-            self.certs[key].cert_details = cert_details
-
     def get_service_details_by_domain_name(self, domain_name,
                                            project_id=None):
         for service_id in self.created_services:
@@ -182,48 +179,6 @@ class ServicesController(base.ServicesController):
                 service_result = self.format_result(service_dict_in_cache)
                 service_result._status = 'deployed'
                 return service_result
-
-    def create_cert(self, project_id, cert_obj):
-        key = (cert_obj.flavor_id, cert_obj.domain_name, cert_obj.cert_type)
-        if key not in self.certs:
-            self.certs[key] = cert_obj
-        else:
-            raise ValueError
-
-    def get_certs_by_domain(self, domain_name, project_id=None, flavor_id=None,
-                            cert_type=None, status=u'create_in_progress'):
-        certs = []
-        for cert in self.certs:
-            if domain_name in cert:
-                certs.append(self.certs[cert])
-        if project_id:
-            if flavor_id is not None and cert_type is not None:
-                return ssl_certificate.SSLCertificate(
-                    "premium",
-                    "blog.testabcd.com",
-                    "san",
-                    project_id=project_id,
-                    cert_details={
-                        'Akamai': {
-                            u'cert_domain': u'secure2.san1.test_123.com',
-                            u'extra_info': {
-                                u'action': u'Waiting for customer domain '
-                                            'validation for blog.testabc.com',
-                                u'akamai_spsId': str(random.randint(1, 100000)
-                                                     ),
-                                u'create_at': u'2015-09-29 16:09:12.429147',
-                                u'san cert': u'secure2.san1.test_123.com',
-                                u'status': status}
-                            }
-                    }
-                )
-            return [cert for cert in certs if cert.project_id == project_id]
-        else:
-            return certs
-
-    def delete_cert(self, project_id, domain_name, cert_type):
-        if "non_exist" in domain_name:
-            raise ValueError("No certs on this domain")
 
     @staticmethod
     def format_result(result):

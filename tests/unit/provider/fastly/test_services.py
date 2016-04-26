@@ -36,8 +36,14 @@ class TestServices(base.TestCase):
     @mock.patch('fastly.FastlyVersion')
     @mock.patch('poppy.provider.fastly.services.ServiceController.client')
     @mock.patch('poppy.provider.fastly.driver.CDNProvider')
-    def setUp(self, mock_connection, mock_service, mock_version,
-              mock_controllerclient, mock_driver):
+    def setUp(
+        self,
+        mock_driver,
+        mock_controllerclient,
+        mock_version,
+        mock_service,
+        mock_connection
+    ):
         super(TestServices, self).setUp()
         self.driver = mock_driver()
         self.driver.provider_name = 'Fastly'

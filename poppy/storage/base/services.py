@@ -28,8 +28,8 @@ class ServicesControllerBase(controller.StorageControllerBase):
         super(ServicesControllerBase, self).__init__(driver)
 
     @abc.abstractmethod
-    def list(self, project_id, marker=None, limit=None):
-        """list
+    def get_services(self, project_id, marker=None, limit=None):
+        """Get a list of services for a project.
 
         :param project_id
         :param marker
@@ -39,19 +39,18 @@ class ServicesControllerBase(controller.StorageControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create(self, project_id, service_id, service_json):
-        """create
+    def create_service(self, project_id, service_obj):
+        """Create a service.
 
         :param project_id
-        :param service_id
-        :param service_json
+        :param service_obj
         :raise NotImplementedError
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, project_id, service_id, service_json):
-        """update
+    def update_service(self, project_id, service_id, service_json):
+        """Update a service.
 
         :param project_id
         :param service_id
@@ -64,7 +63,7 @@ class ServicesControllerBase(controller.StorageControllerBase):
 
     @abc.abstractmethod
     def update_state(self, project_id, service_id, state):
-        """update_state
+        """Update service state.
 
         Update service state
 
@@ -76,8 +75,8 @@ class ServicesControllerBase(controller.StorageControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self, project_id, service_id):
-        """delete
+    def delete_service(self, project_id, service_id):
+        """Delete a service.
 
         :param project_id
         :param service_id
@@ -86,8 +85,8 @@ class ServicesControllerBase(controller.StorageControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self):
-        """get
+    def get_service(self, project_id, service_id):
+        """Get a service object.
 
         :raise NotImplementedError
         """
@@ -95,7 +94,7 @@ class ServicesControllerBase(controller.StorageControllerBase):
 
     @abc.abstractmethod
     def get_provider_details(self, project_id, service_id):
-        """get_provider_details
+        """Get provider details for a service.
 
         :param project_id
         :param service_id
@@ -104,33 +103,14 @@ class ServicesControllerBase(controller.StorageControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update_provider_details(self, provider_details):
-        """update_provider_details
-
-        :param provider_details
-        :raise NotImplementedError
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def create_cert(self, project_id, cert_obj):
-        """create_cert
+    def update_provider_details(self, project_id, service_id,
+                                provider_details):
+        """Update provider details for a service.
 
         :param project_id
-        :param cert_obj
+        :param service_id
+        :param provider_details
         :raise NotImplementedError
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def update_cert_info(self, domain_name, cert_type, flavor_id,
-                         cert_details):
-        """update_cert_info.
-
-        :param domain_name
-        :param cert_type
-        :param flavor_id
-        :param cert_info
         """
         raise NotImplementedError
 

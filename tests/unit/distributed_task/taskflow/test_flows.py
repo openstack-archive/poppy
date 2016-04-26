@@ -72,7 +72,10 @@ class TestFlowRuns(base.TestCase):
             memoized_controllers.task_controllers('poppy', 'storage')
         service_controller, dns_controller = \
             memoized_controllers.task_controllers('poppy', 'dns')
-        return service_controller, storage_controller, dns_controller
+        service_controller, ssl_cert_controller = \
+            memoized_controllers.task_controllers('poppy', 'ssl_certificate')
+        return service_controller, storage_controller, dns_controller, \
+            ssl_cert_controller
 
     def dns_exceptions_and_succeed(self):
         # NOTE(TheSriram): create a chain of mocked return values,
@@ -193,12 +196,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_create_flow(service_controller,
@@ -235,12 +243,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_update_flow(service_controller, storage_controller,
@@ -270,12 +283,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_delete_flow(service_controller, storage_controller,
@@ -306,12 +324,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_purge_flow(service_controller, storage_controller,
@@ -343,12 +366,17 @@ class TestFlowRuns(base.TestCase):
         disable_kwargs = enable_kwargs.copy()
         disable_kwargs['state'] = 'disable'
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_service_state_flow(service_controller,
@@ -374,12 +402,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_create_flow(service_controller, storage_controller,
@@ -424,12 +457,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_update_flow(service_controller, storage_controller,
@@ -469,12 +507,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_delete_flow(service_controller, storage_controller,
@@ -513,12 +556,17 @@ class TestFlowRuns(base.TestCase):
         disable_kwargs = enable_kwargs.copy()
         disable_kwargs['state'] = 'disable'
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_service_state_flow(service_controller,
@@ -574,12 +622,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_update_flow(service_controller, storage_controller,
@@ -621,12 +674,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_update_flow(service_controller, storage_controller,
@@ -654,12 +712,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_create_flow(service_controller, storage_controller,
@@ -687,12 +750,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_create_flow(service_controller, storage_controller,
@@ -730,12 +798,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_delete_flow(service_controller, storage_controller,
@@ -770,12 +843,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_delete_flow(service_controller, storage_controller,
@@ -812,12 +890,17 @@ class TestFlowRuns(base.TestCase):
         disable_kwargs = enable_kwargs.copy()
         disable_kwargs['state'] = 'disable'
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_service_state_flow(service_controller,
@@ -860,12 +943,17 @@ class TestFlowRuns(base.TestCase):
         disable_kwargs = enable_kwargs.copy()
         disable_kwargs['state'] = 'disable'
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
             self.patch_service_state_flow(service_controller,
                                           storage_controller,
@@ -899,12 +987,17 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_create_ssl_certificate_flow(service_controller,
@@ -928,12 +1021,17 @@ class TestFlowRuns(base.TestCase):
             'cert_obj_json': json.dumps(cert_obj_json.to_dict()),
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
             self.patch_recreate_ssl_certificate_flow(service_controller,
@@ -954,16 +1052,25 @@ class TestFlowRuns(base.TestCase):
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
-        service_controller, storage_controller, dns_controller = \
-            self.all_controllers()
+        (
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+        ) = self.all_controllers()
 
         with MonkeyPatchControllers(service_controller,
                                     dns_controller,
                                     storage_controller,
+                                    ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
-            self.patch_create_ssl_certificate_flow(service_controller,
-                                                   storage_controller,
-                                                   dns_controller)
-            engines.run(delete_ssl_certificate.delete_ssl_certificate(),
-                        store=kwargs)
+            self.patch_create_ssl_certificate_flow(
+                service_controller,
+                storage_controller,
+                dns_controller
+            )
+            engines.run(
+                delete_ssl_certificate.delete_ssl_certificate(),
+                store=kwargs
+            )
