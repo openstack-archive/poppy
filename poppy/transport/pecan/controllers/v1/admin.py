@@ -425,16 +425,17 @@ class AdminCertController(base.Controller, hooks.HookController):
             stoplight_helpers.pecan_getter)
     )
     def get(self):
-        services_controller = self._driver.manager.services_controller
+        ssl_certificate_controller = (
+            self._driver.manager.ssl_certificate_controller
+        )
 
         call_args = getattr(pecan.request.context,
                             "call_args")
         status = call_args.pop('status')
-        cert_domains = services_controller.get_certs_by_status(
+        cert_domains = ssl_certificate_controller.get_certs_by_status(
             status)
 
-        return pecan.Response(json_body=cert_domains,
-                              status=200)
+        return pecan.Response(json_body=cert_domains, status=200)
 
 
 class AdminServiceController(base.Controller, hooks.HookController):

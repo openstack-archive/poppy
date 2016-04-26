@@ -23,8 +23,10 @@ Field Mappings:
     updated and documented in each controller class.
 """
 
+from poppy.storage.mockdb import certificates
 from poppy.storage.mockdb import flavors
 from poppy.storage.mockdb import services
 
-ServicesController = services.ServicesController
+CertificatesController = certificates.CertificatesController
 FlavorsController = flavors.FlavorsController
+ServicesController = services.ServicesController

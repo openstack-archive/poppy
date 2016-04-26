@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Rackspace, Inc.
+# Copyright (c) 2016 Rackspace, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,43 +17,40 @@ import abc
 
 import six
 
-from poppy.manager.base import controller
+from poppy.storage.base import controller
 
 
 @six.add_metaclass(abc.ABCMeta)
-class SSLCertificateController(controller.ManagerControllerBase):
-    """SSL certificate controller base class."""
-
-    def __init__(self, manager):
-        super(SSLCertificateController, self).__init__(manager)
+class CertificatesControllerBase(controller.StorageControllerBase):
 
     @abc.abstractmethod
-    def create_ssl_certificate(self, project_id, cert_obj):
-        """Create ssl certificate.
+    def create_certificate(self, project_id, cert_obj):
+        """Create a certificate
 
-       :param project_id
-       :param cert_obj
-       :raises: NotImplementedError
-       """
+        :param project_id
+        :param cert_obj
+        :raise NotImplementedError
+        """
         raise NotImplementedError
 
-    @abc.abstractmethod
-    def delete_ssl_certificate(self, project_id, domain_name, cert_type):
-        """Delete ssl certificate.
+    def delete_certificate(self, project_id, domain_name, cert_type):
+        """Delete a certificate.
 
         :param project_id
         :param domain_name
         :param cert_type
-       :raises: NotImplementedError
+        :raise NotImplementedError
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_certs_info_by_domain(self, domain_name, project_id):
-        """Get ssl certificate by domain.
+    def update_certificate(self, domain_name, cert_type, flavor_id,
+                           cert_details):
+        """update_cert_info.
 
-        :param domain_name:
-        :param project_id:
-       :raises: NotImplementedError
+        :param domain_name
+        :param cert_type
+        :param flavor_id
+        :param cert_details
         """
         raise NotImplementedError
