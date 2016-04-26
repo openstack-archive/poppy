@@ -77,8 +77,9 @@ class SendNotificationTask(task.Task):
 class UpdateCertInfoTask(task.Task):
 
     def execute(self, project_id, cert_obj_json, responders):
-        service_controller, self.storage_controller = \
-            memoized_controllers.task_controllers('poppy', 'storage')
+        service_controller, self.ssl_certificate_manager = \
+            memoized_controllers.task_controllers('poppy', 'ssl_certificate')
+        self.storage_controller = self.ssl_certificate_manager.storage
 
         cert_details = {}
         for responder in responders:
@@ -86,24 +87,28 @@ class UpdateCertInfoTask(task.Task):
                 cert_details[provider] = json.dumps(responder[provider])
 
         cert_obj = ssl_certificate.load_from_json(json.loads(cert_obj_json))
-        self.storage_controller.update_cert_info(cert_obj.domain_name,
-                                                 cert_obj.cert_type,
-                                                 cert_obj.flavor_id,
-                                                 cert_details)
+        self.storage_controller.update_certificate(
+            cert_obj.domain_name,
+            cert_obj.cert_type,
+            cert_obj.flavor_id,
+            cert_details
+        )
 
         return
 
 
 class CreateStorageSSLCertificateTask(task.Task):
-    '''This task is meant to be used in san rerun flow.'''
+    """This task is meant to be used in san rerun flow."""
 
     def execute(self, project_id, cert_obj_json):
         cert_obj = ssl_certificate.load_from_json(json.loads(cert_obj_json))
 
-        service_controller, self.storage_controller = \
-            memoized_controllers.task_controllers('poppy', 'storage')
+        service_controller, self.ssl_certificate_manager = \
+            memoized_controllers.task_controllers('poppy', 'ssl_certificate')
+        self.storage_controller = self.ssl_certificate_manager.storage
+
         try:
-            self.storage_controller.create_cert(project_id, cert_obj)
+            self.storage_controller.create_certificate(project_id, cert_obj)
         except ValueError as e:
             LOG.exception(e)
 

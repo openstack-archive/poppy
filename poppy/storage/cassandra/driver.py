@@ -220,12 +220,12 @@ class CassandraStorageDriver(base.Driver):
         return _connection(self.cassandra_conf, self.datacenter)
 
     @property
-    def services_controller(self):
-        """services_controller.
+    def certificates_controller(self):
+        """certificates_controller.
 
-        :returns service controller
+        :returns certificates controller
         """
-        return controllers.ServicesController(self)
+        return controllers.CertificatesController(self)
 
     @property
     def flavors_controller(self):
@@ -234,6 +234,14 @@ class CassandraStorageDriver(base.Driver):
         :returns flavor controller
         """
         return controllers.FlavorsController(self)
+
+    @property
+    def services_controller(self):
+        """services_controller.
+
+        :returns service controller
+        """
+        return controllers.ServicesController(self)
 
     @property
     def database(self):

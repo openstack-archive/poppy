@@ -88,6 +88,12 @@ class MockManager(mock.Mock):
         return self.get_services_controller()
 
     @staticmethod
+    def get_ssl_certificate_controller():
+        sc = mock.Mock()
+        sc.ssl_certificate_controller = MockStorageController()
+        return sc
+
+    @staticmethod
     def get_services_controller():
         sc = mock.Mock()
         sc.storage_controller = MockStorageController()

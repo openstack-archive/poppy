@@ -20,7 +20,7 @@ import uuid
 import ddt
 import mock
 
-from poppy.storage.mockdb import services
+from poppy.storage.mockdb import certificates
 from tests.functional.transport.pecan import base
 
 
@@ -100,10 +100,10 @@ class TestRetryList(base.FunctionalTest):
 
     def test_put_retry_list_negative_with_deployed_domain(self):
         # A cert already in deployed status will cause 400.
-        with mock.patch('poppy.storage.mockdb.services.ServicesController.'
-                        'get_certs_by_domain',
+        with mock.patch('poppy.storage.mockdb.certificates.'
+                        'CertificatesController.get_certs_by_domain',
                         new=functools.
-                        partial(services.ServicesController.
+                        partial(certificates.CertificatesController.
                                 get_certs_by_domain,
                                 status='deployed')):
             self.service_name = str(uuid.uuid1())
@@ -228,7 +228,7 @@ class TestRetryList(base.FunctionalTest):
                                      'X-Project-ID': self.project_id})
         self.assertEqual(202, response.status_code)
 
-        # This time the service is present, so the request goes thru
+        # This time the service is present, so the request goes through
         put_data = [
             {
                 "domain_name": "test-san1.cnamecdn.com",
@@ -249,7 +249,7 @@ class TestRetryList(base.FunctionalTest):
                                 headers={
                                     'Content-Type': 'application/json',
                                     'X-Project-ID': self.project_id},
-                                expect_errors=True)
+                                )
         self.assertEqual(200, response.status_code)
 
     def test_post_retry_list(self):

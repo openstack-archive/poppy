@@ -49,13 +49,18 @@ class CreateProviderServicesTask(task.Task):
         service_controller, self.storage_controller = \
             memoized_controllers.task_controllers('poppy', 'storage')
 
+        _, self.ssl_certificate_manager = \
+            memoized_controllers.task_controllers('poppy', 'ssl_certificate')
+
+        self.ssl_certificate_storage = self.ssl_certificate_manager.storage
+
         providers_list = json.loads(providers_list_json)
         try:
             service_obj = self.storage_controller.get(project_id, service_id)
             for domain in service_obj.domains:
                 if domain.certificate == 'san':
                     cert_for_domain = (
-                        self.storage_controller.get_certs_by_domain(
+                        self.ssl_certificate_storage.get_certs_by_domain(
                             domain.domain,
                             project_id=project_id,
                             flavor_id=service_obj.flavor_id,

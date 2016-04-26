@@ -57,12 +57,16 @@ class SendNotificationTask(task.Task):
 class DeleteStorageSSLCertificateTask(task.Task):
 
     def execute(self, project_id, domain_name, cert_type):
-        service_controller, self.storage_controller = \
-            memoized_controllers.task_controllers('poppy', 'storage')
+        service_controller, self.ssl_certificate_manager = \
+            memoized_controllers.task_controllers('poppy', 'ssl_certificate')
+        self.storage_controller = self.ssl_certificate_manager.storage
+
         try:
-            self.storage_controller.delete_cert(project_id,
-                                                domain_name,
-                                                cert_type)
+            self.storage_controller.delete_certificate(
+                project_id,
+                domain_name,
+                cert_type
+            )
         except ValueError as e:
             LOG.exception(e)
 

@@ -21,7 +21,8 @@ from hypothesis import strategies
 import mock
 import six
 
-from poppy.manager.default.services import DefaultServicesController
+from poppy.manager.default.ssl_certificate import \
+    DefaultSSLCertificateController
 
 from tests.functional.transport.pecan import base
 
@@ -56,7 +57,7 @@ class SSLCertificatebyStatusTest(base.FunctionalTest):
     @ddt.data(u'create_in_progress', u'deployed', u'failed', u'cancelled')
     def test_get_service_status_valid_queryparam(self, status):
         # valid status
-        with mock.patch.object(DefaultServicesController,
+        with mock.patch.object(DefaultSSLCertificateController,
                                'get_certs_by_status'):
             response = self.app.get('/v1.0/admin/certificates'
                                     '?status={0}'.format(status),

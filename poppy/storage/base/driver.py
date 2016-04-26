@@ -62,8 +62,8 @@ class StorageDriverBase(object):
         raise NotImplementedError
 
     @abc.abstractproperty
-    def services_controller(self):
-        """Returns the driver's hostname controller.
+    def certificates_controller(self):
+        """Returns the driver's certificates controller.
 
         :raise NotImplementedError
         """
@@ -71,7 +71,15 @@ class StorageDriverBase(object):
 
     @abc.abstractproperty
     def flavors_controller(self):
-        """Returns the driver's hostname controller.
+        """Returns the driver's flavors controller.
+
+        :raise NotImplementedError
+        """
+        raise NotImplementedError
+
+    @abc.abstractproperty
+    def services_controller(self):
+        """Returns the driver's services controller.
 
         :raise NotImplementedError
         """
