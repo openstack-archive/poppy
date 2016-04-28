@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from poppy.common._i18n import _
 from poppy.common import errors
-from poppy.openstack.common.gettextutils import _
 
 
 class SchemaBase(object):

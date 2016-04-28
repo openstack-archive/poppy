@@ -23,7 +23,7 @@ import termios
 from oslo_config import cfg
 from oslo_log import log
 
-from poppy.openstack.common.gettextutils import _
+from poppy.common._i18n import _
 
 
 LOG = log.getLogger(__name__)
