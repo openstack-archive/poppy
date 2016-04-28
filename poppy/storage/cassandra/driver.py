@@ -163,6 +163,8 @@ class CassandraStorageDriver(base.Driver):
 
     def __init__(self, conf):
         super(CassandraStorageDriver, self).__init__(conf)
+
+        self.conf = conf
         conf.register_opts(CASSANDRA_OPTIONS, group=CASSANDRA_GROUP)
         self.cassandra_conf = conf[CASSANDRA_GROUP]
         self.datacenter = conf.datacenter
