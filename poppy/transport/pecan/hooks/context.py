@@ -17,8 +17,9 @@ from oslo_config import cfg
 from oslo_context import context
 import pecan
 from pecan import hooks
+import threading
 
-from poppy.openstack.common import local
+_local_store = threading.local()
 
 
 class PoppyRequestContext(context.RequestContext):
@@ -56,13 +57,13 @@ class ContextHook(hooks.PecanHook):
 
         request_context = PoppyRequestContext(**context_kwargs)
         state.request.context = request_context
-        local.store.context = request_context
+        _local_store.context = request_context
 
         '''Attach tenant_id as a member variable project_id to controller.'''
-        state.controller.__self__.project_id = getattr(local.store.context,
+        state.controller.__self__.project_id = getattr(_local_store.context,
                                                        "tenant", None)
-        state.controller.__self__.base_url = getattr(local.store.context,
+        state.controller.__self__.base_url = getattr(_local_store.context,
                                                      "base_url", None)
         '''Attach auth_token as a member variable project_id to controller.'''
-        state.controller.__self__.auth_token = getattr(local.store.context,
+        state.controller.__self__.auth_token = getattr(_local_store.context,
                                                        "auth_token", None)
