@@ -1248,8 +1248,8 @@ class ServiceController(base.ServiceBase):
                                                 http_series]))
         else:
             for region in regions:
-                metric_buckets.append('_'.join([metricType, domain_name,
-                                                region]))
+                reg = region.strip().replace(" ", "")
+                metric_buckets.append('_'.join([metricType, domain_name, reg]))
 
         metrics_results = metrics_controller.read(metric_names=metric_buckets,
                                                   from_timestamp=startTime,
