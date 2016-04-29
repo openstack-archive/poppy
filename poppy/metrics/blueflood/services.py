@@ -85,7 +85,7 @@ class ServicesController(base.ServicesController):
         }
         for metric_name in metric_names:
             tenanted_blueflood_url_with_metric = helper.join_url(
-                tenanted_blueflood_url, metric_name)
+                tenanted_blueflood_url, metric_name.strip().replace(" ", ""))
             urls.append(helper.set_qs_on_url(
                         tenanted_blueflood_url_with_metric,
                         **params))

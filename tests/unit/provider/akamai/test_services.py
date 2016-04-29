@@ -1007,7 +1007,8 @@ class TestServices(base.TestCase):
         controller = services.ServiceController(self.driver)
         project_id = str(uuid.uuid4())
         domain_name = 'www.' + str(uuid.uuid4()) + '.com'
-        regions = controller.driver.regions
+        regions = ['NorthAmerica', 'SouthAmerica', 'EMEA', 'Japan', 'India',
+                   'APAC']
         end_time = datetime.datetime.utcnow()
         start_time = (datetime.datetime.utcnow() - datetime.timedelta(days=1))
         startTime = start_time.strftime("%Y-%m-%dT%H:%M:%S")
