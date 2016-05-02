@@ -15,7 +15,6 @@
 
 import json
 
-from oslo_config import cfg
 from oslo_log import log
 
 from poppy.manager import base
@@ -26,8 +25,6 @@ from poppy.provider.akamai.background_jobs.update_property import \
     update_property_flow
 from poppy.provider.akamai import driver as a_driver
 
-conf = cfg.CONF
-conf(project='poppy', prog='poppy', args=[])
 LOG = log.getLogger(__name__)
 
 
@@ -36,13 +33,16 @@ class BackgroundJobController(base.BackgroundJobController):
     def __init__(self, manager):
         super(BackgroundJobController, self).__init__(manager)
         self.distributed_task_controller = (
-            self._driver.distributed_task.services_controller)
-        self.akamai_san_cert_suffix = (
-            conf[a_driver.AKAMAI_GROUP].akamai_https_access_url_suffix)
-        self.akamai_san_cert_cname_list = (
-            conf[a_driver.AKAMAI_GROUP].san_cert_cnames)
-        self.notify_email_list = (
-            conf[n_driver.MAIL_NOTIFICATION_GROUP].recipients)
+            self._driver.distributed_task.services_controller
+        )
+        self.akamai_san_cert_suffix = self.driver.conf[
+            a_driver.AKAMAI_GROUP].akamai_https_access_url_suffix
+
+        self.akamai_san_cert_cname_list = self.driver.conf[
+            a_driver.AKAMAI_GROUP].san_cert_cnames
+
+        self.notify_email_list = self.driver.conf[
+            n_driver.MAIL_NOTIFICATION_GROUP].recipients
 
     def post_job(self, job_type, kwargs):
         kwargs = kwargs
