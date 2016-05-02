@@ -30,6 +30,33 @@ class TestAkamaiBJFlowRuns(base.TestCase):
     def setUp(self):
         super(TestAkamaiBJFlowRuns, self).setUp()
 
+        def task_controllers_side_effect(*args, **kwargs):
+            if args[0] == 'poppy':
+                if args[1] == 'providers':
+                    return (
+                        akamai_mocks.MockManager.get_services_controller(),
+                        akamai_mocks.MockManager.get_providers()
+                    )
+                if args[1] == 'storage':
+                    return (
+                        akamai_mocks.MockManager.get_services_controller(),
+                        akamai_mocks.MockManager.get_services_controller().
+                        storage_controller
+                    )
+        mock_task_controllers = mock.Mock()
+        mock_task_controllers.task_controllers.side_effect = (
+            task_controllers_side_effect
+        )
+        memo_controllers_patcher = mock.patch(
+            # 'poppy.distributed_task.utils.memoized_controllers',
+            'poppy.provider.akamai.background_jobs.'
+            'check_cert_status_and_update.'
+            'check_cert_status_and_update_tasks.memoized_controllers',
+            new=mock_task_controllers
+        )
+        memo_controllers_patcher.start()
+        self.addCleanup(memo_controllers_patcher.stop)
+
         bootstrap_patcher = mock.patch(
             'poppy.bootstrap.Bootstrap',
             new=akamai_mocks.MockBootStrap
