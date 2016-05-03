@@ -825,10 +825,10 @@ class TestServices(base.TestCase):
         }
 
         lastSpsId = (
-            controller.san_info_storage.get_cert_last_spsid(
+            controller.cert_info_storage.get_cert_last_spsid(
                 "secure.san1.poppycdn.com"))
 
-        controller.san_info_storage.get_cert_info.return_value = {
+        controller.cert_info_storage.get_cert_info.return_value = {
             'cnameHostname': "secure.san1.poppycdn.com",
             'jobId': "secure.san1.poppycdn.com",
             'issuer': 1789,
@@ -837,7 +837,7 @@ class TestServices(base.TestCase):
             'slot-deployment.class': 'esslType'
         }
 
-        cert_info = controller.san_info_storage.get_cert_info(
+        cert_info = controller.cert_info_storage.get_cert_info(
             "secure.san1.poppycdn.com")
         cert_info['add.sans'] = "www.abc.com"
 
@@ -882,10 +882,10 @@ class TestServices(base.TestCase):
         }
 
         lastSpsId = (
-            controller.san_info_storage.get_cert_last_spsid(
+            controller.cert_info_storage.get_cert_last_spsid(
                 "secure.san1.poppycdn.com"))
 
-        controller.san_info_storage.get_cert_info.return_value = {
+        controller.cert_info_storage.get_cert_info.return_value = {
             'cnameHostname': "secure.san1.poppycdn.com",
             'jobId': "secure.san1.poppycdn.com",
             'issuer': 1789,
@@ -894,7 +894,7 @@ class TestServices(base.TestCase):
             'slot-deployment.class': 'esslType'
         }
 
-        cert_info = controller.san_info_storage.get_cert_info(
+        cert_info = controller.cert_info_storage.get_cert_info(
             "secure.san1.poppycdn.com")
         cert_info['add.sans'] = "www.abc.com"
 

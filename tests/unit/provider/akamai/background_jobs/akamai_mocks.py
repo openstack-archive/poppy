@@ -56,6 +56,10 @@ class MockManager(mock.Mock):
 
     @property
     def providers(self):
+        return self.get_providers()
+
+    @staticmethod
+    def get_providers():
         akamai_mock_provider = mock.Mock()
         akamai_mock_provider_obj = mock.Mock()
         akamai_mock_provider_obj.service_controller = mock.Mock()
@@ -81,6 +85,10 @@ class MockManager(mock.Mock):
 
     @property
     def services_controller(self):
+        return self.get_services_controller()
+
+    @staticmethod
+    def get_services_controller():
         sc = mock.Mock()
         sc.storage_controller = MockStorageController()
         return sc
@@ -129,7 +137,7 @@ class MockPapiAPIClient(mock.Mock):
         self.response_200 = mock.Mock(status_code=200)
 
     def get(self, url):
-        if 'hostnames' in url:
+        if 'hostnames' in url and 'versions' in url:
             self.response_200.text = json.dumps({
                 "accountId": "act_1-ABCDE",
                 "contractId": "B-ABCDE",
@@ -152,6 +160,8 @@ class MockPapiAPIClient(mock.Mock):
                     }]
                 }
             })
+            self.response_200.status_code = 200
+            return self.response_200
         if 'edgehostnames' in url:
             self.response_200.text = json.dumps({
                 "accountId": "act_1-ABCDE",
@@ -179,6 +189,8 @@ class MockPapiAPIClient(mock.Mock):
                     }]
                 }
             })
+            self.response_200.status_code = 200
+            return self.response_200
         if 'activations' in url:
             self.response_200.text = json.dumps({
                 "activationId": "atv_2511473",
