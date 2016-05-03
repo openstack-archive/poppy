@@ -767,7 +767,6 @@ class ServiceController(base.ServiceBase):
 
         LOG.info("Starting to put Sub-Customer ID "
                  "region for domain: {0}".format(domain))
-
         resp = self.subcustomer_api_client.put(
             self.akamai_subcustomer_api_base_url.format(
                 configuration_number=configuration_number,
@@ -1265,7 +1264,7 @@ class ServiceController(base.ServiceBase):
                 unquoted_metric_name = parse.unquote(
                     metric_name.split('_')[2]
                 ).lower()
-                if region.lower() == unquoted_metric_name:
+                if region.lower().replace(' ','') == unquoted_metric_name:
                     formatted_results[metricType][region].append(
                         metrics_response
                     )
