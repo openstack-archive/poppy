@@ -39,10 +39,10 @@ AKAMAI_OPTIONS = [
 AKAMAI_GROUP = 'drivers:provider:akamai'
 
 
-class TestSANInfoStorage(base.TestCase):
+class TestZookeeperCertInfoStorage(base.TestCase):
 
     def setUp(self):
-        super(TestSANInfoStorage, self).setUp()
+        super(TestZookeeperCertInfoStorage, self).setUp()
         zookeeper_client_patcher = mock.patch(
             'kazoo.client.KazooClient'
         )

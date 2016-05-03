@@ -107,11 +107,12 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
     def __init__(self, conf):
         super(CassandraSanInfoStorage, self).__init__(conf)
 
-        self._conf.register_opts(_DEFAULT_OPTIONS)
-        self.storage = driver.CassandraStorageDriver(self._conf)
+        self.conf = conf
+        self.conf.register_opts(_DEFAULT_OPTIONS)
+        self.storage = driver.CassandraStorageDriver(self.conf)
 
-        if self._conf.use_same_storage_driver is False:
-            self.storage.change_config_opts(
+        if self.conf.use_same_storage_driver is False:
+            self.storage.change_config_group(
                 CASSANDRA_OPTIONS,
                 AKAMAI_CASSANDRA_STORAGE_GROUP
             )

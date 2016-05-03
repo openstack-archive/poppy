@@ -24,10 +24,10 @@ from tests.unit import base
 
 
 @ddt.ddt
-class TestCassandraSANInfoStorage(base.TestCase):
+class TestCassandraCertInfoStorage(base.TestCase):
 
     def setUp(self):
-        super(TestCassandraSANInfoStorage, self).setUp()
+        super(TestCassandraCertInfoStorage, self).setUp()
 
         # create mocked config and driver
         migrations_patcher = mock.patch(
@@ -43,8 +43,6 @@ class TestCassandraSANInfoStorage(base.TestCase):
         self.addCleanup(cluster_patcher.stop)
 
         self.conf = cfg.ConfigOpts()
-        self.cassa_storage = cassandra_storage.CassandraSanInfoStorage(
-            self.conf)
 
         self.get_returned_value = [{'info': {
             'san_info':
@@ -56,28 +54,55 @@ class TestCassandraSANInfoStorage(base.TestCase):
                 '"slot_deployment_klass": "esslType", '
                 '"jobId": "1432", "spsId": 1423}}'}}]
 
+    @mock.patch.object(
+        cassandra_storage,
+        '_DEFAULT_OPTIONS',
+        new=[
+            cfg.StrOpt('datacenter', default=''),
+            cfg.BoolOpt('use_same_storage_driver', default=False)
+        ]
+    )
+    def test_usage_non_shared_cassandra_cluster(self):
+        with mock.patch(
+            'poppy.storage.cassandra.driver.CassandraStorageDriver'
+        ) as mock_driver:
+            mock_d = mock.Mock()
+            mock_d.cassandra_conf.consistency_level = 'ONE'
+            mock_driver.return_value = mock_d
+            cass = cassandra_storage.CassandraSanInfoStorage(
+                self.conf
+            )
+
+        self.assertTrue(cass.storage.change_config_group.called)
+
     def test__get_akamai_provider_info(self):
-        mock_execute = self.cassa_storage.session.execute
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf)
+        mock_execute = self.cassandra_storage.session.execute
         mock_execute.return_value = self.get_returned_value
-        res = self.cassa_storage._get_akamai_provider_info()
+        res = self.cassandra_storage._get_akamai_provider_info()
         mock_execute.assert_called()
         self.assertTrue(res == self.get_returned_value[0])
 
     def test__get_akamai_san_certs_info(self):
-        mock_execute = self.cassa_storage.session.execute
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf)
+        mock_execute = self.cassandra_storage.session.execute
         mock_execute.return_value = self.get_returned_value
 
-        res = self.cassa_storage._get_akamai_san_certs_info()
+        res = self.cassandra_storage._get_akamai_san_certs_info()
         mock_execute.assert_called()
         self.assertTrue(
             res == json.loads(self.get_returned_value[0]['info']['san_info'])
         )
 
     def test_list_all_san_cert_names(self):
-        mock_execute = self.cassa_storage.session.execute
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf)
+        mock_execute = self.cassandra_storage.session.execute
         mock_execute.return_value = self.get_returned_value
 
-        res = self.cassa_storage.list_all_san_cert_names()
+        res = self.cassandra_storage.list_all_san_cert_names()
         mock_execute.assert_called()
         self.assertTrue(
             res == json.loads(self.get_returned_value[0]['info']['san_info']).
@@ -86,10 +111,12 @@ class TestCassandraSANInfoStorage(base.TestCase):
 
     @ddt.data("secure1.san1.test-cdn.com", "secure2.san1.test-cdn.com")
     def test_save_cert_last_spsid(self, san_cert_name):
-        mock_execute = self.cassa_storage.session.execute
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf)
+        mock_execute = self.cassandra_storage.session.execute
         mock_execute.return_value = self.get_returned_value
 
-        self.cassa_storage.save_cert_last_ids(
+        self.cassandra_storage.save_cert_last_ids(
             san_cert_name,
             '1234'
         )
@@ -97,10 +124,12 @@ class TestCassandraSANInfoStorage(base.TestCase):
 
     @ddt.data("secure1.san1.test-cdn.com", "secure2.san1.test-cdn.com")
     def test_save_cert_last_spsid_with_job_id(self, san_cert_name):
-        mock_execute = self.cassa_storage.session.execute
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf)
+        mock_execute = self.cassandra_storage.session.execute
         mock_execute.return_value = self.get_returned_value
 
-        self.cassa_storage.save_cert_last_ids(
+        self.cassandra_storage.save_cert_last_ids(
             san_cert_name,
             '1234',
             job_id_value=7777
@@ -108,11 +137,13 @@ class TestCassandraSANInfoStorage(base.TestCase):
         self.assertTrue(mock_execute.call_count == 3)
 
     def test_get_cert_last_spsid(self):
-        mock_execute = self.cassa_storage.session.execute
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf)
+        mock_execute = self.cassandra_storage.session.execute
         mock_execute.return_value = self.get_returned_value
         cert_name = "secure1.san1.test-cdn.com"
 
-        res = self.cassa_storage.get_cert_last_spsid(
+        res = self.cassandra_storage.get_cert_last_spsid(
             cert_name
         )
         mock_execute.assert_called()
@@ -122,16 +153,20 @@ class TestCassandraSANInfoStorage(base.TestCase):
         )
 
     def test_update_san_info(self):
-        mock_execute = self.cassa_storage.session.execute
-        self.cassa_storage.update_san_info({})
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf)
+        mock_execute = self.cassandra_storage.session.execute
+        self.cassandra_storage.update_san_info({})
         mock_execute.assert_called()
 
     def test_get_cert_config(self):
-        mock_execute = self.cassa_storage.session.execute
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf)
+        mock_execute = self.cassandra_storage.session.execute
         mock_execute.return_value = self.get_returned_value
         cert_name = "secure1.san1.test-cdn.com"
 
-        res = self.cassa_storage.get_cert_config(
+        res = self.cassandra_storage.get_cert_config(
             cert_name
         )
         mock_execute.assert_called()
@@ -142,12 +177,14 @@ class TestCassandraSANInfoStorage(base.TestCase):
         )
 
     def test_update_cert_config(self):
-        mock_execute = self.cassa_storage.session.execute
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf)
+        mock_execute = self.cassandra_storage.session.execute
         mock_execute.return_value = self.get_returned_value
         cert_name = "secure1.san1.test-cdn.com"
         new_spsId = 3456
 
-        self.cassa_storage.update_cert_config(
+        self.cassandra_storage.update_cert_config(
             cert_name, {'spsId': new_spsId}
         )
         mock_execute.assert_called()
