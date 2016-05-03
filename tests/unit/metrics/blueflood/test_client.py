@@ -24,6 +24,8 @@ from tests.unit import base
 
 import requests_mock
 
+import requests
+
 
 class TestBlueFloodClient(base.TestCase):
 
@@ -59,6 +61,8 @@ class TestBlueFloodClient(base.TestCase):
             results = self.bf_client.async_requests(urls)
             re_ordered_urls = []
             for result in results:
+                result.status_code = requests.codes.ok
+                result.text = 'Success'
                 self.assertEqual(result.status_code, 200)
                 self.assertEqual(result.text, 'Success')
                 re_ordered_urls.append(result.url)
