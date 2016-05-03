@@ -109,6 +109,8 @@ class SSLCertificateControllerTest(base.FunctionalTest):
                          response_list[0]["domain_name"])
         self.assertEqual(ssl_certificate_json["flavor_id"],
                          response_list[0]["flavor_id"])
+        self.assertEqual(ssl_certificate_json["project_id"],
+                         response_list[0]["project_id"])
 
     def test_get_ssl_certificate_existing_domain_different_project_id(self):
         domain = 'www.iexist.com'

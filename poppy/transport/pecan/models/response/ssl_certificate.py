@@ -22,7 +22,7 @@ from poppy.common import util
 
 class Model(collections.OrderedDict):
 
-    'response class for SSLCertificate'
+    """response class for SSLCertificate."""
 
     def __init__(self, ssl_certificate):
         super(Model, self).__init__()
@@ -31,3 +31,4 @@ class Model(collections.OrderedDict):
         self['cert_type'] = ssl_certificate.cert_type
         self['cert_details'] = ssl_certificate.cert_details
         self['status'] = ssl_certificate.get_cert_status()
+        self['project_id'] = ssl_certificate.project_id

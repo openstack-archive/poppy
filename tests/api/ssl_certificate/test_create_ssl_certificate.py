@@ -78,6 +78,7 @@ class TestCreateSSLCertificate(base.TestBase):
             self.assertEqual(cert['domain_name'], self.domain_name)
             self.assertEqual(cert['flavor_id'], flavor_id)
             self.assertEqual(cert['cert_type'], self.cert_type)
+            self.assertEqual(cert['project_id'], project_id)
 
     def tearDown(self):
         # Do not call delete cert for negative test
