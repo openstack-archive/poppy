@@ -18,6 +18,8 @@
 
 import uuid
 
+from mock import MagicMock
+
 from poppy.metrics.blueflood.utils import client
 
 from tests.unit import base
@@ -25,6 +27,11 @@ from tests.unit import base
 import requests_mock
 
 import requests
+
+class ResponseMocked():
+    def __init__(self):
+        self.status_code = 200
+        self.text = 'Success'
 
 
 class TestBlueFloodClient(base.TestCase):
@@ -43,6 +50,9 @@ class TestBlueFloodClient(base.TestCase):
             token=self.token,
             executors=self.executors
         )
+        self.mockedResponse = ResponseMocked()
+        self.bf_client.async_requests = MagicMock(
+            return_value=self.mockedResponse)
 
     def test_client_init(self):
 
@@ -61,8 +71,6 @@ class TestBlueFloodClient(base.TestCase):
             results = self.bf_client.async_requests(urls)
             re_ordered_urls = []
             for result in results:
-                result.status_code = requests.codes.ok
-                result.text = 'Success'
                 self.assertEqual(result.status_code, 200)
                 self.assertEqual(result.text, 'Success')
                 re_ordered_urls.append(result.url)
