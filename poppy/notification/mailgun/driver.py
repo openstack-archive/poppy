@@ -68,15 +68,17 @@ class MailNotificationDriver(base.Driver):
 
         # validate email addresses
         if not validate_email_address(self.from_address):
-            raise validate_email_address("Notification config error:"
-                                         "%s is not a valid email address"
-                                         % self.from_address)
+            raise ValueError(
+                "Notification config error: "
+                "{0} is not a valid email address".format(self.from_address)
+            )
 
         for address in self.recipients:
             if not validate_email_address(address):
-                raise validate_email_address("Notification config error:"
-                                             "%s is not a valid email address"
-                                             % address)
+                raise ValueError(
+                    "Notification config error: "
+                    "{0} is not a valid email address".format(address)
+                )
 
     @property
     def services_controller(self):
