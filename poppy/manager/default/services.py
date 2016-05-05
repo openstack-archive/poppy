@@ -679,10 +679,32 @@ class DefaultServicesController(base.ServicesController):
         except ValueError as e:
             # If service is not found
             LOG.warning('Migrating domain failed: Service {0} could not '
-                        'be found.. Error message: {1}'.format(service_id, e))
+                        'be found. Error message: {1}'.format(service_id, e))
             raise errors.ServiceNotFound(e)
 
         for provider in provider_details:
+            provider_details[provider].domains_certificate_status.\
+                set_domain_certificate_status(domain_name, cert_status)
+
+            cert_obj = storage_controller.get_certs_by_domain(
+                domain_name,
+                project_id=project_id,
+                cert_type='san'
+            )
+
+            if cert_obj != []:
+                # cert was found, update the cert status
+                cert_details = cert_obj.cert_details
+                cert_details[provider]['extra_info']['status'] = cert_status
+                cert_details[provider] = json.dumps(cert_details[provider])
+
+                storage_controller.update_cert_info(
+                    cert_obj.domain_name,
+                    cert_obj.cert_type,
+                    cert_obj.flavor_id,
+                    cert_details
+                )
+
             for url in provider_details[provider].access_urls:
                 if url.get('domain') == domain_name:
                     if 'operator_url' in url:
@@ -707,8 +729,6 @@ class DefaultServicesController(base.ServicesController):
                     'provider_url': new_cert
                 }
                 provider_details[provider].access_urls.append(new_url)
-                provider_details[provider].domains_certificate_status.\
-                    set_domain_certificate_status(domain_name, cert_status)
                 storage_controller.update_provider_details(
                     project_id,
                     service_id,
