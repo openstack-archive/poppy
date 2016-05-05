@@ -68,7 +68,7 @@ class MailNotificationDriver(base.Driver):
 
         # validate email addresses
         if not validate_email_address(self.from_address):
-            raise validate_email_address("Notification config error:"
+            raise ValueError("Notification config error:"
                                          "%s is not a valid email address"
                                          % self.from_address)
 
