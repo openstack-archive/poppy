@@ -677,12 +677,12 @@ class TestServices(base.TestCase):
                         "parameters": [{
                             "name": "cnameHostname",
                             "value": "secure.san1.poppycdn.com"
-                            }, {"name": "createType", "value": "modSan"},
+                        }, {"name": "createType", "value": "modSan"},
                             {"name": "csr.cn",
                              "value": "secure.san3.poppycdn.com"},
                             {"name": "add.sans",
                              "value": "www.abc.com"}],
-                     "lastStatusChange": "2015-03-19T21:47:10Z",
+                      "lastStatusChange": "2015-03-19T21:47:10Z",
                         "spsId": 1789,
                         "status": sps_status,
                         "workflowProgress": workFlowProgress,
@@ -754,12 +754,12 @@ class TestServices(base.TestCase):
                         "parameters": [{
                             "name": "cnameHostname",
                             "value": "secure.san1.poppycdn.com"
-                            }, {"name": "createType", "value": "modSan"},
+                        }, {"name": "createType", "value": "modSan"},
                             {"name": "csr.cn",
                              "value": "secure.san3.poppycdn.com"},
                             {"name": "add.sans",
                              "value": "www.abc.com"}],
-                     "lastStatusChange": "2015-03-19T21:47:10Z",
+                      "lastStatusChange": "2015-03-19T21:47:10Z",
                         "spsId": 1789,
                         "status": sps_status,
                         "workflowProgress": workFlowProgress,
@@ -908,12 +908,12 @@ class TestServices(base.TestCase):
                         "parameters": [{
                             "name": "cnameHostname",
                             "value": "secure.san1.poppycdn.com"
-                            }, {"name": "createType", "value": "modSan"},
+                        }, {"name": "createType", "value": "modSan"},
                             {"name": "csr.cn",
                              "value": "secure.san3.poppycdn.com"},
                             {"name": "add.sans",
                              "value": "www.abc.com"}],
-                     "lastStatusChange": "2015-03-19T21:47:10Z",
+                      "lastStatusChange": "2015-03-19T21:47:10Z",
                         "spsId": 1789,
                         "status": "SPS Request Complete",
                         "workflowProgress": "",
@@ -1020,9 +1020,10 @@ class TestServices(base.TestCase):
         if 'httpResponseCode' in metrictype:
             http_series = metrictype.split('_')[1]
             for region in regions:
-                metric_buckets.append('_'.join(['requestCount', domain_name,
-                                                region,
-                                                http_series]))
+                metric_buckets.append('_'.join(['httpResponseCode',
+                                                http_series,
+                                                domain_name,
+                                                region]))
         else:
             for region in regions:
                 metric_buckets.append('_'.join([metrictype, domain_name,

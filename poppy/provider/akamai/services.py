@@ -1249,7 +1249,8 @@ class ServiceController(base.ServiceBase):
                                                 region]))
         else:
             for region in regions:
-                metric_buckets.append('_'.join([metricType, domain_name,
+                metric_buckets.append('_'.join([metricType,
+                                                domain_name,
                                                 region]))
 
         metrics_results = metrics_controller.read(metric_names=metric_buckets,
@@ -1263,10 +1264,10 @@ class ServiceController(base.ServiceBase):
         for region in regions:
             formatted_results[metricType][region] = []
             for metric_name, metrics_response in metrics_results:
-                unquoted_metric_name = parse.unquote(
-                    metric_name.split('_')[2]
+                metric_region = parse.unquote(
+                    metric_name.split('_')[-1]
                 ).lower()
-                if region.lower().replace(' ', '') == unquoted_metric_name:
+                if region.lower().replace(' ', '') == metric_region:
                     formatted_results[metricType][region].append(
                         metrics_response
                     )
