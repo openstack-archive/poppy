@@ -34,7 +34,7 @@ class ServicesController(base.ServicesController):
 
     def _result_formatter(self, response):
 
-        resp_dict = dict()
+        resp_dict = []
 
         if not response.ok:
             LOG.warning("BlueFlood Metrics Response status Code:{0} "
@@ -49,14 +49,19 @@ class ServicesController(base.ServicesController):
             try:
                 values = serialized_response['values']
                 for val in values:
-                    key = helper.datetime_from_epoch(int(val['timestamp']))
-                    resp_dict[key] = val['sum']
+                    m = {}
+                    m['timestamp'] = helper.datetime_from_epoch(int(val['timestamp']))
+                    m['count'] = val['sum']
+                    resp_dict.append(m)
             except KeyError:
                 msg = 'content from {0} not conforming ' \
                       'to API contracts'.format(response.url)
                 LOG.warning(msg)
                 raise errors.BlueFloodApiSchemaError(msg)
 
+            # sort the resp_dict by timestamp ascending
+            resp_dict = sorted(resp_dict, key=lambda x: x['timestamp'])
+            
             return resp_dict
 
     def read(self, metric_names, from_timestamp, to_timestamp, resolution):
