@@ -1243,9 +1243,10 @@ class ServiceController(base.ServiceBase):
         if 'httpResponseCode' in metricType:
             http_series = metricType.split('_')[1]
             for region in regions:
-                metric_buckets.append('_'.join(['requestCount', domain_name,
-                                                region,
-                                                http_series]))
+                metric_buckets.append('_'.join(['httpResponseCode',
+                                                http_series,
+                                                domain_name,
+                                                region]))
         else:
             for region in regions:
                 metric_buckets.append('_'.join([metricType, domain_name,

@@ -47,9 +47,10 @@ class ServicesController(base.ServicesController):
 
             serialized_response = response.json()
             try:
-                time_series = serialized_response['values']
-                for timerange in time_series:
-                    resp_dict[timerange['timestamp']] = timerange['sum']
+                values = serialized_response['values']
+                for val in values:
+                    key = helper.datetime_from_epoch(int(val['timestamp']))
+                    resp_dict[key] = val['sum']
             except KeyError:
                 msg = 'content from {0} not conforming ' \
                       'to API contracts'.format(response.url)
@@ -86,6 +87,8 @@ class ServicesController(base.ServicesController):
         for metric_name in metric_names:
             tenanted_blueflood_url_with_metric = helper.join_url(
                 tenanted_blueflood_url, metric_name.strip().replace(" ", ""))
+            LOG.info("Querying BlueFlood Metric: {0}".format(
+                tenanted_blueflood_url_with_metric))
             urls.append(helper.set_qs_on_url(
                         tenanted_blueflood_url_with_metric,
                         **params))

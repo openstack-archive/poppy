@@ -71,25 +71,29 @@ class TestBlueFloodServiceController(base.TestCase):
         with mock.patch.object(client.BlueFloodMetricsClient,
                                'async_requests',
                                auto_spec=True) as mock_async:
-            timestamp1 = str(int(time.time()))
-            timestamp2 = str(int(time.time()) + 100)
-            timestamp3 = str(int(time.time()) + 200)
+            timestamp1 = str((int(time.time()) + 0) * 1000)
+            timestamp2 = str((int(time.time()) + 100) * 1000)
+            timestamp3 = str((int(time.time()) + 200) * 1000)
             json_dict = {
                 'values': [
                     {
+                        'numPoints': 2,
                         'timestamp': timestamp1,
                         'sum': 45
                     },
                     {
+                        'numPoints': 1,
                         'timestamp': timestamp2,
                         'sum': 34
                     },
                     {
+                        'numPoints': 3,
                         'timestamp': timestamp3,
                         'sum': 11
                     },
                 ]
             }
+
             metric_names = []
             regions = ['Mock_region{0}'.format(i) for i in range(6)]
             for region in regions:
@@ -120,9 +124,15 @@ class TestBlueFloodServiceController(base.TestCase):
                 metric_name, response = result
                 self.assertIn(metric_name, metric_names)
                 metric_names.remove(metric_name)
-                self.assertEqual(response[timestamp1], 45)
-                self.assertEqual(response[timestamp2], 34)
-                self.assertEqual(response[timestamp3], 11)
+                self.assertEqual(response[time.strftime(
+                    '%Y-%m-%dT%H:%M:%S', time.gmtime(int(timestamp1) / 1000))],
+                    45)
+                self.assertEqual(response[time.strftime(
+                    '%Y-%m-%dT%H:%M:%S', time.gmtime(int(timestamp2) / 1000))],
+                    34)
+                self.assertEqual(response[time.strftime(
+                    '%Y-%m-%dT%H:%M:%S', time.gmtime(int(timestamp3) / 1000))],
+                    11)
 
     def test_format_results_exception(self):
         json_dict = {

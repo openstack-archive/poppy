@@ -995,10 +995,10 @@ class TestServices(base.TestCase):
                 self.assertEqual(metric_split[1], domain_name)
                 self.assertIn(metric_split[2], regions)
             else:
-                self.assertEqual(metric_split[0], 'requestCount')
-                self.assertEqual(metric_split[1], domain_name)
-                self.assertIn(metric_split[2], regions)
-                self.assertIn(metric_split[3], metrictype.split('_')[1])
+                self.assertEqual(metric_split[0], 'httpResponseCode')
+                self.assertIn(metric_split[1], metrictype.split('_')[1])
+                self.assertEqual(metric_split[2], domain_name)
+                self.assertIn(metric_split[3], regions)
 
     @ddt.data('requestCount', 'bandwidthOut', 'httpResponseCode_1XX',
               'httpResponseCode_2XX', 'httpResponseCode_3XX',

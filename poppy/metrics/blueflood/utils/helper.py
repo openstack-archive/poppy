@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import calendar
 import time
 
 try:  # pragma: no cover
@@ -46,7 +47,11 @@ def join_url(base_url, url):
 
 
 def datetime_to_epoch(datetime_obj):
-    return time.mktime(datetime_obj.timetuple()) * 1000
+    return calendar.timegm(datetime_obj.timetuple()) * 1000
+
+
+def datetime_from_epoch(ms):
+    return time.strftime('%Y-%m-%dT%H:%M:%S', time.gmtime(ms / 1000))
 
 
 def resolution_converter_seconds_to_enum(resolution_seconds):

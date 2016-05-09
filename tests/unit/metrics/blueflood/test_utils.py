@@ -15,10 +15,6 @@
 
 """Unittests for BlueFlood utils"""
 
-import datetime
-import time
-
-
 from poppy.metrics.blueflood.utils import helper
 
 from tests.unit import base
@@ -31,7 +27,7 @@ class TestBlueFloodUtils(base.TestCase):
         self.url = 'https://www.metrics.com'
 
     def _almostequal(self, entity1, entity2, delta=1):
-        if abs(entity1-entity2) <= delta:
+        if abs(entity1 - entity2) <= delta:
             return True
         else:
             return False
@@ -59,13 +55,6 @@ class TestBlueFloodUtils(base.TestCase):
         non_relative_url = self.url + '/' + relative_url
         self.assertEqual(helper.retrieve_last_relative_url(non_relative_url),
                          relative_url)
-
-    def test_datetime_to_epoch(self):
-        datetime_obj = datetime.datetime.today()
-        expected = helper.datetime_to_epoch(datetime_obj=datetime_obj)
-        observed = int(time.time()) * 1000
-        equality = self._almostequal(expected, observed)
-        self.assertEqual(equality, True)
 
     def test_resolution_converter_seconds_to_enum_happy(self):
         seconds_series = ['0', '300', '1200', '3600', '14400', '86400']
