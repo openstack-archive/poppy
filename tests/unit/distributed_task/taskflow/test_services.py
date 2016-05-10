@@ -39,17 +39,27 @@ class TestServiceController(base.TestCase):
         self.distributed_task_driver.job_board = mock.Mock()
         self.distributed_task_driver.job_board.return_value = (
             self.mock_persistence_n_board.copy())
+        self.distributed_task_driver.job_board.return_value.__enter__ = (
+            mock.Mock()
+        )
+        self.distributed_task_driver.job_board.return_value.__exit__ = (
+            mock.Mock()
+        )
 
     def test_persistence(self):
         self.assertTrue(self.distributed_task_driver.persistence is not None)
 
     def test_submit_task(self):
-        flow_factory = mock.Mock()
+        flow_factory = mock.MagicMock
         self.distributed_task_driver.services_controller.submit_task(
             flow_factory,
             **{})
-        self.mock_persistence_n_board.get_connection.assert_called()
-        self.mock_persistence_n_board.post.assert_called()
+
+        # save the job logbook
+        self.mock_persistence_n_board.__enter__().\
+            get_connection().save_logbook.assert_called()
+        # post job to board
+        self.mock_persistence_n_board.copy().__enter__().post.assert_called()
 
     def test_run_task_worker(self):
         self.distributed_task_driver.services_controller.run_task_worker(
