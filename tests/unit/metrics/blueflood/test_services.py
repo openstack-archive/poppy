@@ -82,15 +82,15 @@ class TestBlueFloodServiceController(base.TestCase):
                         'sum': 45
                     },
                     {
-                        'numPoints': 1,
-                        'timestamp': timestamp2,
-                        'sum': 34
-                    },
-                    {
                         'numPoints': 3,
                         'timestamp': timestamp3,
                         'sum': 11
                     },
+                    {
+                        'numPoints': 1,
+                        'timestamp': timestamp2,
+                        'sum': 34
+                    }
                 ]
             }
 
@@ -120,23 +120,26 @@ class TestBlueFloodServiceController(base.TestCase):
                 resolution='86400'
             )
 
+            # confirm the results are in date asc order and all returned.
+            expected_order = [
+                {"timestamp": time.strftime(
+                    '%Y-%m-%dT%H:%M:%S', time.gmtime(int(timestamp1) / 1000)),
+                    "count": 45},
+                {"timestamp": time.strftime(
+                    '%Y-%m-%dT%H:%M:%S', time.gmtime(int(timestamp2) / 1000)),
+                    "count": 34},
+                {"timestamp": time.strftime(
+                    '%Y-%m-%dT%H:%M:%S', time.gmtime(int(timestamp3) / 1000)),
+                    "count": 11}
+            ]
+
             for result in results:
                 metric_name, response = result
-                self.assertIn(metric_name, metric_names)
-                metric_names.remove(metric_name)
-                self.assertEqual(response[time.strftime(
-                    '%Y-%m-%dT%H:%M:%S', time.gmtime(int(timestamp1) / 1000))],
-                    45)
-                self.assertEqual(response[time.strftime(
-                    '%Y-%m-%dT%H:%M:%S', time.gmtime(int(timestamp2) / 1000))],
-                    34)
-                self.assertEqual(response[time.strftime(
-                    '%Y-%m-%dT%H:%M:%S', time.gmtime(int(timestamp3) / 1000))],
-                    11)
+                self.assertListEqual(response, expected_order)
 
     def test_format_results_exception(self):
         json_dict = {
-            'this is a error': [
+            'this is an error': [
                 {
                     'errorcode': 400,
                 }
