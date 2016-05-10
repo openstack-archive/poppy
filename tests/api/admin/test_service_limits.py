@@ -59,7 +59,7 @@ class TestServiceLimits(base.TestBase):
         resp = self._service_limit_create_test_service(
             client=self.service_limit_user_client,
             resp_code=True)
-        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 400)
 
         resp = self.operator_client.get_admin_service_limit(
             project_id=self.service_limit_user_client.project_id

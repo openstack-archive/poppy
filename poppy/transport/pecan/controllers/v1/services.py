@@ -235,7 +235,7 @@ class ServicesController(base.Controller, hooks.HookController):
             pecan.abort(400, detail=str(e))
         except errors.ServicesOverLimit as e:
             # error handler for services count exceeding limit
-            pecan.abort(403, detail=str(e))
+            pecan.abort(400, detail=str(e))
         service_url = str(
             uri.encode(u'{0}/v1.0/services/{1}'.format(
                 pecan.request.host_url,
