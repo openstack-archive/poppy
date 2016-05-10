@@ -887,7 +887,10 @@ class TestFlowRuns(base.TestCase):
     # Keep create credentials for now
     @mock.patch('pyrax.cloud_dns')
     @mock.patch('pyrax.set_credentials')
-    def test_create_ssl_certificate_normal(self, mock_creds, mock_dns_client):
+    @mock.patch('cassandra.cluster.Cluster')
+    def test_create_ssl_certificate_normal(
+            self, mock_cluster, mock_creds, mock_dns_client):
+
         providers = ['cdn_provider']
         cert_obj_json = ssl_certificate.SSLCertificate('cdn',
                                                        'mytestsite.com',
@@ -915,7 +918,10 @@ class TestFlowRuns(base.TestCase):
 
     @mock.patch('pyrax.cloud_dns')
     @mock.patch('pyrax.set_credentials')
-    def test_recreate_ssl_certificate(self, mock_creds, mock_dns_client):
+    @mock.patch('cassandra.cluster.Cluster')
+    def test_recreate_ssl_certificate(
+            self, mock_cluster, mock_creds, mock_dns_client):
+
         providers = ['cdn_provider']
         cert_obj_json = ssl_certificate.SSLCertificate('cdn',
                                                        'mytestsite.com',
@@ -945,7 +951,9 @@ class TestFlowRuns(base.TestCase):
     # Keep create credentials for now
     @mock.patch('pyrax.cloud_dns')
     @mock.patch('pyrax.set_credentials')
-    def test_delete_ssl_certificate_normal(self, mock_creds, mock_dns_client):
+    @mock.patch('cassandra.cluster.Cluster')
+    def test_delete_ssl_certificate_normal(
+            self, mock_cluster, mock_creds, mock_dns_client):
 
         kwargs = {
             'cert_type': "san",
