@@ -36,8 +36,14 @@ class TestServices(base.TestCase):
     @mock.patch('fastly.FastlyVersion')
     @mock.patch('poppy.provider.fastly.services.ServiceController.client')
     @mock.patch('poppy.provider.fastly.driver.CDNProvider')
-    def setUp(self, mock_connection, mock_service, mock_version,
-              mock_controllerclient, mock_driver):
+    def setUp(
+        self,
+        mock_driver,
+        mock_controllerclient,
+        mock_version,
+        mock_service,
+        mock_connection
+    ):
         super(TestServices, self).setUp()
         self.driver = mock_driver()
         self.driver.provider_name = 'Fastly'
@@ -56,6 +62,7 @@ class TestServices(base.TestCase):
         self.version = self.mock_version(
             self.controller.client,
             self.mock_create_version_resp)
+        self.version.number = self.mock_create_version_resp.get('number')
         self.controller.client.create_service.return_value = (
             self.service_instance)
         self.controller.client.create_version.return_value = self.version
@@ -197,8 +204,9 @@ class TestServices(base.TestCase):
         self.assertEqual(False,
                          controller.client.create_response_object.called)
 
-        controller.client.create_backend.assert_has_any_call(
-            self.service_instance.id, 1,
+        controller.client.create_backend.assert_any_call(
+            self.service_instance.id,
+            self.version.number,
             service_obj.origins[0].origin.replace(":", "-"),
             service_obj.origins[0].origin,
             service_obj.origins[0].ssl,
@@ -247,26 +255,36 @@ class TestServices(base.TestCase):
         controller.client.check_domains.assert_called_once_with(
             self.service_instance.id, self.version.number)
 
-        referrer_resctriction_list = [rule.http_host
+        referrer_resctriction_list = [rule.referrer
                                       for restriction in
                                       service_obj.restrictions
-                                      for rule in restriction.rules]
+                                      for rule in restriction.rules
+                                      if hasattr(rule, 'referrer')]
 
         # referrer assert
-        host_pattern_stament = ' || '.join(['request.http.referer'
-                                            ' !~ %s' % host for host in
-                                            referrer_resctriction_list])
+        host_pattern_stament = ' || '.join(['req.http.referer'
+                                            ' !~ "%s"' % host for host in
+                                            referrer_resctriction_list
+                                            if host is not None])
         condition_stmt = ('req.http.referer && (%s)'
                           % host_pattern_stament)
 
-        controller.client.create_condition.assert_has_any_call(
-            self.service_instance.id, 1,
+        controller.client.create_condition.assert_any_call(
+            self.service_instance.id,
+            self.version.number,
             'Referrer Restriction Matching Rules',
             fastly.FastlyConditionType.REQUEST,
             condition_stmt,
             priority=10)
 
-        controller.client.create_response_object.assert_has_any_call()
+        controller.client.create_response_object.assert_any_call(
+            self.service_instance.id,
+            self.version.number,
+            'Referrer Restriction response rule(s)',
+            content='Referring from a non-permitted domain',
+            status='403',
+            request_condition=controller.client.create_condition().name
+        )
 
         # cache rule asset
         # create condition first
@@ -278,10 +296,20 @@ class TestServices(base.TestCase):
                     {'general.default_ttl': caching_rule.ttl}
                 )
             else:
-                controller.client.create_cache_settings.assert_has_any_call()
+                # import pdb; pdb.set_trace()
+                controller.client.create_cache_settings.assert_any_call(
+                    self.service_instance.id,
+                    self.version.number,
+                    caching_rule.name,
+                    None,
+                    cache_condition=controller.client.create_condition().name,
+                    stale_ttl=0,
+                    ttl=caching_rule.ttl
+                )
 
-        controller.client.create_backend.assert_has_any_call(
-            self.service_instance.id, 1,
+        controller.client.create_backend.assert_any_call(
+            self.service_instance.id,
+            self.version.number,
             service_obj.origins[0].origin.replace(":", "-"),
             service_obj.origins[0].origin,
             service_obj.origins[0].ssl,
