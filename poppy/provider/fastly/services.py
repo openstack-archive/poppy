@@ -102,7 +102,7 @@ class ServiceController(base.ServiceBase):
                 request_condition=request_condition.name
             )
 
-        # Fastly cachine rule implementation
+        # Fastly caching rule implementation
         for caching_rule in service_obj.caching:
             if caching_rule.name.lower() == 'default':
                 self.client.update_settings(service.id,
