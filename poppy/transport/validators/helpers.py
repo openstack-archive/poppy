@@ -541,7 +541,7 @@ def is_valid_analytics_request(request):
         raise exceptions.ValidationFailed('startTime or endTime is not in '
                                           'valid format. details: %s.'
                                           'Valid time stamp format is: '
-                                          'YY-MM-DDTHH:MM:SS' % str(e))
+                                          'YYYY-mm-ddTHH:MM:SS' % str(e))
     else:
         if start_time > end_time:
             raise exceptions.ValidationFailed('startTime cannot be later than'
