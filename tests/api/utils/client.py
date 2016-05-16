@@ -199,8 +199,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('GET', url, params=param,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def delete_service(self, location,
-                       requestslib_kwargs=None):
+    def delete_service(self, location, requestslib_kwargs=None):
         """Delete Service
 
         :return: Response Object containing response code 204
@@ -210,6 +209,27 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
 
         return self.request('DELETE', location,
                             requestslib_kwargs=requestslib_kwargs)
+
+    def get_analytics(self, location, domain, start_time, metric_type,
+                      end_time=None, requestslib_kwargs=None):
+        """Get Analytics for the domain
+
+        :return: Response Object containing response code 200
+        GET
+        location/analytics?domain=domain&startTime=startTime&endTime=endTime
+        &metricType=metricType
+        """
+        if end_time:
+            url = location + \
+                u'/analytics?domain={0}&startTime={1}&endTime={2}\
+                &metricType={3}'.format(
+                    domain, start_time, end_time, metric_type)
+        else:
+            url = location + \
+                u'/analytics?domain={0}&startTime={1}&metricType={3}'.format(
+                    domain, start_time, metric_type)
+
+        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
 
     def admin_get_service_by_domain_name(self, domain):
         """Get Service By domain name
