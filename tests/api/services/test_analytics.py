@@ -99,6 +99,36 @@ class TestAnalytics(base.TestBase):
         elif metric_type == 'httpResponseCode_5XX':
             self.assertSchema(body, analytics.get_httpResponseCode_5XX)
 
+    @ddt.data('requestCount', 'bandwidthOut', 'httpResponseCode_2XX',
+              'httpResponseCode_3XX', 'httpResponseCode_4XX',
+              'httpResponseCode_5XX')
+    def test_analytics_no_endtime(self, metric_type):
+        end_time = datetime.datetime.now()
+        delta_days = datetime.timedelta(days=1)
+        start_time = end_time - delta_days
+
+        start_time_str = start_time.strftime('%Y-%m-%dT%H:%M:%S')
+        domain = self.domain
+
+        resp = self.client.get_analytics(
+            location=self.location, domain=domain, start_time=start_time_str,
+            metric_type=metric_type)
+        self.assertEqual(resp.status_code, 200)
+
+        body = resp.json()
+        if metric_type == 'requestCount':
+            self.assertSchema(body, analytics.get_request_count)
+        elif metric_type == 'bandwidthOut':
+            self.assertSchema(body, analytics.get_bandwidthOut)
+        elif metric_type == 'httpResponseCode_2XX':
+            self.assertSchema(body, analytics.get_httpResponseCode_2XX)
+        elif metric_type == 'httpResponseCode_3XX':
+            self.assertSchema(body, analytics.get_httpResponseCode_3XX)
+        elif metric_type == 'httpResponseCode_4XX':
+            self.assertSchema(body, analytics.get_httpResponseCode_4XX)
+        elif metric_type == 'httpResponseCode_5XX':
+            self.assertSchema(body, analytics.get_httpResponseCode_5XX)
+
     @hypothesis.given(strategies.text())
     def test_analytics_negative_metric_type(self, metric_type):
         end_time = datetime.datetime.now()
