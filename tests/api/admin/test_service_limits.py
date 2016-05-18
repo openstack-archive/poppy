@@ -46,6 +46,17 @@ class TestServiceLimits(base.TestBase):
     @ddt.data(1, 3, 5)
     def test_check_imposed_limit_on_services(self, limit):
 
+        resp = self.service_limit_user_client.list_services()
+
+        body = resp.json()
+
+        if body["services"] != [] or body["links"] != []:
+            self.fail(
+                "Testing services limits expects an account that "
+                "doesn't have existing services. Found services: "
+                "{0}".format(body["services"])
+            )
+
         resp = self.operator_client.admin_service_limit(
             project_id=self.service_limit_user_client.project_id,
             limit=limit)
