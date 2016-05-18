@@ -119,11 +119,50 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                             'minLength': 3,
                             'maxLength': 253
                         },
-                        'san_cert_name': {
+                        'cert_details': {
+                            'type': 'object',
+                            'required': True,
+                            'additionalProperties': False,
+                            'properties': {
+                                'Akamai': {
+                                    'type': 'object',
+                                    'required': True,
+                                    'additionalProperties': False,
+                                    'properties': {
+                                        'extra_info': {
+                                            'type': 'object',
+                                            'required': True,
+                                            'properties': {
+                                                'san cert': {
+                                                    'type': 'string',
+                                                    'required': True,
+                                                    'minLength': 3,
+                                                    'maxLength': 253
+                                                },
+                                                'akamai_spsId': {
+                                                    'type': 'integer',
+                                                    'required': True
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        'flavor_id': {
                             'type': 'string',
                             'required': True,
-                            'minLength': 3,
-                            'maxLength': 253
+                            'minLength': 1,
+                            'maxLength': 256
+                        },
+                        'project_id': {
+                            'type': 'string',
+                            'required': True,
+                        },
+                        'cert_type': {
+                            'type': 'string',
+                            'required': True,
+                            'enum': ['san'],
                         }
                     }
                 }
