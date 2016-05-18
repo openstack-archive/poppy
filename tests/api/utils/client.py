@@ -17,6 +17,7 @@
 
 import json
 import pyrax
+import requests as python_requests
 import time
 
 from cafe.engine.http import client
@@ -221,15 +222,17 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         """
         if end_time:
             url = location + \
-                u'/analytics?domain={0}&startTime={1}&endTime={2}\
-                &metricType={3}'.format(
+                u'/analytics?domain={0}&startTime={1}&endTime={2}&metricType={3}'.format(  # noqa
                     domain, start_time, end_time, metric_type)
         else:
             url = location + \
                 u'/analytics?domain={0}&startTime={1}&metricType={3}'.format(
                     domain, start_time, metric_type)
 
-        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
+        # CAFE requests bombs with hypothesis test data
+        return python_requests.get(url, headers=self.default_headers)
+        # return self.request(
+        #    'GET', url, requestslib_kwargs=requestslib_kwargs)
 
     def admin_get_service_by_domain_name(self, domain):
         """Get Service By domain name
