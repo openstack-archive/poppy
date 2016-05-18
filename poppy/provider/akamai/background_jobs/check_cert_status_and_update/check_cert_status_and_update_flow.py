@@ -31,7 +31,6 @@ conf(project='poppy', prog='poppy', args=[])
 
 def check_cert_status_and_update_flow():
     flow = linear_flow.Flow('Update Akamai Property').add(
-        check_cert_status_and_update_tasks.GetCertInfoTask(),
         check_cert_status_and_update_tasks.CheckCertStatusTask(),
         check_cert_status_and_update_tasks.UpdateCertStatusTask()
     )

@@ -56,12 +56,18 @@ class TestSanMappingList(base.FunctionalTest):
     def test_put_san_mapping_list_positive(self):
         put_data = [
             {
-                "domain_name": "test-san1.cnamecdn.com",
-                "san_cert_name": "san1.sample.com"
-            },
-            {
-                "domain_name": "test-san2.cnamecdn.com",
-                "san_cert_name": "san2.sample.com"
+                "cert_details": {
+                    "Akamai": {
+                        "extra_info": {
+                            "san cert": "secure1.san1.altcdn.com",
+                            "akamai_spsId": 1234
+                        }
+                    }
+                },
+                "project_id": "000",
+                "cert_type": "san",
+                "domain_name": "www.mockssl.com",
+                "flavor_id": "premium"
             }
         ]
 

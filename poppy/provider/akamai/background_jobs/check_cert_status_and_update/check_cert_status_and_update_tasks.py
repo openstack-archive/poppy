@@ -53,8 +53,8 @@ class CheckCertStatusTask(task.Task):
 
     def execute(self, cert_obj_json):
         if cert_obj_json != "":
-            cert_obj = ssl_certificate.load_from_json(json.loads(cert_obj_json)
-                                                      )
+            cert_obj = ssl_certificate.load_from_json(
+                json.loads(cert_obj_json))
             latest_sps_id = cert_obj.cert_details['Akamai']['extra_info'].get(
                 'akamai_spsId')
             current_status = cert_obj.cert_details['Akamai']['extra_info'].get(
@@ -94,8 +94,15 @@ class CheckCertStatusTask(task.Task):
             elif status == 'CPS cancelled':
                 return "cancelled"
             else:
-                LOG.info("SPS Not completed for %s ..." %
-                         cert_obj.get_san_edge_name())
+                LOG.info(
+                    "SPS Not completed for {0}. "
+                    "Returning certificate object to Queue.".format(
+                        cert_obj.get_san_edge_name()
+                    )
+                )
+                self.akamai_driver.san_mapping_queue.enqueue_san_mapping(
+                    cert_obj_json
+                )
                 return ""
 
 
@@ -108,8 +115,9 @@ class UpdateCertStatusTask(task.Task):
 
     def execute(self, project_id, cert_obj_json, status_change_to):
         if cert_obj_json != "":
-            cert_obj = ssl_certificate.load_from_json(json.loads(cert_obj_json)
-                                                      )
+            cert_obj = ssl_certificate.load_from_json(
+                json.loads(cert_obj_json)
+            )
             cert_details = cert_obj.cert_details
 
             if status_change_to != "":

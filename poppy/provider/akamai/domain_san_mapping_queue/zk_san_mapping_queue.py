@@ -68,13 +68,14 @@ class ZookeeperSanMappingQueue(base.SanMappingQueue):
     def enqueue_san_mapping(self, san_domain_map):
         self.san_mapping_queue_backend.put(san_domain_map)
 
-    def traverse_queue(self):
+    def traverse_queue(self, consume=False):
         res = []
         while len(self.san_mapping_queue_backend) > 0:
             item = self.san_mapping_queue_backend.get()
             self.san_mapping_queue_backend.consume()
             res.append(item)
-        self.san_mapping_queue_backend.put_all(res)
+        if consume is False:
+            self.san_mapping_queue_backend.put_all(res)
         return res
 
     def put_queue_data(self, queue_data):

@@ -28,8 +28,8 @@ class BackgroundJobControllerBase(controller.ManagerControllerBase):
         super(BackgroundJobControllerBase, self).__init__(manager)
 
     @abc.abstractmethod
-    def post_job(self, job_type, args):
-        """Returns the health of storage and providers
+    def post_job(self, job_type, kwargs):
+        """Posts a background job to the distributed task driver.
 
         :raises: NotImplementedError
         """

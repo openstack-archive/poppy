@@ -17,6 +17,7 @@ import json
 import mock
 from taskflow import engines
 
+from poppy.model import ssl_certificate
 from poppy.provider.akamai.background_jobs.check_cert_status_and_update \
     import check_cert_status_and_update_flow
 from poppy.provider.akamai.background_jobs.update_property import (
@@ -65,10 +66,23 @@ class TestAkamaiBJFlowRuns(base.TestCase):
         self.addCleanup(bootstrap_patcher.stop)
 
     def test_check_cert_status_and_update_flow(self):
+        cert_obj_json = json.dumps(
+            ssl_certificate.SSLCertificate(
+                'cdn',
+                'website.com',
+                'san',
+                cert_details={
+                    'Akamai': {
+                        'extra_info': {
+                            'san cert': 'secure1.san1.testcdn.com'
+                        }
+                    }
+                }
+            ).to_dict()
+        )
+
         kwargs = {
-            'domain_name': "blog.testabc.com",
-            'cert_type': "san",
-            'flavor_id': "premium",
+            'cert_obj_json': cert_obj_json,
             'project_id': "000"
         }
         engines.run(check_cert_status_and_update_flow.
