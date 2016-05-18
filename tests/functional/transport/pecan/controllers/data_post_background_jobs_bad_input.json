@@ -1,27 +1,25 @@
 {
     "invalid_job_type_name": {
-        "job_type": "nonsense",
-        "flavor_id": "mock"
-    },
-    "missing_cert_type": {
-        "job_type": "akamai_check_and_update_cert_status",
-        "domain_name": "www.abc.com",
-        "flavor_id": "mock",
-        "project_id": "000"
-    },
-    "missing_domain_name": {
-        "job_type": "akamai_check_and_update_cert_status",
-        "cert_type": "san",
-        "flavor_id": "mock",
-        "project_id": "000"
+        "job_type": "nonsense"
     },
     "missing_san_cert_name": {
         "job_type": "akamai_check_and_update_cert_status",
         "domain_name": "www.abc.com"
     },
-    "papi_non_existent_san_cert_cname": {
+    "papi_unsupported_update_type": {
         "job_type": "akamai_update_papi_property_for_mod_san",
-        "domain_name": "www.abc.com",
-        "san_cert_name": "secure_noexist.test_san.com"
+        "update_type": "unsupported_update_type"
+    },
+    "papi_unsupported_action": {
+        "job_type": "akamai_update_papi_property_for_mod_san",
+        "update_type": "unsupported_action"
+    },
+    "papi_unsupported_property_spec": {
+        "job_type": "akamai_update_papi_property_for_mod_san",
+        "update_type": "unsupported_property_spec"
+    },
+    "papi_unsupported_san_cert_suffix": {
+        "job_type": "akamai_update_papi_property_for_mod_san",
+        "update_type": 1
     }
 }

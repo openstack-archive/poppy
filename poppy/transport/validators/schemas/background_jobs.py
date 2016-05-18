@@ -18,7 +18,7 @@ from poppy.transport.validators import schema_base
 
 class BackgroundJobSchema(schema_base.SchemaBase):
 
-    '''JSON Schema validation for /admin/provider/akamai/background_jobs'''
+    """JSON Schema validation for /admin/provider/akamai/background_jobs"""
 
     schema = {
         'background_jobs': {
@@ -31,23 +31,6 @@ class BackgroundJobSchema(schema_base.SchemaBase):
                             'required': True,
                             'enum': ['akamai_check_and_update_cert_status']
                         },
-                        'domain_name': {
-                            'type': 'string',
-                            'required': True
-                        },
-                        'project_id': {
-                            'type': 'string',
-                            'required': True
-                        },
-                        'cert_type': {
-                            'type': 'string',
-                            'required': True,
-                            'enum': ['san']
-                        },
-                        'flavor_id': {
-                            'type': 'string',
-                            'required': True
-                        }
                     }
                 },
                     {
@@ -58,23 +41,9 @@ class BackgroundJobSchema(schema_base.SchemaBase):
                             'required': True,
                             'enum': ['akamai_update_papi_property_for_mod_san']
                         },
-                        'update_cname_host_mapping_info': {
-                            'type': 'array',
-                            'properties': {
-                                'domain_name': {
-                                    'type': 'string',
-                                    'required': True
-                                },
-                                'san_cert_name': {
-                                    'type': 'string',
-                                    'required': True
-                                },
-                            },
-                            'minItems': 1,
-                        },
                         'update_type': {
                             'type': 'string',
-                            'enum': ['hostsnames']
+                            'enum': ['hostnames']
                         },
                         'action': {
                             'type': 'string',
