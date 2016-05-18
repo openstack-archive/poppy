@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import datetime
 import json
 
@@ -150,11 +151,15 @@ class CertificateController(base.CertificateBase):
                             this_sps_id,
                             this_job_id
                         )
+                        cert_copy = copy.deepcopy(cert_obj.to_dict())
+                        (
+                            cert_copy['cert_details']
+                            [self.driver.provider_name]
+                            ['extra_info']['san cert']
+                        ) = san_cert_name
+
                         self.san_mapping_queue.enqueue_san_mapping(
-                            json.dumps({
-                                'san_cert_domain': san_cert_name,
-                                'domain_name': cert_obj.domain_name,
-                            })
+                            json.dumps(cert_copy)
                         )
                         return self.responder.ssl_certificate_provisioned(
                             san_cert_name, {
