@@ -138,7 +138,7 @@ class CertificateController(base.CertificateBase):
                         resp_dict = json.loads(resp.text)
                         LOG.info(
                             'modSan request submitted. Response: {0}'.format(
-                                str(resp_dict)
+                                resp_dict
                             )
                         )
                         this_sps_id = resp_dict['spsId']
@@ -151,10 +151,7 @@ class CertificateController(base.CertificateBase):
                             this_job_id
                         )
                         self.san_mapping_queue.enqueue_san_mapping(
-                            json.dumps({
-                                'san_cert_domain': san_cert_name,
-                                'domain_name': cert_obj.domain_name,
-                            })
+                            json.dumps(cert_obj.to_dict())
                         )
                         return self.responder.ssl_certificate_provisioned(
                             san_cert_name, {
