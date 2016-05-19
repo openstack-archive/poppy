@@ -94,6 +94,18 @@ class ServicesController(base.ServicesController):
         except KeyError:
             return 0
 
+    def get_services_by_status(self, status):
+
+        complete_results = []
+        for created_service in self.created_services:
+            service_obj = self.format_result(
+                self.created_services[created_service]
+            )
+            if service_obj._status == status:
+                complete_results.append(created_service.service_id)
+
+        return complete_results
+
     def update(self, project_id, service_id, service_json):
         # update configuration in storage
         if service_json.service_id in self.created_service_ids \
