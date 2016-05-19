@@ -129,6 +129,60 @@ class TestAnalytics(base.TestBase):
         elif metric_type == 'httpResponseCode_5XX':
             self.assertSchema(body, analytics.get_httpResponseCode_5XX)
 
+    def tearDown(self):
+        self.client.delete_service(location=self.location)
+
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
+
+        super(TestAnalytics, self).tearDown()
+
+
+@ddt.ddt
+class TestAnalyticsHypothesis(base.TestBase):
+
+    """Hypothesis Tests for Analytics."""
+
+    def setUp(self):
+        super(TestAnalyticsHypothesis, self).setUp()
+
+        if self.test_config.run_hypothesis_tests is False:
+            self.skipTest(
+                'Hypothesis Tests are disabled in configuration')
+
+        self.flavor_id = self.test_flavor
+        service_name = str(uuid.uuid1())
+
+        self.domain = self.generate_random_string(
+            prefix='www.api-test-domain') + '.com'
+        self.domain_list = [{"domain": self.domain}]
+
+        self.origin_list = [{"origin": self.generate_random_string(
+            prefix='api-test-origin') + '.com', "port": 80, "ssl": False,
+            "hostheadertype": "custom", "hostheadervalue":
+            "www.customweb.com"}]
+
+        self.caching_list = [{"name": "default", "ttl": 3600},
+                             {"name": "home", "ttl": 1200,
+                              "rules": [{"name": "index",
+                                         "request_url": "/index.htm"}]}]
+        self.log_delivery = {"enabled": False}
+
+        resp = self.client.create_service(service_name=service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id,
+                                          log_delivery=self.log_delivery)
+
+        self.location = resp.headers["location"]
+        self.client.wait_for_service_status(
+            location=self.location,
+            status='deployed',
+            abort_on_status='failed',
+            retry_interval=self.test_config.status_check_retry_interval,
+            retry_timeout=self.test_config.status_check_retry_timeout)
+
     @hypothesis.given(strategies.text())
     def test_analytics_negative_metric_type(self, metric_type):
         end_time = datetime.datetime.now()
@@ -180,4 +234,4 @@ class TestAnalytics(base.TestBase):
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
 
-        super(TestAnalytics, self).tearDown()
+        super(TestAnalyticsHypothesis, self).tearDown()
