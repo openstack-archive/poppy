@@ -99,7 +99,6 @@ class TestBase(fixtures.BaseTestFixture):
                 service_limit_project_id,
                 serialize_format='json',
                 deserialize_format='json')
-
         if cls.test_config.run_operator_tests:
             operator_auth_token, operator_project_id = \
                 cls.auth_client.authenticate_user(
