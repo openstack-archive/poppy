@@ -83,6 +83,11 @@ class TestConfig(data_interfaces.ConfigSectionInterface):
         return self.get_boolean('run_ssl_tests')
 
     @property
+    def run_hypothesis_tests(self):
+        """Flag to indicate if the hypothesis tests should run."""
+        return self.get_boolean('run_hypothesis_tests')
+
+    @property
     def cassandra_consistency_wait_time(self):
         """Int value in seconds to wait for cassandra consistency."""
         return int(self.get('cassandra_consistency_wait_time'))
