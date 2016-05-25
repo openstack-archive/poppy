@@ -16,10 +16,10 @@
 
 from oslo_log import log
 from oslo_utils import uuidutils
-from taskflow.conductors import single_threaded
+from taskflow.conductors.backends import impl_blocking
 from taskflow import engines
 from taskflow.listeners import logging as logging_listener
-from taskflow.persistence import logbook
+from taskflow.persistence import models
 from taskflow.types.notifier import Notifier
 
 from poppy.distributed_task import base
@@ -28,7 +28,7 @@ from poppy.distributed_task import base
 LOG = log.getLogger(__name__)
 
 
-class NotifyingConductor(single_threaded.SingleThreadedConductor):
+class NotifyingConductor(impl_blocking.BlockingConductor):
 
     def _listeners_from_job(self, job, engine):
 
@@ -74,9 +74,9 @@ class ServicesController(base.ServicesController):
 
                 job_id = uuidutils.generate_uuid()
                 job_name = '-'.join([flow_factory.__name__, job_id])
-                job_logbook = logbook.LogBook(job_name)
-                flow_detail = logbook.FlowDetail(job_name,
-                                                 uuidutils.generate_uuid())
+                job_logbook = models.LogBook(job_name)
+                flow_detail = models.FlowDetail(
+                    job_name, uuidutils.generate_uuid())
                 factory_args = ()
                 factory_kwargs = {}
                 engines.save_factory_details(flow_detail, flow_factory,
