@@ -199,6 +199,21 @@ class DefaultServicesController(base.ServicesController):
         service_limit = self.storage_controller.get_service_limit(project_id)
         service_count = self.storage_controller.get_service_count(project_id)
 
+        services_delete_in_progress = self.storage_controller.\
+            get_services_by_status('delete_in_progress')
+
+        services_delete_count = len(services_delete_in_progress)
+
+        # Check that the number of deleted services is less
+        # than the total number of existing services for the project.
+        # Adjust the service count removing delete_in_progress
+        # services.
+        service_count -= (
+            services_delete_count
+            if 0 < services_delete_count < service_count else 0
+        )
+        # service_count should always be a >= 0.
+
         if service_count >= service_limit:
             raise errors.ServicesOverLimit('Maximum Services '
                                            'Limit of {0} '
