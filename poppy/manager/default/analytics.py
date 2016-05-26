@@ -29,10 +29,14 @@ class AnalyticsController(base.AnalyticsController):
         try:
             result = storage_controller.get_service_details_by_domain_name(
                 domain_name=domain_name, project_id=project_id)
-        except ValueError:
-            msg = "Domain: {0} was not found for project_id: {1}".format(
-                domain_name, project_id)
-            LOG.warning(msg)
+        except ValueError as ve:
+            msg = (
+                "Error retrieving details for domain {0} "
+                "project_id {1} : {2}".format(
+                    domain_name, project_id, ve
+                )
+            )
+            LOG.error(msg)
             raise errors.ServiceNotFound(msg)
         if not result:
             msg = "Domain: {0} was not found for project_id: {1}".format(
