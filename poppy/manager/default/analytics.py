@@ -62,8 +62,8 @@ class AnalyticsController(base.AnalyticsController):
 
         if not provider_for_domain:
             msg = "Provider not found for Domain : {0}".format(domain_name)
-            LOG.warning(msg)
-            raise errors.ProviderNotFound(msg)
+            LOG.error(msg)
+            return {}
 
         provider_obj = self.providers[provider_for_domain.lower()].obj
         provider_service_controller = provider_obj.service_controller
