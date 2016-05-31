@@ -40,7 +40,7 @@ class NotifyingConductor(impl_blocking.BlockingConductor):
             LOG.info("Taskflow transitioning to state {0}."
                      " Details: {1}".format(state, details))
 
-        engine.task_notifier.register(Notifier.ANY, task_transition)
+        engine.atom_notifier.register(Notifier.ANY, task_transition)
         engine.notifier.register(Notifier.ANY, flow_transition)
 
         listeners = super(NotifyingConductor,
