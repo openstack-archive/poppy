@@ -22,9 +22,9 @@ import uuid
 
 import ddt
 import mock
-
 from oslo_config import cfg
 from oslo_context import context as context_utils
+import six.moves as sm
 
 from poppy.metrics.blueflood import driver
 from poppy.metrics.blueflood.utils import client
@@ -53,6 +53,10 @@ class TestBlueFloodServiceController(base.TestCase):
         self.conf = cfg.ConfigOpts()
         self.metrics_driver = (
             driver.BlueFloodMetricsDriver(self.conf))
+
+        # tear down mocked context below, that way it doesn't
+        # affect other tests that use oslo context
+        self.addCleanup(sm.reload_module, context_utils)
 
     @ddt.data('requestCount', 'bandwidthOut', 'httpResponseCode_1XX',
               'httpResponseCode_2XX', 'httpResponseCode_3XX',

@@ -1,0 +1,101 @@
+{
+    "service_json": {
+        "name" : "mysite.com",
+        "domains": [
+               {"domain": "parsely.sage.com"},
+               {"domain": "shared.sage.com",
+               "protocol": "https",
+               "certificate": "shared"},
+               {"domain": "san.sage.com",
+               "protocol": "https",
+               "certificate": "san"},
+               {"domain": "rosemary.thyme.net",
+              "protocol": "http"}
+          ],
+        "origins": [
+            {"origin": "mockdomain.com", "ssl": false, "port": 80}
+        ],
+        "caching": [
+            {"name": "default", "ttl": 1200 },
+            {"name": "img-only",
+             "ttl": 1800,
+             "rules": [
+                { "name": "jpeg-rules",
+                  "request_url": "/*.jpeg"
+                },
+                { "name": "gif-rules",
+                  "request_url": "/*.gif"
+                }
+             ]
+            }
+        ],
+        "restrictions": [
+             {
+                "name": "website only",
+                "rules": [
+                    {
+                        "name": "mocksite.com",
+                        "http_host": "www.mocksite.com"
+                    }
+                ]
+            },
+            {
+                "name": "graphic only",
+                "rules": [
+                    {
+                        "name": "mockgraphicsite.com",
+                        "referrer": "www.mocksitegraphic.com"
+                    }
+                ]
+            }
+        ],
+        "flavor_id" : "standard",
+        "provider_details": {
+          "provider_error": {
+            "provider_service_id": "000",
+            "access_urls": [
+              {
+                "access_url": "mock_access_url",
+                "operator_url": "mock_operator_url"
+              },
+              {
+                "log_delivery": [
+                  {
+                    "publicURL": "mock_public_log_delivery"
+                  }
+                ]
+              },
+              {
+                "dummy_key": "dummy_value"
+              }
+            ],
+            "error_message": "Something error message!"
+          },
+          "provider_no_error": {
+            "provider_service_id": "000",
+            "access_urls": [
+              {
+                "access_url": "mock_access_url",
+                "operator_url": "mock_operator_url"
+              },
+              {
+                "log_delivery": [
+                  {
+                    "publicURL": "mock_public_log_delivery"
+                  }
+                ]
+              },
+              {
+                "dummy_key": "dummy_value"
+              }
+            ]
+          }
+        }
+    },
+    "service_disabled_no_errors": {
+      "name" : "mysite.com",
+      "operator_status": "disabled"
+    }
+}
+
+
