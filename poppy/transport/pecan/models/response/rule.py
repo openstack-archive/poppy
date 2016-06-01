@@ -22,7 +22,7 @@ from poppy.common import util
 
 class Model(collections.OrderedDict):
 
-    'response class for rule'
+    """response class for rule."""
 
     def __init__(self, rule):
         super(Model, self).__init__()

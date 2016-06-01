@@ -34,6 +34,20 @@ class TestDNSModel(base.TestCase):
         self.assertEqual('false', dns_model['online'])
 
 
+class TestDistributedTaskModel(base.TestCase):
+
+    def setUp(self):
+        super(TestDistributedTaskModel, self).setUp()
+
+    def test_distributed_task_is_alive(self):
+        distributed_task_model = health.DistributedTaskModel(True)
+        self.assertEqual('true', distributed_task_model['online'])
+
+    def test_distributed_task_is_not_alive(self):
+        distributed_task_model = health.DistributedTaskModel(False)
+        self.assertEqual('false', distributed_task_model['online'])
+
+
 class TestStorageModel(base.TestCase):
 
     def setUp(self):

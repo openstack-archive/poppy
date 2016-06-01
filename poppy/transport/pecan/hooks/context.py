@@ -41,6 +41,7 @@ class ContextHook(hooks.PecanHook):
                 '/'.join(state.request.path.split('/')[0:2]))
             # hack: if the configuration is set, the project_id
             # will be appended into the base_url
+            # import pdb; pdb.set_trace()
             if cfg.CONF.project_id_in_url:
                 context_kwargs['base_url'] = '/'.join([
                     context_kwargs['base_url'],

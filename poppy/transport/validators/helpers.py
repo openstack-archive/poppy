@@ -64,6 +64,7 @@ def with_schema_pecan(request, schema=None, handler=custom_abort_pecan,
     For an HTTP POST or PUT (RFC2616 unsafe methods) request, the schema is
     used to validate the request body.
 
+    :param request: request object
     :param schema: A JSON schema.
     :param handler: A Function (Error_handler)
     """
