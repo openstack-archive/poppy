@@ -172,10 +172,9 @@ class DefaultManagerServiceTests(base.TestCase):
         services_controller.get_service_details_by_domain_name = \
             mock.Mock(return_value=StorageResult(
                 provider_details=provider_details_dict))
-        self.assertEqual(404,
-                         analytics_controller.get_metrics_by_domain(
-                             self.project_id,
-                             self.domain_name, **extras))
+        self.assertRaises(errors.ProviderDetailsIncomplete,
+                          analytics_controller.get_metrics_by_domain,
+                          self.project_id, self.domain_name, **extras)
 
     def test_analytics_get_metrics_by_domain_happy_path(self):
 

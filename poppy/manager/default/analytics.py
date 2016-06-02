@@ -12,8 +12,6 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import requests
-
 from oslo_log import log
 
 from poppy.common import errors
@@ -62,9 +60,9 @@ class AnalyticsController(base.AnalyticsController):
                 provider_for_domain = provider
 
         if not provider_for_domain:
-            msg = "Provider not found for Domain : {0}".format(domain_name)
+            msg = "Provider not found for Domain {0}".format(domain_name)
             LOG.error(msg)
-            return requests.status_codes.codes.NOT_FOUND
+            raise errors.ProviderDetailsIncomplete(msg)
 
         provider_obj = self.providers[provider_for_domain.lower()].obj
         provider_service_controller = provider_obj.service_controller

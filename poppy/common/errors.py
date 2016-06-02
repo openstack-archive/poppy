@@ -30,10 +30,17 @@ class BadProviderDetail(Exception):
 
 
 class ProviderNotFound(Exception):
+
     """Raised when domain is not associated with a known Provider"""
 
 
+class ProviderDetailsIncomplete(Exception):
+
+    """Raised when domain details with a Provider is incomplete"""
+
+
 class ServiceNotFound(Exception):
+
     """Raised when service is not found."""
 
 
