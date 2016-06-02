@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import requests
 
 from oslo_log import log
 
@@ -63,7 +64,7 @@ class AnalyticsController(base.AnalyticsController):
         if not provider_for_domain:
             msg = "Provider not found for Domain : {0}".format(domain_name)
             LOG.error(msg)
-            return {}
+            return requests.status_codes.codes.NOT_FOUND
 
         provider_obj = self.providers[provider_for_domain.lower()].obj
         provider_service_controller = provider_obj.service_controller
