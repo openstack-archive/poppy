@@ -125,6 +125,8 @@ class ServicesAnalyticsController(base.Controller, hooks.HookController):
             )
         except errors.ServiceNotFound:
             return pecan.Response(status=404)
+        except errors.ProviderDetailsIncomplete:
+            return pecan.Response(status=404)
         except Exception:
             return pecan.Response(status=500)
         else:
