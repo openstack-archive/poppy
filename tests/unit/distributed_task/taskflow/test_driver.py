@@ -28,22 +28,56 @@ class TestDriver(base.TestCase):
     def setUp(self):
         super(TestDriver, self).setUp()
 
+        self.persistence_backends_patcher = mock.patch(
+            'poppy.distributed_task.taskflow.driver.persistence_backends')
+        self.persistence = self.persistence_backends_patcher.start()
+        self.persistence.backend.return_value.__enter__ = mock.MagicMock()
+        self.persistence.backend.return_value.__exit__ = mock.MagicMock()
+
+        self.job_backends_patcher = mock.patch(
+            'poppy.distributed_task.taskflow.driver.job_backends')
+        self.job_board = self.job_backends_patcher.start()
+        self.mock_board = mock.MagicMock()
+        type(self.mock_board).connected = False
+        self.job_board.backend.return_value.__enter__ = mock.MagicMock(
+            return_value=self.mock_board
+        )
+        self.job_board.backend.return_value.__exit__ = mock.MagicMock()
+
         self.conf = cfg.ConfigOpts()
         self.distributed_task_driver = (
             driver.TaskFlowDistributedTaskDriver(self.conf))
 
+        self.addCleanup(self.persistence_backends_patcher.stop)
+        self.addCleanup(self.job_backends_patcher.stop)
+
     def test_init(self):
-        self.assertTrue(self.distributed_task_driver is not None)
+        self.assertIsNotNone(self.distributed_task_driver)
 
     def test_vendor_name(self):
         self.assertEqual('TaskFlow', self.distributed_task_driver.vendor_name)
 
-    def test_is_alive(self):
-        with mock.patch.object(driver.TaskFlowDistributedTaskDriver,
-                               'is_alive') as mock_alive:
-            mock_alive.return_value = True
-            self.assertEqual(True, self.distributed_task_driver.is_alive())
+    def test_persistence(self):
+        self.assertIsNotNone(self.distributed_task_driver.persistence())
 
-    def test_service_contoller(self):
-        self.assertTrue(self.distributed_task_driver.services_controller
-                        is not None)
+    def test_job_board(self):
+        self.assertIsNotNone(
+            self.distributed_task_driver.job_board(mock.Mock(), mock.Mock()))
+
+    def test_is_alive_true(self):
+        type(self.mock_board).connected = True
+        self.assertEqual(True, self.distributed_task_driver.is_alive())
+
+    def test_is_alive_false(self):
+        self.assertEqual(False, self.distributed_task_driver.is_alive())
+
+    def test_is_alive_exception(self):
+        # NOTE(isaacm): when mocking nested context manager the mocked
+        # exception side effect should be on the outer context
+        self.persistence.backend.return_value.__exit__.side_effect = Exception(
+            "Mock __exit__ : Something went wrong!")
+
+        self.assertEqual(False, self.distributed_task_driver.is_alive())
+
+    def test_service_controller(self):
+        self.assertIsNotNone(self.distributed_task_driver.services_controller)
