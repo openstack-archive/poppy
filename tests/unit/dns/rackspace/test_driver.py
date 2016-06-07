@@ -62,6 +62,31 @@ class TestDriver(base.TestCase):
             provider._conf['drivers:dns:rackspace'].username,
             provider._conf['drivers:dns:rackspace'].api_key)
 
+    @mock.patch('pyrax.set_setting')
+    @mock.patch('pyrax.set_credentials')
+    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
+    def test_init_auth_endpoint(self, mock_set_credentials, mock_set_settings):
+        custom_auth = cfg.StrOpt(
+            'auth_endpoint',
+            default='http://auth.com/v2',
+            help='Authentication end point for DNS'
+        )
+        for index, item in enumerate(RACKSPACE_OPTIONS):
+            if item.name == 'auth_endpoint':
+                RACKSPACE_OPTIONS[index] = custom_auth
+
+        pyrax.cloud_dns = mock.Mock()
+        provider = driver.DNSProvider(self.conf)
+        mock_set_credentials.assert_called_once_with(
+            provider._conf['drivers:dns:rackspace'].username,
+            provider._conf['drivers:dns:rackspace'].api_key)
+        mock_set_settings.assert_has_calls(
+            [
+                mock.call("auth_endpoint", custom_auth.default),
+                mock.call("identity_type", "rackspace")
+            ]
+        )
+
     @mock.patch('pyrax.set_credentials')
     @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
     def test_is_alive(self, mock_set_credentials):
