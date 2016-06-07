@@ -163,7 +163,7 @@ class CertificatesController(base.CertificatesController):
         self.session.execute(stmt, args)
 
         try:
-            provider_status = json.loads(cert_details.values()[0])
+            provider_status = json.loads(list(cert_details.values())[0])
             cert_status = provider_status['extra_info']['status']
         except (IndexError, IndexError, ValueError) as e:
             LOG.error("Certificate details "
