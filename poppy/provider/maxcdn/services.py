@@ -129,6 +129,8 @@ class ServiceController(base.ServiceBase):
         Map a poppy service name to a provider's service name so it
         can comply provider's naming convention.
         """
+        if isinstance(service_name, bytes):
+            service_name = service_name.decode("utf-8")
         if MAXCDN_NAMING_REGEX.match(service_name):
             return service_name
         else:

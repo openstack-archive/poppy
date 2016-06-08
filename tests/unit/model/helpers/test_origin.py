@@ -27,8 +27,8 @@ class TestOrigin(base.TestCase):
     @ddt.unpack
     @ddt.data({'origin_url': 'www.mydomain.com',
               'changed_origin_url': 'www.changed-domain.com'},
-              {'origin_url': u'www.düsseldorf-Lörick.com',
-              'changed_origin_url': u'www.düsseldorf.com'})
+              {'origin_url': u'www.düsseldorf-Lörick.com'.encode("utf-8"),
+              'changed_origin_url': u'www.düsseldorf.com'.encode("utf-8")})
     def test_origin(self, origin_url, changed_origin_url):
 
         port = 80

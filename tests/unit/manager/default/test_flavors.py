@@ -19,6 +19,7 @@ import uuid
 import mock
 from oslo_config import cfg
 
+from poppy import bootstrap
 from poppy.manager.default import driver
 from poppy.manager.default import flavors
 from poppy.model import flavor
@@ -42,6 +43,9 @@ class DefaultManagerFlavorTests(base.TestCase):
                 os.path.dirname(os.path.dirname(__file__)))))
         conf_path = os.path.join(tests_path, 'etc', 'default_functional.conf')
         cfg.CONF(args=[], default_config_files=[conf_path])
+        cfg.CONF.register_opts(bootstrap._DEFAULT_OPTIONS)
+        cfg.CONF.register_opts(bootstrap._DRIVER_OPTIONS,
+                               group=bootstrap._DRIVER_GROUP)
 
         manager_driver = driver.DefaultManagerDriver(cfg.CONF,
                                                      mock_driver,
