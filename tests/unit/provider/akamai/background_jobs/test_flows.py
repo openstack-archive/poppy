@@ -43,12 +43,18 @@ class TestAkamaiBJFlowRuns(base.TestCase):
                         akamai_mocks.MockManager.get_services_controller().
                         storage_controller
                     )
+                if args[1] == 'ssl_certificate':
+                    return (
+                        akamai_mocks.MockManager.get_services_controller(),
+                        akamai_mocks.MockManager.
+                        get_ssl_certificate_controller().
+                        ssl_certificate_controller
+                    )
         mock_task_controllers = mock.Mock()
         mock_task_controllers.task_controllers.side_effect = (
             task_controllers_side_effect
         )
         memo_controllers_patcher = mock.patch(
-            # 'poppy.distributed_task.utils.memoized_controllers',
             'poppy.provider.akamai.background_jobs.'
             'check_cert_status_and_update.'
             'check_cert_status_and_update_tasks.memoized_controllers',

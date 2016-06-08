@@ -26,7 +26,6 @@ import mock
 from oslo_config import cfg
 
 from poppy.model.helpers import provider_details
-from poppy.model import ssl_certificate
 from poppy.storage.cassandra import driver
 from poppy.storage.cassandra import services
 from poppy.transport.pecan.models.request import service as req_service
@@ -73,7 +72,7 @@ class CassandraStorageServiceTests(base.TestCase):
         value[0]['service_id'] = self.service_id
         mock_execute.execute.return_value = value
 
-        actual_response = self.sc.get(self.project_id, self.service_id)
+        actual_response = self.sc.get_service(self.project_id, self.service_id)
 
         # TODO(amitgandhinz): assert the response
         # matches the expectation (using jsonschema)
@@ -86,8 +85,12 @@ class CassandraStorageServiceTests(base.TestCase):
         # mock the response from cassandra
         mock_execute.execute.return_value = []
 
-        self.assertRaises(ValueError, self.sc.get,
-                          self.project_id, self.service_id)
+        self.assertRaises(
+            ValueError,
+            self.sc.get_service,
+            self.project_id,
+            self.service_id
+        )
 
     @ddt.file_data('../data/data_create_service.json')
     @mock.patch.object(services.ServicesController,
@@ -98,7 +101,7 @@ class CassandraStorageServiceTests(base.TestCase):
     def test_create_service(self, value,
                             mock_check, mock_session, mock_execute):
         service_obj = req_service.load_from_json(value)
-        responses = self.sc.create(self.project_id, service_obj)
+        responses = self.sc.create_service(self.project_id, service_obj)
 
         # Expect the response to be None as there are no providers passed
         # into the driver to respond to this call
@@ -117,9 +120,11 @@ class CassandraStorageServiceTests(base.TestCase):
         service_obj = req_service.load_from_json(value)
         self.sc.get = mock.Mock(return_value=service_obj)
 
-        self.assertRaises(ValueError,
-                          self.sc.create,
-                          self.project_id, service_obj)
+        self.assertRaises(
+            ValueError,
+            self.sc.create_service,
+            self.project_id, service_obj
+        )
 
     @ddt.file_data('data_list_services.json')
     @mock.patch.object(services.ServicesController, 'session')
@@ -130,7 +135,7 @@ class CassandraStorageServiceTests(base.TestCase):
         mock_execute.prepare.return_value = mock.Mock()
         mock_execute.execute.return_value = value
 
-        actual_response = self.sc.list(self.project_id, None, None)
+        actual_response = self.sc.get_services(self.project_id, None, None)
 
         # TODO(amitgandhinz): assert the response
         # matches the expectation (using jsonschema)
@@ -142,7 +147,10 @@ class CassandraStorageServiceTests(base.TestCase):
     def test_delete_service(self, mock_session, mock_execute):
         # mock the response from cassandra
         mock_execute.execute.return_value = iter([{}])
-        actual_response = self.sc.delete(self.project_id, self.service_id)
+        actual_response = self.sc.delete_service(
+            self.project_id,
+            self.service_id
+        )
 
         # Expect the response to be None as there are no providers passed
         # into the driver to respond to this call
@@ -173,9 +181,11 @@ class CassandraStorageServiceTests(base.TestCase):
                 }
                 mock_session.execute.return_value = iter([{}])
                 service_obj = req_service.load_from_json(service_json)
-                actual_response = self.sc.update(self.project_id,
-                                                 self.service_id,
-                                                 service_obj)
+                actual_response = self.sc.update_service(
+                    self.project_id,
+                    self.service_id,
+                    service_obj
+                )
 
                 # Expect the response to be None as there are no
                 # providers passed into the driver to respond to this call
@@ -195,53 +205,6 @@ class CassandraStorageServiceTests(base.TestCase):
         self.assertTrue("Mock" in actual_response)
         self.assertTrue("CloudFront" in actual_response)
         self.assertTrue("Fastly" in actual_response)
-
-    @ddt.file_data('data_get_certs_by_domain.json')
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_get_certs_by_domain(self, cert_details_json,
-                                 mock_session, mock_execute):
-        # mock the response from cassandra
-        mock_execute.execute.return_value = cert_details_json[0]
-        actual_response = self.sc.get_certs_by_domain(
-            domain_name="www.mydomain.com")
-        self.assertEqual(len(actual_response), 2)
-        self.assertTrue(all([isinstance(ssl_cert,
-                                        ssl_certificate.SSLCertificate)
-                             for ssl_cert in actual_response]))
-        mock_execute.execute.return_value = cert_details_json[1]
-        actual_response = self.sc.get_certs_by_domain(
-            domain_name="www.example.com",
-            flavor_id="flavor1")
-        self.assertEqual(len(actual_response), 2)
-        self.assertTrue(all([isinstance(ssl_cert,
-                                        ssl_certificate.SSLCertificate)
-                             for ssl_cert in actual_response]))
-        mock_execute.execute.return_value = cert_details_json[2]
-        actual_response = self.sc.get_certs_by_domain(
-            domain_name="www.mydomain.com",
-            flavor_id="flavor1",
-            cert_type="san")
-        self.assertTrue(isinstance(actual_response,
-                                   ssl_certificate.SSLCertificate))
-
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_get_certs_by_status(self, mock_session, mock_execute):
-        # mock the response from cassandra
-        mock_execute.execute.return_value = \
-            [{"domain_name": "www.example.com"}]
-        actual_response = self.sc.get_certs_by_status(
-            status="deployed")
-        self.assertEqual(actual_response,
-                         [{"domain_name": "www.example.com"}])
-
-        mock_execute.execute.return_value = \
-            [{"domain_name": "www.example1.com"}]
-        actual_response = self.sc.get_certs_by_status(
-            status="failed")
-        self.assertEqual(actual_response,
-                         [{"domain_name": "www.example1.com"}])
 
     @ddt.file_data('data_provider_details.json')
     @mock.patch.object(services.ServicesController, 'session')

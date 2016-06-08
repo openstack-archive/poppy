@@ -175,7 +175,7 @@ class ServicesController(base.Controller, hooks.HookController):
             pecan.abort(400, detail="Marker must be a valid UUID")
 
         services_controller = self._driver.manager.services_controller
-        service_resultset = services_controller.list(
+        service_resultset = services_controller.get_services(
             self.project_id, marker, limit)
         results = [
             resp_service_model.Model(s, self)
@@ -204,7 +204,7 @@ class ServicesController(base.Controller, hooks.HookController):
     def get_one(self, service_id):
         services_controller = self._driver.manager.services_controller
         try:
-            service_obj = services_controller.get(
+            service_obj = services_controller.get_service(
                 self.project_id, service_id)
         except ValueError:
             pecan.abort(404, detail='service %s could not be found' %
@@ -224,9 +224,11 @@ class ServicesController(base.Controller, hooks.HookController):
         service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
         service_id = None
         try:
-            service_obj = services_controller.create(self.project_id,
-                                                     self.auth_token,
-                                                     service_json_dict)
+            service_obj = services_controller.create_service(
+                self.project_id,
+                self.auth_token,
+                service_json_dict
+            )
             service_id = service_obj.service_id
         except errors.SharedShardsExhausted as e:
             # domain - shared domains exhausted
@@ -255,7 +257,7 @@ class ServicesController(base.Controller, hooks.HookController):
         services_controller = self._driver.manager.services_controller
 
         try:
-            services_controller.delete(self.project_id, service_id)
+            services_controller.delete_service(self.project_id, service_id)
         except LookupError as e:
             pecan.abort(404, detail=str(e))
         except ValueError as e:
@@ -279,7 +281,7 @@ class ServicesController(base.Controller, hooks.HookController):
         services_controller = self._driver.manager.services_controller
 
         try:
-            services_controller.update(
+            services_controller.update_service(
                 self.project_id, service_id, self.auth_token, service_updates)
         except exceptions.ValidationFailed as e:
             pecan.abort(400, detail=u'{0}'.format(e))

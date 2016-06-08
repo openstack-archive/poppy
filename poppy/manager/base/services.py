@@ -33,19 +33,19 @@ class ServicesControllerBase(controller.ManagerControllerBase):
         self.notification_wrapper = notifications.NotificationWrapper()
 
     @abc.abstractmethod
-    def list(self, project_id, marker=None, limit=None):
-        """list
+    def get_services(self, project_id, marker=None, limit=None):
+        """Get a list of services.
 
         :param project_id
         :param marker
-        :limit
+        :param limit
         :raises: NotImplementedError
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, project_id, service_id):
-        """GET
+    def get_service(self, project_id, service_id):
+        """Get a service.
 
         :param project_id
         :param service_id
@@ -54,22 +54,26 @@ class ServicesControllerBase(controller.ManagerControllerBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create(self, project_id, auth_token, service_obj):
-        """create
+    def create_service(self, project_id, auth_token, service_obj):
+        """Create a service.
 
         :param project_id
+        :param auth_token
         :param service_obj
         :raises: NotImplementedError
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, project_id, service_id, service_obj):
-        """POST
+    def update_service(self, project_id, service_id,
+                       auth_token, service_updates, force_update=False):
+        """Update a service.
 
         :param project_id
         :param service_id
-        :param service_obj
+        :param auth_token
+        :param service_updates
+        :param force_update
         :raises: NotImplementedError
         """
         raise NotImplementedError
@@ -85,8 +89,8 @@ class ServicesControllerBase(controller.ManagerControllerBase):
         """
 
     @abc.abstractmethod
-    def delete(self, project_id, service_id):
-        """DELETE
+    def delete_service(self, project_id, service_id):
+        """Delete a service.
 
        :param project_id
        :param service_id
@@ -96,5 +100,13 @@ class ServicesControllerBase(controller.ManagerControllerBase):
 
     @abc.abstractmethod
     def purge(self, project_id, service_id, hard=False, purge_url=None):
-        '''If purge_url is none, all content of this service will be purge.'''
+        """Purge assets for a service.
+
+        If purge_url is none, all content of this service will be purged.
+
+        :param project_id
+        :param service_id
+        :param hard
+        :param purge_url
+        """
         raise NotImplementedError
