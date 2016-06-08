@@ -74,7 +74,8 @@ class MockProviderServicesTest(base.TestCase):
         response = self.sc.create(service_obj)
         self.assertTrue(response is not None)
 
-    @ddt.data("my_mock_service.com", u'www.düsseldorf-Lörick.com')
+    @ddt.data("my_mock_service.com",
+              u'www.düsseldorf-Lörick.com'.encode('utf-8'))
     def test__map_service_name(self, service_name):
         self.assertTrue(self.sc._map_service_name(service_name),
                         service_name)
