@@ -312,6 +312,8 @@ class TestFlowRuns(base.TestCase):
 
             self.patch_delete_flow(service_controller, storage_controller,
                                    dns_controller)
+            storage_controller.get_service = mock.Mock(
+                return_value=service_obj)
             engines.run(delete_service.delete_service(), store=kwargs)
 
     def test_purge_flow_normal(self):
