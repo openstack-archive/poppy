@@ -27,8 +27,8 @@ class TestDomain(base.TestCase):
     @ddt.unpack
     @ddt.data({'domain_name': 'www.mydomain.com',
                'changed_domain_name': 'www.changed-domain.com'},
-              {'domain_name': u'www.düsseldorf-Lörick.com',
-               'changed_domain_name': u'www.düsseldorf.com'
+              {'domain_name': u'www.düsseldorf-Lörick.com'.encode("utf-8"),
+               'changed_domain_name': u'www.düsseldorf.com'.encode("utf-8")
                },
               {'domain_name': u'WWW.UPPERCASE.COM',
                'changed_domain_name': u'WWW.UPPERCASE-CHANGED.COM'
