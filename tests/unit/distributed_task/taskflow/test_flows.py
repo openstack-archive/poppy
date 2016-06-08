@@ -45,6 +45,19 @@ class TestFlowRuns(base.TestCase):
 
     def setUp(self):
         super(TestFlowRuns, self).setUp()
+
+        pyrax_cloud_dns_patcher = mock.patch('pyrax.cloud_dns')
+        pyrax_cloud_dns_patcher.start()
+        self.addCleanup(pyrax_cloud_dns_patcher.stop)
+
+        pyrax_set_credentials_patcher = mock.patch('pyrax.set_credentials')
+        pyrax_set_credentials_patcher.start()
+        self.addCleanup(pyrax_set_credentials_patcher.stop)
+
+        cassandra_cluster_patcher = mock.patch('cassandra.cluster.Cluster')
+        cassandra_cluster_patcher.start()
+        self.addCleanup(cassandra_cluster_patcher.stop)
+
         self.time_factor = 0.001
         self.total_retries = 5
         self.dns_exception_responder = [
@@ -67,7 +80,8 @@ class TestFlowRuns(base.TestCase):
             }
         ]
 
-    def all_controllers(self):
+    @staticmethod
+    def all_controllers():
         service_controller, storage_controller = \
             memoized_controllers.task_controllers('poppy', 'storage')
         service_controller, dns_controller = \
@@ -92,7 +106,8 @@ class TestFlowRuns(base.TestCase):
         dns_responder_returns = [self.dns_exception_responder * 5]
         return dns_responder_returns
 
-    def patch_create_flow(self, service_controller,
+    @staticmethod
+    def patch_create_flow(service_controller,
                           storage_controller, dns_controller):
         storage_controller.get = mock.Mock()
         storage_controller.get.return_value = mock.Mock(domains=[])
@@ -106,7 +121,8 @@ class TestFlowRuns(base.TestCase):
         dns_controller.create._mock_return_value = []
         common.create_log_delivery_container = mock.Mock()
 
-    def patch_update_flow(self, service_controller,
+    @staticmethod
+    def patch_update_flow(service_controller,
                           storage_controller, dns_controller):
         storage_controller.get = mock.Mock()
         storage_controller.update = mock.Mock()
@@ -119,7 +135,8 @@ class TestFlowRuns(base.TestCase):
         dns_controller.update._mock_return_value = []
         common.create_log_delivery_container = mock.Mock()
 
-    def patch_delete_flow(self, service_controller,
+    @staticmethod
+    def patch_delete_flow(service_controller,
                           storage_controller, dns_controller):
         storage_controller.get = mock.Mock()
         storage_controller.update = mock.Mock()
@@ -132,7 +149,8 @@ class TestFlowRuns(base.TestCase):
         dns_controller.update = mock.Mock()
         dns_controller.update._mock_return_value = []
 
-    def patch_purge_flow(self, service_controller,
+    @staticmethod
+    def patch_purge_flow(service_controller,
                          storage_controller, dns_controller):
         storage_controller.get = mock.Mock()
         storage_controller.update = mock.Mock()
@@ -143,7 +161,8 @@ class TestFlowRuns(base.TestCase):
         service_controller._driver = mock.Mock()
         service_controller._driver.providers.__getitem__ = mock.Mock()
 
-    def patch_service_state_flow(self, service_controller,
+    @staticmethod
+    def patch_service_state_flow(service_controller,
                                  storage_controller, dns_controller):
         storage_controller.update_state = mock.Mock()
         dns_controller.enable = mock.Mock()
@@ -151,7 +170,8 @@ class TestFlowRuns(base.TestCase):
         dns_controller.disable = mock.Mock()
         dns_controller.disable._mock_return_value = []
 
-    def patch_create_ssl_certificate_flow(self, service_controller,
+    @staticmethod
+    def patch_create_ssl_certificate_flow(service_controller,
                                           storage_controller, dns_controller):
         storage_controller.get = mock.Mock()
         storage_controller.update = mock.Mock()
@@ -166,8 +186,8 @@ class TestFlowRuns(base.TestCase):
         dns_controller.create._mock_return_value = []
         common.create_log_delivery_container = mock.Mock()
 
+    @staticmethod
     def patch_recreate_ssl_certificate_flow(
-            self,
             service_controller, storage_controller, dns_controller):
         storage_controller.get = mock.Mock()
         storage_controller.update = mock.Mock()
@@ -182,9 +202,7 @@ class TestFlowRuns(base.TestCase):
         dns_controller.create._mock_return_value = []
         common.create_log_delivery_container = mock.Mock()
 
-    @mock.patch('pyrax.cloud_dns')
-    @mock.patch('pyrax.set_credentials')
-    def test_create_flow_normal(self, mock_creds, mock_dns_client):
+    def test_create_flow_normal(self):
         providers = ['cdn_provider']
         kwargs = {
             'providers_list_json': json.dumps(providers),
@@ -214,9 +232,7 @@ class TestFlowRuns(base.TestCase):
                                    dns_controller)
             engines.run(create_service.create_service(), store=kwargs)
 
-    @mock.patch('pyrax.cloud_dns')
-    @mock.patch('pyrax.set_credentials')
-    def test_update_flow_normal(self, mock_creds, mock_dns_client):
+    def test_update_flow_normal(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         domains_new = domain.Domain(domain='mycdn.poppy.org')
@@ -260,9 +276,7 @@ class TestFlowRuns(base.TestCase):
                                    dns_controller)
             engines.run(update_service.update_service(), store=kwargs)
 
-    @mock.patch('pyrax.cloud_dns')
-    @mock.patch('pyrax.set_credentials')
-    def test_delete_flow_normal(self, mock_creds, mock_dns_client):
+    def test_delete_flow_normal(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         current_origin = origin.Origin(origin='poppy.org')
@@ -300,9 +314,7 @@ class TestFlowRuns(base.TestCase):
                                    dns_controller)
             engines.run(delete_service.delete_service(), store=kwargs)
 
-    @mock.patch('pyrax.cloud_dns')
-    @mock.patch('pyrax.set_credentials')
-    def test_purge_flow_normal(self, mock_creds, mock_dns_client):
+    def test_purge_flow_normal(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         current_origin = origin.Origin(origin='poppy.org')
@@ -341,10 +353,7 @@ class TestFlowRuns(base.TestCase):
                                   dns_controller)
             engines.run(purge_service.purge_service(), store=kwargs)
 
-    @mock.patch('pyrax.cloud_dns')
-    @mock.patch('pyrax.set_credentials')
-    def test_service_state_flow_normal(self, mock_creds,
-                                       mock_dns_client):
+    def test_service_state_flow_normal(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         current_origin = origin.Origin(origin='poppy.org')
@@ -387,10 +396,7 @@ class TestFlowRuns(base.TestCase):
             engines.run(update_service_state.disable_service(),
                         store=disable_kwargs)
 
-    @mock.patch('pyrax.cloud_dns')
-    @mock.patch('pyrax.set_credentials')
-    def test_create_flow_dns_exception(self, mock_creds,
-                                       mock_dns_client):
+    def test_create_flow_dns_exception(self):
         providers = ['cdn_provider']
         kwargs = {
             'providers_list_json': json.dumps(providers),
@@ -427,10 +433,7 @@ class TestFlowRuns(base.TestCase):
             }
             engines.run(create_service.create_service(), store=kwargs)
 
-    @mock.patch('pyrax.cloud_dns')
-    @mock.patch('pyrax.set_credentials')
-    def test_update_flow_dns_exception(self, mock_creds,
-                                       mock_dns_client):
+    def test_update_flow_dns_exception(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         domains_new = domain.Domain(domain='mycdn.poppy.org')
@@ -483,10 +486,7 @@ class TestFlowRuns(base.TestCase):
 
             engines.run(update_service.update_service(), store=kwargs)
 
-    @mock.patch('pyrax.cloud_dns')
-    @mock.patch('pyrax.set_credentials')
-    def test_delete_flow_dns_exception(self, mock_creds,
-                                       mock_dns_client):
+    def test_delete_flow_dns_exception(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         current_origin = origin.Origin(origin='poppy.org')
@@ -533,8 +533,7 @@ class TestFlowRuns(base.TestCase):
 
             engines.run(delete_service.delete_service(), store=kwargs)
 
-    @mock.patch('pyrax.set_credentials')
-    def test_service_state_flow_dns_exception(self, mock_creds):
+    def test_service_state_flow_dns_exception(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         current_origin = origin.Origin(origin='poppy.org')
@@ -593,9 +592,7 @@ class TestFlowRuns(base.TestCase):
             engines.run(update_service_state.disable_service(),
                         store=disable_kwargs)
 
-    @mock.patch('pyrax.set_credentials')
-    def test_update_flow_dns_exception_with_retry_and_succeed(self,
-                                                              mock_creds):
+    def test_update_flow_dns_exception_with_retry_and_succeed(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         domains_new = domain.Domain(domain='mycdn.poppy.org')
@@ -646,8 +643,7 @@ class TestFlowRuns(base.TestCase):
 
             engines.run(update_service.update_service(), store=kwargs)
 
-    @mock.patch('pyrax.set_credentials')
-    def test_update_flow_dns_exception_with_retry_and_fail(self, mock_creds):
+    def test_update_flow_dns_exception_with_retry_and_fail(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         domains_new = domain.Domain(domain='mycdn.poppy.org')
@@ -698,9 +694,7 @@ class TestFlowRuns(base.TestCase):
 
             engines.run(update_service.update_service(), store=kwargs)
 
-    @mock.patch('pyrax.set_credentials')
-    def test_create_flow_dns_exception_with_retry_and_succeed(self,
-                                                              mock_creds):
+    def test_create_flow_dns_exception_with_retry_and_succeed(self):
         providers = ['cdn_provider']
         kwargs = {
             'providers_list_json': json.dumps(providers),
@@ -737,8 +731,7 @@ class TestFlowRuns(base.TestCase):
 
             engines.run(create_service.create_service(), store=kwargs)
 
-    @mock.patch('pyrax.set_credentials')
-    def test_create_flow_dns_exception_with_retry_and_fail(self, mock_creds):
+    def test_create_flow_dns_exception_with_retry_and_fail(self):
         providers = ['cdn_provider']
         kwargs = {
             'providers_list_json': json.dumps(providers),
@@ -775,9 +768,7 @@ class TestFlowRuns(base.TestCase):
 
             engines.run(create_service.create_service(), store=kwargs)
 
-    @mock.patch('pyrax.set_credentials')
-    def test_delete_flow_dns_exception_with_retry_and_succeed(self,
-                                                              mock_creds):
+    def test_delete_flow_dns_exception_with_retry_and_succeed(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         current_origin = origin.Origin(origin='poppy.org')
@@ -821,8 +812,7 @@ class TestFlowRuns(base.TestCase):
                                                        dns_responder_returns)
             engines.run(delete_service.delete_service(), store=kwargs)
 
-    @mock.patch('pyrax.set_credentials')
-    def test_delete_flow_dns_exception_with_retry_and_fail(self, mock_creds):
+    def test_delete_flow_dns_exception_with_retry_and_fail(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         current_origin = origin.Origin(origin='poppy.org')
@@ -866,9 +856,7 @@ class TestFlowRuns(base.TestCase):
                                                        dns_responder_returns)
             engines.run(delete_service.delete_service(), store=kwargs)
 
-    @mock.patch('pyrax.set_credentials')
-    def test_service_state_flow_dns_exception_retry_and_succeed(self,
-                                                                mock_creds):
+    def test_service_state_flow_dns_exception_retry_and_succeed(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         current_origin = origin.Origin(origin='poppy.org')
@@ -920,8 +908,7 @@ class TestFlowRuns(base.TestCase):
             engines.run(update_service_state.disable_service(),
                         store=disable_kwargs)
 
-    @mock.patch('pyrax.set_credentials')
-    def test_service_state_flow_dns_exception_retry_and_fail(self, mock_creds):
+    def test_service_state_flow_dns_exception_retry_and_fail(self):
         service_id = str(uuid.uuid4())
         domains_old = domain.Domain(domain='cdn.poppy.org')
         current_origin = origin.Origin(origin='poppy.org')
@@ -972,12 +959,7 @@ class TestFlowRuns(base.TestCase):
             engines.run(update_service_state.disable_service(),
                         store=disable_kwargs)
 
-    # Keep create credentials for now
-    @mock.patch('pyrax.cloud_dns')
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch('cassandra.cluster.Cluster')
-    def test_create_ssl_certificate_normal(
-            self, mock_cluster, mock_creds, mock_dns_client):
+    def test_create_ssl_certificate_normal(self):
 
         providers = ['cdn_provider']
         cert_obj_json = ssl_certificate.SSLCertificate('cdn',
@@ -1009,11 +991,7 @@ class TestFlowRuns(base.TestCase):
             engines.run(create_ssl_certificate.create_ssl_certificate(),
                         store=kwargs)
 
-    @mock.patch('pyrax.cloud_dns')
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch('cassandra.cluster.Cluster')
-    def test_recreate_ssl_certificate(
-            self, mock_cluster, mock_creds, mock_dns_client):
+    def test_recreate_ssl_certificate(self):
 
         providers = ['cdn_provider']
         cert_obj_json = ssl_certificate.SSLCertificate('cdn',
@@ -1046,12 +1024,7 @@ class TestFlowRuns(base.TestCase):
             engines.run(recreate_ssl_certificate.recreate_ssl_certificate(),
                         store=kwargs)
 
-    # Keep create credentials for now
-    @mock.patch('pyrax.cloud_dns')
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch('cassandra.cluster.Cluster')
-    def test_delete_ssl_certificate_normal(
-            self, mock_cluster, mock_creds, mock_dns_client):
+    def test_delete_ssl_certificate_normal(self):
 
         kwargs = {
             'cert_type': "san",

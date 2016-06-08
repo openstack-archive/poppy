@@ -51,62 +51,68 @@ class TestDriver(base.TestCase):
     def setUp(self):
         super(TestDriver, self).setUp()
 
+        pyrax_cloud_dns_patcher = mock.patch('pyrax.cloud_dns')
+        pyrax_cloud_dns_patcher.start()
+        self.addCleanup(pyrax_cloud_dns_patcher.stop)
+
+        pyrax_set_credentials_patcher = mock.patch('pyrax.set_credentials')
+        self.mock_credentials = pyrax_set_credentials_patcher.start()
+        self.addCleanup(pyrax_set_credentials_patcher.stop)
+
+        pyrax_set_setting_patcher = mock.patch('pyrax.set_setting')
+        pyrax_set_setting_patcher.start()
+        self.addCleanup(pyrax_set_setting_patcher.stop)
+
+        rs_options_patcher = mock.patch.object(
+            driver,
+            'RACKSPACE_OPTIONS',
+            new=RACKSPACE_OPTIONS
+        )
+        rs_options_patcher.start()
+        self.addCleanup(rs_options_patcher.stop)
+
         self.conf = cfg.ConfigOpts()
 
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
-    def test_init(self, mock_set_credentials):
+    def test_init(self):
         pyrax.cloud_dns = mock.Mock()
         provider = driver.DNSProvider(self.conf)
-        mock_set_credentials.assert_called_once_with(
+        self.mock_credentials.assert_called_once_with(
             provider._conf['drivers:dns:rackspace'].username,
-            provider._conf['drivers:dns:rackspace'].api_key)
+            provider._conf['drivers:dns:rackspace'].api_key
+        )
 
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
-    def test_is_alive(self, mock_set_credentials):
+    def test_is_alive(self):
         """Happy path test for checking the health of DNS."""
         provider = driver.DNSProvider(self.conf)
         provider.rackdns_client = mock.Mock()
         self.assertTrue(provider.is_alive())
 
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
-    def test_is_alive_dns_down(self, mock_set_credentials):
+    def test_is_alive_dns_down(self):
         """Negative test for checking the health of DNS."""
         provider = driver.DNSProvider(self.conf)
         provider.rackdns_client = mock.Mock()
         provider.rackdns_client.list = mock.Mock(side_effect=Exception('foo'))
         self.assertFalse(provider.is_alive())
 
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
-    def test_wrong_credentials(self, mock_set_credentials):
+    def test_wrong_credentials(self):
         """Negative test for checking the health of DNS."""
-        mock_set_credentials.side_effect = pyrax.exc.AuthenticationFailed(
+        self.mock_credentials.side_effect = pyrax.exc.AuthenticationFailed(
             "Incorrect/unauthorized credentials received")
 
         self.assertRaises(pyrax.exc.AuthenticationFailed,
                           driver.DNSProvider,
                           self.conf)
 
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch('pyrax.set_setting')
-    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
-    def test_get_client(self, mock_set_credentials, mock_set_setting):
+    def test_get_client(self):
         pyrax.cloud_dns = mock.Mock()
         provider = driver.DNSProvider(self.conf)
         client = provider.client
         self.assertNotEqual(client, None)
 
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
-    def test_service_controller(self, mock_set_credentials):
+    def test_service_controller(self):
         provider = driver.DNSProvider(self.conf)
         self.assertNotEqual(provider.services_controller, None)
 
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
-    def test_retry_exceptions(self, mock_set_credentials):
+    def test_retry_exceptions(self):
         provider = driver.DNSProvider(self.conf)
         self.assertEqual(provider.retry_exceptions, retry_exceptions)
