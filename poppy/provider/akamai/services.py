@@ -148,14 +148,11 @@ class ServiceController(base.ServiceBase):
                     if cert_info is None:
                         domains_certificate_status[
                             classified_domain.domain] = "create_in_progress"
-                        continue
                     else:
                         edge_host_name = (
                             classified_domain.cert_info.get_san_edge_name())
                         domains_certificate_status[classified_domain.domain] \
                             = (classified_domain.cert_info.get_cert_status())
-                        if edge_host_name is None:
-                            continue
                 provider_access_url = self._get_provider_access_url(
                     classified_domain, dp, edge_host_name)
                 links.append({'href': provider_access_url,
@@ -385,7 +382,6 @@ class ServiceController(base.ServiceBase):
                             domains_certificate_status[
                                 classified_domain.domain] = (
                                     "create_in_progress")
-                            continue
                         else:
                             edge_host_name = (
                                 classified_domain.cert_info.
@@ -393,8 +389,6 @@ class ServiceController(base.ServiceBase):
                             domains_certificate_status[
                                 classified_domain.domain] = (
                                 classified_domain.cert_info.get_cert_status())
-                            if edge_host_name is None:
-                                continue
                     provider_access_url = self._get_provider_access_url(
                         classified_domain, dp, edge_host_name)
                     links.append({'href': provider_access_url,
@@ -1023,7 +1017,11 @@ class ServiceController(base.ServiceBase):
                      self.driver.akamai_https_access_url_suffix])
             elif domain_obj.certificate == 'san':
                 if edge_host_name is None:
-                    raise ValueError("No EdgeHost name provided for SAN Cert")
+                    # default provider_access_url to  "edgekey.net"
+                    # for now, more tweak might be needed
+                    provider_access_url = '.'.join(
+                        ['edgekey.net',
+                         self.driver.akamai_https_access_url_suffix])
                 # ugly fix for existing san cert domains, but we will
                 # have to take it for now
                 elif edge_host_name.endswith(
