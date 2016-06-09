@@ -204,7 +204,7 @@ class DeleteStorageServiceTask(task.Task):
     def execute(self, project_id, service_id):
         service_controller, self.storage_controller = \
             memoized_controllers.task_controllers('poppy', 'storage')
-        self.storage_controller.delete(project_id, service_id)
+        self.storage_controller.delete_service(project_id, service_id)
 
     def revert(self, *args, **kwargs):
         try:
