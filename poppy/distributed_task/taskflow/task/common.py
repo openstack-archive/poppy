@@ -161,7 +161,10 @@ class UpdateProviderDetailTask(task.Task):
             in provider_details_dict.items()])
         service_controller, self.storage_controller = \
             memoized_controllers.task_controllers('poppy', 'storage')
-        service_obj = self.storage_controller.get(project_id, service_id)
+        service_obj = self.storage_controller.get_service(
+            project_id,
+            service_id
+        )
         service_obj.provider_details = provider_details_dict
 
         enabled = lambda provider: any([True if 'log_delivery'
@@ -176,7 +179,11 @@ class UpdateProviderDetailTask(task.Task):
                  "and service_id: {2}".format(service_obj.to_dict(),
                                               project_id,
                                               service_id))
-        self.storage_controller.update(project_id, service_id, service_obj)
+        self.storage_controller.update_service(
+            project_id,
+            service_id,
+            service_obj
+        )
 
         LOG.info('Update service detail task complete...')
 

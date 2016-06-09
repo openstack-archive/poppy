@@ -263,7 +263,11 @@ class GatherProviderDetailsTask(task.Task):
             provider_details_dict[provider_name] = (
                 provider_details_dict[provider_name].to_dict())
 
-        self.storage_controller.update(project_id, service_id, service_obj)
+        self.storage_controller.update_service(
+            project_id,
+            service_id,
+            service_obj
+        )
 
         provider_details_dict_error_tuple = (provider_details_dict, error_flag)
 
@@ -327,7 +331,11 @@ class UpdateProviderDetailsTask_Errors(task.Task):
                  "and service_id: {2}".format(service_obj.to_dict(),
                                               project_id,
                                               service_id))
-        self.storage_controller.update(project_id, service_id, service_obj)
+        self.storage_controller.update_service(
+            project_id,
+            service_id,
+            service_obj
+        )
         LOG.info('Update provider detail service worker process complete...')
 
     def revert(self, *args, **kwargs):

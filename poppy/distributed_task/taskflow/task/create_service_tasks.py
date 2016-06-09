@@ -56,7 +56,10 @@ class CreateProviderServicesTask(task.Task):
 
         providers_list = json.loads(providers_list_json)
         try:
-            service_obj = self.storage_controller.get(project_id, service_id)
+            service_obj = self.storage_controller.get_service(
+                project_id,
+                service_id
+            )
             for domain in service_obj.domains:
                 if domain.certificate == 'san':
                     cert_for_domain = (
@@ -158,8 +161,10 @@ class CreateServiceDNSMappingTask(task.Task):
                     memoized_controllers.task_controllers('poppy', 'storage')
 
                 try:
-                    service_obj = self.storage_controller.get(project_id,
-                                                              service_id)
+                    service_obj = self.storage_controller.get_service(
+                        project_id,
+                        service_id
+                    )
                 except ValueError:
                     msg = 'Creating service {0} from Poppy failed. ' \
                           'No such service exists'.format(service_id)
@@ -207,7 +212,10 @@ class CreateLogDeliveryContainerTask(task.Task):
             memoized_controllers.task_controllers('poppy', 'storage')
 
         try:
-            service_obj = self.storage_controller.get(project_id, service_id)
+            service_obj = self.storage_controller.get_service(
+                project_id,
+                service_id
+            )
             self.storage_controller._driver.close_connection()
         except ValueError:
             msg = 'Creating service {0} from Poppy failed. ' \

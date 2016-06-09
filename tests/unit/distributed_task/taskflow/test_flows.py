@@ -109,9 +109,9 @@ class TestFlowRuns(base.TestCase):
     @staticmethod
     def patch_create_flow(service_controller,
                           storage_controller, dns_controller):
-        storage_controller.get = mock.Mock()
-        storage_controller.get.return_value = mock.Mock(domains=[])
-        storage_controller.update = mock.Mock()
+        storage_controller.get_service = mock.Mock()
+        storage_controller.get_service.return_value = mock.Mock(domains=[])
+        storage_controller.update_service = mock.Mock()
         storage_controller._driver.close_connection = mock.Mock()
         service_controller.provider_wrapper.create = mock.Mock()
         service_controller.provider_wrapper.create._mock_return_value = []
@@ -124,8 +124,8 @@ class TestFlowRuns(base.TestCase):
     @staticmethod
     def patch_update_flow(service_controller,
                           storage_controller, dns_controller):
-        storage_controller.get = mock.Mock()
-        storage_controller.update = mock.Mock()
+        storage_controller.get_service = mock.Mock()
+        storage_controller.update_service = mock.Mock()
         storage_controller._driver.close_connection = mock.Mock()
         service_controller.provider_wrapper.update = mock.Mock()
         service_controller.provider_wrapper.update._mock_return_value = []
@@ -138,9 +138,9 @@ class TestFlowRuns(base.TestCase):
     @staticmethod
     def patch_delete_flow(service_controller,
                           storage_controller, dns_controller):
-        storage_controller.get = mock.Mock()
-        storage_controller.update = mock.Mock()
-        storage_controller.delete = mock.Mock()
+        storage_controller.get_service = mock.Mock()
+        storage_controller.update_service = mock.Mock()
+        storage_controller.delete_service = mock.Mock()
         storage_controller._driver.close_connection = mock.Mock()
         service_controller.provider_wrapper.delete = mock.Mock()
         service_controller.provider_wrapper.delete._mock_return_value = []
@@ -152,9 +152,9 @@ class TestFlowRuns(base.TestCase):
     @staticmethod
     def patch_purge_flow(service_controller,
                          storage_controller, dns_controller):
-        storage_controller.get = mock.Mock()
-        storage_controller.update = mock.Mock()
-        storage_controller.delete = mock.Mock()
+        storage_controller.get_service = mock.Mock()
+        storage_controller.update_service = mock.Mock()
+        storage_controller.delete_service = mock.Mock()
         storage_controller._driver.close_connection = mock.Mock()
         service_controller.provider_wrapper.purge = mock.Mock()
         service_controller.provider_wrapper.purge._mock_return_value = []

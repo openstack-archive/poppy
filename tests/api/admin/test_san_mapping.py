@@ -31,7 +31,17 @@ class TestGetSetSanMappingList(base.TestBase):
             [
                 {
                     "domain_name": "www.example.com",
-                    "san_cert_name": "san.example.com"
+                    "flavor_id": "flavor_id",
+                    "project_id": "project_id",
+                    "cert_type": "san",
+                    "cert_details": {
+                        "Akamai": {
+                            "extra_info": {
+                                "san cert": "san.example.com",
+                                "akamai_spsId": 1
+                            }
+                        }
+                    }
                 }
             ]
         )
