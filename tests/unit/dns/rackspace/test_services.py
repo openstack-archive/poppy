@@ -51,10 +51,29 @@ RACKSPACE_GROUP = 'drivers:dns:rackspace'
 @ddt.ddt
 class TestServicesCreate(base.TestCase):
 
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
-    def setUp(self, mock_set_credentials):
+    def setUp(self):
         super(TestServicesCreate, self).setUp()
+
+        pyrax_cloud_dns_patcher = mock.patch('pyrax.cloud_dns')
+        pyrax_cloud_dns_patcher.start()
+        self.addCleanup(pyrax_cloud_dns_patcher.stop)
+
+        pyrax_set_credentials_patcher = mock.patch('pyrax.set_credentials')
+        pyrax_set_credentials_patcher.start()
+        self.addCleanup(pyrax_set_credentials_patcher.stop)
+
+        pyrax_set_setting_patcher = mock.patch('pyrax.set_setting')
+        pyrax_set_setting_patcher.start()
+        self.addCleanup(pyrax_set_setting_patcher.stop)
+
+        rs_options_patcher = mock.patch.object(
+            driver,
+            'RACKSPACE_OPTIONS',
+            new=RACKSPACE_OPTIONS
+        )
+        rs_options_patcher.start()
+        self.addCleanup(rs_options_patcher.stop)
+
         provider = driver.DNSProvider(self.conf)
         self.client = mock.Mock()
         self.controller = provider.services_controller
@@ -224,10 +243,29 @@ class TestServicesCreate(base.TestCase):
 @ddt.ddt
 class TestServicesDelete(base.TestCase):
 
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
-    def setUp(self, mock_set_credentials):
+    def setUp(self):
         super(TestServicesDelete, self).setUp()
+
+        pyrax_cloud_dns_patcher = mock.patch('pyrax.cloud_dns')
+        pyrax_cloud_dns_patcher.start()
+        self.addCleanup(pyrax_cloud_dns_patcher.stop)
+
+        pyrax_set_credentials_patcher = mock.patch('pyrax.set_credentials')
+        pyrax_set_credentials_patcher.start()
+        self.addCleanup(pyrax_set_credentials_patcher.stop)
+
+        pyrax_set_setting_patcher = mock.patch('pyrax.set_setting')
+        pyrax_set_setting_patcher.start()
+        self.addCleanup(pyrax_set_setting_patcher.stop)
+
+        rs_options_patcher = mock.patch.object(
+            driver,
+            'RACKSPACE_OPTIONS',
+            new=RACKSPACE_OPTIONS
+        )
+        rs_options_patcher.start()
+        self.addCleanup(rs_options_patcher.stop)
+
         provider = driver.DNSProvider(self.conf)
         self.client = mock.Mock()
         self.controller = provider.services_controller
@@ -464,10 +502,29 @@ class TestServicesDelete(base.TestCase):
 @ddt.ddt
 class TestServicesUpdate(base.TestCase):
 
-    @mock.patch('pyrax.set_credentials')
-    @mock.patch.object(driver, 'RACKSPACE_OPTIONS', new=RACKSPACE_OPTIONS)
-    def setUp(self, mock_set_credentials):
+    def setUp(self):
         super(TestServicesUpdate, self).setUp()
+
+        pyrax_cloud_dns_patcher = mock.patch('pyrax.cloud_dns')
+        pyrax_cloud_dns_patcher.start()
+        self.addCleanup(pyrax_cloud_dns_patcher.stop)
+
+        pyrax_set_credentials_patcher = mock.patch('pyrax.set_credentials')
+        pyrax_set_credentials_patcher.start()
+        self.addCleanup(pyrax_set_credentials_patcher.stop)
+
+        pyrax_set_setting_patcher = mock.patch('pyrax.set_setting')
+        pyrax_set_setting_patcher.start()
+        self.addCleanup(pyrax_set_setting_patcher.stop)
+
+        rs_options_patcher = mock.patch.object(
+            driver,
+            'RACKSPACE_OPTIONS',
+            new=RACKSPACE_OPTIONS
+        )
+        rs_options_patcher.start()
+        self.addCleanup(rs_options_patcher.stop)
+
         self.client = mock.Mock()
         provider = driver.DNSProvider(self.conf)
         self.controller = provider.services_controller
