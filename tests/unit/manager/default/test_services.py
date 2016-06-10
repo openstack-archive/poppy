@@ -490,7 +490,7 @@ class DefaultManagerServiceTests(base.TestCase):
                 )
             elif name == 'fastly':
                 return_mock = {
-                    'Fastly': {'error': "fail to create servcice",
+                    'Fastly': {'error': "fail to create service",
                                'error_detail': 'Fastly Create failed'
                                '     because of XYZ'}
                 }
@@ -527,6 +527,17 @@ class DefaultManagerServiceTests(base.TestCase):
                                     self.sc.ssl_certificate_storage,
                                     memoized_controllers.task_controllers):
             self.mock_create_service(provider_details_json)
+
+    def test_create_service_flavor_get_error(self):
+        # fake one return value
+        self.sc.flavor_controller.get.side_effect = LookupError(
+            "Mock -- Invalid flavor!"
+        )
+
+        with testtools.ExpectedException(LookupError):
+            self.sc.create_service('project_id', 'auth_token', {})
+
+        self.assertFalse(self.sc.storage_controller.create_service.called)
 
     @ddt.file_data('data_provider_details.json')
     def test_update_service_worker_success_and_failure(self,
@@ -874,6 +885,19 @@ class DefaultManagerServiceTests(base.TestCase):
                                     memoized_controllers.task_controllers):
             self.mock_delete_service()
 
+    def test_delete_get_provider_details_error(self):
+        self.sc.storage_controller.get_service.return_value = (
+            self.service_obj
+        )
+
+        self.sc.storage_controller.get_provider_details.\
+            side_effect = Exception(
+                "Mock -- Error during get provider details!"
+            )
+
+        with testtools.ExpectedException(LookupError):
+            self.sc.delete_service('project_id', 'service_id')
+
     @ddt.file_data('data_provider_details.json')
     def test_purge(self, provider_details_json):
         self.provider_details = {}
@@ -907,6 +931,40 @@ class DefaultManagerServiceTests(base.TestCase):
             self.project_id,
             self.service_id,
         )
+
+    @ddt.file_data('data_provider_details.json')
+    def test_purge_not_deployed_exception(self, provider_details_json):
+        self.provider_details = {}
+        for provider_name in provider_details_json:
+            provider_detail_dict = json.loads(
+                provider_details_json[provider_name]
+            )
+            provider_service_id = provider_detail_dict.get('id', None)
+            access_urls = provider_detail_dict.get('access_urls', [])
+            status = provider_detail_dict.get('status', u'update_in_progress')
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=provider_service_id,
+                access_urls=access_urls,
+                status=status)
+            self.provider_details[provider_name] = provider_detail_obj
+
+        self.sc.storage_controller.get_provider_details.return_value = (
+            self.provider_details
+        )
+
+        self.service_obj.provider_details = self.provider_details
+        self.sc.storage_controller.get_service.return_value = (
+            self.service_obj
+        )
+
+        with testtools.ExpectedException(errors.ServiceStatusNotDeployed):
+            self.sc.purge(self.project_id, self.service_id)
+
+        # ensure the manager never called the storage driver
+        # ensure the manager never submitted a task
+        sc = self.sc.storage_controller
+        self.assertEqual(False, sc.get_provider_details.called)
+        self.assertEqual(False, sc.distributed_task_controller.called)
 
     @ddt.file_data('data_provider_details.json')
     def test_purge_service_worker_success(self, provider_details_json):
@@ -1163,6 +1221,157 @@ class DefaultManagerServiceTests(base.TestCase):
             )
         )
 
+    def test_migrate_domain_not_in_provider_details(self):
+        provider_detail_obj = provider_details.ProviderDetail(
+            provider_service_id='service_id',
+            access_urls=[
+                {
+                    'domain': 'domain.com',
+                    'operator_url': 'operator.domain.com'
+                }
+            ],
+            status='deployed',
+            domains_certificate_status={
+                "domain.com": "deployed"
+            }
+        )
+        mock_provider_details = {
+            'Akamai': provider_detail_obj
+        }
+
+        ssl_cert_obj = ssl_certificate.SSLCertificate(
+            "flavor_id",
+            "new-domain.com",
+            "san",
+            project_id="project_id",
+            cert_details={
+                'Akamai': {
+                    'extra_info': {
+                        'status': 'deployed'
+                    }
+                }
+            }
+        )
+        self.mock_storage.services_controller.\
+            get_provider_details.return_value = mock_provider_details
+
+        self.mock_storage.certificates_controller.\
+            get_certs_by_domain.return_value = ssl_cert_obj
+
+        self.sc.migrate_domain(
+            "project_id",
+            "service_id",
+            "new-domain.com",
+            "new_san_cert",
+            cert_status='create_in_progress'
+        )
+
+        self.mock_storage.services_controller.\
+            update_cert_info.assert_called_once_with(
+                "new-domain.com",
+                "san",
+                "flavor_id",
+                {
+                    'Akamai': json.dumps({
+                        'extra_info': {
+                            'status': 'create_in_progress'
+                        }
+                    })
+                }
+            )
+
+        (
+            project_id_arg,
+            service_id_arg,
+            provider_details_arg
+        ), _kwargs = self.mock_storage.services_controller.\
+            update_provider_details.call_args
+
+        self.assertEqual("project_id", project_id_arg)
+        self.assertEqual("service_id", service_id_arg)
+        self.assertEqual(
+            "create_in_progress",
+            provider_details_arg['Akamai'].domains_certificate_status.
+            get_domain_certificate_status(
+                "new-domain.com"
+            )
+        )
+
+    def test_migrate_domain_missing_operator_url(self):
+        provider_detail_obj = provider_details.ProviderDetail(
+            provider_service_id='service_id',
+            access_urls=[
+                {
+                    'domain': 'domain.com',
+                }
+            ],
+            status='deployed',
+            domains_certificate_status={
+                "domain.com": "deployed"
+            }
+        )
+        mock_provider_details = {
+            'Akamai': provider_detail_obj
+        }
+
+        ssl_cert_obj = ssl_certificate.SSLCertificate(
+            "flavor_id",
+            "domain.com",
+            "san",
+            project_id="project_id",
+            cert_details={
+                'Akamai': {
+                    'extra_info': {
+                        'status': 'deployed'
+                    }
+                }
+            }
+        )
+        self.mock_storage.services_controller.\
+            get_provider_details.return_value = mock_provider_details
+
+        self.mock_storage.certificates_controller.\
+            get_certs_by_domain.return_value = ssl_cert_obj
+
+        self.sc.migrate_domain(
+            "project_id",
+            "service_id",
+            "domain.com",
+            "new_san_cert",
+            cert_status='create_in_progress'
+        )
+
+        self.mock_storage.services_controller.\
+            update_cert_info.assert_called_once_with(
+                "domain.com",
+                "san",
+                "flavor_id",
+                {
+                    'Akamai': json.dumps({
+                        'extra_info': {
+                            'status': 'create_in_progress'
+                        }
+                    })
+                }
+            )
+
+        (
+            project_id_arg,
+            service_id_arg,
+            provider_details_arg
+        ), _kwargs = self.mock_storage.services_controller.\
+            update_provider_details.call_args
+
+        self.assertEqual("project_id", project_id_arg)
+        self.assertEqual("service_id", service_id_arg)
+        self.assertEqual(
+            "create_in_progress",
+            provider_details_arg['Akamai'].domains_certificate_status.
+            get_domain_certificate_status(
+                "domain.com"
+            )
+        )
+
     def test_migrate_domain_cert_not_found(self):
         provider_detail_obj = provider_details.ProviderDetail(
             provider_service_id='service_id',
@@ -1237,3 +1446,102 @@ class DefaultManagerServiceTests(base.TestCase):
             self.mock_storage.services_controller.
             update_provider_details.called
         )
+
+    @ddt.data('delete', 'enable', 'disable')
+    def test_services_action_positive(self, action):
+        self.mock_storage.services_controller.get_services.side_effect = [
+            [self.service_obj],
+            []
+        ]
+
+        self.sc.services_action('project_id', action)
+
+        if action == 'delete':
+            self.assertTrue(self.sc.storage_controller.update_service.called)
+
+        self.assertTrue(self.sc.distributed_task_controller.submit_task.called)
+
+    def test_services_action_negative_unsupported_action(self):
+        self.mock_storage.services_controller.get_services.side_effect = [
+            [self.service_obj],
+            []
+        ]
+
+        self.sc.services_action('project_id', 'invalid-action')
+
+        self.assertFalse(self.sc.distributed_task_controller.submit_task.called)
+
+    def test_services_action_negative_distributed_task_exception(self):
+        self.mock_storage.services_controller.get_services.side_effect = [
+            [self.service_obj],
+            []
+        ]
+
+        self.sc.distributed_task_controller.submit_task.\
+            side_effect = Exception(
+                "Mock -- Something went wrong with distributed_task driver!"
+            )
+
+        with mock.patch(
+                'oslo_log.log.KeywordArgumentAdapter.warning') as logger:
+
+            self.sc.services_action('project_id', 'enable')
+
+            self.assertTrue(logger.called)
+            self.assertTrue(
+                self.sc.distributed_task_controller.submit_task.called)
+
+    def test_get_services_limit_positive(self):
+        limit = 1
+        self.sc.storage_controller.get_service_limit.return_value = limit
+
+        self.assertEqual({'limit': limit},
+                         self.sc.get_services_limit('project_id'))
+
+    def test_set_services_limit_positive(self):
+        limit = 1
+        self.sc.storage_controller.get_services_limit.return_value = None
+
+        try:
+            self.sc.services_limit('project_id', limit)
+        except Exception as e:
+            self.fail(
+                "Unable to set services limit in unit test: {0}".format(e))
+
+    def test_get_service_by_domain_name_positive(self):
+
+        self.sc.storage_controller.get_service_details_by_domain_name.\
+            return_value = self.service_obj
+
+        self.assertEqual(self.service_obj,
+                         self.sc.get_service_by_domain_name('domain_name'))
+
+    def test_get_service_by_domain_name_not_found_error(self):
+
+        self.sc.storage_controller.get_service_details_by_domain_name.\
+            return_value = None
+
+        with testtools.ExpectedException(LookupError):
+            self.sc.get_service_by_domain_name('domain_name')
+
+    def test_get_services_by_status_positive(self):
+
+        self.sc.storage_controller.get_services_by_status.\
+            return_value = [self.service_obj.service_id]
+
+        self.assertEqual([self.service_obj.service_id],
+                         self.sc.get_services_by_status('deployed'))
+
+    def test_get_domains_by_provider_url_positive(self):
+
+        domains = [
+            'domain-a.com',
+            'domain-b.com',
+            'domain-c.com',
+        ]
+
+        self.sc.storage_controller.get_domains_by_provider_url.\
+            return_value = domains
+
+        self.assertEqual(domains,
+                         self.sc.get_domains_by_provider_url('provider_url'))
