@@ -1121,7 +1121,7 @@ class DefaultManagerServiceTests(base.TestCase):
         self.mock_storage.services_controller.\
             get_provider_details.return_value = mock_provider_details
 
-        self.mock_storage.services_controller.\
+        self.mock_storage.certificates_controller.\
             get_certs_by_domain.return_value = ssl_cert_obj
 
         self.sc.migrate_domain(
@@ -1184,7 +1184,7 @@ class DefaultManagerServiceTests(base.TestCase):
         self.mock_storage.services_controller.\
             get_provider_details.return_value = mock_provider_details
 
-        self.mock_storage.services_controller.\
+        self.mock_storage.certificates_controller.\
             get_certs_by_domain.return_value = []
 
         self.sc.migrate_domain(

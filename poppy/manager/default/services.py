@@ -729,7 +729,7 @@ class DefaultServicesController(base.ServicesController):
             # from the query below. Once additional flavors are added, a
             # query for the service object rather than provider details only
             # should provide the flavor id to use in the query below
-            cert_obj = storage_controller.get_certs_by_domain(
+            cert_obj = self.ssl_certificate_storage.get_certs_by_domain(
                 domain_name,
                 project_id=project_id,
                 cert_type='san'
