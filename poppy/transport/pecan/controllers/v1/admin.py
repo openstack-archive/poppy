@@ -161,6 +161,7 @@ class AkamaiRetryListController(base.Controller, hooks.HookController):
 
     @pecan.expose('json')
     def get_all(self):
+        retry_list = None
         try:
             retry_list = (
                 self._driver.manager.ssl_certificate_controller.
@@ -173,12 +174,17 @@ class AkamaiRetryListController(base.Controller, hooks.HookController):
     @pecan.expose('json')
     def post(self):
         """Rerun retry-list mod-san requests."""
+        sent, ignored = None, None
         try:
-            self._driver.manager.ssl_certificate_controller.\
+            sent, ignored = self._driver.manager.ssl_certificate_controller.\
                 rerun_san_retry_list()
         except Exception as e:
             pecan.abort(404, str(e))
-        return pecan.Response(None, 202)
+
+        return pecan.Response(
+            json_body={"processing": sent, "failed_validation": ignored},
+            status=202
+        )
 
     @pecan.expose('json')
     @decorators.validate(
