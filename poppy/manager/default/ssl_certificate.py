@@ -156,10 +156,13 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                    akamai_driver.mod_san_queue.put_queue_data(new_queue_data)]
 
             deleted = tuple(x for x in orig if x not in res)
+
         # other provider's retry-list implementation goes here
         return res, deleted
 
     def rerun_san_retry_list(self):
+        run_list = []
+        ignore_list = []
         if 'akamai' in self._driver.providers:
             akamai_driver = self._driver.providers['akamai'].obj
             retry_list = []
@@ -181,25 +184,41 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             # double check in POST. This check should really be first done in
             # PUT
             for r in retry_list:
+                err_state = False
                 service_obj = self.service_storage\
                     .get_service_details_by_domain_name(r['domain_name'])
                 if service_obj is None and r.get('validate_service', True):
-                    raise LookupError(u'Domain {0} does not exist on any '
-                                      'service, are you sure you want to '
-                                      'proceed request, {1}? You can set '
-                                      'validate_service to False to retry this'
-                                      ' san-retry request forcefully'.
-                                      format(r['domain_name'], r))
+                    err_state = True
+                    LOG.error(
+                        u'Domain {0} does not exist on any service, are you '
+                        'sure you want to proceed request, {1}? You can set '
+                        'validate_service to False to retry this san-retry '
+                        'request forcefully'.format(r['domain_name'], r)
+                    )
 
                 cert_for_domain = self.storage.get_certs_by_domain(
                     r['domain_name'])
                 if cert_for_domain != []:
                     if cert_for_domain.get_cert_status() == "deployed":
-                        raise ValueError(u'Certificate on {0} has already been'
-                                         ' provisioned successfully.'.
-                                         format(r['domain_name']))
+                        err_state = True
+                        LOG.error(
+                            u'Certificate on {0} has already been provisioned '
+                            'successfully.'.format(r['domain_name']))
 
-            for cert_obj_dict in retry_list:
+                if err_state is False:
+                    run_list.append(r)
+                else:
+                    ignore_list.append(r)
+                    akamai_driver.mod_san_queue.enqueue_mod_san_request(
+                        json.dumps(r)
+                    )
+                    LOG.warn(
+                        "{0} was skipped because it failed validation.".format(
+                            r['domain_name']
+                        )
+                    )
+
+            for cert_obj_dict in run_list:
                 try:
                     cert_obj = ssl_certificate.SSLCertificate(
                         cert_obj_dict['flavor_id'],
@@ -244,15 +263,18 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                     # When exception happens we log it and re-queue this
                     # request
                     LOG.exception(e)
+                    run_list.remove(cert_obj_dict)
+                    ignore_list.append(cert_obj_dict)
                     akamai_driver.mod_san_queue.enqueue_mod_san_request(
                         json.dumps(cert_obj_dict)
                     )
         # For other providers post san_retry_list implementation goes here
         else:
-            # if not using akamai driver just return None
+            # if not using akamai driver just return summary of run list and
+            # ignore list
             pass
 
-        return None
+        return run_list, ignore_list
 
     def get_san_cert_configuration(self, san_cert_name):
         if 'akamai' in self._driver.providers:
@@ -307,6 +329,6 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
         return res
 
     def get_certs_by_status(self, status):
-        services_project_ids = self.storage.get_certs_by_status(status)
+        certs_by_status = self.storage.get_certs_by_status(status)
 
-        return services_project_ids
+        return certs_by_status

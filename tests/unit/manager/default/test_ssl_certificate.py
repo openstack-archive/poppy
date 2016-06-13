@@ -278,20 +278,30 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             'akamai'].obj.mod_san_queue
         mod_san_queue.mod_san_queue_backend = mock.MagicMock()
         mod_san_queue.mod_san_queue_backend.__len__.side_effect = [1, 0]
+        test_queue_item = {
+            "domain_name": "a_domain",
+            "project_id": "00000",
+            "flavor_id": "flavor",
+            "validate_service": True
+        }
         mod_san_queue.dequeue_mod_san_request.side_effect = [
-            bytearray(json.dumps({
-                "domain_name": "a_domain",
-                "project_id": "00000",
-                "flavor_id": "flavor",
-                "validate_service": True
-            }), encoding='utf-8')
+            bytearray(json.dumps(test_queue_item), encoding='utf-8')
         ]
 
         self.scc.service_storage.get_service_details_by_domain_name. \
             return_value = None
 
-        with testtools.ExpectedException(LookupError):
+        with mock.patch('oslo_log.log.KeywordArgumentAdapter.error') as logger:
             self.scc.rerun_san_retry_list()
+
+            self.assertTrue(logger.called)
+            args, _ = logger.call_args
+            self.assertTrue(test_queue_item["domain_name"] in args[0])
+            self.assertTrue(test_queue_item["project_id"] in args[0])
+            self.assertTrue(test_queue_item["flavor_id"] in args[0])
+            self.assertTrue(
+                str(test_queue_item["validate_service"]) in args[0]
+            )
 
         self.assertEqual(
             False,
@@ -303,9 +313,10 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             'akamai'].obj.mod_san_queue
         mod_san_queue.mod_san_queue_backend = mock.MagicMock()
         mod_san_queue.mod_san_queue_backend.__len__.side_effect = [1, 0]
+        test_domain = "a_domain"
         mod_san_queue.dequeue_mod_san_request.side_effect = [
             bytearray(json.dumps({
-                "domain_name": "a_domain",
+                "domain_name": test_domain,
                 "project_id": "00000",
                 "flavor_id": "flavor",
                 "validate_service": True
@@ -317,8 +328,16 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         self.scc.storage.get_certs_by_domain. \
             return_value = cert_domain_mock
 
-        with testtools.ExpectedException(ValueError):
+        with mock.patch('oslo_log.log.KeywordArgumentAdapter.error') as logger:
             self.scc.rerun_san_retry_list()
+
+            self.assertTrue(logger.called)
+            args, _ = logger.call_args
+            self.assertEqual(
+                (u'Certificate on {0} has already been provisioned '
+                 'successfully.'.format(test_domain), ),
+                args
+            )
 
         self.assertEqual(
             False,
@@ -405,3 +424,11 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             True,
             self.scc.distributed_task_controller.submit_task.called
         )
+
+    def test_get_certs_by_status(self):
+        result_list_mock = [mock.Mock()]
+        self.scc.storage.get_certs_by_status.return_value = result_list_mock
+
+        results = self.scc.get_certs_by_status("create_in_progress")
+
+        self.assertEqual(result_list_mock, results)
