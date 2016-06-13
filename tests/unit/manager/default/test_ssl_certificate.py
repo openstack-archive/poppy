@@ -14,12 +14,14 @@
 # limitations under the License.
 
 import ddt
+import json
 import mock
 from oslo_config import cfg
 import testtools
 
 from poppy.manager.default import driver
 from poppy.manager.default import ssl_certificate
+from poppy.model import ssl_certificate as ssl_cert_model
 from tests.unit import base
 
 
@@ -39,7 +41,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
 
         conf = cfg.ConfigOpts()
 
-        provider_mocks = {
+        self.provider_mocks = {
             'akamai': mock.Mock(provider_name="Akamai"),
             'maxcdn': mock.Mock(provider_name='MaxCDN'),
             'cloudfront': mock.Mock(provider_name='CloudFront'),
@@ -49,7 +51,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
 
         # mock a stevedore provider extension
         def get_provider_by_name(name):
-            obj_mock = provider_mocks[name]
+            obj_mock = self.provider_mocks[name]
             obj_mock.san_cert_cnames = ["san1", "san2"]
             obj_mock.akamai_sps_api_base_url = 'akamai_base_url/{spsId}'
 
@@ -57,7 +59,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             return provider
 
         def provider_membership(key):
-            return True if key in provider_mocks else False
+            return True if key in self.provider_mocks else False
 
         self.mock_providers = mock.MagicMock()
         self.mock_providers.__getitem__.side_effect = get_provider_by_name
@@ -74,6 +76,43 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         self.scc = ssl_certificate.DefaultSSLCertificateController(
             self.manager_driver
         )
+
+    def test_create_ssl_certificate_exception_validation(self):
+        cert_obj = ssl_cert_model.SSLCertificate(
+            'flavor_id',
+            'invalid_domain',
+            'san',
+            project_id='project_id'
+        )
+
+        with testtools.ExpectedException(ValueError):
+            self.scc.create_ssl_certificate('project_id', cert_obj=cert_obj)
+
+    def test_create_ssl_certificate_exception_storage_create_cert(self):
+        cert_obj = ssl_cert_model.SSLCertificate(
+            'flavor_id',
+            'www.valid-domain.com',
+            'san',
+            project_id='project_id'
+        )
+
+        self.scc.storage.create_certificate.side_effect = ValueError(
+            'Mock -- Cert already exists!')
+        with testtools.ExpectedException(ValueError):
+            self.scc.create_ssl_certificate('project_id', cert_obj=cert_obj)
+
+    def test_get_san_cert_configuration_positive(self):
+        resp = self.scc.get_san_cert_configuration("san1")
+        self.assertIsNotNone(resp)
+
+    def test_get_san_cert_configuration_positive_no_akamai_provider(self):
+        del self.provider_mocks['akamai']
+        resp = self.scc.get_san_cert_configuration("san1")
+        self.assertEqual({}, resp)
+
+    def test_get_san_cert_configuration_invalid_san_cert_cname(self):
+        with testtools.ExpectedException(ValueError):
+            self.scc.get_san_cert_configuration("non-existant")
 
     def test_update_san_cert_configuration_positive(self):
         resp = mock.Mock()
@@ -97,6 +136,19 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             )
         )
 
+    def test_update_san_cert_configuration_no_sps_id(self):
+        api_client = self.mock_providers['akamai'].obj.sps_api_client
+
+        self.scc.update_san_cert_configuration("san1", {"spsId": None})
+
+        self.assertEqual(False, api_client.called)
+
+    def test_update_san_cert_invalid_san_cert_cname(self):
+
+        with testtools.ExpectedException(ValueError):
+            self.scc.update_san_cert_configuration("non-existant",
+                                                   {"spsId": '1234'})
+
     def test_update_san_cert_configuration_api_failure(self):
         resp = mock.Mock()
         resp.status_code = 404
@@ -113,4 +165,243 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             self.mock_providers['akamai'].obj.akamai_sps_api_base_url.format(
                 spsId=1234
             )
+        )
+
+    def test_get_san_retry_list(self):
+        self.manager_driver.providers[
+            'akamai'].obj.mod_san_queue.traverse_queue.return_value = [
+            json.dumps({
+                "domain_name": "a_domain",
+                "project_id": "00000",
+                "flavor_id": "flavor",
+                "validate_service": True
+            })
+        ]
+
+        self.assertEqual(1, len(self.scc.get_san_retry_list()))
+
+    def test_update_san_retry_list(self):
+        original_queue_data = [{
+            "domain_name": "a_domain",
+            "project_id": "00000",
+            "flavor_id": "flavor",
+            "validate_service": True
+        }]
+
+        akamai_driver = self.manager_driver.providers[
+            'akamai'].obj
+        akamai_driver.mod_san_queue.traverse_queue.return_value = [
+            json.dumps(original_queue_data)
+        ]
+        akamai_driver.mod_san_queue.put_queue_data.side_effect = lambda \
+            value: value
+
+        new_queue_data = [
+            {
+                "domain_name": "b_domain",
+                "project_id": "00000",
+                "flavor_id": "flavor",
+                "validate_service": True
+            }
+        ]
+
+        cert_domain_mock = mock.Mock()
+        cert_domain_mock.get_cert_status.return_value = "create_in_progress"
+        self.scc.storage.get_certs_by_domain. \
+            return_value = cert_domain_mock
+
+        res, deleted = self.scc.update_san_retry_list(new_queue_data)
+
+        self.assertEqual(new_queue_data, res)
+
+        self.assertEqual(
+            True,
+            self.scc.storage.get_certs_by_domain.called
+        )
+        self.assertEqual(
+            True,
+            akamai_driver.mod_san_queue.traverse_queue.called
+        )
+        self.assertEqual(
+            True,
+            akamai_driver.mod_san_queue.put_queue_data.called
+        )
+
+    def test_update_san_retry_list_cert_deployed_error(self):
+        queue_data = [
+            {
+                "domain_name": "a_domain",
+                "project_id": "00000",
+                "flavor_id": "flavor",
+                "validate_service": True
+            }
+        ]
+
+        cert_domain_mock = mock.Mock()
+        cert_domain_mock.get_cert_status.return_value = "deployed"
+        self.scc.storage.get_certs_by_domain. \
+            return_value = cert_domain_mock
+
+        with testtools.ExpectedException(ValueError):
+            self.scc.update_san_retry_list(queue_data)
+
+        self.assertEqual(
+            True,
+            self.scc.storage.get_certs_by_domain.called
+        )
+
+    def test_rerun_san_retry_list(self):
+        mod_san_queue = self.manager_driver.providers[
+            'akamai'].obj.mod_san_queue
+        mod_san_queue.mod_san_queue_backend = mock.MagicMock()
+        mod_san_queue.mod_san_queue_backend.__len__.side_effect = [1, 0]
+        mod_san_queue.dequeue_mod_san_request.side_effect = [
+            bytearray(json.dumps({
+                "domain_name": "a_domain",
+                "project_id": "00000",
+                "flavor_id": "flavor",
+                "validate_service": True
+            }), encoding='utf-8')
+        ]
+        self.scc.storage.get_certs_by_domain. \
+            return_value = []
+
+        self.scc.rerun_san_retry_list()
+
+        self.assertEqual(
+            True,
+            self.scc.distributed_task_controller.submit_task.called
+        )
+
+    def test_rerun_san_retry_list_exception_service_validation(self):
+        mod_san_queue = self.manager_driver.providers[
+            'akamai'].obj.mod_san_queue
+        mod_san_queue.mod_san_queue_backend = mock.MagicMock()
+        mod_san_queue.mod_san_queue_backend.__len__.side_effect = [1, 0]
+        mod_san_queue.dequeue_mod_san_request.side_effect = [
+            bytearray(json.dumps({
+                "domain_name": "a_domain",
+                "project_id": "00000",
+                "flavor_id": "flavor",
+                "validate_service": True
+            }), encoding='utf-8')
+        ]
+
+        self.scc.service_storage.get_service_details_by_domain_name. \
+            return_value = None
+
+        with testtools.ExpectedException(LookupError):
+            self.scc.rerun_san_retry_list()
+
+        self.assertEqual(
+            False,
+            self.scc.distributed_task_controller.submit_task.called
+        )
+
+    def test_rerun_san_retry_list_exception_cert_already_deployed(self):
+        mod_san_queue = self.manager_driver.providers[
+            'akamai'].obj.mod_san_queue
+        mod_san_queue.mod_san_queue_backend = mock.MagicMock()
+        mod_san_queue.mod_san_queue_backend.__len__.side_effect = [1, 0]
+        mod_san_queue.dequeue_mod_san_request.side_effect = [
+            bytearray(json.dumps({
+                "domain_name": "a_domain",
+                "project_id": "00000",
+                "flavor_id": "flavor",
+                "validate_service": True
+            }), encoding='utf-8')
+        ]
+
+        cert_domain_mock = mock.Mock()
+        cert_domain_mock.get_cert_status.return_value = "deployed"
+        self.scc.storage.get_certs_by_domain. \
+            return_value = cert_domain_mock
+
+        with testtools.ExpectedException(ValueError):
+            self.scc.rerun_san_retry_list()
+
+        self.assertEqual(
+            False,
+            self.scc.distributed_task_controller.submit_task.called
+        )
+
+    def test_rerun_san_retry_list_exception_flavor_get(self):
+        mod_san_queue = self.manager_driver.providers[
+            'akamai'].obj.mod_san_queue
+        mod_san_queue.mod_san_queue_backend = mock.MagicMock()
+        mod_san_queue.mod_san_queue_backend.__len__.side_effect = [1, 0]
+        mod_san_queue.dequeue_mod_san_request.side_effect = [
+            bytearray(json.dumps({
+                "domain_name": "a_domain",
+                "project_id": "00000",
+                "flavor_id": "flavor",
+                "validate_service": True
+            }), encoding='utf-8')
+        ]
+
+        self.scc.flavor_controller.get.side_effect = LookupError(
+            "Mock -- Flavor not found!")
+
+        self.scc.rerun_san_retry_list()
+
+        self.assertEqual(True, mod_san_queue.enqueue_mod_san_request.called)
+        self.assertEqual(
+            False,
+            self.scc.distributed_task_controller.submit_task.called
+        )
+
+    def test_rerun_san_retry_list_cert_deployed_second_check(self):
+        mod_san_queue = self.manager_driver.providers[
+            'akamai'].obj.mod_san_queue
+        mod_san_queue.mod_san_queue_backend = mock.MagicMock()
+        mod_san_queue.mod_san_queue_backend.__len__.side_effect = [1, 0]
+        mod_san_queue.dequeue_mod_san_request.side_effect = [
+            bytearray(json.dumps({
+                "domain_name": "a_domain",
+                "project_id": "00000",
+                "flavor_id": "flavor",
+                "validate_service": True
+            }), encoding='utf-8')
+        ]
+
+        cert_domain_mock = mock.Mock()
+        cert_domain_mock.get_cert_status.return_value = "create_in_progress"
+        cert_domain_mock_2 = mock.Mock()
+        cert_domain_mock_2.get_cert_status.return_value = "deployed"
+        self.scc.storage.get_certs_by_domain. \
+            side_effect = [cert_domain_mock, cert_domain_mock_2]
+
+        self.scc.rerun_san_retry_list()
+
+        self.assertEqual(
+            False,
+            self.scc.distributed_task_controller.submit_task.called
+        )
+
+    def test_rerun_san_retry_list_cert_create_in_progress_second_check(self):
+        mod_san_queue = self.manager_driver.providers[
+            'akamai'].obj.mod_san_queue
+        mod_san_queue.mod_san_queue_backend = mock.MagicMock()
+        mod_san_queue.mod_san_queue_backend.__len__.side_effect = [1, 0]
+        mod_san_queue.dequeue_mod_san_request.side_effect = [
+            bytearray(json.dumps({
+                "domain_name": "a_domain",
+                "project_id": "00000",
+                "flavor_id": "flavor",
+                "validate_service": True
+            }), encoding='utf-8')
+        ]
+
+        cert_domain_mock = mock.Mock()
+        cert_domain_mock.get_cert_status.return_value = "create_in_progress"
+        cert_domain_mock_2 = mock.Mock()
+        cert_domain_mock_2.get_cert_status.return_value = "create_in_progress"
+        self.scc.storage.get_certs_by_domain. \
+            side_effect = [cert_domain_mock, cert_domain_mock_2]
+
+        self.scc.rerun_san_retry_list()
+
+        self.assertEqual(
+            True,
+            self.scc.distributed_task_controller.submit_task.called
         )
