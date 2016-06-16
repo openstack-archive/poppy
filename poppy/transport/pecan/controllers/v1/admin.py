@@ -95,17 +95,22 @@ class BackgroundJobController(base.Controller, hooks.HookController):
         request_json = json.loads(pecan.request.body.decode('utf-8'))
         job_type = request_json.pop('job_type')
 
+        sent = []
+        ignored = []
+
         try:
-            self._driver.manager.background_job_controller.post_job(
-                job_type,
-                request_json
-            )
-        except ValueError as e:
-            pecan.abort(400, str(e))
+            sent, ignored = self._driver.manager.background_job_controller.\
+                post_job(job_type, request_json)
         except NotImplementedError as e:
             pecan.abort(400, str(e))
 
-        return pecan.Response(None, 202)
+        return pecan.Response(
+            json_body={
+                "sent": sent,
+                "ignored": ignored
+            },
+            status=202,
+        )
 
 
 class AkamaiSanMappingListController(base.Controller, hooks.HookController):
