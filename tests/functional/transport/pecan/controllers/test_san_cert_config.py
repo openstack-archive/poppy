@@ -17,6 +17,7 @@ import json
 import uuid
 
 import ddt
+import mock
 
 from tests.functional.transport.pecan import base
 
@@ -39,7 +40,7 @@ class TestSanCertConfigController(base.FunctionalTest):
 
     @ddt.file_data("data_update_san_cert_config_bad.json")
     def test_update_san_cert_config_negative(self, config_data):
-        # create with errorenous data: invalid json data
+        # create with erroneous data: invalid json data
         response = self.app.post('/v1.0/admin/provider/akamai/'
                                  'ssl_certificate/config/'
                                  'secure1.test-san.com',
@@ -52,6 +53,17 @@ class TestSanCertConfigController(base.FunctionalTest):
         self.assertEqual(400, response.status_code)
 
     def test_update_san_cert_config_positive(self):
+        resp_mock = mock.Mock()
+        type(resp_mock).status_code = 200
+        type(resp_mock).ok = True
+        resp_mock.json.return_value = {
+            'requestList': [
+                {'jobId': 1234}
+            ]
+        }
+
+        self.sps_api_client_mock.get.return_value = resp_mock
+
         config_data = {
             'spsId': 1345,
             'enabled': False
