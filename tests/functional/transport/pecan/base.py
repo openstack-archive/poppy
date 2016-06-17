@@ -53,6 +53,28 @@ class BaseFunctionalTest(base.TestCase):
         self.b_obj.distributed_task.job_board.return_value = (
             mock_persistence.copy())
         self.b_obj.distributed_task.is_alive = mock.Mock(return_value=True)
+
+        self.sps_api_client_mock = mock.MagicMock()
+        if 'akamai' in self.b_obj.provider:
+            # akamai driver was loaded. mock out queues
+            akamai_driver = self.b_obj.provider['akamai'].obj
+
+            mock_cert_info = mock.MagicMock()
+            mock_cert_info.get_cert_config.return_value = {}
+
+            mod_san_q = mock.MagicMock()
+            mod_san_q.traverse_queue.return_value = []
+            mod_san_q.mod_san_queue_backend.__len__.return_value = 0
+
+            san_mapping_q = mock.MagicMock()
+            san_mapping_q.traverse_queue.return_value = []
+
+            akamai_driver.mod_san_queue = mod_san_q
+            akamai_driver.san_mapping_queue = san_mapping_q
+            akamai_driver.is_alive = mock.Mock(return_value=True)
+            type(akamai_driver).cert_info_storage = mock_cert_info
+            type(akamai_driver).sps_api_client = self.sps_api_client_mock
+
         # Note(tonytan4ever):Need this hack to preserve mockdb storage
         # controller's service cache
         # b_obj.manager.ssl_certificate_controller.storage_controller = (
