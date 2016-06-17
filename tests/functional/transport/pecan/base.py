@@ -17,6 +17,7 @@ import os
 
 import mock
 from oslo_config import cfg
+from oslo_log import log
 import webtest
 
 from poppy import bootstrap
@@ -36,6 +37,12 @@ class BaseFunctionalTest(base.TestCase):
         conf_path = os.path.join(tests_path, 'etc', 'default_functional.conf')
         cfg.CONF(args=[], default_config_files=[conf_path])
         self.b_obj = bootstrap.Bootstrap(cfg.CONF)
+
+        # memoized_controllers module looks for log options being registered
+        # register them here to avoid `cfg.ArgsAlreadyParsedError` when
+        # running individual functional tests
+        cfg.CONF.register_opts(log._options.logging_cli_opts)
+
         # mock the persistence part for taskflow distributed_task
         mock_persistence = mock.Mock()
         mock_persistence.__enter__ = mock.Mock()
