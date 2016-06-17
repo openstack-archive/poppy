@@ -18,6 +18,7 @@ import pecan
 from pecan import hooks
 
 from poppy.common import errors
+from poppy.common import util
 from poppy.transport.pecan.controllers import base
 from poppy.transport.pecan import hooks as poppy_hooks
 from poppy.transport.pecan.models.response import service as resp_service_model
@@ -442,6 +443,45 @@ class AdminCertController(base.Controller, hooks.HookController):
             status)
 
         return pecan.Response(json_body=cert_domains, status=200)
+
+    @pecan.expose('json')
+    @decorators.validate(
+        domain_name=rule.Rule(
+            helpers.is_valid_domain_by_name(),
+            helpers.abort_with_message
+        ),
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                ssl_certificate.SSLCertificateSchema.get_schema(
+                    "admin_cert_status",
+                    "PATCH"
+                )
+            ),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter)
+    )
+    def patch_one(self, domain_name):
+
+        ssl_certificate_controller = (
+            self._driver.manager.ssl_certificate_controller
+        )
+        certificate_updates = json.loads(pecan.request.body.decode('utf-8'))[0]
+        try:
+            ssl_certificate_controller.update_certificate_status(
+                domain_name,
+                certificate_updates
+            )
+        except ValueError:
+            pecan.abort(
+                status_code=404,
+                detail='Certificate could not be found for domain: {0}'.format(
+                    domain_name
+                )
+            )
+        except Exception as e:
+            pecan.abort(status_code=400, detail=util.help_escape(str(e)))
+
+        return pecan.Response(body=None, status=204)
 
 
 class AdminServiceController(base.Controller, hooks.HookController):

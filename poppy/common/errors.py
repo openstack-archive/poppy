@@ -77,3 +77,8 @@ class SharedShardsExhausted(Exception):
 class ServiceProviderDetailsNotFound(Exception):
 
     """Raised when provider details for a service is None."""
+
+
+class CertificateStatusUpdateError(Exception):
+
+    """Raised when errors encountered updating a certificate."""
