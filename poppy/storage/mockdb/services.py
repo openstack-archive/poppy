@@ -176,7 +176,7 @@ class ServicesController(base.ServicesController):
         pass
 
     def update_provider_details(self, project_id, service_name,
-                                provider_details):
+                                new_provider_details):
         pass
 
     def domain_exists_elsewhere(self, domain_name, service_id):

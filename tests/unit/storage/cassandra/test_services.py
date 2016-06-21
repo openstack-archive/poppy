@@ -270,10 +270,28 @@ class CassandraStorageServiceTests(base.TestCase):
 
         mock_execute.execute.side_effect = assert_mock_execute_args
 
-        self.sc.update_provider_details(
-            self.project_id,
-            self.service_id,
-            provider_details_dict)
+        with mock.patch.object(
+                services.ServicesController,
+                'get_provider_details') as mock_provider_det:
+
+            mock_provider_det.return_value = {
+                "MaxCDN":  # "{\"id\": 11942, \"access_urls\": "
+                #           "[{\"provider_url\": \"maxcdn.provider.com\", "
+                #           "\"domain\": \"xk.cd\"}], "
+                #           "\"domains_certificate_status\":"
+                #           "{\"mypullzone.com\": "
+                #           "\"failed\"} }",
+                provider_details.ProviderDetail(
+                    provider_service_id='{}',
+                    access_urls=[]
+                )
+            }
+
+            self.sc.update_provider_details(
+                self.project_id,
+                self.service_id,
+                provider_details_dict
+            )
 
     @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_session(self, mock_service_database):

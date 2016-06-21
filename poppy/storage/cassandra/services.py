@@ -563,9 +563,11 @@ class ServicesController(base.ServicesController):
         for provider_name in sorted(provider_details_dict.keys()):
             provider_details_dict[provider_name].status = status
 
-        self.update_provider_details(project_id=project_id,
-                                     service_id=service_id,
-                                     provider_details=provider_details_dict)
+        self.update_provider_details(
+            project_id=project_id,
+            service_id=service_id,
+            new_provider_details=provider_details_dict
+        )
 
     def create_service(self, project_id, service_obj):
         """create.
@@ -898,41 +900,61 @@ class ServicesController(base.ServicesController):
         return details
 
     def update_provider_details(self, project_id, service_id,
-                                provider_details):
+                                new_provider_details):
         """update_provider_details.
 
         :param project_id
         :param service_id
-        :param provider_details
+        :param new_provider_details
         """
 
-        provider_detail_dict = {}
-        status = None
-        domain_names_provider_urls = []
-        for provider_name in sorted(provider_details.keys()):
+        old_domain_names_provider_urls = []
+        old_provider_details = self.get_provider_details(
+            project_id,
+            service_id
+        )
+        for provider_name in sorted(old_provider_details.keys()):
             the_provider_detail_dict = collections.OrderedDict()
             the_provider_detail_dict["id"] = (
-                provider_details[provider_name].provider_service_id)
+                old_provider_details[provider_name].provider_service_id)
             the_provider_detail_dict["access_urls"] = (
-                provider_details[provider_name].access_urls)
+                old_provider_details[provider_name].access_urls)
             for access_url in the_provider_detail_dict["access_urls"]:
                 domain_name = access_url.get("domain", None)
                 provider_url = access_url.get("provider_url", None)
                 if domain_name and provider_url:
-                    domain_names_provider_urls.append((domain_name,
-                                                       provider_url))
+                    old_domain_names_provider_urls.append(
+                        (domain_name, provider_url)
+                    )
+
+        provider_detail_dict = {}
+        status = None
+        new_domain_names_provider_urls = []
+        for provider_name in sorted(new_provider_details.keys()):
+            the_provider_detail_dict = collections.OrderedDict()
+            the_provider_detail_dict["id"] = (
+                new_provider_details[provider_name].provider_service_id)
+            the_provider_detail_dict["access_urls"] = (
+                new_provider_details[provider_name].access_urls)
+            for access_url in the_provider_detail_dict["access_urls"]:
+                domain_name = access_url.get("domain", None)
+                provider_url = access_url.get("provider_url", None)
+                if domain_name and provider_url:
+                    new_domain_names_provider_urls.append(
+                        (domain_name, provider_url)
+                    )
             the_provider_detail_dict["status"] = (
-                provider_details[provider_name].status)
+                new_provider_details[provider_name].status)
             status = the_provider_detail_dict["status"]
             the_provider_detail_dict["name"] = (
-                provider_details[provider_name].name)
+                new_provider_details[provider_name].name)
             the_provider_detail_dict["domains_certificate_status"] = (
-                provider_details[provider_name].domains_certificate_status.
+                new_provider_details[provider_name].domains_certificate_status.
                 to_dict())
             the_provider_detail_dict["error_info"] = (
-                provider_details[provider_name].error_info)
+                new_provider_details[provider_name].error_info)
             the_provider_detail_dict["error_message"] = (
-                provider_details[provider_name].error_message)
+                new_provider_details[provider_name].error_message)
             provider_detail_dict[provider_name] = json.dumps(
                 the_provider_detail_dict)
 
@@ -962,8 +984,8 @@ class ServicesController(base.ServicesController):
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, service_args)
 
-        if domain_names_provider_urls:
-            for domain_name, provider_url in domain_names_provider_urls:
+        if new_domain_names_provider_urls:
+            for domain_name, provider_url in new_domain_names_provider_urls:
                 provider_url_args = {
                     'domain_name': domain_name,
                     'provider_url': provider_url
@@ -971,6 +993,23 @@ class ServicesController(base.ServicesController):
 
                 stmt = query.SimpleStatement(
                     CQL_SET_PROVIDER_URL,
+                    consistency_level=self._driver.consistency_level)
+                self.session.execute(stmt, provider_url_args)
+
+        if new_domain_names_provider_urls and old_domain_names_provider_urls:
+            # remove mapping for domains that were deleted during the update
+            deleted_domains = (
+                set(new_domain_names_provider_urls) -
+                set(old_domain_names_provider_urls)
+            )
+            for domain_name, provider_url in deleted_domains:
+                provider_url_args = {
+                    'domain_name': domain_name,
+                    'provider_url': provider_url
+                }
+
+                stmt = query.SimpleStatement(
+                    CQL_DELETE_PROVIDER_URL,
                     consistency_level=self._driver.consistency_level)
                 self.session.execute(stmt, provider_url_args)
 
