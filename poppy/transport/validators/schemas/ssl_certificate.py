@@ -168,4 +168,41 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                 }
             }
         },
+
+        'admin_cert_status': {
+            'PATCH': {
+                'type': 'array',
+                'minItems': 1,
+                'maxItems': 1,
+                'additionalItems': False,
+                'items': {
+                    'type': 'object',
+                    'additionalProperties': False,
+                    'properties': {
+                        'op': {
+                            'type': 'string',
+                            'enum': [
+                                'replace',
+                            ],
+                            'required': True,
+                        },
+                        'path': {
+                            'type': 'string',
+                            'enum': ['status'],
+                            'required': True,
+                        },
+                        'value': {
+                            'type': 'string',
+                            'enum': [
+                                'cancelled',
+                                'create_in_progress',
+                                'deployed',
+                                'failed'
+                            ],
+                            'required': True,
+                        }
+                    }
+                }
+            }
+        }
     }

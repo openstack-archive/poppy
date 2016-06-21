@@ -19,6 +19,7 @@ import json
 from oslo_context import context as context_utils
 from oslo_log import log
 
+from poppy.common import errors
 from poppy.distributed_task.taskflow.flow import create_ssl_certificate
 from poppy.distributed_task.taskflow.flow import delete_ssl_certificate
 from poppy.distributed_task.taskflow.flow import recreate_ssl_certificate
@@ -332,3 +333,52 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
         certs_by_status = self.storage.get_certs_by_status(status)
 
         return certs_by_status
+
+    def update_certificate_status(self, domain_name, certificate_updates):
+        certificate_old = self.storage.get_certs_by_domain(domain_name)
+        if not certificate_old:
+            raise ValueError(
+                "certificate information not found for {0} ".format(
+                    domain_name
+                )
+            )
+
+        try:
+            if (
+                certificate_updates.get("op") == "replace" and
+                certificate_updates.get("path") == "status" and
+                certificate_updates.get("value") is not None
+            ):
+                if (
+                    certificate_old.get_cert_status() !=
+                    certificate_updates.get("value")
+                ):
+                    new_cert_details = certificate_old.cert_details
+                    # update the certificate for the first provider akamai
+                    # this logic changes when multiple certificate providers
+                    # are supported
+                    first_provider = list(new_cert_details.keys())[0]
+                    first_provider_cert_details = (
+                        list(new_cert_details.values())[0]
+                    )
+
+                    first_provider_cert_details["extra_info"][
+                        "status"] = certificate_updates.get("value")
+
+                    new_cert_details[first_provider] = json.dumps(
+                        first_provider_cert_details
+                    )
+
+                    self.storage.update_certificate(
+                        certificate_old.domain_name,
+                        certificate_old.cert_type,
+                        certificate_old.flavor_id,
+                        new_cert_details
+                    )
+        except Exception as e:
+            LOG.error(
+                "Something went wrong during certificate update: {0}".format(
+                    e
+                )
+            )
+            raise errors.CertificateStatusUpdateError(e)

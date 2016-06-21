@@ -221,6 +221,7 @@ def is_root_domain(domain):
 
 
 def is_valid_service_configuration(service, schema):
+    errors_list = list()
     if schema is not None:
         errors_list = list(
             jsonschema.Draft3Validator(schema).iter_errors(service))
