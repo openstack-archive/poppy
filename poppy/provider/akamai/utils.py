@@ -74,6 +74,39 @@ def get_ssl_number_of_hosts(remote_host):
     return result
 
 
+def get_sans_by_host(remote_host):
+    """Get Subject Alternative Names for a (SAN) Cert."""
+
+    for ssl_version in ssl_versions:
+        try:
+            cert = ssl.get_server_certificate(
+                (remote_host, 443),
+                ssl_version=ssl_version
+            )
+        except ssl.SSLError:
+            # This exception m
+            continue
+
+        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert)
+
+        sans = []
+        for idx in range(0, x509.get_extension_count()):
+            extension = x509.get_extension(idx)
+            if extension.get_short_name() == 'subjectAltName':
+                sans = [
+                    san.replace('DNS:', '').strip() for san in
+                    str(extension).split(',')
+                ]
+                break
+
+        # accumulate all sans across multiple versions
+        result = sans
+        break
+    else:
+        raise ValueError('Get remote host certificate info failed...')
+    return result
+
+
 def connect_to_zookeeper_storage_backend(conf):
     """Connect to a zookeeper cluster"""
     storage_backend_hosts = ','.join(['%s:%s' % (

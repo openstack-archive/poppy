@@ -33,6 +33,14 @@ class TestCertificates(base.TestCase):
         self.san_cert_cnames = [str(x) for x in range(7)]
         self.driver.san_cert_cnames = self.san_cert_cnames
 
+        background_job_controller_patcher = mock.patch(
+            'poppy.provider.akamai.utils.get_sans_by_host'
+        )
+        self.mock_get_sans_by_host = background_job_controller_patcher.start()
+        self.addCleanup(background_job_controller_patcher.stop)
+
+        self.mock_get_sans_by_host.return_value = []
+
         self.controller = certificates.CertificateController(self.driver)
 
     @ddt.data(("SPS Request Complete", ""),
@@ -354,4 +362,33 @@ class TestCertificates(base.TestCase):
 
         mod_san_q.enqueue_mod_san_request.assert_called_once_with(
             json.dumps(ssl_certificate.load_from_json(data).to_dict())
+        )
+
+    def test_cert_create_domain_exists_on_san(self):
+
+        data = {
+            "cert_type": "san",
+            "domain_name": "www.abc.com",
+            "flavor_id": "premium"
+        }
+
+        self.mock_get_sans_by_host.return_value = [
+            data["domain_name"]
+        ]
+
+        controller = certificates.CertificateController(self.driver)
+
+        responder = controller.create_certificate(
+            ssl_certificate.load_from_json(data),
+            True
+        )
+
+        self.assertIsNone(responder['Akamai']['cert_domain'])
+        self.assertEqual(
+            'failed',
+            responder['Akamai']['extra_info']['status']
+        )
+        self.assertEqual(
+            'Domain www.abc.com already exists on san cert 0.',
+            responder['Akamai']['extra_info']['action']
         )
