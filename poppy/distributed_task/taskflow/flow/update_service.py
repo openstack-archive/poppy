@@ -44,6 +44,7 @@ def update_service():
         update_service_tasks.GatherProviderDetailsTask(
             rebind=['responders', 'dns_responder', 'log_responders']),
         update_service_tasks.UpdateProviderDetailsTask_Errors(
-            rebind=['provider_details_dict_errors_tuple'])
+            rebind=['provider_details_dict_errors_tuple']),
+        update_service_tasks.DeleteCertsForRemovedDomains()
     )
     return flow

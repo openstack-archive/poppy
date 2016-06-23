@@ -19,9 +19,11 @@ import json
 import time
 
 from oslo_config import cfg
+from oslo_context import context as context_utils
 from oslo_log import log
 from taskflow import task
 
+from poppy.distributed_task.taskflow.flow import delete_ssl_certificate
 from poppy.distributed_task.taskflow.task import common
 from poppy.distributed_task.utils import exc_loader
 from poppy.distributed_task.utils import memoized_controllers
@@ -346,3 +348,49 @@ class UpdateProviderDetailsTask_Errors(task.Task):
                 LOG.info('Cassandra session being shutdown')
         except AttributeError:
             LOG.info('Cassandra session already shutdown')
+
+
+class DeleteCertsForRemovedDomains(task.Task):
+    """Delete certificates domains deleted during service update."""
+
+    def execute(self, service_old, responders,
+                service_id):
+        service_controller, dns = \
+            memoized_controllers.task_controllers('poppy', 'dns')
+
+        service_old_json = json.loads(service_old)
+        service_old = service.load_from_json(service_old_json)
+
+        old_domains = set()
+        project_id = service_old.project_id
+        old_provider_details = service_old.provider_details
+        for provider_name in old_provider_details:
+            provider_detail = old_provider_details[provider_name]
+            access_urls = provider_detail.access_urls
+
+            for access_url in access_urls:
+                if 'domain' in access_url:
+                    old_domains.add(access_url['domain'])
+
+        # get new_domains
+        new_domains = set()
+        for responder in responders:
+            for provider_name in responder:
+                links = responder[provider_name]['links']
+                for link in links:
+                    new_domains.add(link['domain'])
+
+        removed_domains = old_domains.difference(new_domains)
+
+        kwargs = {
+            'project_id': project_id,
+            'cert_type': 'san',
+            'context_dict': context_utils.get_current().to_dict()
+        }
+
+        for domain in removed_domains:
+            kwargs['domain_name'] = domain
+            service_controller.distributed_task_controller.submit_task(
+                delete_ssl_certificate.delete_ssl_certificate,
+                **kwargs
+            )
