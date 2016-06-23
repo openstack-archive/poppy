@@ -16,7 +16,7 @@
 from poppy.model import common
 
 
-VALID_CERT_TYPES = [u'san', u'custom']
+VALID_CERT_TYPES = [u'san', u'custom', u'dedicated']
 VALID_STATUS_IN_CERT_DETAIL = [
     u'deployed',
     u'create_in_progress',

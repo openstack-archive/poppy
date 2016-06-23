@@ -70,7 +70,7 @@ class DomainMigrationController(base.Controller, hooks.HookController):
         except errors.ServiceNotFound:
             pecan.abort(404, detail='Service {0} could not be found'.format(
                 service_id))
-        except LookupError:
+        except (LookupError, ValueError):
             pecan.abort(404, detail='Domain {0} could not be found'.format(
                 domain_name))
 
