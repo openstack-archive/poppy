@@ -21,6 +21,7 @@ except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
 
 import cassandra
+from cassandra import query
 import ddt
 import mock
 from oslo_config import cfg
@@ -292,6 +293,197 @@ class CassandraStorageServiceTests(base.TestCase):
                 self.service_id,
                 provider_details_dict
             )
+
+    @ddt.file_data('data_provider_details.json')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_update_provider_details_domain_deleted(
+            self,
+            provider_details_json,
+            mock_session,
+            mock_execute
+    ):
+        provider_details_dict = {}
+        for k, v in provider_details_json.items():
+            provider_detail_dict = json.loads(v)
+
+            provider_details_dict[k] = provider_details.ProviderDetail(
+                provider_service_id=(
+                    provider_detail_dict["id"]),
+                access_urls=provider_detail_dict["access_urls"],
+                domains_certificate_status=provider_detail_dict.get(
+                    "domains_certificate_status", {}))
+
+        # mock the response from cassandra
+        mock_execute.execute.return_value = None
+
+        # this is for update_provider_details unittest code coverage
+        arg_provider_details_dict = {}
+        status = None
+        for provider_name in provider_details_dict:
+            the_provider_detail_dict = collections.OrderedDict()
+            the_provider_detail_dict["id"] = (
+                provider_details_dict[provider_name].provider_service_id)
+            the_provider_detail_dict["access_urls"] = (
+                provider_details_dict[provider_name].access_urls)
+            the_provider_detail_dict["status"] = (
+                provider_details_dict[provider_name].status)
+            status = the_provider_detail_dict["status"]
+            the_provider_detail_dict["name"] = (
+                provider_details_dict[provider_name].name)
+            the_provider_detail_dict["domains_certificate_status"] = (
+                provider_details_dict[provider_name].
+                domains_certificate_status.to_dict())
+            the_provider_detail_dict["error_info"] = (
+                provider_details_dict[provider_name].error_info)
+            the_provider_detail_dict["error_message"] = (
+                provider_details_dict[provider_name].error_message)
+            arg_provider_details_dict[provider_name] = json.dumps(
+                the_provider_detail_dict)
+
+        provider_details_args = {
+            'project_id': self.project_id,
+            'service_id': self.service_id,
+            'provider_details': arg_provider_details_dict
+        }
+        status_args = {
+            'status': status,
+            'project_id': self.project_id,
+            'service_id': self.service_id
+        }
+        # This is to verify mock has been called with the correct arguments
+
+        def assert_mock_execute_args(*args):
+
+            if args[0].query_string == services.CQL_UPDATE_PROVIDER_DETAILS:
+                self.assertEqual(args[1], provider_details_args)
+            elif args[0].query_string == services.CQL_SET_SERVICE_STATUS:
+                self.assertEqual(args[1], status_args)
+
+        mock_execute.execute.side_effect = assert_mock_execute_args
+
+        with mock.patch.object(
+                services.ServicesController,
+                'get_provider_details') as mock_provider_det:
+
+            mock_provider_det.return_value = {
+                "MaxCDN": provider_details.ProviderDetail(
+                    provider_service_id="{\"id\": 11942, \"access_urls\": "
+                        "[{\"provider_url\": \"maxcdn.provider.com\", "
+                        "\"domain\": \"xk2.cd\"}], "
+                        "\"domains_certificate_status\":"
+                        "{\"mypullzone.com\": "
+                        "\"failed\"} }",
+                    access_urls=[
+                        {
+                            "provider_url": "fastly.provider.com",
+                            "domain": "xk2.cd"
+                        }
+                    ]
+                )
+            }
+
+            self.sc.update_provider_details(
+                self.project_id,
+                self.service_id,
+                provider_details_dict
+            )
+
+            delete_queries = []
+            deleted_domains = []
+            for query_mock_call in self.sc.session.execute.mock_calls:
+                name, args, kwargs = query_mock_call
+                for arg in args:
+                    if hasattr(arg, 'query_string'):
+                        if arg.query_string == services.CQL_DELETE_PROVIDER_URL:
+                            delete_queries.append(query_mock_call)
+                            _, delete_query_args = args
+                            deleted_domains.append(
+                                delete_query_args["domain_name"])
+
+            self.assertEqual(1, len(delete_queries))
+            self.assertEqual(['xk2.cd'], deleted_domains)
+
+            self.assertTrue(self.sc.session.execute.called)
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_update_provider_details_new_provider_details_empty(
+            self, mock_session, mock_execute):
+
+        provider_details_dict = {}
+
+        # mock the response from cassandra
+        mock_execute.execute.return_value = None
+
+        # this is for update_provider_details unittest code coverage
+        arg_provider_details_dict = {}
+        status = None
+
+        provider_details_args = {
+            'project_id': self.project_id,
+            'service_id': self.service_id,
+            'provider_details': arg_provider_details_dict
+        }
+        status_args = {
+            'status': status,
+            'project_id': self.project_id,
+            'service_id': self.service_id
+        }
+        # This is to verify mock has been called with the correct arguments
+
+        def assert_mock_execute_args(*args):
+
+            if args[0].query_string == services.CQL_UPDATE_PROVIDER_DETAILS:
+                self.assertEqual(args[1], provider_details_args)
+            elif args[0].query_string == services.CQL_SET_SERVICE_STATUS:
+                self.assertEqual(args[1], status_args)
+
+        mock_execute.execute.side_effect = assert_mock_execute_args
+
+        with mock.patch.object(
+                services.ServicesController,
+                'get_provider_details') as mock_provider_det:
+
+            mock_provider_det.return_value = {
+                "MaxCDN": provider_details.ProviderDetail(
+                    provider_service_id="{\"id\": 11942, \"access_urls\": "
+                        "[{\"provider_url\": \"maxcdn.provider.com\", "
+                        "\"domain\": \"xk2.cd\"}], "
+                        "\"domains_certificate_status\":"
+                        "{\"mypullzone.com\": "
+                        "\"failed\"} }",
+                    access_urls=[
+                        {
+                            "provider_url": "fastly.provider.com",
+                            "domain": "xk2.cd"
+                        }
+                    ]
+                )
+            }
+
+            self.sc.update_provider_details(
+                self.project_id,
+                self.service_id,
+                provider_details_dict
+            )
+
+            delete_queries = []
+            deleted_domains = []
+            for query_mock_call in self.sc.session.execute.mock_calls:
+                name, args, kwargs = query_mock_call
+                for arg in args:
+                    if hasattr(arg, 'query_string'):
+                        if arg.query_string == services.CQL_DELETE_PROVIDER_URL:
+                            delete_queries.append(query_mock_call)
+                            _, delete_query_args = args
+                            deleted_domains.append(
+                                delete_query_args["domain_name"])
+
+            self.assertEqual(1, len(delete_queries))
+            self.assertEqual(['xk2.cd'], deleted_domains)
+
+            self.assertTrue(self.sc.session.execute.called)
 
     @mock.patch.object(cassandra.cluster.Cluster, 'connect')
     def test_session(self, mock_service_database):
