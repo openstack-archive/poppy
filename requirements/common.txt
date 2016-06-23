@@ -18,3 +18,4 @@ oslo.config>=2.0.0
 oslo.log>=1.12.1
 oslo.serialization>=1.7.0
 oslo.utils>=2.0.0
+SecretStorage==2.1.4
