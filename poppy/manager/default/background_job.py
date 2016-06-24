@@ -54,7 +54,6 @@ class BackgroundJobController(base.BackgroundJobController):
                     consume=True
                 )
 
-                run_list += queue_data
                 for cert_dict in queue_data:
                     try:
                         cert_dict = json.loads(cert_dict)
@@ -77,11 +76,15 @@ class BackgroundJobController(base.BackgroundJobController):
                             check_cert_status_and_update_flow,
                             **t_kwargs
                         )
+                        run_list.append(cert_dict)
                     except Exception as e:
-                        akamai_driver.san_mapping_queue.enqueue_san_mapping(
-                            json.dumps(cert_dict)
-                        )
-                        run_list.remove(cert_dict)
+                        try:
+                            akamai_driver.san_mapping_queue.\
+                                enqueue_san_mapping(json.dumps(cert_dict))
+                        except Exception as e:
+                            akamai_driver.san_mapping_queue.\
+                                enqueue_san_mapping(cert_dict)
+
                         cert_dict['error_message'] = str(e.message)
                         ignore_list.append(cert_dict)
                         LOG.exception(e)
@@ -95,7 +98,6 @@ class BackgroundJobController(base.BackgroundJobController):
 
             cname_host_info_list = []
 
-            run_list += queue_data
             for cert_dict in queue_data:
                 try:
                     cert_dict = json.loads(cert_dict)
@@ -137,8 +139,8 @@ class BackgroundJobController(base.BackgroundJobController):
                         ),
                         "cnameType": "EDGE_HOSTNAME"
                     })
+                    run_list.append(cert_dict)
                 except Exception as e:
-                    run_list.remove(cert_dict)
                     cert_dict['error_message'] = str(e.message)
                     ignore_list.append(cert_dict)
                     LOG.exception(e)
