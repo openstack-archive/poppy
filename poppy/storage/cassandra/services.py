@@ -996,22 +996,21 @@ class ServicesController(base.ServicesController):
                     consistency_level=self._driver.consistency_level)
                 self.session.execute(stmt, provider_url_args)
 
-        if new_domain_names_provider_urls and old_domain_names_provider_urls:
-            # remove mapping for domains that were deleted during the update
-            deleted_domains = (
-                set(new_domain_names_provider_urls) -
-                set(old_domain_names_provider_urls)
-            )
-            for domain_name, provider_url in deleted_domains:
-                provider_url_args = {
-                    'domain_name': domain_name,
-                    'provider_url': provider_url
-                }
+        # remove mapping for domains that were deleted during the update
+        deleted_domains = (
+            set(old_domain_names_provider_urls) -
+            set(new_domain_names_provider_urls)
+        )
+        for domain_name, provider_url in deleted_domains:
+            provider_url_args = {
+                'domain_name': domain_name,
+                'provider_url': provider_url
+            }
 
-                stmt = query.SimpleStatement(
-                    CQL_DELETE_PROVIDER_URL,
-                    consistency_level=self._driver.consistency_level)
-                self.session.execute(stmt, provider_url_args)
+            stmt = query.SimpleStatement(
+                CQL_DELETE_PROVIDER_URL,
+                consistency_level=self._driver.consistency_level)
+            self.session.execute(stmt, provider_url_args)
 
     @staticmethod
     def format_result(result):
