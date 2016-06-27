@@ -132,7 +132,6 @@ COUNTRY_CODE_MAPPING = {
     'Bermuda': 'BM',
     'British Virgin Islands': 'VG',
     'Cayman Islands': 'KY',
-    'Costa Rica': 'CR',
     'Cuba': 'CU',
     'Dominica': 'DM',
     'Dominican Republic': 'DO',
