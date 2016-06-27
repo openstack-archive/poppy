@@ -24,6 +24,7 @@ import cassandra
 import ddt
 import mock
 from oslo_config import cfg
+import testtools
 
 from poppy.model.helpers import provider_details
 from poppy.storage.cassandra import driver
@@ -297,3 +298,196 @@ class CassandraStorageServiceTests(base.TestCase):
     def test_session(self, mock_service_database):
         session = self.sc.session
         self.assertNotEqual(session, None)
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_domain_exists_elsewhere_true(self, mock_execute, mock_session):
+        mock_session.execute.return_value = [
+            {
+                'service_id': 'service_id',
+                'project_id': 'project_id',
+                'domain_name': 'domain_name'
+            }
+        ]
+        self.assertTrue(
+            self.sc.domain_exists_elsewhere('domain_name', 'new_service_id'))
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_domain_exists_elsewhere_false(self, mock_execute, mock_session):
+        mock_session.execute.return_value = [
+            {
+                'service_id': 'service_id',
+                'project_id': 'project_id',
+                'domain_name': 'domain_name'
+            }
+        ]
+        self.assertFalse(
+            self.sc.domain_exists_elsewhere('domain_name', 'service_id'))
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_domain_exists_elsewhere_no_results(self, mock_execute,
+                                                mock_session):
+        mock_session.execute.return_value = []
+        self.assertFalse(
+            self.sc.domain_exists_elsewhere('domain_name', 'new_service_id'))
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_domain_exists_elsewhere_value_error(self, mock_execute,
+                                                 mock_session):
+        mock_session.execute.side_effect = ValueError(
+            'Mock -- Something went wrong!'
+        )
+        self.assertFalse(
+            self.sc.domain_exists_elsewhere('domain_name', 'new_service_id'))
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_service_count_positive(self, mock_execute, mock_session):
+
+        mock_session.execute.return_value = [
+            {
+                'count': 1
+            }
+        ]
+
+        self.assertEqual(1, self.sc.get_service_count('project_id'))
+
+    @ddt.file_data('data_list_services.json')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_services_marker_not_none(
+            self, data, mock_execute, mock_session
+    ):
+
+        mock_session.execute.return_value = data
+
+        results = self.sc.get_services('project_id', uuid.uuid4(), 1)
+        self.assertEqual(data[0]["project_id"], results[0].project_id)
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_services_by_status_positive(self, mock_execute, mock_session):
+
+        mock_session.execute.return_value = [
+            {'service_id': 1},
+            {'service_id': 2},
+            {'service_id': 3}
+        ]
+
+        self.assertEqual(
+            [
+                {'service_id': '1'},
+                {'service_id': '2'},
+                {'service_id': '3'}
+            ],
+            self.sc.get_services_by_status('project_id')
+        )
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_delete_services_by_status_positive(self, mock_execute,
+                                                mock_session):
+        try:
+            self.sc.delete_services_by_status(
+                'project_id', uuid.uuid4(), 'status'
+            )
+        except Exception as e:
+            self.fail(e)
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_domains_by_provider_url_positive(self, mock_execute,
+                                                  mock_session):
+
+        mock_session.execute.return_value = [
+            {'domain_name': 'www.xyz.com'},
+        ]
+
+        self.assertEqual([{'domain_name': 'www.xyz.com'}],
+                         self.sc.get_domains_by_provider_url('provider_url'))
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_delete_provider_url_positive(self, mock_execute, mock_session):
+        try:
+            self.sc.delete_provider_url('provider_url', 'domain_name')
+        except Exception as e:
+            self.fail(e)
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_service_limit_positive(self, mock_execute, mock_session):
+        mock_session.execute.return_value = [
+            {'project_limit': 999}
+        ]
+        self.assertEqual(999, self.sc.get_service_limit('project_id'))
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_service_limit_empty_result(self, mock_execute, mock_session):
+        mock_session.execute.return_value = []
+
+        self.assertEqual(
+            self.sc._driver.max_services_conf.max_services_per_project,
+            self.sc.get_service_limit('project_id'))
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_service_limit_value_error(self, mock_execute, mock_session):
+        mock_session.execute.side_effect = ValueError(
+            'Mock -- Something went wrong!'
+        )
+        self.assertEqual(
+            self.sc._driver.max_services_conf.max_services_per_project,
+            self.sc.get_service_limit('project_id')
+        )
+
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_set_service_limit_positive(self, mock_execute, mock_session):
+        try:
+            self.sc.set_service_limit('project_id', 'project_limit')
+        except Exception as e:
+            self.fail(e)
+
+    @ddt.file_data('data_list_services.json')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_service_details_by_domain_name(self, data, mock_execute,
+                                                mock_session):
+        service_id = uuid.uuid4()
+        mock_session.execute.side_effect = [
+            [{
+                'project_id': 'project_id',
+                'service_id': service_id,
+                'domain_name': 'domain_name'
+            }],
+            [data[0]]
+        ]
+
+        results = self.sc.get_service_details_by_domain_name('domain_name')
+
+        self.assertEqual(data[0]["project_id"], results.project_id)
+
+    @ddt.file_data('data_list_services.json')
+    @mock.patch.object(services.ServicesController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_service_details_by_domain_name_domain_not_present(
+            self, data, mock_execute, mock_session):
+        mock_session.execute.side_effect = [
+            [{
+                'project_id': 'proj_id',  # differs from arg to func
+                'service_id': uuid.uuid4(),
+                'domain_name': 'domain_name'
+            }],
+            [data[0]]
+        ]
+
+        with testtools.ExpectedException(ValueError):
+            self.sc.get_service_details_by_domain_name(
+                'domain_name',
+                project_id='project_id'
+            )
