@@ -13,11 +13,11 @@ RUN apt-get -qq upgrade
 RUN apt-get -qqy install git-core wget curl libpython-dev libev4 libev-dev libffi6 libffi-dev libssl-dev python-dev
 
 # setuptools
-RUN wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+RUN wget https://bootstrap.pypa.io/ez_setup.py
 RUN python ez_setup.py
 
 # pip
-RUN wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+RUN wget https://bootstrap.pypa.io/get-pip.py
 RUN python get-pip.py
 
 # uwsgi 
@@ -29,7 +29,10 @@ RUN git clone https://github.com/openstack/poppy.git /home/poppy
 # Install Requirements
 RUN sudo pip install -r /home/poppy/requirements/requirements.txt
 
-RUN sudo pip install -e /home/poppy/.
+# Install testrepository
+RUN sudo pip install testrepository
+
+RUN sudo pip install -e /home/poppy/
 
 # Set up the configuration files
 ADD poppy.conf /etc/poppy.conf
