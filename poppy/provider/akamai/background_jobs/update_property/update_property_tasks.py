@@ -68,7 +68,7 @@ class PropertyGetLatestVersionTask(task.Task):
                                                          str(max_version)))
                 return max_version
             else:
-                # else now we need to create a new version (bump up a version)
+                # retrieve the latest version from akamai
                 resp = self.akamai_driver.akamai_papi_api_client.get(
                     self.akamai_driver.akamai_papi_api_base_url.format(
                         middle_part='properties/%s/versions/%s' % (
@@ -77,8 +77,26 @@ class PropertyGetLatestVersionTask(task.Task):
                 if resp.status_code != 200:
                     raise RuntimeError('PAPI API request failed.'
                                        'Exception: %s' % resp.text)
+
+                # if the latest version is pending state, stop execution
+                production_status = \
+                json.loads(resp.text)['versions']['items'][0][
+                    'productionStatus']
+
+                if production_status.upper() == 'PENDING':
+                    err_message = (
+                        'Aborting task/flow execution.'
+                        'Akamai property version {0} is in {1} status.'.format(
+                            max_version,
+                            production_status
+                        )
+                    )
+                    LOG.error(err_message)
+                    raise ValueError(err_message)
+
                 etag = json.loads(resp.text)['versions']['items'][0]['etag']
-                # create a new version
+
+                # now we need to create a new version (bump up a version)
                 resp = self.akamai_driver.akamai_papi_api_client.post(
                     self.akamai_driver.akamai_papi_api_base_url.format(
                         middle_part='properties/%s/versions' % (
