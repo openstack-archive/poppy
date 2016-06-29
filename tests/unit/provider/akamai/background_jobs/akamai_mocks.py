@@ -212,7 +212,8 @@ class MockPapiAPIClient(mock.Mock):
                 "versions": {
                     "items": [{
                         "propertyVersion": 1,
-                        "etag": str(uuid.uuid4())
+                        "etag": str(uuid.uuid4()),
+                        "productionStatus": "ACTIVE",
                     }]
                 }
             })
