@@ -20,10 +20,10 @@ try:
 except ImportError:        # pragma: no cover
     import collections     # pragma: no cover
 
-import cassandra
 import ddt
 import mock
 from oslo_config import cfg
+import testtools
 
 from poppy.model.helpers import provider_details
 from poppy.storage.cassandra import driver
@@ -60,17 +60,20 @@ class CassandraStorageServiceTests(base.TestCase):
         migrations_patcher.start()
         self.addCleanup(migrations_patcher.stop)
 
+        cluster_patcher = mock.patch('cassandra.cluster.Cluster')
+        self.mock_cluster = cluster_patcher.start()
+        self.mock_session = self.mock_cluster().connect()
+        self.addCleanup(cluster_patcher.stop)
+
         # stubbed cassandra driver
         self.sc = services.ServicesController(cassandra_driver)
 
     @ddt.file_data('data_get_service.json')
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_get_service(self, value, mock_session, mock_execute):
+    def test_get_service(self, value):
 
         # mock the response from cassandra
         value[0]['service_id'] = self.service_id
-        mock_execute.execute.return_value = value
+        self.mock_session.execute.return_value = value
 
         actual_response = self.sc.get_service(self.project_id, self.service_id)
 
@@ -78,12 +81,38 @@ class CassandraStorageServiceTests(base.TestCase):
         # matches the expectation (using jsonschema)
         self.assertEqual(str(actual_response.service_id), str(self.service_id))
 
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_get_service_with_exception(self, mock_session, mock_execute):
+    @ddt.file_data('data_get_service.json')
+    def test_update_state(self, value):
+
+        details = value[0]['provider_details']
+        new_details = {}
+        for provider, detail in list(details.items()):
+            detail = json.loads(detail)
+            detail['status'] = 'deployed'
+            detail['access_urls'] = [
+                {
+                    'provider_url': "{0}.com".format(provider.lower()),
+                    'domain': detail['access_urls'][0]
+                }
+            ]
+            new_details[provider] = json.dumps(detail)
+
+        value[0]['provider_details'] = new_details
+        # mock the response from cassandra
+        value[0]['service_id'] = self.service_id
+        self.mock_session.execute.return_value = [value[0]]
+
+        expected_obj = self.sc.get_service(self.project_id, self.service_id)
+
+        actual_obj = self.sc.update_state(self.project_id, self.service_id,
+                                          'deployed')
+
+        self.assertEqual(expected_obj.service_id, actual_obj.service_id)
+
+    def test_get_service_with_exception(self):
 
         # mock the response from cassandra
-        mock_execute.execute.return_value = []
+        self.mock_session.execute.return_value = []
 
         self.assertRaises(
             ValueError,
@@ -96,10 +125,7 @@ class CassandraStorageServiceTests(base.TestCase):
     @mock.patch.object(services.ServicesController,
                        'domain_exists_elsewhere',
                        return_value=False)
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_create_service(self, value,
-                            mock_check, mock_session, mock_execute):
+    def test_create_service(self, value, mock_check):
         service_obj = req_service.load_from_json(value)
         responses = self.sc.create_service(self.project_id, service_obj)
 
@@ -113,10 +139,7 @@ class CassandraStorageServiceTests(base.TestCase):
     @mock.patch.object(services.ServicesController,
                        'domain_exists_elsewhere',
                        return_value=True)
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_create_service_exist(self, value,
-                                  mock_check, mock_session, mock_execute):
+    def test_create_service_exist(self, value, mock_check):
         service_obj = req_service.load_from_json(value)
         self.sc.get = mock.Mock(return_value=service_obj)
 
@@ -127,13 +150,11 @@ class CassandraStorageServiceTests(base.TestCase):
         )
 
     @ddt.file_data('data_list_services.json')
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_list_services(self, value, mock_session, mock_execute):
+    def test_list_services(self, value):
         # mock the response from cassandra
         value[0]['project_id'] = self.project_id
-        mock_execute.prepare.return_value = mock.Mock()
-        mock_execute.execute.return_value = value
+        self.mock_session.prepare.return_value = mock.Mock()
+        self.mock_session.execute.return_value = value
 
         actual_response = self.sc.get_services(self.project_id, None, None)
 
@@ -142,11 +163,45 @@ class CassandraStorageServiceTests(base.TestCase):
         self.assertEqual(actual_response[0].name, "mocksite")
         self.assertEqual(actual_response[0].project_id, self.project_id)
 
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_delete_service(self, mock_session, mock_execute):
+    @ddt.file_data('data_get_service.json')
+    def test_delete_service(self, value):
+
+        details = value[0]['provider_details']
+        new_details = {}
+        for provider, detail in list(details.items()):
+            detail = json.loads(detail)
+            detail['status'] = 'deployed'
+            detail['access_urls'] = [
+                {
+                    'provider_url': "{0}.com".format(provider.lower()),
+                    'domain': detail['access_urls'][0]
+                }
+            ]
+            new_details[provider] = json.dumps(detail)
+
+        value[0]['provider_details'] = new_details
+
         # mock the response from cassandra
-        mock_execute.execute.return_value = iter([{}])
+        value[0]['service_id'] = self.service_id
+        # self.mock_session.execute.return_value = value
+
+        def mock_execute_side_effect(*args):
+            if args[0].query_string == services.CQL_GET_SERVICE:
+                return [value[0]]
+            else:
+                return None
+
+        self.mock_session.execute.side_effect = mock_execute_side_effect
+
+        self.sc.delete_service(
+            self.project_id,
+            self.service_id
+        )
+        # TODO(isaacm): Add assertions on queries called
+
+    def test_delete_service_no_result(self):
+        # mock the response from cassandra
+        self.mock_session.execute.return_value = iter([{}])
         actual_response = self.sc.delete_service(
             self.project_id,
             self.service_id
@@ -160,13 +215,11 @@ class CassandraStorageServiceTests(base.TestCase):
     @mock.patch.object(services.ServicesController,
                        'domain_exists_elsewhere',
                        return_value=False)
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
     @mock.patch.object(services.ServicesController,
                        'set_service_provider_details')
     def test_update_service(self, service_json,
                             mock_set_service_provider_details,
-                            mock_execute, mock_session, mock_check):
+                            mock_check):
             with mock.patch.object(
                     services.ServicesController,
                     'get_provider_details') as mock_provider_det:
@@ -179,7 +232,7 @@ class CassandraStorageServiceTests(base.TestCase):
                               "{\"mypullzone.com\": "
                               "\"failed\"} }",
                 }
-                mock_session.execute.return_value = iter([{}])
+                self.mock_session.execute.return_value = iter([{}])
                 service_obj = req_service.load_from_json(service_json)
                 actual_response = self.sc.update_service(
                     self.project_id,
@@ -192,25 +245,33 @@ class CassandraStorageServiceTests(base.TestCase):
                 self.assertEqual(actual_response, None)
 
     @ddt.file_data('data_provider_details.json')
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_get_provider_details(self, provider_details_json,
-                                  mock_session, mock_execute):
+    def test_get_provider_details(self, provider_details_json):
         # mock the response from cassandra
-        mock_execute.execute.return_value = [{'provider_details':
-                                              provider_details_json}]
-        actual_response = self.sc.get_provider_details(self.project_id,
-                                                       self.service_id)
+        self.mock_session.execute.return_value = [
+            {'provider_details': provider_details_json}
+        ]
+        actual_response = self.sc.get_provider_details(
+            self.project_id,
+            self.service_id
+        )
         self.assertTrue("MaxCDN" in actual_response)
         self.assertTrue("Mock" in actual_response)
         self.assertTrue("CloudFront" in actual_response)
         self.assertTrue("Fastly" in actual_response)
 
     @ddt.file_data('data_provider_details.json')
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_update_provider_details(self, provider_details_json,
-                                     mock_session, mock_execute):
+    def test_get_provider_details_value_error(self, provider_details_json):
+        # mock the response from cassandra
+        self.mock_session.execute.return_value = []
+
+        with testtools.ExpectedException(ValueError):
+            self.sc.get_provider_details(
+                self.project_id,
+                self.service_id
+            )
+
+    @ddt.file_data('data_provider_details.json')
+    def test_update_provider_details(self, provider_details_json):
         provider_details_dict = {}
         for k, v in provider_details_json.items():
             provider_detail_dict = json.loads(v)
@@ -223,7 +284,7 @@ class CassandraStorageServiceTests(base.TestCase):
                     "domains_certificate_status", {}))
 
         # mock the response from cassandra
-        mock_execute.execute.return_value = None
+        self.mock_session.execute.return_value = None
 
         # this is for update_provider_details unittest code coverage
         arg_provider_details_dict = {}
@@ -268,7 +329,7 @@ class CassandraStorageServiceTests(base.TestCase):
             elif args[0].query_string == services.CQL_SET_SERVICE_STATUS:
                 self.assertEqual(args[1], status_args)
 
-        mock_execute.execute.side_effect = assert_mock_execute_args
+        self.mock_session.execute.side_effect = assert_mock_execute_args
 
         with mock.patch.object(
                 services.ServicesController,
@@ -294,13 +355,9 @@ class CassandraStorageServiceTests(base.TestCase):
             )
 
     @ddt.file_data('data_provider_details.json')
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_update_provider_details_domain_deleted(
             self,
             provider_details_json,
-            mock_session,
-            mock_execute
     ):
         provider_details_dict = {}
         for k, v in provider_details_json.items():
@@ -314,7 +371,7 @@ class CassandraStorageServiceTests(base.TestCase):
                     "domains_certificate_status", {}))
 
         # mock the response from cassandra
-        mock_execute.execute.return_value = None
+        self.mock_session.execute.return_value = None
 
         # this is for update_provider_details unittest code coverage
         arg_provider_details_dict = {}
@@ -359,7 +416,7 @@ class CassandraStorageServiceTests(base.TestCase):
             elif args[0].query_string == services.CQL_SET_SERVICE_STATUS:
                 self.assertEqual(args[1], status_args)
 
-        mock_execute.execute.side_effect = assert_mock_execute_args
+        self.mock_session.execute.side_effect = assert_mock_execute_args
 
         with mock.patch.object(
                 services.ServicesController,
@@ -410,15 +467,12 @@ class CassandraStorageServiceTests(base.TestCase):
 
             self.assertTrue(self.sc.session.execute.called)
 
-    @mock.patch.object(services.ServicesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_update_provider_details_new_provider_details_empty(
-            self, mock_session, mock_execute):
+    def test_update_provider_details_new_provider_details_empty(self):
 
         provider_details_dict = {}
 
         # mock the response from cassandra
-        mock_execute.execute.return_value = None
+        self.mock_session.execute.return_value = None
 
         # this is for update_provider_details unittest code coverage
         arg_provider_details_dict = {}
@@ -443,7 +497,7 @@ class CassandraStorageServiceTests(base.TestCase):
             elif args[0].query_string == services.CQL_SET_SERVICE_STATUS:
                 self.assertEqual(args[1], status_args)
 
-        mock_execute.execute.side_effect = assert_mock_execute_args
+        self.mock_session.execute.side_effect = assert_mock_execute_args
 
         with mock.patch.object(
                 services.ServicesController,
@@ -494,7 +548,195 @@ class CassandraStorageServiceTests(base.TestCase):
 
             self.assertTrue(self.sc.session.execute.called)
 
-    @mock.patch.object(cassandra.cluster.Cluster, 'connect')
-    def test_session(self, mock_service_database):
+    def test_session(self):
         session = self.sc.session
         self.assertNotEqual(session, None)
+
+    def test_domain_exists_elsewhere_true(self):
+        self.mock_session.execute.return_value = [
+            {
+                'service_id': 'service_id',
+                'project_id': 'project_id',
+                'domain_name': 'domain_name'
+            }
+        ]
+        self.assertTrue(
+            self.sc.domain_exists_elsewhere('domain_name', 'new_service_id'))
+
+    def test_domain_exists_elsewhere_false(self):
+        self.mock_session.execute.return_value = [
+            {
+                'service_id': 'service_id',
+                'project_id': 'project_id',
+                'domain_name': 'domain_name'
+            }
+        ]
+        self.assertFalse(
+            self.sc.domain_exists_elsewhere('domain_name', 'service_id'))
+
+    def test_domain_exists_elsewhere_no_results(self):
+        self.mock_session.execute.return_value = []
+        self.assertFalse(
+            self.sc.domain_exists_elsewhere('domain_name', 'new_service_id'))
+
+    def test_domain_exists_elsewhere_value_error(self):
+        self.mock_session.execute.side_effect = ValueError(
+            'Mock -- Something went wrong!'
+        )
+        self.assertFalse(
+            self.sc.domain_exists_elsewhere('domain_name', 'new_service_id'))
+
+    def test_get_service_count_positive(self):
+
+        self.mock_session.execute.return_value = [
+            {
+                'count': 1
+            }
+        ]
+
+        self.assertEqual(1, self.sc.get_service_count('project_id'))
+
+    @ddt.file_data('data_list_services.json')
+    def test_get_services_marker_not_none(self, data):
+
+        self.mock_session.execute.return_value = data
+
+        results = self.sc.get_services('project_id', uuid.uuid4(), 1)
+        self.assertEqual(data[0]["project_id"], results[0].project_id)
+
+    def test_get_services_by_status_positive(self):
+
+        self.mock_session.execute.return_value = [
+            {'service_id': 1},
+            {'service_id': 2},
+            {'service_id': 3}
+        ]
+
+        self.assertEqual(
+            [
+                {'service_id': '1'},
+                {'service_id': '2'},
+                {'service_id': '3'}
+            ],
+            self.sc.get_services_by_status('project_id')
+        )
+
+    def test_delete_services_by_status_positive(self):
+        try:
+            self.sc.delete_services_by_status(
+                'project_id', uuid.uuid4(), 'status'
+            )
+        except Exception as e:
+            self.fail(e)
+
+    def test_get_domains_by_provider_url_positive(self):
+
+        self.mock_session.execute.return_value = [
+            {'domain_name': 'www.xyz.com'},
+        ]
+
+        self.assertEqual([{'domain_name': 'www.xyz.com'}],
+                         self.sc.get_domains_by_provider_url('provider_url'))
+
+    def test_delete_provider_url_positive(self):
+        try:
+            self.sc.delete_provider_url('provider_url', 'domain_name')
+        except Exception as e:
+            self.fail(e)
+
+    def test_get_service_limit_positive(self):
+        self.mock_session.execute.return_value = [
+            {'project_limit': 999}
+        ]
+        self.assertEqual(999, self.sc.get_service_limit('project_id'))
+
+    def test_get_service_limit_empty_result(self):
+        self.mock_session.execute.return_value = []
+
+        self.assertEqual(
+            self.sc._driver.max_services_conf.max_services_per_project,
+            self.sc.get_service_limit('project_id'))
+
+    def test_get_service_limit_value_error(self):
+        self.mock_session.execute.side_effect = ValueError(
+            'Mock -- Something went wrong!'
+        )
+        self.assertEqual(
+            self.sc._driver.max_services_conf.max_services_per_project,
+            self.sc.get_service_limit('project_id')
+        )
+
+    def test_set_service_limit_positive(self):
+        try:
+            self.sc.set_service_limit('project_id', 'project_limit')
+        except Exception as e:
+            self.fail(e)
+
+    @ddt.file_data('data_list_services.json')
+    def test_get_service_details_by_domain_name(self, data):
+        service_id = uuid.uuid4()
+        self.mock_session.execute.side_effect = [
+            [{
+                'project_id': 'project_id',
+                'service_id': service_id,
+                'domain_name': 'domain_name'
+            }],
+            [data[0]]
+        ]
+
+        results = self.sc.get_service_details_by_domain_name('domain_name')
+
+        self.assertEqual(data[0]["project_id"], results.project_id)
+
+    @ddt.file_data('data_list_services.json')
+    def test_get_service_details_by_domain_name_domain_not_present(
+            self, data):
+        self.mock_session.execute.side_effect = [
+            [{
+                'project_id': 'proj_id',  # differs from arg to func
+                'service_id': uuid.uuid4(),
+                'domain_name': 'domain_name'
+            }],
+            [data[0]]
+        ]
+
+        with testtools.ExpectedException(ValueError):
+            self.sc.get_service_details_by_domain_name(
+                'domain_name',
+                project_id='project_id'
+            )
+
+    @ddt.file_data('data_provider_details.json')
+    def test_set_service_provider_details(self, data):
+        service_id = uuid.uuid4()
+
+        def mock_execute_side_effect(*args):
+            if args[0].query_string == services.CQL_GET_PROVIDER_DETAILS:
+                return [{'provider_details': data}]
+            else:
+                return None
+
+        self.mock_session.execute.side_effect = mock_execute_side_effect
+
+        self.sc.set_service_provider_details(
+            'project_id', service_id, 'deployed'
+        )
+
+        [
+            update_service_status,
+            get_provider_details,
+            _,
+            update_provider_details,
+            _,
+            _,
+            _,
+            _,
+            _,
+        ] = self.mock_session.execute.mock_calls
+
+        self.assertEqual(services.CQL_SET_SERVICE_STATUS,
+                         update_service_status[1][0].query_string)
+        self.assertEqual(services.CQL_GET_PROVIDER_DETAILS,
+                         get_provider_details[1][0].query_string)
+        self.assertEqual(services.CQL_UPDATE_PROVIDER_DETAILS,
+                         update_provider_details[1][0].query_string)

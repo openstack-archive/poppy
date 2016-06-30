@@ -333,7 +333,7 @@ class ServicesController(base.ServicesController):
             results = self.session.execute(stmt, args)
 
             if results:
-                LOG.info("Checking for domain '{0}'"
+                LOG.info("Checking for domain '{0}' "
                          "existence yielded {1}".format(domain_name,
                                                         str(results)))
                 for r in results:
@@ -348,7 +348,7 @@ class ServicesController(base.ServicesController):
                          "yielded no results".format(domain_name))
                 return False
         except ValueError as ex:
-                LOG.warning("Checking for domain '{0}'"
+                LOG.warning("Checking for domain '{0}' "
                             "failed!".format(domain_name))
                 LOG.exception(ex)
                 return False
