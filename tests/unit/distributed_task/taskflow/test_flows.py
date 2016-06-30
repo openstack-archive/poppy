@@ -522,6 +522,10 @@ class TestFlowRuns(base.TestCase):
 
             self.patch_delete_flow(service_controller, storage_controller,
                                    dns_controller)
+
+            service_mock = mock.Mock()
+            type(service_mock).domains = []
+            storage_controller.get_service.return_value = service_mock
             dns_controller.delete = mock.Mock()
             dns_controller.delete._mock_return_value = {
                 'cdn_provider': {
