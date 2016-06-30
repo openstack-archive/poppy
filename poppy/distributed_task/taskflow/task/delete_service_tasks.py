@@ -19,9 +19,11 @@ import json
 import time
 
 from oslo_config import cfg
+from oslo_context import context as context_utils
 from oslo_log import log
 from taskflow import task
 
+from poppy.distributed_task.taskflow.flow import delete_ssl_certificate
 from poppy.distributed_task.taskflow.task import common
 from poppy.distributed_task.utils import exc_loader
 from poppy.distributed_task.utils import memoized_controllers
@@ -214,3 +216,34 @@ class DeleteStorageServiceTask(task.Task):
                 LOG.info('Cassandra session being shutdown')
         except AttributeError:
             LOG.info('Cassandra session already shutdown')
+
+
+class DeleteCertificatesForServiceSanDomains(task.Task):
+
+    def execute(self, project_id, service_id):
+        service_controller, self.storage_controller = \
+            memoized_controllers.task_controllers('poppy', 'storage')
+
+        service_obj = self.storage_controller.get_service(
+            project_id,
+            service_id
+        )
+
+        kwargs = {
+            'project_id': project_id,
+            'cert_type': 'san',
+            'context_dict': context_utils.get_current().to_dict()
+        }
+
+        for domain in service_obj.domains:
+            if domain.protocol == 'https' and domain.certificate == 'san':
+                kwargs["domain"] = domain.domain
+                LOG.info(
+                    "Delete service submit task san_cert deletion {0}".format(
+                        domain.domain
+                    )
+                )
+                service_controller.distributed_task_controller.submit_task(
+                    delete_ssl_certificate.delete_ssl_certificate,
+                    **kwargs
+                )

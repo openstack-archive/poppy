@@ -45,6 +45,9 @@ def delete_service():
         linear_flow.Flow('Delete service storage operation').add(
             common.UpdateProviderDetailIfNotEmptyTask(
                 rebind=['provider_details_dict']),
-            delete_service_tasks.DeleteStorageServiceTask())
+            delete_service_tasks.DeleteStorageServiceTask()),
+        linear_flow.Flow('Delete san certificates for service').add(
+            delete_service_tasks.DeleteCertificatesForServiceSanDomains()
+        )
     )
     return flow
