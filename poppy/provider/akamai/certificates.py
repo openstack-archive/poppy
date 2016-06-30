@@ -19,6 +19,7 @@ import json
 
 from oslo_log import log
 
+from poppy.provider.akamai import utils
 from poppy.provider import base
 
 LOG = log.getLogger(__name__)
@@ -55,6 +56,24 @@ class CertificateController(base.CertificateBase):
     def create_certificate(self, cert_obj, enqueue=True):
         if cert_obj.cert_type == 'san':
             try:
+                found, found_cert = (
+                    self._check_domain_already_exists_on_san_certs(
+                        cert_obj.domain_name
+                    )
+                )
+                if found is True:
+                    return self.responder.ssl_certificate_provisioned(None, {
+                        'status': 'failed',
+                        'san cert': None,
+                        'created_at': str(datetime.datetime.now()),
+                        'action': (
+                            'Domain {0} already exists '
+                            'on san cert {1}.'.format(
+                                cert_obj.domain_name, found_cert
+                            )
+                        )
+                    })
+
                 if enqueue:
                     self.mod_san_queue.enqueue_mod_san_request(
                         json.dumps(cert_obj.to_dict()))
@@ -235,3 +254,17 @@ class CertificateController(base.CertificateBase):
                     cert_obj.cert_type
                 )
             })
+
+    def _check_domain_already_exists_on_san_certs(self, domain_name):
+        """Check all configured san certs for domain."""
+
+        found = False
+        found_cert = None
+        for san_cert_name in self.san_cert_cnames:
+            sans = utils.get_sans_by_host(san_cert_name)
+            if domain_name in sans:
+                found = True
+                found_cert = san_cert_name
+                break
+
+        return found, found_cert
