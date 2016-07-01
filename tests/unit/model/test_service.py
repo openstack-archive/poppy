@@ -132,17 +132,47 @@ class TestServiceModel(base.TestCase):
                          [origin.to_dict() for origin
                           in myservice.origins])
 
-        # (amitgandhinz) need to add caching and restrictions
-        # self.assertEqual([caching.to_dict() for caching
-        #                   in cloned_service.caching],
-        #                  [caching.to_dict() for caching
-        #                   in myservice.caching])
+        self.assertEqual([caching.to_dict()['rules'] for caching
+                          in cloned_service.caching],
+                         [caching.to_dict()['rules'] for caching
+                          in myservice.caching])
 
-        # self.assertEqual([restrictions.to_dict() for restrictions
-        #                   in cloned_service.restrictions],
-        #                  [restrictions.to_dict() for restrictions
-        #                   in myservice.restrictions])
+        self.assertEqual([caching.to_dict()['name'] for caching
+                          in cloned_service.caching],
+                         [caching.to_dict()['name'] for caching
+                          in myservice.caching])
 
+        self.assertEqual([caching.to_dict()['ttl'] for caching
+                          in cloned_service.caching],
+                         [caching.to_dict()['ttl'] for caching
+                          in myservice.caching])
+
+        self.assertEqual([restrictions.to_dict()['rules'] for restrictions
+                          in cloned_service.restrictions],
+                         [restrictions.to_dict()['rules'] for restrictions
+                          in myservice.restrictions])
+
+        self.assertEqual([restrictions.to_dict()['name'] for restrictions
+                          in cloned_service.restrictions],
+                         [restrictions.to_dict()['name'] for restrictions
+                          in myservice.restrictions])
+
+    def test_init_from_dict_whitespaces(self):
+        caching = [cachingrule.CachingRule('images ', 3600)]
+        restrictions = [restriction.Restriction('client_ip ','whitelist')]
+        name = 'tests '
+        myservice = service.Service(
+            self.service_id,
+            name, self.mydomains, self.myorigins, self.flavor_id,
+            caching, restrictions)
+        cloned_service = service.Service.init_from_dict(self.project_id,
+                                                        myservice.to_dict())
+        self.assertNotEqual(cloned_service.name, myservice.name.strip())
+        self.assertNotEqual([x.name for x in cloned_service.caching],
+                         [y.name for y in myservice.caching])
+        self.assertNotEqual([x.name for x in cloned_service.restrictions],
+                         [y.name for y in myservice.restrictions])
+        
     @ddt.data(u'', u'apple')
     def test_set_invalid_status(self, status):
         myservice = service.Service(
