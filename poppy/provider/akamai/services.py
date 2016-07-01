@@ -57,6 +57,23 @@ class ServiceController(base.ServiceBase):
                                'Accept': 'text/plain'}
         self.san_cert_hostname_limit = self.driver.san_cert_hostname_limit
 
+    def reorder_rules(self, post_data):
+        ordered_dict = {}
+        sorted_map = None
+        ordered_list = []
+        if post_data['rules']:
+            for k, v in enumerate(post_data['rules']):
+                if v['matches'][0]['value']:
+                    ordered_dict[k] = \
+                        len(v['matches'][0]['value'].split('/'))
+            sorted_map = sorted(ordered_dict.items(), key=lambda x: x[1],
+                                reverse=True)
+            for val in sorted_map:
+                if val[0] != 0:
+                    ordered_list.append(post_data['rules'][val[0]])
+            ordered_list.append(post_data['rules'][0])
+        return ordered_list
+
     def create(self, service_obj):
         try:
             post_data = {
@@ -79,7 +96,8 @@ class ServiceController(base.ServiceBase):
                 service_obj.caching, post_data['rules'])
             self._process_restriction_rules(
                 service_obj.restrictions, post_data['rules'])
-
+            # Change the order of the caching rules
+            post_data['rules'] = self.reorder_rules(post_data)
             classified_domains = self._classify_domains(service_obj.domains)
 
             # NOTE(tonytan4ever): for akamai it might be possible to have
@@ -254,6 +272,7 @@ class ServiceController(base.ServiceBase):
                 self._process_cache_invalidation_rules(
                     invalidate_url, policy_content['rules'])
             # Update domain if necessary (by adjust digital property)
+            policy_content['rules'] = self.reorder_rules(policy_content)
             classified_domains = self._classify_domains(
                 service_obj.domains)
 

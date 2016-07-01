@@ -213,7 +213,6 @@ class Service(common.DictSerializableModel):
         o = cls(service_id=uuid.uuid4(), name='unnamed',
                 domains=[], origins=[], flavor_id='unnamed',
                 project_id=project_id)
-
         domains = input_dict.get('domains', [])
         input_dict['domains'] = [domain.Domain.init_from_dict(d)
                                  for d in domains]
@@ -241,7 +240,6 @@ class Service(common.DictSerializableModel):
             log_delivery)
 
         o.from_dict(input_dict)
-
         return o
 
     def to_dict(self):
@@ -273,7 +271,6 @@ class Service(common.DictSerializableModel):
             new_provider_details[provider] = (
                 provider_details[provider].to_dict())
         result['provider_details'] = new_provider_details
-
         result['log_delivery'] = result['log_delivery'].to_dict()
 
         return result

@@ -39,7 +39,7 @@ class CachingRule(common.DictSerializableModel):
 
     @name.setter
     def name(self, value):
-        self._name = value
+        self._name = value.strip()
 
     @property
     def ttl(self):
@@ -81,9 +81,12 @@ class CachingRule(common.DictSerializableModel):
 
         o = cls("unnamed", 3600)
         o.caching = dict_obj.get("caching", "unnamed")
-        o.name = dict_obj.get("name", "unnamed")
+        o.name = dict_obj.get("name", "unnamed").strip()
         o.ttl = dict_obj.get("ttl", 3600)
         rules_dict_list = dict_obj.get("rules", [])
+        for val in rules_dict_list:
+            val['name'] = val['name'].strip()
+            val['request_url'] = val['request_url'].strip()
         o.rules = []
         for rule_dict in rules_dict_list:
             new_rule = rule.Rule(rule_dict['name'])

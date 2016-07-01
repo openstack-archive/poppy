@@ -42,7 +42,7 @@ class Restriction(common.DictSerializableModel):
 
     @name.setter
     def name(self, value):
-        self._name = value
+        self._name = value.strip()
 
     @property
     def access(self):
@@ -87,8 +87,14 @@ class Restriction(common.DictSerializableModel):
 
         access = dict_obj.get("access", 'whitelist')
         o = cls("unnamed", access)
-        o.name = dict_obj.get("name", "unnamed")
+        o.name = dict_obj.get("name", "unnamed").strip()
         rules_dict_list = dict_obj.get("rules", [])
+        for val in rules_dict_list:
+            val['name'] = val['name'].strip()
+            if 'referrer' in val:
+                val['referrer'] = val['referrer'].strip()
+            elif 'geography' in val:
+                val['geography'] = val['geography'].strip()
         o.rules = []
         for rule_dict in rules_dict_list:
             new_rule = rule.Rule(rule_dict['name'])
