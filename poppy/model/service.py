@@ -213,19 +213,49 @@ class Service(common.DictSerializableModel):
         o = cls(service_id=uuid.uuid4(), name='unnamed',
                 domains=[], origins=[], flavor_id='unnamed',
                 project_id=project_id)
-
         domains = input_dict.get('domains', [])
+        if domains:
+            for val in domains:
+                for k, v in val.items():
+                    if v:
+                        val[k] = v.strip()
         input_dict['domains'] = [domain.Domain.init_from_dict(d)
                                  for d in domains]
         origins = input_dict.get('origins', [])
+        if origins:
+            for val in origins:
+                val['origin'] = val['origin'].strip()
+                if 'rules' in val:
+                    for sub_val in val['rules']:
+                        sub_val['request_url'] = sub_val['request_url'].strip()
+                        sub_val['name'] = sub_val['name'].strip()
+
         input_dict['origins'] = [origin.Origin.init_from_dict(og)
                                  for og in origins]
 
         caching_rules = input_dict.get('caching', [])
+        if caching_rules:
+            for val in caching_rules:
+                val['name'] = val['name'].strip()
+                if 'rules' in val:
+                    for sub_val in val['rules']:
+                        req_ = sub_val['request_url'].strip()
+                        sub_val['request_url'] = req_
         input_dict['caching'] = [cachingrule.CachingRule.init_from_dict(cr)
                                  for cr in caching_rules]
 
         restrictions = input_dict.get('restrictions', [])
+        if restrictions:
+            for val in restrictions:
+                val['name'] = val['name'].strip()
+                if 'type' in val:
+                    val['type'] = val['type'].strip()
+                for sub_val in val['rules']:
+                    if 'referrer' in sub_val:
+                        sub_val['referrer'] = sub_val['referrer'].strip()
+                    elif 'geography' in sub_val:
+                        sub_val['geography'] = sub_val['geography'].strip()
+                    sub_val['name'] = sub_val['name'].strip()
         input_dict['restrictions'] = [restriction.Restriction.init_from_dict(r)
                                       for r in restrictions]
 
@@ -241,7 +271,6 @@ class Service(common.DictSerializableModel):
             log_delivery)
 
         o.from_dict(input_dict)
-
         return o
 
     def to_dict(self):
@@ -273,7 +302,6 @@ class Service(common.DictSerializableModel):
             new_provider_details[provider] = (
                 provider_details[provider].to_dict())
         result['provider_details'] = new_provider_details
-
         result['log_delivery'] = result['log_delivery'].to_dict()
 
         return result
