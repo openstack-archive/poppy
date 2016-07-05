@@ -171,6 +171,9 @@ class CertificatesController(base.CertificatesController):
                       "state: {0}".format(cert_details))
             LOG.error(e)
         else:
+            self.insert_cert_status(domain_name, cert_status)
+
+    def insert_cert_status(self, domain_name, cert_status):
             cert_args = {
                 'domain_name': domain_name,
                 'status': cert_status

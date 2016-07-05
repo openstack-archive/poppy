@@ -406,6 +406,10 @@ class DefaultServicesController(base.ServicesController):
                                 project_id,
                                 new_cert_obj
                             )
+                            self.ssl_certificate_storage.insert_cert_status(
+                                new_cert_obj.domain_name,
+                                new_cert_obj.get_cert_status()
+                            )
                             # deserialize cert_details dict
                             new_cert_obj.cert_details[
                                 providers[0].provider_id.title()] = json.loads(
