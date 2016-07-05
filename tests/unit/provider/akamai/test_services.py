@@ -54,6 +54,8 @@ class TestServices(base.TestCase):
         self.san_cert_cnames = [str(x) for x in range(7)]
         self.driver.san_cert_cnames = self.san_cert_cnames
         self.driver.regions = geo_zone_code_mapping.REGIONS
+        self.driver.country_mapping = \
+            geo_zone_code_mapping.REGION_COUNTRY_MAPPING
         self.driver.metrics_resolution = 86400
         self.controller = services.ServiceController(self.driver)
         service_id = str(uuid.uuid4())
@@ -633,6 +635,14 @@ class TestServices(base.TestCase):
         controller = services.ServiceController(self.driver)
         self.assertEqual(controller.driver.regions,
                          geo_zone_code_mapping.REGIONS)
+        if 'Costa Rica' in controller.driver.country_mapping['North America']:
+            NA = True
+            SA = False
+        if 'Costa Rica' in controller.driver.country_mapping['South America']:
+            SA = True
+            NA = False
+        self.assertTrue(SA)
+        self.assertFalse(NA)
 
     @ddt.data('requestCount', 'bandwidthOut', 'httpResponseCode_1XX',
               'httpResponseCode_2XX', 'httpResponseCode_3XX',
