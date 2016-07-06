@@ -216,7 +216,17 @@ class TestServicesCreate(base.TestCase):
                         'domain': u'test.mocksite.com',
                         'href': u'test.mocksite.com.global.prod.fastly.net',
                         'rel': 'access_url'
-                    }
+                    },
+                    {
+                        'href': 'https://cloudfiles.rackspace/CONTAINER/OBJ',
+                        'rel': 'log_delivery'
+                    },
+                    {
+                        'domain': u'shared.mocksite.com',
+                        'href': u'test.mocksite.com.global.prod.fastly.net',
+                        'certificate': 'shared',
+                        'rel': 'access_url'
+                    },
                 ]}
             }]
 
@@ -397,6 +407,10 @@ class TestServicesDelete(base.TestCase):
                 u'provider_url': u'mocksite.com.global.fastly.net',
                 u'domain': u'mocksite.com',
                 u'operator_url': u'mocksite.cdn80.mycdn.com'
+            },
+            {
+                u'provider_url': u'test.com.global.fastly.net',
+                u'domain': u'mocksite.com'
             }
         ]
 
@@ -544,7 +558,8 @@ class TestServicesUpdate(base.TestCase):
                 u'provider_url': u'blog.domain.com.global.prod.fastly.net',
                 u'domain': u'blog.domain.com',
                 u'operator_url': u'blog.domain.com.cdn80.mycdn.com'
-            }]
+            }
+        ]
 
         fastly_provider_details_old = mock.Mock()
         fastly_provider_details_old.access_urls = fastly_access_urls_old
@@ -611,6 +626,56 @@ class TestServicesUpdate(base.TestCase):
                     self.assertIsNotNone(
                         dns_details[provider_name]['error_class']
                     )
+
+    def test_update_add_domains_with_no_domains_in_update(self):
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        client = mock.Mock()
+        self.controller.client = client
+
+        service_updates = service.Service(
+            service_id=self.service_old.service_id,
+            name='myservice',
+            domains=[],
+            origins=[],
+            flavor_id='standard'
+        )
+
+        responders = [{
+            'Fastly': {
+                'id': str(uuid.uuid4()),
+                'links': [
+                    {
+                        'domain': u'test.domain.com',
+                        'href': u'test.domain.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    },
+                    {
+                        'domain': u'blog.domain.com',
+                        'href': u'blog.domain.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    },
+                    {
+                        'domain': u'pictures.domain.com',
+                        'href': u'pictures.domain.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    }
+                ]}
+            }]
+
+        dns_details = self.controller.update(
+            self.service_old,
+            service_updates,
+            responders
+        )
+
+        access_urls_map = {}
+        for provider_name in self.service_old.provider_details:
+            provider_detail = self.service_old.provider_details[provider_name]
+            access_urls = provider_detail.access_urls
+            access_urls_map[provider_name] = {'access_urls': access_urls}
+
+        self.assertEqual(access_urls_map, dns_details)
 
     def test_update_remove_domains_provider_error(self):
         domains_new = [domain.Domain('test.domain.com'),
@@ -834,3 +899,18 @@ class TestServicesUpdate(base.TestCase):
                 for domain_new in domains_new:
                     self.assertIsNotNone(
                         access_urls_map[provider_name][domain_new.domain])
+
+    def test_gather_cname_links_positive(self):
+        cname_links = self.controller.gather_cname_links(self.service_old)
+        # TODO(isaacm): Add assertions on the returned object
+        self.assertIsNotNone(cname_links)
+
+    def test_enable_positive(self):
+        responder_enable = self.controller.enable(self.service_old)
+        # TODO(isaacm): Add assertions on the returned object
+        self.assertIsNotNone(responder_enable)
+
+    def test_disable_positive(self):
+        responder_disable = self.controller.disable(self.service_old)
+        # TODO(isaacm): Add assertions on the returned object
+        self.assertIsNotNone(responder_disable)
