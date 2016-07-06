@@ -170,11 +170,6 @@ class CertificateController(base.CertificateBase):
                             this_sps_id,
                             this_job_id
                         )
-                        self.cert_info_storage.save_cert_last_ids(
-                            san_cert_name,
-                            this_sps_id,
-                            this_job_id
-                        )
                         cert_copy = copy.deepcopy(cert_obj.to_dict())
                         (
                             cert_copy['cert_details']
