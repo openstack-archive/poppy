@@ -731,3 +731,8 @@ class TestServices(base.TestCase):
                          sorted(regions))
         for timestamp_counter in formatted_results[metrictype].values():
             self.assertEqual(timestamp_counter[0][timestamp], value)
+
+    @ddt.file_data('caching_rules.json')
+    def test_reorder_rules(self, caching_rules_json):
+        res = self.controller.reorder_rules(caching_rules_json['input'])
+        self.assertEqual(res, caching_rules_json['output']['rules'])
