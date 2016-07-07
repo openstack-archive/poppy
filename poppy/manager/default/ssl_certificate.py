@@ -196,6 +196,18 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                         'validate_service to False to retry this san-retry '
                         'request forcefully'.format(r['domain_name'], r)
                     )
+                elif service_obj.operator_status.lower() == 'disabled':
+                    err_state = True
+                    LOG.error(
+                        u'The service for domain {0} is disabled.'
+                        'No certificates will be created for '
+                        'service {1} while it remains in {2} operator_status'
+                        'request forcefully'.format(
+                            r['domain_name'],
+                            service_obj.service_id,
+                            service_obj.operator_status
+                        )
+                    )
 
                 cert_for_domain = self.storage.get_certs_by_domain(
                     r['domain_name'])
@@ -210,9 +222,12 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                     run_list.append(r)
                 else:
                     ignore_list.append(r)
-                    akamai_driver.mod_san_queue.enqueue_mod_san_request(
-                        json.dumps(r)
-                    )
+                    if not r.get('validate_service', True):
+                        # validation is False, send ignored retry_list
+                        # object back to queue
+                        akamai_driver.mod_san_queue.enqueue_mod_san_request(
+                            json.dumps(r)
+                        )
                     LOG.warn(
                         "{0} was skipped because it failed validation.".format(
                             r['domain_name']
