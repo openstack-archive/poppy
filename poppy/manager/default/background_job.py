@@ -77,17 +77,18 @@ class BackgroundJobController(base.BackgroundJobController):
                             **t_kwargs
                         )
                         run_list.append(cert_dict)
-                    except Exception as e:
+                    except Exception as exc:
                         try:
                             akamai_driver.san_mapping_queue.\
                                 enqueue_san_mapping(json.dumps(cert_dict))
                         except Exception as e:
+                            LOG.exception(e)
                             akamai_driver.san_mapping_queue.\
                                 enqueue_san_mapping(cert_dict)
 
-                        cert_dict['error_message'] = str(e.message)
+                        cert_dict['error_message'] = str(exc)
                         ignore_list.append(cert_dict)
-                        LOG.exception(e)
+                        LOG.exception(exc)
 
             return run_list, ignore_list
         elif job_type == "akamai_update_papi_property_for_mod_san":
@@ -141,7 +142,7 @@ class BackgroundJobController(base.BackgroundJobController):
                     })
                     run_list.append(cert_dict)
                 except Exception as e:
-                    cert_dict['error_message'] = str(e.message)
+                    cert_dict['error_message'] = str(e)
                     ignore_list.append(cert_dict)
                     LOG.exception(e)
 
