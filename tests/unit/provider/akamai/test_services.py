@@ -87,6 +87,34 @@ class TestServices(base.TestCase):
         self.assertIn('error', resp[self.driver.provider_name])
 
     @ddt.file_data('data_service.json')
+    def test_create_with_get_sub_customer_exception(self, service_json):
+        service_obj = service.load_from_json(service_json)
+        self.controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=400,
+                      ok=False,
+                      content=json.dumps({"geo": "US"}))
+        self.controller.policy_api_client.put.side_effect = (
+            RuntimeError('Creating service failed.'))
+        resp = self.controller.create(service_obj)
+        self.assertIn('error', resp[self.driver.provider_name])
+
+    @ddt.file_data('data_service.json')
+    def test_create_with_put_sub_customer_exception(self, service_json):
+        # ASSERTIONS
+        # create_service
+        service_obj = service.load_from_json(service_json)
+        self.controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=400,
+                      ok=False,
+                      content=json.dumps({"geo": "US"}))
+        self.controller.subcustomer_api_client.put.return_value = \
+            mock.Mock(status_code=400,
+                      ok=False,
+                      content=json.dumps({"geo": "US"}))
+        resp = self.controller.create(service_obj)
+        self.assertIn('error', resp[self.driver.provider_name])
+
+    @ddt.file_data('data_service.json')
     def test_create_with_4xx_return(self, service_json):
         service_obj = service.load_from_json(service_json)
         self.controller.subcustomer_api_client.get.return_value = \
@@ -731,3 +759,26 @@ class TestServices(base.TestCase):
                          sorted(regions))
         for timestamp_counter in formatted_results[metrictype].values():
             self.assertEqual(timestamp_counter[0][timestamp], value)
+
+    def test_get_provider_service_id(self):
+        controller = services.ServiceController(self.driver)
+
+        expected_id = []
+
+        for service_domain in self.service_obj.domains:
+            dp_obj = {'policy_name': service_domain.domain,
+                      'protocol': service_domain.protocol,
+                      'certificate': service_domain.certificate}
+            expected_id.append(dp_obj)
+
+        actual_id = controller.get_provider_service_id(self.service_obj)
+
+        self.assertEqual(json.dumps(expected_id), actual_id)
+
+    def test_get(self):
+        controller = services.ServiceController(self.driver)
+        self.assertIsNone(controller.get('service_name'))
+
+    def test_current_customer(self):
+        controller = services.ServiceController(self.driver)
+        self.assertIsNone(controller.current_customer)
