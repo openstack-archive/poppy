@@ -1162,6 +1162,11 @@
                                 "name": "only North America",
                                 "geography": "North America",
                                 "request_url" : "/*"
+                            },
+                            {
+                                "name": "only South America",
+                                "geography": "South America",
+                                "request_url" : "/*"
                             }
                         ]}
         ]
