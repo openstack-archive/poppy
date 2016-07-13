@@ -37,7 +37,7 @@ class Origin(common.DictSerializableModel):
     @origin.setter
     def origin(self, value):
         """origin setter."""
-        self._origin = value
+        self._origin = value.strip()
 
     @property
     def port(self):
@@ -110,7 +110,7 @@ class Origin(common.DictSerializableModel):
         """
 
         o = cls("unnamed")
-        o.origin = dict_obj.get("origin", "unnamed")
+        o.origin = dict_obj.get("origin", "unnamed").strip()
         o.port = dict_obj.get("port", 80)
         o.ssl = dict_obj.get("ssl", False)
         o.hostheadertype = dict_obj.get("hostheadertype", "domain")
@@ -118,6 +118,9 @@ class Origin(common.DictSerializableModel):
         if o.hostheadertype == 'origin':
             o.hostheadervalue = o.origin
         rules_dict_list = dict_obj.get("rules", [])
+        for val in rules_dict_list:
+            val['name'] = val['name'].strip()
+            val['request_url'] = val['request_url'].strip()
         o.rules = []
         for rule_dict in rules_dict_list:
             new_rule = rule.Rule(rule_dict['name'])

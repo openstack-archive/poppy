@@ -28,13 +28,13 @@ class Rule(common.DictSerializableModel):
         self._request_url = request_url
 
         if referrer:
-            self._referrer = referrer
+            self._referrer = referrer.strip()
         if http_host:
-            self._http_host = http_host
+            self._http_host = http_host.strip()
         if client_ip:
-            self._client_ip = client_ip
+            self._client_ip = client_ip.strip()
         if http_method:
-            self._http_method = http_method
+            self._http_method = http_method.strip()
         if geography:
             # Validate the geography should be in a list of supported
             # countries
@@ -46,7 +46,7 @@ class Rule(common.DictSerializableModel):
                                  'geo zones' % geography))
             self._geography = geography
         if request_url:
-            self._request_url = request_url
+            self._request_url = request_url.strip()
 
     @property
     def name(self):

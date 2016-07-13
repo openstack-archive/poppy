@@ -782,3 +782,8 @@ class TestServices(base.TestCase):
     def test_current_customer(self):
         controller = services.ServiceController(self.driver)
         self.assertIsNone(controller.current_customer)
+
+    @ddt.file_data('caching_rules.json')
+    def test_reorder_rules(self, caching_rules_json):
+        res = self.controller.reorder_rules(caching_rules_json['input'])
+        self.assertEqual(res, caching_rules_json['output']['rules'])
