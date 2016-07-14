@@ -57,7 +57,59 @@ class TestDriver(base.TestCase):
     def test_init(self):
         self.assertTrue(self.mailgun_notification_driver is not None)
 
-    def test_service_contoller(self):
+    def test_service_controller(self):
         self.assertTrue(self.mailgun_notification_driver.services_controller
                         is not None)
         self.assertTrue(self.mailgun_notification_driver.retry_send == 5)
+
+
+class TestDriverInit(base.TestCase):
+
+    def setUp(self):
+        super(TestDriverInit, self).setUp()
+
+    def test_invalid_from_address(self):
+        notification_options = [
+            cfg.StrOpt('mailgun_api_key', default='123'),
+            cfg.IntOpt('retry_send', default=5),
+            cfg.StrOpt('mailgun_request_url', default='http://123.com/{0}'),
+            cfg.StrOpt('sand_box', default='123.com'),
+            cfg.StrOpt('from_address', default='invalid.email.address'),
+            cfg.ListOpt('recipients', default=['recipient@gmail.com']),
+            cfg.StrOpt('notification_subject',
+                       default='Poppy SSL Certificate Provisioned')
+        ]
+
+        with mock.patch.object(
+                driver, 'MAIL_NOTIFICATION_OPTIONS', new=notification_options):
+
+            self.conf = cfg.ConfigOpts()
+
+            self.assertRaises(
+                ValueError,
+                driver.MailNotificationDriver,
+                self.conf
+            )
+
+    def test_invalid_recipients(self):
+        notification_options = [
+            cfg.StrOpt('mailgun_api_key', default='123'),
+            cfg.IntOpt('retry_send', default=5),
+            cfg.StrOpt('mailgun_request_url', default='http://123.com/{0}'),
+            cfg.StrOpt('sand_box', default='123.com'),
+            cfg.StrOpt('from_address', default='noreply@poppycdn.org'),
+            cfg.ListOpt('recipients', default=['invalid.email.address']),
+            cfg.StrOpt('notification_subject',
+                       default='Poppy SSL Certificate Provisioned')
+        ]
+
+        with mock.patch.object(
+                driver, 'MAIL_NOTIFICATION_OPTIONS', new=notification_options):
+
+            self.conf = cfg.ConfigOpts()
+
+            self.assertRaises(
+                ValueError,
+                driver.MailNotificationDriver,
+                self.conf
+            )
