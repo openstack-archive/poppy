@@ -88,6 +88,17 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         with testtools.ExpectedException(ValueError):
             self.scc.create_ssl_certificate('project_id', cert_obj=cert_obj)
 
+    def test_create_ssl_certificate_invalid_domain(self):
+        cert_obj = ssl_cert_model.SSLCertificate(
+            'premium',
+            'www.krusty.happyclowns',
+            'san',
+            project_id='000'
+        )
+
+        with testtools.ExpectedException(ValueError):
+            self.scc.create_ssl_certificate('project_id', cert_obj=cert_obj)
+
     def test_create_ssl_certificate_exception_storage_create_cert(self):
         cert_obj = ssl_cert_model.SSLCertificate(
             'flavor_id',

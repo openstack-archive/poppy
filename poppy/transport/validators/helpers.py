@@ -17,6 +17,8 @@ import datetime
 import functools
 import json
 import re
+import whois
+
 try:
     set
 except NameError:  # noqa  pragma: no cover
@@ -132,6 +134,13 @@ def json_matches_flavor_schema_inner(request, schema=None):
 def is_valid_shared_ssl_domain_name(domain_name):
     shared_ssl_domain_regex = '^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$'
     return re.match(shared_ssl_domain_regex, domain_name) is not None
+
+
+def is_valid_tld(domain_name):
+    try:
+        return whois.whois(domain_name)['registrar'] is not None
+    except Exception:
+        return False
 
 
 def is_valid_domain_name(domain_name):
