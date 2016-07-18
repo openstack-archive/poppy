@@ -256,7 +256,8 @@ class CertificateController(base.CertificateBase):
         found = False
         found_cert = None
         for san_cert_name in self.san_cert_cnames:
-            sans = utils.get_sans_by_host(san_cert_name)
+            sans = utils.get_sans_by_host(
+                san_cert_name + self.driver.akamai_https_access_url_suffix)
             if domain_name in sans:
                 found = True
                 found_cert = san_cert_name
