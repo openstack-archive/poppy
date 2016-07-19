@@ -266,6 +266,61 @@ class AkamaiSanCertConfigController(base.Controller, hooks.HookController):
         return res
 
 
+class AkamaiSettingsController(base.Controller, hooks.HookController):
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    @pecan.expose('json')
+    def get_one(self, setting):
+
+        if setting == 'san_cert_hostname_limit':
+            try:
+                return (
+                    self._driver.manager.ssl_certificate_controller.
+                    get_san_cert_hostname_limit()
+                )
+            except Exception as e:
+                pecan.abort(400, str(e))
+        else:
+            pecan.abort(
+                status_code=404,
+                detail='Akamai setting {0} could not be found'.format(
+                    setting
+                )
+            )
+
+    @pecan.expose('json')
+    @decorators.validate(
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                ssl_certificate.SSLCertificateSchema.get_schema(
+                    "akamai_settings", "PUT")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter))
+    def put(self, setting):
+
+        if setting == 'san_cert_hostname_limit':
+            san_cert_hostname_limit_json = json.loads(
+                pecan.request.body.decode('utf-8')
+            )
+
+            try:
+                return (
+                    self._driver.manager.ssl_certificate_controller.
+                    set_san_cert_hostname_limit(
+                        san_cert_hostname_limit_json['san_cert_hostname_limit']
+                    )
+                )
+            except Exception as e:
+                pecan.abort(400, str(e))
+        else:
+            pecan.abort(
+                status_code=404,
+                detail='Akamai setting {0} could not be found'.format(
+                    setting
+                )
+            )
+
+
 class AkamaiSSLCertificateController(base.Controller, hooks.HookController):
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
