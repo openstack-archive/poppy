@@ -105,6 +105,20 @@ class SSLCertificateSchema(schema_base.SchemaBase):
             }
         },
 
+        'akamai_settings': {
+            'PUT': {
+                'type': 'object',
+                'additionalProperties': False,
+                'properties': {
+                    'san_cert_hostname_limit': {
+                        'type': 'integer',
+                        'minimum': 1,
+                        'maximum': 200,
+                    }
+                }
+            }
+        },
+
         'san_mapping_list': {
             'PUT': {
                 'type': 'array',
