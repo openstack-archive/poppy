@@ -100,6 +100,11 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                     },
                     'enabled': {
                         'type': 'boolean'
+                    },
+                    'san_cert_hostname_limit': {
+                        'type': 'integer',
+                        'minimum': 1,
+                        'maximum': 200,
                     }
                 }
             }

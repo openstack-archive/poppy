@@ -216,11 +216,10 @@ class AkamaiRetryListController(base.Controller, hooks.HookController):
             res, deleted = (
                 self._driver.manager.ssl_certificate_controller.
                 update_san_retry_list(queue_data))
+            # queue is the new queue, and deleted is deleted items
+            return {"queue": res,  "deleted": deleted}
         except Exception as e:
             pecan.abort(400, str(e))
-
-        # queue is the new queue, and deleted is deleted items
-        return {"queue": res,  "deleted": deleted}
 
 
 class AkamaiSanCertConfigController(base.Controller, hooks.HookController):
@@ -228,24 +227,32 @@ class AkamaiSanCertConfigController(base.Controller, hooks.HookController):
 
     @pecan.expose('json')
     @decorators.validate(
-        san_cert_name=rule.Rule(
-            helpers.is_valid_domain_by_name(),
+        query=rule.Rule(
+            helpers.is_valid_domain_by_name_or_akamai_setting(),
             helpers.abort_with_message))
-    def get_one(self, san_cert_name):
+    def get_one(self, query):
 
-        try:
-            res = (
-                self._driver.manager.ssl_certificate_controller.
-                get_san_cert_configuration(san_cert_name))
-        except Exception as e:
-            pecan.abort(400, str(e))
-
-        return res
+        if query == 'san_cert_hostname_limit':
+            try:
+                return (
+                    self._driver.manager.ssl_certificate_controller.
+                    get_san_cert_hostname_limit()
+                )
+            except Exception as e:
+                pecan.abort(400, str(e))
+        else:
+            try:
+                return (
+                    self._driver.manager.ssl_certificate_controller.
+                    get_san_cert_configuration(query)
+                )
+            except Exception as e:
+                pecan.abort(400, str(e))
 
     @pecan.expose('json')
     @decorators.validate(
-        san_cert_name=rule.Rule(
-            helpers.is_valid_domain_by_name(),
+        query=rule.Rule(
+            helpers.is_valid_domain_by_name_or_akamai_setting(),
             helpers.abort_with_message),
         request=rule.Rule(
             helpers.json_matches_service_schema(
@@ -253,17 +260,25 @@ class AkamaiSanCertConfigController(base.Controller, hooks.HookController):
                     "config", "POST")),
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
-    def post(self, san_cert_name):
-        config_json = json.loads(pecan.request.body.decode('utf-8'))
+    def post(self, query):
+        request_json = json.loads(pecan.request.body.decode('utf-8'))
 
-        try:
-            res = (
-                self._driver.manager.ssl_certificate_controller.
-                update_san_cert_configuration(san_cert_name, config_json))
-        except Exception as e:
-            pecan.abort(400, str(e))
+        if query == 'san_cert_hostname_limit':
+            try:
+                self._driver.manager.ssl_certificate_controller. \
+                    set_san_cert_hostname_limit(request_json)
 
-        return res
+                return pecan.Response(None, 202)
+            except Exception as e:
+                pecan.abort(400, str(e))
+        else:
+            try:
+                res = (
+                    self._driver.manager.ssl_certificate_controller.
+                    update_san_cert_configuration(query, request_json))
+                return res
+            except Exception as e:
+                pecan.abort(400, str(e))
 
 
 class AkamaiSSLCertificateController(base.Controller, hooks.HookController):

@@ -114,7 +114,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         with testtools.ExpectedException(ValueError):
             self.scc.get_san_cert_configuration("non-existant")
 
-    def test_update_san_cert_configuration_positive(self):
+    def test_set_san_cert_hostname_limit_positive(self):
         resp = mock.Mock()
         resp.status_code = 200
         resp.json.return_value = {
@@ -135,6 +135,29 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
                 spsId=1234
             )
         )
+
+    def test_update_san_cert_configuration_positive(self):
+
+        self.scc.set_san_cert_hostname_limit(
+            {"san_cert_hostname_limit": '1234'}
+        )
+
+        cert_info_storage = self.mock_providers['akamai'].obj.cert_info_storage
+
+        cert_info_storage.set_san_cert_hostname_limit.\
+            assert_called_once_with('1234')
+
+    def test_update_san_cert_configuration_negative(self):
+
+        with testtools.ExpectedException(ValueError):
+            self.scc.set_san_cert_hostname_limit(
+                {"invalid_setting_name": '1234'}
+            )
+
+        cert_info_storage = self.mock_providers['akamai'].obj.cert_info_storage
+
+        self.assertFalse(
+            cert_info_storage.set_san_cert_hostname_limit.called)
 
     def test_update_san_cert_configuration_no_sps_id(self):
         api_client = self.mock_providers['akamai'].obj.sps_api_client
