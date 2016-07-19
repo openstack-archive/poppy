@@ -189,6 +189,14 @@ def is_valid_project_id(project_id):
                                           '{0}'.format(project_id))
 
 
+@decorators.validation_function
+def is_valid_akamai_setting(setting):
+    if setting not in ['san_cert_hostname_limit']:
+        raise exceptions.ValidationFailed(
+            'Invalid akamai setting : {0}'.format(setting)
+        )
+
+
 def is_root_domain(domain):
     domain_name = domain.get('domain')
 

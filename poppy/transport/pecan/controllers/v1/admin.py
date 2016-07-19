@@ -266,6 +266,61 @@ class AkamaiSanCertConfigController(base.Controller, hooks.HookController):
         return res
 
 
+class AkamaiSettingsController(base.Controller, hooks.HookController):
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    @pecan.expose('json')
+    def get_one(self, setting):
+
+        if setting == 'san_cert_hostname_limit':
+            try:
+                return (
+                    self._driver.manager.ssl_certificate_controller.
+                    get_san_cert_hostname_limit()
+                )
+            except Exception as e:
+                pecan.abort(400, str(e))
+        else:
+            pecan.abort(
+                status_code=404,
+                detail='Akamai setting {0} could not be found'.format(
+                    setting
+                )
+            )
+
+    @pecan.expose('json')
+    @decorators.validate(
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                ssl_certificate.SSLCertificateSchema.get_schema(
+                    "akamai_settings", "PUT")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter),
+        setting=rule.Rule(
+            helpers.is_valid_akamai_setting(),
+            helpers.abort_with_message)
+    )
+    def put(self, setting):
+
+        request_json = json.loads(pecan.request.body.decode('utf-8'))
+
+        if setting == 'san_cert_hostname_limit':
+            try:
+                self._driver.manager.ssl_certificate_controller. \
+                    set_san_cert_hostname_limit(request_json)
+
+                return pecan.Response(None, 202)
+            except Exception as e:
+                pecan.abort(400, str(e))
+        else:
+            pecan.abort(
+                status_code=404,
+                detail='Akamai setting {0} could not be found'.format(
+                    setting
+                )
+            )
+
+
 class AkamaiSSLCertificateController(base.Controller, hooks.HookController):
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
@@ -273,6 +328,7 @@ class AkamaiSSLCertificateController(base.Controller, hooks.HookController):
         super(AkamaiSSLCertificateController, self).__init__(driver)
         self.__class__.retry_list = AkamaiRetryListController(driver)
         self.__class__.config = AkamaiSanCertConfigController(driver)
+        self.__class__.settings = AkamaiSettingsController(driver)
 
 
 class AkamaiController(base.Controller, hooks.HookController):
