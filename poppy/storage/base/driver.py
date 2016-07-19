@@ -78,6 +78,14 @@ class StorageDriverBase(object):
         raise NotImplementedError
 
     @abc.abstractproperty
+    def settings_controller(self):
+        """Returns the driver's settings controller.
+
+        :raise NotImplementedError
+        """
+        raise NotImplementedError
+
+    @abc.abstractproperty
     def services_controller(self):
         """Returns the driver's services controller.
 

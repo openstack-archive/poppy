@@ -67,6 +67,10 @@ class MockDBStorageDriver(base.Driver):
         return controllers.FlavorsController(self)
 
     @property
+    def settings_controller(self):
+        return controllers.SettingsController(self)
+
+    @property
     def services_controller(self):
         return controllers.ServicesController(self)
 

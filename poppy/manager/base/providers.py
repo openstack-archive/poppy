@@ -75,16 +75,19 @@ class ProviderWrapper(object):
             hard,
             purge_url)
 
-    def create_certificate(self, ext, cert_obj, enqueue):
+    def create_certificate(self, ext, cert_obj, enqueue,
+                           san_cert_hostname_limit):
         """Create a certificate
 
         :param ext
         :param cert_obj
         :param enqueue
+        :param san_cert_hostname_limit
         :returns: ext.obj.service_controller.create(service_obj)
         """
 
         return ext.obj.certificate_controller.create_certificate(
             cert_obj,
-            enqueue
+            enqueue,
+            san_cert_hostname_limit
         )

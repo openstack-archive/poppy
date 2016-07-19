@@ -26,7 +26,9 @@ Field Mappings:
 from poppy.storage.mockdb import certificates
 from poppy.storage.mockdb import flavors
 from poppy.storage.mockdb import services
+from poppy.storage.mockdb import settings
 
 CertificatesController = certificates.CertificatesController
 FlavorsController = flavors.FlavorsController
+SettingsController = settings.SettingsController
 ServicesController = services.ServicesController

@@ -236,6 +236,14 @@ class CassandraStorageDriver(base.Driver):
         return controllers.FlavorsController(self)
 
     @property
+    def settings_controller(self):
+        """services_controller.
+
+        :returns service controller
+        """
+        return controllers.SettingsController(self)
+
+    @property
     def services_controller(self):
         """services_controller.
 

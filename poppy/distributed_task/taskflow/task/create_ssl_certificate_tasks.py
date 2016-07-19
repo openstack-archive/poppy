@@ -33,8 +33,11 @@ class CreateProviderSSLCertificateTask(task.Task):
 
     def execute(self, providers_list_json, cert_obj_json, enqueue=True):
         service_controller = memoized_controllers.task_controllers('poppy')
+        settings_store = (
+            service_controller._driver.storage.settings_controller
+        )
 
-        # call provider create_ssl_certificate function
+        san_cert_hostname_limit = settings_store.get_san_cert_hostname_limit()
         providers_list = json.loads(providers_list_json)
         cert_obj = ssl_certificate.load_from_json(json.loads(cert_obj_json))
 
@@ -46,7 +49,8 @@ class CreateProviderSSLCertificateTask(task.Task):
             responder = service_controller.provider_wrapper.create_certificate(
                 service_controller._driver.providers[provider],
                 cert_obj,
-                enqueue
+                enqueue,
+                san_cert_hostname_limit
             )
             responders.append(responder)
 

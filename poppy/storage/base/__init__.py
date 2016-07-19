@@ -17,10 +17,12 @@ from poppy.storage.base import certificates
 from poppy.storage.base import driver
 from poppy.storage.base import flavors
 from poppy.storage.base import services
+from poppy.storage.base import settings
 
 
 Driver = driver.StorageDriverBase
 
 CertificatesController = certificates.CertificatesControllerBase
 FlavorsController = flavors.FlavorsControllerBase
+SettingsController = settings.SettingsControllerBase
 ServicesController = services.ServicesControllerBase

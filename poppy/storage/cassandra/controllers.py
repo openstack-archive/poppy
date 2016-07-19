@@ -26,7 +26,9 @@ Field Mappings:
 from poppy.storage.cassandra import certificates
 from poppy.storage.cassandra import flavors
 from poppy.storage.cassandra import services
+from poppy.storage.cassandra import settings
 
 CertificatesController = certificates.CertificatesController
 FlavorsController = flavors.FlavorsController
+SettingsController = settings.SettingsController
 ServicesController = services.ServicesController
