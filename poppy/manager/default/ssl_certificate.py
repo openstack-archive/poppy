@@ -344,6 +344,36 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
 
         return res
 
+    def get_san_cert_hostname_limit(self):
+        if 'akamai' in self._driver.providers:
+            akamai_driver = self._driver.providers['akamai'].obj
+            res = akamai_driver.cert_info_storage.get_san_cert_hostname_limit()
+        else:
+            # if not using akamai driver just return an empty list
+            res = 0
+
+        return res
+
+    def set_san_cert_hostname_limit(self, request_json):
+        if 'akamai' in self._driver.providers:
+            try:
+                new_limit = request_json['san_cert_hostname_limit']
+            except Exception as exc:
+                LOG.error("Error attempting to update san settings {0}".format(
+                    exc
+                ))
+                raise ValueError('Unknown setting!')
+
+            akamai_driver = self._driver.providers['akamai'].obj
+            res = akamai_driver.cert_info_storage.set_san_cert_hostname_limit(
+                new_limit
+            )
+        else:
+            # if not using akamai driver just return an empty list
+            res = 0
+
+        return res
+
     def get_certs_by_status(self, status):
         certs_by_status = self.storage.get_certs_by_status(status)
 
