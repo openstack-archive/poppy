@@ -44,6 +44,7 @@ class TestCassandraCertInfoStorage(base.TestCase):
 
         self.conf = cfg.ConfigOpts()
 
+        self.default_limit = 80
         self.get_returned_value = [{'info': {
             'san_info':
                 '{"secure2.san1.test-cdn.com": '
@@ -52,7 +53,9 @@ class TestCassandraCertInfoStorage(base.TestCase):
                 '"secure1.san1.test-cdn.com": '
                 '{"ipVersion": "ipv4", "issuer": "symentec", '
                 '"slot_deployment_klass": "esslType", '
-                '"jobId": "1432", "spsId": 1423}}'}}]
+                '"jobId": "1432", "spsId": 1423}}',
+            'settings': '{"san_cert_hostname_limit": 80}'
+        }}]
 
     @mock.patch.object(
         cassandra_storage,
@@ -188,3 +191,28 @@ class TestCassandraCertInfoStorage(base.TestCase):
             cert_name, {'spsId': new_spsId}
         )
         mock_execute.assert_called()
+
+    def test_set_san_cert_hostname_limit(self):
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf
+        )
+
+        mock_execute = self.cassandra_storage.session.execute
+        mock_execute.return_value = self.get_returned_value
+
+        self.cassandra_storage.set_san_cert_hostname_limit(99)
+
+        mock_execute.assert_called()
+
+    def test_get_san_cert_hostname_limit(self):
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf
+        )
+
+        mock_execute = self.cassandra_storage.session.execute
+        mock_execute.return_value = self.get_returned_value
+
+        res = self.cassandra_storage.get_san_cert_hostname_limit()
+
+        mock_execute.assert_called()
+        self.assertEqual(res, self.default_limit)
