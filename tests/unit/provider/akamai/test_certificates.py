@@ -36,13 +36,20 @@ class TestCertificates(base.TestCase):
             'example.net'
         )
 
-        background_job_controller_patcher = mock.patch(
+        san_by_host_patcher = mock.patch(
             'poppy.provider.akamai.utils.get_sans_by_host'
         )
-        self.mock_get_sans_by_host = background_job_controller_patcher.start()
-        self.addCleanup(background_job_controller_patcher.stop)
+        self.mock_get_sans_by_host = san_by_host_patcher.start()
+        self.addCleanup(san_by_host_patcher.stop)
+
+        ssl_number_of_hosts_patcher = mock.patch(
+            'poppy.provider.akamai.utils.get_ssl_number_of_hosts'
+        )
+        self.mock_get_ssl_number_of_hosts = ssl_number_of_hosts_patcher.start()
+        self.addCleanup(ssl_number_of_hosts_patcher.stop)
 
         self.mock_get_sans_by_host.return_value = []
+        self.mock_get_ssl_number_of_hosts.return_value = 10
 
         self.controller = certificates.CertificateController(self.driver)
 
@@ -76,6 +83,9 @@ class TestCertificates(base.TestCase):
             'ipVersion': 'ipv4',
             'slot-deployment.class': 'esslType'
         }
+
+        controller.cert_info_storage.get_san_cert_hostname_limit. \
+            return_value = 80
 
         cert_info = controller.cert_info_storage.get_cert_info(
             "secure.san1.poppycdn.com")
@@ -148,6 +158,9 @@ class TestCertificates(base.TestCase):
         lastSpsId = (
             controller.cert_info_storage.get_cert_last_spsid(
                 "secure.san1.poppycdn.com"))
+
+        controller.cert_info_storage.get_san_cert_hostname_limit. \
+            return_value = 80
 
         controller.cert_info_storage.get_cert_info.return_value = {
             'cnameHostname': "secure.san1.poppycdn.com",
@@ -246,6 +259,9 @@ class TestCertificates(base.TestCase):
             controller.cert_info_storage.get_cert_last_spsid(
                 "secure.san1.poppycdn.com"))
 
+        controller.cert_info_storage.get_san_cert_hostname_limit. \
+            return_value = 80
+
         controller.cert_info_storage.get_cert_info.return_value = {
             'cnameHostname': "secure.san1.poppycdn.com",
             'jobId': "secure.san1.poppycdn.com",
@@ -302,6 +318,9 @@ class TestCertificates(base.TestCase):
         lastSpsId = (
             controller.cert_info_storage.get_cert_last_spsid(
                 "secure.san1.poppycdn.com"))
+
+        controller.cert_info_storage.get_san_cert_hostname_limit. \
+            return_value = 80
 
         controller.cert_info_storage.get_cert_info.return_value = {
             'cnameHostname': "secure.san1.poppycdn.com",

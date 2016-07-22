@@ -88,6 +88,10 @@ class CertificateController(base.CertificateBase):
                         )
                     })
 
+                san_cert_hostname_limit = (
+                    self.cert_info_storage.get_san_cert_hostname_limit()
+                )
+
                 for san_cert_name in self.san_cert_cnames:
                     enabled = (
                         self.cert_info_storage.get_enabled_status(
@@ -96,6 +100,25 @@ class CertificateController(base.CertificateBase):
                     )
                     if not enabled:
                         continue
+
+                    # if the limit provided as an arg to this function is None
+                    # default san_cert_hostname_limit to the value provided in
+                    # the config file.
+                    san_cert_hostname_limit = (
+                        san_cert_hostname_limit or
+                        self.driver.san_cert_hostname_limit
+                    )
+
+                    # Check san_cert to enforce number of hosts hasn't
+                    # reached the limit. If the current san_cert is at max
+                    # capacity continue to the next san_cert
+                    san_hosts = utils.get_ssl_number_of_hosts(
+                        san_cert_name +
+                        self.driver.akamai_https_access_url_suffix
+                    )
+                    if san_hosts >= san_cert_hostname_limit:
+                        continue
+
                     last_sps_id = (
                         self.cert_info_storage.get_cert_last_spsid(
                             san_cert_name

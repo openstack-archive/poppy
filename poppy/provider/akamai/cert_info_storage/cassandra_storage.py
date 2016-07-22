@@ -130,7 +130,8 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
 
         stmt = query.SimpleStatement(
             GET_PROVIDER_INFO,
-            consistency_level=self.consistency_level)
+            consistency_level=self.consistency_level
+        )
         results = self.session.execute(stmt, args)
         complete_results = list(results)
         if len(complete_results) != 1:
@@ -142,6 +143,39 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
 
     def _get_akamai_san_certs_info(self):
         return json.loads(self._get_akamai_provider_info()['info']['san_info'])
+
+    def _get_akamai_san_certs_settings(self):
+        try:
+            return json.loads(
+                self._get_akamai_provider_info()['info']['settings']
+            )
+        except KeyError as ke:
+            LOG.error(
+                'Error retrieving cert info storage settings. {0}'.format(ke)
+            )
+            # settings doesn't exist in the table
+            self._seed_san_info_settings()
+
+        return json.loads(self._get_akamai_provider_info()['info']['settings'])
+
+    def _seed_san_info_settings(self):
+        provider_info = dict(self._get_akamai_provider_info()['info'])
+        provider_info['settings'] = json.dumps(
+            {
+                'san_cert_hostname_limit': 80
+            }
+        )
+
+        stmt = query.SimpleStatement(
+            UPDATE_PROVIDER_INFO,
+            consistency_level=self.consistency_level)
+
+        args = {
+            'provider_name': 'akamai',
+            'info': provider_info
+        }
+
+        self.session.execute(stmt, args)
 
     def list_all_san_cert_names(self):
         return self._get_akamai_san_certs_info().keys()
@@ -279,3 +313,38 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         }
 
         self.session.execute(stmt, args)
+
+    def get_san_cert_hostname_limit(self):
+        """Get the san cert hostname limit setting.
+
+        :returns the hostname limit if the limit exists else None.
+        """
+
+        return self._get_akamai_san_certs_settings().get(
+            'san_cert_hostname_limit'
+        )
+
+    def set_san_cert_hostname_limit(self, new_hostname_limit):
+        settings = self._get_akamai_san_certs_settings()
+
+        if settings is None:
+            raise ValueError('No san cert settings found.')
+
+        settings['san_cert_hostname_limit'] = new_hostname_limit
+
+        # Change the previous san info in the overall provider_info dictionary
+        provider_info = dict(self._get_akamai_provider_info()['info'])
+        provider_info['settings'] = json.dumps(settings)
+
+        stmt = query.SimpleStatement(
+            UPDATE_PROVIDER_INFO,
+            consistency_level=self.consistency_level
+        )
+
+        args = {
+            'provider_name': 'akamai',
+            'info': provider_info
+        }
+
+        self.session.execute(stmt, args)
+        return self.get_san_cert_hostname_limit()
