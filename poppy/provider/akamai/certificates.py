@@ -113,8 +113,12 @@ class CertificateController(base.CertificateBase):
                     # reached the limit. If the current san_cert is at max
                     # capacity continue to the next san_cert
                     san_hosts = utils.get_ssl_number_of_hosts(
-                        san_cert_name +
-                        self.driver.akamai_https_access_url_suffix
+                        '.'.join(
+                            [
+                                san_cert_name,
+                                self.driver.akamai_https_access_url_suffix
+                            ]
+                        )
                     )
                     if san_hosts >= san_cert_hostname_limit:
                         continue
