@@ -33,10 +33,16 @@ except AttributeError:                           # pragma: no cover
     extra_versions = []                          # pragma: no cover
 
 ssl_versions = [
-    ssl.PROTOCOL_SSLv3,
     ssl.PROTOCOL_TLSv1,
     ssl.PROTOCOL_SSLv23
 ]
+
+try:
+    # Warning from python: "documentation SSL version 3 is insecure.
+    # Its use is highly discouraged."
+    ssl_versions.append(ssl.PROTOCOL_SSLv3)
+except AttributeError:
+    pass
 
 ssl_versions.extend(extra_versions)
 
