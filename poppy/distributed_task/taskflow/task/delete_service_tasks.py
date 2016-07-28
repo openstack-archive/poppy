@@ -237,7 +237,7 @@ class DeleteCertificatesForServiceSanDomains(task.Task):
 
         for domain in service_obj.domains:
             if domain.protocol == 'https' and domain.certificate == 'san':
-                kwargs["domain"] = domain.domain
+                kwargs["domain_name"] = domain.domain
                 LOG.info(
                     "Delete service submit task san_cert deletion {0}".format(
                         domain.domain
