@@ -375,9 +375,9 @@ class DeleteCertsForRemovedDomains(task.Task):
 
         removed_domains = old_domains.difference(new_domains)
 
-        LOG.info("Old domains: {0}".format(old_domains))
-        LOG.info("New domains: {0}".format(new_domains))
-        LOG.info("Deleted domains: {0}".format(removed_domains))
+        LOG.info("update_service Old domains: {0}".format(old_domains))
+        LOG.info("update_service New domains: {0}".format(new_domains))
+        LOG.info("update_service Deleted domains: {0}".format(removed_domains))
 
         kwargs = {
             'project_id': project_id,
@@ -387,6 +387,10 @@ class DeleteCertsForRemovedDomains(task.Task):
 
         for domain in removed_domains:
             kwargs['domain_name'] = domain
+            LOG.info(
+                "update_service removing certificate "
+                "for deleted domain {0}".format(domain)
+            )
             service_controller.distributed_task_controller.submit_task(
                 delete_ssl_certificate.delete_ssl_certificate,
                 **kwargs
