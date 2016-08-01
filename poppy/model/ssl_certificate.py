@@ -16,7 +16,7 @@
 from poppy.model import common
 
 
-VALID_CERT_TYPES = [u'san', u'custom', u'dedicated']
+VALID_CERT_TYPES = [u'san', u'sni', u'custom', u'dedicated']
 VALID_STATUS_IN_CERT_DETAIL = [
     u'deployed',
     u'create_in_progress',
@@ -120,8 +120,8 @@ class SSLCertificate(common.DictSerializableModel):
                 )
             return result
 
-    def get_san_edge_name(self):
-        if self.cert_type == 'san':
+    def get_edge_host_name(self):
+        if self.cert_type in ['san', 'sni']:
             if self.cert_details is None or self.cert_details == {}:
                 return None
             first_provider_cert_details = (
@@ -129,7 +129,10 @@ class SSLCertificate(common.DictSerializableModel):
             if first_provider_cert_details is None:
                 return None
             else:
-                return first_provider_cert_details.get('san cert', None)
+                if self.cert_type == 'san':
+                    return first_provider_cert_details.get('san cert', None)
+                else:
+                    return first_provider_cert_details.get('sni_cert', None)
         else:
             return None
 

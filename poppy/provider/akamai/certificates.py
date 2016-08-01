@@ -18,6 +18,7 @@ import datetime
 import json
 
 from oslo_log import log
+from six.moves import urllib
 
 from poppy.provider.akamai import utils
 from poppy.provider import base
@@ -36,6 +37,10 @@ class CertificateController(base.CertificateBase):
         return self.driver.san_cert_cnames
 
     @property
+    def sni_cert_cnames(self):
+        return self.driver.sni_cert_cnames
+
+    @property
     def cert_info_storage(self):
         return self.driver.cert_info_storage
 
@@ -47,11 +52,16 @@ class CertificateController(base.CertificateBase):
     def sps_api_client(self):
         return self.driver.akamai_sps_api_client
 
+    @property
+    def cps_api_client(self):
+        return self.driver.akamai_cps_api_client
+
     def __init__(self, driver):
         super(CertificateController, self).__init__(driver)
 
         self.driver = driver
         self.sps_api_base_url = self.driver.akamai_sps_api_base_url
+        self.cps_api_base_url = self.driver.akamai_cps_api_base_url
 
     def create_certificate(self, cert_obj, enqueue=True, https_upgrade=False):
         if cert_obj.cert_type == 'san':
@@ -280,6 +290,10 @@ class CertificateController(base.CertificateBase):
                                   'san cert failed for {0} failed.'.format(
                             cert_obj.domain_name)
                     })
+        elif cert_obj.cert_type == 'sni':
+            # create a DV SAN SNI certificate using Akamai CPS API
+            return self.create_sni_certificate(
+                cert_obj, enqueue, https_upgrade)
         else:
             return self.responder.ssl_certificate_provisioned(None, {
                 'status': 'failed',
@@ -308,3 +322,248 @@ class CertificateController(base.CertificateBase):
                 break
 
         return found, found_cert
+
+    def _check_domain_already_exists_on_sni_certs(self, domain_name):
+        """Check all configured sni certs for domain."""
+
+        found = False
+        found_cert = None
+        for sni_cert_name in self.sni_cert_cnames:
+            sans = utils.get_sans_by_host_alternate(sni_cert_name)
+            if domain_name in sans:
+                found = True
+                found_cert = sni_cert_name
+                break
+
+        return found, found_cert
+
+    def create_sni_certificate(self, cert_obj, enqueue, https_upgrade):
+        try:
+            found, found_cert = (
+                self._check_domain_already_exists_on_sni_certs(
+                    cert_obj.domain_name
+                )
+            )
+            if found is True:
+                return self.responder.ssl_certificate_provisioned(None, {
+                    'status': 'failed',
+                    'sni_cert': None,
+                    'created_at': str(datetime.datetime.now()),
+                    'action': (
+                        'Domain {0} already exists '
+                        'on sni cert {1}.'.format(
+                            cert_obj.domain_name, found_cert
+                        )
+                    )
+                })
+            if enqueue:
+                self.mod_san_queue.enqueue_mod_san_request(
+                    json.dumps(cert_obj.to_dict()))
+                extras = {
+                    'status': 'create_in_progress',
+                    'sni_cert': None,
+                    # Add logging so it is easier for testing
+                    'created_at': str(datetime.datetime.now()),
+                    'action': (
+                        'SNI cert request for {0} has been '
+                        'enqueued.'.format(cert_obj.domain_name)
+                    )
+                }
+                if https_upgrade is True:
+                    extras['https upgrade notes'] = (
+                        "This domain was upgraded from HTTP to HTTPS SNI."
+                        "Take note of the domain name. Where applicable, "
+                        "delete the old HTTP policy after the upgrade is "
+                        "complete or the old policy is no longer in use."
+                    )
+                return self.responder.ssl_certificate_provisioned(
+                    None,
+                    extras
+                )
+            cert_hostname_limit = (
+                self.cert_info_storage.get_san_cert_hostname_limit()
+            )
+            for cert_name in self.sni_cert_cnames:
+                cert_hostname_limit = (
+                    cert_hostname_limit or
+                    self.driver.san_cert_hostname_limit
+                )
+
+                host_names_count = utils.get_ssl_number_of_hosts_alternate(
+                    cert_name
+                )
+                if host_names_count >= cert_hostname_limit:
+                    continue
+
+                try:
+                    enrollment_id = (
+                        self.cert_info_storage.get_cert_enrollment_id(
+                            cert_name))
+                    # GET the enrollment by ID
+                    headers = {
+                        'Accept': ('application/vnd.akamai.cps.enrollment.v1+'
+                                   'json')
+                    }
+                    resp = self.cps_api_client.get(
+                        self.cps_api_base_url.format(
+                            enrollmentId=enrollment_id),
+                        headers=headers
+                    )
+                    if resp.status_code not in [200, 202]:
+                        raise RuntimeError(
+                            'CPS Request failed. Unable to GET enrollment '
+                            'with id {0} Exception: {1}'.format(
+                                enrollment_id, resp.text))
+                    resp_json = json.loads(resp.text)
+                    # check enrollment does not have any pending changes
+                    if len(resp_json['pendingChanges']) > 0:
+                        LOG.info("{0} has pending changes, skipping...".format(
+                            cert_name))
+                        continue
+
+                    # adding sans should get them cloned into sni host names
+                    resp_json['csr']['sans'] = resp_json['csr']['sans'].append(
+                        cert_obj.domain_name
+                    )
+
+                    # PUT the enrollment including the modifications
+                    headers = {
+                        'Content-Type': (
+                            'application/vnd.akamai.cps.enrollment.v1+json'),
+                        'Accept': (
+                            'application/vnd.akamai.cps.enrollment-status.v1+'
+                            'json')
+                    }
+                    resp = self.cps_api_client.put(
+                        self.cps_api_base_url.format(
+                            enrollmentId=enrollment_id),
+                        data=json.dumps(resp_json),
+                        headers=headers
+                    )
+                    if resp.status_code not in [200, 202]:
+                        raise RuntimeError(
+                            'CPS Request failed. Unable to modify enrollment '
+                            'with id {0} Exception: {1}'.format(
+                                enrollment_id, resp.text))
+
+                    # resp code 200 means PUT didn't create a change
+                    # resp code 202 means PUT created a change
+                    if resp.status_code == 202:
+                        # save the change id for future reference
+                        change_url = json.loads(resp.text)['changes'][0]
+                        cert_copy = copy.deepcopy(cert_obj.to_dict())
+                        (
+                            cert_copy['cert_details']
+                            [self.driver.provider_name]
+                        ) = {
+                            'extra_info': {
+                                'change_url': change_url,
+                                'sni_cert': cert_name
+                            }
+                        }
+                        self.san_mapping_queue.enqueue_san_mapping(
+                            json.dumps(cert_copy)
+                        )
+                        return self.responder.ssl_certificate_provisioned(
+                            cert_name, {
+                                'status': 'create_in_progress',
+                                'sni_cert': cert_name,
+                                'change_url': change_url,
+                                'created_at': str(datetime.datetime.now()),
+                                'action': 'Waiting for customer domain '
+                                          'validation for {0}'.format(
+                                    cert_obj.domain_name)
+                            })
+                except Exception as exc:
+                    LOG.exception(
+                        "Unable to provision certificate {0}, "
+                        "Error: {1}".format(cert_obj.domain_name, exc))
+                    return self.responder.ssl_certificate_provisioned(None, {
+                        'status': 'failed',
+                        'sni_cert': None,
+                        'created_at': str(datetime.datetime.now()),
+                        'action': 'Waiting for action... CPS API provision '
+                                  'DV SNI cert failed for {0} failed.'.format(
+                            cert_obj.domain_name)
+                    })
+            else:
+                self.mod_san_queue.enqueue_mod_san_request(
+                    json.dumps(cert_obj.to_dict()))
+                return self.responder.ssl_certificate_provisioned(None, {
+                    'status': 'create_in_progress',
+                    'sni_cert': None,
+                    # Add logging so it is easier for testing
+                    'created_at': str(datetime.datetime.now()),
+                    'action': 'No available sni cert for {0} right now,'
+                              ' or no sni cert info available. Support:'
+                              'Please write down the domain and keep an'
+                              ' eye on next available freed-up SNI certs.'
+                              ' More provisioning might be needed'.format(
+                        cert_obj.domain_name)
+                })
+        except Exception as e:
+            LOG.exception(
+                "Error {0} during SNI certificate creation for {1} "
+                "sending the request sent back to the queue.".format(
+                    e, cert_obj.domain_name
+                )
+            )
+            try:
+                self.mod_san_queue.enqueue_mod_san_request(
+                    json.dumps(cert_obj.to_dict()))
+                return self.responder.ssl_certificate_provisioned(None, {
+                    'status': 'create_in_progress',
+                    'sni_cert': None,
+                    # Add logging so it is easier for testing
+                    'created_at': str(datetime.datetime.now()),
+                    'action': (
+                        'SNI cert request for {0} has been '
+                        'enqueued.'.format(cert_obj.domain_name)
+                    )
+                })
+            except Exception as exc:
+                LOG.exception("Unable to enqueue {0}, Error: {1}".format(
+                    cert_obj.domain_name,
+                    exc
+                ))
+                return self.responder.ssl_certificate_provisioned(None, {
+                    'status': 'failed',
+                    'sni_cert': None,
+                    'created_at': str(datetime.datetime.now()),
+                    'action': 'Waiting for action... Provision '
+                              'sni cert failed for {0} failed.'.format(
+                        cert_obj.domain_name)
+                })
+
+    def cancel_change_request(self, cert_obj):
+        # get change id
+        first_provider_cert_details = (
+            list(cert_obj.cert_details.values())[0].get("extra_info", None))
+        if first_provider_cert_details is None:
+            raise ValueError(
+                'No cert details found for {0}'.format(cert_obj.domain_name))
+
+        change_url = first_provider_cert_details.get('change_url')
+
+        headers = {
+            'Accept': 'application/vnd.akamai.cps.change-id.v1+json'
+        }
+
+        akamai_change_url = urllib.parse.urljoin(
+            str(self.akamai_conf.policy_api_base_url),
+            change_url
+        )
+
+        # delete call to cps api to cancel the change
+        resp = self.cps_api_client.delete(akamai_change_url, headers=headers)
+        if resp.status_code != 200:
+            LOG.error("Certificate delete failed for {0}, {1}".format(
+                cert_obj.domain_name,
+                resp.text
+            ))
+        else:
+            LOG.info(
+                "Successfully cancelled {0}, {1}".format(
+                    cert_obj.domain_name,
+                    resp.text)
+            )
