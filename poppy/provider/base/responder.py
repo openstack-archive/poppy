@@ -139,3 +139,17 @@ class Responder(object):
                 'extra_info': extra_info
             }
         }
+
+    def ssl_certificate_deleted(self, cert_domain, extra_info=None):
+        """SSL Certificate Deleted.
+
+        :param cert_domain
+        :param extra_info
+        :returns provider msg{cert_domain, extra_info}
+        """
+        return {
+            self.provider: {
+                'cert_domain': cert_domain,
+                'extra_info': extra_info
+            }
+        }
