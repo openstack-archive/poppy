@@ -40,7 +40,7 @@ class CreateProviderSSLCertificateTask(task.Task):
         cert_obj = ssl_certificate.load_from_json(json.loads(cert_obj_json))
 
         responders = []
-        # try to create all service from each provider
+        # try to create all certificates from each provider
         for provider in providers_list:
             LOG.info('Starting to create ssl certificate: {0}'
                      'from {1}'.format(cert_obj.to_dict(), provider))

@@ -36,11 +36,10 @@ class ServicesController(base.ServicesBase):
         self.recipients = self.driver.recipients
 
     def send(self, subject, mail_content):
-        """send notification to a (list) of recipients.
+        """Send notification to a (list) of recipients.
 
         :param subject
         :param mail_content
-        :raises NotImplementedError
         """
         res = self._send_mail_notification_via_mailgun(subject, mail_content)
         if res:

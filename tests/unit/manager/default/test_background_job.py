@@ -60,6 +60,19 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             group=aka_driver.AKAMAI_GROUP
         )
         conf.set_override(
+            'sni_cert_cnames',
+            [
+                "sni.example.com", "sni2.example.com"
+            ],
+            group=aka_driver.AKAMAI_GROUP,
+            enforce_type=True
+        )
+        self.addCleanup(
+            conf.clear_override,
+            'sni_cert_cnames',
+            group=aka_driver.AKAMAI_GROUP
+        )
+        conf.set_override(
             'akamai_https_access_url_suffix',
             'edge.key.net',
             group=aka_driver.AKAMAI_GROUP,
@@ -208,7 +221,8 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
 
     @ddt.data(
         "akamai_check_and_update_cert_status",
-        "akamai_update_papi_property_for_mod_san"
+        "akamai_update_papi_property_for_mod_san",
+        "akamai_update_papi_property_for_mod_sni"
     )
     def test_post_job_no_akamai_driver(self, job_type):
         del self.provider_mocks['akamai']
@@ -219,10 +233,12 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         self.assertEqual(0, len(ignore_list))
 
     @ddt.data(
-        "akamai_check_and_update_cert_status",
-        "akamai_update_papi_property_for_mod_san"
+        ("akamai_check_and_update_cert_status", "san"),
+        ("akamai_update_papi_property_for_mod_san", "san"),
+        ("akamai_update_papi_property_for_mod_sni", "sni")
     )
-    def test_post_job_positive(self, job_type):
+    def test_post_job_positive(self, job_tuple):
+        job_type, cert_type = job_tuple
         # mock ssl storage returning a cert
         self.mock_storage.certificates_controller.\
             get_certs_by_domain.return_value = [
@@ -238,7 +254,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
                     domain.Domain(
                         "www.example.com",
                         protocol='https',
-                        certificate='san'
+                        certificate=cert_type
                     )
                 ],
                 [],
@@ -248,16 +264,17 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
 
         san_mapping_queue = self.manager_driver.providers[
             'akamai'].obj.san_mapping_queue
+        cert_key = ('san cert' if cert_type == 'san' else 'sni_cert')
         san_mapping_queue.traverse_queue.return_value = [
             json.dumps({
                 "domain_name": "www.example.com",
                 "flavor_id": "flavor_id",
                 "project_id": "project_id",
-                "cert_type": "san",
+                "cert_type": cert_type,
                 "cert_details": {
                     "Akamai": {
                         "extra_info": {
-                            "san cert": "san.example.com",
+                            cert_key: "{0}.example.com".format(cert_type),
                             "akamai_spsId": 1
                         }
                     }
@@ -278,10 +295,11 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             self.bgc.distributed_task_controller.submit_task.called
         )
 
-    def test_post_job_ignored_cert_no_longer_exists(self):
+    @ddt.data("san", "sni")
+    def test_post_job_ignored_cert_no_longer_exists(self, cert_type):
         self.mock_storage.certificates_controller.\
             get_certs_by_domain.return_value = []
-
+        cert_key = ('san cert' if cert_type == 'san' else 'sni_cert')
         san_mapping_queue = self.manager_driver.providers[
             'akamai'].obj.san_mapping_queue
         san_mapping_queue.traverse_queue.return_value = [
@@ -289,11 +307,11 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
                 "domain_name": "www.example.com",
                 "flavor_id": "flavor_id",
                 "project_id": "project_id",
-                "cert_type": "san",
+                "cert_type": cert_type,
                 "cert_details": {
                     "Akamai": {
                         "extra_info": {
-                            "san cert": "san.example.com",
+                            cert_key: "san.example.com",
                             "akamai_spsId": 1
                         }
                     }
@@ -303,7 +321,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         ]
 
         run_list, ignore_list = self.bgc.post_job(
-            "akamai_update_papi_property_for_mod_san",
+            "akamai_update_papi_property_for_mod_{0}".format(cert_type),
             {'project_id': 'project_id'}
         )
         self.assertEqual(0, len(run_list))
@@ -314,7 +332,8 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             self.bgc.distributed_task_controller.submit_task.called
         )
 
-    def test_post_job_domain_type_modified_on_service(self):
+    @ddt.data("san", "sni")
+    def test_post_job_domain_type_modified_on_service(self, cert_type):
         self.mock_storage.certificates_controller.\
             get_certs_by_domain.return_value = [
                 mock.Mock()
@@ -334,6 +353,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
                 'flavor_id',
                 project_id='project_id'
             )
+        cert_key = ('san cert' if cert_type == 'san' else 'sni_cert')
         san_mapping_queue = self.manager_driver.providers[
             'akamai'].obj.san_mapping_queue
         san_mapping_queue.traverse_queue.return_value = [
@@ -341,11 +361,11 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
                 "domain_name": "www.example.com",
                 "flavor_id": "flavor_id",
                 "project_id": "project_id",
-                "cert_type": "san",
+                "cert_type": cert_type,
                 "cert_details": {
                     "Akamai": {
                         "extra_info": {
-                            "san cert": "san.example.com",
+                            cert_key: "san.example.com",
                             "akamai_spsId": 1
                         }
                     }
@@ -355,7 +375,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         ]
 
         run_list, ignore_list = self.bgc.post_job(
-            "akamai_update_papi_property_for_mod_san",
+            "akamai_update_papi_property_for_mod_{0}".format(cert_type),
             {'project_id': 'project_id'}
         )
         self.assertEqual(0, len(run_list))
@@ -366,8 +386,55 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             self.bgc.distributed_task_controller.submit_task.called
         )
 
-    @ddt.data("akamai_update_papi_property_for_mod_san")
-    def test_post_job_invalid_san_cert_cname(self, job_type):
+    @ddt.data("san", "sni")
+    def test_post_job_service_no_longer_exists(self, cert_type):
+        self.mock_storage.certificates_controller.\
+            get_certs_by_domain.return_value = [
+                mock.Mock()
+            ]
+        # simulate domain being changed from https+san to http
+        self.mock_storage.services_controller. \
+            get_service_details_by_domain_name.return_value = None
+
+        cert_key = ('san cert' if cert_type == 'san' else 'sni_cert')
+        san_mapping_queue = self.manager_driver.providers[
+            'akamai'].obj.san_mapping_queue
+        san_mapping_queue.traverse_queue.return_value = [
+            json.dumps({
+                "domain_name": "www.example.com",
+                "flavor_id": "flavor_id",
+                "project_id": "project_id",
+                "cert_type": cert_type,
+                "cert_details": {
+                    "Akamai": {
+                        "extra_info": {
+                            cert_key: "san.example.com",
+                            "akamai_spsId": 1
+                        }
+                    }
+                },
+                'property_activated': True
+            })
+        ]
+
+        run_list, ignore_list = self.bgc.post_job(
+            "akamai_update_papi_property_for_mod_{0}".format(cert_type),
+            {'project_id': 'project_id'}
+        )
+        self.assertEqual(0, len(run_list))
+        self.assertEqual(1, len(ignore_list))
+
+        self.assertEqual(
+            False,
+            self.bgc.distributed_task_controller.submit_task.called
+        )
+
+    @ddt.data(
+        ("akamai_update_papi_property_for_mod_san", "san"),
+        ("akamai_update_papi_property_for_mod_sni", "sni"),
+    )
+    def test_post_job_invalid_cert_cname(self, job_tuple):
+        job_type, cert_type = job_tuple
         # mock ssl storage returning a cert
         self.mock_storage.certificates_controller.\
             get_certs_by_domain.return_value = [
@@ -383,13 +450,14 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
                     domain.Domain(
                         "www.example.com",
                         protocol='https',
-                        certificate='san'
+                        certificate=cert_type
                     )
                 ],
                 [],
                 'flavor_id',
                 project_id='project_id'
             )
+        cert_key = ('san cert' if cert_type == 'san' else 'sni_cert')
         san_mapping_queue = self.manager_driver.providers[
             'akamai'].obj.san_mapping_queue
         san_mapping_queue.traverse_queue.return_value = [
@@ -397,11 +465,11 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
                 "domain_name": "www.example.com",
                 "flavor_id": "flavor_id",
                 "project_id": "project_id",
-                "cert_type": "san",
+                "cert_type": cert_type,
                 "cert_details": {
                     "Akamai": {
                         "extra_info": {
-                            "san cert": "not.exist.com",
+                            cert_key: "not.exist.com",
                             "akamai_spsId": 1
                         }
                     }

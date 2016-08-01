@@ -219,8 +219,8 @@ class UpdateProviderDetailIfNotEmptyTask(task.Task):
                                               project_id,
                                               service_id))
 
-        LOG.info('Updating service detail task'
-                 'complete for Changed Provider Details :'
+        LOG.info('Updating service detail task '
+                 'complete for Changed Provider Details : '
                  '{0}'.format(changed_provider_details_dict))
 
     def revert(self, *args, **kwargs):
