@@ -37,7 +37,7 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                     'cert_type': {
                         'type': 'string',
                         'required': True,
-                        'enum': ['san'],
+                        'enum': ['san', 'sni'],
                     },
                     'domain_name': {
                         'type': 'string',
@@ -154,7 +154,13 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                                             'properties': {
                                                 'san cert': {
                                                     'type': 'string',
-                                                    'required': True,
+                                                    'required': False,
+                                                    'minLength': 3,
+                                                    'maxLength': 253
+                                                },
+                                                'sni_cert': {
+                                                    'type': 'string',
+                                                    'required': False,
                                                     'minLength': 3,
                                                     'maxLength': 253
                                                 },
@@ -181,7 +187,7 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                         'cert_type': {
                             'type': 'string',
                             'required': True,
-                            'enum': ['san'],
+                            'enum': ['san', 'sni'],
                         }
                     }
                 }

@@ -187,6 +187,27 @@ class TestFlowRuns(base.TestCase):
         common.create_log_delivery_container = mock.Mock()
 
     @staticmethod
+    def patch_delete_ssl_certificate_flow(
+            service_controller,
+            storage_controller,
+            dns_controller,
+            ssl_cert_controller
+    ):
+        storage_controller.get = mock.Mock()
+        storage_controller.update = mock.Mock()
+        ssl_cert_controller.storage.delete_certificate = mock.Mock()
+        storage_controller._driver.close_connection = mock.Mock()
+        service_controller.provider_wrapper.delete_certificate = mock.Mock()
+        service_controller.provider_wrapper.delete_certificate.\
+            _mock_return_value = []
+        service_controller._driver = mock.Mock()
+        service_controller._driver.providers.__getitem__ = mock.Mock()
+        service_controller._driver.notification = [mock.Mock()]
+        dns_controller.create = mock.Mock()
+        dns_controller.create._mock_return_value = []
+        common.create_log_delivery_container = mock.Mock()
+
+    @staticmethod
     def patch_recreate_ssl_certificate_flow(
             service_controller, storage_controller, dns_controller):
         storage_controller.get = mock.Mock()
@@ -1031,11 +1052,18 @@ class TestFlowRuns(base.TestCase):
                         store=kwargs)
 
     def test_delete_ssl_certificate_normal(self):
-
+        providers = ['cdn_provider']
+        cert_obj_json = ssl_certificate.SSLCertificate(
+            'cdn',
+            'mytestsite.com',
+            'san'
+        )
         kwargs = {
             'cert_type': "san",
             'project_id': json.dumps(str(uuid.uuid4())),
-            'domain_name': "san.san.com",
+            'domain_name': "mytestsite.com",
+            'cert_obj_json': json.dumps(cert_obj_json.to_dict()),
+            'providers_list_json': json.dumps(providers),
             'context_dict': context_utils.RequestContext().to_dict()
         }
 
@@ -1052,10 +1080,11 @@ class TestFlowRuns(base.TestCase):
                                     ssl_cert_controller,
                                     memoized_controllers.task_controllers):
 
-            self.patch_create_ssl_certificate_flow(
+            self.patch_delete_ssl_certificate_flow(
                 service_controller,
                 storage_controller,
-                dns_controller
+                dns_controller,
+                ssl_cert_controller
             )
             engines.run(
                 delete_ssl_certificate.delete_ssl_certificate(),

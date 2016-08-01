@@ -229,6 +229,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             json.dumps({
                 "domain_name": "a_domain",
                 "project_id": "00000",
+                "cert_type": "san",
                 "flavor_id": "flavor",
                 "validate_service": True
             })
@@ -315,6 +316,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             bytearray(json.dumps({
                 "domain_name": "a_domain",
                 "project_id": "00000",
+                "cert_type": "san",
                 "flavor_id": "flavor",
                 "validate_service": True
             }), encoding='utf-8')
@@ -434,6 +436,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             bytearray(json.dumps({
                 "domain_name": "a_domain",
                 "project_id": "00000",
+                "cert_type": "san",
                 "flavor_id": "flavor",
                 "validate_service": True
             }), encoding='utf-8')
@@ -462,6 +465,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             bytearray(json.dumps({
                 "domain_name": "a_domain",
                 "project_id": "00000",
+                "cert_type": "san",
                 "flavor_id": "flavor",
                 "validate_service": True
             }), encoding='utf-8')

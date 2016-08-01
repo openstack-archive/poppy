@@ -74,17 +74,23 @@ AKAMAI_OPTIONS = [
              'SAN cert https policies'
     ),
     cfg.ListOpt(
+        'akamai_https_sni_config_numbers',
+        default=[str(random.randint(10000, 99999))],
+        help='A list of Akamai configuration number for '
+             'SNI cert https policies'
+    ),
+    cfg.ListOpt(
         'akamai_https_custom_config_numbers',
         default=[str(random.randint(10000, 99999))],
         help='A list of Akamai configuration number for '
              'Custom cert https policies'
     ),
 
-    cfg.ListOpt('sni_cert_cnames', default='secure.san.test.com',
+    cfg.ListOpt('sni_cert_cnames', default='secure.sni.test.com',
                 help='A list of sni certs cname host names'),
     # SANCERT related configs
     cfg.ListOpt('san_cert_cnames', default='secure.san.test.com',
-                help='A list of san certs cnamehost names'),
+                help='A list of san certs cname host names'),
     cfg.IntOpt('san_cert_hostname_limit', default=80,
                help='default limit on how many hostnames can'
                ' be held by a SAN cert'),
