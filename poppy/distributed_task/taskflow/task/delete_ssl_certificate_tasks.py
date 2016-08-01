@@ -48,7 +48,7 @@ class SendNotificationTask(task.Task):
         for n_driver in service_controller._driver.notification:
             service_controller.notification_wrapper.send(
                 n_driver,
-                n_driver.obj.notification_subject,
+                "Poppy Certificate Deleted",
                 notification_content)
 
         return

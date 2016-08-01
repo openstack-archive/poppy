@@ -13,12 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import socket
 import ssl
 import sys
 
 from kazoo import client
 from OpenSSL import crypto
+from oslo_log import log
 import six
+
+LOG = log.getLogger(__name__)
 
 # Python 3 does not have ssl.PROTOCOL_SSLv2, but has PROTOCOL_TLSv1_1,
 # PROTOCOL_TLSv1_2, and for some reason Jenkins will not pil up these
@@ -48,10 +52,9 @@ ssl_versions.extend(extra_versions)
 
 
 def get_ssl_number_of_hosts(remote_host):
-    '''Get number of Alternative names for a (SAN) Cert
+    """Get number of Alternative names for a (SAN) Cert."""
 
-    '''
-
+    LOG.info("Checking number of hosts for {0}".format(remote_host))
     for ssl_version in ssl_versions:
         try:
             cert = ssl.get_server_certificate((remote_host, 443),
@@ -76,13 +79,30 @@ def get_ssl_number_of_hosts(remote_host):
         result = len(sans)
         break
     else:
-        raise ValueError('Get remote host certificate info failed...')
+        raise ValueError(
+            'Get remote host certificate {0} info failed.'.format(remote_host))
     return result
+
+
+def get_ssl_number_of_hosts_alternate(remote_host):
+    context = ssl.create_default_context()
+    conn = context.wrap_socket(socket.socket(socket.AF_INET),
+                               server_hostname=remote_host)
+    conn.connect((remote_host, 443))
+    cert = conn.getpeercert()
+
+    conn.close()
+
+    return len([
+        san for record_type, san in cert['subjectAltName']
+        if record_type == 'DNS'
+    ])
 
 
 def get_sans_by_host(remote_host):
     """Get Subject Alternative Names for a (SAN) Cert."""
 
+    LOG.info("Retrieving sans for {0}".format(remote_host))
     for ssl_version in ssl_versions:
         try:
             cert = ssl.get_server_certificate(
@@ -109,8 +129,24 @@ def get_sans_by_host(remote_host):
         result = sans
         break
     else:
-        raise ValueError('Get remote host certificate info failed...')
+        raise ValueError(
+            'Get remote host certificate {0} info failed.'.format(remote_host))
     return result
+
+
+def get_sans_by_host_alternate(remote_host):
+    context = ssl.create_default_context()
+    conn = context.wrap_socket(socket.socket(socket.AF_INET),
+                               server_hostname=remote_host)
+    conn.connect((remote_host, 443))
+    cert = conn.getpeercert()
+
+    conn.close()
+
+    return [
+        san for record_type, san in cert['subjectAltName']
+        if record_type == 'DNS'
+    ]
 
 
 def connect_to_zookeeper_storage_backend(conf):
