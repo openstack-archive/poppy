@@ -28,11 +28,11 @@ class ServicesControllerBase(controller.NotificationControllerBase):
     def __init__(self, driver):
         super(ServicesControllerBase, self).__init__(driver)
 
-    def send(self):
+    def send(self, subject, mail_content):
         """delete.
 
-        :param provider_details
+        :param subject
+        :param mail_content
         :raises NotImplementedError
         """
-
         raise NotImplementedError

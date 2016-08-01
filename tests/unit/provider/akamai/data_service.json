@@ -29,6 +29,21 @@
         ],
         "flavor_id" : "standard"
     },
+    "single_one_origin_https_sni": {
+        "name" : "mysite.com",
+        "domains": [
+            {"domain": "parsely.sage.com"},
+            {"domain": "densely.sage.com",
+            "protocol": "https",
+            "certificate": "sni"},
+            {"domain": "rosemary.thyme.net",
+            "protocol": "http"}
+        ],
+        "origins": [
+            {"origin": "mockdomain.com", "ssl": false, "port": 80}
+        ],
+        "flavor_id" : "standard"
+    },
     "multiple_origins": {
         "name" : "mysite.com",
         "domains": [

@@ -45,7 +45,10 @@ class BackgroundJobSchema(schema_base.SchemaBase):
                         'job_type': {
                             'type': 'string',
                             'required': True,
-                            'enum': ['akamai_update_papi_property_for_mod_san']
+                            'enum': [
+                                'akamai_update_papi_property_for_mod_san',
+                                'akamai_update_papi_property_for_mod_sni'
+                            ]
                         },
                         'update_type': {
                             'type': 'string',
@@ -57,7 +60,10 @@ class BackgroundJobSchema(schema_base.SchemaBase):
                         },
                         'property_spec': {
                             'type': 'string',
-                            'enum': ['akamai_https_san_config_numbers']
+                            'enum': [
+                                'akamai_https_san_config_numbers'
+                                'akamai_https_sni_config_numbers'
+                            ]
                         },
                         'san_cert_domain_suffix': {
                             'type': 'string'

@@ -98,8 +98,27 @@ class ZookeeperSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         spsId, _ = self.zookeeper_client.get(my_sps_id_path)
         return spsId
 
+    def get_cert_enrollment_id(self, san_cert_name):
+        enrollment_id_path = self._zk_path(san_cert_name, 'enrollmentId')
+        self.zookeeper_client.ensure_path(enrollment_id_path)
+        enrollment_id, _ = self.zookeeper_client.get(enrollment_id_path)
+        return enrollment_id
+
     def _save_cert_property_value(self, san_cert_name,
                                   property_name, value):
         property_name_path = self._zk_path(san_cert_name, property_name)
         self.zookeeper_client.ensure_path(property_name_path)
         self.zookeeper_client.set(property_name_path, str(value))
+
+    def set_san_cert_hostname_limit(self, new_hostname_limit):
+        san_cert_hostname_limit_path = self._zk_path('san_cert_hostname_limit')
+        self.zookeeper_client.ensure_path(san_cert_hostname_limit_path)
+        hostname_limit, _ = self.zookeeper_client.set(
+            san_cert_hostname_limit_path, str(new_hostname_limit))
+
+    def get_san_cert_hostname_limit(self):
+        san_cert_hostname_limit_path = self._zk_path('san_cert_hostname_limit')
+        self.zookeeper_client.ensure_path(san_cert_hostname_limit_path)
+        hostname_limit, _ = self.zookeeper_client.get(
+            san_cert_hostname_limit_path)
+        return hostname_limit

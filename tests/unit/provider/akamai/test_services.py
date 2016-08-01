@@ -153,9 +153,14 @@ class TestServices(base.TestCase):
         )
         for curr_domain in service_obj.domains:
             if (
-                curr_domain.certificate == 'san' and
+                curr_domain.certificate in ['san', 'sni'] and
                 curr_domain.protocol == 'https'
             ):
+                cert_key = (
+                    'san cert'
+                    if curr_domain.certificate == 'san'
+                    else 'sni_cert'
+                )
                 curr_domain.cert_info = ssl_certificate.SSLCertificate(
                     'flavor_id',
                     curr_domain.domain,
@@ -166,7 +171,7 @@ class TestServices(base.TestCase):
                             cert_domain='1',
                             extra_info={
                                 'status': 'deployed',
-                                'san cert': '1',
+                                cert_key: '1',
                                 'created_at': str(datetime.datetime.now())
                             }
                         )
@@ -195,7 +200,7 @@ class TestServices(base.TestCase):
         num_domains_not_deployed = 0
         for curr_domain in service_obj.domains:
             if (
-                curr_domain.certificate == 'san' and
+                curr_domain.certificate in ['san', 'sni'] and
                 curr_domain.protocol == 'https'
             ):
                 num_domains_not_deployed += 1
@@ -615,9 +620,14 @@ class TestServices(base.TestCase):
         san_domains = []
         for curr_domain in service_obj.domains:
             if (
-                curr_domain.certificate == 'san' and
+                curr_domain.certificate in ['san', 'sni'] and
                 curr_domain.protocol == 'https'
             ):
+                cert_key = (
+                    'san cert'
+                    if curr_domain.certificate == 'san'
+                    else 'sni_cert'
+                )
                 curr_domain.cert_info = ssl_certificate.SSLCertificate(
                     'flavor_id',
                     curr_domain.domain,
@@ -628,7 +638,7 @@ class TestServices(base.TestCase):
                             cert_domain='1',
                             extra_info={
                                 'status': 'deployed',
-                                'san cert': '1',
+                                cert_key: '1',
                                 'created_at': str(datetime.datetime.now())
                             }
                         )
