@@ -76,7 +76,7 @@ class TestSSLCertificate(base.TestCase):
         ssl_cert.cert_details = cert_details
         self.assertEqual(ssl_cert.get_cert_status(), 'deployed')
         # check san edge on cert_type custom
-        self.assertEqual(ssl_cert.get_san_edge_name(), None)
+        self.assertEqual(ssl_cert.get_edge_host_name(), None)
         cert_details['mock']['extra_info'] = {
             'status': 'whatever'
         }
@@ -101,7 +101,7 @@ class TestSSLCertificate(base.TestCase):
                                                   cert_details=cert_details)
 
         self.assertEqual(ssl_cert.get_cert_status(), 'create_in_progress')
-        self.assertEqual(ssl_cert.get_san_edge_name(), None)
+        self.assertEqual(ssl_cert.get_edge_host_name(), None)
 
     def test_cert_details_is_none(self):
         project_id = '12345'
@@ -117,7 +117,7 @@ class TestSSLCertificate(base.TestCase):
                                                   cert_details=cert_details)
 
         self.assertEqual(ssl_cert.get_cert_status(), 'create_in_progress')
-        self.assertEqual(ssl_cert.get_san_edge_name(), None)
+        self.assertEqual(ssl_cert.get_edge_host_name(), None)
 
     def test_get_san_edge_positive(self):
         project_id = '12345'
@@ -138,7 +138,7 @@ class TestSSLCertificate(base.TestCase):
                                                   cert_type=cert_type,
                                                   cert_details=cert_details)
         self.assertEqual(
-            ssl_cert.get_san_edge_name(), 'secureX.sanX.content.com')
+            ssl_cert.get_edge_host_name(), 'secureX.sanX.content.com')
 
     def test_init_from_dict_positive(self):
         ssl_cert = ssl_certificate.SSLCertificate.init_from_dict(

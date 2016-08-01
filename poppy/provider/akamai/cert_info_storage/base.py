@@ -43,3 +43,15 @@ class BaseAkamaiSanInfoStorage(object):
     @abc.abstractmethod
     def list_all_san_cert_names(self):
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_san_cert_hostname_limit(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def set_san_cert_hostname_limit(self, new_hostname_limit):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_cert_enrollment_id(self, san_cert_name):
+        raise NotImplementedError
