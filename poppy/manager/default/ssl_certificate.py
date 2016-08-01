@@ -86,10 +86,22 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
         return kwargs
 
     def delete_ssl_certificate(self, project_id, domain_name, cert_type):
+        cert_obj = self.storage.get_certs_by_domain(
+            domain_name, cert_type=cert_type)
+
+        try:
+            flavor = self.flavor_controller.get(cert_obj.flavor_id)
+        # raise a lookup error if the flavor is not found
+        except LookupError as e:
+            raise e
+
+        providers = [p.provider_id for p in flavor.providers]
         kwargs = {
             'project_id': project_id,
             'domain_name': domain_name,
             'cert_type': cert_type,
+            'cert_obj_json': json.dumps(cert_obj.to_dict()),
+            'providers_list_json': json.dumps(providers),
             'context_dict': context_utils.get_current().to_dict()
         }
         self.distributed_task_controller.submit_task(
@@ -124,6 +136,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             {"domain_name": r['domain_name'],
              "project_id":  r['project_id'],
              "flavor_id":   r['flavor_id'],
+             "cert_type":   r['cert_type'],
              "validate_service": r.get('validate_service', True)}
             for r in res
         ]
@@ -238,7 +251,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                     cert_obj = ssl_certificate.SSLCertificate(
                         cert_obj_dict['flavor_id'],
                         cert_obj_dict['domain_name'],
-                        'san',
+                        cert_obj_dict['cert_type'],
                         project_id=cert_obj_dict['project_id']
                     )
 
@@ -254,6 +267,8 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                         # If this cert has been deployed through manual
                         # process we ignore the rerun process for this entry
                         if cert_for_domain.get_cert_status() == 'deployed':
+                            run_list.remove(cert_obj_dict)
+                            ignore_list.append(cert_obj_dict)
                             continue
                     # rerun the san process
                     try:
@@ -266,7 +281,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                     kwargs = {
                         'project_id': cert_obj.project_id,
                         'domain_name': cert_obj.domain_name,
-                        'cert_type': 'san',
+                        'cert_type': cert_obj.cert_type,
                         'providers_list_json': json.dumps(providers),
                         'cert_obj_json': json.dumps(cert_obj.to_dict()),
                         'enqueue': False,

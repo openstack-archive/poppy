@@ -315,6 +315,19 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         spsId = the_san_cert_info.get('spsId')
         return spsId
 
+    def get_cert_enrollment_id(self, sni_cert_name):
+        sni_cert_info = self._get_akamai_sni_certs_info().get(
+            sni_cert_name
+        )
+
+        if sni_cert_info is None:
+            raise ValueError(
+                'No enrollment info found for {0}.'.format(sni_cert_name)
+            )
+
+        enrollment_id = sni_cert_info.get('enrollmentId')
+        return enrollment_id
+
     def get_enabled_status(self, san_cert_name):
         the_san_cert_info = self._get_akamai_san_certs_info().get(
             san_cert_name

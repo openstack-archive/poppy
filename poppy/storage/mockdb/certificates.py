@@ -74,4 +74,7 @@ class CertificatesController(base.CertificatesController):
                 )
             return [cert for cert in certs if cert.project_id == project_id]
         else:
-            return certs
+            if len(certs) == 1:
+                return certs[0]
+            else:
+                return certs

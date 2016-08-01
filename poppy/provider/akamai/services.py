@@ -174,7 +174,7 @@ class ServiceController(base.ServiceBase):
                          (dp, classified_domain.domain))
                 # pick a san cert for this domain
                 edge_host_name = None
-                if classified_domain.certificate == 'san':
+                if classified_domain.certificate in ['san', 'sni']:
                     cert_info = getattr(classified_domain, 'cert_info', None)
                     if cert_info is None:
                         domains_certificate_status[
@@ -182,7 +182,7 @@ class ServiceController(base.ServiceBase):
                         continue
                     else:
                         edge_host_name = (
-                            classified_domain.cert_info.get_san_edge_name())
+                            classified_domain.cert_info.get_edge_host_name())
                         domains_certificate_status[classified_domain.domain] \
                             = (classified_domain.cert_info.get_cert_status())
                         if edge_host_name is None:
@@ -411,7 +411,7 @@ class ServiceController(base.ServiceBase):
                              'complete' % (dp, classified_domain.domain))
                     edge_host_name = None
                     old_operator_url = None
-                    if classified_domain.certificate == 'san':
+                    if classified_domain.certificate in ['san', 'sni']:
                         cert_info = getattr(classified_domain, 'cert_info',
                                             None)
                         if cert_info is None:
@@ -422,7 +422,7 @@ class ServiceController(base.ServiceBase):
                         else:
                             edge_host_name = (
                                 classified_domain.cert_info.
-                                get_san_edge_name())
+                                get_edge_host_name())
                             domain_access_url = service_obj.provider_details[
                                 self.driver.provider_name
                             ].get_domain_access_url(classified_domain.domain)
@@ -1075,6 +1075,8 @@ class ServiceController(base.ServiceBase):
                 configuration_number = self.driver.https_shared_conf_number
             elif domain_obj.certificate == 'san':
                 configuration_number = self.driver.https_san_conf_number
+            elif domain_obj.certificate == 'sni':
+                configuration_number = self.driver.https_sni_conf_number
             elif domain_obj.certificate == 'custom':
                 configuration_number = self.driver.https_custom_conf_number
             else:
@@ -1093,7 +1095,8 @@ class ServiceController(base.ServiceBase):
                      self.driver.akamai_https_access_url_suffix])
             elif domain_obj.certificate == 'san':
                 if edge_host_name is None:
-                    raise ValueError("No EdgeHost name provided for SAN Cert")
+                    raise ValueError(
+                        "No EdgeHost name provided for SAN Cert")
                 # ugly fix for existing san cert domains, but we will
                 # have to take it for now
                 elif edge_host_name.endswith(
@@ -1103,6 +1106,10 @@ class ServiceController(base.ServiceBase):
                     provider_access_url = '.'.join(
                         [edge_host_name,
                          self.driver.akamai_https_access_url_suffix])
+            elif domain_obj.certificate == 'sni':
+                if edge_host_name is None:
+                    raise ValueError("No EdgeHost name provided for SNI Cert")
+                provider_access_url = edge_host_name
             elif domain_obj.certificate == 'custom':
                 provider_access_url = '.'.join(
                     [dp, self.driver.akamai_https_access_url_suffix])

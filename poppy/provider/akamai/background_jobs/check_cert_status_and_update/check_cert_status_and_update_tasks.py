@@ -57,59 +57,113 @@ class CheckCertStatusTask(task.Task):
         if cert_obj_json != "":
             cert_obj = ssl_certificate.load_from_json(
                 json.loads(cert_obj_json))
-            latest_sps_id = cert_obj.cert_details['Akamai']['extra_info'].get(
-                'akamai_spsId')
-            current_status = cert_obj.cert_details['Akamai']['extra_info'].get(
-                'status')
+            if cert_obj.cert_type == 'san':
+                latest_sps_id = cert_obj.\
+                    cert_details['Akamai']['extra_info'].get(
+                        'akamai_spsId')
+                current_status = cert_obj.\
+                    cert_details['Akamai']['extra_info'].get(
+                        'status')
 
-            if latest_sps_id is None:
-                return current_status
+                if latest_sps_id is None:
+                    return current_status
 
-            resp = self.akamai_driver.akamai_sps_api_client.get(
-                self.akamai_driver.akamai_sps_api_base_url.format(
-                    spsId=latest_sps_id
-                )
-            )
-
-            if resp.status_code != 200:
-                raise RuntimeError('SPS API Request Failed'
-                                   'Exception: %s' % resp.text)
-
-            sps_request_info = json.loads(resp.text)['requestList'][0]
-            status = sps_request_info['status']
-            workFlowProgress = sps_request_info.get(
-                'workflowProgress')
-
-            # This SAN Cert is on pending status
-            if status == 'SPS Request Complete':
-                LOG.info("SPS completed for %s..." %
-                         cert_obj.get_san_edge_name())
-                return "deployed"
-            elif status == 'edge host already created or pending':
-                if workFlowProgress is not None and \
-                        'error' in workFlowProgress.lower():
-                    LOG.info("SPS Pending with Error:" %
-                             workFlowProgress)
-                    return "failed"
-                else:
-                    return "deployed"
-            elif status == 'CPS cancelled':
-                return "cancelled"
-            else:
-                LOG.info(
-                    "SPS Not completed for domain {0}, san_cert {1}. "
-                    "Found status {2}. "
-                    "Returning certificate object to Queue.".format(
-                        cert_obj.domain_name,
-                        cert_obj.get_san_edge_name(),
-                        status
+                resp = self.akamai_driver.akamai_sps_api_client.get(
+                    self.akamai_driver.akamai_sps_api_base_url.format(
+                        spsId=latest_sps_id
                     )
                 )
-                # convert cert_obj_json from unicode -> string
-                # before enqueue
-                self.akamai_driver.san_mapping_queue.enqueue_san_mapping(
-                    json.dumps(cert_obj.to_dict()))
-                return ""
+
+                if resp.status_code != 200:
+                    raise RuntimeError('SPS API Request Failed'
+                                       'Exception: %s' % resp.text)
+
+                sps_request_info = json.loads(resp.text)['requestList'][0]
+                status = sps_request_info['status']
+                workFlowProgress = sps_request_info.get(
+                    'workflowProgress')
+
+                # This SAN Cert is on pending status
+                if status == 'SPS Request Complete':
+                    LOG.info("SPS completed for %s..." %
+                             cert_obj.get_edge_host_name())
+                    return "deployed"
+                elif status == 'edge host already created or pending':
+                    if workFlowProgress is not None and \
+                            'error' in workFlowProgress.lower():
+                        LOG.info("SPS Pending with Error:" %
+                                 workFlowProgress)
+                        return "failed"
+                    else:
+                        return "deployed"
+                elif status == 'CPS cancelled':
+                    return "cancelled"
+                else:
+                    LOG.info(
+                        "SPS Not completed for domain {0}, san_cert {1}. "
+                        "Found status {2}. "
+                        "Returning certificate object to Queue.".format(
+                            cert_obj.domain_name,
+                            cert_obj.get_edge_host_name(),
+                            status
+                        )
+                    )
+                    # convert cert_obj_json from unicode -> string
+                    # before enqueue
+                    self.akamai_driver.san_mapping_queue.enqueue_san_mapping(
+                        json.dumps(cert_obj.to_dict()))
+                    return ""
+            elif cert_obj.cert_type == 'sni':
+                change_url = cert_obj.cert_details['Akamai']['extra_info'].get(
+                    'change_url')
+                current_status = cert_obj.\
+                    cert_details['Akamai']['extra_info'].get(
+                        'status')
+
+                if change_url is None:
+                    return current_status
+
+                enrollment_id = self.akamai_driver.cert_info_storage.\
+                    get_cert_enrollment_id(cert_obj.get_edge_host_name())
+
+                headers = {
+                    'Accept': (
+                        'application/vnd.akamai.cps.enrollment.v1+json')
+                }
+                resp = self.akamai_driver.akamai_cps_api_client.get(
+                    self.akamai_driver.akamai_cps_api_base_url.format(
+                        enrollmentId=enrollment_id
+                    ),
+                    headers=headers
+                )
+                if resp.status_code not in [200, 202]:
+                    LOG.error(
+                        "Unable to retrieve enrollment while attempting"
+                        "to update cert status. Status {0} Body {1}".format(
+                            resp.status_code,
+                            resp.text
+                        )
+                    )
+                    return current_status
+                resp_json = json.loads(resp.text)
+
+                pending_changes = resp_json["pendingChanges"]
+                dns_names = (
+                    resp_json["networkConfiguration"]["sni"]["dnsNames"]
+                )
+
+                if change_url not in pending_changes:
+                    if cert_obj.domain_name in dns_names:
+                        return "deployed"
+                    else:
+                        return "failed"
+                else:
+                    # the change url is still present under pending changes,
+                    # return the item to the queue. another attempt to
+                    # check and update the cert status should happen
+                    self.akamai_driver.san_mapping_queue.enqueue_san_mapping(
+                        json.dumps(cert_obj.to_dict()))
+                    return current_status
 
 
 class UpdateCertStatusTask(task.Task):

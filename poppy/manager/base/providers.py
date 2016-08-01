@@ -74,12 +74,14 @@ class ProviderWrapper(object):
             purge_url)
 
     def create_certificate(self, ext, cert_obj, enqueue, https_upgrade):
-        """Create a certificate
+        """Create a certificate.
 
         :param ext
         :param cert_obj
         :param enqueue
-        :returns: ext.obj.service_controller.create(service_obj)
+        :param https_upgrade
+        :returns: ext.obj.certificate_controller.create_certificate(cert_obj,
+            enqueue, https_upgrade)
         """
 
         return ext.obj.certificate_controller.create_certificate(
@@ -87,3 +89,13 @@ class ProviderWrapper(object):
             enqueue,
             https_upgrade
         )
+
+    def delete_certificate(self, ext, cert_obj):
+        """Delete a certificate.
+
+        :param ext
+        :param cert_obj
+        :returns: ext.obj.service_controller.delete_certificate(cert_obj)
+        """
+
+        return ext.obj.certificate_controller.delete_certificate(cert_obj)

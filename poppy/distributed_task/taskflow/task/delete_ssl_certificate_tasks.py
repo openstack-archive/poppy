@@ -13,11 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 from oslo_config import cfg
 from oslo_log import log
 from taskflow import task
 
 from poppy.distributed_task.utils import memoized_controllers
+from poppy.transport.pecan.models.request import ssl_certificate
 
 LOG = log.getLogger(__name__)
 
@@ -28,11 +31,24 @@ conf(project='poppy', prog='poppy', args=[])
 class DeleteProviderSSLCertificateTask(task.Task):
     default_provides = "responders"
 
-    def execute(self):
-        # Note(tonytan4ever): For right now there is no
-        # way to code the process of deleting a certificate object
-        # from Akamai
+    def execute(self, providers_list_json, cert_obj_json):
+        service_controller = memoized_controllers.task_controllers('poppy')
+
+        cert_obj = ssl_certificate.load_from_json(json.loads(cert_obj_json))
+        providers_list = json.loads(providers_list_json)
+
         responders = []
+        # try to delete all certificates from each provider
+        for provider in providers_list:
+            LOG.info(
+                'Starting to delete ssl certificate: {0} from {1}.'.format(
+                    cert_obj.to_dict(), provider))
+            responder = service_controller.provider_wrapper.delete_certificate(
+                service_controller._driver.providers[provider],
+                cert_obj,
+            )
+            responders.append(responder)
+
         return responders
 
 
@@ -45,10 +61,23 @@ class SendNotificationTask(task.Task):
             "Project ID: %s, Domain Name: %s, Cert type: %s" %
             (project_id, domain_name, cert_type))
 
+        notification_content = ""
+        for responder in responders:
+            for provider in responder:
+                notification_content += (
+                    "Project ID: {0}, Provider: {1}, "
+                    "Detail: {2}, Cert type: {3}".format(
+                        project_id,
+                        provider,
+                        str(responder[provider]),
+                        cert_type
+                    )
+                )
+
         for n_driver in service_controller._driver.notification:
             service_controller.notification_wrapper.send(
                 n_driver,
-                n_driver.obj.notification_subject,
+                "Poppy Certificate Deleted",
                 notification_content)
 
         return
