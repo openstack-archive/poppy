@@ -85,14 +85,21 @@ AKAMAI_OPTIONS = [
              'SAN cert https policies'
     ),
     cfg.ListOpt(
+        'akamai_https_sni_config_numbers',
+        help='A list of Akamai configuration number for '
+             'SNI cert https policies'
+    ),
+    cfg.ListOpt(
         'akamai_https_custom_config_numbers',
         help='A list of Akamai configuration number for '
              'Custom cert https policies'
     ),
 
+    cfg.ListOpt('sni_cert_cnames',
+                help='A list of sni cert cname host names'),
     # SANCERT related configs
     cfg.ListOpt('san_cert_cnames',
-                help='A list of san certs cnamehost names'),
+                help='A list of san certs cname host names'),
     cfg.IntOpt('san_cert_hostname_limit', default=80,
                help='default limit on how many hostnames can'
                ' be held by a SAN cert'),
@@ -120,6 +127,7 @@ VALID_PROPERTY_SPEC = [
     "akamai_http_config_number",
     "akamai_https_shared_config_number",
     "akamai_https_san_config_numbers",
+    "akamai_https_sni_config_numbers",
     "akamai_https_custom_config_numbers"]
 
 
@@ -151,6 +159,8 @@ class CDNProvider(base.Driver):
             self.akamai_conf.akamai_https_shared_config_number)
         self.https_san_conf_number = (
             self.akamai_conf.akamai_https_san_config_numbers[-1])
+        self.https_sni_conf_number = (
+            self.akamai_conf.akamai_https_sni_config_numbers[-1])
         self.https_custom_conf_number = (
             self.akamai_conf.akamai_https_custom_config_numbers[-1])
 
@@ -182,6 +192,11 @@ class CDNProvider(base.Driver):
             )
         ])
 
+        self.akamai_cps_api_base_url = ''.join([
+            str(self.akamai_conf.policy_api_base_url),
+            'cps/v2/enrollments/{enrollmentId}'
+        ])
+
         self.akamai_papi_api_base_url = ''.join([
             str(self.akamai_conf.policy_api_base_url),
             'papi/v0/{middle_part}/'
@@ -191,10 +206,12 @@ class CDNProvider(base.Driver):
         ])
 
         self.san_cert_cnames = self.akamai_conf.san_cert_cnames
+        self.sni_cert_cnames = self.akamai_conf.sni_cert_cnames
         self.san_cert_hostname_limit = self.akamai_conf.san_cert_hostname_limit
 
         self.akamai_sps_api_client = self.akamai_policy_api_client
         self.akamai_papi_api_client = self.akamai_policy_api_client
+        self.akamai_cps_api_client = self.akamai_policy_api_client
         self.akamai_sub_customer_api_client = self.akamai_policy_api_client
         self.mod_san_queue = (
             zookeeper_queue.ZookeeperModSanQueue(self._conf))

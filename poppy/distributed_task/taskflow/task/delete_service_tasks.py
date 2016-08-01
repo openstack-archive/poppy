@@ -231,13 +231,16 @@ class DeleteCertificatesForServiceSanDomains(task.Task):
 
         kwargs = {
             'project_id': project_id,
-            'cert_type': 'san',
             'context_dict': context_utils.get_current().to_dict()
         }
 
         for domain in service_obj.domains:
-            if domain.protocol == 'https' and domain.certificate == 'san':
+            if (
+                domain.protocol == 'https' and
+                domain.certificate in ['san', 'sni']
+            ):
                 kwargs["domain_name"] = domain.domain
+                kwargs["cert_type"] = domain.certificate
                 LOG.info(
                     "Delete service submit task san_cert deletion {0}".format(
                         domain.domain

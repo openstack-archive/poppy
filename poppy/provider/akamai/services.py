@@ -174,7 +174,7 @@ class ServiceController(base.ServiceBase):
                          (dp, classified_domain.domain))
                 # pick a san cert for this domain
                 edge_host_name = None
-                if classified_domain.certificate == 'san':
+                if classified_domain.certificate in ['san', 'sni']:
                     cert_info = getattr(classified_domain, 'cert_info', None)
                     if cert_info is None:
                         domains_certificate_status[
@@ -411,7 +411,7 @@ class ServiceController(base.ServiceBase):
                              'complete' % (dp, classified_domain.domain))
                     edge_host_name = None
                     old_operator_url = None
-                    if classified_domain.certificate == 'san':
+                    if classified_domain.certificate in ['san', 'sni']:
                         cert_info = getattr(classified_domain, 'cert_info',
                                             None)
                         if cert_info is None:
@@ -1075,6 +1075,8 @@ class ServiceController(base.ServiceBase):
                 configuration_number = self.driver.https_shared_conf_number
             elif domain_obj.certificate == 'san':
                 configuration_number = self.driver.https_san_conf_number
+            elif domain_obj.certificate == 'sni':
+                configuration_number = self.driver.https_sni_conf_number
             elif domain_obj.certificate == 'custom':
                 configuration_number = self.driver.https_custom_conf_number
             else:
@@ -1091,10 +1093,11 @@ class ServiceController(base.ServiceBase):
                 provider_access_url = '.'.join(
                     ['.'.join(dp.split('.')[1:]),
                      self.driver.akamai_https_access_url_suffix])
-            elif domain_obj.certificate == 'san':
+            elif domain_obj.certificate in ['san', 'sni']:
                 if edge_host_name is None:
-                    raise ValueError("No EdgeHost name provided for SAN Cert")
-                # ugly fix for existing san cert domains, but we will
+                    raise ValueError(
+                        "No EdgeHost name provided for SAN/SNI Cert")
+                # ugly fix for existing san or sni cert domains, but we will
                 # have to take it for now
                 elif edge_host_name.endswith(
                         self.driver.akamai_https_access_url_suffix):

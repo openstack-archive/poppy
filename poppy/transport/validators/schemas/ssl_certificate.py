@@ -37,7 +37,7 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                     'cert_type': {
                         'type': 'string',
                         'required': True,
-                        'enum': ['san'],
+                        'enum': ['san', 'sni'],
                     },
                     'domain_name': {
                         'type': 'string',
