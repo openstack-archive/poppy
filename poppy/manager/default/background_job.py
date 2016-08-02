@@ -54,9 +54,10 @@ class BackgroundJobController(base.BackgroundJobController):
                     consume=True
                 )
 
-                for cert_dict in queue_data:
+                for cert in queue_data:
+                    cert_dict = dict()
                     try:
-                        cert_dict = json.loads(cert_dict)
+                        cert_dict = json.loads(cert)
                         LOG.info(
                             'Starting to check status on domain: {0},'
                             'for project_id: {1}'
@@ -69,7 +70,7 @@ class BackgroundJobController(base.BackgroundJobController):
                         )
                         t_kwargs = {
                             "cert_obj_json": json.dumps(cert_dict),
-                            "project_id": kwargs.get("project_id")
+                            "project_id": cert_dict.get("project_id")
                         }
                         self.distributed_task_controller.submit_task(
                             check_cert_status_and_update_flow.
@@ -99,9 +100,10 @@ class BackgroundJobController(base.BackgroundJobController):
 
             cname_host_info_list = []
 
-            for cert_dict in queue_data:
+            for cert in queue_data:
+                cert_dict = dict()
                 try:
-                    cert_dict = json.loads(cert_dict)
+                    cert_dict = json.loads(cert)
 
                     domain_name = cert_dict["domain_name"]
                     san_cert = (

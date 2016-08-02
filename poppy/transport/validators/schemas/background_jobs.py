@@ -33,7 +33,7 @@ class BackgroundJobSchema(schema_base.SchemaBase):
                         },
                         'project_id': {
                             'type': 'string',
-                            'required': True
+                            'required': False
                         }
                     }
                 },
