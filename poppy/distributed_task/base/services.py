@@ -28,7 +28,7 @@ class ServicesControllerBase(controller.DistributedTaskControllerBase):
     def __init__(self, driver):
         super(ServicesControllerBase, self).__init__(driver)
 
-    def submit_task(self):
+    def submit_task(self, flow_factory, **kwargs):
         """submit a task .
 
         :raises NotImplementedError
