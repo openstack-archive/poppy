@@ -33,18 +33,18 @@ class ModSanQueue(object):
     def __init__(self, conf):
         self._conf = conf
 
-    def enqueue_mod_san_request(self, domain_name):
+    def enqueue_mod_san_request(self, cert_obj_json):
         raise NotImplementedError
 
     def dequeue_mod_san_request(self):
         raise NotImplementedError
 
     def traverse_queue(self):
-        '''Travese queue and return all items on the queue in a list'''
+        """Traverse queue and return all items on the queue in a list."""
         raise NotImplementedError
 
     def put_queue_data(self, queue_data_list):
-        '''Juggling and put new queue data list in the queue'''
+        """Juggling and put new queue data list in the queue."""
         raise NotImplementedError
 
     def move_request_to_top(self):

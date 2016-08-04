@@ -97,14 +97,18 @@ class CheckCertStatusTask(task.Task):
                 return "cancelled"
             else:
                 LOG.info(
-                    "SPS Not completed for {0}. "
+                    "SPS Not completed for domain {0}, san_cert {1}. "
+                    "Found status {2}. "
                     "Returning certificate object to Queue.".format(
-                        cert_obj.get_san_edge_name()
+                        cert_obj.domain_name,
+                        cert_obj.get_san_edge_name(),
+                        status
                     )
                 )
+                # convert cert_obj_json from unicode -> string
+                # before enqueue
                 self.akamai_driver.san_mapping_queue.enqueue_san_mapping(
-                    cert_obj_json
-                )
+                    json.dumps(cert_obj.to_dict()))
                 return ""
 
 

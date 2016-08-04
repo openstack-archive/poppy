@@ -196,7 +196,10 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                         'validate_service to False to retry this san-retry '
                         'request forcefully'.format(r['domain_name'], r)
                     )
-                elif service_obj.operator_status.lower() == 'disabled':
+                elif (
+                    service_obj is not None and
+                    service_obj.operator_status.lower() == 'disabled'
+                ):
                     err_state = True
                     LOG.error(
                         u'The service for domain {0} is disabled.'
