@@ -115,10 +115,19 @@ class CertificatesController(base.CertificatesController):
             CQL_CREATE_CERT,
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
-        self.insert_cert_status(
-            cert_obj.domain_name,
-            cert_obj.get_cert_status()
-        )
+
+        try:
+            provider_status = json.loads(
+                list(cert_obj.cert_details.values())[0]
+            )
+            cert_status = provider_status['extra_info']['status']
+        except (IndexError, IndexError, ValueError) as e:
+            LOG.error("Certificate details in inconsistent "
+                      "state: {0}".format(cert_obj.cert_details))
+            LOG.error(e)
+        else:
+            # insert/update for cassandra
+            self.insert_cert_status(cert_obj.domain_name, cert_status)
 
     def delete_certificate(self, project_id, domain_name, cert_type):
         args = {
@@ -170,8 +179,7 @@ class CertificatesController(base.CertificatesController):
             provider_status = json.loads(list(cert_details.values())[0])
             cert_status = provider_status['extra_info']['status']
         except (IndexError, IndexError, ValueError) as e:
-            LOG.error("Certificate details "
-                      "in inconsistent "
+            LOG.error("Certificate details in inconsistent "
                       "state: {0}".format(cert_details))
             LOG.error(e)
         else:

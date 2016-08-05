@@ -418,7 +418,7 @@ class DefaultServicesController(base.ServicesController):
             delattr(self, store)
 
         # check if the service domain names already exist
-        # existing ones does not count!
+        # existing shared domains do not count!
         for d in service_new.domains:
             if self.storage_controller.domain_exists_elsewhere(
                     d.domain,

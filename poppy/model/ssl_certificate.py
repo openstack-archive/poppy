@@ -108,8 +108,8 @@ class SSLCertificate(common.DictSerializableModel):
         if first_provider_cert_details is None:
             return "create_in_progress"
         else:
-            result = first_provider_cert_details.get('status',
-                                                     "create_in_progress")
+            result = first_provider_cert_details.get(
+                'status', "create_in_progress")
             if result not in VALID_STATUS_IN_CERT_DETAIL:
                 raise ValueError(
                     u'Status in cert_details: {0} not in valid options: {1}'.

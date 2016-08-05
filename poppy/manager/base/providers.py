@@ -34,8 +34,6 @@ class ProviderWrapper(object):
 
         :param ext
         :param provider_details
-        :param service_old
-        :param service_updates
         :param service_obj
         """
 

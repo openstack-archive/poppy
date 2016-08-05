@@ -202,7 +202,7 @@ class ServicesController(base.ServicesBase):
                 yield '{0}{1}.{2}'.format(shard_prefix, shard_id, suffix)
 
     def generate_shared_ssl_domain_suffix(self):
-        """Rackespace DNS scheme to generate a shared ssl domain suffix,
+        """Rackspace DNS scheme to generate a shared ssl domain suffix,
 
         to be used with manager for shared ssl feature
 

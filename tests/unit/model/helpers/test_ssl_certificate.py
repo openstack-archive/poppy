@@ -75,8 +75,77 @@ class TestSSLCertificate(base.TestCase):
         }
         ssl_cert.cert_details = cert_details
         self.assertEqual(ssl_cert.get_cert_status(), 'deployed')
+        # check san edge on cert_type custom
+        self.assertEqual(ssl_cert.get_san_edge_name(), None)
         cert_details['mock']['extra_info'] = {
             'status': 'whatever'
         }
 
         self.assertRaises(ValueError, ssl_cert.get_cert_status)
+
+    def test_get_cert_status_extra_info_none(self):
+        project_id = '12345'
+        cert_details = {
+            'mock': {
+                'extra_info': None
+            }
+        }
+        flavor_id = 'myflavor'
+        domain_name = 'www.mydomain.com'
+        cert_type = 'san'
+
+        ssl_cert = ssl_certificate.SSLCertificate(project_id=project_id,
+                                                  flavor_id=flavor_id,
+                                                  domain_name=domain_name,
+                                                  cert_type=cert_type,
+                                                  cert_details=cert_details)
+
+        self.assertEqual(ssl_cert.get_cert_status(), 'create_in_progress')
+        self.assertEqual(ssl_cert.get_san_edge_name(), None)
+
+    def test_cert_details_is_none(self):
+        project_id = '12345'
+        cert_details = None
+        flavor_id = 'myflavor'
+        domain_name = 'www.mydomain.com'
+        cert_type = 'san'
+
+        ssl_cert = ssl_certificate.SSLCertificate(project_id=project_id,
+                                                  flavor_id=flavor_id,
+                                                  domain_name=domain_name,
+                                                  cert_type=cert_type,
+                                                  cert_details=cert_details)
+
+        self.assertEqual(ssl_cert.get_cert_status(), 'create_in_progress')
+        self.assertEqual(ssl_cert.get_san_edge_name(), None)
+
+    def test_get_san_edge_positive(self):
+        project_id = '12345'
+        cert_details = {
+            'mock': {
+                'extra_info': {
+                    'san cert': 'secureX.sanX.content.com'
+                }
+            }
+        }
+        flavor_id = 'flavor'
+        domain_name = 'www.domain.com'
+        cert_type = 'san'
+
+        ssl_cert = ssl_certificate.SSLCertificate(project_id=project_id,
+                                                  flavor_id=flavor_id,
+                                                  domain_name=domain_name,
+                                                  cert_type=cert_type,
+                                                  cert_details=cert_details)
+        self.assertEqual(
+            ssl_cert.get_san_edge_name(), 'secureX.sanX.content.com')
+
+    def test_init_from_dict_positive(self):
+        ssl_cert = ssl_certificate.SSLCertificate.init_from_dict(
+            {'cert_type': 'san'})
+
+        self.assertIsNone(ssl_cert.flavor_id)
+        self.assertIsNone(ssl_cert.domain_name)
+        self.assertEqual('san', ssl_cert.cert_type)
+        self.assertEqual({}, ssl_cert.cert_details)
+        self.assertIsNone(ssl_cert.project_id)
