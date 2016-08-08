@@ -15,7 +15,6 @@
 
 import uuid
 
-import cassandra
 import ddt
 import mock
 from oslo_config import cfg
@@ -27,10 +26,10 @@ from tests.unit import base
 
 
 @ddt.ddt
-class CassandraStorageServiceTests(base.TestCase):
+class CassandraStorageCertificateTests(base.TestCase):
 
     def setUp(self):
-        super(CassandraStorageServiceTests, self).setUp()
+        super(CassandraStorageCertificateTests, self).setUp()
 
         # mock arguments to use
         self.project_id = '123456'
@@ -54,16 +53,18 @@ class CassandraStorageServiceTests(base.TestCase):
         migrations_patcher.start()
         self.addCleanup(migrations_patcher.stop)
 
+        cluster_patcher = mock.patch('cassandra.cluster.Cluster')
+        self.mock_cluster = cluster_patcher.start()
+        self.mock_session = self.mock_cluster().connect()
+        self.addCleanup(cluster_patcher.stop)
+
         # stubbed cassandra driver
         self.cc = certificates.CertificatesController(cassandra_driver)
 
     @ddt.file_data('data_get_certs_by_domain.json')
-    @mock.patch.object(certificates.CertificatesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_get_certs_by_domain(self, cert_details_json,
-                                 mock_session, mock_execute):
+    def test_get_certs_by_domain(self, cert_details_json):
         # mock the response from cassandra
-        mock_execute.execute.return_value = cert_details_json[0]
+        self.mock_session.execute.return_value = cert_details_json[0]
         actual_response = self.cc.get_certs_by_domain(
             domain_name="www.mydomain.com"
         )
@@ -71,7 +72,7 @@ class CassandraStorageServiceTests(base.TestCase):
         self.assertTrue(all([isinstance(ssl_cert,
                                         ssl_certificate.SSLCertificate)
                              for ssl_cert in actual_response]))
-        mock_execute.execute.return_value = cert_details_json[1]
+        self.mock_session.execute.return_value = cert_details_json[1]
         actual_response = self.cc.get_certs_by_domain(
             domain_name="www.example.com",
             flavor_id="flavor1")
@@ -79,7 +80,7 @@ class CassandraStorageServiceTests(base.TestCase):
         self.assertTrue(all([isinstance(ssl_cert,
                                         ssl_certificate.SSLCertificate)
                              for ssl_cert in actual_response]))
-        mock_execute.execute.return_value = cert_details_json[2]
+        self.mock_session.execute.return_value = cert_details_json[2]
         actual_response = self.cc.get_certs_by_domain(
             domain_name="www.mydomain.com",
             flavor_id="flavor1",
@@ -87,20 +88,82 @@ class CassandraStorageServiceTests(base.TestCase):
         self.assertTrue(isinstance(actual_response,
                                    ssl_certificate.SSLCertificate))
 
-    @mock.patch.object(certificates.CertificatesController, 'session')
-    @mock.patch.object(cassandra.cluster.Session, 'execute')
-    def test_get_certs_by_status(self, mock_session, mock_execute):
+    def test_get_certs_by_status(self):
         # mock the response from cassandra
-        mock_execute.execute.return_value = \
+        self.mock_session.execute.return_value = \
             [{"domain_name": "www.example.com"}]
         actual_response = self.cc.get_certs_by_status(
             status="deployed")
         self.assertEqual(actual_response,
                          [{"domain_name": "www.example.com"}])
 
-        mock_execute.execute.return_value = \
+        self.mock_session.execute.return_value = \
             [{"domain_name": "www.example1.com"}]
         actual_response = self.cc.get_certs_by_status(
             status="failed")
         self.assertEqual(actual_response,
                          [{"domain_name": "www.example1.com"}])
+
+    @ddt.file_data('data_get_certs_by_domain.json')
+    def test_create_cert_already_exists(self, cert_details_json):
+        # mock the response from cassandra
+        self.mock_session.execute.return_value = cert_details_json[0]
+
+        ssl_cert_obj = ssl_certificate.SSLCertificate(
+            'flavor1',
+            'www.mydomain.com',
+            'san'
+        )
+        self.assertRaises(
+            ValueError,
+            self.cc.create_certificate, '12345', ssl_cert_obj
+        )
+
+    @ddt.file_data('data_get_certs_by_domain.json')
+    def test_delete_cert(self, cert_details_json):
+        # mock the response from cassandra
+        self.mock_session.execute.return_value = cert_details_json[0]
+
+        try:
+            self.cc.delete_certificate('12345', 'www.mydomain.com', 'san')
+        except Exception as e:
+            self.fail(e)
+
+    def test_create_certificate_with_cert_status_in_details(self):
+        ssl_cert_obj = ssl_certificate.SSLCertificate(
+            'flavor1',
+            'www.mydomain.com',
+            'san',
+            project_id='12345',
+            cert_details={
+                "provider": "{\"cert_domain\": \"abc\", \"extra_info\": "
+                            "{ \"status\": \"deployed\", \"san_cert\": \""
+                            "awesome_san\", \"action\": \"Ready\"}}"
+            }
+        )
+
+        try:
+            self.cc.create_certificate('12345', ssl_cert_obj)
+        except Exception as e:
+            self.fail(e)
+
+    def test_update_certificate_with_cert_status_in_details(self):
+        ssl_cert_obj = ssl_certificate.SSLCertificate(
+            'flavor1',
+            'www.mydomain.com',
+            'san',
+            project_id='12345',
+            cert_details={
+                "provider": "{\"cert_domain\": \"abc\", \"extra_info\": "
+                            "{ \"status\": \"deployed\", \"san_cert\": \""
+                            "awesome_san\", \"action\": \"Ready\"}}"
+            }
+        )
+
+        try:
+            self.cc.update_certificate(
+                'www.mydomain.com', 'san', 'flavor1',
+                ssl_cert_obj.cert_details
+            )
+        except Exception as e:
+            self.fail(e)

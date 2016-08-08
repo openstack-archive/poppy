@@ -73,7 +73,7 @@ class ProviderWrapper(object):
             hard,
             purge_url)
 
-    def create_certificate(self, ext, cert_obj, enqueue):
+    def create_certificate(self, ext, cert_obj, enqueue, https_upgrade):
         """Create a certificate
 
         :param ext
@@ -84,5 +84,6 @@ class ProviderWrapper(object):
 
         return ext.obj.certificate_controller.create_certificate(
             cert_obj,
-            enqueue
+            enqueue,
+            https_upgrade
         )

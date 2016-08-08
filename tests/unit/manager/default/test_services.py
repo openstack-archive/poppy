@@ -669,8 +669,7 @@ class DefaultManagerServiceTests(base.TestCase):
                                        return_value=Response(False)):
                     self.mock_update_service(provider_details_json)
 
-    @ddt.file_data('service_update.json')
-    def test_update(self, update_json):
+    def test_update(self):
         provider_details_dict = {
             "MaxCDN": {"id": 11942, "access_urls": ["mypullzone.netdata.com"]},
             "Mock": {"id": 73242, "access_urls": ["mycdn.mock.com"]},
@@ -712,6 +711,177 @@ class DefaultManagerServiceTests(base.TestCase):
 
         # ensure the manager calls the storage driver with the appropriate data
         self.sc.storage_controller.update_service.assert_called_once()
+
+    def test_upgrade_http_to_https_san(self):
+        provider_details_dict = {
+            "MaxCDN": {
+                "id": 11942,
+                "access_urls": [{
+                    "domain": "www.mywebsite.com",
+                    "access_url": "mypullzone.netdata.com",
+                    "provider_url": 'maxcdn.provider.com'
+                }]
+            },
+            "Mock": {
+                "id": 73242,
+                "access_urls": [{
+                    "domain": "www.mywebsite.com",
+                    "access_url": "mycdn.mock.com",
+                    "provider_url": 'mock.provider.com'
+                }]
+            },
+            "CloudFront": {
+                "id": "5ABC892",
+                "access_urls": [{
+                    "access_url": "cf123.cloudcf.com",
+                    "domain": "www.mywebsite.com",
+                    "provider_url": 'cf.provider.com'
+                }]
+            },
+            "Fastly": {
+                "id": 3488,
+                "access_urls": [{
+                    "access_url": "mockcf123.fastly.prod.com",
+                    "domain": "www.mywebsite.com",
+                    "provider_url": 'fastly.provider.com'
+                }]
+            }
+        }
+
+        providers_details_dict = {}
+        for name in provider_details_dict:
+            details = provider_details_dict[name]
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=details['id'],
+                access_urls=details['access_urls'],
+                status=details.get('status', u'unknown'))
+            providers_details_dict[name] = provider_detail_obj
+
+        self.sc.storage_controller.get_provider_details.return_value = (
+            providers_details_dict
+        )
+
+        service_obj = service.load_from_json(self.service_json)
+        service_obj.provider_details = providers_details_dict
+        service_obj.status = u'deployed'
+        self.sc.storage_controller.get_service.return_value = service_obj
+        self.sc.ssl_certificate_storage.get_certs_by_domain.return_value = []
+        self.sc.flavor_controller.get.return_value = flavor.Flavor(
+            'standard',
+            providers=[
+                flavor.Provider('MaxCDN', 'http://maxcdn.com'),
+                flavor.Provider('Mock', 'http://www.mock.com'),
+                flavor.Provider('CloudFront', 'http://www.cloudfront.com'),
+                flavor.Provider('Fastly', 'http://www.fastly.com')
+            ]
+        )
+        service_updates = json.dumps([
+            {
+                "op": "replace",
+                "path": "/domains/0",
+                "value": {
+                    "domain": "www.mywebsite.com",
+                    "protocol": "https",
+                    "certificate": "san"
+                }
+            }
+        ])
+
+        self.sc.update_service(
+            self.project_id,
+            self.service_id,
+            self.auth_token,
+            service_updates
+        )
+
+        # ensure the manager calls the storage driver with the appropriate data
+        self.sc.storage_controller.update_service.assert_called_once()
+
+    def test_update_service_operator_status_disabled_error(self):
+        provider_details_dict = {
+            "MaxCDN": {"id": 11942, "access_urls": ["mypullzone.netdata.com"]},
+            "Mock": {"id": 73242, "access_urls": ["mycdn.mock.com"]},
+            "CloudFront": {
+                "id": "5ABC892", "access_urls": ["cf123.cloudcf.com"]},
+            "Fastly": {
+                "id": 3488, "access_urls": ["mockcf123.fastly.prod.com"]}
+        }
+        providers_details = {}
+        for name in provider_details_dict:
+            details = provider_details_dict[name]
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=details['id'],
+                access_urls=details['access_urls'],
+                status=details.get('status', u'unknown'))
+            providers_details[name] = provider_detail_obj
+
+        self.sc.storage_controller.get_provider_details.return_value = (
+            providers_details
+        )
+
+        service_obj = service.load_from_json(self.service_json)
+        service_obj.status = u'deployed'
+        service_obj.operator_status = 'disabled'
+        self.sc.storage_controller.get_service.return_value = service_obj
+        service_updates = json.dumps([
+            {
+                "op": "replace",
+                "path": "/domains/0",
+                "value": {"domain": "added.mocksite4.com"}
+            }
+        ])
+
+        with testtools.ExpectedException(errors.ServiceStatusDisabled):
+            self.sc.update_service(
+                self.project_id,
+                self.service_id,
+                self.auth_token,
+                service_updates
+            )
+
+    def test_update_service_status_not_failed_or_deployed_error(self):
+        provider_details_dict = {
+            "MaxCDN": {"id": 11942, "access_urls": ["mypullzone.netdata.com"]},
+            "Mock": {"id": 73242, "access_urls": ["mycdn.mock.com"]},
+            "CloudFront": {
+                "id": "5ABC892", "access_urls": ["cf123.cloudcf.com"]},
+            "Fastly": {
+                "id": 3488, "access_urls": ["mockcf123.fastly.prod.com"]}
+        }
+        providers_details = {}
+        for name in provider_details_dict:
+            details = provider_details_dict[name]
+            provider_detail_obj = provider_details.ProviderDetail(
+                provider_service_id=details['id'],
+                access_urls=details['access_urls'],
+                status=details.get('status', u'unknown'))
+            providers_details[name] = provider_detail_obj
+
+        self.sc.storage_controller.get_provider_details.return_value = (
+            providers_details
+        )
+
+        service_obj = service.load_from_json(self.service_json)
+        service_obj.status = u'create_in_progress'
+
+        self.sc.storage_controller.get_service.return_value = service_obj
+        service_updates = json.dumps([
+            {
+                "op": "replace",
+                "path": "/domains/0",
+                "value": {"domain": "added.mocksite4.com"}
+            }
+        ])
+
+        with testtools.ExpectedException(
+                errors.ServiceStatusNeitherDeployedNorFailed
+        ):
+            self.sc.update_service(
+                self.project_id,
+                self.service_id,
+                self.auth_token,
+                service_updates
+            )
 
     @ddt.file_data('data_provider_details.json')
     def test_delete(self, provider_details_json):
