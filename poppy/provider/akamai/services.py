@@ -427,8 +427,29 @@ class ServiceController(base.ServiceBase):
                               format(provider_service_id))
                 return self.responder.failed("failed to update service")
 
+            # check to see if a domain was upgraded from http -> https+san
+            # and keep the policy if it was an upgrade
             try:
                 for policy in policies:
+
+                    is_upgrade = False
+                    for link_id in ids:
+                        if (
+                            link_id['policy_name'] == policy['policy_name'] and
+                            link_id['protocol'] == 'https' and
+                            policy['protocol'] == 'http'
+                        ):
+                            is_upgrade = True
+
+                    # skip policy delete if a http -> https+san
+                    # upgrade is detected
+                    if is_upgrade is True:
+                        LOG.info(
+                            "{0} was upgraded from http to https san. "
+                            "Skipping old policy delete.".format(
+                                policy['policy_name']))
+                        continue
+
                     configuration_number = self._get_configuration_number(
                         util.dict2obj(policy))
 
