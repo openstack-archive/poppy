@@ -53,6 +53,7 @@ class DefaultServicesController(base.ServicesController):
         self.ssl_certificate_storage = (
             self._driver.storage.certificates_controller
         )
+        self.ssl_cert_manager = self._driver.ssl_certificate_controller
         self.flavor_controller = self._driver.storage.flavors_controller
         self.dns_controller = self._driver.dns.services_controller
         self.distributed_task_controller = (
@@ -380,21 +381,26 @@ class DefaultServicesController(base.ServicesController):
                             )
                             san_cert_url = access_url_for_domain.get(
                                 'provider_url')
-                            # Note(tonytan4ever): stored san_cert_url
-                            # for two times, that's intentional
-                            # a little extra info does not hurt
-                            new_cert_detail = {
-                                providers[0].provider_id.title():
-                                json.dumps(dict(
-                                    cert_domain=san_cert_url,
-                                    extra_info={
-                                        'status': 'deployed',
-                                        'san cert': san_cert_url,
-                                        'created_at': str(
-                                            datetime.datetime.now())
-                                    }
-                                ))
-                            }
+                            https_upgrade = self._detect_upgrade_http_to_https(
+                                service_old.domains, domain)
+                            if https_upgrade is True:
+                                new_cert_detail = None
+                            else:
+                                # Note(tonytan4ever): stored san_cert_url
+                                # for two times, that's intentional
+                                # a little extra info does not hurt
+                                new_cert_detail = {
+                                    providers[0].provider_id.title():
+                                    json.dumps(dict(
+                                        cert_domain=san_cert_url,
+                                        extra_info={
+                                            'status': 'deployed',
+                                            'san cert': san_cert_url,
+                                            'created_at': str(
+                                                datetime.datetime.now())
+                                        }
+                                    ))
+                                }
                             new_cert_obj = ssl_certificate.SSLCertificate(
                                 service_new.flavor_id,
                                 domain.domain,
@@ -402,16 +408,31 @@ class DefaultServicesController(base.ServicesController):
                                 project_id,
                                 new_cert_detail
                             )
-                            self.ssl_certificate_storage.create_certificate(
-                                project_id,
-                                new_cert_obj
-                            )
+                            if https_upgrade is True:
+                                # request a new ssl cert the same way
+                                # ssl_cert creation is done using taskflow
+                                LOG.debug('Sending request to create ssl cert')
+                                self.ssl_cert_manager.create_ssl_certificate(
+                                    project_id,
+                                    new_cert_obj
+                                )
+                            else:
+                                self.ssl_certificate_storage.\
+                                    create_certificate(
+                                        project_id,
+                                        new_cert_obj
+                                    )
                             # deserialize cert_details dict
-                            new_cert_obj.cert_details[
-                                providers[0].provider_id.title()] = json.loads(
+                            try:
                                 new_cert_obj.cert_details[
-                                    providers[0].provider_id.title()]
-                            )
+                                    providers[0].provider_id.title()
+                                ] = json.loads(
+                                    new_cert_obj.cert_details[
+                                        providers[0].provider_id.title()]
+                                )
+                            except Exception:
+                                new_cert_obj.cert_details[
+                                    providers[0].provider_id.title()] = {}
                             domain.cert_info = new_cert_obj
 
         if hasattr(self, store):
@@ -773,3 +794,15 @@ class DefaultServicesController(base.ServicesController):
                 service_id,
                 provider_details
             )
+
+    def _detect_upgrade_http_to_https(self, old_domains, new_domain):
+        is_upgrade = False
+        for old_domain in old_domains:
+            if old_domain.domain == new_domain.domain:
+                if (
+                    old_domain.protocol == 'http' and
+                    new_domain.protocol == 'https'
+                ):
+                    is_upgrade = True
+                    break
+        return is_upgrade

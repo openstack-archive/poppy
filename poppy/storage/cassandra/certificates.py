@@ -116,16 +116,18 @@ class CertificatesController(base.CertificatesController):
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
 
+        cert_status = None
         try:
             provider_status = json.loads(
                 list(cert_obj.cert_details.values())[0]
             )
             cert_status = provider_status['extra_info']['status']
-        except (IndexError, IndexError, ValueError) as e:
-            LOG.error("Certificate details in inconsistent "
-                      "state: {0}".format(cert_obj.cert_details))
+        except (IndexError, KeyError, ValueError) as e:
+            LOG.error("Create certificate details in inconsistent "
+                      "state: {0}: {1}".format(cert_obj.cert_details, e))
             LOG.error(e)
-        else:
+            cert_status = 'create_in_progress'
+        finally:
             # insert/update for cassandra
             self.insert_cert_status(cert_obj.domain_name, cert_status)
 
@@ -163,6 +165,7 @@ class CertificatesController(base.CertificatesController):
 
     def update_certificate(self, domain_name, cert_type, flavor_id,
                            cert_details):
+        LOG.info('Update cert details: {0}'.format(cert_details))
 
         args = {
             'domain_name': domain_name,
@@ -178,10 +181,9 @@ class CertificatesController(base.CertificatesController):
         try:
             provider_status = json.loads(list(cert_details.values())[0])
             cert_status = provider_status['extra_info']['status']
-        except (IndexError, IndexError, ValueError) as e:
-            LOG.error("Certificate details in inconsistent "
-                      "state: {0}".format(cert_details))
-            LOG.error(e)
+        except (IndexError, KeyError, ValueError) as e:
+            LOG.error("Update certificate details in inconsistent "
+                      "state: {0}: {1}".format(cert_details, e))
         else:
             # insert/update for cassandra
             self.insert_cert_status(domain_name, cert_status)
