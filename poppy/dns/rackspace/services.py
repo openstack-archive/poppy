@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import random
+import re
 try:
     set
 except NameError:  # noqa  pragma: no cover
@@ -64,6 +65,7 @@ class ServicesController(base.ServicesBase):
 
         # randomly select a shard
         shard_id = random.randint(1, num_shards)
+        # ex. cdnXXX.altcdn.com
         subdomain_name = '{0}{1}.{2}'.format(shard_prefix, shard_id,
                                              cdn_domain_name)
         subdomain = self._get_subdomain(subdomain_name)
@@ -75,14 +77,42 @@ class ServicesController(base.ServicesBase):
         shared_ssl_subdomain_name = None
         for link in links:
             # pick out shared ssl domains here
-            domain_name, certificate = link
+            domain_name, certificate, pref_operator_url = link
             if certificate == "shared":
                 shared_ssl_subdomain_name = (
                     '.'.join(domain_name.split('.')[1:]))
                 # perform shared ssl cert logic
                 name = domain_name
             else:
-                name = '{0}.{1}'.format(domain_name, subdomain_name)
+                if pref_operator_url is not None:
+                    # verify sub-domain exists
+                    regex_match = re.match(
+                        '^.*(' + shard_prefix + '[0-9]+\.' +
+                        re.escape(cdn_domain_name) + ')$',
+                        pref_operator_url
+                    )
+                    my_sub_domain_name = regex_match.groups(-1)
+                    if my_sub_domain_name is None:
+                        raise ValueError(
+                            'Unable to parse preferred provider url')
+                    # add to cname record
+                    my_sub_domain = self._get_subdomain(my_sub_domain_name)
+                    cname_record = {
+                        'type': 'CNAME',
+                        'name': pref_operator_url,
+                        'data': links[link],
+                        'ttl': 300
+                    }
+                    LOG.info("Updating DNS Record for HTTPS upgrade "
+                             "domain - {0}".format(cname_records))
+                    my_sub_domain.add_records([cname_record])
+                    dns_links[link] = {
+                        'provider_url': links[link],
+                        'operator_url': pref_operator_url
+                    }
+                    continue
+                else:
+                    name = '{0}.{1}'.format(domain_name, subdomain_name)
 
             cname_record = {'type': 'CNAME',
                             'name': name,
@@ -245,8 +275,11 @@ class ServicesController(base.ServicesBase):
                         # We need to distinguish shared ssl domains in
                         # which case the we will use different shard prefix and
                         # and shard number
-                        links[(link['domain'], link.get('certificate',
-                                                        None))] = link['href']
+                        links[(
+                            link['domain'],
+                            link.get('certificate', None),
+                            None  # new link no pref operator url
+                        )] = link['href']
 
         # create CNAME records
         try:
@@ -269,14 +302,16 @@ class ServicesController(base.ServicesBase):
                     if link['rel'] == 'access_url':
                         access_url = {
                             'domain': link['domain'],
-                            'provider_url':
-                                dns_links[(link['domain'],
-                                           link.get('certificate', None)
-                                           )]['provider_url'],
-                            'operator_url':
-                                dns_links[(link['domain'],
-                                           link.get('certificate', None)
-                                           )]['operator_url']}
+                            'provider_url': dns_links[(
+                                link['domain'],
+                                link.get('certificate', None),
+                                None
+                            )]['provider_url'],
+                            'operator_url': dns_links[(
+                                link['domain'],
+                                link.get('certificate', None),
+                                None
+                            )]['operator_url']}
                         # Need to indicate if this access_url is a shared ssl
                         # access url, since its has different shard_prefix and
                         # num_shard
@@ -310,7 +345,7 @@ class ServicesController(base.ServicesBase):
                             access_url['operator_url'],
                             access_url.get('shared_ssl_flag', False))
                         if msg:
-                            error_msg = error_msg + msg
+                            error_msg += msg
                     except exc.NotFound as e:
                         LOG.error('Can not access the subdomain. Please make '
                                   'sure it exists and you have permissions '
@@ -320,8 +355,8 @@ class ServicesController(base.ServicesBase):
                         error_class = e.__class__
                     except Exception as e:
                         LOG.error('Rackspace DNS Exception: {0}'.format(e))
-                        error_msg = error_msg + 'Rackspace DNS ' \
-                                                'Exception: {0}'.format(e)
+                        error_msg += 'Rackspace DNS ' \
+                                     'Exception: {0}'.format(e)
                         error_class = e.__class__
                 # format the error message for this provider
             if not error_msg:
@@ -361,8 +396,11 @@ class ServicesController(base.ServicesBase):
                     domain_added = (link['rel'] == 'access_url' and
                                     link['domain'] in added_domains)
                     if domain_added:
-                        links[(link['domain'], link.get('certificate',
-                                                        None))] = link['href']
+                        links[(
+                            link['domain'],
+                            link.get('certificate', None),
+                            link.get('pref_operator_url', None)
+                        )] = link['href']
 
         # create CNAME records for added domains
         try:
@@ -387,11 +425,13 @@ class ServicesController(base.ServicesBase):
                             'domain': link['domain'],
                             'provider_url':
                                 dns_links[(link['domain'],
-                                           link.get('certificate', None)
+                                           link.get('certificate', None),
+                                           link.get('pref_operator_url', None)
                                            )]['provider_url'],
                             'operator_url':
                                 dns_links[(link['domain'],
-                                           link.get('certificate', None)
+                                           link.get('certificate', None),
+                                           link.get('pref_operator_url', None)
                                            )]['operator_url']}
                         # Need to indicate if this access_url is a shared ssl
                         # access url, since its has different shard_prefix and
@@ -589,6 +629,35 @@ class ServicesController(base.ServicesBase):
                         if old_access_url.get('shared_ssl_flag', False):
                             access_url['shared_ssl_flag'] = True
                         access_urls.append(access_url)
+                # find domain that don't have an access url entry
+                for domain in service_updates.domains:
+                    is_upgrade = False
+                    for old_domain in service_old.domains:
+                        if old_domain.domain == domain.domain:
+                            if (
+                                old_domain.protocol == 'http' and
+                                domain.protocol == 'https' and
+                                domain.certificate == 'san'
+                            ):
+                                is_upgrade = True
+                                break
+                    if is_upgrade is True:
+                        access_url_for_domain = (
+                            service_updates.provider_details.values()[0].
+                            get_domain_access_url(domain.domain))
+                        old_access_url_for_domain = (
+                            service_old.provider_details.values()[0].
+                            get_domain_access_url(domain.domain))
+                        if access_url_for_domain is None:
+                            # add placeholder access url for domain
+                            access_urls.append({
+                                'domain': domain.domain,
+                                'provider_url': None,
+                                'operator_url': None,
+                                'old_operator_url': old_access_url_for_domain[
+                                    'operator_url']
+                            })
+
                 dns_details[provider_name] = {'access_urls': access_urls}
 
         return self.responder.updated(dns_details)
