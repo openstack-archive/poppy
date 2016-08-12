@@ -302,7 +302,6 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                 raise ValueError(
                     "%s is not a valid san cert, valid san certs are: %s" %
                     (san_cert_name, akamai_driver.san_cert_cnames))
-            akamai_driver = self._driver.providers['akamai'].obj
             res = akamai_driver.cert_info_storage.get_cert_config(
                 san_cert_name
             )
