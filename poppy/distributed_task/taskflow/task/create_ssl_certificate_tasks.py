@@ -31,7 +31,8 @@ conf(project='poppy', prog='poppy', args=[])
 class CreateProviderSSLCertificateTask(task.Task):
     default_provides = "responders"
 
-    def execute(self, providers_list_json, cert_obj_json, enqueue=True):
+    def execute(self, providers_list_json, cert_obj_json, enqueue=True,
+                https_upgrade=False):
         service_controller = memoized_controllers.task_controllers('poppy')
 
         # call provider create_ssl_certificate function
@@ -46,7 +47,8 @@ class CreateProviderSSLCertificateTask(task.Task):
             responder = service_controller.provider_wrapper.create_certificate(
                 service_controller._driver.providers[provider],
                 cert_obj,
-                enqueue
+                enqueue,
+                https_upgrade
             )
             responders.append(responder)
 
@@ -55,7 +57,7 @@ class CreateProviderSSLCertificateTask(task.Task):
 
 class SendNotificationTask(task.Task):
 
-    def execute(self, project_id, responders):
+    def execute(self, project_id, responders, upgrade=False):
         service_controller = memoized_controllers.task_controllers('poppy')
 
         notification_content = ""
@@ -64,6 +66,13 @@ class SendNotificationTask(task.Task):
                 notification_content += (
                     "Project ID: %s, Provider: %s, Detail: %s" %
                     (project_id, provider, str(responder[provider])))
+
+        if upgrade is True:
+            notification_content += (
+                " The domain was upgraded from HTTP to HTTPS SAN. "
+                "If applicable, take note of the domain name and "
+                "delete the old HTTP policy in the provider."
+            )
 
         for n_driver in service_controller._driver.notification:
             service_controller.notification_wrapper.send(

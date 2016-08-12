@@ -116,16 +116,20 @@ class CertificatesController(base.CertificatesController):
             consistency_level=self._driver.consistency_level)
         self.session.execute(stmt, args)
 
+        cert_status = None
         try:
             provider_status = json.loads(
                 list(cert_obj.cert_details.values())[0]
             )
             cert_status = provider_status['extra_info']['status']
-        except (IndexError, IndexError, ValueError) as e:
-            LOG.error("Certificate details in inconsistent "
-                      "state: {0}".format(cert_obj.cert_details))
-            LOG.error(e)
-        else:
+        except (IndexError, KeyError, ValueError) as e:
+            LOG.warning(
+                "Create certificate missing extra info "
+                "status {0}: Error {1}. "
+                "Using 'create_in_progress' instead. ".format(
+                    cert_obj.cert_details, e))
+            cert_status = 'create_in_progress'
+        finally:
             # insert/update for cassandra
             self.insert_cert_status(cert_obj.domain_name, cert_status)
 
@@ -178,13 +182,14 @@ class CertificatesController(base.CertificatesController):
         try:
             provider_status = json.loads(list(cert_details.values())[0])
             cert_status = provider_status['extra_info']['status']
-        except (IndexError, IndexError, ValueError) as e:
-            LOG.error("Certificate details in inconsistent "
-                      "state: {0}".format(cert_details))
-            LOG.error(e)
-        else:
-            # insert/update for cassandra
             self.insert_cert_status(domain_name, cert_status)
+        except (IndexError, KeyError, ValueError) as e:
+            # certs already existing in DB should have all
+            # the necessary fields
+            LOG.error(
+                "Unable to update cert_status because certificate "
+                "details are in  an inconsistent "
+                "state: {0}: {1}".format(cert_details, e))
 
     def insert_cert_status(self, domain_name, cert_status):
             cert_args = {

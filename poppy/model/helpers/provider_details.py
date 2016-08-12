@@ -152,10 +152,13 @@ class ProviderDetail(common.DictSerializableModel):
         self._error_class = value
 
     def get_domain_access_url(self, domain):
-        '''Find an access url of a domain.
+        """Return an access url object for a domain.
 
-        :param domain
-        '''
+        :param domain: domain to use as search key
+        :type domain: poppy.model.helpers.domain.Domain
+
+        :returns: access_url -- dict containing matching domain
+        """
         for access_url in self.access_urls:
             if access_url.get('domain') == domain:
                 return access_url
