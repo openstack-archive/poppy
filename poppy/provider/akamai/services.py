@@ -397,6 +397,7 @@ class ServiceController(base.ServiceBase):
                     LOG.info('Creating/Updating policy %s on domain %s '
                              'complete' % (dp, classified_domain.domain))
                     edge_host_name = None
+                    old_operator_url = None
                     if classified_domain.certificate == 'san':
                         cert_info = getattr(classified_domain, 'cert_info',
                                             None)
@@ -409,6 +410,11 @@ class ServiceController(base.ServiceBase):
                             edge_host_name = (
                                 classified_domain.cert_info.
                                 get_san_edge_name())
+                            old_operator_url = service_obj.provider_details[
+                                self.driver.provider_name
+                            ].get_domain_access_url(
+                                classified_domain.domain
+                            ).get('old_operator_url', None)
                             domains_certificate_status[
                                 classified_domain.domain] = (
                                 classified_domain.cert_info.get_cert_status())
@@ -416,12 +422,13 @@ class ServiceController(base.ServiceBase):
                                 continue
                     provider_access_url = self._get_provider_access_url(
                         classified_domain, dp, edge_host_name)
-                    links.append({'href': provider_access_url,
-                                  'rel': 'access_url',
-                                  'domain': dp,
-                                  'certificate':
-                                  classified_domain.certificate
-                                  })
+                    links.append({
+                        'href': provider_access_url,
+                        'rel': 'access_url',
+                        'domain': dp,
+                        'certificate': classified_domain.certificate,
+                        'old_operator_url': old_operator_url
+                    })
             except Exception:
                 LOG.exception("Failed to Update Service - {0}".
                               format(provider_service_id))

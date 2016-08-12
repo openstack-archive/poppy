@@ -170,7 +170,7 @@ def is_valid_ip_address(ip_address):
     # "{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1"
     # "}[0-9]))$"
 
-    # Note(tonytan4ever): make it more clear because re.mtach will return
+    # Note(tonytan4ever): make it more clear because re.match will return
     # a match object is there is a match, None if there is no match.
     return re.match(ipv4_regex, ip_address) is not None
 
