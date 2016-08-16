@@ -309,3 +309,29 @@ class PropertyActivateTask(task.Task):
 
     def revert(self, property_spec, new_version_number, **kwargs):
         LOG.info('retrying task: %s ...' % self.name)
+
+
+class MarkQueueItemsWithActivatedProperty(task.Task):
+
+    def __init__(self):
+        super(MarkQueueItemsWithActivatedProperty, self).__init__()
+        service_controller, self.providers = \
+            memoized_controllers.task_controllers('poppy', 'providers')
+        self.akamai_driver = self.providers['akamai'].obj
+
+    def execute(self, update_info_list):
+        update_info_list = json.loads(update_info_list)
+
+        queue_data = self.akamai_driver.san_mapping_queue.traverse_queue()
+        new_queue_data = []
+        for cert in queue_data:
+            cert_dict = json.loads(cert)
+
+            for action, update_cname_host_mapping_info in update_info_list:
+                for host_info in update_cname_host_mapping_info:
+                    if host_info['cnameFrom'] == cert_dict['domain_name']:
+                        cert_dict['property_activated'] = True
+
+            new_queue_data.append(json.dumps(cert_dict))
+
+        self.akamai_driver.san_mapping_queue.put_queue_data(new_queue_data)

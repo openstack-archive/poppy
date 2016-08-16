@@ -77,6 +77,8 @@ class MockManager(mock.Mock):
         akamai_mock_provider_obj.akamai_papi_api_base_url = (
             'https://mybaseurl.net/papi/v0/{middle_part}/'
             '?contractId=ctr_None&groupId=grp_None')
+        akamai_mock_provider_obj.san_mapping_queue.\
+            traverse_queue.return_value = []
         akamai_mock_provider.obj = akamai_mock_provider_obj
         providers = {
             'akamai': akamai_mock_provider,
