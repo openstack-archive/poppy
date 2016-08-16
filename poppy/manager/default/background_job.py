@@ -47,7 +47,10 @@ class BackgroundJobController(base.BackgroundJobController):
         run_list = []
         ignore_list = []
         if job_type == "akamai_check_and_update_cert_status":
-            # this task will consume the san mapping queue
+            # this task consumes the san mapping queue
+            # items marked as having an updated property are processed
+            # for the this job type, all other items are returned to the
+            # queue until they are ready for processing
             if 'akamai' in self._driver.providers:
                 akamai_driver = self._driver.providers['akamai'].obj
                 queue_data += akamai_driver.san_mapping_queue.traverse_queue(
@@ -72,12 +75,24 @@ class BackgroundJobController(base.BackgroundJobController):
                             "cert_obj_json": json.dumps(cert_dict),
                             "project_id": cert_dict.get("project_id")
                         }
-                        self.distributed_task_controller.submit_task(
-                            check_cert_status_and_update_flow.
-                            check_cert_status_and_update_flow,
-                            **t_kwargs
-                        )
-                        run_list.append(cert_dict)
+                        if cert_dict.get('property_activated', False) is True:
+                            self.distributed_task_controller.submit_task(
+                                check_cert_status_and_update_flow.
+                                check_cert_status_and_update_flow,
+                                **t_kwargs
+                            )
+                            run_list.append(cert_dict)
+                        else:
+                            akamai_driver.san_mapping_queue.\
+                                enqueue_san_mapping(json.dumps(cert_dict))
+                            ignore_list.append(cert_dict)
+                            LOG.info(
+                                "Queue item for {0} was sent back to the "
+                                "queue because it wasn't marked as "
+                                "activated.".format(
+                                    cert_dict.get("domain_name")
+                                )
+                            )
                     except Exception as exc:
                         try:
                             akamai_driver.san_mapping_queue.\
@@ -93,7 +108,9 @@ class BackgroundJobController(base.BackgroundJobController):
 
             return run_list, ignore_list
         elif job_type == "akamai_update_papi_property_for_mod_san":
-            # this task will leave the san mapping queue intact
+            # this task leaves the san mapping queue intact,
+            # once items are successfully processed they are marked
+            # ready for the next job type execution
             if 'akamai' in self._driver.providers:
                 akamai_driver = self._driver.providers['akamai'].obj
                 queue_data += akamai_driver.san_mapping_queue.traverse_queue()

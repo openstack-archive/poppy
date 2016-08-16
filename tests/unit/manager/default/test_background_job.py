@@ -235,7 +235,8 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
                             "akamai_spsId": 1
                         }
                     }
-                }
+                },
+                'property_activated': True
             })
         ]
 
@@ -337,7 +338,8 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
                             "akamai_spsId": 1
                         }
                     }
-                }
+                },
+                'property_activated': True
             })
         ]
 

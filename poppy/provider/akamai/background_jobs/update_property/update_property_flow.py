@@ -33,7 +33,8 @@ def update_property_flow():
     flow = linear_flow.Flow('Update Akamai Property').add(
         update_property_tasks.PropertyGetLatestVersionTask(),
         update_property_tasks.PropertyUpdateTask(),
-        update_property_tasks.PropertyActivateTask()
+        update_property_tasks.PropertyActivateTask(),
+        update_property_tasks.MarkQueueItemsWithActivatedProperty()
     )
     return flow
 
