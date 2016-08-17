@@ -662,6 +662,7 @@ class ServicesController(base.ServicesBase):
                     elif link['domain'] in common_domains:
                         # iterate through old access urls and get access url
                         operator_url = None
+                        old_access_url = None
                         for old_access_url in old_access_urls:
                             if old_access_url['domain'] == link['domain']:
                                 operator_url = old_access_url['operator_url']
@@ -704,6 +705,16 @@ class ServicesController(base.ServicesBase):
                                 'operator_url'
                             ]
                         })
+
+                # keep log_delivery urls intact when both old and new
+                # services have log_delivery enabled
+                if (
+                    service_old.log_delivery.enabled is True and
+                    service_updates.log_delivery.enabled is True
+                ):
+                    for old_access_url in old_access_urls:
+                        if 'log_delivery' in old_access_url:
+                            access_urls.append(old_access_url)
 
                 dns_details[provider_name] = {'access_urls': access_urls}
 
