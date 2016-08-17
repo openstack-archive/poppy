@@ -22,6 +22,7 @@ import pyrax.exceptions as exc
 
 from poppy.dns.rackspace import driver
 from poppy.model.helpers import domain
+from poppy.model import log_delivery
 from poppy.model import service
 from tests.unit import base
 
@@ -558,6 +559,14 @@ class TestServicesUpdate(base.TestCase):
                 u'provider_url': u'blog.domain.com.global.prod.fastly.net',
                 u'domain': u'blog.domain.com',
                 u'operator_url': u'blog.domain.com.cdn80.mycdn.com'
+            },
+            {
+                "log_delivery": [
+                    {
+                        "internalURL": "https://internal.storage.com",
+                        "publicURL": "https://external.storage.com"
+                    }
+                ]
             }
         ]
 
@@ -703,8 +712,9 @@ class TestServicesUpdate(base.TestCase):
             access_urls_map[provider_name] = {}
             access_urls_list = dns_details[provider_name]['access_urls']
             for access_urls in access_urls_list:
-                access_urls_map[provider_name][access_urls['domain']] = (
-                    access_urls['operator_url'])
+                if 'operator_url' in access_urls:
+                    access_urls_map[provider_name][access_urls['domain']] = (
+                        access_urls['operator_url'])
 
         for responder in responders:
             for provider_name in responder:
@@ -756,8 +766,9 @@ class TestServicesUpdate(base.TestCase):
             access_urls_map[provider_name] = {}
             access_urls_list = dns_details[provider_name]['access_urls']
             for access_urls in access_urls_list:
-                access_urls_map[provider_name][access_urls['domain']] = (
-                    access_urls['operator_url'])
+                if 'operator_url' in access_urls:
+                    access_urls_map[provider_name][access_urls['domain']] = (
+                        access_urls['operator_url'])
 
         for responder in responders:
             for provider_name in responder:
@@ -836,8 +847,9 @@ class TestServicesUpdate(base.TestCase):
             access_urls_map[provider_name] = {}
             access_urls_list = dns_details[provider_name]['access_urls']
             for access_urls in access_urls_list:
-                access_urls_map[provider_name][access_urls['domain']] = (
-                    access_urls['operator_url'])
+                if 'operator_url' in access_urls:
+                    access_urls_map[provider_name][access_urls['domain']] = (
+                        access_urls['operator_url'])
 
         for responder in responders:
             for provider_name in responder:
@@ -893,6 +905,68 @@ class TestServicesUpdate(base.TestCase):
             for access_urls in access_urls_list:
                 access_urls_map[provider_name][access_urls['domain']] = (
                     access_urls['operator_url'])
+
+        for responder in responders:
+            for provider_name in responder:
+                for domain_new in domains_new:
+                    self.assertIsNotNone(
+                        access_urls_map[provider_name][domain_new.domain])
+
+    def test_update_add_domains_keeps_log_delivery(self):
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        self.client.find = mock.Mock(return_value=subdomain)
+
+        domains_new = [domain.Domain('test.domain.com'),
+                       domain.Domain('blog.domain.com'),
+                       domain.Domain('pictures.domain.com')]
+
+        service_new = service.Service(
+            service_id=self.service_old.service_id,
+            name='myservice',
+            domains=domains_new,
+            origins=[],
+            flavor_id='standard',
+            log_delivery=log_delivery.LogDelivery(enabled=True)
+        )
+        self.service_old.log_delivery = log_delivery.LogDelivery(enabled=True)
+        responders = [{
+            'Fastly': {
+                'id': str(uuid.uuid4()),
+                'links': [
+                    {
+                        'domain': u'test.domain.com',
+                        'href': u'test.domain.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    },
+                    {
+                        'domain': u'blog.domain.com',
+                        'href': u'blog.domain.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    },
+                    {
+                        'domain': u'pictures.domain.com',
+                        'href': u'pictures.domain.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    }
+                ]}
+            }]
+
+        dns_details = self.controller.update(self.service_old,
+                                             service_new,
+                                             responders)
+        access_urls_map = {}
+        for provider_name in dns_details:
+            access_urls_map[provider_name] = {}
+            access_urls_list = dns_details[provider_name]['access_urls']
+            for access_urls in access_urls_list:
+                if 'operator_url' in access_urls:
+                    access_urls_map[provider_name][access_urls['domain']] = (
+                        access_urls['operator_url'])
+                if 'log_delivery' in access_urls:
+                    for ld_url in access_urls['log_delivery']:
+                        self.assertIsNotNone(ld_url['internalURL'])
+                        self.assertIsNotNone(ld_url['publicURL'])
 
         for responder in responders:
             for provider_name in responder:
