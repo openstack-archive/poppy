@@ -18,12 +18,13 @@ from poppy.transport.validators import schema_base
 
 class BackgroundJobSchema(schema_base.SchemaBase):
 
-    """JSON Schema validation for /admin/provider/akamai/background_jobs"""
+    """JSON Schema validation for /admin/provider/akamai/background_job"""
 
     schema = {
         'background_jobs': {
             'POST': {
                 'type': [{
+                    'type': 'object',
                     'additionalProperties': False,
                     'properties': {
                         'job_type': {
@@ -38,6 +39,7 @@ class BackgroundJobSchema(schema_base.SchemaBase):
                     }
                 },
                     {
+                    'type': 'object',
                     'additionalProperties': False,
                     'properties': {
                         'job_type': {
