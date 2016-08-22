@@ -95,7 +95,10 @@ class Model(collections.OrderedDict):
             # add the access urls
             access_urls = provider_detail.access_urls
             for access_url in access_urls:
-                if 'operator_url' in access_url:
+                if (
+                    'operator_url' in access_url and
+                    access_url['operator_url'] is not None
+                ):
                     self['links'].append(link.Model(
                         access_url['operator_url'],
                         'access_url'))

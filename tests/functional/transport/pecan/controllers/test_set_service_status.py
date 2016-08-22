@@ -155,7 +155,7 @@ class TestServicesState(base.FunctionalTest):
     @given(strategies.text(min_size=257))
     def test_services_state_invalid_project_id(self, project_id):
         # NOTE(TheSriram): the min size is assigned to 257, since
-        # project_id regex allows upto 256 chars
+        # project_id regex allows up to 256 chars
         # invalid project_id field
         self.req_body['project_id'] = project_id
         self.req_body['status'] = 'deployed'

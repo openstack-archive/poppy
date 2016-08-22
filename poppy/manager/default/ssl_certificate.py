@@ -43,7 +43,8 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
         self.service_storage = self._driver.storage.services_controller
         self.flavor_controller = self._driver.storage.flavors_controller
 
-    def create_ssl_certificate(self, project_id, cert_obj):
+    def create_ssl_certificate(
+            self, project_id, cert_obj, https_upgrade=False):
 
         if (not validators.is_valid_domain_name(cert_obj.domain_name)) or \
                 (validators.is_root_domain(
@@ -75,6 +76,9 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             'cert_obj_json': json.dumps(cert_obj.to_dict()),
             'context_dict': context_utils.get_current().to_dict()
         }
+        if https_upgrade is True:
+            kwargs['https_upgrade'] = True
+
         self.distributed_task_controller.submit_task(
             create_ssl_certificate.create_ssl_certificate,
             **kwargs)

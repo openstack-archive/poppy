@@ -53,7 +53,7 @@ class CertificateController(base.CertificateBase):
         self.driver = driver
         self.sps_api_base_url = self.driver.akamai_sps_api_base_url
 
-    def create_certificate(self, cert_obj, enqueue=True):
+    def create_certificate(self, cert_obj, enqueue=True, https_upgrade=False):
         if cert_obj.cert_type == 'san':
             try:
                 found, found_cert = (
@@ -77,7 +77,7 @@ class CertificateController(base.CertificateBase):
                 if enqueue:
                     self.mod_san_queue.enqueue_mod_san_request(
                         json.dumps(cert_obj.to_dict()))
-                    return self.responder.ssl_certificate_provisioned(None, {
+                    extras = {
                         'status': 'create_in_progress',
                         'san cert': None,
                         # Add logging so it is easier for testing
@@ -86,7 +86,18 @@ class CertificateController(base.CertificateBase):
                             'San cert request for {0} has been '
                             'enqueued.'.format(cert_obj.domain_name)
                         )
-                    })
+                    }
+                    if https_upgrade is True:
+                        extras['https upgrade notes'] = (
+                            "This domain was upgraded from HTTP to HTTPS SAN."
+                            "Take note of the domain name. Where applicable, "
+                            "delete the old HTTP policy after the upgrade is "
+                            "complete or the old policy is no longer in use."
+                        )
+                    return self.responder.ssl_certificate_provisioned(
+                        None,
+                        extras
+                    )
 
                 san_cert_hostname_limit = (
                     self.cert_info_storage.get_san_cert_hostname_limit()
