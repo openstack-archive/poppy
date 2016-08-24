@@ -161,7 +161,7 @@ class _AssertRaisesContext(object):
         except NameError:
             # Python 3 compatibility
             basestring = unicode = str
-            unicode  # For pep8: unicde is defined but not used.
+            unicode  # For pep8: unicode is defined but not used.
         if isinstance(expected_regexp, basestring):
             expected_regexp = re.compile(expected_regexp)
         if not expected_regexp.search(str(exc_value)):

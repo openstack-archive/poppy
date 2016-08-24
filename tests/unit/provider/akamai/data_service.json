@@ -14,6 +14,21 @@
         ],
         "flavor_id" : "standard"
     },
+    "single_one_origin_https_san": {
+        "name" : "mysite.com",
+        "domains": [
+            {"domain": "parsely.sage.com"},
+            {"domain": "densely.sage.com",
+            "protocol": "https",
+            "certificate": "san"},
+            {"domain": "rosemary.thyme.net",
+            "protocol": "http"}
+        ],
+        "origins": [
+            {"origin": "mockdomain.com", "ssl": false, "port": 80}
+        ],
+        "flavor_id" : "standard"
+    },
     "multiple_origins": {
         "name" : "mysite.com",
         "domains": [
@@ -94,7 +109,7 @@
                 },
                 { "name": "gif-rules",
                   "request_url": "/*.gif"
-                }       
+                }
              ]
             },
             {"name": "zero-cache", "ttl": 0 },
