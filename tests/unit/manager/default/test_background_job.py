@@ -21,6 +21,8 @@ from oslo_config import cfg
 
 from poppy.manager.default import background_job
 from poppy.manager.default import driver
+from poppy.model.helpers import domain
+from poppy.model import service
 from poppy.notification.mailgun import driver as n_driver
 from poppy.provider.akamai import driver as aka_driver
 from tests.unit import base
@@ -89,6 +91,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         def provider_membership(key):
             return True if key in self.provider_mocks else False
 
+        self.mock_storage = mock_storage
         self.mock_providers = mock.MagicMock()
         self.mock_providers.__getitem__.side_effect = get_provider_by_name
         self.mock_providers.__contains__.side_effect = provider_membership
@@ -220,6 +223,29 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         "akamai_update_papi_property_for_mod_san"
     )
     def test_post_job_positive(self, job_type):
+        # mock ssl storage returning a cert
+        self.mock_storage.certificates_controller.\
+            get_certs_by_domain.return_value = [
+                mock.Mock()
+            ]
+        # mock service storage returning a service with domain with
+        # correct protocol + cert
+        self.mock_storage.services_controller. \
+            get_service_details_by_domain_name.return_value = service.Service(
+                'service_id',
+                'name',
+                [
+                    domain.Domain(
+                        "www.example.com",
+                        protocol='https',
+                        certificate='san'
+                    )
+                ],
+                [],
+                'flavor_id',
+                project_id='project_id'
+            )
+
         san_mapping_queue = self.manager_driver.providers[
             'akamai'].obj.san_mapping_queue
         san_mapping_queue.traverse_queue.return_value = [
@@ -252,8 +278,118 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             self.bgc.distributed_task_controller.submit_task.called
         )
 
+    def test_post_job_ignored_cert_no_longer_exists(self):
+        self.mock_storage.certificates_controller.\
+            get_certs_by_domain.return_value = []
+
+        san_mapping_queue = self.manager_driver.providers[
+            'akamai'].obj.san_mapping_queue
+        san_mapping_queue.traverse_queue.return_value = [
+            json.dumps({
+                "domain_name": "www.example.com",
+                "flavor_id": "flavor_id",
+                "project_id": "project_id",
+                "cert_type": "san",
+                "cert_details": {
+                    "Akamai": {
+                        "extra_info": {
+                            "san cert": "san.example.com",
+                            "akamai_spsId": 1
+                        }
+                    }
+                },
+                'property_activated': True
+            })
+        ]
+
+        run_list, ignore_list = self.bgc.post_job(
+            "akamai_update_papi_property_for_mod_san",
+            {'project_id': 'project_id'}
+        )
+        self.assertEqual(0, len(run_list))
+        self.assertEqual(1, len(ignore_list))
+
+        self.assertEqual(
+            False,
+            self.bgc.distributed_task_controller.submit_task.called
+        )
+
+    def test_post_job_domain_type_modified_on_service(self):
+        self.mock_storage.certificates_controller.\
+            get_certs_by_domain.return_value = [
+                mock.Mock()
+            ]
+        # simulate domain being changed from https+san to http
+        self.mock_storage.services_controller. \
+            get_service_details_by_domain_name.return_value = service.Service(
+                'service_id',
+                'name',
+                [
+                    domain.Domain(
+                        "www.example.com",
+                        protocol='http',
+                    )
+                ],
+                [],
+                'flavor_id',
+                project_id='project_id'
+            )
+        san_mapping_queue = self.manager_driver.providers[
+            'akamai'].obj.san_mapping_queue
+        san_mapping_queue.traverse_queue.return_value = [
+            json.dumps({
+                "domain_name": "www.example.com",
+                "flavor_id": "flavor_id",
+                "project_id": "project_id",
+                "cert_type": "san",
+                "cert_details": {
+                    "Akamai": {
+                        "extra_info": {
+                            "san cert": "san.example.com",
+                            "akamai_spsId": 1
+                        }
+                    }
+                },
+                'property_activated': True
+            })
+        ]
+
+        run_list, ignore_list = self.bgc.post_job(
+            "akamai_update_papi_property_for_mod_san",
+            {'project_id': 'project_id'}
+        )
+        self.assertEqual(0, len(run_list))
+        self.assertEqual(1, len(ignore_list))
+
+        self.assertEqual(
+            False,
+            self.bgc.distributed_task_controller.submit_task.called
+        )
+
     @ddt.data("akamai_update_papi_property_for_mod_san")
     def test_post_job_invalid_san_cert_cname(self, job_type):
+        # mock ssl storage returning a cert
+        self.mock_storage.certificates_controller.\
+            get_certs_by_domain.return_value = [
+                mock.Mock()
+            ]
+        # mock service storage returning a service with domain with
+        # correct protocol + cert
+        self.mock_storage.services_controller. \
+            get_service_details_by_domain_name.return_value = service.Service(
+                'service_id',
+                'name',
+                [
+                    domain.Domain(
+                        "www.example.com",
+                        protocol='https',
+                        certificate='san'
+                    )
+                ],
+                [],
+                'flavor_id',
+                project_id='project_id'
+            )
         san_mapping_queue = self.manager_driver.providers[
             'akamai'].obj.san_mapping_queue
         san_mapping_queue.traverse_queue.return_value = [
@@ -281,7 +417,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         self.assertEqual(1, len(ignore_list))
 
         self.assertEqual(
-            True,
+            False,
             self.bgc.distributed_task_controller.submit_task.called
         )
 

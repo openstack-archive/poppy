@@ -18,6 +18,7 @@ import json
 from oslo_log import log
 
 from poppy.manager import base
+from poppy.model import ssl_certificate
 from poppy.notification.mailgun import driver as n_driver
 from poppy.provider.akamai.background_jobs.check_cert_status_and_update \
     import check_cert_status_and_update_flow
@@ -40,6 +41,8 @@ class BackgroundJobController(base.BackgroundJobController):
             a_driver.AKAMAI_GROUP].san_cert_cnames
         self.notify_email_list = self.driver.conf[
             n_driver.MAIL_NOTIFICATION_GROUP].recipients
+        self.cert_storage = self._driver.storage.certificates_controller
+        self.service_storage = self._driver.storage.services_controller
 
     def post_job(self, job_type, kwargs):
         queue_data = []
@@ -121,7 +124,58 @@ class BackgroundJobController(base.BackgroundJobController):
                 cert_dict = dict()
                 try:
                     cert_dict = json.loads(cert)
+                    # add validation that the domain still exists on a
+                    # service and that it has a type of SAN
+                    cert_obj = ssl_certificate.SSLCertificate(
+                        cert_dict['flavor_id'],
+                        cert_dict['domain_name'],
+                        'san',
+                        project_id=cert_dict['project_id']
+                    )
 
+                    cert_for_domain = self.cert_storage.get_certs_by_domain(
+                        cert_obj.domain_name,
+                        project_id=cert_obj.project_id,
+                        flavor_id=cert_obj.flavor_id,
+                        cert_type=cert_obj.cert_type
+                    )
+                    if cert_for_domain == []:
+                        ignore_list.append(cert_dict)
+                        LOG.info(
+                            "Ignored property update because "
+                            "certificate for {0} does not exist.".format(
+                                cert_obj.domain_name
+                            )
+                        )
+                        continue
+
+                    service_obj = self.service_storage.\
+                        get_service_details_by_domain_name(
+                            cert_obj.domain_name,
+                            cert_obj.project_id
+                        )
+                    found = False
+                    for domain in service_obj.domains:
+                        if (
+                            domain.domain == cert_obj.domain_name and
+                            domain.protocol == 'https' and
+                            domain.certificate == 'san'
+                        ):
+                            found = True
+                    if found is False:
+                        # skip the task for current cert obj is the
+                        # domain doesn't exist on a service with the
+                        # same protocol and certificate.
+                        ignore_list.append(cert_dict)
+                        LOG.info(
+                            "Ignored update property for a "
+                            "domain '{0}' that no longer exists on a service "
+                            "with the same protocol 'https' and certificate "
+                            "type 'san'".format(
+                                cert_obj.domain_name,
+                            )
+                        )
+                        continue
                     domain_name = cert_dict["domain_name"]
                     san_cert = (
                         cert_dict["cert_details"]
@@ -182,9 +236,20 @@ class BackgroundJobController(base.BackgroundJobController):
                 "notify_email_list": self.notify_email_list
             }
 
-            self.distributed_task_controller.submit_task(
-                update_property_flow.update_property_flow,
-                **t_kwargs)
+            # check to see if there are changes to be made before submitting
+            # the task, avoids creating a new property version when there are
+            # no changes to be made.
+            if len(cname_host_info_list) > 0:
+                self.distributed_task_controller.submit_task(
+                    update_property_flow.update_property_flow,
+                    **t_kwargs)
+            else:
+                LOG.info(
+                    "No tasks submitted to update_property_flow"
+                    "update_info_list was empty: {0}".format(
+                        update_info_list
+                    )
+                )
 
             return run_list, ignore_list
         else:
