@@ -86,3 +86,88 @@ class AdminControllerTest(base.FunctionalTest):
             expect_errors=True
         )
         self.assertEqual(400, response.status_code)
+
+    def test_post_background_job_negative(self):
+        response = self.app.post(
+            '/v1.0/admin/provider/akamai/background_job',
+            headers={
+                'Content-Type': 'application/json',
+                'X-Project-ID': self.project_id
+            },
+            params=json.dumps([]),
+            expect_errors=True
+        )
+        self.assertEqual(400, response.status_code)
+
+    def test_post_service_status_negative(self):
+        response = self.app.post(
+            '/v1.0/admin/services/status',
+            headers={
+                'Content-Type': 'application/json',
+                'X-Project-ID': self.project_id
+            },
+            params=json.dumps([]),
+            expect_errors=True
+        )
+        self.assertEqual(400, response.status_code)
+
+    def test_post_migrate_domain_invalid_domain_name(self):
+        payload = {
+            "project_id": self.project_id,
+            "service_id": "abcdef",
+            "domain_name": "invalid",
+            "new_cert": "scdn1.secure6.raxcdn.com.edgekey.net",
+            "cert_status": "create_in_progress"
+        }
+
+        # post with bad data
+        response = self.app.post(
+            '/v1.0/admin/provider/akamai/service',
+            params=json.dumps(payload),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Project-ID': self.project_id
+            },
+            expect_errors=True
+        )
+        self.assertEqual(400, response.status_code)
+
+    def test_post_migrate_domain_non_existant_service(self):
+        payload = {
+            "project_id": self.project_id,
+            "service_id": "does_not_exist",
+            "domain_name": "www.test.com",
+            "new_cert": "scdn1.secure6.raxcdn.com",
+            "cert_status": "create_in_progress"
+        }
+
+        response = self.app.post(
+            '/v1.0/admin/provider/akamai/service',
+            params=json.dumps(payload),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Project-ID': self.project_id
+            },
+            expect_errors=True
+        )
+        self.assertEqual(404, response.status_code)
+
+    def test_post_migrate_domain_new_cert_with_edge_key(self):
+        payload = {
+            "project_id": self.project_id,
+            "service_id": "does_not_exist",
+            "domain_name": "www.test.com",
+            "new_cert": "scdn1.secure6.raxcdn.com.edgekey.net",
+            "cert_status": "create_in_progress"
+        }
+
+        response = self.app.post(
+            '/v1.0/admin/provider/akamai/service',
+            params=json.dumps(payload),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Project-ID': self.project_id
+            },
+            expect_errors=True
+        )
+        self.assertEqual(404, response.status_code)
