@@ -22,6 +22,8 @@ from poppy.model import ssl_certificate
 from poppy.notification.mailgun import driver as n_driver
 from poppy.provider.akamai.background_jobs.check_cert_status_and_update \
     import check_cert_status_and_update_flow
+from poppy.provider.akamai.background_jobs.delete_policy \
+    import delete_obsolete_http_policy_flow
 from poppy.provider.akamai.background_jobs.update_property import \
     update_property_flow
 from poppy.provider.akamai import driver as a_driver
@@ -286,3 +288,58 @@ class BackgroundJobController(base.BackgroundJobController):
             deleted = tuple(x for x in orig if x not in res)
         # other provider's san_mapping_list implementation goes here
         return res, deleted
+
+    def delete_http_policy(self):
+        http_policies = []
+        run_list = []
+        ignore_list = []
+        if 'akamai' in self._driver.providers:
+            akamai_driver = self._driver.providers['akamai'].obj
+            http_policies += akamai_driver.http_policy_queue.traverse_queue(
+                consume=True
+            )
+
+            for policy in http_policies:
+                policy_dict = json.loads(policy)
+                cert_for_domain = self.cert_storage.get_certs_by_domain(
+                    policy_dict['policy_name'],
+                    project_id=policy_dict['project_id'],
+                    cert_type='san'
+                )
+                if cert_for_domain == []:
+                    ignore_list.append(policy_dict)
+                    LOG.info(
+                        "No cert found for policy name. "
+                        "Policy {0} won't persist on the queue. ".format(
+                            policy_dict
+                        )
+                    )
+                    continue
+
+                if cert_for_domain.get_cert_status() != 'deployed':
+                    ignore_list.append(policy_dict)
+                    LOG.info(
+                        "Policy {0} is not ready for deletion. "
+                        "Certificate exists but hasn't deployed yet. "
+                        "Sending back to queue for later retry.".format(
+                            policy_dict
+                        )
+                    )
+                    akamai_driver.http_policy_queue.enqueue_http_policy(
+                        policy
+                    )
+                    continue
+
+                kwargs = {
+                    'configuration_number': policy_dict[
+                        'configuration_number'],
+                    'policy_name': policy_dict['policy_name']
+                }
+                self.distributed_task_controller.submit_task(
+                    delete_obsolete_http_policy_flow.
+                    delete_obsolete_http_policy,
+                    **kwargs
+                )
+                run_list.append(policy_dict)
+
+        return run_list, ignore_list

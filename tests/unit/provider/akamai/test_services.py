@@ -50,6 +50,7 @@ class TestServices(base.TestCase):
         super(TestServices, self).setUp()
         self.driver = mock_driver()
         self.driver.provider_name = 'Akamai'
+        self.driver.http_conf_number = 1
         self.driver.akamai_https_access_url_suffix = str(uuid.uuid1())
         self.san_cert_cnames = [str(x) for x in range(7)]
         self.driver.san_cert_cnames = self.san_cert_cnames
