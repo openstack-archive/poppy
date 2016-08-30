@@ -779,7 +779,7 @@ class DefaultServicesController(base.ServicesController):
                         break
             else:
                 links = {}
-                link_key_tuple = (domain_name, 'san')
+                link_key_tuple = (domain_name, 'san', None)
                 links[link_key_tuple] = new_cert
                 created_dns_link = dns_controller._create_cname_records(links)
                 new_url = {
