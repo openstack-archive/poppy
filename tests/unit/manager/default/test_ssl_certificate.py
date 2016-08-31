@@ -23,6 +23,7 @@ from poppy.manager.default import driver
 from poppy.manager.default import ssl_certificate
 from poppy.model import ssl_certificate as ssl_cert_model
 from tests.unit import base
+from poppy.transport.validators import helpers as validators
 
 
 @ddt.ddt
@@ -95,7 +96,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             'san',
             project_id='000'
         )
-
+        validators.is_valid_tld = mock.Mock(return_value=False)
         with testtools.ExpectedException(ValueError):
             self.scc.create_ssl_certificate('project_id', cert_obj=cert_obj)
 
