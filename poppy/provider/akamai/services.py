@@ -72,6 +72,7 @@ class ServiceController(base.ServiceBase):
                 if val[0] != 0:
                     ordered_list.append(post_data['rules'][val[0]])
             ordered_list.append(post_data['rules'][0])
+        ordered_list.reverse()
         return ordered_list
 
     def create(self, service_obj):
