@@ -1,458 +1,459 @@
-{"test_reorder_rules":
-{ 
-    "input" :
+{
+   "test_reorder_rules": {
+      "input": {
+         "rules": [
             {
-   "rules": [
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "params": {
-                  "cacheKeyType": "digital_property",
-                  "cacheKeyValue": "-",
-                  "hostHeaderType": "digital_property",
-                  "originDomain": "www.obulpathi.com",
-                  "hostHeaderValue": "-"
-               },
-               "name": "origin",
-               "value": "-"
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/*"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "params": {
+                        "cacheKeyType": "digital_property",
+                        "cacheKeyValue": "-",
+                        "hostHeaderType": "digital_property",
+                        "originDomain": "www.obulpathi.com",
+                        "hostHeaderValue": "-"
+                     },
+                     "name": "origin",
+                     "value": "-"
+                  },
+                  {
+                     "type": "no-store",
+                     "name": "caching",
+                     "value": "0s"
+                  },
+                  {
+                     "name": "referer-whitelist",
+                     "value": "*www.mocksite.com*"
+                  },
+                  {
+                     "type": "country",
+                     "name": "geo-whitelist",
+                     "value": "US"
+                  }
+               ]
             },
             {
-               "type": "no-store",
-               "name": "caching",
-               "value": "0s"
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/img"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "params": {
+                        "cacheKeyType": "digital_property",
+                        "cacheKeyValue": "-",
+                        "hostHeaderType": "digital_property",
+                        "originDomain": "www.gandhi.co.nz",
+                        "hostHeaderValue": "-"
+                     },
+                     "name": "origin",
+                     "value": "-"
+                  }
+               ]
             },
             {
-               "name": "referer-whitelist",
-               "value": "*www.mocksite.com*"
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/favicon.ico"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ]
             },
             {
-               "type": "country",
-               "name": "geo-whitelist",
-               "value": "US"
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/areas/trinseo/scripts/*"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ]
+            },
+            {
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/areas/trinseo/image/*"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ]
+            },
+            {
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/areas/trinseo/images/*"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ]
+            },
+            {
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/areas/trinseo/styles/*"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ]
+            },
+            {
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/bundles/wffm/*"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ]
+            },
+            {
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/content/wffm/*"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ]
+            },
+            {
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/Areas/Trinseo/image/*"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ]
+            },
+            {
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/Areas/Trinseo/images/*"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ]
+            },
+            {
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/Areas/Trinseo/scripts/*"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ]
+            },
+            {
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/Areas/Trinseo/styles/*"
+                  }
+               ],
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ]
             }
          ]
       },
-      {
-         "matches": [
+      "output": {
+         "rules": [
             {
-               "name": "url-wildcard",
-               "value": "/img"
-            }
-         ],
-         "behaviors": [
+               "behaviors": [
+                  {
+                     "params": {
+                        "hostHeaderValue": "-",
+                        "cacheKeyValue": "-",
+                        "originDomain": "www.obulpathi.com",
+                        "hostHeaderType": "digital_property",
+                        "cacheKeyType": "digital_property"
+                     },
+                     "name": "origin",
+                     "value": "-"
+                  },
+                  {
+                     "type": "no-store",
+                     "name": "caching",
+                     "value": "0s"
+                  },
+                  {
+                     "name": "referer-whitelist",
+                     "value": "*www.mocksite.com*"
+                  },
+                  {
+                     "type": "country",
+                     "name": "geo-whitelist",
+                     "value": "US"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/*"
+                  }
+               ]
+            },
             {
-               "params": {
-                  "cacheKeyType": "digital_property",
-                  "cacheKeyValue": "-",
-                  "hostHeaderType": "digital_property",
-                  "originDomain": "www.gandhi.co.nz",
-                  "hostHeaderValue": "-"
-               },
-               "name": "origin",
-               "value": "-"
-            }
-         ]
-      },
-      {
-         "matches": [
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/bundles/wffm/*"
+                  }
+               ]
+            },
             {
-               "name": "url-wildcard",
-               "value": "/favicon.ico"
-            }
-         ],
-         "behaviors": [
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/content/wffm/*"
+                  }
+               ]
+            },
             {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/areas/trinseo/scripts/*"
+                  }
+               ]
+            },
             {
-               "name": "url-wildcard",
-               "value": "/areas/trinseo/scripts/*"
-            }
-         ],
-         "behaviors": [
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/areas/trinseo/image/*"
+                  }
+               ]
+            },
             {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/areas/trinseo/images/*"
+                  }
+               ]
+            },
             {
-               "name": "url-wildcard",
-               "value": "/areas/trinseo/image/*"
-            }
-         ],
-         "behaviors": [
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/areas/trinseo/styles/*"
+                  }
+               ]
+            },
             {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/Areas/Trinseo/image/*"
+                  }
+               ]
+            },
             {
-               "name": "url-wildcard",
-               "value": "/areas/trinseo/images/*"
-            }
-         ],
-         "behaviors": [
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/Areas/Trinseo/images/*"
+                  }
+               ]
+            },
             {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/Areas/Trinseo/scripts/*"
+                  }
+               ]
+            },
             {
-               "name": "url-wildcard",
-               "value": "/areas/trinseo/styles/*"
-            }
-         ],
-         "behaviors": [
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/Areas/Trinseo/styles/*"
+                  }
+               ]
+            },
             {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
+               "behaviors": [
+                  {
+                     "params": {
+                        "hostHeaderValue": "-",
+                        "cacheKeyValue": "-",
+                        "originDomain": "www.gandhi.co.nz",
+                        "hostHeaderType": "digital_property",
+                        "cacheKeyType": "digital_property"
+                     },
+                     "name": "origin",
+                     "value": "-"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/img"
+                  }
+               ]
+            },
             {
-               "name": "url-wildcard",
-               "value": "/bundles/wffm/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/content/wffm/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/Areas/Trinseo/image/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/Areas/Trinseo/images/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/Areas/Trinseo/scripts/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/Areas/Trinseo/styles/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
+               "behaviors": [
+                  {
+                     "type": "fixed",
+                     "name": "caching",
+                     "value": "86400s"
+                  }
+               ],
+               "matches": [
+                  {
+                     "name": "url-wildcard",
+                     "value": "/favicon.ico"
+                  }
+               ]
             }
          ]
       }
-   ]
-},
-
-"output" :
-            {
-   "rules": [
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/areas/trinseo/scripts/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/areas/trinseo/image/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/areas/trinseo/images/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/areas/trinseo/styles/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/Areas/Trinseo/image/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/Areas/Trinseo/images/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/Areas/Trinseo/scripts/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/Areas/Trinseo/styles/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/bundles/wffm/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/content/wffm/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/img"
-            }
-         ],
-         "behaviors": [
-            {
-               "params": {
-                  "cacheKeyType": "digital_property",
-                  "cacheKeyValue": "-",
-                  "hostHeaderType": "digital_property",
-                  "originDomain": "www.gandhi.co.nz",
-                  "hostHeaderValue": "-"
-               },
-               "name": "origin",
-               "value": "-"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/favicon.ico"
-            }
-         ],
-         "behaviors": [
-            {
-               "type": "fixed",
-               "name": "caching",
-               "value": "86400s"
-            }
-         ]
-      },
-      {
-         "matches": [
-            {
-               "name": "url-wildcard",
-               "value": "/*"
-            }
-         ],
-         "behaviors": [
-            {
-               "params": {
-                  "cacheKeyType": "digital_property",
-                  "cacheKeyValue": "-",
-                  "hostHeaderType": "digital_property",
-                  "originDomain": "www.obulpathi.com",
-                  "hostHeaderValue": "-"
-               },
-               "name": "origin",
-               "value": "-"
-            },
-            {
-               "type": "no-store",
-               "name": "caching",
-               "value": "0s"
-            },
-            {
-               "name": "referer-whitelist",
-               "value": "*www.mocksite.com*"
-            },
-            {
-               "type": "country",
-               "name": "geo-whitelist",
-               "value": "US"
-            }
-         ]
-      }
-   ]
+   }
 }
 
-}
-}
+
+
+
+

@@ -58,20 +58,29 @@ class ServiceController(base.ServiceBase):
         self.san_cert_hostname_limit = self.driver.san_cert_hostname_limit
 
     def reorder_rules(self, post_data):
-        ordered_dict = {}
-        sorted_map = None
+        star_dict = {}
+        non_star_dict = {}
         ordered_list = []
+        sorted_star_map = []
+        sorted_nonstar_map = []
         if post_data['rules']:
             for k, v in enumerate(post_data['rules']):
-                if v['matches'][0]['value']:
-                    ordered_dict[k] = \
-                        len(v['matches'][0]['value'].split('/'))
-            sorted_map = sorted(ordered_dict.items(), key=lambda x: x[1],
-                                reverse=True)
-            for val in sorted_map:
-                if val[0] != 0:
-                    ordered_list.append(post_data['rules'][val[0]])
-            ordered_list.append(post_data['rules'][0])
+                st = v['matches'][0]['value']
+                if st:
+                    tokens = st.split('/')
+                    if '*' in st:
+                        star_dict[k] = len(tokens)
+                    else:
+                        non_star_dict[k] = len(tokens)
+            sorted_star_map = sorted(star_dict.items(),
+                                     key=lambda x: x[1],
+                                     reverse=False)
+            sorted_nonstar_map = sorted(non_star_dict.items(),
+                                        key=lambda x: x[1],
+                                        reverse=False)
+            sorted_star_map.extend(sorted_nonstar_map)
+            for val in sorted_star_map:
+                ordered_list.append(post_data['rules'][val[0]])
         return ordered_list
 
     def create(self, service_obj):
