@@ -64,14 +64,18 @@ class ServiceController(base.ServiceBase):
         if post_data['rules']:
             for k, v in enumerate(post_data['rules']):
                 if v['matches'][0]['value']:
-                    ordered_dict[k] = \
-                        len(v['matches'][0]['value'].split('/'))
+                    tokens = v['matches'][0]['value'].split('/')
+                    if len(tokens) == 2 and tokens[-1] != '*':
+                        ordered_dict[k] = 0
+                    else:
+                        ordered_dict[k] = len(tokens)
             sorted_map = sorted(ordered_dict.items(), key=lambda x: x[1],
-                                reverse=True)
+                                reverse=False)
             for val in sorted_map:
                 if val[0] != 0:
                     ordered_list.append(post_data['rules'][val[0]])
             ordered_list.append(post_data['rules'][0])
+        ordered_list.reverse()
         return ordered_list
 
     def create(self, service_obj):
