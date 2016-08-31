@@ -289,20 +289,19 @@ class ServiceControllerTest(base.FunctionalTest):
                                          'X-Project-ID': self.project_id
                                      })
             self.assertEqual(202, response.status_code)
-            response = self.app.patch(response.location,
-                                      params=json.dumps([{
-                                          "op": "add",
-                                          "path": "/domains/-",
-                                          "value": {
-                                                "domain": "mocksite",
-                                                "protocol": "https",
-                                                "certificate": "shared"}
-                                      }]),
-                                      headers={'Content-Type':
-                                               'application/json',
-                                               'X-Project-ID':
-                                               self.project_id
-                                               }, expect_errors=True)
+            response = self.app.patch(
+                response.location,
+                params=json.dumps([{
+                    "op": "add",
+                    "path": "/domains/-",
+                    "value": {
+                        "domain": "mocksite",
+                        "protocol": "https",
+                        "certificate": "shared"}
+                }]),
+                headers={'Content-Type': 'application/json',
+                         'X-Project-ID': self.project_id}
+            )
             self.assertEqual(202, response.status_code)
 
         # NOTE(TheSriram): Now create another service, and patch it.
@@ -461,7 +460,6 @@ class ServiceControllerTest(base.FunctionalTest):
         self.assertEqual(400, response.status_code)
 
     def test_update_with_good_input(self):
-        self.skipTest('Skip failing test')
         response = self.app.get(
             self.service_url,
             headers={'X-Project-ID': self.project_id})
@@ -475,7 +473,7 @@ class ServiceControllerTest(base.FunctionalTest):
                                           "value": {
                                               "origin": "44.33.22.11",
                                               "port": 80,
-                                              "ssl": "false"
+                                              "ssl": False
                                           }
                                       }
                                   ]),
