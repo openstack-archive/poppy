@@ -22,8 +22,8 @@ import testtools
 from poppy.manager.default import driver
 from poppy.manager.default import ssl_certificate
 from poppy.model import ssl_certificate as ssl_cert_model
-from tests.unit import base
 from poppy.transport.validators import helpers as validators
+from tests.unit import base
 
 
 @ddt.ddt

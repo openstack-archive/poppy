@@ -22,6 +22,7 @@ import mock
 from poppy.transport.validators import helpers as validators
 from tests.functional.transport.pecan import base
 
+
 @ddt.ddt
 class SSLCertificateControllerTest(base.FunctionalTest):
 
