@@ -37,19 +37,17 @@ from tests.unit import base
 @ddt.ddt
 class TestServices(base.TestCase):
 
-    @mock.patch(
-        'poppy.provider.akamai.services.ServiceController.policy_api_client')
-    @mock.patch(
-        'poppy.provider.akamai.services.ServiceController.ccu_api_client')
-    @mock.patch('poppy.provider.akamai.driver.CDNProvider')
-    def setUp(
-        self,
-        mock_driver,
-        mock_controller_ccu_api_client,
-        mock_controller_policy_api_client
-    ):
+    def setUp(self):
         super(TestServices, self).setUp()
+
+        driver_patcher = mock.patch('poppy.provider.akamai.driver.CDNProvider')
+        mock_driver = driver_patcher.start()
+        self.addCleanup(driver_patcher.stop)
+
         self.driver = mock_driver()
+        self.policy_client = self.driver.policy_api_client
+        self.ccu_client = self.driver.ccu_api_client
+
         self.driver.provider_name = 'Akamai'
         self.driver.akamai_https_access_url_suffix = str(uuid.uuid1())
         self.san_cert_cnames = [str(x) for x in range(7)]
@@ -65,6 +63,16 @@ class TestServices(base.TestCase):
                                    domains=[domains_old],
                                    origins=[current_origin],
                                    flavor_id='cdn')
+
+    def test_controller_properties(self):
+        self.assertEqual(
+            self.policy_client,
+            self.controller.policy_api_client
+        )
+        self.assertEqual(
+            self.ccu_client,
+            self.controller.ccu_api_client
+        )
 
     @ddt.file_data('domains_list.json')
     def test_classify_domains(self, domains_list):
@@ -142,6 +150,27 @@ class TestServices(base.TestCase):
             status_code=200,
             text='Put successful'
         )
+        for curr_domain in service_obj.domains:
+            if (
+                curr_domain.certificate == 'san' and
+                curr_domain.protocol == 'https'
+            ):
+                curr_domain.cert_info = ssl_certificate.SSLCertificate(
+                    'flavor_id',
+                    curr_domain.domain,
+                    curr_domain.certificate,
+                    service_obj.project_id,
+                    cert_details={
+                        'Akamai': dict(
+                            cert_domain='1',
+                            extra_info={
+                                'status': 'deployed',
+                                'san cert': '1',
+                                'created_at': str(datetime.datetime.now())
+                            }
+                        )
+                    }
+                )
         provider_responses = self.controller.create(service_obj)
         for provider_name in provider_responses:
             provider_response = provider_responses[provider_name]
@@ -149,6 +178,52 @@ class TestServices(base.TestCase):
             num_of_links = len(provider_response['links'])
             # make sure we have same number of domains and links
             self.assertEqual(num_of_domains, num_of_links)
+            self.assertIn('id', provider_responses[provider_name])
+
+    @ddt.file_data('data_service.json')
+    def test_create_with_multiple_domains_no_san_edge_name(self, service_json):
+        service_obj = service.load_from_json(service_json)
+        self.controller.subcustomer_api_client.get.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+        self.controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
+        num_domains_not_deployed = 0
+        for curr_domain in service_obj.domains:
+            if (
+                curr_domain.certificate == 'san' and
+                curr_domain.protocol == 'https'
+            ):
+                num_domains_not_deployed += 1
+                curr_domain.cert_info = ssl_certificate.SSLCertificate(
+                    'flavor_id',
+                    curr_domain.domain,
+                    curr_domain.certificate,
+                    service_obj.project_id,
+                    cert_details={
+                        'Akamai': dict(
+                            extra_info={
+                                'status': 'create_in_progress',
+                                'created_at': str(datetime.datetime.now())
+                            }
+                        )
+                    }
+                )
+        provider_responses = self.controller.create(service_obj)
+        for provider_name in provider_responses:
+            provider_response = provider_responses[provider_name]
+            num_of_domains = len(service_obj.domains)
+            num_of_links = len(provider_response['links'])
+            # make sure we have same number of domains and links
+            # usually cannot get a link for http+san cert that
+            # hasn't deployed.
+            self.assertEqual(
+                num_of_domains - num_domains_not_deployed,
+                num_of_links
+            )
             self.assertIn('id', provider_responses[provider_name])
 
     @ddt.file_data('data_service.json')
