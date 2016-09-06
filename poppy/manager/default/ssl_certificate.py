@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import itertools
 import json
 
 from oslo_context import context as context_utils
 from oslo_log import log
 
 from poppy.common import errors
+from poppy.common import util
 from poppy.distributed_task.taskflow.flow import create_ssl_certificate
 from poppy.distributed_task.taskflow.flow import delete_ssl_certificate
 from poppy.distributed_task.taskflow.flow import recreate_ssl_certificate
@@ -176,16 +176,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                 res = akamai_driver.mod_san_queue.dequeue_mod_san_request()
                 retry_list.append(json.loads(res.decode('utf-8')))
 
-            # remove duplicates
-            # see http://bit.ly/1mX2Vcb for details
-            def remove_duplicates(data):
-                """Remove duplicates from the data (normally a list).
-
-                The data must be sortable and have an equality operator
-                """
-                data = sorted(data)
-                return [k for k, _ in itertools.groupby(data)]
-            retry_list = remove_duplicates(retry_list)
+            retry_list = util.remove_duplicates(retry_list)
 
             # double check in POST. This check should really be first done in
             # PUT

@@ -27,6 +27,7 @@ from poppy.common import decorators
 from poppy.provider.akamai import controllers
 from poppy.provider.akamai.domain_san_mapping_queue import zk_san_mapping_queue
 from poppy.provider.akamai import geo_zone_code_mapping
+from poppy.provider.akamai.http_policy_queue import http_policy_queue
 from poppy.provider.akamai.mod_san_queue import zookeeper_queue
 from poppy.provider import base
 import uuid
@@ -198,6 +199,9 @@ class CDNProvider(base.Driver):
         self.mod_san_queue = (
             zookeeper_queue.ZookeeperModSanQueue(self._conf))
         self.san_mapping_queue = zk_san_mapping_queue.ZookeeperSanMappingQueue(
+            self._conf
+        )
+        self.http_policy_queue = http_policy_queue.ZookeeperHttpPolicyQueue(
             self._conf
         )
 

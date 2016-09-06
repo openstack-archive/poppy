@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import cgi
+import itertools
 import pprint
 
 from oslo_log import log
@@ -54,3 +55,14 @@ def help_escape(potentially_bad_string):
     if potentially_bad_string is None:
         LOG.warning('Should not happen: trying to escape a None object')
     return cgi.escape(potentially_bad_string or "")
+
+
+# remove duplicates
+# see http://bit.ly/1mX2Vcb for details
+def remove_duplicates(data):
+    """Remove duplicates from the data (normally a list).
+
+    The data must be sortable and have an equality operator
+    """
+    data = sorted(data)
+    return [k for k, _ in itertools.groupby(data)]

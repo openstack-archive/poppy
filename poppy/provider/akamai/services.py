@@ -34,6 +34,10 @@ LOG = log.getLogger(__name__)
 class ServiceController(base.ServiceBase):
 
     @property
+    def http_policy_queue(self):
+        return self.driver.http_policy_queue
+
+    @property
     def policy_api_client(self):
         return self.driver.policy_api_client
 
@@ -459,17 +463,25 @@ class ServiceController(base.ServiceBase):
                         ):
                             is_upgrade = True
 
-                    # skip policy delete if a http -> https+san
-                    # upgrade is detected
+                    configuration_number = self._get_configuration_number(
+                        util.dict2obj(policy))
+
+                    # when an upgrade is detected, keep track of the
+                    # old http policy. the old http policy will be deleted
+                    # later.
                     if is_upgrade is True:
                         LOG.info(
                             "{0} was upgraded from http to https san. "
-                            "Skipping old policy delete.".format(
+                            "Queuing old http policy for delete.".format(
                                 policy['policy_name']))
+                        self.http_policy_queue.enqueue_http_policy(
+                            json.dumps({
+                                'configuration_number': configuration_number,
+                                'policy_name': policy['policy_name'],
+                                'project_id': service_obj.project_id
+                            })
+                        )
                         continue
-
-                    configuration_number = self._get_configuration_number(
-                        util.dict2obj(policy))
 
                     LOG.info('Starting to delete old policy %s' %
                              policy['policy_name'])
