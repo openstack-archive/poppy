@@ -27,6 +27,7 @@ from poppy.model.helpers import origin
 from poppy.model.helpers import restriction
 from poppy.model.helpers import rule
 from poppy.model.service import Service
+from poppy.model import ssl_certificate
 from poppy.provider.akamai import geo_zone_code_mapping
 from poppy.provider.akamai import services
 from poppy.transport.pecan.models.request import service
@@ -385,6 +386,181 @@ class TestServices(base.TestCase):
         service_obj = service.load_from_json(service_json)
         resp = controller.update(
             provider_service_id, service_obj)
+        self.assertIn('id', resp[self.driver.provider_name])
+
+    @ddt.file_data('data_update_service.json')
+    def test_update_create_new_sub_customer_new_policy(self, service_json):
+        provider_service_id = json.dumps([{'policy_name': str(uuid.uuid1()),
+                                           'protocol': 'http',
+                                           'certificate': None}])
+        controller = services.ServiceController(self.driver)
+        controller.subcustomer_api_client.get.side_effect = [
+            mock.Mock(status_code=400,
+                      ok=False,
+                      text='Error retrieving sub customer!'),
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"})),
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"})),
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+        ]
+
+        controller.subcustomer_api_client.delete.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True)
+
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            text=json.dumps(dict(rules=[]))
+        )
+        controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
+        controller.policy_api_client.delete.return_value = mock.Mock(
+            status_code=200,
+            text='Delete successful'
+        )
+        service_obj = service.load_from_json(service_json)
+        resp = controller.update(
+            provider_service_id, service_obj)
+        self.assertIn('id', resp[self.driver.provider_name])
+
+    @ddt.file_data('data_update_service.json')
+    def test_update_create_new_sub_customer_policy_exists(self, service_json):
+        provider_service_id = []
+        for domain_obj in service_json.get('domains', []):
+            provider_service_id.append(
+                {
+                    'policy_name': domain_obj['domain'],
+                    'protocol': domain_obj.get('protocol', 'http'),
+                    'certificate': domain_obj.get('certificate', None)
+                }
+            )
+        if len(provider_service_id) == 0:
+            provider_service_id = [{'policy_name': str(uuid.uuid1()),
+                                    'protocol': 'http',
+                                    'certificate': None}]
+        provider_service_id = json.dumps(provider_service_id)
+
+        controller = services.ServiceController(self.driver)
+        controller.subcustomer_api_client.get.side_effect = [
+            mock.Mock(status_code=400,
+                      ok=False,
+                      text='Error retrieving sub customer!'),
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"})),
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"})),
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+        ]
+
+        controller.subcustomer_api_client.delete.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True)
+
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            text=json.dumps(dict(rules=[]))
+        )
+        controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
+        controller.policy_api_client.delete.return_value = mock.Mock(
+            status_code=200,
+            text='Delete successful'
+        )
+
+        service_obj = service.load_from_json(service_json)
+        resp = controller.update(
+            provider_service_id, service_obj)
+        self.assertIn('id', resp[self.driver.provider_name])
+
+    @ddt.file_data('data_update_service.json')
+    def test_update_https_san_domains_with_cert_info(self, service_json):
+        provider_service_id = []
+        for domain_obj in service_json.get('domains', []):
+            provider_service_id.append(
+                {
+                    'policy_name': domain_obj['domain'],
+                    'protocol': domain_obj.get('protocol', 'http'),
+                    'certificate': domain_obj.get('certificate', None)
+                }
+            )
+        if len(provider_service_id) == 0:
+            provider_service_id = [{'policy_name': str(uuid.uuid1()),
+                                    'protocol': 'http',
+                                    'certificate': None}]
+        provider_service_id = json.dumps(provider_service_id)
+
+        controller = services.ServiceController(self.driver)
+        controller.subcustomer_api_client.get.side_effect = [
+            mock.Mock(status_code=400,
+                      ok=False,
+                      text='Error retrieving sub customer!'),
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"})),
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"})),
+            mock.Mock(status_code=200,
+                      ok=True,
+                      content=json.dumps({"geo": "US"}))
+        ]
+
+        controller.subcustomer_api_client.delete.return_value = \
+            mock.Mock(status_code=200,
+                      ok=True)
+
+        controller.policy_api_client.get.return_value = mock.Mock(
+            status_code=200,
+            text=json.dumps(dict(rules=[]))
+        )
+        controller.policy_api_client.put.return_value = mock.Mock(
+            status_code=200,
+            text='Put successful'
+        )
+        controller.policy_api_client.delete.return_value = mock.Mock(
+            status_code=200,
+            text='Delete successful'
+        )
+
+        service_obj = service.load_from_json(service_json)
+        san_domains = []
+        for curr_domain in service_obj.domains:
+            if (
+                curr_domain.certificate == 'san' and
+                curr_domain.protocol == 'https'
+            ):
+                curr_domain.cert_info = ssl_certificate.SSLCertificate(
+                    'flavor_id',
+                    curr_domain.domain,
+                    curr_domain.certificate,
+                    service_obj.project_id,
+                    cert_details={
+                        'Akamai': dict(
+                            cert_domain='1',
+                            extra_info={
+                                'status': 'deployed',
+                                'san cert': '1',
+                                'created_at': str(datetime.datetime.now())
+                            }
+                        )
+                    }
+                )
+                san_domains.append(curr_domain)
+
+        resp = controller.update(provider_service_id, service_obj)
         self.assertIn('id', resp[self.driver.provider_name])
 
     @ddt.file_data('data_update_service.json')

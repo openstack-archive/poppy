@@ -17,7 +17,9 @@
         "name" : "mysite.com",
         "domains": [
             {"domain": "parsely.sage.com"},
-            {"domain": "densely.sage.com"},
+            {"domain": "densely.sage.com",
+                        "protocol": "https",
+                        "certificate": "san"},
             {"domain": "rosemary.thyme.net"}
         ],
         "origins": [
@@ -25,7 +27,14 @@
             {"origin": "mockdomain-image.com",
              "rules": [{"name": "img", "request_url": "/img"}] }
         ],
-        "flavor_id" : "standard"
+        "flavor_id" : "standard",
+        "provider_details": {
+            "Akamai": {
+                "access_urls": [{"provider_url": "akamai.provider.com", "domain": "densely.sage.com"}],
+                "id": [{"protocol": "https", "certificate": "san", "policy_name": "densely.sage.com"}],
+                "domains_certificate_status": {"densely.sage.com": "create_in_progress"}
+            }
+        }
     },
     "single_one_origin_without_domains": {
         "name" : "mysite.com",
