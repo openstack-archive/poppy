@@ -14,9 +14,12 @@
 # limitations under the License.
 
 import datetime
+import dns.resolver
 import functools
 import json
 import re
+import whois
+
 try:
     set
 except NameError:  # noqa  pragma: no cover
@@ -30,6 +33,7 @@ from poppy.common import util
 from poppy.transport.validators import root_domain_regexes as regexes
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import exceptions
+from tld import get_tld
 
 
 def req_accepts_json_pecan(request, desired_content_type='application/json'):
@@ -132,6 +136,23 @@ def json_matches_flavor_schema_inner(request, schema=None):
 def is_valid_shared_ssl_domain_name(domain_name):
     shared_ssl_domain_regex = '^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$'
     return re.match(shared_ssl_domain_regex, domain_name) is not None
+
+
+def is_valid_tld(domain_name):
+    try:
+        status = whois.whois(domain_name)['status']
+        if status is not None or status != '':
+            url = 'https://{domain}'
+            tld_obj = get_tld(url.format(domain=domain_name),
+                              as_object=True)
+            tld = tld_obj.suffix
+            try:
+                dns.resolver.query(tld + '.', 'SOA')
+                return True
+            except dns.resolver.NXDOMAIN:
+                return False
+    except Exception:
+        return False
 
 
 def is_valid_domain_name(domain_name):

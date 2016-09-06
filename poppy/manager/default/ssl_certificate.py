@@ -48,7 +48,8 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
 
         if (not validators.is_valid_domain_name(cert_obj.domain_name)) or \
                 (validators.is_root_domain(
-                    domain.Domain(cert_obj.domain_name).to_dict())):
+                    domain.Domain(cert_obj.domain_name).to_dict())) or \
+                (not validators.is_valid_tld(cert_obj.domain_name)):
             # here created a http domain object but it does not matter http or
             # https
             raise ValueError('%s must be a valid non-root domain' %
