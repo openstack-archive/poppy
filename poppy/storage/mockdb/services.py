@@ -76,7 +76,9 @@ class ServicesController(base.ServicesController):
         self.created_service_ids.append(service_obj.service_id)
         self.created_services[service_obj.service_id] = service_obj.to_dict()
         for domain_obj in service_obj.domains:
-            self.claimed_domains.append(domain_obj.domain)
+            self.claimed_domains.append(
+                (domain_obj.domain, service_obj.service_id)
+            )
         try:
             self.service_count_per_project_id[project_id] += 1
         except KeyError:
@@ -118,8 +120,13 @@ class ServicesController(base.ServicesController):
                                                         service_id)]):
                 self.created_services[service_id] = service_json.to_dict()
                 for domain_obj in service_json.domains:
-                    if domain_obj not in self.claimed_domains:
-                        self.claimed_domains.append(domain_obj.domain)
+                    if (
+                        (domain_obj.domain, service_id) not in
+                        self.claimed_domains
+                    ):
+                        self.claimed_domains.append(
+                            (domain_obj.domain, service_id)
+                        )
             else:
                 raise ValueError("Domain has already been taken")
 
@@ -180,7 +187,16 @@ class ServicesController(base.ServicesController):
         pass
 
     def domain_exists_elsewhere(self, domain_name, service_id):
-        return domain_name in self.claimed_domains
+        claimed = False
+        for claimed_domain, claimed_service_id in self.claimed_domains:
+            if (
+                claimed_domain == domain_name and
+                claimed_service_id != service_id
+            ):
+                claimed = True
+                break
+
+        return claimed
 
     def get_service_details_by_domain_name(self, domain_name,
                                            project_id=None):
