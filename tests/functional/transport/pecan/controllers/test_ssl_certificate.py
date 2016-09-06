@@ -140,7 +140,7 @@ class SSLCertificateControllerTest(base.FunctionalTest):
         self.assertEqual(200, response.status_code)
 
     def test_create_with_invalid_json(self):
-        # create with errorenous data: invalid json data
+        # create with erroneous data: invalid json data
         response = self.app.post('/v1.0/ssl_certificate',
                                  params="{",
                                  headers={
@@ -151,7 +151,7 @@ class SSLCertificateControllerTest(base.FunctionalTest):
 
     @ddt.file_data("data_create_ssl_certificate_bad_input_json.json")
     def test_create_with_bad_input_json(self, ssl_certificate_json):
-        # create with errorenous data
+        # create with erroneous data
         response = self.app.post('/v1.0/ssl_certificate',
                                  params=json.dumps(ssl_certificate_json),
                                  headers={'Content-Type': 'application/json',
@@ -160,14 +160,14 @@ class SSLCertificateControllerTest(base.FunctionalTest):
         self.assertEqual(400, response.status_code)
 
     def test_delete_cert(self):
-        # create with errorenous data: invalid json data
+        # create with erroneous data: invalid json data
         response = self.app.delete('/v1.0/ssl_certificate/blog.test.com',
                                    headers={'X-Project-ID': self.project_id}
                                    )
         self.assertEqual(202, response.status_code)
 
     def test_delete_cert_non_exist(self):
-        # create with errorenous data: invalid json data
+        # create with erroneous data: invalid json data
         response = self.app.delete('/v1.0/ssl_certificate/blog.non_exist.com',
                                    headers={'X-Project-ID': self.project_id},
                                    expect_errors=True)

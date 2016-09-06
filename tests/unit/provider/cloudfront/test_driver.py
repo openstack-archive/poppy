@@ -83,3 +83,7 @@ class TestDriver(base.TestCase):
     def test_service_controller(self, MockController):
         provider = driver.CDNProvider(self.conf)
         self.assertNotEqual(provider.service_controller, None)
+
+    def test_certificate_controller(self):
+        provider = driver.CDNProvider(self.conf)
+        self.assertNotEqual(provider.certificate_controller, None)

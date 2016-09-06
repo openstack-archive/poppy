@@ -76,6 +76,27 @@ class HealthControllerTest(base.FunctionalTest):
             self.assertEqual(200, response.status_code)
             self.assertIn('true', str(response.body))
 
+    @mock.patch('requests.get')
+    def test_health_dns(self, mock_requests):
+        response_object = util.dict2obj(
+            {'content': '', 'status_code': 200})
+        mock_requests.return_value = response_object
+
+        response = self.app.get('/v1.0/health',
+                                headers={'X-Project-ID': self.project_id})
+        for name in response.json['dns']:
+            endpoint = '/v1.0/health/dns/{0}'.format(name)
+            response = self.app.get(endpoint,
+                                    headers={'X-Project-ID': self.project_id})
+            self.assertEqual(200, response.status_code)
+            self.assertIn('true', str(response.body))
+
+    def test_get_unknown_dns(self):
+        response = self.app.get('/v1.0/health/dns/unknown',
+                                headers={'X-Project-ID': self.project_id},
+                                expect_errors=True)
+        self.assertEqual(404, response.status_code)
+
     def test_get_unknown_provider(self):
         response = self.app.get('/v1.0/health/provider/unknown',
                                 headers={'X-Project-ID': self.project_id},
