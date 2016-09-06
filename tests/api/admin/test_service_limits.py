@@ -79,6 +79,7 @@ class TestServiceLimits(base.TestBase):
         self.assertEqual(json.loads(resp.content)['limit'], limit)
 
     def tearDown(self):
+        super(TestServiceLimits, self).tearDown()
         for service in self.service_list:
             self.service_limit_user_client.delete_service(location=service)
             self.service_limit_user_client.wait_for_service_delete(

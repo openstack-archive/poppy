@@ -18,7 +18,9 @@ import random
 import ddt
 import mock
 from oslo_config import cfg
+import requests
 
+from poppy.provider.akamai import certificates
 from poppy.provider.akamai import driver
 from tests.unit import base
 
@@ -191,3 +193,57 @@ class TestDriver(base.TestCase):
         mock_connect.return_value = mock.Mock()
         provider = driver.CDNProvider(self.conf)
         self.assertNotEqual(None, provider.cert_info_storage)
+
+    @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
+    def test_certificate_controller(self):
+        provider = driver.CDNProvider(self.conf)
+        self.assertTrue(
+            isinstance(
+                provider.certificate_controller,
+                certificates.CertificateController
+            )
+        )
+
+    @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
+    def test_policy_api_client(self):
+        provider = driver.CDNProvider(self.conf)
+        self.assertTrue(
+            isinstance(provider.policy_api_client, requests.Session))
+
+    @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
+    def test_ccu_api_client(self):
+        provider = driver.CDNProvider(self.conf)
+        self.assertTrue(
+            isinstance(provider.ccu_api_client, requests.Session))
+
+    @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
+    def test_sps_api_client(self):
+        provider = driver.CDNProvider(self.conf)
+        self.assertTrue(
+            isinstance(provider.sps_api_client, requests.Session))
+
+    @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
+    def test_papi_api_client(self):
+        provider = driver.CDNProvider(self.conf)
+        self.assertTrue(
+            isinstance(provider.papi_api_client, requests.Session))
+
+    @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
+    def test_papi_property_id_positive(self):
+        provider = driver.CDNProvider(self.conf)
+
+        prop_id = provider.papi_property_id('akamai_http_config_number')
+        self.assertIsNotNone(prop_id)
+
+    @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
+    def test_papi_property_id_positive_spec_returns_list(self):
+        provider = driver.CDNProvider(self.conf)
+        prop_id = provider.papi_property_id('akamai_https_san_config_numbers')
+        self.assertIsNotNone(prop_id)
+
+    @mock.patch.object(driver, 'AKAMAI_OPTIONS', new=AKAMAI_OPTIONS)
+    def test_papi_property_id_invalid_spec(self):
+        provider = driver.CDNProvider(self.conf)
+
+        self.assertRaises(
+            ValueError, provider.papi_property_id, 'invalid_spec_name')

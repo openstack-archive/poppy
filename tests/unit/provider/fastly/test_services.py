@@ -380,6 +380,32 @@ class TestServices(base.TestCase):
             provider_service_id, service_obj)
         self.assertIn('id', resp[self.driver.provider_name])
 
+    @ddt.file_data('data_service.json')
+    def test_update_fastly_exception(self, service_json):
+        provider_service_id = uuid.uuid1()
+        controller = services.ServiceController(self.driver)
+        controller.client.list_versions.return_value = [self.version]
+        controller.client.get_service_details.side_effect = (
+            fastly.FastlyError('Mock -- Fastly error!')
+        )
+        service_obj = service.load_from_json(service_json)
+        resp = controller.update(
+            provider_service_id, service_obj)
+        self.assertIn('error', resp[self.driver.provider_name])
+
+    @ddt.file_data('data_service.json')
+    def test_update_general_exception(self, service_json):
+        provider_service_id = uuid.uuid1()
+        controller = services.ServiceController(self.driver)
+        controller.client.list_versions.return_value = [self.version]
+        controller.client.get_service_details.side_effect = (
+            Exception('Mock -- Something went wrong!')
+        )
+        service_obj = service.load_from_json(service_json)
+        resp = controller.update(
+            provider_service_id, service_obj)
+        self.assertIn('error', resp[self.driver.provider_name])
+
     def test_purge_with_exception(self):
         provider_service_id = uuid.uuid1()
         controller = services.ServiceController(self.driver)
@@ -408,7 +434,8 @@ class TestServices(base.TestCase):
             mock.Mock(name='domain_1'),
             mock.Mock(name='domain_2')]
         controller.client.purge_url.return_value = 'purge_url_return'
-        resp = controller.purge(provider_service_id, ['/url_1', '/url_2'])
+        resp = controller.purge(
+            provider_service_id, hard=True, purge_url='some_url')
         self.assertIn('id', resp[self.driver.provider_name])
 
     def test_client(self):
@@ -504,3 +531,19 @@ class TestProviderValidation(base.TestCase):
         driver.regions = []
         controller = services.ServiceController(driver)
         self.assertEqual(controller.driver.regions, [])
+
+    def test_get_provider_service_id(self):
+        driver = mock.Mock()
+        controller = services.ServiceController(driver)
+        mock_service = mock.Mock()
+        mock_service.service_id = uuid.uuid4()
+        self.assertEqual(
+            mock_service.service_id,
+            controller.get_provider_service_id(mock_service))
+
+    def test_get_metrics_by_domain(self):
+        driver = mock.Mock()
+        controller = services.ServiceController(driver)
+        self.assertEqual(
+            [],
+            controller.get_metrics_by_domain('project_id', 'domain_name', []))

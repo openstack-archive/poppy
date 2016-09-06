@@ -160,3 +160,14 @@ class TestServices(base.TestCase):
 
     def test_regions(self):
         self.assertEqual(self.controller.driver.regions, [])
+
+    def test_get_provider_service_id(self):
+        mock_service = mock.Mock()
+        mock_service.name = uuid.uuid4()
+        self.assertEqual(
+            mock_service.name,
+            self.controller.get_provider_service_id(mock_service))
+
+    def test_get_metrics_by_domain(self):
+        self.assertEqual([], self.controller.get_metrics_by_domain(
+            'project_id', 'domain_name', []))
