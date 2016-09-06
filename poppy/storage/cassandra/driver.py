@@ -46,7 +46,7 @@ CASSANDRA_OPTIONS = [
     cfg.BoolOpt('auth_enabled', default=False,
                 help='Does Cassandra have authentication enabled?'),
     cfg.StrOpt('username', default='', help='Cassandra username'),
-    cfg.StrOpt('password', default='', help='Cassandra password'),
+    cfg.StrOpt('password', default='', secret=True, help='Cassandra password'),
     cfg.StrOpt('load_balance_strategy', default='RoundRobinPolicy',
                help='Load balancing strategy for connecting to cluster nodes'),
     cfg.StrOpt('consistency_level', default='ONE',
