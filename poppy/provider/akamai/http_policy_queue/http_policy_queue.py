@@ -23,9 +23,9 @@ from poppy.provider.akamai import utils
 
 AKAMAI_OPTIONS = [
     # queue backend configs
-    cfg.StrOpt(
-        'queue_backend_type',
-        help='SAN Cert Queueing backend'),
+    # cfg.StrOpt(
+    #     'queue_backend_type',
+    #     help='HTTP policy queueing backend'),
     cfg.ListOpt(
         'queue_backend_host',
         default=['localhost'],

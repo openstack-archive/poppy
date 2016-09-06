@@ -75,8 +75,12 @@ class TestDriver(base.TestCase):
         client = provider.client()
         self.assertNotEqual(client, None)
 
-    @mock.patch('poppy.provider.fastly.controllers.ServiceController')
     @mock.patch.object(driver, 'FASTLY_OPTIONS', new=FASTLY_OPTIONS)
-    def test_service_controller(self, MockController):
+    def test_service_controller(self):
         provider = driver.CDNProvider(self.conf)
         self.assertNotEqual(provider.service_controller, None)
+
+    @mock.patch.object(driver, 'FASTLY_OPTIONS', new=FASTLY_OPTIONS)
+    def test_certificate_controller(self):
+        provider = driver.CDNProvider(self.conf)
+        self.assertIsNotNone(provider.certificate_controller)
