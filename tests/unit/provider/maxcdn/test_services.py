@@ -289,7 +289,8 @@ class TestServices(base.TestCase):
         self.assertEqual(controller._map_service_name(service_name),
                          service_name)
 
-    @ddt.data(u'www.düsseldorf-Lörick.com', 'yahoo%_notvalid')
+    @ddt.data(u'www.düsseldorf-Lörick.com'.encode("utf-8"),
+              'yahoo%_notvalid')
     @mock.patch.object(driver.CDNProvider, 'client',
                        new=fake_maxcdn_api_client())
     def test_map_service_name_with_hash(self, service_name):
