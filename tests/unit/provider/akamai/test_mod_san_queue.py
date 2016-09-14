@@ -131,3 +131,9 @@ class TestModSanQueue(base.TestCase):
         res = self.zk_queue.traverse_queue()
         res = [json.loads(r.decode('utf-8')) for r in res]
         self.assertTrue(res == cert_obj_list)
+
+        # test put data to non-empty queue
+        # should replace all items added above
+        self.zk_queue.put_queue_data(
+            [json.dumps(o).encode('utf-8') for o in cert_obj_list])
+        self.assertTrue(len(self.zk_queue.mod_san_queue_backend) == 10)

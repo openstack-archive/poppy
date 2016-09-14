@@ -85,3 +85,10 @@ class MockProviderServicesTest(base.TestCase):
 
     def test_regions(self):
         self.assertEqual(self.sc._driver.regions, [])
+
+    def test_get_provider_service_id(self):
+        self.assertEqual([], self.sc.get_provider_service_id({}))
+
+    def test_get_metrics_by_domain(self):
+        self.assertEqual(
+            [], self.sc.get_metrics_by_domain('project_id', 'domain_name', []))

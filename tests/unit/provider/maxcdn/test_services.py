@@ -218,8 +218,35 @@ class TestServices(base.TestCase):
 
     @mock.patch('poppy.provider.maxcdn.driver.CDNProvider.client')
     @mock.patch('poppy.provider.maxcdn.driver.CDNProvider')
-    def test_delete_with_exception(self, mock_controllerclient,
-                                   mock_driver):
+    def test_delete_failed(self, mock_controllerclient, mock_driver):
+        # test create with exceptions
+        mock_response = mock.MagicMock()
+        mock_response.text = 'Mock -- something went wrong!'
+        mock_dict = {u'code': 500}
+        mock_response.__getitem__.side_effect = mock_dict.__getitem__
+        driver = mock_driver()
+        driver.attach_mock(mock_controllerclient, 'client')
+        driver.client.configure_mock(
+            **{'delete.return_value': mock_response})
+
+        controller = services.ServiceController(driver)
+        service_name = 'test_service_name'
+        service_id = str(uuid.uuid4())
+        current_domain = str(uuid.uuid1())
+        domains_old = domain.Domain(domain=current_domain)
+        current_origin = origin.Origin(origin='poppy.org')
+        service_obj = Service(service_id=service_id,
+                              name='poppy cdn service',
+                              domains=[domains_old],
+                              origins=[current_origin],
+                              flavor_id='cdn',
+                              project_id=str(uuid.uuid4()))
+        resp = controller.delete(service_obj, service_name)
+        self.assertIn('error', resp[driver.provider_name])
+
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider.client')
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider')
+    def test_delete_with_exception(self, mock_controllerclient, mock_driver):
         # test create with exceptions
         driver = mock_driver()
         driver.attach_mock(mock_controllerclient, 'client')
@@ -280,13 +307,33 @@ class TestServices(base.TestCase):
         resp = controller_purge_with_error.purge(pullzone_id)
         self.assertIn('id', resp[driver.provider_name])
 
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider.client')
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider')
+    def test_purge_failed(self, mock_controllerclient, mock_driver):
+        # test create with exceptions
+        mock_response = mock.MagicMock()
+        mock_response.text = 'Mock -- something went wrong!'
+        mock_dict = {u'code': 500}
+        mock_response.__getitem__.side_effect = mock_dict.__getitem__
+        driver = mock_driver()
+        driver.attach_mock(mock_controllerclient, 'client')
+        driver.client.configure_mock(
+            **{'purge.return_value': mock_response})
+
+        controller = services.ServiceController(driver)
+        pullzone_id = 'test_random_pullzone_id'
+        resp = controller.purge(pullzone_id)
+        self.assertIn('error', resp[driver.provider_name])
+
     @ddt.data('good-service-name', 'yahooservice')
     @mock.patch.object(driver.CDNProvider, 'client',
                        new=fake_maxcdn_api_client())
     def test_map_service_name_no_hash(self, service_name):
         maxcdn_driver = driver.CDNProvider(self.conf)
         controller = services.ServiceController(maxcdn_driver)
-        self.assertEqual(controller._map_service_name(service_name),
+        mock_service = mock.Mock()
+        mock_service.name = service_name
+        self.assertEqual(controller.get_provider_service_id(mock_service),
                          service_name)
 
     @ddt.data(u'www.düsseldorf-Lörick.com'.encode("utf-8"),
@@ -337,3 +384,13 @@ class TestServices(base.TestCase):
         driver.attach_mock(mock_controllerclient, 'client')
         controller = services.ServiceController(driver)
         self.assertEqual(controller.driver.regions, [])
+
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider.client')
+    @mock.patch('poppy.provider.maxcdn.driver.CDNProvider')
+    def test_get_metrics_by_domain(self, mock_controllerclient, mock_driver):
+        driver = mock_driver()
+        driver.attach_mock(mock_controllerclient, 'client')
+        controller = services.ServiceController(driver)
+        self.assertEqual(
+            [],
+            controller.get_metrics_by_domain('project_id', 'domain_name', []))

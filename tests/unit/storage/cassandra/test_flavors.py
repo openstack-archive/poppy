@@ -70,13 +70,25 @@ class CassandraStorageFlavorsTests(base.TestCase):
         self.assertEqual(
             len(actual_response.providers), len(value[0]['providers']))
 
+    @ddt.file_data('data_get_flavor.json')
+    @mock.patch.object(flavors.FlavorsController, 'session')
+    @mock.patch.object(cassandra.cluster.Session, 'execute')
+    def test_get_flavor_multiple(self, value, mock_session, mock_execute):
+
+        # mock the response from cassandra
+        # more than one flavor returned
+        mock_execute.execute.return_value = [value[0], value[0]]
+
+        self.assertRaises(
+            LookupError, lambda: self.fc.get(value[0]['flavor_id']))
+
     @ddt.file_data('data_get_flavor_bad.json')
     @mock.patch.object(flavors.FlavorsController, 'session')
     @mock.patch.object(cassandra.cluster.Session, 'execute')
     def test_get_flavor_error(self, value, mock_session, mock_execute):
 
         # mock the response from cassandra
-        mock_execute.execute.return_value = value
+        mock_execute.execute.return_value = []
 
         self.assertRaises(
             LookupError, lambda: self.fc.get(value[0]['flavor_id']))
