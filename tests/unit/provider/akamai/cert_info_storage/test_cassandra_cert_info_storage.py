@@ -54,6 +54,8 @@ class TestCassandraCertInfoStorage(base.TestCase):
                 '{"ipVersion": "ipv4", "issuer": "symentec", '
                 '"slot_deployment_klass": "esslType", '
                 '"jobId": "1432", "spsId": 1423}}',
+            'sni_info':
+                '{"secured2.sni1.test-cdn.com": {"enrollmentId": "2345"}}',
             'settings': '{"san_cert_hostname_limit": 80}'
         }}]
 
@@ -97,6 +99,18 @@ class TestCassandraCertInfoStorage(base.TestCase):
         mock_execute.assert_called()
         self.assertTrue(
             res == json.loads(self.get_returned_value[0]['info']['san_info'])
+        )
+
+    def test__get_akamai_sni_certs_info(self):
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf)
+        mock_execute = self.cassandra_storage.session.execute
+        mock_execute.return_value = self.get_returned_value
+
+        res = self.cassandra_storage._get_akamai_sni_certs_info()
+        mock_execute.assert_called()
+        self.assertTrue(
+            res == json.loads(self.get_returned_value[0]['info']['sni_info'])
         )
 
     def test_list_all_san_cert_names(self):
@@ -179,6 +193,23 @@ class TestCassandraCertInfoStorage(base.TestCase):
                 )[cert_name]['spsId'])
         )
 
+    def test_get_sni_cert_info(self):
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf)
+        mock_execute = self.cassandra_storage.session.execute
+        mock_execute.return_value = self.get_returned_value
+        cert_name = "secured2.sni1.test-cdn.com"
+
+        res = self.cassandra_storage.get_sni_cert_info(
+            cert_name
+        )
+        mock_execute.assert_called()
+        self.assertTrue(
+            res['enrollmentId'] == str(json.loads(
+                self.get_returned_value[0]['info']['sni_info']
+                )[cert_name]['enrollmentId'])
+        )
+
     def test_update_cert_config(self):
         self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
             self.conf)
@@ -189,6 +220,19 @@ class TestCassandraCertInfoStorage(base.TestCase):
 
         self.cassandra_storage.update_cert_config(
             cert_name, {'spsId': new_spsId}
+        )
+        mock_execute.assert_called()
+
+    def test_update_sni_cert_config(self):
+        self.cassandra_storage = cassandra_storage.CassandraSanInfoStorage(
+            self.conf)
+        mock_execute = self.cassandra_storage.session.execute
+        mock_execute.return_value = self.get_returned_value
+        cert_name = "secured2.sni1.test-cdn.com"
+        new_enrollment_id = 9898
+
+        self.cassandra_storage.update_sni_cert_config(
+            cert_name, {'enrollmentId': new_enrollment_id}
         )
         mock_execute.assert_called()
 
