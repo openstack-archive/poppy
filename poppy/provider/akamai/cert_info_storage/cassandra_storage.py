@@ -299,9 +299,26 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         enabled = the_san_cert_info.get('enabled', True)
         return enabled
 
-    def update_san_info(self, san_info_dict):
-        provider_info = {}
-        provider_info['san_info'] = json.dumps(san_info_dict)
+    def update_san_info(self, info_dict, info_type=None):
+        if info_type == 'san':
+            info_key = 'san_info'
+        elif info_type == 'sni':
+            info_key = 'sni_info'
+        else:
+            # defaults to san_info
+            info_key = 'san_info'
+
+        try:
+            provider_info = self._get_akamai_provider_info()['info']
+        except (ValueError, KeyError) as err:
+            # no providers info, create them
+            LOG.error(
+                "Unable to retrieve providers info: {0} "
+                "Creating new providers info entries.".format(err)
+            )
+            provider_info = dict()
+
+        provider_info[info_key] = json.dumps(info_dict)
 
         stmt = query.SimpleStatement(
             CREATE_PROVIDER_INFO,

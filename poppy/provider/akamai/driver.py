@@ -90,6 +90,8 @@ AKAMAI_OPTIONS = [
              'Custom cert https policies'
     ),
 
+    cfg.ListOpt('sni_cert_cnames',
+                help='A list of sni certs cname host names'),
     # SANCERT related configs
     cfg.ListOpt('san_cert_cnames',
                 help='A list of san certs cnamehost names'),
