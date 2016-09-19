@@ -144,6 +144,9 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
     def _get_akamai_san_certs_info(self):
         return json.loads(self._get_akamai_provider_info()['info']['san_info'])
 
+    def _get_akamai_sni_certs_info(self):
+        return json.loads(self._get_akamai_provider_info()['info']['sni_info'])
+
     def _get_akamai_san_certs_settings(self):
         try:
             return json.loads(
@@ -212,6 +215,23 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
 
         return res
 
+    def get_sni_cert_info(self, cert_name):
+        cert_info = self._get_akamai_sni_certs_info().get(cert_name)
+        if cert_info is None:
+            raise ValueError('No san cert info found for %s.' % cert_name)
+
+        enrollment_id = cert_info.get("enrollmentId")
+
+        res = {
+            'cnameHostname': cert_name,
+            'enrollmentId': enrollment_id,
+        }
+
+        if any([i for i in [enrollment_id] if i is None]):
+            raise ValueError("SNI info error: {0}".format(res))
+
+        return res
+
     def get_cert_config(self, san_cert_name):
         res = self.get_cert_info(san_cert_name)
         res['spsId'] = str(self.get_cert_last_spsid(san_cert_name))
@@ -221,20 +241,27 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         self.save_cert_config(san_cert_name, new_cert_config)
         return self.get_cert_config(san_cert_name)
 
-    def save_cert_config(self, san_cert_name, new_cert_config):
-        san_info = self._get_akamai_san_certs_info()
-        the_san_cert_info = san_info.get(
-            san_cert_name
-        )
+    def update_sni_cert_config(self, sni_cert_name, new_cert_config):
+        self.save_cert_config(
+            sni_cert_name, new_cert_config, info_type='sni_info')
+        return self.get_sni_cert_info(sni_cert_name)
 
-        if the_san_cert_info is None:
-            raise ValueError('No san cert info found for %s.' % san_cert_name)
+    def save_cert_config(self, cert_name, new_cert_config,
+                         info_type='san_info'):
+        if info_type == 'sni_info':
+            certs_info = self._get_akamai_sni_certs_info()
+        else:
+            certs_info = self._get_akamai_san_certs_info()
+        cert_info = certs_info.get(cert_name)
 
-        the_san_cert_info.update(new_cert_config)
-        san_info[san_cert_name] = the_san_cert_info
-        # Change the previous san info in the overall provider_info dictionary
+        if cert_info is None:
+            raise ValueError('No cert info found for %s.' % cert_name)
+
+        cert_info.update(new_cert_config)
+        certs_info[cert_name] = cert_info
+        # Change the previous info in the overall provider_info dictionary
         provider_info = dict(self._get_akamai_provider_info()['info'])
-        provider_info['san_info'] = json.dumps(san_info)
+        provider_info[info_type] = json.dumps(certs_info)
 
         stmt = query.SimpleStatement(
             UPDATE_PROVIDER_INFO,

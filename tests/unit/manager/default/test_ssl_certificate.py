@@ -54,6 +54,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         def get_provider_by_name(name):
             obj_mock = self.provider_mocks[name]
             obj_mock.san_cert_cnames = ["san1", "san2"]
+            obj_mock.sni_cert_cnames = ["sni1", "sni2"]
             obj_mock.akamai_sps_api_base_url = 'akamai_base_url/{spsId}'
 
             provider = mock.Mock(obj=obj_mock)
@@ -117,14 +118,27 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         resp = self.scc.get_san_cert_configuration("san1")
         self.assertIsNotNone(resp)
 
+    def test_get_sni_cert_configuration_positive(self):
+        resp = self.scc.get_sni_cert_configuration("sni1")
+        self.assertIsNotNone(resp)
+
     def test_get_san_cert_configuration_positive_no_akamai_provider(self):
         del self.provider_mocks['akamai']
         resp = self.scc.get_san_cert_configuration("san1")
         self.assertEqual({}, resp)
 
+    def test_get_sni_cert_configuration_positive_no_akamai_provider(self):
+        del self.provider_mocks['akamai']
+        resp = self.scc.get_sni_cert_configuration("sni1")
+        self.assertEqual({}, resp)
+
     def test_get_san_cert_configuration_invalid_san_cert_cname(self):
         with testtools.ExpectedException(ValueError):
             self.scc.get_san_cert_configuration("non-existant")
+
+    def test_get_sni_cert_configuration_invalid_san_cert_cname(self):
+        with testtools.ExpectedException(ValueError):
+            self.scc.get_sni_cert_configuration("non-existant")
 
     def test_set_san_cert_hostname_limit_positive(self):
         resp = mock.Mock()
@@ -183,6 +197,13 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         with testtools.ExpectedException(ValueError):
             self.scc.update_san_cert_configuration("non-existant",
                                                    {"spsId": '1234'})
+
+    def test_update_sni_cert_invalid_cert_cname(self):
+        with testtools.ExpectedException(ValueError):
+            self.scc.update_sni_cert_configuration(
+                "non-existant",
+                {"enrollmentId": '1234'}
+            )
 
     def test_update_san_cert_configuration_api_failure(self):
         resp = mock.Mock()

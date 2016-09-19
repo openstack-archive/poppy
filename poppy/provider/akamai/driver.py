@@ -193,6 +193,7 @@ class CDNProvider(base.Driver):
         ])
 
         self.san_cert_cnames = self.akamai_conf.san_cert_cnames
+        self.sni_cert_cnames = self.akamai_conf.sni_cert_cnames
         self.san_cert_hostname_limit = self.akamai_conf.san_cert_hostname_limit
 
         self.akamai_sps_api_client = self.akamai_policy_api_client

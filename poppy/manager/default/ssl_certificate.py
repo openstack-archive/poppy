@@ -314,7 +314,7 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                 raise ValueError(
                     "%s is not a valid san cert, valid san certs are: %s" %
                     (san_cert_name, akamai_driver.san_cert_cnames))
-            akamai_driver = self._driver.providers['akamai'].obj
+
             # given the spsId, determine the most recent jobId
             # and persist the jobId
             if new_cert_config.get('spsId') is not None:
@@ -342,6 +342,31 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
 
         return res
 
+    def get_sni_cert_configuration(self, cert_name):
+        if 'akamai' in self._driver.providers:
+            akamai_driver = self._driver.providers['akamai'].obj
+            self._validate_sni_cert_name(akamai_driver, cert_name)
+            res = akamai_driver.cert_info_storage.get_sni_cert_info(cert_name)
+        else:
+            # if not using akamai driver just return an empty list
+            res = {}
+
+        return res
+
+    def update_sni_cert_configuration(self, cert_name, new_cert_config):
+        if 'akamai' in self._driver.providers:
+            akamai_driver = self._driver.providers['akamai'].obj
+            self._validate_sni_cert_name(akamai_driver, cert_name)
+            res = akamai_driver.cert_info_storage.update_sni_cert_config(
+                cert_name,
+                new_cert_config
+            )
+        else:
+            # if not using akamai driver just return an empty list
+            res = {}
+
+        return res
+
     def get_san_cert_hostname_limit(self):
         if 'akamai' in self._driver.providers:
             akamai_driver = self._driver.providers['akamai'].obj
@@ -352,6 +377,14 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
             res = {'san_cert_hostname_limit': 0}
 
         return res
+
+    @staticmethod
+    def _validate_sni_cert_name(provider_driver, cert_name):
+        if cert_name not in provider_driver.sni_cert_cnames:
+            raise ValueError(
+                "{0} is not a valid sni cert, "
+                "valid sni certs are: {1}".format(
+                    cert_name, provider_driver.sni_cert_cnames))
 
     def set_san_cert_hostname_limit(self, request_json):
         if 'akamai' in self._driver.providers:

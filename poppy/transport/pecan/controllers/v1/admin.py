@@ -281,6 +281,45 @@ class AkamaiSanCertConfigController(base.Controller, hooks.HookController):
                 pecan.abort(400, str(e))
 
 
+class AkamaiSNICertConfigController(base.Controller, hooks.HookController):
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    @pecan.expose('json')
+    @decorators.validate(
+        query=rule.Rule(
+            helpers.is_valid_domain_by_name(),
+            helpers.abort_with_message))
+    def get_one(self, query):
+        try:
+            return (
+                self._driver.manager.ssl_certificate_controller.
+                get_sni_cert_configuration(query)
+            )
+        except Exception as e:
+            pecan.abort(400, str(e))
+
+    @pecan.expose('json')
+    @decorators.validate(
+        query=rule.Rule(
+            helpers.is_valid_domain_by_name(),
+            helpers.abort_with_message),
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                ssl_certificate.SSLCertificateSchema.get_schema(
+                    "sni_config", "POST")),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter))
+    def post(self, query):
+        request_json = json.loads(pecan.request.body.decode('utf-8'))
+        try:
+            res = (
+                self._driver.manager.ssl_certificate_controller.
+                update_sni_cert_configuration(query, request_json))
+            return res
+        except Exception as e:
+            pecan.abort(400, str(e))
+
+
 class AkamaiSSLCertificateController(base.Controller, hooks.HookController):
     __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
 
@@ -288,6 +327,7 @@ class AkamaiSSLCertificateController(base.Controller, hooks.HookController):
         super(AkamaiSSLCertificateController, self).__init__(driver)
         self.__class__.retry_list = AkamaiRetryListController(driver)
         self.__class__.config = AkamaiSanCertConfigController(driver)
+        self.__class__.sni_config = AkamaiSNICertConfigController(driver)
 
 
 class AkamaiController(base.Controller, hooks.HookController):

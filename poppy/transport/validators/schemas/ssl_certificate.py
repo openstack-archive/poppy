@@ -110,6 +110,20 @@ class SSLCertificateSchema(schema_base.SchemaBase):
             }
         },
 
+        'sni_config': {
+            'POST': {
+                'type': 'object',
+                'additionalProperties': False,
+                'properties': {
+                    'enrollmentId': {
+                        'type': 'integer',
+                        # we cannot have 0 or negative enrollmentId
+                        'minimum': 1
+                    }
+                }
+            }
+        },
+
         'san_mapping_list': {
             'PUT': {
                 'type': 'array',
