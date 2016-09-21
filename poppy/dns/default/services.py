@@ -90,3 +90,6 @@ class ServicesController(base.ServicesBase):
         random.shuffle(shard_ids)
         for shard in shard_ids:
             yield 'scdn{0}.secure.defaultcdn.com'.format(shard)
+
+    def is_shard_full(self, shard_name):
+        return False
