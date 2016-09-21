@@ -69,3 +69,11 @@ class ServicesControllerBase(controller.DNSControllerBase):
         """
 
         raise NotImplementedError
+
+    def is_shard_full(self, shard_name):
+        """Check if shard can accept new records
+
+        :raises NotImplementedError
+        """
+
+        raise NotImplementedError

@@ -15,6 +15,8 @@
 
 """Unittests for TaskFlow distributed_task driver implementation."""
 
+import mock
+
 from poppy.distributed_task.utils import memoized_controllers
 from tests.unit import base
 
@@ -23,6 +25,14 @@ class TestMemoizeUtils(base.TestCase):
 
     def setUp(self):
         super(TestMemoizeUtils, self).setUp()
+
+        rax_dns_set_credentials = mock.patch('pyrax.set_credentials')
+        rax_dns_set_credentials.start()
+        self.addCleanup(rax_dns_set_credentials.stop)
+
+        rax_dns = mock.patch('pyrax.cloud_dns')
+        rax_dns.start()
+        self.addCleanup(rax_dns.stop)
 
     def test_memoization_service_controller(self):
         service_controller_first = \
