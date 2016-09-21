@@ -28,12 +28,12 @@ import uuid
 
 import jsonschema
 import pecan
+import tld as tld_helper
 
 from poppy.common import util
 from poppy.transport.validators import root_domain_regexes as regexes
 from poppy.transport.validators.stoplight import decorators
 from poppy.transport.validators.stoplight import exceptions
-from tld import get_tld
 
 
 def req_accepts_json_pecan(request, desired_content_type='application/json'):
@@ -143,8 +143,10 @@ def is_valid_tld(domain_name):
         status = whois.whois(domain_name)['status']
         if status is not None or status != '':
             url = 'https://{domain}'
-            tld_obj = get_tld(url.format(domain=domain_name),
-                              as_object=True)
+            tld_obj = tld_helper.get_tld(
+                url.format(domain=domain_name),
+                as_object=True
+            )
             tld = tld_obj.suffix
             try:
                 dns.resolver.query(tld + '.', 'SOA')

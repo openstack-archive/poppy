@@ -40,6 +40,14 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
 
         super(DefaultSSLCertificateControllerTests, self).setUp()
 
+        tld_patcher = mock.patch('tld.get_tld')
+        tld_patcher.start()
+        self.addCleanup(tld_patcher.stop)
+
+        dns_resolver_patcher = mock.patch('dns.resolver')
+        dns_resolver_patcher.start()
+        self.addCleanup(dns_resolver_patcher.stop)
+
         conf = cfg.ConfigOpts()
 
         self.provider_mocks = {

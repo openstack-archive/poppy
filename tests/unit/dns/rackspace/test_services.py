@@ -34,6 +34,8 @@ RACKSPACE_OPTIONS = [
     cfg.BoolOpt('sharding_enabled', default=True,
                 help='Enable Sharding?'),
     cfg.IntOpt('num_shards', default=500, help='Number of Shards to use'),
+    cfg.IntOpt('records_limit', default=400,
+               help='Number of records per domain.'),
     cfg.StrOpt('shard_prefix', default='cdn',
                help='The shard prefix to use'),
     cfg.StrOpt('url', default='mycdn.com',
@@ -1047,3 +1049,38 @@ class TestServicesUpdate(base.TestCase):
         responder_disable = self.controller.disable(self.service_old)
         # TODO(isaacm): Add assertions on the returned object
         self.assertIsNotNone(responder_disable)
+
+    def test_is_shard_full_shard_not_found(self):
+        self.client.find.side_effect = exc.NotFound(404)
+
+        self.assertTrue(self.controller.is_shard_full('shard_name'))
+
+    def test_is_shard_full_false(self):
+        find_mock = mock.Mock()
+        find_mock.list_records.return_value = range(100)
+        self.client.find.return_value = find_mock
+
+        self.client.list_records_next_page.side_effect = exc.NoMoreResults
+
+        self.assertFalse(self.controller.is_shard_full('shard_name'))
+
+    def test_is_shard_full_true(self):
+        find_mock = mock.Mock()
+        find_mock.list_records.return_value = range(600)
+        self.client.find.return_value = find_mock
+
+        self.client.list_records_next_page.side_effect = exc.NoMoreResults
+
+        self.assertTrue(self.controller.is_shard_full('shard_name'))
+
+    def test_is_shard_full_paginate_true(self):
+        find_mock = mock.Mock()
+        find_mock.list_records.return_value = range(300)
+        self.client.find.return_value = find_mock
+
+        self.client.list_records_next_page.side_effect = [
+            range(300),
+            exc.NoMoreResults,
+        ]
+
+        self.assertTrue(self.controller.is_shard_full('shard_name'))

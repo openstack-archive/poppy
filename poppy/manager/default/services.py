@@ -685,14 +685,19 @@ class DefaultServicesController(base.ServicesController):
                 uuid_store[domain_name] = \
                     self.dns_controller.generate_shared_ssl_domain_suffix()
                 setattr(self, store, uuid_store)
-            return '.'.join([domain_name,
-                             next(uuid_store[domain_name])])
+
+            shard = next(uuid_store[domain_name])
+            while self.dns_controller.is_shard_full(shard):
+                LOG.info(
+                    "Skipped shard {0} because it's at maximum capacity."
+                    .format(shard))
+                shard = next(uuid_store[domain_name])
+
+            return '.'.join([domain_name, shard])
         except StopIteration:
             delattr(self, store)
-            raise errors.SharedShardsExhausted('Domain {0} '
-                                               'has already '
-                                               'been '
-                                               'taken'.format(domain_name))
+            raise errors.SharedShardsExhausted(
+                'Domain {0} has already been taken'.format(domain_name))
 
     def _pick_shared_ssl_domain(self, domain, service_id, store):
         shared_ssl_domain = self._generate_shared_ssl_domain(
@@ -707,7 +712,7 @@ class DefaultServicesController(base.ServicesController):
         return shared_ssl_domain
 
     def _shard_retry(self, project_id, service_obj, store=None):
-            # deal with shared ssl domains
+        # deal with shared ssl domains
         try:
             for domain in service_obj.domains:
                 if domain.protocol == 'https' \
