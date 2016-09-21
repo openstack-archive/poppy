@@ -32,6 +32,8 @@ RACKSPACE_OPTIONS = [
     cfg.BoolOpt('sharding_enabled', default=True,
                 help='Enable Sharding?'),
     cfg.IntOpt('num_shards', default=10, help='Number of Shards to use'),
+    cfg.IntOpt('records_limit', default=500,
+               help='Number of records per domain.'),
     cfg.StrOpt('shard_prefix', default='cdn',
                help='The shard prefix to use'),
     cfg.IntOpt('shared_ssl_num_shards', default=5, help='Number of Shards '
