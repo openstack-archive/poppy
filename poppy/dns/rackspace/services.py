@@ -801,23 +801,16 @@ class ServicesController(base.ServicesBase):
                                   target_url=new_cert, shared_ssl_flag=False)
 
     def is_shard_full(self, shard_name):
-        count = 0
         try:
             shard_domain = self.client.find(name=shard_name)
         except exc.NotFound:
             LOG.error("Shards not configured properly, could not find {0}.")
             return True
 
-        records = shard_domain.list_records(limit=100)
-        count += len(records)
+        # populates dns client with metadata
+        shard_domain.list_records()
 
-        # Loop until all records are printed
-        while True:
-            try:
-                records = self.client.list_records_next_page()
-                count += len(records)
-            except exc.NoMoreResults:
-                break
+        count = int(self.client._manager._paging['record']['total_entries'])
 
         LOG.info(
             "There were a total of {0} record(s) for {1}.".format(

@@ -1060,7 +1060,11 @@ class TestServicesUpdate(base.TestCase):
         find_mock.list_records.return_value = range(100)
         self.client.find.return_value = find_mock
 
-        self.client.list_records_next_page.side_effect = exc.NoMoreResults
+        self.client._manager._paging = {
+            'record': {
+                'total_entries': 100
+            }
+        }
 
         self.assertFalse(self.controller.is_shard_full('shard_name'))
 
@@ -1068,19 +1072,10 @@ class TestServicesUpdate(base.TestCase):
         find_mock = mock.Mock()
         find_mock.list_records.return_value = range(600)
         self.client.find.return_value = find_mock
-
-        self.client.list_records_next_page.side_effect = exc.NoMoreResults
-
-        self.assertTrue(self.controller.is_shard_full('shard_name'))
-
-    def test_is_shard_full_paginate_true(self):
-        find_mock = mock.Mock()
-        find_mock.list_records.return_value = range(300)
-        self.client.find.return_value = find_mock
-
-        self.client.list_records_next_page.side_effect = [
-            range(300),
-            exc.NoMoreResults,
-        ]
+        self.client._manager._paging = {
+            'record': {
+                'total_entries': 600
+            }
+        }
 
         self.assertTrue(self.controller.is_shard_full('shard_name'))

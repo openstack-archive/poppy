@@ -697,7 +697,9 @@ class DefaultServicesController(base.ServicesController):
         except StopIteration:
             delattr(self, store)
             raise errors.SharedShardsExhausted(
-                'Domain {0} has already been taken'.format(domain_name))
+                'Domain {0} has already been taken or '
+                'all shards are at maximum capacity when '
+                'trying to provision.'.format(domain_name))
 
     def _pick_shared_ssl_domain(self, domain, service_id, store):
         shared_ssl_domain = self._generate_shared_ssl_domain(
