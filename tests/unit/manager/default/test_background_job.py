@@ -273,8 +273,7 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         self.assertEqual(1, len(run_list))
         self.assertEqual(0, len(ignore_list))
 
-        self.assertEqual(
-            True,
+        self.assertTrue(
             self.bgc.distributed_task_controller.submit_task.called
         )
 
@@ -498,3 +497,77 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             True,
             san_mapping_queue.enqueue_san_mapping.called
         )
+
+    def test_delete_http_policy_positive(self):
+        cert_mock = mock.Mock()
+        cert_mock.get_cert_status.return_value = 'deployed'
+        self.mock_storage.certificates_controller.\
+            get_certs_by_domain.return_value = cert_mock
+
+        http_policy_queue = self.manager_driver.providers[
+            'akamai'].obj.http_policy_queue
+        http_policy_queue.traverse_queue.return_value = [
+            json.dumps({
+                'policy_name': 'www.example.com',
+                'project_id': 'project_id',
+                'configuration_number': 12345
+            })
+        ]
+
+        run_list, ignore_list = self.bgc.delete_http_policy()
+        self.assertEqual(1, len(run_list))
+        self.assertEqual(0, len(ignore_list))
+        self.assertTrue(
+            self.bgc.distributed_task_controller.submit_task.called
+        )
+
+    def test_delete_http_policy_cert_not_deployed(self):
+        cert_mock = mock.Mock()
+        cert_mock.get_cert_status.return_value = 'create_in_progress'
+        self.mock_storage.certificates_controller.\
+            get_certs_by_domain.return_value = cert_mock
+
+        http_policy_queue = self.manager_driver.providers[
+            'akamai'].obj.http_policy_queue
+        http_policy_queue.traverse_queue.return_value = [
+            json.dumps({
+                'policy_name': 'www.example.com',
+                'project_id': 'project_id',
+                'configuration_number': 12345
+            })
+        ]
+
+        run_list, ignore_list = self.bgc.delete_http_policy()
+        self.assertEqual(0, len(run_list))
+        self.assertEqual(1, len(ignore_list))
+        self.assertFalse(
+            self.bgc.distributed_task_controller.submit_task.called
+        )
+
+    def test_delete_http_policy_cert_doesnt_exist(self):
+        self.mock_storage.certificates_controller.\
+            get_certs_by_domain.return_value = []
+
+        http_policy_queue = self.manager_driver.providers[
+            'akamai'].obj.http_policy_queue
+        http_policy_queue.traverse_queue.return_value = [
+            json.dumps({
+                'policy_name': 'www.example.com',
+                'project_id': 'project_id',
+                'configuration_number': 12345
+            })
+        ]
+
+        run_list, ignore_list = self.bgc.delete_http_policy()
+        self.assertEqual(0, len(run_list))
+        self.assertEqual(1, len(ignore_list))
+        self.assertFalse(
+            self.bgc.distributed_task_controller.submit_task.called
+        )
+
+    def test_delete_http_policy_no_akamai_provider(self):
+        del self.provider_mocks['akamai']
+
+        run_list, ignore_list = self.bgc.delete_http_policy()
+        self.assertEqual(0, len(run_list))
+        self.assertEqual(0, len(ignore_list))
