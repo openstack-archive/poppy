@@ -25,6 +25,7 @@ from poppy.transport.pecan.models.response import service as resp_service_model
 from poppy.transport.validators import helpers
 from poppy.transport.validators.schemas import background_jobs
 from poppy.transport.validators.schemas import domain_migration
+from poppy.transport.validators.schemas import provider_details_update
 from poppy.transport.validators.schemas import service_action
 from poppy.transport.validators.schemas import service_limit
 from poppy.transport.validators.schemas import service_status
@@ -75,6 +76,57 @@ class DomainMigrationController(base.Controller, hooks.HookController):
                 domain_name))
 
         return pecan.Response(None, 202)
+
+
+class AdminProviderDetailsController(base.Controller, hooks.HookController):
+    __hooks__ = [poppy_hooks.Context(), poppy_hooks.Error()]
+
+    def __init__(self, driver):
+        super(AdminProviderDetailsController, self).__init__(driver)
+
+    @pecan.expose('json')
+    @decorators.validate(
+        service_id=rule.Rule(
+            helpers.is_valid_service_id(),
+            helpers.abort_with_message),
+        request=rule.Rule(
+            helpers.json_matches_service_schema(
+                provider_details_update.ProviderDetailsUpdateSchema.get_schema(
+                    "update_provider_access_url", "PATCH")
+            ),
+            helpers.abort_with_message,
+            stoplight_helpers.pecan_getter))
+    def patch_one(self, service_id):
+        request_json = json.loads(pecan.request.body.decode('utf-8'))
+        project_id = request_json.get('project_id', None)
+        domain_name = request_json.get('domain_name', None)
+        operator_url = request_json.get('operator_url', None)
+        provider_url = request_json.get('provider_url', None)
+
+        if not helpers.is_valid_domain_name(domain_name):
+            pecan.abort(400, detail='Domain {0} is not valid'.format(
+                domain_name))
+
+        try:
+            self._driver.manager.services_controller.update_access_url_service(
+                project_id,
+                service_id,
+                access_url_changes={
+                    'domain_name': domain_name,
+                    'operator_url': operator_url,
+                    'provider_url': provider_url
+                }
+            )
+        except errors.ServiceNotFound:
+            pecan.abort(404, detail='Service {0} could not be found'.format(
+                service_id))
+        except errors.InvalidOperation as e:
+            pecan.abort(400, detail='{0}'.format(e))
+        except (LookupError, ValueError):
+            pecan.abort(404, detail='Domain {0} could not be found'.format(
+                domain_name))
+
+        return pecan.Response(body=None, status=204)
 
 
 class BackgroundJobController(base.Controller, hooks.HookController):
@@ -552,6 +604,9 @@ class AdminServiceController(base.Controller, hooks.HookController):
         super(AdminServiceController, self).__init__(driver)
         self.__class__.action = OperatorServiceActionController(driver)
         self.__class__.status = ServiceStatusController(driver)
+        self.__class__.provider_details = AdminProviderDetailsController(
+            driver
+        )
 
     @pecan.expose('json')
     @decorators.validate(

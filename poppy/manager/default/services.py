@@ -812,3 +812,50 @@ class DefaultServicesController(base.ServicesController):
                     is_upgrade = True
                     break
         return is_upgrade
+
+    def update_access_url_service(
+            self, project_id, service_id, access_url_changes):
+        try:
+            provider_details = self.storage_controller.get_provider_details(
+                project_id,
+                service_id
+            )
+        except ValueError as e:
+            # If service is not found
+            LOG.warning('Get provider details failed for service {0}. '
+                        'Error message: {1}'.format(service_id, e))
+            raise errors.ServiceNotFound(e)
+
+        updated_details = False
+        for provider in provider_details:
+            for access_url in provider_details[provider].access_urls:
+                if (
+                    access_url.get('domain') ==
+                    access_url_changes.get('domain_name')
+                ):
+                    if (
+                        'operator_url' in access_url and
+                        'provider_url' in access_url
+                    ):
+                        new_access_url = access_url_changes['operator_url']
+                        new_provider_url = access_url_changes['provider_url']
+                        if new_provider_url != access_url['provider_url']:
+                            errors.InvalidOperation(
+                                'Please use the migrate domain functionality '
+                                'to migrate the domain to a new cert.'
+                            )
+                        # self.dns_controller.modify_cname(
+                        #     new_access_url,
+                        #     new_provider_url
+                        # )
+                        access_url['provider_url'] = new_provider_url
+                        access_url['operator_url'] = new_access_url
+                        updated_details = True
+                        break
+
+        if updated_details is True:
+            self.storage_controller.update_provider_details(
+                project_id,
+                service_id,
+                provider_details
+            )
