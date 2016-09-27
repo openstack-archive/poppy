@@ -21,7 +21,9 @@ CERTIFICATE_OPTIONS = [
     None,
     u'shared',
     u'san',
-    u'custom']
+    u'sni',
+    u'custom'
+]
 
 from poppy.model import common
 
