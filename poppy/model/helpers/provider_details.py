@@ -155,7 +155,7 @@ class ProviderDetail(common.DictSerializableModel):
         """Return an access url object for a domain.
 
         :param domain: domain to use as search key
-        :type domain: poppy.model.helpers.domain.Domain
+        :type domain: str
 
         :returns: access_url -- dict containing matching domain
         """

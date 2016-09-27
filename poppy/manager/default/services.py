@@ -812,3 +812,81 @@ class DefaultServicesController(base.ServicesController):
                     is_upgrade = True
                     break
         return is_upgrade
+
+    def update_access_url_service(
+            self, project_id, service_id, access_url_changes):
+        try:
+            service_old = self.storage_controller.get_service(
+                project_id,
+                service_id
+            )
+        except ValueError as e:
+            # If service is not found
+            LOG.warning('Get service {0} failed. '
+                        'Error message: {1}'.format(service_id, e))
+            raise errors.ServiceNotFound(e)
+
+        updated_details = False
+        provider_details = service_old.provider_details
+        domain_name = access_url_changes.get('domain_name')
+        for provider in provider_details:
+            for access_url in provider_details[provider].access_urls:
+                if access_url.get('domain') == domain_name:
+                    if (
+                        'operator_url' in access_url and
+                        'provider_url' in access_url
+                    ):
+                        new_access_url = access_url_changes['operator_url']
+                        new_provider_url = access_url_changes['provider_url']
+                        if access_url.get('shared_ssl_flag', False) is True:
+                            raise errors.InvalidOperation(
+                                'Changing access urls for shared ssl domains '
+                                'is not supported.')
+                        if not new_access_url.startswith(domain_name):
+                            LOG.info('Invalid access_url/domain_name.')
+                            raise errors.InvalidResourceName(
+                                'Invalid access_url/domain_name.')
+                        if new_access_url == access_url['operator_url']:
+                            LOG.info(
+                                "No changes made, both old and new access "
+                                "urls are the same. "
+                                "Domain '{0}'.".format(domain_name))
+                            return False
+                        if new_provider_url != access_url['provider_url']:
+                            raise errors.InvalidOperation(
+                                'Please use the migrate domain functionality '
+                                'to migrate the domain to a new cert.'
+                            )
+                        certificate = (
+                            "shared"
+                            if access_url.get('shared_ssl_flag', False) is True
+                            else None
+                        )
+                        self.dns_controller._create_preferred_cname_record(
+                            domain_name,
+                            certificate,
+                            new_access_url,
+                            new_provider_url
+                        )
+                        self.dns_controller._delete_cname_record(
+                            access_url['operator_url'],
+                            access_url.get('shared_ssl_flag', False)
+                        )
+                        access_url['provider_url'] = new_provider_url
+                        access_url['operator_url'] = new_access_url
+                        updated_details = True
+                        break
+
+        if updated_details is True:
+            self.storage_controller.update_provider_details(
+                project_id,
+                service_id,
+                provider_details
+            )
+        else:
+            err_msg = 'Domain {0} could not be found on service {1}.'.format(
+                domain_name, service_id)
+            LOG.error(err_msg)
+            raise ValueError(err_msg)
+
+        return updated_details
