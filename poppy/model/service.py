@@ -201,6 +201,19 @@ class Service(common.DictSerializableModel):
     def provider_details(self, value):
         self._provider_details = value
 
+    def get_domain(self, domain_name):
+        """Return an access url object for a domain.
+
+        :param domain_name: domain to use as search key
+        :type domain_name: poppy.model.helpers.domain.Domain
+
+        :returns: access_url -- dict containing matching domain
+        """
+        for current_domain in self.domains:
+            if current_domain.domain == domain_name:
+                return current_domain
+        return None
+
     @classmethod
     def init_from_dict(cls, project_id, input_dict):
         """Construct a model instance from a dictionary.
