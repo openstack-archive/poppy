@@ -973,6 +973,115 @@ class TestServicesUpdate(base.TestCase):
                     self.assertIsNotNone(
                         access_urls_map[provider_name][domain_new.domain])
 
+    @mock.patch('re.match')
+    def test_update_add_domains_https_upgrade_regex_exception(self, re_mock):
+        re_mock.return_value.groups.return_value = (None,)
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        self.client.find = mock.Mock(return_value=subdomain)
+
+        domains_new = [
+            domain.Domain('test.domain.com'),
+            domain.Domain('blog.domain.com')
+        ]
+
+        self.service_old.domains = domains_new
+        service_new = service.Service(
+            service_id=self.service_old.service_id,
+            name='myservice',
+            domains=domains_new,
+            origins=[],
+            flavor_id='standard')
+
+        responders = [{
+            'Fastly': {
+                'id': str(uuid.uuid4()),
+                'links': [
+                    {
+                        'domain': u'test.domain.com',
+                        'href': u'test.domain.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    },
+                    {
+                        'domain': u'blog.domain.com',
+                        'href': u'blog.domain.com.global.prod.fastly.net',
+                        'rel': 'access_url',
+                        'certificate': 'san',
+                        'old_operator_url': 'old.operator.url.cdn99.mycdn.com'
+                    }
+                ]}
+            }]
+
+        dns_details = self.controller.update(
+            self.service_old,
+            service_new,
+            responders
+        )
+        self.assertTrue('error' in dns_details['Fastly'])
+        self.assertTrue('error_detail' in dns_details['Fastly'])
+        self.assertTrue('error_class' in dns_details['Fastly'])
+        self.assertTrue('ValueError' in dns_details['Fastly']['error_class'])
+
+    def test_update_add_domains_https_upgrade_create_cname_record(self):
+        subdomain = mock.Mock()
+        subdomain.add_records = mock.Mock()
+        subdomain.find_record.side_effect = exc.DomainRecordNotFound(
+            "Mock -- couldn't find cname record."
+        )
+        self.client.find = mock.Mock(return_value=subdomain)
+
+        domains_new = [
+            domain.Domain('test.domain.com'),
+            domain.Domain('blog.domain.com')
+        ]
+
+        self.service_old.domains = domains_new
+        service_new = service.Service(
+            service_id=self.service_old.service_id,
+            name='myservice',
+            domains=domains_new,
+            origins=[],
+            flavor_id='standard')
+
+        responders = [{
+            'Fastly': {
+                'id': str(uuid.uuid4()),
+                'links': [
+                    {
+                        'domain': u'test.domain.com',
+                        'href': u'test.domain.com.global.prod.fastly.net',
+                        'rel': 'access_url'
+                    },
+                    {
+                        'domain': u'blog.domain.com',
+                        'href': u'blog.domain.com.global.prod.fastly.net',
+                        'rel': 'access_url',
+                        'certificate': 'san',
+                        'old_operator_url': 'old.operator.url.cdn99.mycdn.com'
+                    }
+                ]}
+            }]
+
+        dns_details = self.controller.update(
+            self.service_old,
+            service_new,
+            responders
+        )
+
+        access_urls_map = {}
+        for provider_name in dns_details:
+            access_urls_map[provider_name] = {}
+            access_urls_list = dns_details[provider_name]['access_urls']
+            for access_urls in access_urls_list:
+                access_urls_map[provider_name][access_urls['domain']] = (
+                    access_urls['operator_url'])
+
+        for responder in responders:
+            for provider_name in responder:
+                for domain_new in domains_new:
+                    self.assertIsNotNone(
+                        access_urls_map[provider_name][domain_new.domain])
+
     def test_update_add_domains_keeps_log_delivery(self):
         subdomain = mock.Mock()
         subdomain.add_records = mock.Mock()
