@@ -221,10 +221,12 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
             raise ValueError('No san cert info found for %s.' % cert_name)
 
         enrollment_id = cert_info.get("enrollmentId")
+        enabled = cert_info.get("enabled", True)
 
         res = {
             'cnameHostname': cert_name,
             'enrollmentId': enrollment_id,
+            'enabled': enabled
         }
 
         if any([i for i in [enrollment_id] if i is None]):
@@ -328,15 +330,16 @@ class CassandraSanInfoStorage(base.BaseAkamaiSanInfoStorage):
         enrollment_id = sni_cert_info.get('enrollmentId')
         return enrollment_id
 
-    def get_enabled_status(self, san_cert_name):
-        the_san_cert_info = self._get_akamai_san_certs_info().get(
-            san_cert_name
-        )
+    def get_enabled_status(self, cert_name, info_type='san'):
+        if info_type == 'sni':
+            cert_info = self._get_akamai_sni_certs_info().get(cert_name)
+        else:
+            cert_info = self._get_akamai_san_certs_info().get(cert_name)
 
-        if the_san_cert_info is None:
-            raise ValueError('No san cert info found for %s.' % san_cert_name)
+        if cert_info is None:
+            raise ValueError('No cert info found for %s.' % cert_name)
 
-        enabled = the_san_cert_info.get('enabled', True)
+        enabled = cert_info.get('enabled', True)
         return enabled
 
     def update_san_info(self, info_dict, info_type=None):

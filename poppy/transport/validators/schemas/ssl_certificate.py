@@ -119,7 +119,10 @@ class SSLCertificateSchema(schema_base.SchemaBase):
                         'type': 'integer',
                         # we cannot have 0 or negative enrollmentId
                         'minimum': 1
-                    }
+                    },
+                    'enabled': {
+                        'type': 'boolean'
+                    },
                 }
             }
         },

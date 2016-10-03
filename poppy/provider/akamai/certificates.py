@@ -120,6 +120,8 @@ class CertificateController(base.CertificateBase):
                         )
                     )
                     if not enabled:
+                        LOG.info("SAN cert {0} is disabled.".format(
+                            san_cert_name))
                         continue
 
                     # if the limit provided as an arg to this function is None
@@ -142,6 +144,12 @@ class CertificateController(base.CertificateBase):
                         )
                     )
                     if san_hosts >= san_cert_hostname_limit:
+                        LOG.info(
+                            "SAN cert {0} has {1} hosts, "
+                            "limit is {2}.".format(
+                                san_cert_name,
+                                san_hosts,
+                                san_cert_hostname_limit))
                         continue
 
                     last_sps_id = (
@@ -384,6 +392,15 @@ class CertificateController(base.CertificateBase):
                 self.cert_info_storage.get_san_cert_hostname_limit()
             )
             for cert_name in self.sni_cert_cnames:
+                enabled = (
+                    self.cert_info_storage.get_enabled_status(
+                        cert_name, info_type='sni'
+                    )
+                )
+                if not enabled:
+                    LOG.info("SNI cert {0} is disabled.".format(
+                        cert_name))
+                    continue
                 cert_hostname_limit = (
                     cert_hostname_limit or
                     self.driver.san_cert_hostname_limit
@@ -393,6 +410,12 @@ class CertificateController(base.CertificateBase):
                     cert_name
                 )
                 if host_names_count >= cert_hostname_limit:
+                    LOG.info(
+                        "SNI cert {0} has {1} hosts, "
+                        "limit is {2}.".format(
+                            cert_name,
+                            host_names_count,
+                            cert_hostname_limit))
                     continue
 
                 try:
