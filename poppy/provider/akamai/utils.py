@@ -120,8 +120,24 @@ def get_sans_by_host(remote_host):
     return result
 
 
+def _build_context():
+    import _ssl
+    context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+    context.options |= ssl.OP_NO_SSLv2
+    context.options |= ssl.OP_NO_SSLv3
+    context.options |= getattr(_ssl, "OP_NO_COMPRESSION", 0)
+    context.verify_mode = ssl.CERT_REQUIRED
+    context.check_hostname = True
+    context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+    return context
+
+
 def _get_cert_alternate(remote_host):
-    context = ssl.create_default_context()
+    try:
+        context = ssl.create_default_context()
+    except AttributeError:
+        context = _build_context()
+
     conn = context.wrap_socket(socket.socket(socket.AF_INET),
                                server_hostname=remote_host)
     conn.connect((remote_host, 443))

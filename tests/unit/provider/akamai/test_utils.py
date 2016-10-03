@@ -38,6 +38,10 @@ class TestAkamaiUtils(base.TestCase):
         self.mock_ssl_context = ssl_context_patcher.start()
         self.addCleanup(ssl_context_patcher.stop)
 
+        context_patcher = mock.patch('ssl.SSLContext')
+        self.mock_context = context_patcher.start()
+        self.addCleanup(context_patcher.stop)
+
         self.mock_ssl_context.return_value.wrap_socket.return_value. \
             getpeercert.return_value = {
                 'issuer': (
@@ -172,3 +176,34 @@ class TestAkamaiUtils(base.TestCase):
         self.assertRaises(
             ValueError, utils.get_ssl_number_of_hosts, 'remote_host')
         self.assertRaises(ValueError, utils.get_sans_by_host, 'remote_host')
+
+    def test_default_context_error(self):
+        self.mock_ssl_context.side_effect = AttributeError(
+            'Mock -- Something went wrong create default context.'
+        )
+        self.mock_context.return_value.wrap_socket.return_value. \
+            getpeercert.return_value = {
+                'issuer': (
+                    (('countryName', 'IL'),),
+                    (('organizationName', 'Issuer Ltd.'),),
+                    (('organizationalUnitName', 'Secure Cert Signing'),),
+                    (('commonName', 'Secure CA'),)
+                ),
+                'notAfter': 'Nov 22 08:15:19 2013 GMT',
+                'notBefore': 'Nov 21 03:09:52 2011 GMT',
+                'serialNumber': 'DEAD',
+                'subject': (
+                    (('description', 'Some-DESCRIPTION'),),
+                    (('countryName', 'US'),),
+                    (('stateOrProvinceName', 'Georgia'),),
+                    (('localityName', 'Atlanta'),),
+                    (('organizationName', 'R_Host, Inc.'),),
+                    (('commonName', '*.r_host'),),
+                    (('emailAddress', 'host_master@r_host'),)
+                ),
+                'subjectAltName': (('DNS', '*.r_host'), ('DNS', 'r_host')),
+                'version': 3
+            }
+
+        self.assertEqual(
+            2, utils.get_ssl_number_of_hosts_alternate('remote_host'))
