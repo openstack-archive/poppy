@@ -285,6 +285,9 @@ class DefaultSSLCertificateController(base.SSLCertificateController):
                         'providers_list_json': json.dumps(providers),
                         'cert_obj_json': json.dumps(cert_obj.to_dict()),
                         'enqueue': False,
+                        'context_dict': context_utils.RequestContext(
+                            tenant=cert_obj.project_id
+                        ).to_dict()
                     }
                     self.distributed_task_controller.submit_task(
                         recreate_ssl_certificate.recreate_ssl_certificate,
