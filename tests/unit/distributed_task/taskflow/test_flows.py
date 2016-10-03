@@ -1030,6 +1030,7 @@ class TestFlowRuns(base.TestCase):
             'domain_name': 'mytestsite.com',
             'cert_type': 'san',
             'cert_obj_json': json.dumps(cert_obj_json.to_dict()),
+            'context_dict': context_utils.RequestContext().to_dict()
         }
 
         (
