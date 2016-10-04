@@ -68,10 +68,8 @@ class ServicesController(base.ServicesBase):
         # ex. cdnXXX.altcdn.com
         subdomain_name = '{0}{1}.{2}'.format(shard_prefix, shard_id,
                                              cdn_domain_name)
-        subdomain = self._get_subdomain(subdomain_name)
         # create CNAME record for adding
         cname_records = []
-
         dns_links = {}
 
         shared_ssl_subdomain_name = None
@@ -85,40 +83,13 @@ class ServicesController(base.ServicesBase):
                 name = domain_name
             else:
                 if old_operator_url is not None:
-                    # verify sub-domain exists
-                    regex_match = re.match(
-                        r'^.*(' + shard_prefix + '[0-9]+\.' +
-                        re.escape(cdn_domain_name) + ')$',
-                        old_operator_url
+                    created_dns_links = self._create_preferred_cname_record(
+                        domain_name,
+                        certificate,
+                        old_operator_url,
+                        links[link]
                     )
-                    my_sub_domain_name = regex_match.groups(-1)[0]
-                    if my_sub_domain_name is None:
-                        raise ValueError('Unable to parse old provider url')
-
-                    # add to cname record
-                    my_sub_domain = self._get_subdomain(my_sub_domain_name)
-                    LOG.info(
-                        "Updating DNS Record for HTTPS upgrade "
-                        "domain {0}. CNAME update from {1} to {2}".format(
-                            my_sub_domain_name,
-                            old_operator_url,
-                            links[link]
-                        )
-                    )
-
-                    old_dns_record = my_sub_domain.find_record(
-                        'CNAME',
-                        old_operator_url
-                    )
-                    my_sub_domain.update_record(
-                        old_dns_record,
-                        data=links[link]
-                    )
-
-                    dns_links[link] = {
-                        'provider_url': links[link],
-                        'operator_url': old_operator_url
-                    }
+                    dns_links.update(created_dns_links)
                     continue
                 else:
                     name = '{0}.{1}'.format(domain_name, subdomain_name)
@@ -140,9 +111,69 @@ class ServicesController(base.ServicesBase):
             else:
                 cname_records.append(cname_record)
         # add the cname records
-        if cname_records != []:
+        if len(cname_records) > 0:
+            subdomain = self._get_subdomain(subdomain_name)
             LOG.info("Creating DNS Record - {0}".format(cname_records))
             subdomain.add_records(cname_records)
+        return dns_links
+
+    def _create_preferred_cname_record(
+            self, domain_name, certificate, operator_url, provider_url):
+        """Creates a CNAME chain with designated operator_url
+
+        :param domain_name: domain name that CNAME chain is created for
+        :param certificate: certificate type
+        :operator_url: The preferred operator url
+        :provider_url: provider url
+        :return dns_links: Map from provider access URL to DNS access URL
+        """
+
+        shard_prefix = self._driver.rackdns_conf.shard_prefix
+        cdn_domain_name = self._driver.rackdns_conf.url
+
+        dns_links = {}
+
+        # verify sub-domain exists
+        regex_match = re.match(
+            r'^.*(' + shard_prefix + '[0-9]+\.' +
+            re.escape(cdn_domain_name) + ')$',
+            operator_url
+        )
+        my_sub_domain_name = regex_match.groups(-1)[0]
+
+        if my_sub_domain_name is None:
+            raise ValueError('Unable to parse old operator url')
+
+        # add to cname record
+        my_sub_domain = self._get_subdomain(my_sub_domain_name)
+        LOG.info(
+            "Updating dns record {0}. "
+            "CNAME create/update from {1} to {2}".format(
+                my_sub_domain_name,
+                operator_url,
+                provider_url
+            )
+        )
+
+        try:
+            old_dns_record = my_sub_domain.find_record('CNAME', operator_url)
+        except exc.DomainRecordNotFound:
+            my_sub_domain.add_records(
+                [{
+                    'type': 'CNAME',
+                    'name': operator_url,
+                    'data': provider_url,
+                    'ttl': 300
+                }]
+            )
+        else:
+            my_sub_domain.update_record(old_dns_record, data=provider_url)
+
+        dns_links[(domain_name, certificate, operator_url)] = {
+            'provider_url': provider_url,
+            'operator_url': operator_url
+        }
+
         return dns_links
 
     def _search_cname_record(self, access_url, shared_ssl_flag):
@@ -158,7 +189,7 @@ class ServicesController(base.ServicesBase):
             suffix = self._driver.rackdns_conf.shared_ssl_domain_suffix
         else:
             suffix = self._driver.rackdns_conf.url
-        # Note: use rindex to find last occurence of the suffix
+        # Note: use rindex to find last occurrence of the suffix
         shard_name = access_url[:access_url.rindex(suffix)-1].split('.')[-1]
         subdomain_name = '.'.join([shard_name, suffix])
 
@@ -184,6 +215,8 @@ class ServicesController(base.ServicesBase):
         :param shared_ssl_flag: flag indicating if this is a shared ssl domain
         :return error_msg: returns error message, if any
         """
+        LOG.info('Attempting to delete DNS records for : {0}'.format(
+            access_url))
 
         records = self._search_cname_record(access_url, shared_ssl_flag)
         # delete the record

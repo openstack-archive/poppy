@@ -1724,3 +1724,272 @@ class DefaultManagerServiceTests(base.TestCase):
 
         self.assertEqual(domains,
                          self.sc.get_domains_by_provider_url('provider_url'))
+
+    def test_update_access_url_positive(self):
+        service_obj = service.load_from_json(self.service_json)
+        service_obj.status = u'deployed'
+        service_obj.provider_details = {
+            'Akamai': provider_details.ProviderDetail(
+                provider_service_id=[
+                    {
+                        "protocol": "http",
+                        "certificate": None,
+                        "policy_name": "www.test1.com"
+                    }
+                ],
+                access_urls=[
+                    {
+                        "provider_url": "altcdn.com.mdc.edgesuite.net",
+                        "domain": "www.test1.com",
+                        "operator_url": "www.test1.com.cdn136.myraxcdn.net"
+                    }
+                ],
+                status="deployed",
+            )
+        }
+        self.sc.storage_controller.get_service.return_value = service_obj
+
+        updated = self.sc.update_access_url_service(
+            "project_id",
+            "service_id",
+            {
+                'domain_name': 'www.test1.com',
+                'operator_url': 'www.test1.com.cdn137.myraxcdn.net',
+                'provider_url': 'altcdn.com.mdc.edgesuite.net'
+            }
+        )
+
+        self.assertTrue(updated)
+
+    def test_update_access_url_service_not_found(self):
+        self.sc.storage_controller.get_service.side_effect = (
+            ValueError('Mock -- Service not found.')
+        )
+
+        self.assertRaises(
+            errors.ServiceNotFound,
+            self.sc.update_access_url_service,
+            "project_id",
+            "service_id",
+            {
+                'domain_name': 'www.test1.com',
+                'operator_url': 'www.test1.com.cdn137.myraxcdn.net',
+                'provider_url': 'altcdn.com.mdc.edgesuite.net'
+            }
+        )
+
+    def test_update_access_url_no_op_patch(self):
+        service_obj = service.load_from_json(self.service_json)
+        service_obj.status = u'deployed'
+        service_obj.provider_details = {
+            'Akamai': provider_details.ProviderDetail(
+                provider_service_id=[
+                    {
+                        "protocol": "http",
+                        "certificate": None,
+                        "policy_name": "www.test1.com"
+                    }
+                ],
+                access_urls=[
+                    {
+                        "provider_url": "altcdn.com.mdc.edgesuite.net",
+                        "domain": "www.test1.com",
+                        "operator_url": "www.test1.com.cdn136.myraxcdn.net"
+                    }
+                ],
+                status="deployed",
+            )
+        }
+        self.sc.storage_controller.get_service.return_value = service_obj
+
+        updated = self.sc.update_access_url_service(
+            "project_id",
+            "service_id",
+            {
+                'domain_name': 'www.test1.com',
+                'operator_url': 'www.test1.com.cdn136.myraxcdn.net',
+                'provider_url': 'altcdn.com.mdc.edgesuite.net'
+            }
+        )
+
+        self.assertFalse(updated)
+
+    def test_update_access_url_provider_url_mismatch(self):
+        service_obj = service.load_from_json(self.service_json)
+        service_obj.status = u'deployed'
+        service_obj.provider_details = {
+            'Akamai': provider_details.ProviderDetail(
+                provider_service_id=[
+                    {
+                        "protocol": "http",
+                        "certificate": None,
+                        "policy_name": "www.test1.com"
+                    }
+                ],
+                access_urls=[
+                    {
+                        "provider_url": "altcdn.com.mdc.edgesuite.net",
+                        "domain": "www.test1.com",
+                        "operator_url": "www.test1.com.cdn136.myraxcdn.net"
+                    }
+                ],
+                status="deployed",
+            )
+        }
+        self.sc.storage_controller.get_service.return_value = service_obj
+
+        self.assertRaises(
+            errors.InvalidOperation,
+            self.sc.update_access_url_service,
+            "project_id",
+            "service_id",
+            {
+                'domain_name': 'www.test1.com',
+                'operator_url': 'www.test1.com.cdn137.myraxcdn.net',
+                'provider_url': 'raxcdn.com.mdc.edgesuite.net'
+            }
+        )
+
+    def test_update_access_url_mismatch_access_url_and_domain(self):
+        service_obj = service.load_from_json(self.service_json)
+        service_obj.status = u'deployed'
+        service_obj.provider_details = {
+            'Akamai': provider_details.ProviderDetail(
+                provider_service_id=[
+                    {
+                        "protocol": "http",
+                        "certificate": None,
+                        "policy_name": "www.test1.com"
+                    }
+                ],
+                access_urls=[
+                    {
+                        "provider_url": "altcdn.com.mdc.edgesuite.net",
+                        "domain": "www.test1.com",
+                        "operator_url": "www.test1.com.cdn136.myraxcdn.net"
+                    }
+                ],
+                status="deployed",
+            )
+        }
+        self.sc.storage_controller.get_service.return_value = service_obj
+
+        self.assertRaises(
+            errors.InvalidResourceName,
+            self.sc.update_access_url_service,
+            "project_id",
+            "service_id",
+            {
+                'domain_name': 'www.test1.com',
+                'operator_url': 'www.test2.com.cdn137.myraxcdn.net',
+                'provider_url': 'altcdn.com.mdc.edgesuite.net'
+            }
+        )
+
+    def test_update_access_url_missing_provider_url(self):
+        service_obj = service.load_from_json(self.service_json)
+        service_obj.status = u'deployed'
+        service_obj.provider_details = {
+            'Akamai': provider_details.ProviderDetail(
+                provider_service_id=[
+                    {
+                        "protocol": "http",
+                        "certificate": None,
+                        "policy_name": "www.test1.com"
+                    }
+                ],
+                access_urls=[
+                    {
+                        "domain": "www.test1.com",
+                        "operator_url": "www.test1.com.cdn136.myraxcdn.net"
+                    }
+                ],
+                status="deployed",
+            )
+        }
+        self.sc.storage_controller.get_service.return_value = service_obj
+
+        self.assertRaises(
+            ValueError,
+            self.sc.update_access_url_service,
+            "project_id",
+            "service_id",
+            {
+                'domain_name': 'www.test1.com',
+                'operator_url': 'www.test1.com.cdn137.myraxcdn.net',
+                'provider_url': 'altcdn.com.mdc.edgesuite.net'
+            }
+        )
+
+    def test_update_access_url_no_matching_access_urls(self):
+        service_obj = service.load_from_json(self.service_json)
+        service_obj.status = u'deployed'
+        service_obj.provider_details = {
+            'Akamai': provider_details.ProviderDetail(
+                provider_service_id=[
+                    {
+                        "protocol": "http",
+                        "certificate": None,
+                        "policy_name": "www.test1.com"
+                    }
+                ],
+                access_urls=[
+                    {
+                        "provider_url": "altcdn.com.mdc.edgesuite.net",
+                        "domain": "www.test2.com",
+                        "operator_url": "www.test2.com.cdn136.myraxcdn.net"
+                    }
+                ],
+                status="deployed",
+            )
+        }
+        self.sc.storage_controller.get_service.return_value = service_obj
+
+        self.assertRaises(
+            ValueError,
+            self.sc.update_access_url_service,
+            "project_id",
+            "service_id",
+            {
+                'domain_name': 'www.test1.com',
+                'operator_url': 'www.test1.com.cdn137.myraxcdn.net',
+                'provider_url': 'altcdn.com.mdc.edgesuite.net'
+            }
+        )
+
+    def test_update_access_url_shared_ssl_domain(self):
+        service_obj = service.load_from_json(self.service_json)
+        service_obj.status = u'deployed'
+        service_obj.provider_details = {
+            'Akamai': provider_details.ProviderDetail(
+                provider_service_id=[
+                    {
+                        "protocol": "https",
+                        "certificate": "shared",
+                        "policy_name": "test99.scdn1.secure.cdn.net"
+                    }
+                ],
+                access_urls=[
+                    {
+                        "provider_url": "scdn1.secure.cdn.net.edgekey.net",
+                        "domain": "test99.scdn1.secure.cdn.net",
+                        "shared_ssl_flag": True,
+                        "operator_url": "test99.scdn1.secure.cdn.net"
+                    }
+                ],
+                status="deployed",
+            )
+        }
+        self.sc.storage_controller.get_service.return_value = service_obj
+
+        self.assertRaises(
+            errors.InvalidOperation,
+            self.sc.update_access_url_service,
+            "project_id",
+            "service_id",
+            {
+                'domain_name': 'test99.scdn1.secure.cdn.net',
+                'operator_url': 'test99.scdn2.secure.cdn.net',
+                'provider_url': 'scdn2.secure.cdn.net.edgekey.net'
+            }
+        )
