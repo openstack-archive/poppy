@@ -156,6 +156,15 @@ class BackgroundJobController(base.BackgroundJobController):
                             )
                             continue
 
+                        if cert_dict.get('property_activated', False) is True:
+                            ignore_list.append(cert_dict)
+                            LOG.info(
+                                "{0} ignored for property update because "
+                                "hostname has already been activated. "
+                                "Set property_activated = False to "
+                                "activation.".format(cert_obj.domain_name))
+                            continue
+
                         service_obj = self.service_storage.\
                             get_service_details_by_domain_name(
                                 cert_obj.domain_name,
@@ -180,7 +189,7 @@ class BackgroundJobController(base.BackgroundJobController):
                             ):
                                 found = True
                         if found is False:
-                            # skip the task for current cert obj is the
+                            # skip the task for current cert obj if the
                             # domain doesn't exist on a service with the
                             # same protocol and certificate.
                             ignore_list.append(cert_dict)
@@ -324,6 +333,14 @@ class BackgroundJobController(base.BackgroundJobController):
                                     cert_obj.domain_name
                                 )
                             )
+                            continue
+                        if cert_dict.get('property_activated', False) is True:
+                            ignore_list.append(cert_dict)
+                            LOG.info(
+                                "{0} ignored for property update because "
+                                "hostname has already been activated. "
+                                "Set property_activated = False to "
+                                "activation.".format(cert_obj.domain_name))
                             continue
 
                         found = False

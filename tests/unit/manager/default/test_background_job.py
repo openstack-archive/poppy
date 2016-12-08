@@ -279,7 +279,10 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
                         }
                     }
                 },
-                'property_activated': True
+                'property_activated': (
+                    True
+                    if job_type == "akamai_check_and_update_cert_status"
+                    else False)
             })
         ]
 
@@ -291,6 +294,69 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
         self.assertEqual(0, len(ignore_list))
 
         self.assertTrue(
+            self.bgc.distributed_task_controller.submit_task.called
+        )
+
+    @ddt.data(
+        ("akamai_update_papi_property_for_mod_san", "san"),
+        ("akamai_update_papi_property_for_mod_sni", "sni")
+    )
+    def test_post_job_skip_activated(self, job_tuple):
+        job_type, cert_type = job_tuple
+        # mock ssl storage returning a cert
+        self.mock_storage.certificates_controller.\
+            get_certs_by_domain.return_value = [
+                mock.Mock()
+            ]
+        # mock service storage returning a service with domain with
+        # correct protocol + cert
+        self.mock_storage.services_controller. \
+            get_service_details_by_domain_name.return_value = service.Service(
+                'service_id',
+                'name',
+                [
+                    domain.Domain(
+                        "www.example.com",
+                        protocol='https',
+                        certificate=cert_type
+                    )
+                ],
+                [],
+                'flavor_id',
+                project_id='project_id'
+            )
+
+        san_mapping_queue = self.manager_driver.providers[
+            'akamai'].obj.san_mapping_queue
+        cert_key = ('san cert' if cert_type == 'san' else 'sni_cert')
+        san_mapping_queue.traverse_queue.return_value = [
+            json.dumps({
+                "domain_name": "www.example.com",
+                "flavor_id": "flavor_id",
+                "project_id": "project_id",
+                "cert_type": cert_type,
+                "cert_details": {
+                    "Akamai": {
+                        "extra_info": {
+                            cert_key: "{0}.example.com".format(cert_type),
+                            "akamai_spsId": 1
+                        }
+                    }
+                },
+                # This item will be skipped if repeated attempts
+                # to activate the same domain_name are made.
+                "property_activated": True
+            })
+        ]
+
+        run_list, ignore_list = self.bgc.post_job(
+            job_type,
+            {'project_id': 'project_id'}
+        )
+        self.assertEqual(0, len(run_list))
+        self.assertEqual(1, len(ignore_list))
+
+        self.assertFalse(
             self.bgc.distributed_task_controller.submit_task.called
         )
 
