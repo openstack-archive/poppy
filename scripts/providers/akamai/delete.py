@@ -66,8 +66,8 @@ def akamai_request(env, domain, config):
         domain
     )
 
-    print ("API URL: " + policy_url)
-    print ("ARLID: " + str(policy_num))
+    print("API URL: " + policy_url)
+    print("ARLID: " + str(policy_num))
 
     s = edge_session(env, config)
     response = s.delete(

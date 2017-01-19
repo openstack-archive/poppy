@@ -86,8 +86,8 @@ def akamai_request(env, domain, use_staging, config):
         env_var
     )
 
-    print ("API URL: " + policy_url)
-    print ("ARLID: " + str(policy_num))
+    print("API URL: " + policy_url)
+    print("ARLID: " + str(policy_num))
 
     s = edge_session(env, config)
     response = s.get(policy_url,
@@ -112,8 +112,8 @@ def dig_cname(target):
 def browser_request(target):
     print("browser response for " + target)
     response = requests.get("http://" + target)
-    print ("Status Code: " + str(response.status_code))
-    print ("Response Body: " + response.text)
+    print("Status Code: " + str(response.status_code))
+    print("Response Body: " + response.text)
 
 
 if __name__ == '__main__':

@@ -29,16 +29,16 @@ def main(args):
     loop = int(args[2])
     sleep_time = int(args[3])
 
-    print ("requesting " + url)
+    print("requesting " + url)
 
     for x in range(0, loop / sleep_time):
         response = requests.get(url, headers={'PRAGMA': 'akamai-x-cache-on'})
 
         if 'X-Cache' in response.headers:
-            print (str(datetime.datetime.now()) +
+            print(str(datetime.datetime.now()) +
                    " - Akamai Response: " + str(response.headers['X-Cache']))
         else:
-            print ("Not served through Akamai")
+            print("Not served through Akamai")
 
         time.sleep(sleep_time)
 
