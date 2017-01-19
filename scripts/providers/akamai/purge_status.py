@@ -65,8 +65,8 @@ def akamai_purge_status(env, config, purge_url, purge_id):
     purge_status_url = ('{0}ccu/v2/purges/{1}'
                         .format(purge_base_url, purge_id))
 
-    print ("Purge URL: " + purge_url)
-    print ("Purge ID: " + purge_id)
+    print("Purge URL: " + purge_url)
+    print("Purge ID: " + purge_id)
     data = {
         'objects': [purge_url]
     }

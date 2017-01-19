@@ -73,8 +73,8 @@ def akamai_request(env, domain, use_staging, config):
         env_var
     )
 
-    print ("API URL: " + policy_url)
-    print ("ARLID: " + str(policy_num))
+    print("API URL: " + policy_url)
+    print("ARLID: " + str(policy_num))
 
     s = edge_session(env, config)
     data = {
