@@ -30,7 +30,7 @@ def main():
     all_san_cert_names = v_cassandra_storage.list_all_san_cert_names()
 
     if not all_san_cert_names:
-        print ("Currently no SAN cert info has been initialized")
+        print("Currently no SAN cert info has been initialized")
 
     for san_cert_name in all_san_cert_names:
         print("%s:%s" % (san_cert_name,

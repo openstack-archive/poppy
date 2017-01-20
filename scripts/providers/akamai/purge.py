@@ -63,7 +63,7 @@ def akamai_purge(env, config, url):
     purge_url = ('{0}ccu/v2/queues/default'
                  .format(purge_base_url))
 
-    print ("Purge URL: " + purge_url)
+    print("Purge URL: " + purge_url)
     data = {
         'objects': [url]
     }
