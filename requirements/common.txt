@@ -23,3 +23,5 @@ SecretStorage==2.1.4
 python-whois>=0.6.2
 tld>=0.7.6
 dnspython>=1.14.0
+
+testrepository==0.0.20
