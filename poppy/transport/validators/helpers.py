@@ -140,8 +140,8 @@ def is_valid_shared_ssl_domain_name(domain_name):
 
 def is_valid_tld(domain_name):
     try:
-        status = whois.whois(domain_name)['status']
-        if status is not None or status != '':
+        whois_rec = whois.whois(domain_name)
+        if whois_rec:
             url = 'https://{domain}'
             tld_obj = tld_helper.get_tld(
                 url.format(domain=domain_name),
