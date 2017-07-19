@@ -7,6 +7,8 @@ Install Docker-Compose::
 
 Warning - never git commit your secret credentials to upstream!
 
+If you get an error while uninstalling six package, add '--ignore-installed six' parameter to above command.
+
 
 Install the Full Poppy stack (poppy_stack.yml)
 ----------------------------------------------
