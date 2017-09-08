@@ -52,7 +52,6 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
                 "san.example.com", "san2.example.com"
             ],
             group=aka_driver.AKAMAI_GROUP,
-            enforce_type=True
         )
         self.addCleanup(
             conf.clear_override,
@@ -65,7 +64,6 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
                 "sni.example.com", "sni2.example.com"
             ],
             group=aka_driver.AKAMAI_GROUP,
-            enforce_type=True
         )
         self.addCleanup(
             conf.clear_override,
@@ -76,7 +74,6 @@ class DefaultSSLCertificateControllerTests(base.TestCase):
             'akamai_https_access_url_suffix',
             'edge.key.net',
             group=aka_driver.AKAMAI_GROUP,
-            enforce_type=True
         )
         self.addCleanup(
             conf.clear_override,
