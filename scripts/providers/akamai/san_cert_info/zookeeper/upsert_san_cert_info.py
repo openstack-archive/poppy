@@ -17,6 +17,7 @@ from oslo_config import cfg
 
 from poppy.provider.akamai.cert_info_storage import zookeeper_storage
 from poppy.provider.akamai import driver
+from bulitins import input
 
 
 CONF = cfg.CONF
@@ -42,7 +43,7 @@ def main():
         for attr in san_attribute_default_list:
             user_input = None
             while ((user_input or "").strip() or user_input) in ["", None]:
-                user_input = raw_input('Please input value for attr: %s, '
+                user_input = input('Please input value for attr: %s, '
                                        'San cert: %s,'
                                        'default value: %s'
                                        ' (if default is None, '
