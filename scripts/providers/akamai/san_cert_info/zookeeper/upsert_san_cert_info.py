@@ -44,14 +44,14 @@ def main():
             user_input = None
             while ((user_input or "").strip() or user_input) in ["", None]:
                 user_input = input('Please input value for attr: %s, '
-                                       'San cert: %s,'
-                                       'default value: %s'
-                                       ' (if default is None, '
-                                       'that means a real value has to'
-                                       ' be input): ' %
-                                       (attr,
-                                        san_cert_name,
-                                        san_attribute_default_list[attr]))
+                                   'San cert: %s,'
+                                   'default value: %s'
+                                   ' (if default is None, '
+                                   'that means a real value has to'
+                                   ' be input): ' %
+                                   (attr,
+                                    san_cert_name,
+                                    san_attribute_default_list[attr]))
                 if san_attribute_default_list[attr] is None:
                     continue
                 else:

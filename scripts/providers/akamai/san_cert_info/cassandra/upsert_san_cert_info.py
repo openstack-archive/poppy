@@ -46,14 +46,14 @@ def main():
             user_input = None
             while ((user_input or "").strip() or user_input) in ["", None]:
                 user_input = input('Please input value for attr: %s, '
-                                       'San cert: %s,'
-                                       'default value: %s'
-                                       ' (if default is None, '
-                                       'that means a real value has to'
-                                       ' be input, except spsId): ' %
-                                       (attr,
-                                        san_cert_name,
-                                        san_attribute_default_list[attr]))
+                                   'San cert: %s,'
+                                   'default value: %s'
+                                   ' (if default is None, '
+                                   'that means a real value has to'
+                                   ' be input, except spsId): ' %
+                                   (attr,
+                                    san_cert_name,
+                                    san_attribute_default_list[attr]))
                 # We allow not inputing spsId, however if it is in
                 # transitioning from the old manual SAN process we NEED
                 # to put in spsId
