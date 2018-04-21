@@ -96,5 +96,5 @@ Installing `CassandraDB`_ (using Docker)
 4. Import the schema file from the poppy/storage/cassandra/schema.cql file.
 
 .. _`CassandraDB` : http://cassandra.apache.org
-.. _`virtualenv` : https://pypi.python.org/pypi/virtualenv/
+.. _`virtualenv` : https://pypi.org/project/virtualenv/
 

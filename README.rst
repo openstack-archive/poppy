@@ -193,4 +193,4 @@ And then run tests::
 
 .. _`CassandraDB` : http://cassandra.apache.org
 .. _`pyenv` : https://github.com/yyuu/pyenv/
-.. _`virtualenv` : https://pypi.python.org/pypi/virtualenv/
+.. _`virtualenv` : https://pypi.org/project/virtualenv/
