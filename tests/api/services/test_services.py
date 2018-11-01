@@ -18,7 +18,7 @@
 import json
 import six
 import time
-import urlparse
+import six.moves.urllib.parse as urlparse
 import uuid
 
 import ddt
