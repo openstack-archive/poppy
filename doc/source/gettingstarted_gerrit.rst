@@ -51,7 +51,7 @@ Set up your local branch
 
 Use the following commands to set up your local branch:
 
-  git clone git://git.openstack.org/openstack/poppy
+  git clone https://git.openstack.org/openstack/poppy
   cd poppy
   git checkout -b [branch name]
   git review -s
