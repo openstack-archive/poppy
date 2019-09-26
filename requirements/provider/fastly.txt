@@ -1,2 +1,0 @@
-cdn-fastly==1.0.4
-httplib2>=0.8

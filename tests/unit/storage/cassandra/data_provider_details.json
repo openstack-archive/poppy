@@ -1,9 +1,0 @@
-{
-	"provider_details":
-			{
-			   "MaxCDN": "{\"id\": 11942, \"access_urls\": [{\"provider_url\": \"maxcdn.provider.com\", \"domain\": \"xk.cd\"}], \"domains_certificate_status\":{\"mypullzone.com\": \"failed\"} }",
-			   "Mock": "{\"id\": 73242, \"access_urls\": [{\"provider_url\": \"mycdn.mock.com\", \"domain\": \"xk.cd\"}], \"domains_certificate_status\":{\"mycdn.mock.com\": \"deployed\"} }",
-			   "CloudFront": "{\"id\": \"5ABC892\", \"access_urls\": [{\"provider_url\": \"cloudfront.provider.com\", \"domain\": \"xk.cd\"}]}",
-			   "Fastly": "{\"id\": 3488, \"access_urls\": [{\"provider_url\": \"fastly.provider.com\", \"domain\": \"xk.cd\"}], \"domains_certificate_status\":{\"mockcf123.com\": \"create_in_progress\"}}"
-			}
-}

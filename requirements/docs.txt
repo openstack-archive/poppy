@@ -1,5 +1,0 @@
-oslosphinx
-sphinx
-sphinxcontrib-pecanwsme
-sphinxcontrib-httpdomain
-oslo.i18n>=2.1.0

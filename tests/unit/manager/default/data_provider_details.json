@@ -1,7 +1,0 @@
-{
-	"provider_details":
-			{
-			   "Mock": "{\"id\": 73242, \"access_urls\": [\"mycdn.mock.com\"]}",
-			   "CloudFront": "{\"id\": \"5ABC892\", \"access_urls\": [\"cf123.cloudcf.com\"]}"
-			}
-}

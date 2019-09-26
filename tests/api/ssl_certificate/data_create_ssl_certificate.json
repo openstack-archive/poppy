@@ -1,6 +1,0 @@
-{
-    "create_san_test_1": {
-        "cert_type": "san",
-        "domain_name": "www.abc.com"
-    }
-}
